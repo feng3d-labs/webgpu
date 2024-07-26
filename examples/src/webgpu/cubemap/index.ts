@@ -4,7 +4,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleCubemapWGSL from "./sampleCubemap.frag.wgsl";
 
-import { IBufferBinding, IGPUCopyExternalImageToTexture, IRenderObject, IRenderPass, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPUCopyExternalImageToTexture, IRenderObject, IRenderPass, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -145,7 +145,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         updateTransformationMatrix();
 
-        (renderObject.bindingResources.uniforms as IBufferBinding).map.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        (renderObject.bindingResources.uniforms as IGPUBufferBinding).map.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
         webgpu.renderPass(renderPass);
         webgpu.renderObject(renderObject);

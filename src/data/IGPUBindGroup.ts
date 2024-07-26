@@ -122,9 +122,14 @@ export type IGPUBindingResource =
 export interface IGPUBufferBinding extends Omit<GPUBufferBinding, "buffer">
 {
     /**
-     * The {@link GPUBuffer} to bind.
+     * 如果未设置将通过反射信息自动生成。
      */
-    buffer: IGPUBuffer;
+    buffer?: IGPUBuffer;
+
+    /**
+     * 缓冲区数据映射。
+     */
+    map?: { [name: string]: ArrayLike<number> | number; }
 }
 
 /**

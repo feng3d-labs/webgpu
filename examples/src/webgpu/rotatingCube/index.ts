@@ -4,7 +4,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IBufferBinding, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -28,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const uniforms: IBufferBinding = {
+    const uniforms: IGPUBufferBinding = {
         map: { modelViewProjectionMatrix: new Float32Array(16) }
     };
 

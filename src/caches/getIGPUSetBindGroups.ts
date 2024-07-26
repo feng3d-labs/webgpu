@@ -1,7 +1,7 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
-import { IBindingResources, IBufferBinding } from "../data/IBindingResources";
-import { IGPUBindGroupEntry, IGPUBindingResource, IGPUExternalTexture } from "../data/IGPUBindGroup";
+import { IBindingResources } from "../data/IBindingResources";
+import { IGPUBindGroupEntry, IGPUBindingResource, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroup";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
 import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
@@ -53,7 +53,7 @@ export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputeP
                     //
                     const size = variableInfo.size;
 
-                    const uniformData = bindingResource as IBufferBinding;
+                    const uniformData = bindingResource as IGPUBufferBinding;
 
                     if (!uniformData.buffer)
                     {
@@ -141,7 +141,7 @@ export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputeP
 
 const bindGroupsMap = new ChainMap<[IGPURenderPipeline | IGPUComputePipeline, IBindingResources], IGPUSetBindGroup[]>();
 
-function updateBufferBinding(variableInfo: VariableInfo, uniformData: IBufferBinding)
+function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding)
 {
     if (!variableInfo.members)
     {

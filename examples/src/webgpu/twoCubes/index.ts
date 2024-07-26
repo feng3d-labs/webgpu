@@ -5,7 +5,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IGPUBuffer, IBufferBinding, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IGPUBufferBinding, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -38,7 +38,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };
 
-    const uniforms: IBufferBinding = {
+    const uniforms: IGPUBufferBinding = {
         buffer: uniformBuffer, offset: 0, size: matrixSize,
         map: {
             modelViewProjectionMatrix: null, // 在帧循环中设置
@@ -62,7 +62,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         draw: { vertexCount: cubeVertexCount },
     };
 
-    const uniforms1: IBufferBinding = {
+    const uniforms1: IGPUBufferBinding = {
         buffer: uniformBuffer, offset, size: matrixSize,
         map: {
             modelViewProjectionMatrix: null, // 在帧循环中设置
