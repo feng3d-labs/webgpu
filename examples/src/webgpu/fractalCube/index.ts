@@ -2,7 +2,7 @@ import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import { IGPUBufferBinding, IGPUCanvasContext, ICopyTextureToTexture, IRenderObject, IRenderPass, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPUCanvasContext, IGPUCopyTextureToTexture, IRenderObject, IRenderPass, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleSelfWGSL from "./sampleSelf.frag.wgsl";
 
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         draw: { vertexCount: cubeVertexCount },
     };
 
-    const copyTextureToTexture: ICopyTextureToTexture = {
+    const copyTextureToTexture: IGPUCopyTextureToTexture = {
         source: { texture: { context } },
         destination: { texture: cubeTexture },
         copySize: [canvas.width, canvas.height],

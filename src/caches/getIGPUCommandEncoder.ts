@@ -1,5 +1,4 @@
 import { ICommandEncoder } from "../data/ICommandEncoder";
-import { ICopyTextureToTexture } from "../data/ICopyTextureToTexture";
 import { IGPUCommandEncoder, IGPUPassEncoder } from "../data/IGPUCommandEncoder";
 import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
@@ -54,9 +53,9 @@ function isIRenderPassEncoder(arg: any): arg is IRenderPassEncoder
     return !!(arg as IRenderPassEncoder).renderPass;
 }
 
-function isICopyTextureToTexture(arg: any): arg is ICopyTextureToTexture
+function isICopyTextureToTexture(arg: any): arg is IGPUCopyTextureToTexture
 {
-    return !!(arg as ICopyTextureToTexture).source?.texture;
+    return !!(arg as IGPUCopyTextureToTexture).source?.texture;
 }
 
 function isICopyBufferToBuffer(arg: any): arg is IGPUCopyBufferToBuffer
@@ -71,7 +70,7 @@ function isICopyBufferToBuffer(arg: any): arg is IGPUCopyBufferToBuffer
     return true;
 }
 
-function getIGPUCopyTextureToTexture(v: ICopyTextureToTexture)
+function getIGPUCopyTextureToTexture(v: IGPUCopyTextureToTexture)
 {
     const sourceTexture = v.source.texture;
     const destinationTexture = v.destination.texture;

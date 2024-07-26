@@ -1,9 +1,9 @@
 import { getIGPUSubmit } from "./caches/getIGPUSubmit";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
-import { ICopyTextureToTexture } from "./data/ICopyTextureToTexture";
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
 import { IGPUComputePassEncoder } from "./data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
+import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture, IGPUTextureBase } from "./data/IGPUTexture";
 import { IRenderObject } from "./data/IRenderObject";
@@ -63,7 +63,7 @@ export class WebGPU
         this._currentComputePassEncoder.computeObjects.push(computeObject);
     }
 
-    copyTextureToTexture(copyTextureToTexture: ICopyTextureToTexture)
+    copyTextureToTexture(copyTextureToTexture: IGPUCopyTextureToTexture)
     {
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
 

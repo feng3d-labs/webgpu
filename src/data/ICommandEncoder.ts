@@ -1,7 +1,7 @@
-import { ICopyTextureToTexture } from "./ICopyTextureToTexture";
 import { IGPUCommandEncoder } from "./IGPUCommandEncoder";
 import { IGPUComputePassEncoder } from "./IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
+import { IGPUCopyTextureToTexture } from "./IGPUCopyTextureToTexture";
 import { IRenderPassEncoder } from "./IRenderPassEncoder";
 
 /**
@@ -30,6 +30,6 @@ export interface ICommandEncoder extends Omit<IGPUCommandEncoder, "passEncoders"
 export type IPassEncoder =
     | IGPUComputePassEncoder
     | IRenderPassEncoder
-    | ICopyTextureToTexture
+    | IGPUCopyTextureToTexture
     | IGPUCopyBufferToBuffer
     ;
