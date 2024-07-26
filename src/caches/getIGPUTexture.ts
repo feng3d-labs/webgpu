@@ -1,28 +1,6 @@
 import { IGPUTexture, IGPUTextureFromContext, IGPUTextureSize } from "../data/IGPUTexture";
 import { IAttachmentSize } from "../data/IRenderPass";
 
-export function getIGPUTexture(texture: IGPUTexture)
-{
-    let gpuTexture: IGPUTexture;
-
-    if (isITextureFromContext(texture))
-    {
-        const gpuCanvasContext = texture.context;
-
-        gpuCanvasContext["_gpuTexture"] = gpuCanvasContext["_gpuTexture"] || {
-            ...texture,
-            context: gpuCanvasContext
-        };
-        gpuTexture = gpuCanvasContext["_gpuTexture"];
-    }
-    else
-    {
-        gpuTexture = texture;
-    }
-
-    return gpuTexture;
-}
-
 function isITextureFromContext(arg: any): arg is IGPUTextureFromContext
 {
     return !!(arg as IGPUTextureFromContext).context;

@@ -8,7 +8,6 @@ import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IRenderPassEncoder } from "../data/IRenderPassEncoder";
 import { getIComputePassEncoder } from "./getIComputePassEncoder";
 import { getIGPURenderPassEncoder } from "./getIGPURenderPassEncoder";
-import { getIGPUTexture } from "./getIGPUTexture";
 
 export function getIGPUCommandEncoder(device: GPUDevice, v: ICommandEncoder)
 {
@@ -75,8 +74,8 @@ function isICopyBufferToBuffer(arg: any): arg is ICopyBufferToBuffer
 
 function getIGPUCopyTextureToTexture(v: ICopyTextureToTexture)
 {
-    const sourceTexture = getIGPUTexture(v.source.texture);
-    const destinationTexture = getIGPUTexture(v.destination.texture);
+    const sourceTexture = v.source.texture;
+    const destinationTexture = v.destination.texture;
 
     const gpuCopyTextureToTexture: IGPUCopyTextureToTexture = {
         ...v,
