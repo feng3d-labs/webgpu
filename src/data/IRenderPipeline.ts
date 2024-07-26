@@ -1,6 +1,5 @@
 import { IFragmentState } from "./IFragmentState";
 import { IGPURenderPipeline, IGPUMultisampleState, IGPUDepthStencilState } from "./IGPURenderObject";
-import { IRenderPass } from "./IRenderPass";
 import { IVertexState } from "./IVertexState";
 
 /**
@@ -34,7 +33,7 @@ export interface IRenderPipeline extends Omit<IGPURenderPipeline, "vertex" | "fr
 /**
  * 多重采样阶段描述。
  *
- * 多重采样次数将由 {@link IRenderPass.multisample} 覆盖。
+ * 多重采样次数将由 {@link IGPURenderPassDescriptor.multisample} 覆盖。
  */
 export interface IMultisampleState extends Omit<IGPUMultisampleState, "count">
 {
@@ -44,7 +43,7 @@ export interface IMultisampleState extends Omit<IGPUMultisampleState, "count">
 /**
  * 深度模板阶段描述。
  *
- * `format` 将从深度附件 {@link IRenderPass.depthStencilAttachment} 纹理上获取。
+ * `format` 将从深度附件 {@link IGPURenderPassDescriptor.depthStencilAttachment} 纹理上获取。
  */
 export interface IDepthStencilState extends Omit<IGPUDepthStencilState, "format" | "depthWriteEnabled" | "depthCompare">
 {

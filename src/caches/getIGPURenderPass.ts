@@ -1,8 +1,7 @@
 import { watcher } from "@feng3d/watcher";
-import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
+import { IAttachmentSize, IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
 import { IGPUTexture } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
-import { IAttachmentSize, IRenderPass, IRenderPassDepthStencilAttachment } from "../data/IRenderPass";
 import { updateIGPURenderPassAttachmentSize } from "./getGPURenderPassDescriptor";
 import { getGPUTextureFormat } from "./getGPUTexture";
 import { getGPUTextureSize, setITextureSize } from "./getIGPUTexture";
@@ -13,7 +12,7 @@ import { getGPUTextureSize, setITextureSize } from "./getIGPUTexture";
  * @param renderPass 渲染通道描述。
  * @returns 完整的渲染通道描述。
  */
-export function getIGPURenderPass(device: GPUDevice, renderPass: IRenderPass)
+export function getIGPURenderPass(device: GPUDevice, renderPass: IGPURenderPassDescriptor)
 {
     let iGPURenderPass = renderPassMap.get(renderPass);
     if (!iGPURenderPass)
@@ -51,7 +50,7 @@ export function getIGPURenderPass(device: GPUDevice, renderPass: IRenderPass)
 
     return iGPURenderPass;
 }
-const renderPassMap = new Map<IRenderPass, IGPURenderPassDescriptor>();
+const renderPassMap = new Map<IGPURenderPassDescriptor, IGPURenderPassDescriptor>();
 
 /**
  * 获取渲染通道附件上的纹理描述列表。
@@ -61,7 +60,7 @@ const renderPassMap = new Map<IRenderPass, IGPURenderPassDescriptor>();
  *
  * @returns 渲染通道附件上的纹理描述列表。
  */
-function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[], depthStencilAttachment?: IRenderPassDepthStencilAttachment)
+function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
 {
     const textures: IGPUTexture[] = [];
 
@@ -100,7 +99,7 @@ function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[]
  * @param renderPass 渲染通道。
  * @returns 渲染通道附件纹理格式。
  */
-export function getIRenderPassFormats(device: GPUDevice, renderPass: IRenderPass)
+export function getIRenderPassFormats(device: GPUDevice, renderPass: IGPURenderPassDescriptor)
 {
     const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(device, renderPass);
 
@@ -115,7 +114,7 @@ export function getIRenderPassFormats(device: GPUDevice, renderPass: IRenderPass
  * @param renderPass 渲染通道。
  * @returns 渲染通道深度模板附件纹理格式。
  */
-export function getIRenderPassDepthStencilAttachmentFormats(device: GPUDevice, renderPass: IRenderPass)
+export function getIRenderPassDepthStencilAttachmentFormats(device: GPUDevice, renderPass: IGPURenderPassDescriptor)
 {
     const gpuRenderPass = getIGPURenderPass(device, renderPass);
 
@@ -134,7 +133,7 @@ export function getIRenderPassDepthStencilAttachmentFormats(device: GPUDevice, r
  * @param renderPass 渲染通道。
  * @returns 渲染通道颜色附件纹理格式。
  */
-export function getIRenderPassColorAttachmentFormats(device: GPUDevice, renderPass: IRenderPass)
+export function getIRenderPassColorAttachmentFormats(device: GPUDevice, renderPass: IGPURenderPassDescriptor)
 {
     const gpuRenderPass = getIGPURenderPass(device, renderPass);
 
@@ -187,7 +186,7 @@ const multisampleTextureMap = new WeakMap<IGPUTexture, IGPUTextureView>();
  * @param multisample 多重采样次数。
  * @returns 深度模板附件完整描述。
  */
-function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencilAttachment: IRenderPassDepthStencilAttachment, attachmentSize: IAttachmentSize, multisample: number)
+function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: IAttachmentSize, multisample: number)
 {
     let gpuDepthStencilAttachment: IGPURenderPassDepthStencilAttachment;
     if (depthStencilAttachment)
@@ -269,7 +268,7 @@ function getIGPURenderPassColorAttachments(device, colorAttachments: IGPURenderP
  *
  * @param renderPass 渲染通道描述。
  */
-function updateAttachmentSize(device: GPUDevice, renderPass: IRenderPass)
+function updateAttachmentSize(device: GPUDevice, renderPass: IGPURenderPassDescriptor)
 {
     const attachmentTextures = getAttachmentTextures(renderPass.colorAttachments, renderPass.depthStencilAttachment);
     if (!renderPass.attachmentSize)

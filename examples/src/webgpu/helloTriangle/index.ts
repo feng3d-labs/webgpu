@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import { IRenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
 import redFragWGSL from "../../shaders/red.frag.wgsl";
 import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
 
@@ -10,7 +10,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await WebGPU.init();
 
-    const renderPass: IRenderPass = {
+    const renderPass: IGPURenderPassDescriptor = {
         colorAttachments: [{
             view: { texture: { context: { canvasId: canvas.id } } },
             clearValue: [0.0, 0.0, 0.0, 1.0],

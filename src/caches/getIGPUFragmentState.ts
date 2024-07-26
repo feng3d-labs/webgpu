@@ -1,6 +1,6 @@
 import { IFragmentState } from "../data/IFragmentState";
 import { IGPUFragmentState } from "../data/IGPURenderObject";
-import { IRenderPass } from "../data/IRenderPass";
+import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
 import { ChainMap } from "../utils/ChainMap";
 import { getIRenderPassColorAttachmentFormats } from "./getIGPURenderPass";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
@@ -12,7 +12,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param colorAttachmentTextureFormats 颜色附件格式。
  * @returns 片段阶段完整描述。
  */
-export function getIGPUFragmentState(device: GPUDevice, fragmentState: IFragmentState, renderPass: IRenderPass)
+export function getIGPUFragmentState(device: GPUDevice, fragmentState: IFragmentState, renderPass: IGPURenderPassDescriptor)
 {
     if (!fragmentState)
     {
@@ -72,4 +72,4 @@ export function getIGPUFragmentState(device: GPUDevice, fragmentState: IFragment
     return gpuFragmentState;
 }
 
-const fragmentStateMap = new ChainMap<[IFragmentState, IRenderPass], IGPUFragmentState>();
+const fragmentStateMap = new ChainMap<[IFragmentState, IGPURenderPassDescriptor], IGPUFragmentState>();

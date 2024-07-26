@@ -1,7 +1,7 @@
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import sampleExternalTextureWGSL from "../../shaders/sampleExternalTexture.frag.wgsl";
 
-import { IRenderObject, IRenderPass, IGPUSampler, WebGPU } from "webgpu-renderer";
+import { IGPURenderPassDescriptor, IGPUSampler, IRenderObject, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -27,7 +27,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         minFilter: "linear",
     };
 
-    const renderPass: IRenderPass = {
+    const renderPass: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },

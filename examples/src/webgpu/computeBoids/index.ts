@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { IGPUBuffer, IGPUComputeObject, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IGPUComputeObject, IRenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -94,7 +94,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const renderPass: IRenderPass = {
+    const renderPass: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },

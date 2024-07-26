@@ -1,10 +1,10 @@
+import { IGPURenderPassDescriptor } from "./IGPURenderPassEncoder";
 import { IRenderBundleObject } from "./IRenderBundleObject";
 import { IRenderObject } from "./IRenderObject";
-import { IRenderPass } from "./IRenderPass";
 
 export interface IRenderPassEncoder
 {
-    renderPass: IRenderPass,
+    renderPass: IGPURenderPassDescriptor,
 
     renderObjects: (IRenderObject | IRenderBundleObject)[],
 }

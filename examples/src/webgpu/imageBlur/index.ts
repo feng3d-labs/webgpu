@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -152,7 +152,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     updateSettings();
 
-    const renderPassDescriptor: IRenderPass = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },

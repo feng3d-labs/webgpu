@@ -5,7 +5,7 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { IBindingResources, IGPUBuffer, IRenderObject, IRenderPass, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IRenderObject, IGPURenderPassDescriptor, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -300,7 +300,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         data: kMatrices,
     };
 
-    const renderPass: IRenderPass = {
+    const renderPass: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },

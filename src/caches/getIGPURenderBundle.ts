@@ -1,10 +1,10 @@
 import { IGPURenderBundleEncoderDescriptor, IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
+import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
 import { IRenderBundleObject } from "../data/IRenderBundleObject";
-import { IRenderPass } from "../data/IRenderPass";
 import { getIGPURenderObject } from "./getIGPURenderObject";
 import { getIRenderPassFormats } from "./getIGPURenderPass";
 
-export function getIGPURenderBundle(device: GPUDevice, renderBundleObject: IRenderBundleObject, renderPass: IRenderPass)
+export function getIGPURenderBundle(device: GPUDevice, renderBundleObject: IRenderBundleObject, renderPass: IGPURenderPassDescriptor)
 {
     let gpuRenderBundleObject: IGPURenderBundleObject = gpuRenderBundleObjectMap.get(renderBundleObject);
     if (gpuRenderBundleObject)

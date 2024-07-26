@@ -42,8 +42,32 @@ export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 
      * attachment that will be output to and tested against when executing this render pass.
      * Due to compatible usage list|usage compatibility, no writable depth/stencil attachment
      * may alias another attachment or any resource used inside the render pass.
+     *
+     * 当使用深度附件时，必须设置，使用默认值可设置为 `{}` 。
      */
     depthStencilAttachment?: IGPURenderPassDepthStencilAttachment;
+
+    /**
+     * 是否开启多重采样。WebGPU貌似只支持4重采样。如果在颜色附件中没有给出支持多重采样的纹理时则引擎将会自动为其添加。
+     */
+    multisample?: 4;
+
+    /**
+     * 附件尺寸。
+     *
+     * 默认从第一个有效附件纹理中获取尺寸。
+     *
+     * 该值被修改后将会改变所有附件的尺寸，并释放附件上过时的GPU纹理资源。
+     */
+    attachmentSize?: IAttachmentSize;
+}
+
+/**
+ * 附件尺寸。
+ */
+export interface IAttachmentSize
+{
+    width: number, height: number
 }
 
 /**
@@ -106,11 +130,13 @@ export interface IGPURenderPassDepthStencilAttachment extends Omit<GPURenderPass
     /**
      * A {@link GPUTextureView} describing the texture subresource that will be output to
      * and read from for this depth/stencil attachment.
+     *
+     * 当值为空时，将自动从颜色附件中获取尺寸来创建深度纹理。
      */
-    view: IGPUTextureView;
+    view?: IGPUTextureView;
 
     /**
-     * 接收多重采样结果的纹理视图。
+     * 作为解决多重采样的纹理视图。
      */
     resolveTarget?: IGPUTextureView;
 }

@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 interface Renderable
 {
@@ -210,7 +210,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   }
   ensureEnoughAsteroids();
 
-  const renderPassDescriptor: IRenderPass = {
+  const renderPassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
         view: { texture: { context } },

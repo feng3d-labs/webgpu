@@ -1,5 +1,5 @@
+import { IAttachmentSize } from "../data/IGPURenderPassEncoder";
 import { IGPUTexture, IGPUTextureFromContext, IGPUTextureSize } from "../data/IGPUTexture";
-import { IAttachmentSize } from "../data/IRenderPass";
 import { getGPUTexture } from "./getGPUTexture";
 
 function isITextureFromContext(arg: any): arg is IGPUTextureFromContext

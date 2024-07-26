@@ -4,7 +4,7 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -115,7 +115,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         };
 
-        const renderPass: IRenderPass = {
+        const renderPass: IGPURenderPassDescriptor = {
             colorAttachments: [
                 {
                     view: { texture: { context: { canvasId: canvas.id } } },

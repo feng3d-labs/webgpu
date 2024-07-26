@@ -6,7 +6,7 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IBindingResources, IGPUBuffer, IRenderPass, IRenderPipeline, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IRenderPipeline, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const shadowDepthTextureSize = 1024;
 
@@ -107,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
-    const renderPassDescriptor: IRenderPass = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -232,7 +232,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         return viewProjMatrix as Float32Array;
     }
 
-    const shadowPassDescriptor: IRenderPass = {
+    const shadowPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [],
         depthStencilAttachment: {
             view: { texture: shadowDepthTexture },

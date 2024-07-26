@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IGPUBuffer, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IRenderBundleObject, IRenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -124,7 +124,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         let startTime: number;
         const uniformTime = new Float32Array([0]);
 
-        const renderPass: IRenderPass = {
+        const renderPass: IGPURenderPassDescriptor = {
             colorAttachments: [
                 {
                     view: { texture: { context: { canvasId: canvas.id } } },

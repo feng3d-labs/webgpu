@@ -1,6 +1,6 @@
 import { IGPURenderPipeline } from "../data/IGPURenderObject";
+import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
-import { IRenderPass } from "../data/IRenderPass";
 import { IDepthStencilState, IRenderPipeline } from "../data/IRenderPipeline";
 import { IVertexAttributes } from "../data/IVertexAttributes";
 import { ChainMap } from "../utils/ChainMap";
@@ -18,7 +18,7 @@ import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getIGPURenderPipeline(device: GPUDevice, renderPipeline: IRenderPipeline, renderPass: IRenderPass, vertices: IVertexAttributes)
+export function getIGPURenderPipeline(device: GPUDevice, renderPipeline: IRenderPipeline, renderPass: IGPURenderPassDescriptor, vertices: IVertexAttributes)
 {
     let result = renderPipelineMap.get([renderPipeline, renderPass, vertices]);
     if (!result)
@@ -59,7 +59,7 @@ export function getIGPURenderPipeline(device: GPUDevice, renderPipeline: IRender
 }
 
 const renderPipelineMap = new ChainMap<
-    [IRenderPipeline, IRenderPass, IVertexAttributes],
+    [IRenderPipeline, IGPURenderPassDescriptor, IVertexAttributes],
     {
         /**
          * GPU渲染管线描述。
@@ -83,7 +83,7 @@ const renderPipelineMap = new ChainMap<
  * @param depthStencilAttachmentTextureFormat 深度模板附件纹理格式。
  * @returns 深度模板阶段完整描述。
  */
-function getGPUDepthStencilState(device: GPUDevice, depthStencil: IDepthStencilState, renderPass: IRenderPass)
+function getGPUDepthStencilState(device: GPUDevice, depthStencil: IDepthStencilState, renderPass: IGPURenderPassDescriptor)
 {
     // 获取渲染通道附件纹理格式。
     const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormats(device, renderPass);

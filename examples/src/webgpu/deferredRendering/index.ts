@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -135,7 +135,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
-  const writeGBufferPassDescriptor: IRenderPass = {
+  const writeGBufferPassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
         view: gBufferTextureViews[0],
@@ -167,7 +167,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     },
   };
 
-  const textureQuadPassDescriptor: IRenderPass = {
+  const textureQuadPassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
         view: { texture: { context: { canvasId: canvas.id } } },
