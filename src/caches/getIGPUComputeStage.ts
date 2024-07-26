@@ -1,5 +1,4 @@
-import { IProgrammableStage } from "../data/IComputeObject";
-import { IGPUComputeStage } from "../data/IGPUComputeObject";
+import { IGPUComputeStage, IGPUProgrammableStage } from "../data/IGPUComputeObject";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -8,7 +7,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param computeStage 计算阶段描述。
  * @returns 计算阶段完整描述。
  */
-export function getIGPUComputeStage(computeStage: IProgrammableStage)
+export function getIGPUComputeStage(computeStage: IGPUProgrammableStage)
 {
     let gpuComputeState = computeStateMap.get(computeStage);
     if (!gpuComputeState)
@@ -44,4 +43,4 @@ export function getIGPUComputeStage(computeStage: IProgrammableStage)
     return gpuComputeState;
 }
 
-const computeStateMap = new Map<IProgrammableStage, IGPUComputeStage>();
+const computeStateMap = new Map<IGPUProgrammableStage, IGPUComputeStage>();

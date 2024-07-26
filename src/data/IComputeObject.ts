@@ -19,19 +19,5 @@ export interface IComputePipeline extends Omit<IGPUComputePipeline, "compute">
     /**
      * 计算程序。
      */
-    compute: IProgrammableStage;
-}
-
-/**
- *
- */
-export interface IProgrammableStage extends Omit<IGPUProgrammableStage, "entryPoint">
-{
-    /**
-     * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to
-     * perform its work.
-     *
-     * 入口函数可选。默认从着色器中进行反射获取。
-     */
-    entryPoint?: string;
+    compute: IGPUProgrammableStage;
 }

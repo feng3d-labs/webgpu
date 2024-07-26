@@ -93,4 +93,12 @@ export interface IGPUProgrammableStage extends Omit<GPUProgrammableStage, "modul
      * 着色器源码，将由 {@link GPUDevice.createShaderModule} 生成 {@link GPUShaderModule} 。
      */
     code: string;
+
+    /**
+     * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to
+     * perform its work.
+     *
+     * 入口函数可选。默认从着色器中进行反射获取。
+     */
+    entryPoint?: string;
 }
