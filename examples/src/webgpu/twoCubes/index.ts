@@ -1,11 +1,11 @@
-import { mat4, vec3 } from 'wgpu-matrix';
+import { mat4, vec3 } from "wgpu-matrix";
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import basicVertWGSL from '../../shaders/basic.vert.wgsl';
-import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
+import basicVertWGSL from "../../shaders/basic.vert.wgsl";
+import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IBuffer, IBufferBinding, IRenderObject, IRenderPass, WebGPU } from 'webgpu-renderer';
+import { IBuffer, IBufferBinding, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -24,8 +24,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
         depthStencilAttachment: {
             depthClearValue: 1,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 
@@ -49,7 +49,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {
-                cullMode: 'back',
+                cullMode: "back",
             },
         },
         vertices: {
@@ -142,5 +142,5 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas);

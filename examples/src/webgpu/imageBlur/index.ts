@@ -1,9 +1,9 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
-import blurWGSL from './blur.wgsl';
+import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
+import blurWGSL from "./blur.wgsl";
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from 'webgpu-renderer';
+import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -33,13 +33,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const sampler: ISampler = {
-        magFilter: 'linear',
-        minFilter: 'linear',
+        magFilter: "linear",
+        minFilter: "linear",
     };
 
-    const img = document.createElement('img');
+    const img = document.createElement("img");
     img.src = new URL(
-        '../../../assets/img/Di-3d.png',
+        "../../../assets/img/Di-3d.png",
         import.meta.url
     ).toString();
     await img.decode();
@@ -48,7 +48,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const [srcWidth, srcHeight] = [imageBitmap.width, imageBitmap.height];
     const cubeTexture1: ITexture = {
         size: [srcWidth, srcHeight, 1],
-        format: 'rgba8unorm',
+        format: "rgba8unorm",
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
         source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const textures: ITexture[] = [0, 1].map(() =>
     ({
         size: [srcWidth, srcHeight],
-        format: 'rgba8unorm',
+        format: "rgba8unorm",
         usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
     } as ITexture));
 
@@ -144,8 +144,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
         needUpdateEncoder = true;
     };
-    gui.add(settings, 'filterSize', 1, 33).step(2).onChange(updateSettings);
-    gui.add(settings, 'iterations', 1, 10).step(1).onChange(() =>
+    gui.add(settings, "filterSize", 1, 33).step(2).onChange(updateSettings);
+    gui.add(settings, "iterations", 1, 10).step(1).onChange(() =>
     {
         needUpdateEncoder = true;
     });
@@ -247,5 +247,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

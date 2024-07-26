@@ -1,9 +1,9 @@
-import { IBindingResources, ICommandEncoder, IRenderPass, IRenderPassEncoder, IRenderPipeline, ITexture, internal } from 'webgpu-renderer';
+import { IBindingResources, ICommandEncoder, IRenderPass, IRenderPassEncoder, IRenderPipeline, ITexture, internal } from "webgpu-renderer";
 
-import Common from './common';
-import Radiosity from './radiosity';
-import rasterizerWGSL from './rasterizer.wgsl';
-import Scene from './scene';
+import Common from "./common";
+import Radiosity from "./radiosity";
+import rasterizerWGSL from "./rasterizer.wgsl";
+import Scene from "./scene";
 
 /**
  * Rasterizer renders the scene using a regular raserization graphics pipeline.
@@ -29,14 +29,14 @@ export default class Rasterizer
     const framebufferSize = internal.getIGPUTextureSize(framebuffer);
 
     const depthTexture: ITexture = {
-      label: 'RasterizerRenderer.depthTexture',
+      label: "RasterizerRenderer.depthTexture",
       size: [framebufferSize[0], framebufferSize[1]],
-      format: 'depth24plus',
+      format: "depth24plus",
       usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     this.renderPassDescriptor = {
-      label: 'RasterizerRenderer.renderPassDescriptor',
+      label: "RasterizerRenderer.renderPassDescriptor",
       colorAttachments: [
         {
           view: { texture: framebuffer },
@@ -47,23 +47,23 @@ export default class Rasterizer
         view: { texture: depthTexture },
 
         depthClearValue: 1,
-        depthLoadOp: 'clear',
-        depthStoreOp: 'store',
+        depthLoadOp: "clear",
+        depthStoreOp: "store",
       },
     };
 
     this.bindGroup = {
       lightmap: { texture: radiosity.lightmap },
       smpl: {
-        addressModeU: 'clamp-to-edge',
-        addressModeV: 'clamp-to-edge',
-        magFilter: 'linear',
-        minFilter: 'linear',
+        addressModeU: "clamp-to-edge",
+        addressModeV: "clamp-to-edge",
+        magFilter: "linear",
+        minFilter: "linear",
       },
     };
 
     this.pipeline = {
-      label: 'RasterizerRenderer.pipeline',
+      label: "RasterizerRenderer.pipeline",
       vertex: {
         code: rasterizerWGSL + common.wgsl,
       },
@@ -71,7 +71,7 @@ export default class Rasterizer
         code: rasterizerWGSL + common.wgsl,
       },
       primitive: {
-        cullMode: 'back',
+        cullMode: "back",
       },
     };
 
@@ -81,7 +81,7 @@ export default class Rasterizer
       renderObjects: [{
         pipeline: this.pipeline,
         vertices: this.scene.vertexAttributes,
-        index: { buffer: this.scene.indices, indexFormat: 'uint16' },
+        index: { buffer: this.scene.indices, indexFormat: "uint16" },
         bindingResources: {
           ...this.common.uniforms.bindGroup,
           ...this.bindGroup,

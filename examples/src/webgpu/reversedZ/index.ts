@@ -1,16 +1,16 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import { mat4, vec3 } from 'wgpu-matrix';
+import { mat4, vec3 } from "wgpu-matrix";
 
-import fragmentWGSL from './fragment.wgsl';
-import fragmentPrecisionErrorPassWGSL from './fragmentPrecisionErrorPass.wgsl';
-import fragmentTextureQuadWGSL from './fragmentTextureQuad.wgsl';
-import vertexWGSL from './vertex.wgsl';
-import vertexDepthPrePassWGSL from './vertexDepthPrePass.wgsl';
-import vertexPrecisionErrorPassWGSL from './vertexPrecisionErrorPass.wgsl';
-import vertexTextureQuadWGSL from './vertexTextureQuad.wgsl';
+import fragmentWGSL from "./fragment.wgsl";
+import fragmentPrecisionErrorPassWGSL from "./fragmentPrecisionErrorPass.wgsl";
+import fragmentTextureQuadWGSL from "./fragmentTextureQuad.wgsl";
+import vertexWGSL from "./vertex.wgsl";
+import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
+import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
+import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { IBindingResources, IBuffer, ICanvasContext, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-renderer';
+import { IBindingResources, IBuffer, ICanvasContext, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -60,8 +60,8 @@ const depthBufferModes: DepthBufferMode[] = [
     DepthBufferMode.Reversed,
 ];
 const depthCompareFuncs = {
-    [DepthBufferMode.Default]: 'less' as GPUCompareFunction,
-    [DepthBufferMode.Reversed]: 'greater' as GPUCompareFunction,
+    [DepthBufferMode.Default]: "less" as GPUCompareFunction,
+    [DepthBufferMode.Reversed]: "greater" as GPUCompareFunction,
 };
 const depthClearValues = {
     [DepthBufferMode.Default]: 1.0,
@@ -89,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         color: { buffer: verticesBuffer, offset: geometryColorOffset, vertexSize: geometryVertexSize },
     };
 
-    const depthBufferFormat = 'depth32float';
+    const depthBufferFormat = "depth32float";
 
     // depthPrePass is used to render scene to the depth texture
     // this is not needed if you just want to use reversed z to render a scene
@@ -98,7 +98,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: vertexDepthPrePassWGSL,
         },
         primitive: {
-            cullMode: 'back',
+            cullMode: "back",
         },
     };
 
@@ -130,7 +130,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: fragmentPrecisionErrorPassWGSL,
         },
         primitive: {
-            cullMode: 'back',
+            cullMode: "back",
         },
     };
 
@@ -159,7 +159,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: fragmentWGSL,
         },
         primitive: {
-            cullMode: 'back',
+            cullMode: "back",
         },
     };
 
@@ -210,8 +210,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             view: { texture: depthTexture },
 
             depthClearValue: 1,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 
@@ -230,8 +230,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             view: { texture: defaultDepthTexture },
 
             depthClearValue: 1,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 
@@ -239,15 +239,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         colorAttachments: [
             {
                 view: { texture: { context } },
-                loadOp: 'load',
+                loadOp: "load",
             },
         ],
         depthStencilAttachment: {
             view: { texture: defaultDepthTexture },
 
             depthClearValue: 1,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
     const drawPassDescriptors = [drawPassDescriptor, drawPassLoadDescriptor];
@@ -266,8 +266,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
 
-                loadOp: 'load',
-                storeOp: 'store',
+                loadOp: "load",
+                storeOp: "store",
             },
         ],
     };
@@ -376,9 +376,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     const settings = {
-        mode: 'color',
+        mode: "color",
     };
-    gui.add(settings, 'mode', ['color', 'precision-error', 'depth-texture']);
+    gui.add(settings, "mode", ["color", "precision-error", "depth-texture"]);
 
     const colorPassEncoders: IRenderPassEncoder[] = [];
 
@@ -514,11 +514,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         let passEncoders: IRenderPassEncoder[];
 
-        if (settings.mode === 'color')
+        if (settings.mode === "color")
         {
             passEncoders = colorPassEncoders;
         }
-        else if (settings.mode === 'precision-error')
+        else if (settings.mode === "precision-error")
         {
             passEncoders = precisionErrorPassEncoders;
         }
@@ -544,5 +544,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

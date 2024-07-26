@@ -1,10 +1,10 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import computeWGSL from './compute.wgsl';
-import fragWGSL from './frag.wgsl';
-import vertWGSL from './vert.wgsl';
+import computeWGSL from "./compute.wgsl";
+import fragWGSL from "./frag.wgsl";
+import vertWGSL from "./vert.wgsl";
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from 'webgpu-renderer';
+import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -28,11 +28,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     function addGUI()
     {
-        gui.add(GameOptions, 'timestep', 1, 60, 1);
-        gui.add(GameOptions, 'width', 16, 1024, 16).onFinishChange(resetGameData);
-        gui.add(GameOptions, 'height', 16, 1024, 16).onFinishChange(resetGameData);
+        gui.add(GameOptions, "timestep", 1, 60, 1);
+        gui.add(GameOptions, "width", 16, 1024, 16).onFinishChange(resetGameData);
+        gui.add(GameOptions, "height", 16, 1024, 16).onFinishChange(resetGameData);
         gui
-            .add(GameOptions, 'workgroupSize', [4, 8, 16])
+            .add(GameOptions, "workgroupSize", [4, 8, 16])
             .onFinishChange(resetGameData);
     }
 
@@ -72,7 +72,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         verticesBuffer0 = {
-            cell: { buffer: buffer0, stepMode: 'instance' }
+            cell: { buffer: buffer0, stepMode: "instance" }
         };
 
         buffer1 = {
@@ -80,7 +80,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.VERTEX,
         };
         verticesBuffer1 = {
-            cell: { buffer: buffer1, stepMode: 'instance' }
+            cell: { buffer: buffer1, stepMode: "instance" }
         };
 
         const bindGroup0: IBindingResources = {
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const renderPipeline: IRenderPipeline = {
             primitive: {
-                topology: 'triangle-strip',
+                topology: "triangle-strip",
             },
             vertex: {
                 code: vertWGSL,
@@ -190,5 +190,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

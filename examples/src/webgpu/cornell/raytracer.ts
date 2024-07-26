@@ -1,8 +1,8 @@
-import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, internal } from 'webgpu-renderer';
+import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, internal } from "webgpu-renderer";
 
-import Common from './common';
-import Radiosity from './radiosity';
-import raytracerWGSL from './raytracer.wgsl';
+import Common from "./common";
+import Radiosity from "./radiosity";
+import raytracerWGSL from "./raytracer.wgsl";
 
 /**
  * Raytracer renders the scene using a software ray-tracing compute pipeline.
@@ -29,17 +29,17 @@ export default class Raytracer
     this.bindGroup = {
       lightmap: { texture: radiosity.lightmap },
       smpl: {
-        addressModeU: 'clamp-to-edge',
-        addressModeV: 'clamp-to-edge',
-        addressModeW: 'clamp-to-edge',
-        magFilter: 'linear',
-        minFilter: 'linear',
+        addressModeU: "clamp-to-edge",
+        addressModeV: "clamp-to-edge",
+        addressModeW: "clamp-to-edge",
+        magFilter: "linear",
+        minFilter: "linear",
       },
       framebuffer: { texture: framebuffer },
     };
 
     this.pipeline = {
-      label: 'raytracerPipeline',
+      label: "raytracerPipeline",
       compute: {
         code: raytracerWGSL + common.wgsl,
         constants: {

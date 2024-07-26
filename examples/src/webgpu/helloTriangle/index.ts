@@ -1,6 +1,6 @@
-import { IRenderObject, IRenderPass, WebGPU } from 'webgpu-renderer';
-import redFragWGSL from '../../shaders/red.frag.wgsl';
-import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
+import { IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import redFragWGSL from "../../shaders/red.frag.wgsl";
+import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -37,5 +37,5 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas);

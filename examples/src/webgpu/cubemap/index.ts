@@ -1,11 +1,11 @@
-import { mat4, vec3 } from 'wgpu-matrix';
+import { mat4, vec3 } from "wgpu-matrix";
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
-import basicVertWGSL from '../../shaders/basic.vert.wgsl';
-import sampleCubemapWGSL from './sampleCubemap.frag.wgsl';
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import basicVertWGSL from "../../shaders/basic.vert.wgsl";
+import sampleCubemapWGSL from "./sampleCubemap.frag.wgsl";
 
-import { IBufferBinding, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from 'webgpu-renderer';
-import { IGPUCopyExternalImageToTexture } from '../../../../src/webgpu-data-driven/data/IGPUTexture';
+import { IBufferBinding, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from "webgpu-renderer";
+import { IGPUCopyExternalImageToTexture } from "../../../../src/webgpu-data-driven/data/IGPUTexture";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -48,7 +48,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         ];
         const promises = imgSrcs.map((src) =>
         {
-            const img = document.createElement('img');
+            const img = document.createElement("img");
             img.src = src;
 
             return img.decode().then(() => createImageBitmap(img));
@@ -64,17 +64,17 @@ const init = async (canvas: HTMLCanvasElement) =>
         });
 
         cubemapTexture = {
-            dimension: '2d',
+            dimension: "2d",
             size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
-            format: 'rgba8unorm',
+            format: "rgba8unorm",
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             source: textureSource,
         };
     }
 
     const sampler: ISampler = {
-        magFilter: 'linear',
-        minFilter: 'linear',
+        magFilter: "linear",
+        minFilter: "linear",
     };
 
     const aspect = canvas.width / canvas.height;
@@ -116,8 +116,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
         depthStencilAttachment: {
             depthClearValue: 1,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 
@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
             primitive: {
-                cullMode: 'none',
+                cullMode: "none",
             },
         },
         vertices: {
@@ -137,7 +137,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 map: { modelViewProjectionMatrix: new Float32Array(16) }
             },
             mySampler: sampler,
-            myTexture: { texture: cubemapTexture, dimension: 'cube' },
+            myTexture: { texture: cubemapTexture, dimension: "cube" },
         },
         draw: { vertexCount: cubeVertexCount },
     };
@@ -158,5 +158,5 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas);

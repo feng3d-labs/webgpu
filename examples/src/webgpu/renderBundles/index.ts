@@ -1,12 +1,12 @@
-import { GUI } from 'dat.gui';
-import Stats from 'stats-js';
+import { GUI } from "dat.gui";
+import Stats from "stats-js";
 
-import { mat4, vec3 } from 'wgpu-matrix';
-import { SphereLayout, createSphereMesh } from '../../meshes/sphere';
+import { mat4, vec3 } from "wgpu-matrix";
+import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
-import meshWGSL from './mesh.wgsl';
+import meshWGSL from "./mesh.wgsl";
 
-import { IBindingResources, IBuffer, ICanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-renderer';
+import { IBindingResources, IBuffer, ICanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 interface Renderable
 {
@@ -23,8 +23,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     useRenderBundles: true,
     asteroidCount: 5000,
   };
-  gui.add(settings, 'useRenderBundles');
-  gui.add(settings, 'asteroidCount', 1000, 10000, 1000).onChange(() =>
+  gui.add(settings, "useRenderBundles");
+  gui.add(settings, "asteroidCount", 1000, 10000, 1000).onChange(() =>
   {
     // If the content of the scene changes the render bundle must be recreated.
     ensureEnoughAsteroids();
@@ -51,7 +51,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
       // Backface culling since the sphere is solid piece of geometry.
       // Faces pointing away from the camera will be occluded by faces
       // pointing toward the camera.
-      cullMode: 'back',
+      cullMode: "back",
     },
 
     // Enable depth testing so that the fragment closest to the camera
@@ -60,7 +60,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
   const depthTexture: ITexture = {
     size: [canvas.width, canvas.height],
-    format: 'depth24plus',
+    format: "depth24plus",
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
@@ -74,13 +74,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   let planetTexture: ITexture;
   {
     const response = await fetch(
-      new URL('../../../assets/img/saturn.jpg', import.meta.url).toString()
+      new URL("../../../assets/img/saturn.jpg", import.meta.url).toString()
     );
     const imageBitmap = await createImageBitmap(await response.blob());
 
     planetTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
-      format: 'rgba8unorm',
+      format: "rgba8unorm",
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
@@ -89,21 +89,21 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   let moonTexture: ITexture;
   {
     const response = await fetch(
-      new URL('../../../assets/img/moon.jpg', import.meta.url).toString()
+      new URL("../../../assets/img/moon.jpg", import.meta.url).toString()
     );
     const imageBitmap = await createImageBitmap(await response.blob());
 
     moonTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
-      format: 'rgba8unorm',
+      format: "rgba8unorm",
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
   }
 
   const sampler: ISampler = {
-    magFilter: 'linear',
-    minFilter: 'linear',
+    magFilter: "linear",
+    minFilter: "linear",
   };
 
   // Helper functions to create the required meshes and bind groups for each sphere.
@@ -222,8 +222,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
       view: { texture: depthTexture },
 
       depthClearValue: 1,
-      depthLoadOp: 'clear',
-      depthStoreOp: 'store',
+      depthLoadOp: "clear",
+      depthStoreOp: "store",
     },
   };
 
@@ -279,7 +279,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
           pipeline,
           bindingResources: { ...frameBindGroup, ...renderable.bindGroup },
           vertices: renderable.vertexAttributes,
-          index: { buffer: renderable.indices, indexFormat: 'uint16' },
+          index: { buffer: renderable.indices, indexFormat: "uint16" },
           drawIndexed: { indexCount: renderable.indexCount },
         };
       }
@@ -363,5 +363,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 const stats = new Stats();
 document.body.appendChild(stats.dom);
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel, stats);

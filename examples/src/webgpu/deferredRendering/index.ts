@@ -1,16 +1,16 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import { mat4, vec3, vec4 } from 'wgpu-matrix';
-import { mesh } from '../../meshes/stanfordDragon';
+import { mat4, vec3, vec4 } from "wgpu-matrix";
+import { mesh } from "../../meshes/stanfordDragon";
 
-import fragmentDeferredRendering from './fragmentDeferredRendering.wgsl';
-import fragmentGBuffersDebugView from './fragmentGBuffersDebugView.wgsl';
-import fragmentWriteGBuffers from './fragmentWriteGBuffers.wgsl';
-import lightUpdate from './lightUpdate.wgsl';
-import vertexTextureQuad from './vertexTextureQuad.wgsl';
-import vertexWriteGBuffers from './vertexWriteGBuffers.wgsl';
+import fragmentDeferredRendering from "./fragmentDeferredRendering.wgsl";
+import fragmentGBuffersDebugView from "./fragmentGBuffersDebugView.wgsl";
+import fragmentWriteGBuffers from "./fragmentWriteGBuffers.wgsl";
+import lightUpdate from "./lightUpdate.wgsl";
+import vertexTextureQuad from "./vertexTextureQuad.wgsl";
+import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes, WebGPU } from 'webgpu-renderer';
+import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -70,20 +70,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const gBufferTexture2DFloat32: ITexture = {
     size: [canvas.width, canvas.height],
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
-    format: 'rgba32float',
-    sampleType: 'unfilterable-float',
+    format: "rgba32float",
+    sampleType: "unfilterable-float",
   };
   const gBufferTexture2DFloat16: ITexture = {
     size: [canvas.width, canvas.height],
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
-    format: 'rgba16float',
-    sampleType: 'unfilterable-float',
+    format: "rgba16float",
+    sampleType: "unfilterable-float",
   };
   const gBufferTextureAlbedo: ITexture = {
     size: [canvas.width, canvas.height],
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
-    format: 'bgra8unorm',
-    sampleType: 'unfilterable-float',
+    format: "bgra8unorm",
+    sampleType: "unfilterable-float",
   };
   const gBufferTextureViews: ITextureView[] = [
     { texture: gBufferTexture2DFloat32 },
@@ -92,8 +92,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   ];
 
   const primitive: GPUPrimitiveState = {
-    topology: 'triangle-list',
-    cullMode: 'back',
+    topology: "triangle-list",
+    cullMode: "back",
   };
 
   const writeGBuffersPipeline: IRenderPipeline = {
@@ -131,7 +131,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const depthTexture: ITexture = {
     size: [canvas.width, canvas.height],
-    format: 'depth24plus',
+    format: "depth24plus",
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
@@ -162,8 +162,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       view: { texture: depthTexture },
 
       depthClearValue: 1,
-      depthLoadOp: 'clear',
-      depthStoreOp: 'store',
+      depthLoadOp: "clear",
+      depthStoreOp: "store",
     },
   };
 
@@ -178,7 +178,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   };
 
   const settings = {
-    mode: 'rendering',
+    mode: "rendering",
     numLights: 128,
   };
   const configUniformBuffer: IBuffer = {
@@ -187,9 +187,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     data: new Uint32Array([settings.numLights]),
   };
 
-  gui.add(settings, 'mode', ['rendering', 'gBuffers view']);
+  gui.add(settings, "mode", ["rendering", "gBuffers view"]);
   gui
-    .add(settings, 'numLights', 1, kMaxNumLights)
+    .add(settings, "numLights", 1, kMaxNumLights)
     .step(1)
     .onChange(() =>
     {
@@ -374,7 +374,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           ...sceneUniformBindGroup,
         },
         vertices,
-        index: { buffer: indexBuffer, indexFormat: 'uint16' },
+        index: { buffer: indexBuffer, indexFormat: "uint16" },
         drawIndexed: { indexCount },
       },
     ]
@@ -435,7 +435,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const submit: ISubmit = {
       commandEncoders: [
         {
-          passEncoders: settings.mode === 'gBuffers view' ? gBuffersPassEncoders : passEncoders,
+          passEncoders: settings.mode === "gBuffers view" ? gBuffersPassEncoders : passEncoders,
         }
       ]
     };
@@ -448,5 +448,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

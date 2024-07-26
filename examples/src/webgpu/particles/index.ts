@@ -1,13 +1,13 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import { mat4, vec3 } from 'wgpu-matrix';
+import { mat4, vec3 } from "wgpu-matrix";
 
-import importLevelWGSL from './import_level.wgsl';
-import particleWGSL from './particle.wgsl';
-import probabilityMapWGSL from './probabilityMap.wgsl';
-import simulateWGSL from './simulate.wgsl';
+import importLevelWGSL from "./import_level.wgsl";
+import particleWGSL from "./particle.wgsl";
+import probabilityMapWGSL from "./probabilityMap.wgsl";
+import simulateWGSL from "./simulate.wgsl";
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-renderer';
+import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -34,8 +34,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   };
 
   const particlesVertices: IVertexAttributes = {
-    position: { buffer: particlesBuffer, offset: particlePositionOffset, vertexSize: particleInstanceByteSize, stepMode: 'instance' },
-    color: { buffer: particlesBuffer, offset: particleColorOffset, vertexSize: particleInstanceByteSize, stepMode: 'instance' },
+    position: { buffer: particlesBuffer, offset: particlePositionOffset, vertexSize: particleInstanceByteSize, stepMode: "instance" },
+    color: { buffer: particlesBuffer, offset: particleColorOffset, vertexSize: particleInstanceByteSize, stepMode: "instance" },
   };
 
   const renderPipeline: IRenderPipeline = {
@@ -48,14 +48,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
           blend: {
             color: {
-              srcFactor: 'src-alpha',
-              dstFactor: 'one',
-              operation: 'add',
+              srcFactor: "src-alpha",
+              dstFactor: "one",
+              operation: "add",
             },
             alpha: {
-              srcFactor: 'zero',
-              dstFactor: 'one',
-              operation: 'add',
+              srcFactor: "zero",
+              dstFactor: "one",
+              operation: "add",
             },
           },
         },
@@ -95,8 +95,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ],
     depthStencilAttachment: {
       depthClearValue: 1,
-      depthLoadOp: 'clear',
-      depthStoreOp: 'store',
+      depthLoadOp: "clear",
+      depthStoreOp: "store",
     },
   };
 
@@ -126,7 +126,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   let numMipLevels = 1;
   {
     const response = await fetch(
-      new URL('../../../assets/img/webgpu.png', import.meta.url).toString()
+      new URL("../../../assets/img/webgpu.png", import.meta.url).toString()
     );
     const imageBitmap = await createImageBitmap(await response.blob());
 
@@ -143,7 +143,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     texture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
       mipLevelCount: numMipLevels,
-      format: 'rgba8unorm',
+      format: "rgba8unorm",
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
@@ -205,15 +205,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         buf_out: { buffer: level & 1 ? bufferB : bufferA },
         tex_in: {
           texture,
-          format: 'rgba8unorm',
-          dimension: '2d',
+          format: "rgba8unorm",
+          dimension: "2d",
           baseMipLevel: level,
           mipLevelCount: 1,
         },
         tex_out: {
           texture,
-          format: 'rgba8unorm',
-          dimension: '2d',
+          format: "rgba8unorm",
+          dimension: "2d",
           baseMipLevel: level,
           mipLevelCount: 1,
         },
@@ -364,5 +364,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

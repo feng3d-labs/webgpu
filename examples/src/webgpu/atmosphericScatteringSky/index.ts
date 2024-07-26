@@ -1,8 +1,8 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import atmosphericScatteringSkyWGSL from './atmosphericScatteringSky.wgsl';
+import atmosphericScatteringSkyWGSL from "./atmosphericScatteringSky.wgsl";
 
-import { ICanvasContext, IComputeObject, ITexture, WebGPU } from 'webgpu-renderer';
+import { ICanvasContext, IComputeObject, ITexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -13,7 +13,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const context: ICanvasContext = {
         canvasId: canvas.id,
         configuration: {
-            format: 'rgba16float',
+            format: "rgba16float",
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING,
         }
     };
@@ -21,9 +21,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const webgpu = await WebGPU.init();
 
     const framebuffer: ITexture = {
-        label: 'framebuffer',
+        label: "framebuffer",
         size: [canvas.width, canvas.height],
-        format: 'rgba16float',
+        format: "rgba16float",
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
     };
 
@@ -73,5 +73,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

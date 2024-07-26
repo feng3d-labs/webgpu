@@ -1,26 +1,26 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import animometerWGSL from './animometer.wgsl';
+import animometerWGSL from "./animometer.wgsl";
 
-import { IBuffer, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, WebGPU } from 'webgpu-renderer';
+import { IBuffer, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
-    const perfDisplayContainer = document.createElement('div');
-    perfDisplayContainer.style.color = 'white';
-    perfDisplayContainer.style.background = 'black';
-    perfDisplayContainer.style.position = 'absolute';
-    perfDisplayContainer.style.top = '10px';
-    perfDisplayContainer.style.left = '10px';
+    const perfDisplayContainer = document.createElement("div");
+    perfDisplayContainer.style.color = "white";
+    perfDisplayContainer.style.background = "black";
+    perfDisplayContainer.style.position = "absolute";
+    perfDisplayContainer.style.top = "10px";
+    perfDisplayContainer.style.left = "10px";
 
-    const perfDisplay = document.createElement('pre');
+    const perfDisplay = document.createElement("pre");
     perfDisplayContainer.appendChild(perfDisplay);
     canvas.parentNode.appendChild(perfDisplayContainer);
 
     const params = new URLSearchParams(window.location.search);
     const settings = {
-        numTriangles: Number(params.get('numTriangles')) || 20000,
-        renderBundles: Boolean(params.get('renderBundles')),
+        numTriangles: Number(params.get("numTriangles")) || 20000,
+        renderBundles: Boolean(params.get("renderBundles")),
     };
 
     const devicePixelRatio = window.devicePixelRatio || 1;
@@ -39,7 +39,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: animometerWGSL,
         },
         primitive: {
-            frontFace: 'ccw',
+            frontFace: "ccw",
         }
     };
 
@@ -186,10 +186,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         doDraw = configure();
     };
     gui
-        .add(settings, 'numTriangles', 0, 200000)
+        .add(settings, "numTriangles", 0, 200000)
         .step(1)
         .onFinishChange(updateSettings);
-    gui.add(settings, 'renderBundles');
+    gui.add(settings, "renderBundles");
 
     let previousFrameTimestamp: number;
     let jsTimeAvg: number;
@@ -238,5 +238,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

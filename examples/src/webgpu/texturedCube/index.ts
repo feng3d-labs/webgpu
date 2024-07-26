@@ -1,11 +1,11 @@
-import { mat4, vec3 } from 'wgpu-matrix';
+import { mat4, vec3 } from "wgpu-matrix";
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import basicVertWGSL from '../../shaders/basic.vert.wgsl';
-import sampleTextureMixColorWGSL from '../../shaders/sampleTextureMixColor.frag.wgsl';
+import basicVertWGSL from "../../shaders/basic.vert.wgsl";
+import sampleTextureMixColorWGSL from "../../shaders/sampleTextureMixColor.frag.wgsl";
 
-import { IBufferBinding, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from 'webgpu-renderer';
+import { IBufferBinding, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -16,24 +16,24 @@ const init = async (canvas: HTMLCanvasElement) =>
     const webgpu = await WebGPU.init();
 
     // Fetch the image and upload it into a GPUTexture.
-    const img = document.createElement('img');
+    const img = document.createElement("img");
     img.src = new URL(
-        '../../../assets/img/Di-3d.png',
+        "../../../assets/img/Di-3d.png",
         import.meta.url
     ).toString();
     await img.decode();
     const imageBitmap = await createImageBitmap(img);
     const cubeTexture: ITexture = {
         size: [imageBitmap.width, imageBitmap.height],
-        format: 'rgba8unorm',
+        format: "rgba8unorm",
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
         source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
 
     // Create a sampler with linear filtering for smooth interpolation.
     const sampler: ISampler = {
-        magFilter: 'linear',
-        minFilter: 'linear',
+        magFilter: "linear",
+        minFilter: "linear",
     };
 
     const renderPass: IRenderPass = {
@@ -45,8 +45,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
         depthStencilAttachment: {
             depthClearValue: 1,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 
@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleTextureMixColorWGSL },
             primitive: {
-                cullMode: 'back',
+                cullMode: "back",
             },
         },
         vertices: {
@@ -113,5 +113,5 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas);

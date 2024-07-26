@@ -1,7 +1,7 @@
-import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, ITextureFromContext, internal } from 'webgpu-renderer';
+import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, ITextureFromContext, internal } from "webgpu-renderer";
 
-import Common from './common';
-import tonemapperWGSL from './tonemapper.wgsl';
+import Common from "./common";
+import tonemapperWGSL from "./tonemapper.wgsl";
 
 /**
  * Tonemapper implements a tonemapper to convert a linear-light framebuffer to
@@ -32,9 +32,9 @@ export default class Tonemapper
     };
 
     this.pipeline = {
-      label: 'Tonemap.pipeline',
+      label: "Tonemap.pipeline",
       compute: {
-        code: tonemapperWGSL.replace('{OUTPUT_FORMAT}', output.context.configuration.format),
+        code: tonemapperWGSL.replace("{OUTPUT_FORMAT}", output.context.configuration.format),
         constants: {
           WorkgroupSizeX: this.kWorkgroupSizeX,
           WorkgroupSizeY: this.kWorkgroupSizeY,

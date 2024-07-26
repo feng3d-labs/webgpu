@@ -1,12 +1,12 @@
-import { mat4, vec3 } from 'wgpu-matrix';
+import { mat4, vec3 } from "wgpu-matrix";
 
-import { mesh } from '../../meshes/stanfordDragon';
+import { mesh } from "../../meshes/stanfordDragon";
 
-import fragmentWGSL from './fragment.wgsl';
-import vertexWGSL from './vertex.wgsl';
-import vertexShadowWGSL from './vertexShadow.wgsl';
+import fragmentWGSL from "./fragment.wgsl";
+import vertexWGSL from "./vertex.wgsl";
+import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IBindingResources, IBuffer, IRenderPass, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-renderer';
+import { IBindingResources, IBuffer, IRenderPass, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const shadowDepthTextureSize = 1024;
 
@@ -60,14 +60,14 @@ const init = async (canvas: HTMLCanvasElement) =>
     const shadowDepthTexture: ITexture = {
         size: [shadowDepthTextureSize, shadowDepthTextureSize, 1],
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
-        format: 'depth32float',
+        format: "depth32float",
     };
 
     // Create some common descriptors used for both the shadow pipeline
     // and the color rendering pipeline.
     const primitive: GPUPrimitiveState = {
-        topology: 'triangle-list',
-        cullMode: 'back',
+        topology: "triangle-list",
+        cullMode: "back",
     };
 
     const shadowPipeline: IRenderPipeline = {
@@ -76,7 +76,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: 'less',
+            depthCompare: "less",
         },
         primitive,
     };
@@ -96,14 +96,14 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: 'less',
+            depthCompare: "less",
         },
         primitive,
     };
 
     const depthTexture: ITexture = {
         size: [canvas.width, canvas.height],
-        format: 'depth24plus-stencil8',
+        format: "depth24plus-stencil8",
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
@@ -118,11 +118,11 @@ const init = async (canvas: HTMLCanvasElement) =>
             view: { texture: depthTexture },
 
             depthClearValue: 1.0,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
             stencilClearValue: 0,
-            stencilLoadOp: 'clear',
-            stencilStoreOp: 'store',
+            stencilLoadOp: "clear",
+            stencilStoreOp: "store",
         },
     };
 
@@ -152,7 +152,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         shadowMap: { texture: shadowDepthTexture },
         shadowSampler: {
-            compare: 'less',
+            compare: "less",
         },
     };
 
@@ -238,8 +238,8 @@ const init = async (canvas: HTMLCanvasElement) =>
             view: { texture: shadowDepthTexture },
 
             depthClearValue: 1,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 
@@ -257,7 +257,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 vertices,
-                                index: { buffer: indexBuffer, indexFormat: 'uint16' },
+                                index: { buffer: indexBuffer, indexFormat: "uint16" },
                                 drawIndexed: { indexCount },
                             },
                         ]
@@ -272,7 +272,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 vertices,
-                                index: { buffer: indexBuffer, indexFormat: 'uint16' },
+                                index: { buffer: indexBuffer, indexFormat: "uint16" },
                                 drawIndexed: { indexCount },
                             }
                         ],
@@ -296,5 +296,5 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas);

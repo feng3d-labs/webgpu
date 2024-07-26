@@ -1,17 +1,17 @@
-import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
-import sampleExternalTextureWGSL from '../../shaders/sampleExternalTexture.frag.wgsl';
+import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
+import sampleExternalTextureWGSL from "../../shaders/sampleExternalTexture.frag.wgsl";
 
-import { IRenderObject, IRenderPass, ISampler, WebGPU } from 'webgpu-renderer';
+import { IRenderObject, IRenderPass, ISampler, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     // Set video element
-    const video = document.createElement('video');
+    const video = document.createElement("video");
     video.loop = true;
     video.autoplay = true;
     video.muted = true;
     video.src = new URL(
-        '../../../assets/video/pano.webm',
+        "../../../assets/video/pano.webm",
         import.meta.url
     ).toString();
     await video.play();
@@ -23,8 +23,8 @@ const init = async (canvas: HTMLCanvasElement) =>
     const webgpu = await WebGPU.init();
 
     const sampler: ISampler = {
-        magFilter: 'linear',
-        minFilter: 'linear',
+        magFilter: "linear",
+        minFilter: "linear",
     };
 
     const renderPass: IRenderPass = {
@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         webgpu.submit();
 
-        if ('requestVideoFrameCallback' in video)
+        if ("requestVideoFrameCallback" in video)
         {
             video.requestVideoFrameCallback(frame);
         }
@@ -66,7 +66,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         }
     }
 
-    if ('requestVideoFrameCallback' in video)
+    if ("requestVideoFrameCallback" in video)
     {
         video.requestVideoFrameCallback(frame);
     }
@@ -76,5 +76,5 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 };
 
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas);

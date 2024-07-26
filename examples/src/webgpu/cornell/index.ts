@@ -1,38 +1,38 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import Common from './common';
-import Radiosity from './radiosity';
-import Rasterizer from './rasterizer';
-import Raytracer from './raytracer';
-import Scene from './scene';
-import Tonemapper from './tonemapper';
+import Common from "./common";
+import Radiosity from "./radiosity";
+import Rasterizer from "./rasterizer";
+import Raytracer from "./raytracer";
+import Scene from "./scene";
+import Tonemapper from "./tonemapper";
 
-import { ICanvasContext, ICommandEncoder, ISubmit, ITexture, WebGPU } from 'webgpu-renderer';
+import { ICanvasContext, ICommandEncoder, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
   const requiredFeatures: GPUFeatureName[]
-    = presentationFormat === 'bgra8unorm' ? ['bgra8unorm-storage'] : [];
+    = presentationFormat === "bgra8unorm" ? ["bgra8unorm-storage"] : [];
 
   const context: ICanvasContext = {
     canvasId: canvas.id,
     configuration: {
-      format: 'rgba16float',
+      format: "rgba16float",
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING,
     }
   };
 
   const params: {
-    renderer: 'rasterizer' | 'raytracer';
+    renderer: "rasterizer" | "raytracer";
     rotateCamera: boolean;
   } = {
-    renderer: 'rasterizer',
+    renderer: "rasterizer",
     rotateCamera: true,
   };
 
-  gui.add(params, 'renderer', ['rasterizer', 'raytracer']);
-  gui.add(params, 'rotateCamera', true);
+  gui.add(params, "renderer", ["rasterizer", "raytracer"]);
+  gui.add(params, "rotateCamera", true);
 
   const devicePixelRatio = window.devicePixelRatio || 1;
   canvas.width = canvas.clientWidth * devicePixelRatio;
@@ -41,9 +41,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const webgpu = await WebGPU.init(undefined, { requiredFeatures });
 
   const framebuffer: ITexture = {
-    label: 'framebuffer',
+    label: "framebuffer",
     size: [canvas.width, canvas.height],
-    format: 'rgba16float',
+    format: "rgba16float",
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
   };
 
@@ -75,7 +75,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     radiosity.run();
 
     const submit: ISubmit = {
-      commandEncoders: [params.renderer === 'rasterizer' ? rasterizerCommandEncoder : raytracerCommandEncoder]
+      commandEncoders: [params.renderer === "rasterizer" ? rasterizerCommandEncoder : raytracerCommandEncoder]
     };
 
     webgpu.submit(submit);
@@ -87,5 +87,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

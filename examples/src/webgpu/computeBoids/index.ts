@@ -1,9 +1,9 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import spriteWGSL from './sprite.wgsl';
-import updateSpritesWGSL from './updateSprites.wgsl';
+import spriteWGSL from "./sprite.wgsl";
+import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { IBuffer, IComputeObject, IRenderObject, IRenderPass, WebGPU } from 'webgpu-renderer';
+import { IBuffer, IComputeObject, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -107,12 +107,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
             primitive: {
-                cullMode: 'back',
+                cullMode: "back",
             },
         },
         vertices: {
-            a_particlePos: { buffer: particleBuffers[0], offset: 0, vertexSize: 4 * 4, stepMode: 'instance' },
-            a_particleVel: { buffer: particleBuffers[0], offset: 2 * 4, vertexSize: 4 * 4, stepMode: 'instance' },
+            a_particlePos: { buffer: particleBuffers[0], offset: 0, vertexSize: 4 * 4, stepMode: "instance" },
+            a_particleVel: { buffer: particleBuffers[0], offset: 2 * 4, vertexSize: 4 * 4, stepMode: "instance" },
             a_pos: { buffer: { data: vertexBufferData } },
         },
         draw: { vertexCount: 3, instanceCount: numParticles }
@@ -152,5 +152,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

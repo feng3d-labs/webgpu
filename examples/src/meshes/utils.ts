@@ -1,4 +1,4 @@
-import { vec3 } from 'wgpu-matrix';
+import { vec3 } from "wgpu-matrix";
 
 export function computeSurfaceNormals(
   positions: [number, number, number][],
@@ -37,7 +37,7 @@ export function computeSurfaceNormals(
   return normals;
 }
 
-type ProjectedPlane = 'xy' | 'xz' | 'yz';
+type ProjectedPlane = "xy" | "xz" | "yz";
 
 const projectedPlane2Ids: { [key in ProjectedPlane]: [number, number] } = {
   xy: [0, 1],
@@ -47,7 +47,7 @@ const projectedPlane2Ids: { [key in ProjectedPlane]: [number, number] } = {
 
 export function computeProjectedPlaneUVs(
   positions: [number, number, number][],
-  projectedPlane: ProjectedPlane = 'xy'
+  projectedPlane: ProjectedPlane = "xy"
 ): [number, number][]
 {
   const idxs = projectedPlane2Ids[projectedPlane];

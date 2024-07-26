@@ -1,11 +1,11 @@
-import { GUI } from 'dat.gui';
+import { GUI } from "dat.gui";
 
-import { mat4 } from 'wgpu-matrix';
+import { mat4 } from "wgpu-matrix";
 
-import showTextureWGSL from './showTexture.wgsl';
-import texturedSquareWGSL from './texturedSquare.wgsl';
+import showTextureWGSL from "./showTexture.wgsl";
+import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { IBindingResources, IBuffer, IRenderObject, IRenderPass, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from 'webgpu-renderer';
+import { IBindingResources, IBuffer, IRenderObject, IRenderPass, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -62,11 +62,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const kInitSamplerDescriptor = {
-        addressModeU: 'clamp-to-edge',
-        addressModeV: 'clamp-to-edge',
-        magFilter: 'linear',
-        minFilter: 'linear',
-        mipmapFilter: 'linear',
+        addressModeU: "clamp-to-edge",
+        addressModeV: "clamp-to-edge",
+        magFilter: "linear",
+        minFilter: "linear",
+        mipmapFilter: "linear",
         lodMinClamp: 0,
         lodMaxClamp: 4,
         maxAnisotropy: 1,
@@ -87,8 +87,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 Object.assign(config, { flangeLogSize: 10 });
                 Object.assign(samplerDescriptor, {
-                    addressModeU: 'repeat',
-                    addressModeV: 'repeat',
+                    addressModeU: "repeat",
+                    addressModeV: "repeat",
                 });
                 gui.updateDisplay();
 
@@ -97,9 +97,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             smooth()
             {
                 Object.assign(samplerDescriptor, {
-                    magFilter: 'linear',
-                    minFilter: 'linear',
-                    mipmapFilter: 'linear',
+                    magFilter: "linear",
+                    minFilter: "linear",
+                    mipmapFilter: "linear",
                 });
                 gui.updateDisplay();
 
@@ -108,45 +108,45 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             crunchy()
             {
                 Object.assign(samplerDescriptor, {
-                    magFilter: 'nearest',
-                    minFilter: 'nearest',
-                    mipmapFilter: 'nearest',
+                    magFilter: "nearest",
+                    minFilter: "nearest",
+                    mipmapFilter: "nearest",
                 });
                 gui.updateDisplay();
 
                 updateSamplerResources();
             },
         };
-        const presets = gui.addFolder('Presets');
+        const presets = gui.addFolder("Presets");
         presets.open();
-        presets.add(buttons, 'initial').name('reset to initial');
-        presets.add(buttons, 'checkerboard').name('checkered floor');
-        presets.add(buttons, 'smooth').name('smooth (linear)');
-        presets.add(buttons, 'crunchy').name('crunchy (nearest)');
+        presets.add(buttons, "initial").name("reset to initial");
+        presets.add(buttons, "checkerboard").name("checkered floor");
+        presets.add(buttons, "smooth").name("smooth (linear)");
+        presets.add(buttons, "crunchy").name("crunchy (nearest)");
 
-        const flangeFold = gui.addFolder('Plane settings');
+        const flangeFold = gui.addFolder("Plane settings");
         flangeFold.open();
-        flangeFold.add(config, 'flangeLogSize', 0, 10.0, 0.1).name('size = 2**');
-        flangeFold.add(config, 'highlightFlange');
-        flangeFold.add(config, 'animation', 0, 0.5);
+        flangeFold.add(config, "flangeLogSize", 0, 10.0, 0.1).name("size = 2**");
+        flangeFold.add(config, "highlightFlange");
+        flangeFold.add(config, "animation", 0, 0.5);
 
         gui.width = 280;
         {
-            const folder = gui.addFolder('GPUSamplerDescriptor');
+            const folder = gui.addFolder("GPUSamplerDescriptor");
             folder.open();
 
-            const kAddressModes = ['clamp-to-edge', 'repeat', 'mirror-repeat'];
-            folder.add(samplerDescriptor, 'addressModeU', kAddressModes).onChange(updateSamplerResources);
-            folder.add(samplerDescriptor, 'addressModeV', kAddressModes).onChange(updateSamplerResources);
+            const kAddressModes = ["clamp-to-edge", "repeat", "mirror-repeat"];
+            folder.add(samplerDescriptor, "addressModeU", kAddressModes).onChange(updateSamplerResources);
+            folder.add(samplerDescriptor, "addressModeV", kAddressModes).onChange(updateSamplerResources);
 
-            const kFilterModes = ['nearest', 'linear'];
-            folder.add(samplerDescriptor, 'magFilter', kFilterModes).onChange(updateSamplerResources);
-            folder.add(samplerDescriptor, 'minFilter', kFilterModes).onChange(updateSamplerResources);
-            const kMipmapFilterModes = ['nearest', 'linear'] as const;
-            folder.add(samplerDescriptor, 'mipmapFilter', kMipmapFilterModes).onChange(updateSamplerResources);
+            const kFilterModes = ["nearest", "linear"];
+            folder.add(samplerDescriptor, "magFilter", kFilterModes).onChange(updateSamplerResources);
+            folder.add(samplerDescriptor, "minFilter", kFilterModes).onChange(updateSamplerResources);
+            const kMipmapFilterModes = ["nearest", "linear"] as const;
+            folder.add(samplerDescriptor, "mipmapFilter", kMipmapFilterModes).onChange(updateSamplerResources);
 
-            const ctlMin = folder.add(samplerDescriptor, 'lodMinClamp', 0, 4, 0.1);
-            const ctlMax = folder.add(samplerDescriptor, 'lodMaxClamp', 0, 4, 0.1);
+            const ctlMin = folder.add(samplerDescriptor, "lodMinClamp", 0, 4, 0.1);
+            const ctlMax = folder.add(samplerDescriptor, "lodMaxClamp", 0, 4, 0.1);
             ctlMin.onChange((value: number) =>
             {
                 if (samplerDescriptor.lodMaxClamp < value) ctlMax.setValue(value);
@@ -162,11 +162,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             {
                 const folder2 = folder.addFolder(
-                    'maxAnisotropy (set only if all "linear")'
+                    "maxAnisotropy (set only if all \"linear\")"
                 );
                 folder2.open();
                 const kMaxAnisotropy = 16;
-                folder2.add(samplerDescriptor, 'maxAnisotropy', 1, kMaxAnisotropy, 1);
+                folder2.add(samplerDescriptor, "maxAnisotropy", 1, kMaxAnisotropy, 1);
             }
         }
     }
@@ -179,9 +179,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const sampler: ISampler = {
             ...samplerDescriptor,
             maxAnisotropy:
-                samplerDescriptor.minFilter === 'linear'
-                    && samplerDescriptor.magFilter === 'linear'
-                    && samplerDescriptor.mipmapFilter === 'linear'
+                samplerDescriptor.minFilter === "linear"
+                    && samplerDescriptor.magFilter === "linear"
+                    && samplerDescriptor.mipmapFilter === "linear"
                     ? samplerDescriptor.maxAnisotropy
                     : 1,
         };
@@ -209,7 +209,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kCanvasDevicePixels = kScaleFactor * kCanvasSize;
     const kCanvasCSSSize = kCanvasDevicePixels / devicePixelRatio;
     console.log(kCanvasDevicePixels, kCanvasCSSSize);
-    canvas.style.imageRendering = 'pixelated';
+    canvas.style.imageRendering = "pixelated";
     canvas.width = canvas.height = kCanvasSize;
     canvas.style.minWidth = canvas.style.maxWidth = `${kCanvasCSSSize}px`;
 
@@ -231,7 +231,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kTextureBaseSize = 16;
 
     const checkerboard: ITexture = {
-        format: 'rgba8unorm',
+        format: "rgba8unorm",
         usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.TEXTURE_BINDING,
         size: [kTextureBaseSize, kTextureBaseSize],
         mipLevelCount: 4,
@@ -398,5 +398,5 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
 init(webgpuCanvas, panel);

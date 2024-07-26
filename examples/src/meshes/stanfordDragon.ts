@@ -1,5 +1,5 @@
-import dragonRawData from 'stanford-dragon/4';
-import { computeSurfaceNormals, computeProjectedPlaneUVs } from './utils';
+import dragonRawData from "stanford-dragon/4";
+import { computeSurfaceNormals, computeProjectedPlaneUVs } from "./utils";
 
 export const mesh = {
   positions: dragonRawData.positions as [number, number, number][],
@@ -12,7 +12,7 @@ export const mesh = {
 mesh.normals = computeSurfaceNormals(mesh.positions, mesh.triangles);
 
 // Compute some easy uvs for testing
-mesh.uvs = computeProjectedPlaneUVs(mesh.positions, 'xy');
+mesh.uvs = computeProjectedPlaneUVs(mesh.positions, "xy");
 
 // Push indices for an additional ground plane
 mesh.triangles.push(

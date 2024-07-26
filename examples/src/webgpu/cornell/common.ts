@@ -1,6 +1,6 @@
-import { IBindingResources, IBuffer } from 'webgpu-renderer';
-import { mat4, vec3 } from 'wgpu-matrix';
-import commonWGSL from './common.wgsl';
+import { IBindingResources, IBuffer } from "webgpu-renderer";
+import { mat4, vec3 } from "wgpu-matrix";
+import commonWGSL from "./common.wgsl";
 
 /**
  * Common holds the shared WGSL between the shaders, including the common uniform buffer.
@@ -21,7 +21,7 @@ export default class Common
   constructor(quads: IBuffer)
   {
     this.uniformBuffer = {
-      label: 'Common.uniformBuffer',
+      label: "Common.uniformBuffer",
       size:
         0 //
         + 4 * 16 // mvp

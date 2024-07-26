@@ -1,5 +1,5 @@
-import { IBuffer, IVertexAttributes } from 'webgpu-renderer';
-import { vec3 } from 'wgpu-matrix';
+import { IBuffer, IVertexAttributes } from "webgpu-renderer";
+import { vec3 } from "wgpu-matrix";
 type Vec3 = vec3.default;
 
 function reciprocal(v: Vec3)
@@ -41,7 +41,7 @@ function box(params: {
   depth: number;
   rotation: number;
   color: Vec3 | Vec3[];
-  type: 'convex' | 'concave';
+  type: "convex" | "concave";
 }): Quad[]
 {
   //      ─────────┐
@@ -67,7 +67,7 @@ function box(params: {
       ? params.color
       : new Array(6).fill(params.color);
   const sign = (v: Vec3) =>
-    (params.type === 'concave' ? v : vec3.negate(v));
+    (params.type === "concave" ? v : vec3.negate(v));
 
   return [
     {
@@ -150,7 +150,7 @@ export default class Scene
         vec3.fromValues(0.5, 0.5, 0.5), // NegativeY
         vec3.fromValues(0.5, 0.5, 0.5), // NegativeZ
       ],
-      type: 'concave',
+      type: "concave",
     }),
     ...box({
       center: vec3.fromValues(1.5, 1.5, 1),
@@ -159,7 +159,7 @@ export default class Scene
       depth: 3,
       rotation: 0.3,
       color: vec3.fromValues(0.8, 0.8, 0.8),
-      type: 'convex',
+      type: "convex",
     }),
     ...box({
       center: vec3.fromValues(-2, 3, -2),
@@ -168,7 +168,7 @@ export default class Scene
       depth: 3,
       rotation: -0.4,
       color: vec3.fromValues(0.8, 0.8, 0.8),
-      type: 'convex',
+      type: "convex",
     }),
     light,
   ];
@@ -310,19 +310,19 @@ export default class Scene
             // position
             shaderLocation: 0,
             offset: 0 * 4,
-            format: 'float32x4',
+            format: "float32x4",
           } as GPUVertexAttribute,
           {
             // uv
             shaderLocation: 1,
             offset: 4 * 4,
-            format: 'float32x3',
+            format: "float32x3",
           } as GPUVertexAttribute,
           {
             // color
             shaderLocation: 2,
             offset: 7 * 4,
-            format: 'float32x3',
+            format: "float32x3",
           } as GPUVertexAttribute,
         ],
       },

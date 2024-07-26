@@ -1,7 +1,7 @@
-import { IBindingResources, IBuffer, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, internal } from 'webgpu-renderer';
-import Common from './common';
-import radiosityWGSL from './radiosity.wgsl';
-import Scene from './scene';
+import { IBindingResources, IBuffer, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, internal } from "webgpu-renderer";
+import Common from "./common";
+import radiosityWGSL from "./radiosity.wgsl";
+import Scene from "./scene";
 
 /**
  * Radiosity computes lightmaps, calculated by software raytracing of light in
@@ -10,7 +10,7 @@ import Scene from './scene';
 export default class Radiosity
 {
   // The output lightmap format and dimensions
-  static readonly lightmapFormat = 'rgba16float';
+  static readonly lightmapFormat = "rgba16float";
   static readonly lightmapWidth = 256;
   static readonly lightmapHeight = 256;
 
@@ -53,7 +53,7 @@ export default class Radiosity
     this.common = common;
     this.scene = scene;
     this.lightmap = {
-      label: 'Radiosity.lightmap',
+      label: "Radiosity.lightmap",
       size: [
         Radiosity.lightmapWidth,
         Radiosity.lightmapHeight,
@@ -63,7 +63,7 @@ export default class Radiosity
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
     };
     this.accumulationBuffer = {
-      label: 'Radiosity.accumulationBuffer',
+      label: "Radiosity.accumulationBuffer",
       size:
         Radiosity.lightmapWidth
         * Radiosity.lightmapHeight
@@ -74,7 +74,7 @@ export default class Radiosity
     this.kTotalLightmapTexels
       = Radiosity.lightmapWidth * Radiosity.lightmapHeight * scene.quads.length;
     this.uniformBuffer = {
-      label: 'Radiosity.uniformBuffer',
+      label: "Radiosity.uniformBuffer",
       size: 8 * 4, // 8 x f32
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };
@@ -91,10 +91,10 @@ export default class Radiosity
     };
 
     this.radiosityPipeline = {
-      label: 'Radiosity.radiosityPipeline',
+      label: "Radiosity.radiosityPipeline",
       compute: {
         code: radiosityWGSL + common.wgsl,
-        entryPoint: 'radiosity',
+        entryPoint: "radiosity",
         constants: {
           PhotonsPerWorkgroup: this.kPhotonsPerWorkgroup,
           PhotonEnergy: this.kPhotonEnergy,
@@ -103,10 +103,10 @@ export default class Radiosity
     };
 
     this.accumulationToLightmapPipeline = {
-      label: 'Radiosity.accumulationToLightmapPipeline',
+      label: "Radiosity.accumulationToLightmapPipeline",
       compute: {
         code: radiosityWGSL + common.wgsl,
-        entryPoint: 'accumulation_to_lightmap',
+        entryPoint: "accumulation_to_lightmap",
         constants: {
           AccumulationToLightmapWorkgroupSizeX:
             this.kAccumulationToLightmapWorkgroupSizeX,
