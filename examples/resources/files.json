@@ -1,0 +1,26 @@
+{
+	"webgpu": [
+		"helloTriangle",
+		"helloTriangleMSAA",
+		"resizeCanvas",
+		"rotatingCube",
+		"twoCubes",
+		"texturedCube",
+		"instancedCube",
+		"fractalCube",
+		"cubemap",
+		"computeBoids",
+		"animometer",
+		"videoUploading",
+		"samplerParameters",
+		"imageBlur",
+		"shadowMapping",
+		"reversedZ",
+		"deferredRendering",
+		"particles",
+		"cornell",
+		"gameOfLife",
+		"renderBundles",
+		""
+	]
+}

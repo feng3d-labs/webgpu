@@ -1,0 +1,9 @@
+{
+    "name": "webgpu-simplify",
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "src/index.ts"
+    ],
+    "sourceLinkTemplate": "https://gitlab.com/wardenfeng/webgpu-simplify/tree/master/{path}#L{line}",
+    "out": "public/docs"
+}
