@@ -6,7 +6,6 @@ import { IAttachmentSize, IRenderPass, IRenderPassColorAttachment, IRenderPassDe
 import { updateIGPURenderPassAttachmentSize } from "./getGPURenderPassDescriptor";
 import { getGPUTextureFormat } from "./getGPUTexture";
 import { getIGPUTextureSize, setITextureSize } from "./getIGPUTexture";
-import { getIGPUTextureView } from "./getIGPUTextureView";
 
 /**
  * 获取完整的渲染通道描述。
@@ -193,7 +192,7 @@ function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencil
     let gpuDepthStencilAttachment: IGPURenderPassDepthStencilAttachment;
     if (depthStencilAttachment)
     {
-        let view = getIGPUTextureView(depthStencilAttachment.view);
+        let view = depthStencilAttachment.view;
         if (!view)
         {
             view = {
@@ -206,7 +205,7 @@ function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencil
             };
         }
 
-        let resolveTarget = getIGPUTextureView(depthStencilAttachment.resolveTarget);
+        let resolveTarget = depthStencilAttachment.resolveTarget;
         if (multisample && !resolveTarget)
         {
             resolveTarget = view;
@@ -244,8 +243,8 @@ function getIGPURenderPassColorAttachments(device, colorAttachments: IRenderPass
     {
         if (!v) return undefined;
 
-        let view = getIGPUTextureView(v.view);
-        let resolveTarget = getIGPUTextureView(v.resolveTarget);
+        let view = v.view;
+        let resolveTarget = v.resolveTarget;
 
         if (multisample && !resolveTarget)
         {
