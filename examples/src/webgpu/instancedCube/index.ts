@@ -4,7 +4,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import instancedVertWGSL from "../../shaders/instanced.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -127,10 +127,17 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         (renderObject.bindingResources.uniforms as IGPUBufferBinding).map.modelViewProjectionMatrix = new Float32Array(mvpMatricesData); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
-        webgpu.renderPass(renderPass);
-        webgpu.renderObject(renderObject);
+        const data: IGPUSubmit = {
+            commandEncoders: [
+                {
+                    passEncoders: [
+                        { renderPass, renderObjects: [renderObject] },
+                    ]
+                }
+            ],
+        };
 
-        webgpu.submit();
+        webgpu.submit(data);
 
         requestAnimationFrame(frame);
     }

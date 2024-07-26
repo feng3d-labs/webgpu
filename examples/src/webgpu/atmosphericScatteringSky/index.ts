@@ -60,10 +60,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let t = 0;
     function frame()
     {
-        webgpu.computePass();
-        webgpu.computeObject(computeObject0);
-
-        webgpu.submit();
+        webgpu.submit({
+            commandEncoders: [{ passEncoders: [{ computeObjects: [computeObject0] }] }]
+        });
 
         ++t;
 

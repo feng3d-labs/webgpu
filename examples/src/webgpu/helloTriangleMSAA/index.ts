@@ -1,4 +1,4 @@
-import { IGPURenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
+import { IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "webgpu-renderer";
 import redFragWGSL from "../../shaders/red.frag.wgsl";
 import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
 
@@ -27,10 +27,17 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     function frame()
     {
-        webgpu.renderPass(renderPass);
-        webgpu.renderObject(renderObject);
+        const data: IGPUSubmit = {
+            commandEncoders: [
+                {
+                    passEncoders: [
+                        { renderPass, renderObjects: [renderObject] },
+                    ]
+                }
+            ],
+        };
 
-        webgpu.submit();
+        webgpu.submit(data);
 
         requestAnimationFrame(frame);
     }

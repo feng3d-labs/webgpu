@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { IGPUBuffer, IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -136,13 +136,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let t = 0;
     function frame()
     {
-        webgpu.computePass();
-        webgpu.computeObject([computeObject0, computeObject1][t % 2]);
+        const data: IGPUSubmit = {
+            commandEncoders: [
+                {
+                    passEncoders: [
+                        { computeObjects: [[computeObject0, computeObject1][t % 2]] },
+                        { renderPass, renderObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
+                    ]
+                }
+            ],
+        };
 
-        webgpu.renderPass(renderPass);
-        webgpu.renderObject([renderObject, renderObject1][(t + 1) % 2]);
-
-        webgpu.submit();
+        webgpu.submit(data);
 
         ++t;
 

@@ -2,7 +2,7 @@ import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import { IGPUBufferBinding, IGPUCanvasContext, IGPUCopyTextureToTexture, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPUCanvasContext, IGPUCopyTextureToTexture, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleSelfWGSL from "./sampleSelf.frag.wgsl";
 
@@ -109,11 +109,18 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         (renderObject.bindingResources.uniforms as IGPUBufferBinding).map.modelViewProjectionMatrix = new Float32Array(transformationMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
-        webgpu.renderPass(renderPass);
-        webgpu.renderObject(renderObject);
-        webgpu.copyTextureToTexture(copyTextureToTexture);
+        const data: IGPUSubmit = {
+            commandEncoders: [
+                {
+                    passEncoders: [
+                        { renderPass, renderObjects: [renderObject] },
+                        copyTextureToTexture,
+                    ]
+                }
+            ],
+        };
 
-        webgpu.submit();
+        webgpu.submit(data);
 
         requestAnimationFrame(frame);
     }

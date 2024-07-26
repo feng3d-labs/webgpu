@@ -5,7 +5,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IGPUBuffer, IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -131,11 +131,17 @@ const init = async (canvas: HTMLCanvasElement) =>
         uniforms.map.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix1); // 需要赋值新对象才能触发数据变更上传GPU
         uniforms1.map.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix2); // 需要赋值新对象才能触发数据变更上传GPU
 
-        webgpu.renderPass(renderPass);
-        webgpu.renderObject(renderObject);
-        webgpu.renderObject(renderObject1);
+        const data: IGPUSubmit = {
+            commandEncoders: [
+                {
+                    passEncoders: [
+                        { renderPass, renderObjects: [renderObject, renderObject1] },
+                    ]
+                }
+            ],
+        };
 
-        webgpu.submit();
+        webgpu.submit(data);
 
         requestAnimationFrame(frame);
     }

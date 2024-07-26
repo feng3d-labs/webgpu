@@ -1,7 +1,7 @@
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import sampleExternalTextureWGSL from "../../shaders/sampleExternalTexture.frag.wgsl";
 
-import { IGPURenderPassDescriptor, IGPUSampler, IGPURenderObject, WebGPU } from "webgpu-renderer";
+import { IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUSubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -51,10 +51,17 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     function frame()
     {
-        webgpu.renderPass(renderPass);
-        webgpu.renderObject(renderObject);
+        const data: IGPUSubmit = {
+            commandEncoders: [
+                {
+                    passEncoders: [
+                        { renderPass, renderObjects: [renderObject] },
+                    ]
+                }
+            ],
+        };
 
-        webgpu.submit();
+        webgpu.submit(data);
 
         if ("requestVideoFrameCallback" in video)
         {

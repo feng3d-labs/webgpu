@@ -1,7 +1,7 @@
 import redFragWGSL from "../../shaders/red.frag.wgsl";
 import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
 
-import { IGPURenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
+import { IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "webgpu-renderer";
 import styles from "./animatedCanvasSize.module.css";
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -32,10 +32,17 @@ const init = async (canvas: HTMLCanvasElement) =>
         const currentHeight = canvas.clientHeight * devicePixelRatio;
         renderPass.attachmentSize = { width: currentWidth, height: currentHeight };
 
-        webgpu.renderPass(renderPass);
-        webgpu.renderObject(renderObject);
+        const data: IGPUSubmit = {
+            commandEncoders: [
+                {
+                    passEncoders: [
+                        { renderPass, renderObjects: [renderObject] },
+                    ]
+                }
+            ],
+        };
 
-        webgpu.submit();
+        webgpu.submit(data);
 
         requestAnimationFrame(frame);
     }
