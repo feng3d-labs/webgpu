@@ -21,6 +21,8 @@ export * from "./data/ITextureView";
 export * from "./data/IVertexAttributes";
 export * from "./data/IVertexState";
 
+export type { IGPUCopyExternalImageToTexture } from "./data/IGPUTexture";
+
 /**
  * 内部
  */
