@@ -7,15 +7,15 @@ export * from "./data/IGPUBuffer";
 export * from "./data/IGPUComputeObject";
 export * from "./data/IGPUComputePassEncoder";
 export * from "./data/IGPUCopyTextureToTexture";
+export * from "./data/IGPURenderBundleObject";
 export * from "./data/IGPURenderObject";
 export * from "./data/IGPURenderPassEncoder";
 export * from "./data/IGPUSampler";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
-export * from "./data/IRenderBundleObject";
+export * from "./data/IGPUVertexAttributes";
 export * from "./data/IRenderPassEncoder";
 export * from "./data/ISubmit";
-export * from "./data/IGPUVertexAttributes";
 
 /**
  * 内部

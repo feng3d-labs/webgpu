@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IGPURenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext,  IGPURenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, IGPURenderBundleObject } from "webgpu-renderer";
 
 interface Renderable
 {
@@ -261,7 +261,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   // Render bundles function as partial, limited render passes, so we can use the
   // same code both to render the scene normally and to build the render bundle.
   function renderScene(
-    passEncoder: IRenderPassEncoder | IRenderBundleObject
+    passEncoder: IRenderPassEncoder | IGPURenderBundleObject
   )
   {
     // Loop through every renderable object and draw them individually.
@@ -304,13 +304,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   // textures used. Cases where the executed commands differ from frame-to-frame,
   // such as when using frustrum or occlusion culling, will not benefit from
   // using render bundles as much.
-  let renderBundle: IRenderBundleObject = {
+  let renderBundle: IGPURenderBundleObject = {
     renderObjects: [],
   };
   renderScene(renderBundle);
   function updateRenderBundle()
   {
-    const renderBundleEncoder: IRenderBundleObject = {
+    const renderBundleEncoder: IGPURenderBundleObject = {
       renderObjects: [],
     };
     renderScene(renderBundleEncoder);

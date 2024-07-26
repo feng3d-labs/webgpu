@@ -1,6 +1,6 @@
+import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassEncoder } from "../data/IGPURenderPassEncoder";
-import { IRenderBundleObject } from "../data/IRenderBundleObject";
 import { IRenderPassEncoder } from "../data/IRenderPassEncoder";
 import { getIGPURenderBundle } from "./getIGPURenderBundle";
 import { getIGPURenderObject } from "./getIGPURenderObject";
@@ -32,7 +32,7 @@ export function getIGPURenderPassEncoder(device: GPUDevice, renderPassEncoder: I
     return gpuRenderPassEncoder;
 }
 
-function isRenderBundle(arg: IGPURenderObject | IRenderBundleObject): arg is IRenderBundleObject
+function isRenderBundle(arg: IGPURenderObject | IGPURenderBundleObject): arg is IGPURenderBundleObject
 {
-    return !!(arg as IRenderBundleObject).renderObjects;
+    return !!(arg as IGPURenderBundleObject).renderObjects;
 }

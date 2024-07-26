@@ -12,7 +12,7 @@ export interface IGPURenderBundleObject
     /**
      * GPU渲染捆绑编码器描述。
      */
-    renderBundle: IGPURenderBundleEncoderDescriptor
+    renderBundle?: IGPURenderBundleEncoderDescriptor
 
     /**
      * GPU渲染对象列表。
@@ -30,6 +30,8 @@ export interface IGPURenderBundleObject
  *
  * {@link GPURenderBundleEncoderDescriptor}
  * {@link GPUDevice.createRenderBundleEncoder}
+ *
+ * 'colorFormats' | 'depthStencilFormat' | 'sampleCount' 都将从GPU渲染通道中自动获取。
  */
 export interface IGPURenderBundleEncoderDescriptor extends GPURenderBundleEncoderDescriptor
 {

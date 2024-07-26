@@ -1,10 +1,9 @@
 import { IGPURenderBundleEncoderDescriptor, IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
-import { IRenderBundleObject } from "../data/IRenderBundleObject";
 import { getIGPURenderObject } from "./getIGPURenderObject";
 import { getIRenderPassFormats } from "./getIGPURenderPass";
 
-export function getIGPURenderBundle(device: GPUDevice, renderBundleObject: IRenderBundleObject, renderPass: IGPURenderPassDescriptor)
+export function getIGPURenderBundle(device: GPUDevice, renderBundleObject: IGPURenderBundleObject, renderPass: IGPURenderPassDescriptor)
 {
     let gpuRenderBundleObject: IGPURenderBundleObject = gpuRenderBundleObjectMap.get(renderBundleObject);
     if (gpuRenderBundleObject)
@@ -33,4 +32,4 @@ export function getIGPURenderBundle(device: GPUDevice, renderBundleObject: IRend
 
     return gpuRenderBundleObject;
 }
-const gpuRenderBundleObjectMap = new WeakMap<IRenderBundleObject, IGPURenderBundleObject>();
+const gpuRenderBundleObjectMap = new WeakMap<IGPURenderBundleObject, IGPURenderBundleObject>();
