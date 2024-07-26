@@ -1,7 +1,6 @@
 export * from "./WebGPU";
 
 export * from "./data/IBindingResources";
-export * from "./data/ICanvasConfiguration";
 export * from "./data/ICommandEncoder";
 export * from "./data/IComputeObject";
 export * from "./data/IComputePassEncoder";
