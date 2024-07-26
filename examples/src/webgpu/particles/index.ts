@@ -7,7 +7,7 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPUTexture, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, ISubmit, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPUTexture, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -187,7 +187,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const passEncoders: IGPUComputePassEncoder[] = [];
 
-    const submit: ISubmit = {
+    const submit: IGPUSubmit = {
       commandEncoders: [
         {
           passEncoders,
@@ -290,7 +290,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const passEncoders: (IGPUComputePassEncoder | IGPURenderPassEncoder)[] = [];
 
-  const submit: ISubmit = {
+  const submit: IGPUSubmit = {
     commandEncoders: [
       {
         passEncoders,

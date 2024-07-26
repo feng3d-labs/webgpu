@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IGPUBuffer, IGPURenderBundleObject, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, ISubmit, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IGPURenderBundleObject, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, IGPUSubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -138,7 +138,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         const renderPasss: (IGPURenderPassEncoder)[] = [];
-        const submit: ISubmit = {
+        const submit: IGPUSubmit = {
             commandEncoders: [
                 {
                     passEncoders: renderPasss,

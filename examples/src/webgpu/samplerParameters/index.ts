@@ -5,7 +5,7 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -372,7 +372,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     );
 
-    const submit: ISubmit = {
+    const submit: IGPUSubmit = {
         commandEncoders: [
             {
                 passEncoders: [

@@ -6,7 +6,7 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, ISubmit, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const shadowDepthTextureSize = 1024;
 
@@ -243,7 +243,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const submit: ISubmit = {
+    const submit: IGPUSubmit = {
         commandEncoders: [
             {
                 passEncoders: [

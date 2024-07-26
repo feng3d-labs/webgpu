@@ -11,10 +11,10 @@ export * from "./data/IGPURenderBundleObject";
 export * from "./data/IGPURenderObject";
 export * from "./data/IGPURenderPassEncoder";
 export * from "./data/IGPUSampler";
+export * from "./data/IGPUSubmit";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IGPUVertexAttributes";
-export * from "./data/ISubmit";
 
 /**
  * 内部

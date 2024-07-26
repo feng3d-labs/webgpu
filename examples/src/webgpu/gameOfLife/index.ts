@@ -4,7 +4,7 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, ISubmit, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -157,7 +157,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         loopTimes = 0;
         render = () =>
         {
-            const submit: ISubmit = {
+            const submit: IGPUSubmit = {
                 commandEncoders: [
                     {
                         passEncoders: passEncodersArray[loopTimes],

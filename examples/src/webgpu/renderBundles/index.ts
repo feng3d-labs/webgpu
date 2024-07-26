@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext,  IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, IGPURenderBundleObject } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext,  IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, IGPURenderBundleObject } from "webgpu-renderer";
 
 interface Renderable
 {
@@ -344,7 +344,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
       renderPass.renderObjects = renderBundle.renderObjects;
     }
 
-    const submit: ISubmit = {
+    const submit: IGPUSubmit = {
       commandEncoders: [
         {
           passEncoders: [renderPass],

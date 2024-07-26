@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -432,7 +432,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       cameraUniformBuffer.writeBuffers = [{ data: cameraViewProj }];
     }
 
-    const submit: ISubmit = {
+    const submit: IGPUSubmit = {
       commandEncoders: [
         {
           passEncoders: settings.mode === "gBuffers view" ? gBuffersPassEncoders : passEncoders,

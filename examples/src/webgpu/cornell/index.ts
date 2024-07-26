@@ -7,7 +7,7 @@ import Raytracer from "./raytracer";
 import Scene from "./scene";
 import Tonemapper from "./tonemapper";
 
-import { IGPUCommandEncoder, IGPUCanvasContext, IGPUTexture, ISubmit, WebGPU } from "webgpu-renderer";
+import { IGPUCommandEncoder, IGPUCanvasContext, IGPUTexture, IGPUSubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     });
     radiosity.run();
 
-    const submit: ISubmit = {
+    const submit: IGPUSubmit = {
       commandEncoders: [params.renderer === "rasterizer" ? rasterizerCommandEncoder : raytracerCommandEncoder]
     };
 

@@ -8,7 +8,6 @@ import { IGPURenderObject } from "./data/IGPURenderObject";
 import { IGPURenderPassDescriptor, IGPURenderPassEncoder } from "./data/IGPURenderPassEncoder";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture, IGPUTextureBase } from "./data/IGPUTexture";
-import { ISubmit } from "./data/ISubmit";
 import { WebGPU as WebGPUBase } from "./webgpu-data-driven/WebGPU";
 
 export class WebGPU
@@ -23,7 +22,7 @@ export class WebGPU
     }
 
     private _webgpu: WebGPUBase;
-    private _currentSubmit: ISubmit;
+    private _currentSubmit: IGPUSubmit;
     private _currentRenderPassEncoder: IGPURenderPassEncoder;
     private _currentComputePassEncoder: IGPUComputePassEncoder;
 
@@ -85,7 +84,7 @@ export class WebGPU
      *
      * @param data 一次 GPU 提交内容。
      */
-    submit(data?: ISubmit)
+    submit(data?: IGPUSubmit)
     {
         let gpuSubmit: IGPUSubmit;
         if (data)
