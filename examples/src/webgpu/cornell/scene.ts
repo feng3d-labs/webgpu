@@ -1,4 +1,4 @@
-import { IBuffer, IVertexAttributes } from 'webgpu-simplify';
+import { IBuffer, IVertexAttributes } from 'webgpu-renderer';
 import { vec3 } from 'wgpu-matrix';
 type Vec3 = vec3.default;
 

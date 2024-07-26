@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPass, WebGPU } from 'webgpu-simplify';
+import { IRenderObject, IRenderPass, WebGPU } from 'webgpu-renderer';
 import redFragWGSL from '../../shaders/red.frag.wgsl';
 import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
 

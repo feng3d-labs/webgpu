@@ -6,7 +6,7 @@ import fragmentWGSL from './fragment.wgsl';
 import vertexWGSL from './vertex.wgsl';
 import vertexShadowWGSL from './vertexShadow.wgsl';
 
-import { IBindingResources, IBuffer, IRenderPass, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-simplify';
+import { IBindingResources, IBuffer, IRenderPass, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-renderer';
 
 const shadowDepthTextureSize = 1024;
 

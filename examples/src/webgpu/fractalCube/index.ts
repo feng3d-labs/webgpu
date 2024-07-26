@@ -2,7 +2,7 @@ import { mat4, vec3 } from 'wgpu-matrix';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
-import { IBufferBinding, ICanvasContext, ICopyTextureToTexture, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from 'webgpu-simplify';
+import { IBufferBinding, ICanvasContext, ICopyTextureToTexture, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from 'webgpu-renderer';
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import sampleSelfWGSL from './sampleSelf.frag.wgsl';
 

@@ -2,7 +2,7 @@ import { GUI } from 'dat.gui';
 
 import animometerWGSL from './animometer.wgsl';
 
-import { IBuffer, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, WebGPU } from 'webgpu-simplify';
+import { IBuffer, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, WebGPU } from 'webgpu-renderer';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

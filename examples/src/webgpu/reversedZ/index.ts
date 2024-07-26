@@ -10,7 +10,7 @@ import vertexDepthPrePassWGSL from './vertexDepthPrePass.wgsl';
 import vertexPrecisionErrorPassWGSL from './vertexPrecisionErrorPass.wgsl';
 import vertexTextureQuadWGSL from './vertexTextureQuad.wgsl';
 
-import { IBindingResources, IBuffer, ICanvasContext, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-simplify';
+import { IBindingResources, IBuffer, ICanvasContext, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-renderer';
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.

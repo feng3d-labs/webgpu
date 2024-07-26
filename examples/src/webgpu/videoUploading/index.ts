@@ -1,7 +1,7 @@
 import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
 import sampleExternalTextureWGSL from '../../shaders/sampleExternalTexture.frag.wgsl';
 
-import { IRenderObject, IRenderPass, ISampler, WebGPU } from 'webgpu-simplify';
+import { IRenderObject, IRenderPass, ISampler, WebGPU } from 'webgpu-renderer';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {

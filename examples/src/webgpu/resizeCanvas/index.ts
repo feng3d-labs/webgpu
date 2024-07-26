@@ -1,7 +1,7 @@
 import redFragWGSL from '../../shaders/red.frag.wgsl';
 import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
 
-import { IRenderObject, IRenderPass, WebGPU } from 'webgpu-simplify';
+import { IRenderObject, IRenderPass, WebGPU } from 'webgpu-renderer';
 import styles from './animatedCanvasSize.module.css';
 
 const init = async (canvas: HTMLCanvasElement) =>

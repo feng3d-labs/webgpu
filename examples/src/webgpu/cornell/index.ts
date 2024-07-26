@@ -7,7 +7,7 @@ import Raytracer from './raytracer';
 import Scene from './scene';
 import Tonemapper from './tonemapper';
 
-import { ICanvasContext, ICommandEncoder, ISubmit, ITexture, WebGPU } from 'webgpu-simplify';
+import { ICanvasContext, ICommandEncoder, ISubmit, ITexture, WebGPU } from 'webgpu-renderer';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

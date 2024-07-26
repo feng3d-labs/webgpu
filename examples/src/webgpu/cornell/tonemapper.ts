@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, ITextureFromContext, internal } from 'webgpu-simplify';
+import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, ITextureFromContext, internal } from 'webgpu-renderer';
 
 import Common from './common';
 import tonemapperWGSL from './tonemapper.wgsl';

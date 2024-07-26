@@ -4,7 +4,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
 
-import { IBufferBinding, IRenderObject, IRenderPass, WebGPU } from 'webgpu-simplify';
+import { IBufferBinding, IRenderObject, IRenderPass, WebGPU } from 'webgpu-renderer';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {

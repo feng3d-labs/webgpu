@@ -1,5 +1,5 @@
 {
-  "name": "webgpu-simplify-examples",
+  "name": "webgpu-examples",
   "version": "0.0.1",
   "description": "webgpu示例 https://github.com/webgpu/webgpu-samples",
   "main": "public/index.html",
@@ -13,11 +13,7 @@
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.6",
-    "@typescript-eslint/eslint-plugin": "5.17.0",
-    "@typescript-eslint/parser": "5.17.0",
     "@webgpu/types": "^0.1.38",
-    "copyfiles": "^2.4.1",
-    "eslint": "8.12.0",
     "fast-glob": "^3.2.12",
     "fs-extra": "^10.1.0",
     "rimraf": "3.0.2",
@@ -29,6 +25,7 @@
     "dat.gui": "^0.7.6",
     "gl-matrix": "^3.4.3",
     "stanford-dragon": "^1.1.1",
+    "webgpu-renderer": "workspace:*",
     "wgpu-matrix": "^1.1.0"
   }
 }

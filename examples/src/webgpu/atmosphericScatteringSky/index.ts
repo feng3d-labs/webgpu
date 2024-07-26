@@ -2,7 +2,7 @@ import { GUI } from 'dat.gui';
 
 import atmosphericScatteringSkyWGSL from './atmosphericScatteringSky.wgsl';
 
-import { ICanvasContext, IComputeObject, ITexture, WebGPU } from 'webgpu-simplify';
+import { ICanvasContext, IComputeObject, ITexture, WebGPU } from 'webgpu-renderer';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

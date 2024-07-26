@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from '../../meshes/sphere';
 
 import meshWGSL from './mesh.wgsl';
 
-import { IBindingResources, IBuffer, ICanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-simplify';
+import { IBindingResources, IBuffer, ICanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-renderer';
 
 interface Renderable
 {

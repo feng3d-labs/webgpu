@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IRenderPass, IRenderPassEncoder, IRenderPipeline, ITexture, internal } from 'webgpu-simplify';
+import { IBindingResources, ICommandEncoder, IRenderPass, IRenderPassEncoder, IRenderPipeline, ITexture, internal } from 'webgpu-renderer';
 
 import Common from './common';
 import Radiosity from './radiosity';

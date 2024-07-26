@@ -10,7 +10,7 @@ import lightUpdate from './lightUpdate.wgsl';
 import vertexTextureQuad from './vertexTextureQuad.wgsl';
 import vertexWriteGBuffers from './vertexWriteGBuffers.wgsl';
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes, WebGPU } from 'webgpu-simplify';
+import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes, WebGPU } from 'webgpu-renderer';
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);

@@ -7,7 +7,7 @@ import particleWGSL from './particle.wgsl';
 import probabilityMapWGSL from './probabilityMap.wgsl';
 import simulateWGSL from './simulate.wgsl';
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-simplify';
+import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from 'webgpu-renderer';
 
 const numParticles = 50000;
 const particlePositionOffset = 0;

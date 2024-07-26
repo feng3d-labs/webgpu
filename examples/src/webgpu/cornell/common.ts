@@ -1,4 +1,4 @@
-import { IBindingResources, IBuffer } from 'webgpu-simplify';
+import { IBindingResources, IBuffer } from 'webgpu-renderer';
 import { mat4, vec3 } from 'wgpu-matrix';
 import commonWGSL from './common.wgsl';
 

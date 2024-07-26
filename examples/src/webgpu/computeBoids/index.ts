@@ -3,7 +3,7 @@ import { GUI } from 'dat.gui';
 import spriteWGSL from './sprite.wgsl';
 import updateSpritesWGSL from './updateSprites.wgsl';
 
-import { IBuffer, IComputeObject, IRenderObject, IRenderPass, WebGPU } from 'webgpu-simplify';
+import { IBuffer, IComputeObject, IRenderObject, IRenderPass, WebGPU } from 'webgpu-renderer';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

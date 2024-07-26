@@ -5,7 +5,7 @@ import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import sampleCubemapWGSL from './sampleCubemap.frag.wgsl';
 
 import { IGPUCopyExternalImageToTexture } from 'webgpu-data-driven';
-import { IBufferBinding, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from 'webgpu-simplify';
+import { IBufferBinding, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from 'webgpu-renderer';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {

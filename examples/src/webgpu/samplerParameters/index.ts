@@ -5,7 +5,7 @@ import { mat4 } from 'wgpu-matrix';
 import showTextureWGSL from './showTexture.wgsl';
 import texturedSquareWGSL from './texturedSquare.wgsl';
 
-import { IBindingResources, IBuffer, IRenderObject, IRenderPass, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from 'webgpu-simplify';
+import { IBindingResources, IBuffer, IRenderObject, IRenderPass, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from 'webgpu-renderer';
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2

@@ -5,7 +5,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import sampleTextureMixColorWGSL from '../../shaders/sampleTextureMixColor.frag.wgsl';
 
-import { IBufferBinding, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from 'webgpu-simplify';
+import { IBufferBinding, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from 'webgpu-renderer';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {

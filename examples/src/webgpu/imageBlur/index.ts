@@ -3,7 +3,7 @@ import { GUI } from 'dat.gui';
 import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
 import blurWGSL from './blur.wgsl';
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from 'webgpu-simplify';
+import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from 'webgpu-renderer';
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
