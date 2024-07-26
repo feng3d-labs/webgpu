@@ -1,4 +1,3 @@
-import { IGPUCommandEncoder, IGPUPassEncoder } from "../data/IGPUCommandEncoder";
 import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
@@ -58,32 +57,6 @@ import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { getIGPURenderObject } from "./getIGPURenderObject";
 import { getIGPURenderPass } from "./getIGPURenderPass";
-
-export function getIGPURenderPassEncoder(device: GPUDevice, renderPassEncoder: IGPURenderPassEncoder)
-{
-    const renderPass = getIGPURenderPass(device, renderPassEncoder.renderPass);
-
-    const renderObjects = renderPassEncoder.renderObjects.map((v) =>
-    {
-        if (isRenderBundle(v))
-        {
-            const gpuRenderObject = getIGPURenderBundle(device, v, renderPassEncoder.renderPass);
-
-            return gpuRenderObject;
-        }
-
-        const gpuRenderObject = getIGPURenderObject(device, v, renderPassEncoder.renderPass);
-
-        return gpuRenderObject;
-    });
-
-    const gpuRenderPassEncoder: IGPURenderPassEncoder = {
-        renderPass,
-        renderObjects,
-    };
-
-    return gpuRenderPassEncoder;
-}
 
 function isRenderBundle(arg: IGPURenderObject | IGPURenderBundleObject): arg is IGPURenderBundleObject
 {

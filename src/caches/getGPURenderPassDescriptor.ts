@@ -2,6 +2,7 @@ import { IGPURenderPassDescriptor, IGPURenderPassColorAttachment, IGPURenderPass
 import { IGPUTexture } from "../data/IGPUTexture";
 import { setIGPUTextureSize } from "./getGPUTexture";
 import { getGPUTextureView } from "./getGPUTextureView";
+import { getIGPURenderPass } from "./getIGPURenderPass";
 
 /**
  * 获取GPU渲染通道描述。
@@ -12,6 +13,8 @@ import { getGPUTextureView } from "./getGPUTextureView";
  */
 export function getGPURenderPassDescriptor(device: GPUDevice, renderPass: IGPURenderPassDescriptor): GPURenderPassDescriptor
 {
+    renderPass = getIGPURenderPass(device, renderPass);
+
     const renderPassDescriptor: GPURenderPassDescriptor = {
         colorAttachments: [],
     };

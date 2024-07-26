@@ -4,7 +4,8 @@ import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPUTexture } from "./caches/getGPUTexture";
-import { getIComputePassEncoder, getIGPUCopyBufferToBuffer, getIGPUCopyTextureToTexture, getIGPURenderPassEncoder } from "./caches/getIGPUSubmit";
+import { getIGPURenderObject } from "./caches/getIGPURenderObject";
+import { getIComputePassEncoder, getIGPUCopyBufferToBuffer, getIGPUCopyTextureToTexture, getIGPURenderBundle } from "./caches/getIGPUSubmit";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
@@ -167,7 +168,6 @@ export class WebGPU
         {
             if (isRenderPass(v))
             {
-                v = getIGPURenderPassEncoder(this.device, v);
                 this.renderPass(gpuCommandEncoder, v, commands);
             }
             else if (isComputePass(v))
@@ -291,14 +291,16 @@ export class WebGPU
         const renderPipelines = renderPass.renderObjects;
         for (let i = 0; i < renderPipelines.length; i++)
         {
-            const element = renderPipelines[i];
+            let element = renderPipelines[i];
 
             if (isRenderBundle(element))
             {
+                element = getIGPURenderBundle(this.device, element, renderPass.renderPass);
                 this.executeBundles(passEncoder, element, commands);
             }
             else
             {
+                element = getIGPURenderObject(this.device, element, renderPass.renderPass);
                 this.renderPipeline(passEncoder, element, commands);
             }
         }
