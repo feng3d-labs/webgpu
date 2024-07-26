@@ -4,7 +4,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleCubemapWGSL from "./sampleCubemap.frag.wgsl";
 
-import { IGPUBufferBinding, IGPUCopyExternalImageToTexture, IRenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPUCopyExternalImageToTexture, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -120,7 +120,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
             primitive: {

@@ -1,11 +1,10 @@
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
-import { IRenderObject } from "../data/IRenderObject";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPURenderPipeline } from "./getIGPURenderPipeline";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 
-export function getIGPURenderObject(device: GPUDevice, renderObject: IRenderObject, renderPass: IGPURenderPassDescriptor)
+export function getIGPURenderObject(device: GPUDevice, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor)
 {
     let iGPURenderObject = renderObjectMap.get([renderObject, renderPass]);
     if (iGPURenderObject)
@@ -38,4 +37,4 @@ export function getIGPURenderObject(device: GPUDevice, renderObject: IRenderObje
 
     return iGPURenderObject;
 }
-const renderObjectMap = new ChainMap<[IRenderObject, IGPURenderPassDescriptor], IGPURenderObject>();
+const renderObjectMap = new ChainMap<[IGPURenderObject, IGPURenderPassDescriptor], IGPURenderObject>();

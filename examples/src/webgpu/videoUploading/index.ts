@@ -1,7 +1,7 @@
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import sampleExternalTextureWGSL from "../../shaders/sampleExternalTexture.frag.wgsl";
 
-import { IGPURenderPassDescriptor, IGPUSampler, IRenderObject, WebGPU } from "webgpu-renderer";
+import { IGPURenderPassDescriptor, IGPUSampler, IGPURenderObject, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -36,7 +36,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: fullscreenTexturedQuadWGSL }, fragment: { code: sampleExternalTextureWGSL },
         },

@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -44,7 +44,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     vertexBuffer.data = mapping;
   }
 
-  const vertices: IVertexAttributes = {
+  const vertices: IGPUVertexAttributes = {
     position: { buffer: vertexBuffer, offset: 0, vertexSize: Float32Array.BYTES_PER_ELEMENT * 8 },
     normal: { buffer: vertexBuffer, offset: Float32Array.BYTES_PER_ELEMENT * 3, vertexSize: Float32Array.BYTES_PER_ELEMENT * 8 },
     uv: { buffer: vertexBuffer, offset: Float32Array.BYTES_PER_ELEMENT * 6, vertexSize: Float32Array.BYTES_PER_ELEMENT * 8 },

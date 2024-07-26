@@ -2,7 +2,7 @@ import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import { IGPUBufferBinding, IGPUCanvasContext, IGPUCopyTextureToTexture, IRenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPUCanvasContext, IGPUCopyTextureToTexture, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleSelfWGSL from "./sampleSelf.frag.wgsl";
 
@@ -76,7 +76,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleSelfWGSL },
             primitive: {

@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { IGPUBuffer, IGPUComputeObject, IRenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -103,7 +103,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
             primitive: {
@@ -118,7 +118,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         draw: { vertexCount: 3, instanceCount: numParticles }
     };
 
-    const renderObject1: IRenderObject = {
+    const renderObject1: IGPURenderObject = {
         ...renderObject,
         vertices: {
             ...renderObject.vertices,

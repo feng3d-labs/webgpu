@@ -6,7 +6,7 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, ISubmit, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const shadowDepthTextureSize = 1024;
 
@@ -35,7 +35,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         vertexBuffer.data = mapping;
     }
 
-    const vertices: IVertexAttributes = {
+    const vertices: IGPUVertexAttributes = {
         position: { buffer: vertexBuffer, offset: 0, vertexSize: Float32Array.BYTES_PER_ELEMENT * 6 },
         normal: { buffer: vertexBuffer, offset: Float32Array.BYTES_PER_ELEMENT * 3, vertexSize: Float32Array.BYTES_PER_ELEMENT * 6 },
     };

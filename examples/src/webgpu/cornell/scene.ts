@@ -1,4 +1,4 @@
-import { IGPUBuffer, IVertexAttributes } from "webgpu-renderer";
+import { IGPUBuffer, IGPUVertexAttributes } from "webgpu-renderer";
 import { vec3 } from "wgpu-matrix";
 type Vec3 = vec3.default;
 
@@ -131,7 +131,7 @@ export default class Scene
   readonly vertexCount: number;
   readonly indexCount: number;
   readonly vertices: IGPUBuffer;
-  readonly vertexAttributes: IVertexAttributes;
+  readonly vertexAttributes: IGPUVertexAttributes;
   readonly indices: IGPUBuffer;
   readonly vertexBufferLayout: GPUVertexBufferLayout[];
   readonly quadBuffer: IGPUBuffer;
@@ -290,7 +290,7 @@ export default class Scene
       data: vertexData,
     };
 
-    const vertexAttributes: IVertexAttributes = {
+    const vertexAttributes: IGPUVertexAttributes = {
       position: { buffer: vertices, offset: 0 * 4, vertexSize: vertexStride },
       uv: { buffer: vertices, offset: 4 * 4, vertexSize: vertexStride },
       emissive: { buffer: vertices, offset: 7 * 4, vertexSize: vertexStride },

@@ -13,10 +13,9 @@ export * from "./data/IGPUSampler";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IRenderBundleObject";
-export * from "./data/IRenderObject";
 export * from "./data/IRenderPassEncoder";
 export * from "./data/ISubmit";
-export * from "./data/IVertexAttributes";
+export * from "./data/IGPUVertexAttributes";
 
 /**
  * 内部

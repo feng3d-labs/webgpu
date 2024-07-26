@@ -1,7 +1,7 @@
 import redFragWGSL from "../../shaders/red.frag.wgsl";
 import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
 
-import { IRenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
+import { IGPURenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
 import styles from "./animatedCanvasSize.module.css";
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -16,7 +16,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         multisample: 4, // 设置多重采样数量
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },

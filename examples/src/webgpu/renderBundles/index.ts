@@ -6,12 +6,12 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IGPURenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
 
 interface Renderable
 {
-  renderObject?: IRenderObject;
-  vertexAttributes: IVertexAttributes;
+  renderObject?: IGPURenderObject;
+  vertexAttributes: IGPUVertexAttributes;
   indices: IGPUBuffer;
   indexCount: number;
   bindGroup?: IGPUBindingResources;
@@ -128,7 +128,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
       data: sphereMesh.vertices,
     };
 
-    const vertexAttributes: IVertexAttributes = {
+    const vertexAttributes: IGPUVertexAttributes = {
       position: { buffer: vertices, offset: SphereLayout.positionsOffset, vertexSize: SphereLayout.vertexStride },
       normal: { buffer: vertices, offset: SphereLayout.normalOffset, vertexSize: SphereLayout.vertexStride },
       uv: { buffer: vertices, offset: SphereLayout.uvOffset, vertexSize: SphereLayout.vertexStride },

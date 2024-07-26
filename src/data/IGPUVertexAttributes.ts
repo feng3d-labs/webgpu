@@ -3,15 +3,15 @@ import { IGPUBuffer } from "./IGPUBuffer";
 /**
  * 顶点属性数据映射。
  */
-export interface IVertexAttributes
+export interface IGPUVertexAttributes
 {
-    [name: string]: IVertexAttribute;
+    [name: string]: IGPUVertexAttribute;
 }
 
 /**
  * 顶点属性数据。
  */
-export interface IVertexAttribute
+export interface IGPUVertexAttribute
 {
     /**
      * 顶点数据。

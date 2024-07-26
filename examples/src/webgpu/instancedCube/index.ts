@@ -4,7 +4,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import instancedVertWGSL from "../../shaders/instanced.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IGPUBufferBinding, IRenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: instancedVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {

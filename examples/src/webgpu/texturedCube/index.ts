@@ -5,7 +5,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleTextureMixColorWGSL from "../../shaders/sampleTextureMixColor.frag.wgsl";
 
-import { IGPUBufferBinding, IRenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -50,7 +50,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleTextureMixColorWGSL },
             primitive: {

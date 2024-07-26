@@ -1,4 +1,4 @@
-import { IRenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
+import { IGPURenderObject, IGPURenderPassDescriptor, WebGPU } from "webgpu-renderer";
 import redFragWGSL from "../../shaders/red.frag.wgsl";
 import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
 
@@ -17,7 +17,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         }],
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },

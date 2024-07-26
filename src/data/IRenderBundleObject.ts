@@ -1,5 +1,5 @@
-import { IGPURenderBundleObject, IGPURenderBundleEncoderDescriptor } from "./IGPURenderBundleObject";
-import { IRenderObject } from "./IRenderObject";
+import { IGPURenderBundleEncoderDescriptor, IGPURenderBundleObject } from "./IGPURenderBundleObject";
+import { IGPURenderObject } from "./IGPURenderObject";
 
 export interface IRenderBundleObject extends Omit<IGPURenderBundleObject, "renderObjects" | "renderBundle">
 {
@@ -11,7 +11,7 @@ export interface IRenderBundleObject extends Omit<IGPURenderBundleObject, "rende
     /**
      * 渲染对象。
      */
-    renderObjects: IRenderObject[];
+    renderObjects: IGPURenderObject[];
 }
 
 /**

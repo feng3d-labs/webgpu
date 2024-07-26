@@ -1,6 +1,8 @@
 import { IGPUBindGroup } from "./IGPUBindGroup";
+import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPUBuffer } from "./IGPUBuffer";
 import { IGPUPipelineLayout } from "./IGPUPipelineLayout";
+import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "./IGPUVertexBuffer";
 
 /**
@@ -15,11 +17,15 @@ export interface IGPURenderObject
 
     /**
      * GPU绘制时使用的绑定组。
+     *
+     * 自动由反射流程进行填充。
      */
     bindGroups?: IGPUSetBindGroup[],
 
     /**
      * GPU绘制时使用的顶点缓冲区列表。
+     *
+     * 自动由反射流程进行填充。
      */
     vertexBuffers?: IGPUVertexBuffer[],
 
@@ -51,6 +57,21 @@ export interface IGPURenderObject
      * 根据索引数据绘制图元相关参数。
      */
     drawIndexed?: IGPUDrawIndexed;
+
+    /**
+     * 顶点属性数据映射。
+     */
+    vertices?: IGPUVertexAttributes;
+
+    /**
+     * GPU绘制时使用的索引缓冲区。
+     */
+    index?: IGPUSetIndexBuffer,
+
+    /**
+     * 绑定资源。包含数值、纹理、采样、外部纹理。
+     */
+    bindingResources?: IGPUBindingResources;
 }
 
 /**

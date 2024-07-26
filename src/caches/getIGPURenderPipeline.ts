@@ -1,7 +1,7 @@
 import { IGPUDepthStencilState, IGPURenderPipeline } from "../data/IGPURenderObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
-import { IVertexAttributes } from "../data/IVertexAttributes";
+import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUFragmentState } from "./getIGPUFragmentState";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
@@ -17,7 +17,7 @@ import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getIGPURenderPipeline(device: GPUDevice, renderPipeline: IGPURenderPipeline, renderPass: IGPURenderPassDescriptor, vertices: IVertexAttributes)
+export function getIGPURenderPipeline(device: GPUDevice, renderPipeline: IGPURenderPipeline, renderPass: IGPURenderPassDescriptor, vertices: IGPUVertexAttributes)
 {
     let result = renderPipelineMap.get([renderPipeline, renderPass, vertices]);
     if (!result)
@@ -58,7 +58,7 @@ export function getIGPURenderPipeline(device: GPUDevice, renderPipeline: IGPURen
 }
 
 const renderPipelineMap = new ChainMap<
-    [IGPURenderPipeline, IGPURenderPassDescriptor, IVertexAttributes],
+    [IGPURenderPipeline, IGPURenderPassDescriptor, IGPUVertexAttributes],
     {
         /**
          * GPU渲染管线描述。
