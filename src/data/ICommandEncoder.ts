@@ -1,8 +1,8 @@
 import { IComputePassEncoder } from "./IComputePassEncoder";
 import { ICopyTextureToTexture } from "./ICopyTextureToTexture";
-import { IRenderPassEncoder } from "./IRenderPassEncoder";
-import { ICopyBufferToBuffer } from "./ICopyBufferToBuffer";
 import { IGPUCommandEncoder } from "./IGPUCommandEncoder";
+import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
+import { IRenderPassEncoder } from "./IRenderPassEncoder";
 
 /**
  * 命令编码器。
@@ -31,5 +31,5 @@ export type IPassEncoder =
     | IComputePassEncoder
     | IRenderPassEncoder
     | ICopyTextureToTexture
-    | ICopyBufferToBuffer
+    | IGPUCopyBufferToBuffer
     ;

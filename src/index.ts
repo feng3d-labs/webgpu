@@ -4,7 +4,6 @@ export * from "./data/IBindingResources";
 export * from "./data/ICommandEncoder";
 export * from "./data/IComputeObject";
 export * from "./data/IComputePassEncoder";
-export * from "./data/ICopyBufferToBuffer";
 export * from "./data/ICopyTextureToTexture";
 export * from "./data/IFragmentState";
 export * from "./data/IGPUBindGroup";

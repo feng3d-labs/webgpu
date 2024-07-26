@@ -1,6 +1,5 @@
 import { ICommandEncoder } from "../data/ICommandEncoder";
 import { IComputePassEncoder } from "../data/IComputePassEncoder";
-import { ICopyBufferToBuffer } from "../data/ICopyBufferToBuffer";
 import { ICopyTextureToTexture } from "../data/ICopyTextureToTexture";
 import { IGPUCommandEncoder, IGPUPassEncoder } from "../data/IGPUCommandEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
@@ -60,10 +59,10 @@ function isICopyTextureToTexture(arg: any): arg is ICopyTextureToTexture
     return !!(arg as ICopyTextureToTexture).source?.texture;
 }
 
-function isICopyBufferToBuffer(arg: any): arg is ICopyBufferToBuffer
+function isICopyBufferToBuffer(arg: any): arg is IGPUCopyBufferToBuffer
 {
-    const source = (arg as ICopyBufferToBuffer).source;
-    const destination = (arg as ICopyBufferToBuffer).destination;
+    const source = (arg as IGPUCopyBufferToBuffer).source;
+    const destination = (arg as IGPUCopyBufferToBuffer).destination;
 
     // 缓冲区必定给出尺寸 或者 数据。
     if (!(source.size || source.data)) return false;
@@ -86,7 +85,7 @@ function getIGPUCopyTextureToTexture(v: ICopyTextureToTexture)
     return gpuCopyTextureToTexture;
 }
 
-function getIGPUCopyBufferToBuffer(v: ICopyBufferToBuffer)
+function getIGPUCopyBufferToBuffer(v: IGPUCopyBufferToBuffer)
 {
     const source = v.source;
     const destination = v.destination;
