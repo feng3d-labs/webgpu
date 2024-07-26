@@ -6,6 +6,5 @@ export * from "./caches/getIGPURenderPassEncoder";
 export * from "./caches/getIGPURenderPipeline";
 export * from "./caches/getIGPUSubmit";
 export * from "./caches/getIGPUTexture";
-export * from "./caches/getIGPUVertexState";
 export * from "./caches/getWGSLReflectInfo";
 
