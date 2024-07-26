@@ -2,7 +2,6 @@ import { watcher } from "@feng3d/watcher";
 import { IGPUVertexState } from "../data/IGPURenderObject";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 import { IVertexAttributes } from "../data/IVertexAttributes";
-import { IVertexState } from "../data/IVertexState";
 import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
@@ -14,7 +13,7 @@ import { WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInf
  * @param vertices 顶点数据。
  * @returns 完整的顶点阶段描述与顶点缓冲区列表。
  */
-export function getIGPUVertexState(vertexState: IVertexState, vertices: IVertexAttributes)
+export function getIGPUVertexState(vertexState: IGPUVertexState, vertices: IVertexAttributes)
 {
     let result = vertexStateMap.get([vertexState, vertices]);
     if (!result)
@@ -56,7 +55,7 @@ export function getIGPUVertexState(vertexState: IVertexState, vertices: IVertexA
     return result;
 }
 
-const vertexStateMap = new ChainMap<[IVertexState, IVertexAttributes], {
+const vertexStateMap = new ChainMap<[IGPUVertexState, IVertexAttributes], {
     gpuVertexState: IGPUVertexState;
     vertexBuffers: IGPUVertexBuffer[];
 }>();

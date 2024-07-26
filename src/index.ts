@@ -18,7 +18,6 @@ export * from "./data/IRenderPassEncoder";
 export * from "./data/IRenderPipeline";
 export * from "./data/ISubmit";
 export * from "./data/IVertexAttributes";
-export * from "./data/IVertexState";
 
 /**
  * 内部
