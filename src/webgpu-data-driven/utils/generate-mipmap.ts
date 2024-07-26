@@ -29,12 +29,12 @@ export function generateMipmap(device: GPUDevice, texture: GPUTexture)
   let module = moduleByView[view];
   if (!module)
   {
-    const type = view === '2d'
-      ? 'texture_2d<f32>'
-      : 'texture_2d_array<f32>';
-    const extraSampleParamsWGSL = view === '2d'
-      ? ''
-      : ', 0u';
+    const type = view === "2d"
+      ? "texture_2d<f32>"
+      : "texture_2d_array<f32>";
+    const extraSampleParamsWGSL = view === "2d"
+      ? ""
+      : ", 0u";
     module = device.createShaderModule({
       label: `mip level generation for ${view}`,
       code: `
@@ -73,7 +73,7 @@ export function generateMipmap(device: GPUDevice, texture: GPUTexture)
   if (!sampler)
   {
     sampler = device.createSampler({
-      minFilter: 'linear',
+      minFilter: "linear",
     });
     perDeviceInfo.sampler = sampler;
   }
@@ -84,14 +84,14 @@ export function generateMipmap(device: GPUDevice, texture: GPUTexture)
   {
     pipelineByFormatAndView[id] = device.createRenderPipeline({
       label: `mip level generator pipeline for ${view}`,
-      layout: 'auto',
+      layout: "auto",
       vertex: {
         module,
-        entryPoint: 'vs',
+        entryPoint: "vs",
       },
       fragment: {
         module,
-        entryPoint: 'fs',
+        entryPoint: "fs",
         targets: [{ format: texture.format }],
       },
     });
@@ -99,7 +99,7 @@ export function generateMipmap(device: GPUDevice, texture: GPUTexture)
   const pipeline = pipelineByFormatAndView[id];
 
   const encoder = device.createCommandEncoder({
-    label: 'mip gen encoder',
+    label: "mip gen encoder",
   });
 
   const dimension = getViewDimensionForTexture(texture);
@@ -125,7 +125,7 @@ export function generateMipmap(device: GPUDevice, texture: GPUTexture)
       });
 
       const renderPassDescriptor: GPURenderPassDescriptor = {
-        label: 'mip gen renderPass',
+        label: "mip gen renderPass",
         colorAttachments: [
           {
             view: texture.createView({
@@ -135,8 +135,8 @@ export function generateMipmap(device: GPUDevice, texture: GPUTexture)
               baseArrayLayer,
               arrayLayerCount: 1,
             }),
-            loadOp: 'clear',
-            storeOp: 'store',
+            loadOp: "clear",
+            storeOp: "store",
           } as GPURenderPassColorAttachment,
         ],
       };
@@ -157,13 +157,13 @@ function getViewDimensionForTexture(texture: GPUTexture): GPUTextureViewDimensio
 {
   switch (texture.dimension)
   {
-    case '1d':
-      return '1d';
-    case '3d':
-      return '3d';
+    case "1d":
+      return "1d";
+    case "3d":
+      return "3d";
     default: // to shut up TS
-    case '2d':
-      return texture.depthOrArrayLayers > 1 ? '2d-array' : '2d';
+    case "2d":
+      return texture.depthOrArrayLayers > 1 ? "2d-array" : "2d";
   }
 }
 

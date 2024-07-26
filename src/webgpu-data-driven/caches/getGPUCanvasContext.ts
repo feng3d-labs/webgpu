@@ -1,4 +1,4 @@
-import { IGPUCanvasContext } from '../data/IGPUTexture';
+import { IGPUCanvasContext } from "../data/IGPUTexture";
 
 export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContext)
 {
@@ -7,7 +7,7 @@ export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContex
 
     const canvas = document.getElementById(context.canvasId) as HTMLCanvasElement;
 
-    gpuCanvasContext = canvas.getContext('webgpu');
+    gpuCanvasContext = canvas.getContext("webgpu");
 
     let usage = 0;
 

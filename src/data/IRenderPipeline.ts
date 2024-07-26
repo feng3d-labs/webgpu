@@ -1,14 +1,14 @@
-import { IGPURenderPipeline, IGPUMultisampleState, IGPUDepthStencilState } from '../webgpu-data-driven/data/IGPURenderObject';
-import { IFragmentState } from './IFragmentState';
-import { IRenderPass } from './IRenderPass';
-import { IVertexState } from './IVertexState';
+import { IGPURenderPipeline, IGPUMultisampleState, IGPUDepthStencilState } from "../webgpu-data-driven/data/IGPURenderObject";
+import { IFragmentState } from "./IFragmentState";
+import { IRenderPass } from "./IRenderPass";
+import { IVertexState } from "./IVertexState";
 
 /**
  * 渲染管线描述。
  *
  * @see IGPURenderPipeline
  */
-export interface IRenderPipeline extends Omit<IGPURenderPipeline, 'vertex' | 'fragment' | 'depthStencil'>
+export interface IRenderPipeline extends Omit<IGPURenderPipeline, "vertex" | "fragment" | "depthStencil">
 {
     /**
      * 描述顶点着色器源码入口点以及顶点属性缓冲区布局。
@@ -36,7 +36,7 @@ export interface IRenderPipeline extends Omit<IGPURenderPipeline, 'vertex' | 'fr
  *
  * 多重采样次数将由 {@link IRenderPass.multisample} 覆盖。
  */
-export interface IMultisampleState extends Omit<IGPUMultisampleState, 'count'>
+export interface IMultisampleState extends Omit<IGPUMultisampleState, "count">
 {
 
 }
@@ -46,7 +46,7 @@ export interface IMultisampleState extends Omit<IGPUMultisampleState, 'count'>
  *
  * `format` 将从深度附件 {@link IRenderPass.depthStencilAttachment} 纹理上获取。
  */
-export interface IDepthStencilState extends Omit<IGPUDepthStencilState, 'format' | 'depthWriteEnabled' | 'depthCompare'>
+export interface IDepthStencilState extends Omit<IGPUDepthStencilState, "format" | "depthWriteEnabled" | "depthCompare">
 {
     /**
      * Indicates if this {@link GPURenderPipeline} can modify

@@ -1,7 +1,7 @@
-import { IGPUBindGroup } from './IGPUBindGroup';
-import { IGPUBuffer } from './IGPUBuffer';
-import { IGPUPipelineLayout } from './IGPUPipelineLayout';
-import { IGPUVertexBuffer } from './IGPUVertexBuffer';
+import { IGPUBindGroup } from "./IGPUBindGroup";
+import { IGPUBuffer } from "./IGPUBuffer";
+import { IGPUPipelineLayout } from "./IGPUPipelineLayout";
+import { IGPUVertexBuffer } from "./IGPUVertexBuffer";
 
 /**
  * GPU渲染对象，包含一次渲染时包含的所有数据。
@@ -247,7 +247,7 @@ export interface IGPUSetIndexBuffer
  *
  * {@link GPURenderPipelineDescriptor}
  */
-export interface IGPURenderPipeline extends Omit<GPURenderPipelineDescriptor, 'layout' | 'vertex' | 'primitive' | 'depthStencil' | 'multisample' | 'fragment'>
+export interface IGPURenderPipeline extends Omit<GPURenderPipelineDescriptor, "layout" | "vertex" | "primitive" | "depthStencil" | "multisample" | "fragment">
 {
     /**
      * The {@link GPUPipelineLayout} for this pipeline or {@link GPUAutoLayoutMode#"auto"}, to generate
@@ -257,7 +257,7 @@ export interface IGPURenderPipeline extends Omit<GPURenderPipelineDescriptor, 'l
      *
      * 默认 'auto' 。
      */
-    layout?: IGPUPipelineLayout | 'auto';
+    layout?: IGPUPipelineLayout | "auto";
 
     /**
      * Describes the vertex shader entry point of the pipeline and its input buffer layouts.
@@ -327,7 +327,7 @@ export interface IGPUPrimitiveState extends GPUPrimitiveState
  *
  * @see GPUVertexState
  */
-export interface IGPUVertexState extends Omit<GPUVertexState, 'module' | 'buffers'>
+export interface IGPUVertexState extends Omit<GPUVertexState, "module" | "buffers">
 {
     /**
      * 着色器源码，将由 {@link GPUDevice.createShaderModule} 生成 {@link GPUShaderModule} 。
@@ -346,7 +346,7 @@ export interface IGPUVertexState extends Omit<GPUVertexState, 'module' | 'buffer
  *
  * {@link GPUFragmentState}
  */
-export interface IGPUFragmentState extends Omit<GPUFragmentState, 'module' | 'targets'>
+export interface IGPUFragmentState extends Omit<GPUFragmentState, "module" | "targets">
 {
     /**
      * 着色器源码，将由 {@link GPUDevice.createShaderModule} 生成 {@link GPUShaderModule} 。

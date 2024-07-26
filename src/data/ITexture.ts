@@ -1,5 +1,5 @@
-import { IGPUTextureBase } from '../webgpu-data-driven/data/IGPUTexture';
-import { ICanvasContext } from './ICanvasContext';
+import { IGPUTextureBase } from "../webgpu-data-driven/data/IGPUTexture";
+import { ICanvasContext } from "./ICanvasContext";
 
 /**
  * 纹理
@@ -26,5 +26,5 @@ export interface ITextureBase extends IGPUTextureBase
      *
      * {@link GPUTextureBindingLayout.sampleType}
      */
-    sampleType?: 'unfilterable-float';
+    sampleType?: "unfilterable-float";
 }

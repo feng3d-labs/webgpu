@@ -1,10 +1,10 @@
-import { IRenderObject } from '../data/IRenderObject';
-import { IRenderPass } from '../data/IRenderPass';
-import { ChainMap } from '../utils/ChainMap';
-import { IGPURenderObject } from '../webgpu-data-driven/data/IGPURenderObject';
-import { getIGPUBuffer } from './getIGPUBuffer';
-import { getIGPURenderPipeline } from './getIGPURenderPipeline';
-import { getIGPUSetBindGroups } from './getIGPUSetBindGroups';
+import { IRenderObject } from "../data/IRenderObject";
+import { IRenderPass } from "../data/IRenderPass";
+import { ChainMap } from "../utils/ChainMap";
+import { IGPURenderObject } from "../webgpu-data-driven/data/IGPURenderObject";
+import { getIGPUBuffer } from "./getIGPUBuffer";
+import { getIGPURenderPipeline } from "./getIGPURenderPipeline";
+import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 
 export function getIGPURenderObject(renderObject: IRenderObject, renderPass: IRenderPass)
 {

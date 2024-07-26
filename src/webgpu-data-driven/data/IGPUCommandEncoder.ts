@@ -1,7 +1,7 @@
-import { IGPUComputePassEncoder } from './IGPUComputePassEncoder';
-import { IGPUCopyBufferToBuffer } from './IGPUCopyBufferToBuffer';
-import { IGPUCopyTextureToTexture } from './IGPUCopyTextureToTexture';
-import { IGPURenderPassEncoder } from './IGPURenderPassEncoder';
+import { IGPUComputePassEncoder } from "./IGPUComputePassEncoder";
+import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
+import { IGPUCopyTextureToTexture } from "./IGPUCopyTextureToTexture";
+import { IGPURenderPassEncoder } from "./IGPURenderPassEncoder";
 
 /**
  * 命令编码器。

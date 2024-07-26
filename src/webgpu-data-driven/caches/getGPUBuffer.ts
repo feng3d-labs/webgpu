@@ -1,5 +1,5 @@
-import { watcher } from '@feng3d/watcher';
-import { IGPUBuffer } from '../data/IGPUBuffer';
+import { watcher } from "@feng3d/watcher";
+import { IGPUBuffer } from "../data/IGPUBuffer";
 
 /**
  * 获取 GPU 缓冲。
@@ -102,7 +102,7 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
     };
     writeBuffer();
 
-    watcher.watch(buffer, 'writeBuffers', writeBuffer);
+    watcher.watch(buffer, "writeBuffers", writeBuffer);
 
     const dataChange = () =>
     {
@@ -111,7 +111,7 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
         buffer.writeBuffers = writeBuffers;
     };
 
-    watcher.watch(buffer, 'data', dataChange);
+    watcher.watch(buffer, "data", dataChange);
 
     //
     ((oldDestroy) =>
@@ -123,8 +123,8 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
             gBufferMap.delete(buffer);
 
             //
-            watcher.unwatch(buffer, 'writeBuffers', writeBuffer);
-            watcher.unwatch(buffer, 'data', dataChange);
+            watcher.unwatch(buffer, "writeBuffers", writeBuffer);
+            watcher.unwatch(buffer, "data", dataChange);
         };
     })(gBuffer.destroy);
 

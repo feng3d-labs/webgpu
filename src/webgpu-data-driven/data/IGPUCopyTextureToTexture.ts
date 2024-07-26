@@ -1,4 +1,4 @@
-import { IGPUTexture } from './IGPUTexture';
+import { IGPUTexture } from "./IGPUTexture";
 
 /**
  * GPU纹理间拷贝所包含信息。
@@ -29,7 +29,7 @@ export interface IGPUCopyTextureToTexture
  * {@link GPUCommandEncoder.copyTextureToTexture}
  * {@link GPUImageCopyTexture}
  */
-export interface IGPUImageCopyTexture extends Omit<GPUImageCopyTexture, 'texture'>
+export interface IGPUImageCopyTexture extends Omit<GPUImageCopyTexture, "texture">
 {
     /**
      * Texture to copy to/from.

@@ -1,4 +1,4 @@
-import { IBuffer } from './IBuffer';
+import { IBuffer } from "./IBuffer";
 
 /**
  * 顶点属性数据映射。

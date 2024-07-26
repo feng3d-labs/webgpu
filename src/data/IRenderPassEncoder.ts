@@ -1,6 +1,6 @@
-import { IRenderBundleObject } from './IRenderBundleObject';
-import { IRenderObject } from './IRenderObject';
-import { IRenderPass } from './IRenderPass';
+import { IRenderBundleObject } from "./IRenderBundleObject";
+import { IRenderObject } from "./IRenderObject";
+import { IRenderPass } from "./IRenderPass";
 
 export interface IRenderPassEncoder
 {

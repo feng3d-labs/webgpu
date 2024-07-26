@@ -1,4 +1,4 @@
-import { IGPURenderObject } from './IGPURenderObject';
+import { IGPURenderObject } from "./IGPURenderObject";
 
 /**
  * GPU渲染捆绑对象。

@@ -1,9 +1,9 @@
-import { IGPUCanvasConfiguration } from '../webgpu-data-driven/data/IGPUCanvasConfiguration';
+import { IGPUCanvasConfiguration } from "../webgpu-data-driven/data/IGPUCanvasConfiguration";
 
 /**
  * @see IGPUCanvasConfiguration
  */
-export interface ICanvasConfiguration extends Omit<IGPUCanvasConfiguration, 'format'>
+export interface ICanvasConfiguration extends Omit<IGPUCanvasConfiguration, "format">
 {
     /**
      * The format that textures returned by {@link GPUCanvasContext#getCurrentTexture} will have.

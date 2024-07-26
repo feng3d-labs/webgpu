@@ -1,6 +1,6 @@
-import { IGPURenderBundleObject } from './IGPURenderBundleObject';
-import { IGPURenderObject } from './IGPURenderObject';
-import { IGPUTextureView } from './IGPUTextureView';
+import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
+import { IGPURenderObject } from "./IGPURenderObject";
+import { IGPUTextureView } from "./IGPUTextureView";
 
 /**
  * GPU渲染通道编码器。
@@ -27,7 +27,7 @@ export interface IGPURenderPassEncoder
  *
  * {@link GPURenderPassDescriptor}
  */
-export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 'colorAttachments' | 'depthStencilAttachment'>
+export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, "colorAttachments" | "depthStencilAttachment">
 {
     /**
      * The set of {@link GPURenderPassColorAttachment} values in this sequence defines which
@@ -51,7 +51,7 @@ export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 
  *
  * {@link GPURenderPassColorAttachment}
  */
-export interface IGPURenderPassColorAttachment extends Omit<GPURenderPassColorAttachment, 'view' | 'resolveTarget'>
+export interface IGPURenderPassColorAttachment extends Omit<GPURenderPassColorAttachment, "view" | "resolveTarget">
 {
     /**
      * A {@link GPUTextureView} describing the texture subresource that will be output to for this
@@ -72,7 +72,7 @@ export interface IGPURenderPassColorAttachment extends Omit<GPURenderPassColorAt
  *
  * @see GPURenderPassDepthStencilAttachment
  */
-export interface IGPURenderPassDepthStencilAttachment extends Omit<GPURenderPassDepthStencilAttachment, 'view'>
+export interface IGPURenderPassDepthStencilAttachment extends Omit<GPURenderPassDepthStencilAttachment, "view">
 {
     /**
      * A {@link GPUTextureView} describing the texture subresource that will be output to

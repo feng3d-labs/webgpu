@@ -1,11 +1,11 @@
-import { assert, describe, expect, it } from 'vitest';
+import { assert, describe, expect, it } from "vitest";
 const { ok, equal, deepEqual, strictEqual } = assert;
 
-import { getWGSLBindingResourceInfoMap } from '../src/caches/getWGSLReflect';
+import { getWGSLBindingResourceInfoMap } from "../src/caches/getWGSLReflect";
 
-describe('test', () =>
+describe("test", () =>
 {
-    it('getWGSLBindGroups', () =>
+    it("getWGSLBindGroups", () =>
     {
       getWGSLBindingResourceInfoMap(`
         override shadowDepthTextureSize: f32 = 1024.0;

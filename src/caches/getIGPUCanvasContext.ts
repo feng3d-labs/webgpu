@@ -1,6 +1,6 @@
-import { ICanvasContext } from '../data/ICanvasContext';
-import { IGPUCanvasConfiguration } from '../webgpu-data-driven/data/IGPUCanvasConfiguration';
-import { IGPUCanvasContext } from '../webgpu-data-driven/data/IGPUTexture';
+import { ICanvasContext } from "../data/ICanvasContext";
+import { IGPUCanvasConfiguration } from "../webgpu-data-driven/data/IGPUCanvasConfiguration";
+import { IGPUCanvasContext } from "../webgpu-data-driven/data/IGPUTexture";
 
 let defaultConfiguration: IGPUCanvasConfiguration;
 
@@ -11,7 +11,7 @@ export function getIGPUCanvasContext(canvasContext: ICanvasContext)
     {
         defaultConfiguration ||= {
             format: navigator.gpu.getPreferredCanvasFormat(),
-            alphaMode: 'premultiplied'
+            alphaMode: "premultiplied"
         };
 
         gpuCanvasContext = {

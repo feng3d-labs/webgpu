@@ -1,10 +1,10 @@
-import { IGPUCopyBufferToBuffer } from '../webgpu-data-driven/data/IGPUCopyBufferToBuffer';
-import { IBuffer } from './IBuffer';
+import { IGPUCopyBufferToBuffer } from "../webgpu-data-driven/data/IGPUCopyBufferToBuffer";
+import { IBuffer } from "./IBuffer";
 
 /**
  * 拷贝GPU缓冲区。
  */
-export interface ICopyBufferToBuffer extends Omit<IGPUCopyBufferToBuffer, 'source' | 'destination' | 'sourceOffset' | 'destinationOffset' | 'size'>
+export interface ICopyBufferToBuffer extends Omit<IGPUCopyBufferToBuffer, "source" | "destination" | "sourceOffset" | "destinationOffset" | "size">
 {
     /**
      * 源缓冲区。

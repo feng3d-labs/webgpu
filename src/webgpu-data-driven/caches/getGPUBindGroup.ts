@@ -1,11 +1,11 @@
-import { watcher } from '@feng3d/watcher';
-import { IGPUBindGroup } from '../data/IGPUBindGroup';
-import { getGPUBindGroupLayout } from './getGPUBindGroupLayout';
-import { getGPUBufferBinding, isBufferBinding } from './getGPUBufferBinding';
-import { getGPUExternalTexture, isExternalTexture } from './getGPUExternalTexture';
-import { getGPUSampler, isSampler } from './getGPUSampler';
-import { isFromContext } from './getGPUTexture';
-import { getGPUTextureView, isTextureView } from './getGPUTextureView';
+import { watcher } from "@feng3d/watcher";
+import { IGPUBindGroup } from "../data/IGPUBindGroup";
+import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
+import { getGPUBufferBinding, isBufferBinding } from "./getGPUBufferBinding";
+import { getGPUExternalTexture, isExternalTexture } from "./getGPUExternalTexture";
+import { getGPUSampler, isSampler } from "./getGPUSampler";
+import { isFromContext } from "./getGPUTexture";
+import { getGPUTextureView, isTextureView } from "./getGPUTextureView";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
 {
@@ -65,7 +65,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
         entry.resource = getGPUBindingResource();
 
         // 监听绑定资源发生改变
-        watcher.watch(v, 'resource', () =>
+        watcher.watch(v, "resource", () =>
         {
             bindGroupMap.delete(bindGroup);
 

@@ -1,6 +1,6 @@
-import { FunctionInfo, ResourceType, TemplateInfo, TypeInfo, VariableInfo, WgslReflect } from 'wgsl_reflect';
-import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, StorageTextureType, TextureType } from '../types/TextureType';
-import { WGSLVertexType, wgslVertexTypeMap } from '../types/VertexFormat';
+import { FunctionInfo, ResourceType, TemplateInfo, TypeInfo, VariableInfo, WgslReflect } from "wgsl_reflect";
+import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, StorageTextureType, TextureType } from "../types/TextureType";
+import { WGSLVertexType, wgslVertexTypeMap } from "../types/VertexFormat";
 
 /**
  * WGSL着色器反射信息。
@@ -114,7 +114,7 @@ export interface WGSLBindingResourceInfo
     name: string,
     group: number,
     binding: number,
-    type: 'buffer' | 'texture' | 'storageTexture' | 'externalTexture' | 'sampler';
+    type: "buffer" | "texture" | "storageTexture" | "externalTexture" | "sampler";
     buffer?: { layout: GPUBufferBindingLayout, variableInfo: VariableInfo }
     texture?: { layout: GPUTextureBindingLayout }
     storageTexture?: { layout: GPUStorageTextureBindingLayout }
@@ -211,11 +211,11 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
         const { group, binding, name } = uniform;
 
         const layout: GPUBufferBindingLayout = {
-            type: 'uniform',
+            type: "uniform",
             minBindingSize: uniform.size,
         };
 
-        bindingResourceLayoutMap[name] = { name, group, binding, buffer: { layout, variableInfo: uniform }, type: 'buffer' };
+        bindingResourceLayoutMap[name] = { name, group, binding, buffer: { layout, variableInfo: uniform }, type: "buffer" };
     }
 
     for (const storage of reflect.storage)
@@ -225,14 +225,14 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
         let layout: GPUBufferBindingLayout;
         if (storage.resourceType === ResourceType.Storage)
         {
-            const type: GPUBufferBindingType = storage.access === 'read_write' ? 'storage' : 'read-only-storage';
+            const type: GPUBufferBindingType = storage.access === "read_write" ? "storage" : "read-only-storage";
 
             // 无法确定 storage 中数据的尺寸，不设置 minBindingSize 属性。
             layout = {
                 type,
             };
 
-            bindingResourceLayoutMap[name] = { name, group, binding, buffer: { layout, variableInfo: storage }, type: 'buffer' };
+            bindingResourceLayoutMap[name] = { name, group, binding, buffer: { layout, variableInfo: storage }, type: "buffer" };
         }
         else if (storage.resourceType === ResourceType.StorageTexture)
         {
@@ -243,15 +243,15 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
             const viewDimension = TextureType[textureType][2];
 
             const access = (storage.type as TemplateInfo).access;
-            console.assert(access === 'write');
+            console.assert(access === "write");
 
             const layout: GPUStorageTextureBindingLayout = {
-                access: 'write-only',
+                access: "write-only",
                 format: textureSecondType as any,
                 viewDimension,
             };
 
-            bindingResourceLayoutMap[name] = { name, group, binding, storageTexture: { layout }, type: 'storageTexture' };
+            bindingResourceLayoutMap[name] = { name, group, binding, storageTexture: { layout }, type: "storageTexture" };
         }
         else
         {
@@ -269,43 +269,43 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
 
         if (ExternalSampledTextureType[textureType])
         {
-            bindingResourceLayoutMap[name] = { name, group, binding, externalTexture: { layout: {} }, type: 'externalTexture' };
+            bindingResourceLayoutMap[name] = { name, group, binding, externalTexture: { layout: {} }, type: "externalTexture" };
         }
         else if (StorageTextureType[textureType])
         {
             const textureSecondType = (texture.type as TemplateInfo)?.format?.name as GPUTextureFormat;
 
             const access = (texture.type as TemplateInfo).access;
-            console.assert(access === 'write');
+            console.assert(access === "write");
 
             const layout: GPUStorageTextureBindingLayout = {
-                access: 'write-only',
+                access: "write-only",
                 format: textureSecondType as any,
                 viewDimension,
             };
 
-            bindingResourceLayoutMap[name] = { name, group, binding, storageTexture: { layout }, type: 'storageTexture' };
+            bindingResourceLayoutMap[name] = { name, group, binding, storageTexture: { layout }, type: "storageTexture" };
         }
         else
         {
-            const textureSecondType = (texture.type as TemplateInfo)?.format?.name as 'f32' | 'u32' | 'i32';
+            const textureSecondType = (texture.type as TemplateInfo)?.format?.name as "f32" | "u32" | "i32";
 
             let sampleType: GPUTextureSampleType;
             if (DepthTextureType[textureType])
             {
-                sampleType = 'depth';
+                sampleType = "depth";
             }
-            else if (textureSecondType === 'f32')
+            else if (textureSecondType === "f32")
             {
-                sampleType = 'float';
+                sampleType = "float";
             }
-            else if (textureSecondType === 'u32')
+            else if (textureSecondType === "u32")
             {
-                sampleType = 'uint';
+                sampleType = "uint";
             }
-            else if (textureSecondType === 'i32')
+            else if (textureSecondType === "i32")
             {
-                sampleType = 'sint';
+                sampleType = "sint";
             }
             else
             {
@@ -323,7 +323,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
                 layout.multisampled = true;
             }
 
-            bindingResourceLayoutMap[name] = { name, group, binding, texture: { layout }, type: 'texture' };
+            bindingResourceLayoutMap[name] = { name, group, binding, texture: { layout }, type: "texture" };
         }
     }
 
@@ -333,12 +333,12 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
 
         const layout: GPUSamplerBindingLayout = {};
 
-        if (sampler.type.name === 'sampler_comparison')
+        if (sampler.type.name === "sampler_comparison")
         {
-            layout.type = 'comparison';
+            layout.type = "comparison";
         }
 
-        bindingResourceLayoutMap[name] = { name, group, binding, sampler: { layout }, type: 'sampler' };
+        bindingResourceLayoutMap[name] = { name, group, binding, sampler: { layout }, type: "sampler" };
     }
 
     return bindingResourceLayoutMap;
@@ -357,7 +357,7 @@ function getAttributeInfos(vertexFunctionInfo: FunctionInfo)
     vertexFunctionInfo.inputs.forEach((v) =>
     {
         // 跳过内置属性。
-        if (v.locationType === 'builtin')
+        if (v.locationType === "builtin")
         {
             return;
         }

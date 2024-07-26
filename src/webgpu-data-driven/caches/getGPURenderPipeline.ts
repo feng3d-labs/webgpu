@@ -1,14 +1,14 @@
-import { IGPURenderPipeline } from '../data/IGPURenderObject';
-import { getGPUPipelineLayout } from './getGPUPipelineLayout';
-import { getGPUShaderModule } from './getGPUShaderModule';
+import { IGPURenderPipeline } from "../data/IGPURenderObject";
+import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
+import { getGPUShaderModule } from "./getGPUShaderModule";
 
 export function getGPURenderPipeline(device: GPUDevice, descriptor: IGPURenderPipeline)
 {
     let pipeline = pipelineMap.get(descriptor);
     if (pipeline) return pipeline;
 
-    let layout: 'auto' | GPUPipelineLayout = 'auto';
-    if (descriptor.layout && descriptor.layout !== 'auto')
+    let layout: "auto" | GPUPipelineLayout = "auto";
+    if (descriptor.layout && descriptor.layout !== "auto")
     {
         layout = getGPUPipelineLayout(device, descriptor.layout);
     }

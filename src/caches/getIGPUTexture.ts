@@ -1,7 +1,7 @@
-import { IAttachmentSize } from '../data/IRenderPass';
-import { ITexture, ITextureFromContext } from '../data/ITexture';
-import { IGPUTexture, IGPUTextureSize } from '../webgpu-data-driven/data/IGPUTexture';
-import { getIGPUCanvasContext } from './getIGPUCanvasContext';
+import { IAttachmentSize } from "../data/IRenderPass";
+import { ITexture, ITextureFromContext } from "../data/ITexture";
+import { IGPUTexture, IGPUTextureSize } from "../webgpu-data-driven/data/IGPUTexture";
+import { getIGPUCanvasContext } from "./getIGPUCanvasContext";
 
 export function getIGPUTexture(texture: ITexture)
 {
@@ -11,11 +11,11 @@ export function getIGPUTexture(texture: ITexture)
     {
         const gpuCanvasContext = getIGPUCanvasContext(texture.context);
 
-        gpuCanvasContext['_gpuTexture'] = gpuCanvasContext['_gpuTexture'] || {
+        gpuCanvasContext["_gpuTexture"] = gpuCanvasContext["_gpuTexture"] || {
             ...texture,
             context: gpuCanvasContext
         };
-        gpuTexture = gpuCanvasContext['_gpuTexture'];
+        gpuTexture = gpuCanvasContext["_gpuTexture"];
     }
     else
     {
@@ -69,8 +69,7 @@ export function setITextureSize(texture: ITexture, attachmentSize: IAttachmentSi
         element.height = attachmentSize.height;
     }
     else
-    {
-        if (texture.size[2])
+    if (texture.size[2])
         {
             texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
         }
@@ -78,5 +77,4 @@ export function setITextureSize(texture: ITexture, attachmentSize: IAttachmentSi
         {
             texture.size = [attachmentSize.width, attachmentSize.height];
         }
-    }
 }

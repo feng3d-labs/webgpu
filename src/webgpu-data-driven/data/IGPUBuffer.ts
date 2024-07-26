@@ -4,7 +4,7 @@
  * {@link GPUBufferDescriptor}
  * {@link GPUBuffer}
  */
-export interface IGPUBuffer extends Omit<GPUBufferDescriptor, 'mappedAtCreation'>
+export interface IGPUBuffer extends Omit<GPUBufferDescriptor, "mappedAtCreation">
 {
     /**
      * 缓冲初始数据，只上传一次GPU。

@@ -1,13 +1,13 @@
-import { watcher } from '@feng3d/watcher';
-import { IAttachmentSize, IRenderPass, IRenderPassColorAttachment, IRenderPassDepthStencilAttachment } from '../data/IRenderPass';
-import { ITexture } from '../data/ITexture';
-import { updateIGPURenderPassAttachmentSize } from '../webgpu-data-driven/caches/getGPURenderPassDescriptor';
-import { getGPUTextureFormat } from '../webgpu-data-driven/caches/getGPUTexture';
-import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from '../webgpu-data-driven/data/IGPURenderPassEncoder';
-import { IGPUTexture } from '../webgpu-data-driven/data/IGPUTexture';
-import { IGPUTextureView } from '../webgpu-data-driven/data/IGPUTextureView';
-import { getIGPUTextureSize, setITextureSize } from './getIGPUTexture';
-import { getIGPUTextureView } from './getIGPUTextureView';
+import { watcher } from "@feng3d/watcher";
+import { IAttachmentSize, IRenderPass, IRenderPassColorAttachment, IRenderPassDepthStencilAttachment } from "../data/IRenderPass";
+import { ITexture } from "../data/ITexture";
+import { updateIGPURenderPassAttachmentSize } from "../webgpu-data-driven/caches/getGPURenderPassDescriptor";
+import { getGPUTextureFormat } from "../webgpu-data-driven/caches/getGPUTexture";
+import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "../webgpu-data-driven/data/IGPURenderPassEncoder";
+import { IGPUTexture } from "../webgpu-data-driven/data/IGPUTexture";
+import { IGPUTextureView } from "../webgpu-data-driven/data/IGPUTextureView";
+import { getIGPUTextureSize, setITextureSize } from "./getIGPUTexture";
+import { getIGPUTextureView } from "./getIGPUTextureView";
 
 /**
  * 获取完整的渲染通道描述。
@@ -166,7 +166,7 @@ function getMultisampleTextureView(texture: IGPUTexture, multisample: number)
         const size = getIGPUTextureSize(texture);
         const format = getGPUTextureFormat(texture);
         const multisampleTexture: IGPUTexture = {
-            label: '自动生成多重采样的纹理',
+            label: "自动生成多重采样的纹理",
             size,
             sampleCount: multisample,
             format,
@@ -201,7 +201,7 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IRender
                 texture: {
                     label: `自动生成的深度纹理`,
                     size: [attachmentSize.width, attachmentSize.height],
-                    format: 'depth24plus',
+                    format: "depth24plus",
                     usage: GPUTextureUsage.RENDER_ATTACHMENT,
                 }
             };
@@ -258,8 +258,8 @@ function getIGPURenderPassColorAttachments(colorAttachments: IRenderPassColorAtt
             view,
             resolveTarget,
             clearValue: v.clearValue,
-            loadOp: v.loadOp ?? 'clear',
-            storeOp: v.storeOp ?? 'store',
+            loadOp: v.loadOp ?? "clear",
+            storeOp: v.storeOp ?? "store",
         };
     });
 

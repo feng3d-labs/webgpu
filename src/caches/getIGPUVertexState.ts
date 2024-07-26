@@ -1,12 +1,12 @@
-import { watcher } from '@feng3d/watcher';
-import { IVertexAttributes } from '../data/IVertexAttributes';
-import { IVertexState } from '../data/IVertexState';
-import { gpuVertexFormatMap } from '../types/VertexFormat';
-import { ChainMap } from '../utils/ChainMap';
-import { IGPUVertexState } from '../webgpu-data-driven/data/IGPURenderObject';
-import { IGPUVertexBuffer } from '../webgpu-data-driven/data/IGPUVertexBuffer';
-import { getIGPUBuffer } from './getIGPUBuffer';
-import { WGSLVertexAttributeInfo, getWGSLReflectInfo } from './getWGSLReflectInfo';
+import { watcher } from "@feng3d/watcher";
+import { IVertexAttributes } from "../data/IVertexAttributes";
+import { IVertexState } from "../data/IVertexState";
+import { gpuVertexFormatMap } from "../types/VertexFormat";
+import { ChainMap } from "../utils/ChainMap";
+import { IGPUVertexState } from "../webgpu-data-driven/data/IGPURenderObject";
+import { IGPUVertexBuffer } from "../webgpu-data-driven/data/IGPUVertexBuffer";
+import { getIGPUBuffer } from "./getIGPUBuffer";
+import { WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
  * 获取完整的顶点阶段描述与顶点缓冲区列表。
@@ -101,10 +101,10 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
             // 根据顶点数据调整 布局中的数据格式。
             if (vertexAttribute.numComponents !== undefined)
             {
-                const formats = format.split('x');
+                const formats = format.split("x");
                 if (vertexAttribute.numComponents > 1)
                 {
-                    format = [formats[0], vertexAttribute.numComponents].join('x') as any;
+                    format = [formats[0], vertexAttribute.numComponents].join("x") as any;
                 }
                 else
                 {
@@ -120,7 +120,7 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
             isIGPUVertexBufferOffset = true;
         }
 
-        watcher.watch(vertexAttribute, 'buffer', () =>
+        watcher.watch(vertexAttribute, "buffer", () =>
         {
             const index = map.get(data);
             const buffer = vertexAttribute.buffer;

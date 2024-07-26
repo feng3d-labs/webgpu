@@ -1,9 +1,9 @@
-import { IFragmentState } from '../data/IFragmentState';
-import { IRenderPass } from '../data/IRenderPass';
-import { ChainMap } from '../utils/ChainMap';
-import { IGPUFragmentState } from '../webgpu-data-driven/data/IGPURenderObject';
-import { getIRenderPassColorAttachmentFormats } from './getIGPURenderPass';
-import { getWGSLReflectInfo } from './getWGSLReflectInfo';
+import { IFragmentState } from "../data/IFragmentState";
+import { IRenderPass } from "../data/IRenderPass";
+import { ChainMap } from "../utils/ChainMap";
+import { IGPUFragmentState } from "../webgpu-data-driven/data/IGPURenderObject";
+import { getIRenderPassColorAttachmentFormats } from "./getIGPURenderPass";
+import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
  * 获取片段阶段完整描述。

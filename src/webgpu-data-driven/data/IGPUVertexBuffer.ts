@@ -1,4 +1,4 @@
-import { IGPUBuffer } from './IGPUBuffer';
+import { IGPUBuffer } from "./IGPUBuffer";
 
 /**
  * Sets the current vertex buffer for the given slot.

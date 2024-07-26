@@ -1,8 +1,8 @@
-import { IRenderBundleObject } from '../data/IRenderBundleObject';
-import { IRenderPass } from '../data/IRenderPass';
-import { IGPURenderBundleObject, IGPURenderBundleEncoderDescriptor } from '../webgpu-data-driven/data/IGPURenderBundleObject';
-import { getIGPURenderObject } from './getIGPURenderObject';
-import { getIRenderPassFormats } from './getIGPURenderPass';
+import { IRenderBundleObject } from "../data/IRenderBundleObject";
+import { IRenderPass } from "../data/IRenderPass";
+import { IGPURenderBundleObject, IGPURenderBundleEncoderDescriptor } from "../webgpu-data-driven/data/IGPURenderBundleObject";
+import { getIGPURenderObject } from "./getIGPURenderObject";
+import { getIRenderPassFormats } from "./getIGPURenderPass";
 
 export function getIGPURenderBundle(renderBundleObject: IRenderBundleObject, renderPass: IRenderPass)
 {

@@ -1,8 +1,8 @@
-import { IComputePassEncoder } from './IComputePassEncoder';
-import { ICopyTextureToTexture } from './ICopyTextureToTexture';
-import { IRenderPassEncoder } from './IRenderPassEncoder';
-import { ICopyBufferToBuffer } from './ICopyBufferToBuffer';
-import { IGPUCommandEncoder } from '../webgpu-data-driven/data/IGPUCommandEncoder';
+import { IComputePassEncoder } from "./IComputePassEncoder";
+import { ICopyTextureToTexture } from "./ICopyTextureToTexture";
+import { IRenderPassEncoder } from "./IRenderPassEncoder";
+import { ICopyBufferToBuffer } from "./ICopyBufferToBuffer";
+import { IGPUCommandEncoder } from "../webgpu-data-driven/data/IGPUCommandEncoder";
 
 /**
  * 命令编码器。
@@ -10,7 +10,7 @@ import { IGPUCommandEncoder } from '../webgpu-data-driven/data/IGPUCommandEncode
  * @see GPUCommandEncoder
  * @see GPUDevice.createCommandEncoder
  */
-export interface ICommandEncoder extends Omit<IGPUCommandEncoder, 'passEncoders'>
+export interface ICommandEncoder extends Omit<IGPUCommandEncoder, "passEncoders">
 {
     /**
      * 通道编码器列表。

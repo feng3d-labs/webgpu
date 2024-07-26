@@ -1,22 +1,22 @@
-import { getGPUBindGroup } from './caches/getGPUBindGroup';
-import { getGPUBuffer } from './caches/getGPUBuffer';
-import { getGPUComputePipeline } from './caches/getGPUComputePipeline';
-import { getGPURenderPassDescriptor } from './caches/getGPURenderPassDescriptor';
-import { getGPURenderPipeline } from './caches/getGPURenderPipeline';
-import { getGPUTexture } from './caches/getGPUTexture';
-import { IGPUCommandEncoder } from './data/IGPUCommandEncoder';
-import { IGPUComputeObject } from './data/IGPUComputeObject';
-import { IGPUComputePassEncoder } from './data/IGPUComputePassEncoder';
-import { IGPUCopyBufferToBuffer } from './data/IGPUCopyBufferToBuffer';
-import { IGPUCopyTextureToTexture } from './data/IGPUCopyTextureToTexture';
-import { IGPURenderBundleObject } from './data/IGPURenderBundleObject';
-import { IGPURenderObject } from './data/IGPURenderObject';
-import { IGPURenderPassEncoder } from './data/IGPURenderPassEncoder';
-import { IGPUSubmit } from './data/IGPUSubmit';
-import { IGPUTexture } from './data/IGPUTexture';
-import { copyDepthTexture } from './utils/copyDepthTexture';
-import { readPixels } from './utils/readPixels';
-import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
+import { getGPUBindGroup } from "./caches/getGPUBindGroup";
+import { getGPUBuffer } from "./caches/getGPUBuffer";
+import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
+import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
+import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
+import { getGPUTexture } from "./caches/getGPUTexture";
+import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
+import { IGPUComputeObject } from "./data/IGPUComputeObject";
+import { IGPUComputePassEncoder } from "./data/IGPUComputePassEncoder";
+import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
+import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
+import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
+import { IGPURenderObject } from "./data/IGPURenderObject";
+import { IGPURenderPassEncoder } from "./data/IGPURenderPassEncoder";
+import { IGPUSubmit } from "./data/IGPUSubmit";
+import { IGPUTexture } from "./data/IGPUTexture";
+import { copyDepthTexture } from "./utils/copyDepthTexture";
+import { readPixels } from "./utils/readPixels";
+import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
 
 /**
  * WebGPU 对象。
@@ -32,13 +32,13 @@ export class WebGPU
     {
         if (!navigator.gpu)
         {
-            throw 'this browser does not support WebGPU';
+            throw "this browser does not support WebGPU";
         }
 
         const adapter = await navigator.gpu.requestAdapter(options);
         if (!adapter)
         {
-            throw 'this browser supports webgpu but it appears disabled';
+            throw "this browser supports webgpu but it appears disabled";
         }
 
         const device = await adapter?.requestDevice(descriptor);
@@ -50,7 +50,7 @@ export class WebGPU
             console.error(`WebGPU device was lost: ${info.message}`);
 
             // 'reason' will be 'destroyed' if we intentionally destroy the device.
-            if (info.reason !== 'destroyed')
+            if (info.reason !== "destroyed")
             {
                 // try again
                 const newWebGPU = await WebGPU.init(options, descriptor);
@@ -185,7 +185,7 @@ export class WebGPU
             }
         });
 
-        commands.push(['finish']);
+        commands.push(["finish"]);
 
         return gpuCommandEncoder.finish();
     }
@@ -202,7 +202,7 @@ export class WebGPU
             v.destinationOffset,
             v.size,
         );
-        commands.push(['copyBufferToBuffer',
+        commands.push(["copyBufferToBuffer",
             sourceBuffer,
             v.sourceOffset,
             destinationBuffer,
@@ -225,7 +225,7 @@ export class WebGPU
             },
             v.copySize,
         );
-        commands.push(['copyTextureToTexture',
+        commands.push(["copyTextureToTexture",
             {
                 texture: sourceTexture,
             },
@@ -239,7 +239,7 @@ export class WebGPU
     private computePass(commandEncoder: GPUCommandEncoder, v: IGPUComputePassEncoder, commands: any[])
     {
         const passEncoder = commandEncoder.beginComputePass(v.computePass);
-        commands.push(['beginComputePass', v.computePass]);
+        commands.push(["beginComputePass", v.computePass]);
 
         v.computeObjects.forEach((p) =>
         {
@@ -247,14 +247,14 @@ export class WebGPU
         });
 
         passEncoder.end();
-        commands.push(['end']);
+        commands.push(["end"]);
     }
 
     private computePipeline(passEncoder: GPUComputePassEncoder, p: IGPUComputeObject, commands: any[])
     {
         const pipeline = getGPUComputePipeline(this.device, p.pipeline);
         passEncoder.setPipeline(pipeline);
-        commands.push(['setPipeline', pipeline]);
+        commands.push(["setPipeline", pipeline]);
 
         if (p.bindGroups)
         {
@@ -263,24 +263,24 @@ export class WebGPU
                 const gpuBindGroup = getGPUBindGroup(this.device, bindGroup.bindGroup);
                 passEncoder.setBindGroup(index, gpuBindGroup, bindGroup.dynamicOffsets);
 
-                commands.push(['setBindGroup', index, gpuBindGroup, bindGroup.dynamicOffsets]);
+                commands.push(["setBindGroup", index, gpuBindGroup, bindGroup.dynamicOffsets]);
             });
         }
 
         const { workgroupCountX, workgroupCountY, workgroupCountZ } = p.workgroups;
         passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
-        commands.push(['dispatchWorkgroups', workgroupCountX, workgroupCountY, workgroupCountZ]);
+        commands.push(["dispatchWorkgroups", workgroupCountX, workgroupCountY, workgroupCountZ]);
     }
 
     private renderPass(commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPassEncoder, commands: any[])
     {
         const renderPassDescriptor = getGPURenderPassDescriptor(this.device, renderPass.renderPass);
 
-        commands.push(['beginRenderPass', renderPassDescriptor]);
+        commands.push(["beginRenderPass", renderPassDescriptor]);
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-        passEncoder['_bindGroups'] = [];
-        passEncoder['_vertexBuffers'] = [];
+        passEncoder["_bindGroups"] = [];
+        passEncoder["_vertexBuffers"] = [];
 
         const renderPipelines = renderPass.renderObjects;
         for (let i = 0; i < renderPipelines.length; i++)
@@ -297,7 +297,7 @@ export class WebGPU
             }
         }
 
-        commands.push(['end']);
+        commands.push(["end"]);
 
         passEncoder.end();
     }
@@ -308,8 +308,8 @@ export class WebGPU
         if (!gRenderBundle)
         {
             const renderBundleEncoder = this.device.createRenderBundleEncoder(renderBundle.renderBundle);
-            renderBundleEncoder['_bindGroups'] = [];
-            renderBundleEncoder['_vertexBuffers'] = [];
+            renderBundleEncoder["_bindGroups"] = [];
+            renderBundleEncoder["_vertexBuffers"] = [];
 
             const renderPipelines = renderBundle.renderObjects;
             for (let i = 0; i < renderPipelines.length; i++)
@@ -321,34 +321,34 @@ export class WebGPU
             renderBundle._GPURenderBundle = gRenderBundle;
         }
 
-        commands.push(['executeBundles', [gRenderBundle]]);
+        commands.push(["executeBundles", [gRenderBundle]]);
 
         passEncoder.executeBundles([gRenderBundle]);
     }
 
     private renderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, p: IGPURenderObject, commands: any[])
     {
-        if (passEncoder['_pipeline'] !== p.pipeline)
+        if (passEncoder["_pipeline"] !== p.pipeline)
         {
-            passEncoder['_pipeline'] = p.pipeline;
+            passEncoder["_pipeline"] = p.pipeline;
             //
             const pipeline = getGPURenderPipeline(this.device, p.pipeline);
             passEncoder.setPipeline(pipeline);
 
-            commands.push('setPipeline', pipeline);
+            commands.push("setPipeline", pipeline);
         }
 
         if (p.bindGroups)
         {
             p.bindGroups.forEach((bindGroup, index) =>
             {
-                if (passEncoder['_bindGroups'][index] === bindGroup) return;
-                passEncoder['_bindGroups'][index] = bindGroup;
+                if (passEncoder["_bindGroups"][index] === bindGroup) return;
+                passEncoder["_bindGroups"][index] = bindGroup;
 
                 const gBindGroup = getGPUBindGroup(this.device, bindGroup.bindGroup);
                 passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
 
-                commands.push('setBindGroup', index, gBindGroup, bindGroup.dynamicOffsets);
+                commands.push("setBindGroup", index, gBindGroup, bindGroup.dynamicOffsets);
             });
         }
 
@@ -356,54 +356,54 @@ export class WebGPU
         {
             p.vertexBuffers.forEach((vertexBuffer, index) =>
             {
-                if (passEncoder['_vertexBuffers'][index] === vertexBuffer) return;
-                passEncoder['_vertexBuffers'][index] = vertexBuffer;
+                if (passEncoder["_vertexBuffers"][index] === vertexBuffer) return;
+                passEncoder["_vertexBuffers"][index] = vertexBuffer;
 
                 const gBuffer = getGPUBuffer(this.device, vertexBuffer.buffer);
                 passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
 
-                commands.push('setVertexBuffer', index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
+                commands.push("setVertexBuffer", index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
             });
         }
 
         if (p.indexBuffer)
         {
-            if (passEncoder['_indexBuffer'] !== p.indexBuffer)
+            if (passEncoder["_indexBuffer"] !== p.indexBuffer)
             {
-                passEncoder['_indexBuffer'] = p.indexBuffer;
+                passEncoder["_indexBuffer"] = p.indexBuffer;
 
                 const { buffer, indexFormat, offset, size } = p.indexBuffer;
                 const gBuffer = getGPUBuffer(this.device, buffer);
 
                 passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
 
-                commands.push('setIndexBuffer', gBuffer, indexFormat, offset, size);
+                commands.push("setIndexBuffer", gBuffer, indexFormat, offset, size);
             }
         }
 
         if (p.viewport)
         {
-            if (passEncoder['_viewport'] !== p.viewport)
+            if (passEncoder["_viewport"] !== p.viewport)
             {
-                passEncoder['_viewport'] = p.viewport;
+                passEncoder["_viewport"] = p.viewport;
 
                 const { x, y, width, height, minDepth, maxDepth } = p.viewport;
                 (passEncoder as GPURenderPassEncoder).setViewport(x, y, width, height, minDepth, maxDepth);
 
-                commands.push('setViewport', x, y, width, height, minDepth, maxDepth);
+                commands.push("setViewport", x, y, width, height, minDepth, maxDepth);
             }
         }
 
         if (p.scissorRect)
         {
-            if (passEncoder['_scissorRect'] !== p.scissorRect)
+            if (passEncoder["_scissorRect"] !== p.scissorRect)
             {
-                passEncoder['_scissorRect'] = p.scissorRect;
+                passEncoder["_scissorRect"] = p.scissorRect;
 
                 const { x, y, width, height } = p.scissorRect;
                 (passEncoder as GPURenderPassEncoder).setScissorRect(x, y, width, height);
 
-                commands.push('setScissorRect', x, y, width, height);
+                commands.push("setScissorRect", x, y, width, height);
             }
         }
 
@@ -412,7 +412,7 @@ export class WebGPU
             const { vertexCount, instanceCount, firstVertex, firstInstance } = p.draw;
             passEncoder.draw(vertexCount, instanceCount, firstVertex, firstInstance);
 
-            commands.push('draw', vertexCount, instanceCount, firstVertex, firstInstance);
+            commands.push("draw", vertexCount, instanceCount, firstVertex, firstInstance);
         }
 
         if (p.drawIndexed)
@@ -420,7 +420,7 @@ export class WebGPU
             const { indexCount, instanceCount, firstIndex, baseVertex, firstInstance } = p.drawIndexed;
             passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
 
-            commands.push('drawIndexed', indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
+            commands.push("drawIndexed", indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
         }
     }
 }

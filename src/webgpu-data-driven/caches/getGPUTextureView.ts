@@ -1,6 +1,6 @@
-import { IGPUBindingResource } from '../data/IGPUBindGroup';
-import { IGPUTextureView } from '../data/IGPUTextureView';
-import { getGPUTexture, gpuTextureEventEmitter, isFromContext } from './getGPUTexture';
+import { IGPUBindingResource } from "../data/IGPUBindGroup";
+import { IGPUTextureView } from "../data/IGPUTextureView";
+import { getGPUTexture, gpuTextureEventEmitter, isFromContext } from "./getGPUTexture";
 
 export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
 {
@@ -22,7 +22,7 @@ export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
     textureView = gpuTexture.createView(view);
     textureViewMap.set(view, textureView);
     // 销毁纹理时清除对应的纹理视图。
-    gpuTextureEventEmitter.once(gpuTexture, 'destroy', () =>
+    gpuTextureEventEmitter.once(gpuTexture, "destroy", () =>
     {
         textureViewMap.delete(view);
     });

@@ -1,5 +1,5 @@
-import { watcher } from '@feng3d/watcher';
-import { IGPUSampler } from '../data/IGPUSampler';
+import { watcher } from "@feng3d/watcher";
+import { IGPUSampler } from "../data/IGPUSampler";
 
 /**
  * GPU采样器默认值。

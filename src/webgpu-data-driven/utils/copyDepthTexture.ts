@@ -1,4 +1,4 @@
-import wgsl from './copyDepthTexture.wgsl';
+import wgsl from "./copyDepthTexture.wgsl";
 
 /**
  * 拷贝 深度纹理到 普通纹理。
@@ -9,7 +9,7 @@ import wgsl from './copyDepthTexture.wgsl';
  */
 export function copyDepthTexture(device: GPUDevice, sourceTexture: GPUTexture, targetTexture: GPUTexture)
 {
-    if (sourceTexture.format.indexOf('depth') === -1)
+    if (sourceTexture.format.indexOf("depth") === -1)
     {
         console.error(`copyDepthTexture 只用于深度纹理到普通纹理的拷贝。`);
 
@@ -32,7 +32,7 @@ export function copyDepthTexture(device: GPUDevice, sourceTexture: GPUTexture, t
                 binding: 1,
                 visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
                 texture: {
-                    sampleType: 'depth',
+                    sampleType: "depth",
                 },
             },
         ] as GPUBindGroupLayoutEntry[],
@@ -44,8 +44,8 @@ export function copyDepthTexture(device: GPUDevice, sourceTexture: GPUTexture, t
             {
                 binding: 0,
                 resource: device.createSampler({
-                    magFilter: 'linear',
-                    minFilter: 'linear',
+                    magFilter: "linear",
+                    minFilter: "linear",
                 })
             },
             {
@@ -61,14 +61,14 @@ export function copyDepthTexture(device: GPUDevice, sourceTexture: GPUTexture, t
         }),
         vertex: {
             module: wgslModel,
-            entryPoint: 'vsmain',
+            entryPoint: "vsmain",
         },
         fragment: {
             module: wgslModel,
-            entryPoint: 'fsmain',
+            entryPoint: "fsmain",
             targets: [{ format: targetTexture.format }] as GPUColorTargetState[],
         },
-        primitive: { topology: 'triangle-strip' }
+        primitive: { topology: "triangle-strip" }
     });
 
     const commandEncoder = device.createCommandEncoder();
@@ -77,8 +77,8 @@ export function copyDepthTexture(device: GPUDevice, sourceTexture: GPUTexture, t
         colorAttachments: [
             {
                 view: targetTexture.createView(),
-                loadOp: 'load',
-                storeOp: 'store',
+                loadOp: "load",
+                storeOp: "store",
             } as GPURenderPassColorAttachment
         ]
     });

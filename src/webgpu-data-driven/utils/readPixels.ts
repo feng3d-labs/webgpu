@@ -61,7 +61,7 @@ export async function readPixels(device: GPUDevice, params: { texture: GPUTextur
                 bufferData[j * bytesPerRow + i * 4 + 3],
             ];
 
-            if (texture.format === 'bgra8unorm')
+            if (texture.format === "bgra8unorm")
             {
                 rgba = [rgba[2], rgba[1], rgba[0], rgba[3]];
             }

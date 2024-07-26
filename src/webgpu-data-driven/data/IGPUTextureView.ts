@@ -1,4 +1,4 @@
-import { IGPUTexture } from './IGPUTexture';
+import { IGPUTexture } from "./IGPUTexture";
 
 /**
  * 视图纹理。

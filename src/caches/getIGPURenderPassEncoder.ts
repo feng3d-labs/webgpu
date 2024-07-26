@@ -1,10 +1,10 @@
-import { IRenderBundleObject } from '../data/IRenderBundleObject';
-import { IRenderObject } from '../data/IRenderObject';
-import { IRenderPassEncoder } from '../data/IRenderPassEncoder';
-import { IGPURenderPassEncoder } from '../webgpu-data-driven/data/IGPURenderPassEncoder';
-import { getIGPURenderBundle } from './getIGPURenderBundle';
-import { getIGPURenderObject } from './getIGPURenderObject';
-import { getIGPURenderPass } from './getIGPURenderPass';
+import { IRenderBundleObject } from "../data/IRenderBundleObject";
+import { IRenderObject } from "../data/IRenderObject";
+import { IRenderPassEncoder } from "../data/IRenderPassEncoder";
+import { IGPURenderPassEncoder } from "../webgpu-data-driven/data/IGPURenderPassEncoder";
+import { getIGPURenderBundle } from "./getIGPURenderBundle";
+import { getIGPURenderObject } from "./getIGPURenderObject";
+import { getIGPURenderPass } from "./getIGPURenderPass";
 
 export function getIGPURenderPassEncoder(renderPassEncoder: IRenderPassEncoder)
 {

@@ -1,4 +1,4 @@
-import { IGPUCanvasConfiguration } from './IGPUCanvasConfiguration';
+import { IGPUCanvasConfiguration } from "./IGPUCanvasConfiguration";
 
 /**
  * 纹理
@@ -53,7 +53,7 @@ export interface IGPUCopyExternalImageToTexture
     copySize: GPUExtent3DStrict
 }
 
-export interface IGPUImageCopyTextureTagged extends Omit<GPUImageCopyTextureTagged, 'texture'>
+export interface IGPUImageCopyTextureTagged extends Omit<GPUImageCopyTextureTagged, "texture">
 {
 }
 

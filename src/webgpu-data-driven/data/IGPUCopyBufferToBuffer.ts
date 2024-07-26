@@ -1,4 +1,4 @@
-import { IGPUBuffer } from './IGPUBuffer';
+import { IGPUBuffer } from "./IGPUBuffer";
 
 /**
  * GPU缓冲区之间拷贝。

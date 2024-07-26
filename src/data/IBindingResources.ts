@@ -1,7 +1,7 @@
-import { IGPUBufferBinding, IGPUExternalTexture } from '../webgpu-data-driven/data/IGPUBindGroup';
-import { IGPUSampler } from '../webgpu-data-driven/data/IGPUSampler';
-import { IBuffer } from './IBuffer';
-import { ITextureView } from './ITextureView';
+import { IGPUBufferBinding, IGPUExternalTexture } from "../webgpu-data-driven/data/IGPUBindGroup";
+import { IGPUSampler } from "../webgpu-data-driven/data/IGPUSampler";
+import { IBuffer } from "./IBuffer";
+import { ITextureView } from "./ITextureView";
 
 /**
  * GPU绑定的资源映射。
@@ -34,7 +34,7 @@ export interface ISampler extends IGPUSampler
 /**
  * 缓冲区绑定资源。
  */
-export interface IBufferBinding extends Omit<IGPUBufferBinding, 'buffer'>
+export interface IBufferBinding extends Omit<IGPUBufferBinding, "buffer">
 {
     /**
      * 如果未设置将通过反射信息自动生成。

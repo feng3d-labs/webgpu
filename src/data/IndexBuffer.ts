@@ -1,10 +1,10 @@
-import { IGPUSetIndexBuffer } from '../webgpu-data-driven/data/IGPURenderObject';
-import { IBuffer } from './IBuffer';
+import { IGPUSetIndexBuffer } from "../webgpu-data-driven/data/IGPURenderObject";
+import { IBuffer } from "./IBuffer";
 
 /**
  * 顶点索引缓冲区。
  */
-export interface IIndexBuffer extends Omit<IGPUSetIndexBuffer, 'buffer'>
+export interface IIndexBuffer extends Omit<IGPUSetIndexBuffer, "buffer">
 {
     /**
      * Buffer containing index data to use for subsequent drawing commands.

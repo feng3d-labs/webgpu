@@ -1,5 +1,5 @@
-import { IGPUPipelineLayout } from '../data/IGPUPipelineLayout';
-import { getGPUBindGroupLayout } from './getGPUBindGroupLayout';
+import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
+import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 
 export function getGPUPipelineLayout(device: GPUDevice, layout: IGPUPipelineLayout)
 {

@@ -1,7 +1,7 @@
-import { IComputeObject } from '../data/IComputeObject';
-import { IGPUComputeObject } from '../webgpu-data-driven/data/IGPUComputeObject';
-import { getIGPUComputePipeline } from './getIGPUComputePipeline';
-import { getIGPUSetBindGroups } from './getIGPUSetBindGroups';
+import { IComputeObject } from "../data/IComputeObject";
+import { IGPUComputeObject } from "../webgpu-data-driven/data/IGPUComputeObject";
+import { getIGPUComputePipeline } from "./getIGPUComputePipeline";
+import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 
 export function getIGPUComputeObject(renderObject: IComputeObject)
 {

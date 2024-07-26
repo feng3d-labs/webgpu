@@ -1,6 +1,6 @@
-import { IProgrammableStage } from '../data/IComputeObject';
-import { IGPUComputeStage } from '../webgpu-data-driven/data/IGPUComputeObject';
-import { getWGSLReflectInfo } from './getWGSLReflectInfo';
+import { IProgrammableStage } from "../data/IComputeObject";
+import { IGPUComputeStage } from "../webgpu-data-driven/data/IGPUComputeObject";
+import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
  * 获取计算阶段完整描述。

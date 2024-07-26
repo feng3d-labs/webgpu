@@ -1,16 +1,16 @@
-import { watcher } from '@feng3d/watcher';
-import { TemplateInfo, VariableInfo } from 'wgsl_reflect';
-import { IBindingResources, IBufferBinding } from '../data/IBindingResources';
-import { ITextureBase } from '../data/ITexture';
-import { ITextureView } from '../data/ITextureView';
-import { ChainMap } from '../utils/ChainMap';
-import { IGPUBindGroupEntry, IGPUBindingResource, IGPUExternalTexture } from '../webgpu-data-driven/data/IGPUBindGroup';
-import { IGPUComputePipeline } from '../webgpu-data-driven/data/IGPUComputeObject';
-import { IGPUPipelineLayout } from '../webgpu-data-driven/data/IGPUPipelineLayout';
-import { IGPURenderPipeline, IGPUSetBindGroup } from '../webgpu-data-driven/data/IGPURenderObject';
-import { IGPUSampler } from '../webgpu-data-driven/data/IGPUSampler';
-import { getIGPUBuffer } from './getIGPUBuffer';
-import { WGSLBindingResourceInfoMap } from './getWGSLReflectInfo';
+import { watcher } from "@feng3d/watcher";
+import { TemplateInfo, VariableInfo } from "wgsl_reflect";
+import { IBindingResources, IBufferBinding } from "../data/IBindingResources";
+import { ITextureBase } from "../data/ITexture";
+import { ITextureView } from "../data/ITextureView";
+import { ChainMap } from "../utils/ChainMap";
+import { IGPUBindGroupEntry, IGPUBindingResource, IGPUExternalTexture } from "../webgpu-data-driven/data/IGPUBindGroup";
+import { IGPUComputePipeline } from "../webgpu-data-driven/data/IGPUComputeObject";
+import { IGPUPipelineLayout } from "../webgpu-data-driven/data/IGPUPipelineLayout";
+import { IGPURenderPipeline, IGPUSetBindGroup } from "../webgpu-data-driven/data/IGPURenderObject";
+import { IGPUSampler } from "../webgpu-data-driven/data/IGPUSampler";
+import { getIGPUBuffer } from "./getIGPUBuffer";
+import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
 
 export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputePipeline, bindingResources: IBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
 {
@@ -46,7 +46,7 @@ export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputeP
 
                 let resource: IGPUBindingResource;
                 //
-                if (type === 'buffer')
+                if (type === "buffer")
                 {
                     const variableInfo = bindingResourceInfo.buffer.variableInfo;
                     const layoutType = bindingResourceInfo.buffer.layout.type;
@@ -67,7 +67,7 @@ export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputeP
                     const buffer = getIGPUBuffer(uniformData.buffer);
                     const offset = uniformData.offset ?? 0; // 默认值为0
 
-                    if (layoutType === 'uniform')
+                    if (layoutType === "uniform")
                     {
                         resource = {
                             buffer,
@@ -87,31 +87,31 @@ export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputeP
                     // 更新缓冲区绑定的数据。
                     updateBufferBinding(variableInfo, uniformData);
                 }
-                else if (type === 'sampler')
+                else if (type === "sampler")
                 {
                     const uniformData = bindingResource as IGPUSampler;
 
                     resource = uniformData;
                 }
-                else if (type === 'texture')
+                else if (type === "texture")
                 {
                     const uniformData = bindingResource as ITextureView;
 
                     // 设置纹理资源布局上的采样类型。
-                    if ((uniformData.texture as ITextureBase).sampleType === 'unfilterable-float')
+                    if ((uniformData.texture as ITextureBase).sampleType === "unfilterable-float")
                     {
-                        bindingResourceInfo.texture.layout.sampleType = 'unfilterable-float';
+                        bindingResourceInfo.texture.layout.sampleType = "unfilterable-float";
                     }
 
                     resource = uniformData;
                 }
-                else if (type === 'externalTexture')
+                else if (type === "externalTexture")
                 {
                     const uniformData = bindingResource as IGPUExternalTexture;
 
                     resource = uniformData;
                 }
-                else if (type === 'storageTexture')
+                else if (type === "storageTexture")
                 {
                     const uniformData = bindingResource as ITextureView;
 
@@ -154,19 +154,19 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IBufferBin
         return;
     }
 
-    if (uniformData['_variableInfo'] === variableInfo)
+    if (uniformData["_variableInfo"] === variableInfo)
     {
         // 已经做好数据映射。
         return;
     }
 
-    if (uniformData['_variableInfo'] !== undefined)
+    if (uniformData["_variableInfo"] !== undefined)
     {
         console.error(`updateBufferBinding 出现一份数据对应多个 variableInfo`);
 
         return;
     }
-    uniformData['_variableInfo'] = variableInfo;
+    uniformData["_variableInfo"] = variableInfo;
 
     const buffer = getIGPUBuffer(uniformData.buffer);
     const offset = uniformData.offset ?? 0; // 默认值为0
@@ -177,7 +177,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IBufferBin
         const subTypeName = (member.type as TemplateInfo).format?.name;
         const subsubTypeName = (member.type as any).format?.format?.name;
 
-        if (member.type.name === 'f32' || subTypeName === 'f32' || subsubTypeName === 'f32')
+        if (member.type.name === "f32" || subTypeName === "f32" || subsubTypeName === "f32")
         {
             update = () =>
             {
@@ -189,7 +189,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IBufferBin
 
                     return;
                 }
-                if (typeof memberData === 'number')
+                if (typeof memberData === "number")
                 {
                     data = new Float32Array([memberData]);
                 }
@@ -206,7 +206,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IBufferBin
                 buffer.writeBuffers = writeBuffers;
             };
         }
-        else if (member.type.name === 'i32' || subTypeName === 'i32' || subsubTypeName === 'i32')
+        else if (member.type.name === "i32" || subTypeName === "i32" || subsubTypeName === "i32")
         {
             update = () =>
             {
@@ -218,7 +218,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IBufferBin
 
                     return;
                 }
-                if (typeof memberData === 'number')
+                if (typeof memberData === "number")
                 {
                     data = new Int32Array([memberData]);
                 }

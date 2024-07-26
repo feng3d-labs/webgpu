@@ -1,13 +1,13 @@
-import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from '../webgpu-data-driven/data/IGPURenderPassEncoder';
-import { IGPUTextureView } from '../webgpu-data-driven/data/IGPUTextureView';
-import { ITextureView } from './ITextureView';
+import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "../webgpu-data-driven/data/IGPURenderPassEncoder";
+import { IGPUTextureView } from "../webgpu-data-driven/data/IGPUTextureView";
+import { ITextureView } from "./ITextureView";
 
 /**
  * 渲染通道描述。
  *
  * @see IGPURenderPassDescriptor
  */
-export interface IRenderPass extends Omit<IGPURenderPassDescriptor, 'colorAttachments' | 'depthStencilAttachment'>
+export interface IRenderPass extends Omit<IGPURenderPassDescriptor, "colorAttachments" | "depthStencilAttachment">
 {
     /**
      * The set of {@link GPURenderPassColorAttachment} values in this sequence defines which
@@ -50,7 +50,7 @@ export interface IAttachmentSize
     width: number, height: number
 }
 
-export interface IRenderPassDepthStencilAttachment extends Omit<IGPURenderPassDepthStencilAttachment, 'view' | 'resolveTarget'>
+export interface IRenderPassDepthStencilAttachment extends Omit<IGPURenderPassDepthStencilAttachment, "view" | "resolveTarget">
 {
     /**
      * A {@link GPUTextureView} describing the texture subresource that will be output to
@@ -69,7 +69,7 @@ export interface IRenderPassDepthStencilAttachment extends Omit<IGPURenderPassDe
 /**
  * {@link IGPURenderPassColorAttachment}
  */
-export interface IRenderPassColorAttachment extends Omit<IGPURenderPassColorAttachment, 'view' | 'resolveTarget' | 'loadOp' | 'storeOp'>
+export interface IRenderPassColorAttachment extends Omit<IGPURenderPassColorAttachment, "view" | "resolveTarget" | "loadOp" | "storeOp">
 {
     /**
      * A {@link GPUTextureView} describing the texture subresource that will be output to for this

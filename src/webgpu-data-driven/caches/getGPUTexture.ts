@@ -1,8 +1,8 @@
-import { AnyEmitter, anyEmitter } from '@feng3d/event';
-import { watcher } from '@feng3d/watcher';
-import { IGPUTexture, IGPUTextureFromContext } from '../data/IGPUTexture';
-import { generateMipmap } from '../utils/generate-mipmap';
-import { getGPUCanvasContext } from './getGPUCanvasContext';
+import { AnyEmitter, anyEmitter } from "@feng3d/event";
+import { watcher } from "@feng3d/watcher";
+import { IGPUTexture, IGPUTextureFromContext } from "../data/IGPUTexture";
+import { generateMipmap } from "../utils/generate-mipmap";
+import { getGPUCanvasContext } from "./getGPUCanvasContext";
 
 /**
  * GPUTexture 相关事件。
@@ -12,7 +12,7 @@ interface IGPUTextureEvent
     /**
      * 销毁事件。
      */
-    'destroy': undefined;
+    "destroy": undefined;
 }
 /**
  * GPUTexture 事件派发器。
@@ -78,7 +78,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
         }
     };
     updateSource();
-    watcher.watch(texture, 'source', updateSource);
+    watcher.watch(texture, "source", updateSource);
 
     // 监听写纹理操作
     const writeTexture = () =>
@@ -104,7 +104,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
         }
     };
     writeTexture();
-    watcher.watch(texture, 'writeTextures', writeTexture);
+    watcher.watch(texture, "writeTextures", writeTexture);
 
     // 监听纹理尺寸发生变化
     const resize = (newValue: GPUExtent3DStrict, oldValue: GPUExtent3DStrict) =>
@@ -122,7 +122,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
 
         gpuTexture.destroy();
     };
-    watcher.watch(texture, 'size', resize);
+    watcher.watch(texture, "size", resize);
 
     // 自动生成 mipmap。
     if (texture.generateMipmap)
@@ -139,11 +139,11 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
             //
             textureMap.delete(texture);
             // 派发销毁事件
-            gpuTextureEventEmitter.emit(gpuTexture, 'destroy');
+            gpuTextureEventEmitter.emit(gpuTexture, "destroy");
             //
-            watcher.unwatch(texture, 'source', updateSource);
-            watcher.unwatch(texture, 'writeTextures', writeTexture);
-            watcher.unwatch(texture, 'size', resize);
+            watcher.unwatch(texture, "source", updateSource);
+            watcher.unwatch(texture, "writeTextures", writeTexture);
+            watcher.unwatch(texture, "size", resize);
         };
     })(gpuTexture.destroy);
 
@@ -190,8 +190,7 @@ export function setIGPUTextureSize(texture: IGPUTexture, attachmentSize: { width
         element.height = attachmentSize.height;
     }
     else
-    {
-        if (texture.size[2])
+    if (texture.size[2])
         {
             texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
         }
@@ -199,7 +198,6 @@ export function setIGPUTextureSize(texture: IGPUTexture, attachmentSize: { width
         {
             texture.size = [attachmentSize.width, attachmentSize.height];
         }
-    }
 }
 
 /**

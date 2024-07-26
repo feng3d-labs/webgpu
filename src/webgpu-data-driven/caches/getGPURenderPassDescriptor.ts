@@ -1,7 +1,7 @@
-import { IGPURenderPassDescriptor, IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment } from '../data/IGPURenderPassEncoder';
-import { IGPUTexture } from '../data/IGPUTexture';
-import { setIGPUTextureSize } from './getGPUTexture';
-import { getGPUTextureView } from './getGPUTextureView';
+import { IGPURenderPassDescriptor, IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassEncoder";
+import { IGPUTexture } from "../data/IGPUTexture";
+import { setIGPUTextureSize } from "./getGPUTexture";
+import { getGPUTextureView } from "./getGPUTextureView";
 
 /**
  * 获取GPU渲染通道描述。

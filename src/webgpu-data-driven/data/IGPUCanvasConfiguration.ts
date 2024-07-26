@@ -4,7 +4,7 @@
  * @see GPUCanvasConfiguration
  * @see GPUCanvasContext.configure
  */
-export interface IGPUCanvasConfiguration extends Omit<GPUCanvasConfiguration, 'device' | 'usage'>
+export interface IGPUCanvasConfiguration extends Omit<GPUCanvasConfiguration, "device" | "usage">
 {
     /**
      * The usage that textures returned by {@link GPUCanvasContext#getCurrentTexture} will have.

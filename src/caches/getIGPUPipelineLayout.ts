@@ -1,9 +1,9 @@
-import { IComputePipeline } from '../data/IComputeObject';
-import { IRenderPipeline } from '../data/IRenderPipeline';
-import { IGPUShaderStageFlags, IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry } from '../webgpu-data-driven/data/IGPUBindGroup';
-import { IGPUComputePipeline } from '../webgpu-data-driven/data/IGPUComputeObject';
-import { IGPUPipelineLayout } from '../webgpu-data-driven/data/IGPUPipelineLayout';
-import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo } from './getWGSLReflectInfo';
+import { IComputePipeline } from "../data/IComputeObject";
+import { IRenderPipeline } from "../data/IRenderPipeline";
+import { IGPUShaderStageFlags, IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry } from "../webgpu-data-driven/data/IGPUBindGroup";
+import { IGPUComputePipeline } from "../webgpu-data-driven/data/IGPUComputeObject";
+import { IGPUPipelineLayout } from "../webgpu-data-driven/data/IGPUPipelineLayout";
+import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
  * 从GPU管线中获取管线布局。
@@ -29,19 +29,19 @@ export function getIGPUPipelineLayout(pipeline: IRenderPipeline | IComputePipeli
     const visibility: IGPUShaderStageFlags[] = [];
     if (vertexCode)
     {
-        visibility.push('VERTEX');
+        visibility.push("VERTEX");
         const vertexResourceInfoMap = getWGSLReflectInfo(vertexCode).bindingResourceLayoutMap;
         Object.assign(bindingResourceInfoMap, vertexResourceInfoMap);
     }
     if (fragmentCode)
     {
         const fragmentResourceInfoMap = getWGSLReflectInfo(fragmentCode).bindingResourceLayoutMap;
-        visibility.push('FRAGMENT');
+        visibility.push("FRAGMENT");
         Object.assign(bindingResourceInfoMap, fragmentResourceInfoMap);
     }
     if (computeCode)
     {
-        visibility.push('COMPUTE');
+        visibility.push("COMPUTE");
         const computeResourceInfoMap = getWGSLReflectInfo(computeCode).bindingResourceLayoutMap;
         Object.assign(bindingResourceInfoMap, computeResourceInfoMap);
     }

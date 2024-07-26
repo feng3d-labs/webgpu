@@ -1,4 +1,4 @@
-import { IGPUBindGroupLayoutDescriptor } from './IGPUBindGroup';
+import { IGPUBindGroupLayoutDescriptor } from "./IGPUBindGroup";
 
 /**
  * GPU管线布局描述。
@@ -9,7 +9,7 @@ import { IGPUBindGroupLayoutDescriptor } from './IGPUBindGroup';
  *
  * {@link GPUPipelineLayout}
  */
-export interface IGPUPipelineLayout extends Omit<GPUPipelineLayoutDescriptor, 'bindGroupLayouts'>
+export interface IGPUPipelineLayout extends Omit<GPUPipelineLayoutDescriptor, "bindGroupLayouts">
 {
     /**
      * A list of {@link GPUBindGroupLayout}s the pipeline will use. Each element corresponds to a

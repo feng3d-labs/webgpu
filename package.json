@@ -45,9 +45,10 @@
     "vitest": "^0.32.2"
   },
   "dependencies": {
-    "wgsl_reflect": "^0.1.1",
-    "webgpu-data-driven": "^0.0.1",
+    "@feng3d/event": "^0.8.4",
     "@feng3d/watcher": "^0.8.0",
-    "@webgpu/types": "^0.1.38"
+    "@webgpu/types": "^0.1.38",
+    "webgpu-data-driven": "^0.0.1",
+    "wgsl_reflect": "^0.1.1"
   }
 }

@@ -1,4 +1,4 @@
-import wgsl from './textureInvertYPremultiplyAlpha.wgsl';
+import wgsl from "./textureInvertYPremultiplyAlpha.wgsl";
 
 /**
  * 操作纹理进行Y轴翻转或进行预乘Alpha。
@@ -30,23 +30,23 @@ export function textureInvertYPremultiplyAlpha(device: GPUDevice, texture: GPUTe
 
     //
     const pipeline = device.createRenderPipeline({
-        layout: 'auto',
+        layout: "auto",
         vertex: {
             module: wgslModel,
-            entryPoint: 'vsmain',
+            entryPoint: "vsmain",
             constants: {
                 invertY: invertY ? 1 : 0,
             }
         },
         fragment: {
             module: wgslModel,
-            entryPoint: 'fsmain',
+            entryPoint: "fsmain",
             constants: {
                 premultiplyAlpha: premultiplyAlpha ? 1 : 0
             },
-            targets: [{ format: 'rgba8unorm' }] as GPUColorTargetState[],
+            targets: [{ format: "rgba8unorm" }] as GPUColorTargetState[],
         },
-        primitive: { topology: 'triangle-strip' }
+        primitive: { topology: "triangle-strip" }
     });
 
     const bindGroup = device.createBindGroup({
@@ -55,8 +55,8 @@ export function textureInvertYPremultiplyAlpha(device: GPUDevice, texture: GPUTe
             {
                 binding: 0,
                 resource: device.createSampler({
-                    magFilter: 'linear',
-                    minFilter: 'linear',
+                    magFilter: "linear",
+                    minFilter: "linear",
                 })
             },
             {
@@ -72,8 +72,8 @@ export function textureInvertYPremultiplyAlpha(device: GPUDevice, texture: GPUTe
         colorAttachments: [
             {
                 view: texture.createView(),
-                loadOp: 'load',
-                storeOp: 'store',
+                loadOp: "load",
+                storeOp: "store",
             } as GPURenderPassColorAttachment
         ]
     });

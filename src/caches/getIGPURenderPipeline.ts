@@ -1,14 +1,14 @@
-import { IRenderPass } from '../data/IRenderPass';
-import { IDepthStencilState, IRenderPipeline } from '../data/IRenderPipeline';
-import { IVertexAttributes } from '../data/IVertexAttributes';
-import { ChainMap } from '../utils/ChainMap';
-import { IGPURenderPipeline } from '../webgpu-data-driven/data/IGPURenderObject';
-import { IGPUVertexBuffer } from '../webgpu-data-driven/data/IGPUVertexBuffer';
-import { getIGPUFragmentState } from './getIGPUFragmentState';
-import { getIGPUPipelineLayout } from './getIGPUPipelineLayout';
-import { getIRenderPassDepthStencilAttachmentFormats } from './getIGPURenderPass';
-import { getIGPUVertexState } from './getIGPUVertexState';
-import { WGSLBindingResourceInfoMap } from './getWGSLReflectInfo';
+import { IRenderPass } from "../data/IRenderPass";
+import { IDepthStencilState, IRenderPipeline } from "../data/IRenderPipeline";
+import { IVertexAttributes } from "../data/IVertexAttributes";
+import { ChainMap } from "../utils/ChainMap";
+import { IGPURenderPipeline } from "../webgpu-data-driven/data/IGPURenderObject";
+import { IGPUVertexBuffer } from "../webgpu-data-driven/data/IGPUVertexBuffer";
+import { getIGPUFragmentState } from "./getIGPUFragmentState";
+import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
+import { getIRenderPassDepthStencilAttachmentFormats } from "./getIGPURenderPass";
+import { getIGPUVertexState } from "./getIGPUVertexState";
+import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。
@@ -92,7 +92,7 @@ function getGPUDepthStencilState(depthStencil: IDepthStencilState, renderPass: I
     if (depthStencilAttachmentTextureFormat)
     {
         const depthWriteEnabled = depthStencil?.depthWriteEnabled ?? true;
-        const depthCompare = depthStencil?.depthCompare ?? 'less';
+        const depthCompare = depthStencil?.depthCompare ?? "less";
         const format = depthStencilAttachmentTextureFormat;
 
         gpuDepthStencilState = {

@@ -1,5 +1,5 @@
-import { IGPUPipelineLayout } from './IGPUPipelineLayout';
-import { IGPUSetBindGroup } from './IGPURenderObject';
+import { IGPUPipelineLayout } from "./IGPUPipelineLayout";
+import { IGPUSetBindGroup } from "./IGPURenderObject";
 
 /**
  * GPU计算对象，包含GPU一次计算所有数据。
@@ -61,12 +61,12 @@ export interface IGPUWorkgroups
  * {@link GPUDevice.createComputePipeline}
  * {@link GPUComputePipelineDescriptor}
  */
-export interface IGPUComputePipeline extends Omit<GPUComputePipelineDescriptor, 'layout' | 'compute'>
+export interface IGPUComputePipeline extends Omit<GPUComputePipelineDescriptor, "layout" | "compute">
 {
     /**
      * 默认 `'auto'` 。
      */
-    layout?: 'auto' | IGPUPipelineLayout;
+    layout?: "auto" | IGPUPipelineLayout;
 
     /**
      * 计算程序。
@@ -87,7 +87,7 @@ export interface IGPUComputeStage extends IGPUProgrammableStage
  *
  * @see GPUProgrammableStage
  */
-export interface IGPUProgrammableStage extends Omit<GPUProgrammableStage, 'module'>
+export interface IGPUProgrammableStage extends Omit<GPUProgrammableStage, "module">
 {
     /**
      * 着色器源码，将由 {@link GPUDevice.createShaderModule} 生成 {@link GPUShaderModule} 。

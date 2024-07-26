@@ -1,6 +1,6 @@
-import { IGPUBindGroupLayout, IGPUBindGroupLayoutFromPipeline } from '../data/IGPUBindGroup';
-import { getGPUComputePipeline } from './getGPUComputePipeline';
-import { getGPURenderPipeline, isRenderPipeline } from './getGPURenderPipeline';
+import { IGPUBindGroupLayout, IGPUBindGroupLayoutFromPipeline } from "../data/IGPUBindGroup";
+import { getGPUComputePipeline } from "./getGPUComputePipeline";
+import { getGPURenderPipeline, isRenderPipeline } from "./getGPURenderPipeline";
 
 export function getGPUBindGroupLayout(device: GPUDevice, layout: IGPUBindGroupLayout)
 {

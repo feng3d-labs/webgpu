@@ -1,13 +1,13 @@
-import { IGPURenderObject } from '../webgpu-data-driven/data/IGPURenderObject';
-import { IBindingResources } from './IBindingResources';
-import { IRenderPipeline } from './IRenderPipeline';
-import { IVertexAttributes } from './IVertexAttributes';
-import { IIndexBuffer } from './IndexBuffer';
+import { IGPURenderObject } from "../webgpu-data-driven/data/IGPURenderObject";
+import { IBindingResources } from "./IBindingResources";
+import { IRenderPipeline } from "./IRenderPipeline";
+import { IVertexAttributes } from "./IVertexAttributes";
+import { IIndexBuffer } from "./IndexBuffer";
 
 /**
  * 可渲染对象。
  */
-export interface IRenderObject extends Omit<IGPURenderObject, 'pipeline' | 'indexBuffer' | 'vertexBuffers' | 'bindGroups'>
+export interface IRenderObject extends Omit<IGPURenderObject, "pipeline" | "indexBuffer" | "vertexBuffers" | "bindGroups">
 {
     pipeline: IRenderPipeline;
 

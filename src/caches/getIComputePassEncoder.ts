@@ -1,6 +1,6 @@
-import { IComputePassEncoder } from '../data/IComputePassEncoder';
-import { IGPUComputePassEncoder } from '../webgpu-data-driven/data/IGPUComputePassEncoder';
-import { getIGPUComputeObject } from './getIGPUComputeObject';
+import { IComputePassEncoder } from "../data/IComputePassEncoder";
+import { IGPUComputePassEncoder } from "../webgpu-data-driven/data/IGPUComputePassEncoder";
+import { getIGPUComputeObject } from "./getIGPUComputeObject";
 
 export function getIComputePassEncoder(computePassEncoder: IComputePassEncoder)
 {

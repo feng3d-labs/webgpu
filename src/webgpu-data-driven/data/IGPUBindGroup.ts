@@ -1,8 +1,8 @@
-import { IGPUBuffer } from './IGPUBuffer';
-import { IGPUComputePipeline } from './IGPUComputeObject';
-import { IGPURenderPipeline } from './IGPURenderObject';
-import { IGPUSampler } from './IGPUSampler';
-import { IGPUTextureView } from './IGPUTextureView';
+import { IGPUBuffer } from "./IGPUBuffer";
+import { IGPUComputePipeline } from "./IGPUComputeObject";
+import { IGPURenderPipeline } from "./IGPURenderObject";
+import { IGPUSampler } from "./IGPUSampler";
+import { IGPUTextureView } from "./IGPUTextureView";
 
 /**
  * GPU 绑定组。
@@ -10,7 +10,7 @@ import { IGPUTextureView } from './IGPUTextureView';
  * @see GPUBindGroupDescriptor
  * @see GPUDevice.createBindGroup
  */
-export interface IGPUBindGroup extends Omit<GPUBindGroupDescriptor, 'layout' | 'entries'>
+export interface IGPUBindGroup extends Omit<GPUBindGroupDescriptor, "layout" | "entries">
 {
     /**
      * The {@link IGPUBindGroupLayout} the entries of this bind group will conform to.
@@ -40,7 +40,7 @@ export type IGPUBindGroupLayout = IGPUBindGroupLayoutFromPipeline | IGPUBindGrou
  * @see GPUBindGroupLayoutDescriptor
  * @see GPUDevice.createBindGroupLayout
  */
-export interface IGPUBindGroupLayoutDescriptor extends Omit<GPUBindGroupLayoutDescriptor, 'entries'>
+export interface IGPUBindGroupLayoutDescriptor extends Omit<GPUBindGroupLayoutDescriptor, "entries">
 {
     entries: IGPUBindGroupLayoutEntry[];
 }
@@ -50,7 +50,7 @@ export interface IGPUBindGroupLayoutDescriptor extends Omit<GPUBindGroupLayoutDe
  *
  * @see GPUBindGroupLayoutEntry
  */
-export interface IGPUBindGroupLayoutEntry extends Omit<GPUBindGroupLayoutEntry, 'visibility'>
+export interface IGPUBindGroupLayoutEntry extends Omit<GPUBindGroupLayoutEntry, "visibility">
 {
     /**
      * A bitset of the members of {@link GPUShaderStage}.
@@ -65,7 +65,7 @@ export interface IGPUBindGroupLayoutEntry extends Omit<GPUBindGroupLayoutEntry, 
  *
  * @see GPUShaderStage
  */
-export type IGPUShaderStageFlags = 'VERTEX' | 'FRAGMENT' | 'COMPUTE';
+export type IGPUShaderStageFlags = "VERTEX" | "FRAGMENT" | "COMPUTE";
 
 /**
  * 从GPU管线中自动生成指定位置的绑定组布局。
@@ -93,7 +93,7 @@ export interface IGPUBindGroupLayoutFromPipeline
  *
  * @see GPUBindGroupEntry
  */
-export interface IGPUBindGroupEntry extends Omit<GPUBindGroupEntry, 'resource'>
+export interface IGPUBindGroupEntry extends Omit<GPUBindGroupEntry, "resource">
 {
     /**
      * The resource to bind, which may be a {@link GPUSampler}, {@link GPUTextureView},
@@ -119,7 +119,7 @@ export type IGPUBindingResource =
  *
  * @see GPUBufferBinding
  */
-export interface IGPUBufferBinding extends Omit<GPUBufferBinding, 'buffer'>
+export interface IGPUBufferBinding extends Omit<GPUBufferBinding, "buffer">
 {
     /**
      * The {@link GPUBuffer} to bind.

@@ -1,15 +1,15 @@
-import { ICommandEncoder } from '../data/ICommandEncoder';
-import { IComputePassEncoder } from '../data/IComputePassEncoder';
-import { ICopyBufferToBuffer } from '../data/ICopyBufferToBuffer';
-import { ICopyTextureToTexture } from '../data/ICopyTextureToTexture';
-import { IRenderPassEncoder } from '../data/IRenderPassEncoder';
-import { IGPUCommandEncoder, IGPUPassEncoder } from '../webgpu-data-driven/data/IGPUCommandEncoder';
-import { IGPUCopyBufferToBuffer } from '../webgpu-data-driven/data/IGPUCopyBufferToBuffer';
-import { IGPUCopyTextureToTexture } from '../webgpu-data-driven/data/IGPUCopyTextureToTexture';
-import { getIComputePassEncoder } from './getIComputePassEncoder';
-import { getIGPUBuffer } from './getIGPUBuffer';
-import { getIGPURenderPassEncoder } from './getIGPURenderPassEncoder';
-import { getIGPUTexture } from './getIGPUTexture';
+import { ICommandEncoder } from "../data/ICommandEncoder";
+import { IComputePassEncoder } from "../data/IComputePassEncoder";
+import { ICopyBufferToBuffer } from "../data/ICopyBufferToBuffer";
+import { ICopyTextureToTexture } from "../data/ICopyTextureToTexture";
+import { IRenderPassEncoder } from "../data/IRenderPassEncoder";
+import { IGPUCommandEncoder, IGPUPassEncoder } from "../webgpu-data-driven/data/IGPUCommandEncoder";
+import { IGPUCopyBufferToBuffer } from "../webgpu-data-driven/data/IGPUCopyBufferToBuffer";
+import { IGPUCopyTextureToTexture } from "../webgpu-data-driven/data/IGPUCopyTextureToTexture";
+import { getIComputePassEncoder } from "./getIComputePassEncoder";
+import { getIGPUBuffer } from "./getIGPUBuffer";
+import { getIGPURenderPassEncoder } from "./getIGPURenderPassEncoder";
+import { getIGPUTexture } from "./getIGPUTexture";
 
 export function getIGPUCommandEncoder(v: ICommandEncoder)
 {

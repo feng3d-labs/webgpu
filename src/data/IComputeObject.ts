@@ -1,7 +1,7 @@
-import { IGPUComputeObject, IGPUComputePipeline, IGPUProgrammableStage } from '../webgpu-data-driven/data/IGPUComputeObject';
-import { IBindingResources } from './IBindingResources';
+import { IGPUComputeObject, IGPUComputePipeline, IGPUProgrammableStage } from "../webgpu-data-driven/data/IGPUComputeObject";
+import { IBindingResources } from "./IBindingResources";
 
-export interface IComputeObject extends Omit<IGPUComputeObject, 'pipeline' | 'bindGroups'>
+export interface IComputeObject extends Omit<IGPUComputeObject, "pipeline" | "bindGroups">
 {
     /**
      * 计算管线。
@@ -14,7 +14,7 @@ export interface IComputeObject extends Omit<IGPUComputeObject, 'pipeline' | 'bi
     bindingResources?: IBindingResources;
 }
 
-export interface IComputePipeline extends Omit<IGPUComputePipeline, 'compute'>
+export interface IComputePipeline extends Omit<IGPUComputePipeline, "compute">
 {
     /**
      * 计算程序。
@@ -25,7 +25,7 @@ export interface IComputePipeline extends Omit<IGPUComputePipeline, 'compute'>
 /**
  *
  */
-export interface IProgrammableStage extends Omit<IGPUProgrammableStage, 'entryPoint'>
+export interface IProgrammableStage extends Omit<IGPUProgrammableStage, "entryPoint">
 {
     /**
      * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to

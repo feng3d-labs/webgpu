@@ -1,4 +1,4 @@
-import { IGPUCommandEncoder } from './IGPUCommandEncoder';
+import { IGPUCommandEncoder } from "./IGPUCommandEncoder";
 
 /**
  * 一次 GPU 提交。

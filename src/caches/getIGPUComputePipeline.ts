@@ -1,8 +1,8 @@
-import { IComputePipeline } from '../data/IComputeObject';
-import { IGPUComputePipeline } from '../webgpu-data-driven/data/IGPUComputeObject';
-import { getIGPUComputeStage } from './getIGPUComputeStage';
-import { getIGPUPipelineLayout } from './getIGPUPipelineLayout';
-import { WGSLBindingResourceInfoMap } from './getWGSLReflectInfo';
+import { IComputePipeline } from "../data/IComputeObject";
+import { IGPUComputePipeline } from "../webgpu-data-driven/data/IGPUComputeObject";
+import { getIGPUComputeStage } from "./getIGPUComputeStage";
+import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
+import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。

@@ -1,4 +1,4 @@
-import { IGPUComputeObject } from './IGPUComputeObject';
+import { IGPUComputeObject } from "./IGPUComputeObject";
 
 /**
  * GPU计算通道编码器。
