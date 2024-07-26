@@ -5,7 +5,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleTextureMixColorWGSL from "../../shaders/sampleTextureMixColor.frag.wgsl";
 
-import { IBufferBinding, IRenderObject, IRenderPass, ISampler, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IBufferBinding, IRenderObject, IRenderPass, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -31,7 +31,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: ISampler = {
+    const sampler: IGPUSampler = {
         magFilter: "linear",
         minFilter: "linear",
     };

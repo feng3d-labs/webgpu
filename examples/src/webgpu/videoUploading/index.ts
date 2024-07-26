@@ -1,7 +1,7 @@
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import sampleExternalTextureWGSL from "../../shaders/sampleExternalTexture.frag.wgsl";
 
-import { IRenderObject, IRenderPass, ISampler, WebGPU } from "webgpu-renderer";
+import { IRenderObject, IRenderPass, IGPUSampler, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -22,7 +22,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await WebGPU.init();
 
-    const sampler: ISampler = {
+    const sampler: IGPUSampler = {
         magFilter: "linear",
         minFilter: "linear",
     };

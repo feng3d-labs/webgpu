@@ -9,18 +9,17 @@ export * from "./data/ICopyBufferToBuffer";
 export * from "./data/ICopyTextureToTexture";
 export * from "./data/IFragmentState";
 export * from "./data/IGPUBuffer";
+export * from "./data/IGPUSampler";
 export * from "./data/IGPUTexture";
+export * from "./data/IGPUTextureView";
 export * from "./data/IRenderBundleObject";
 export * from "./data/IRenderObject";
 export * from "./data/IRenderPass";
 export * from "./data/IRenderPassEncoder";
 export * from "./data/IRenderPipeline";
 export * from "./data/ISubmit";
-export * from "./data/IGPUTextureView";
 export * from "./data/IVertexAttributes";
 export * from "./data/IVertexState";
-
-export type { IGPUCopyExternalImageToTexture } from "./data/IGPUTexture";
 
 /**
  * 内部

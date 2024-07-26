@@ -17,19 +17,11 @@ export interface IBindingResources
  * @see GPUBindingResource
  */
 export type IBindingResource =
-    | ISampler
+    | IGPUSampler
     | IGPUTextureView
     | IBufferBinding
     | IGPUExternalTexture
     ;
-
-/**
- * 采样器资源。
- */
-export interface ISampler extends IGPUSampler
-{
-
-}
 
 /**
  * 缓冲区绑定资源。

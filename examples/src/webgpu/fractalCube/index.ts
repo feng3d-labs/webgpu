@@ -2,7 +2,7 @@ import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import { IBufferBinding, IGPUCanvasContext, ICopyTextureToTexture, IRenderObject, IRenderPass, ISampler, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IBufferBinding, IGPUCanvasContext, ICopyTextureToTexture, IRenderObject, IRenderPass, IGPUSampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleSelfWGSL from "./sampleSelf.frag.wgsl";
 
@@ -24,7 +24,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: ISampler = {
+    const sampler: IGPUSampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
