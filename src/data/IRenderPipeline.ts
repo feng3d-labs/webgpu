@@ -1,5 +1,4 @@
-import { IFragmentState } from "./IFragmentState";
-import { IGPUDepthStencilState, IGPUMultisampleState, IGPURenderPipeline, IGPUVertexState } from "./IGPURenderObject";
+import { IGPUDepthStencilState, IGPUFragmentState, IGPUMultisampleState, IGPURenderPipeline, IGPUVertexState } from "./IGPURenderObject";
 
 /**
  * 渲染管线描述。
@@ -16,7 +15,7 @@ export interface IRenderPipeline extends Omit<IGPURenderPipeline, "vertex" | "fr
     /**
      * 片段着色器阶段描述。
      */
-    fragment?: IFragmentState;
+    fragment?: IGPUFragmentState;
 
     /**
      * 深度模板阶段描述。
