@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -62,7 +62,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const buffer0 = (() =>
     {
-        const buffer: IBuffer = {
+        const buffer: IGPUBuffer = {
             size: 4,
             usage: GPUBufferUsage.UNIFORM,
             data: new Uint32Array([0]),
@@ -73,7 +73,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const buffer1 = (() =>
     {
-        const buffer: IBuffer = {
+        const buffer: IGPUBuffer = {
             size: 4,
             usage: GPUBufferUsage.UNIFORM,
             data: new Uint32Array([1]),
@@ -82,7 +82,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return buffer;
     })();
 
-    const blurParamsBuffer: IBuffer = {
+    const blurParamsBuffer: IGPUBuffer = {
         size: 8,
         usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
     };

@@ -4,14 +4,24 @@
  * {@link GPUBufferDescriptor}
  * {@link GPUBuffer}
  */
-export interface IGPUBuffer extends Omit<GPUBufferDescriptor, "mappedAtCreation">
+export interface IGPUBuffer extends Omit<GPUBufferDescriptor, "mappedAtCreation" | "size" | "usage">
 {
+    /**
+     * The size of the buffer in bytes.
+     */
+    size?: GPUSize64;
+
     /**
      * 缓冲初始数据，只上传一次GPU。
      *
      * 当值不为空时，将使用 {@link GPUBufferDescriptor.mappedAtCreation} 方式上传数据。
      */
     data?: BufferSource;
+
+    /**
+     * The allowed usages for the buffer.
+     */
+    usage?: GPUBufferUsageFlags;
 
     /**
      * 当该缓冲初始化时，将使用 GPUQueue.writeBuffer 写入数据。

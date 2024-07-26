@@ -1,16 +1,15 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { IBindingResources, IBufferBinding } from "../data/IBindingResources";
-import { ITextureBase } from "../data/ITexture";
-import { ITextureView } from "../data/ITextureView";
-import { ChainMap } from "../utils/ChainMap";
-import { getIGPUBuffer } from "./getIGPUBuffer";
-import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
 import { IGPUBindGroupEntry, IGPUBindingResource, IGPUExternalTexture } from "../data/IGPUBindGroup";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
 import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUSampler } from "../data/IGPUSampler";
+import { ITextureBase } from "../data/ITexture";
+import { ITextureView } from "../data/ITextureView";
+import { ChainMap } from "../utils/ChainMap";
+import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
 
 export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputePipeline, bindingResources: IBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
 {
@@ -64,7 +63,7 @@ export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputeP
                         };
                     }
 
-                    const buffer = getIGPUBuffer(uniformData.buffer);
+                    const buffer = uniformData.buffer;
                     const offset = uniformData.offset ?? 0; // 默认值为0
 
                     if (layoutType === "uniform")
@@ -168,7 +167,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IBufferBin
     }
     uniformData["_variableInfo"] = variableInfo;
 
-    const buffer = getIGPUBuffer(uniformData.buffer);
+    const buffer = uniformData.buffer;
     const offset = uniformData.offset ?? 0; // 默认值为0
 
     variableInfo.members.forEach((member) =>

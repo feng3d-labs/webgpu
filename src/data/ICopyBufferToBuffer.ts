@@ -1,4 +1,4 @@
-import { IBuffer } from "./IBuffer";
+import { IGPUBuffer } from "./IGPUBuffer";
 import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
 
 /**
@@ -9,7 +9,7 @@ export interface ICopyBufferToBuffer extends Omit<IGPUCopyBufferToBuffer, "sourc
     /**
      * 源缓冲区。
      */
-    source: IBuffer,
+    source: IGPUBuffer,
     /**
      * 默认为0。
      */
@@ -17,7 +17,7 @@ export interface ICopyBufferToBuffer extends Omit<IGPUCopyBufferToBuffer, "sourc
     /**
      * 目标缓冲区。
      */
-    destination: IBuffer,
+    destination: IGPUBuffer,
     /**
      * 默认为0。
      */

@@ -1,5 +1,5 @@
-import { IBuffer } from "./IBuffer";
-import { IGPUExternalTexture, IGPUBufferBinding } from "./IGPUBindGroup";
+import { IGPUBufferBinding, IGPUExternalTexture } from "./IGPUBindGroup";
+import { IGPUBuffer } from "./IGPUBuffer";
 import { IGPUSampler } from "./IGPUSampler";
 import { ITextureView } from "./ITextureView";
 
@@ -39,7 +39,7 @@ export interface IBufferBinding extends Omit<IGPUBufferBinding, "buffer">
     /**
      * 如果未设置将通过反射信息自动生成。
      */
-    buffer?: IBuffer;
+    buffer?: IGPUBuffer;
 
     /**
      * 缓冲区数据映射。

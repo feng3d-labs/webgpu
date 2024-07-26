@@ -1,12 +1,11 @@
 import { watcher } from "@feng3d/watcher";
+import { IGPUVertexState } from "../data/IGPURenderObject";
+import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 import { IVertexAttributes } from "../data/IVertexAttributes";
 import { IVertexState } from "../data/IVertexState";
 import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
-import { getIGPUBuffer } from "./getIGPUBuffer";
 import { WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
-import { IGPUVertexState } from "../data/IGPURenderObject";
-import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 
 /**
  * 获取完整的顶点阶段描述与顶点缓冲区列表。
@@ -125,7 +124,7 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
             const index = map.get(data);
             const buffer = vertexAttribute.buffer;
 
-            vertexBuffers[index].buffer = getIGPUBuffer(buffer);
+            vertexBuffers[index].buffer = buffer;
         });
 
         //
@@ -146,7 +145,7 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
             index = vertexBufferLayouts.length;
             map.set(data, index);
 
-            const gpuBuffer = getIGPUBuffer(data);
+            const gpuBuffer = data;
 
             vertexBuffers[index] = { buffer: gpuBuffer, offset: isIGPUVertexBufferOffset ? attributeOffset : 0 };
 

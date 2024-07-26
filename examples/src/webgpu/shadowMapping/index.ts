@@ -6,7 +6,7 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IBindingResources, IBuffer, IRenderPass, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IRenderPass, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const shadowDepthTextureSize = 1024;
 
@@ -20,7 +20,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     const webgpu = await WebGPU.init();
 
     // Create the model vertex buffer.
-    const vertexBuffer: IBuffer = {
+    const vertexBuffer: IGPUBuffer = {
         size: mesh.positions.length * 3 * 2 * Float32Array.BYTES_PER_ELEMENT,
         usage: GPUBufferUsage.VERTEX,
     };
@@ -42,7 +42,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Create the model index buffer.
     const indexCount = mesh.triangles.length * 3;
-    const indexBuffer: IBuffer = {
+    const indexBuffer: IGPUBuffer = {
         size: indexCount * Uint16Array.BYTES_PER_ELEMENT,
         usage: GPUBufferUsage.INDEX,
     };
@@ -126,12 +126,12 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const modelUniformBuffer: IBuffer = {
+    const modelUniformBuffer: IGPUBuffer = {
         size: 4 * 16, // 4x4 matrix
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };
 
-    const sceneUniformBuffer: IBuffer = {
+    const sceneUniformBuffer: IGPUBuffer = {
         // Two 4x4 viewProj matrices,
         // one for the camera and one for the light.
         // Then a vec3 for the light position.

@@ -2,7 +2,6 @@ import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IRenderObject } from "../data/IRenderObject";
 import { IRenderPass } from "../data/IRenderPass";
 import { ChainMap } from "../utils/ChainMap";
-import { getIGPUBuffer } from "./getIGPUBuffer";
 import { getIGPURenderPipeline } from "./getIGPURenderPipeline";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 
@@ -25,7 +24,7 @@ export function getIGPURenderObject(renderObject: IRenderObject, renderPass: IRe
 
     if (renderObject.index)
     {
-        const buffer = getIGPUBuffer(renderObject.index.buffer);
+        const buffer = renderObject.index.buffer;
 
         iGPURenderObject.indexBuffer = { ...renderObject.index, buffer };
     }

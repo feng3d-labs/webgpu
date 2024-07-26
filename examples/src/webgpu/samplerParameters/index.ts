@@ -5,7 +5,7 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { IBindingResources, IBuffer, IRenderObject, IRenderPass, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IRenderObject, IRenderPass, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -288,13 +288,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         mat4.perspective(2 * Math.atan(1 / kCameraDist), 1, 0.1, 100),
         [0, 0, -kCameraDist]
     );
-    const bufConfig: IBuffer = {
+    const bufConfig: IGPUBuffer = {
         usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
         size: 128,
     };
     bufConfig.writeBuffers = [{ data: viewProj }];
 
-    const bufMatrices: IBuffer = {
+    const bufMatrices: IGPUBuffer = {
         usage: GPUBufferUsage.STORAGE,
         size: kMatrices.byteLength,
         data: kMatrices,

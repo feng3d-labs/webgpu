@@ -1,4 +1,4 @@
-import { IBuffer, IVertexAttributes } from "webgpu-renderer";
+import { IGPUBuffer, IVertexAttributes } from "webgpu-renderer";
 import { vec3 } from "wgpu-matrix";
 type Vec3 = vec3.default;
 
@@ -130,11 +130,11 @@ export default class Scene
 {
   readonly vertexCount: number;
   readonly indexCount: number;
-  readonly vertices: IBuffer;
+  readonly vertices: IGPUBuffer;
   readonly vertexAttributes: IVertexAttributes;
-  readonly indices: IBuffer;
+  readonly indices: IGPUBuffer;
   readonly vertexBufferLayout: GPUVertexBufferLayout[];
-  readonly quadBuffer: IBuffer;
+  readonly quadBuffer: IGPUBuffer;
   readonly quads = [
     ...box({
       center: vec3.fromValues(0, 5, 0),
@@ -278,13 +278,13 @@ export default class Scene
       vertexCount += 4;
     }
 
-    const quadBuffer: IBuffer = {
+    const quadBuffer: IGPUBuffer = {
       size: quadStride * this.quads.length,
       usage: GPUBufferUsage.STORAGE,
       data: quadData,
     };
 
-    const vertices: IBuffer = {
+    const vertices: IGPUBuffer = {
       size: vertexData.byteLength,
       usage: GPUBufferUsage.VERTEX,
       data: vertexData,
@@ -296,7 +296,7 @@ export default class Scene
       emissive: { buffer: vertices, offset: 7 * 4, vertexSize: vertexStride },
     };
 
-    const indices: IBuffer = {
+    const indices: IGPUBuffer = {
       size: indexData.byteLength,
       usage: GPUBufferUsage.INDEX,
       data: indexData,

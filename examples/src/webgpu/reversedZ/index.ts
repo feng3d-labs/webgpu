@@ -10,7 +10,7 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { IBindingResources, IBuffer, ICanvasContext, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, ICanvasContext, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -78,7 +78,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await WebGPU.init();
 
-    const verticesBuffer: IBuffer = {
+    const verticesBuffer: IGPUBuffer = {
         size: geometryVertexArray.byteLength,
         usage: GPUBufferUsage.VERTEX,
         data: geometryVertexArray,
@@ -282,15 +282,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const uniformBufferSize = numInstances * matrixStride;
 
-    const uniformBuffer: IBuffer = {
+    const uniformBuffer: IGPUBuffer = {
         size: uniformBufferSize,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };
-    const cameraMatrixBuffer: IBuffer = {
+    const cameraMatrixBuffer: IGPUBuffer = {
         size: 4 * 16, // 4x4 matrix
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };
-    const cameraMatrixReversedDepthBuffer: IBuffer = {
+    const cameraMatrixReversedDepthBuffer: IGPUBuffer = {
         size: 4 * 16, // 4x4 matrix
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };

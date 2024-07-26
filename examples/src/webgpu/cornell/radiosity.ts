@@ -1,4 +1,4 @@
-import { IBindingResources, IBuffer, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, internal } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, internal } from "webgpu-renderer";
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";
@@ -38,8 +38,8 @@ export default class Radiosity
   private readonly radiosityPipeline: IComputePipeline;
   private readonly accumulationToLightmapPipeline: IComputePipeline;
   private readonly bindGroup: IBindingResources;
-  private readonly accumulationBuffer: IBuffer;
-  private readonly uniformBuffer: IBuffer;
+  private readonly accumulationBuffer: IGPUBuffer;
+  private readonly uniformBuffer: IGPUBuffer;
 
   // The 'accumulation' buffer average value
   private accumulationMean = 0;

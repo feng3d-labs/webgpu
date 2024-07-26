@@ -5,7 +5,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IBuffer, IBufferBinding, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IBufferBinding, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -33,7 +33,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     const offset = 256; // uniformBindGroup offset must be 256-byte aligned
     const uniformBufferSize = offset + matrixSize;
 
-    const uniformBuffer: IBuffer = {
+    const uniformBuffer: IGPUBuffer = {
         size: uniformBufferSize,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };

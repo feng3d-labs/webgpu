@@ -2,12 +2,11 @@ import { ICommandEncoder } from "../data/ICommandEncoder";
 import { IComputePassEncoder } from "../data/IComputePassEncoder";
 import { ICopyBufferToBuffer } from "../data/ICopyBufferToBuffer";
 import { ICopyTextureToTexture } from "../data/ICopyTextureToTexture";
-import { IGPUPassEncoder, IGPUCommandEncoder } from "../data/IGPUCommandEncoder";
+import { IGPUCommandEncoder, IGPUPassEncoder } from "../data/IGPUCommandEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IRenderPassEncoder } from "../data/IRenderPassEncoder";
 import { getIComputePassEncoder } from "./getIComputePassEncoder";
-import { getIGPUBuffer } from "./getIGPUBuffer";
 import { getIGPURenderPassEncoder } from "./getIGPURenderPassEncoder";
 import { getIGPUTexture } from "./getIGPUTexture";
 
@@ -90,8 +89,8 @@ function getIGPUCopyTextureToTexture(v: ICopyTextureToTexture)
 
 function getIGPUCopyBufferToBuffer(v: ICopyBufferToBuffer)
 {
-    const source = getIGPUBuffer(v.source);
-    const destination = getIGPUBuffer(v.destination);
+    const source = v.source;
+    const destination = v.destination;
 
     let { sourceOffset, destinationOffset, size } = v;
 

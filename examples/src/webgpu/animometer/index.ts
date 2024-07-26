@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IBuffer, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ...pipelineDesc,
     };
 
-    const vertexBuffer: IBuffer = {
+    const vertexBuffer: IGPUBuffer = {
         size: 2 * 3 * vec4Size,
         usage: GPUBufferUsage.VERTEX,
         data: new Float32Array([
@@ -64,7 +64,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
         const alignedUniformBytes = Math.ceil(uniformBytes / 256) * 256;
         const alignedUniformFloats = alignedUniformBytes / Float32Array.BYTES_PER_ELEMENT;
-        const uniformBuffer: IBuffer = {
+        const uniformBuffer: IGPUBuffer = {
             size: numTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
         };

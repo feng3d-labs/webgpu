@@ -1,4 +1,4 @@
-import { IBuffer } from "./IBuffer";
+import { IGPUBuffer } from "./IGPUBuffer";
 import { IGPUSetIndexBuffer } from "./IGPURenderObject";
 
 /**
@@ -11,5 +11,5 @@ export interface IIndexBuffer extends Omit<IGPUSetIndexBuffer, "buffer">
      *
      * 顶点索引缓冲区，包含提供给后续绘制命令使用的顶点索引数据。
      */
-    buffer: IBuffer;
+    buffer: IGPUBuffer;
 }

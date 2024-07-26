@@ -1,4 +1,4 @@
-import { IBindingResources, IBuffer } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer } from "webgpu-renderer";
 import { mat4, vec3 } from "wgpu-matrix";
 import commonWGSL from "./common.wgsl";
 
@@ -14,11 +14,11 @@ export default class Common
     bindGroup: IBindingResources;
   };
 
-  private readonly uniformBuffer: IBuffer;
+  private readonly uniformBuffer: IGPUBuffer;
 
   private frame = 0;
 
-  constructor(quads: IBuffer)
+  constructor(quads: IGPUBuffer)
   {
     this.uniformBuffer = {
       label: "Common.uniformBuffer",

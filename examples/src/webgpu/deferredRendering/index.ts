@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -27,7 +27,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   // Create the model vertex buffer.
   const kVertexStride = 8;
-  const vertexBuffer: IBuffer = {
+  const vertexBuffer: IGPUBuffer = {
     // position: vec3, normal: vec3, uv: vec2
     size: mesh.positions.length * kVertexStride * Float32Array.BYTES_PER_ELEMENT,
     usage: GPUBufferUsage.VERTEX,
@@ -52,7 +52,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   // Create the model index buffer.
   const indexCount = mesh.triangles.length * 3;
-  const indexBuffer: IBuffer = {
+  const indexBuffer: IGPUBuffer = {
     size: indexCount * Uint16Array.BYTES_PER_ELEMENT,
     usage: GPUBufferUsage.INDEX,
   };
@@ -181,7 +181,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     mode: "rendering",
     numLights: 128,
   };
-  const configUniformBuffer: IBuffer = {
+  const configUniformBuffer: IGPUBuffer = {
     size: Uint32Array.BYTES_PER_ELEMENT,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     data: new Uint32Array([settings.numLights]),
@@ -203,12 +203,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       }
     });
 
-  const modelUniformBuffer: IBuffer = {
+  const modelUniformBuffer: IGPUBuffer = {
     size: 4 * 16 * 2, // two 4x4 matrix
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   };
 
-  const cameraUniformBuffer: IBuffer = {
+  const cameraUniformBuffer: IGPUBuffer = {
     size: 4 * 16, // 4x4 matrix
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   };
@@ -233,7 +233,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const extent = vec3.sub(lightExtentMax, lightExtentMin);
   const lightDataStride = 8;
   const bufferSizeInByte = Float32Array.BYTES_PER_ELEMENT * lightDataStride * kMaxNumLights;
-  const lightsBuffer: IBuffer = {
+  const lightsBuffer: IGPUBuffer = {
     size: bufferSizeInByte,
     usage: GPUBufferUsage.STORAGE,
   };
@@ -264,7 +264,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   }
   lightsBuffer.data = lightData;
 
-  const lightExtentBuffer: IBuffer = {
+  const lightExtentBuffer: IGPUBuffer = {
     size: 4 * 8,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   };

@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { IBuffer, IComputeObject, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IComputeObject, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -30,7 +30,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const simParamBufferSize = 7 * Float32Array.BYTES_PER_ELEMENT;
-    const simParamBuffer: IBuffer = {
+    const simParamBuffer: IGPUBuffer = {
         size: simParamBufferSize,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };
@@ -50,7 +50,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         initialParticleData[4 * i + 3] = 2 * (Math.random() - 0.5) * 0.1;
     }
 
-    const particleBuffers: IBuffer[] = new Array(2);
+    const particleBuffers: IGPUBuffer[] = new Array(2);
     for (let i = 0; i < 2; ++i)
     {
         particleBuffers[i] = {

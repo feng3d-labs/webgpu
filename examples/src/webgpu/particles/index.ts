@@ -7,7 +7,7 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -28,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const webgpu = await WebGPU.init();
 
-  const particlesBuffer: IBuffer = {
+  const particlesBuffer: IGPUBuffer = {
     size: numParticles * particleInstanceByteSize,
     usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
   };
@@ -75,7 +75,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     + 3 * 4 // up : vec3<f32>
     + 4 // padding
     + 0;
-  const uniformBuffer: IBuffer = {
+  const uniformBuffer: IGPUBuffer = {
     size: uniformBufferSize,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   };
@@ -107,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const vertexData = [
     -1.0, -1.0, +1.0, -1.0, -1.0, +1.0, -1.0, +1.0, +1.0, -1.0, +1.0, +1.0,
   ];
-  const quadVertexBuffer: IBuffer = {
+  const quadVertexBuffer: IGPUBuffer = {
     size: 6 * 2 * 4, // 6x vec2<f32>
     usage: GPUBufferUsage.VERTEX,
     data: new Float32Array(vertexData),
@@ -171,15 +171,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       = 1 * 4 // stride
       + 3 * 4 // padding
       + 0;
-    const probabilityMapUBOBuffer: IBuffer = {
+    const probabilityMapUBOBuffer: IGPUBuffer = {
       size: probabilityMapUBOBufferSize,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };
-    const bufferA: IBuffer = {
+    const bufferA: IGPUBuffer = {
       size: textureWidth * textureHeight * 4,
       usage: GPUBufferUsage.STORAGE,
     };
-    const bufferB: IBuffer = {
+    const bufferB: IGPUBuffer = {
       size: textureWidth * textureHeight * 4,
       usage: GPUBufferUsage.STORAGE,
     };
@@ -256,7 +256,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     + 3 * 4 // padding
     + 4 * 4 // seed
     + 0;
-  const simulationUBOBuffer: IBuffer = {
+  const simulationUBOBuffer: IGPUBuffer = {
     size: simulationUBOBufferSize,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   };

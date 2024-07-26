@@ -6,13 +6,13 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IBindingResources, IBuffer, ICanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, ICanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 interface Renderable
 {
   renderObject?: IRenderObject;
   vertexAttributes: IVertexAttributes;
-  indices: IBuffer;
+  indices: IGPUBuffer;
   indexCount: number;
   bindGroup?: IBindingResources;
 }
@@ -65,7 +65,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   };
 
   const uniformBufferSize = 4 * 16; // 4x4 matrix
-  const uniformBuffer: IBuffer = {
+  const uniformBuffer: IGPUBuffer = {
     size: uniformBufferSize,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   };
@@ -122,7 +122,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     );
 
     // Create a vertex buffer from the sphere data.
-    const vertices: IBuffer = {
+    const vertices: IGPUBuffer = {
       size: sphereMesh.vertices.byteLength,
       usage: GPUBufferUsage.VERTEX,
       data: sphereMesh.vertices,
@@ -134,7 +134,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
       uv: { buffer: vertices, offset: SphereLayout.uvOffset, vertexSize: SphereLayout.vertexStride },
     };
 
-    const indices: IBuffer = {
+    const indices: IGPUBuffer = {
       size: sphereMesh.indices.byteLength,
       usage: GPUBufferUsage.INDEX,
       data: sphereMesh.indices,
@@ -153,7 +153,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   ): IBindingResources
   {
     const uniformBufferSize = 4 * 16; // 4x4 matrix
-    const uniformBuffer: IBuffer = {
+    const uniformBuffer: IGPUBuffer = {
       size: uniformBufferSize,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
       data: new Float32Array(transform),

@@ -1,4 +1,4 @@
-import { IBuffer } from "./IBuffer";
+import { IGPUBuffer } from "./IGPUBuffer";
 
 /**
  * 顶点属性数据映射。
@@ -16,7 +16,7 @@ export interface IVertexAttribute
     /**
      * 顶点数据。
      */
-    buffer: IBuffer;
+    buffer: IGPUBuffer;
 
     /**
      * 顶点数据元素数量。

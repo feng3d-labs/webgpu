@@ -1,6 +1,8 @@
 import { watcher } from "@feng3d/watcher";
 import { IGPUBuffer } from "../data/IGPUBuffer";
 
+const defaultGPUBufferUsage = (GPUBufferUsage.VERTEX | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.INDEX);
+
 /**
  * 获取 GPU 缓冲。
  *
@@ -12,6 +14,17 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
 {
     let gBuffer: GPUBuffer = gBufferMap.get(buffer);
     if (gBuffer) return gBuffer;
+
+    if (buffer.size === undefined)
+    {
+        const bufferData = buffer.data;
+        console.assert(!!bufferData, `初始化缓冲区时，当尺寸未定义时，必须设置data属性来计算尺寸。`);
+        buffer.size = bufferData.byteLength;
+        // 调整为 4 的倍数，在 mapped 时必须为 4 的倍数。
+        buffer.size = Math.ceil(buffer.size / 4) * 4;
+    }
+
+    buffer.usage = buffer.usage ?? defaultGPUBufferUsage;
 
     const usage = buffer.usage;
 

@@ -4,7 +4,7 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -38,9 +38,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     let wholeTime = 0;
     let loopTimes = 0;
-    let buffer0: IBuffer;
+    let buffer0: IGPUBuffer;
     let verticesBuffer0: IVertexAttributes;
-    let buffer1: IBuffer;
+    let buffer1: IGPUBuffer;
     let verticesBuffer1: IVertexAttributes;
     let render: () => void;
     function resetGameData()
@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
             },
         };
-        const sizeBuffer: IBuffer = {
+        const sizeBuffer: IGPUBuffer = {
             usage: GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX,
             data: new Uint32Array([GameOptions.width, GameOptions.height]),
         };
