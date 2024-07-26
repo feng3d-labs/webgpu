@@ -112,9 +112,7 @@ export class WebGPU
      */
     textureInvertYPremultiplyAlpha(texture: IGPUTextureBase, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
-        const gTexture = texture;
-
-        this._webgpu.textureInvertYPremultiplyAlpha(gTexture, options);
+        this._webgpu.textureInvertYPremultiplyAlpha(texture, options);
     }
 
     /**
@@ -130,11 +128,7 @@ export class WebGPU
      */
     async readPixels(params: { texture: IGPUTexture, origin: GPUOrigin3D, copySize: { width: number, height: number } })
     {
-        const gTexture = params.texture;
-        const result = await this._webgpu.readPixels({
-            ...params,
-            texture: gTexture,
-        });
+        const result = await this._webgpu.readPixels(params);
 
         return result;
     }
@@ -148,10 +142,7 @@ export class WebGPU
      */
     copyDepthTexture(sourceTexture: IGPUTexture, targetTexture: IGPUTexture)
     {
-        const gSourceTexture = sourceTexture;
-        const gTargetTexture = targetTexture;
-
-        this._webgpu.copyDepthTexture(gSourceTexture, gTargetTexture);
+        this._webgpu.copyDepthTexture(sourceTexture, targetTexture);
     }
 
     /**
@@ -161,8 +152,7 @@ export class WebGPU
      */
     destoryTexture(texture: IGPUTexture)
     {
-        const gTexture = texture;
-        this._webgpu.destoryTexture(gTexture);
+        this._webgpu.destoryTexture(texture);
     }
 
     getIGPUTextureSize(input: IGPUTexture)
