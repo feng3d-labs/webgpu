@@ -3,83 +3,8 @@ import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPURenderPassEncoder } from "../data/IGPURenderPassEncoder";
-import { IGPUSubmit } from "../data/IGPUSubmit";
 
-export function getIGPUSubmit(device: GPUDevice, data: IGPUSubmit)
-{
-    const commandEncoders = data.commandEncoders.map((v) => getIGPUCommandEncoder(device, v));
-
-    const gpuSubmit: IGPUSubmit = {
-        commandEncoders,
-    };
-
-    return gpuSubmit;
-}
-
-function getIGPUCommandEncoder(device: GPUDevice, v: IGPUCommandEncoder)
-{
-    const passEncoders = v.passEncoders.map((v) =>
-    {
-        let gpuPassEncoder: IGPUPassEncoder;
-        if (isIRenderPassEncoder(v))
-        {
-            gpuPassEncoder = getIGPURenderPassEncoder(device, v);
-        }
-        else if (isIComputePassEncoder(v))
-        {
-            gpuPassEncoder = getIComputePassEncoder(v);
-        }
-        else if (isICopyTextureToTexture(v))
-        {
-            gpuPassEncoder = getIGPUCopyTextureToTexture(v);
-        }
-        else if (isICopyBufferToBuffer(v))
-        {
-            gpuPassEncoder = getIGPUCopyBufferToBuffer(v);
-        }
-        else
-        {
-            throw `未处理通道编码器 ${v}`;
-        }
-
-        return gpuPassEncoder;
-    });
-
-    const gpuCommandEncoder: IGPUCommandEncoder = {
-        passEncoders,
-    };
-
-    return gpuCommandEncoder;
-}
-
-function isIComputePassEncoder(arg: any): arg is IGPUComputePassEncoder
-{
-    return !!(arg as IGPUComputePassEncoder).computeObjects;
-}
-
-function isIRenderPassEncoder(arg: any): arg is IGPURenderPassEncoder
-{
-    return !!(arg as IGPURenderPassEncoder).renderPass;
-}
-
-function isICopyTextureToTexture(arg: any): arg is IGPUCopyTextureToTexture
-{
-    return !!(arg as IGPUCopyTextureToTexture).source?.texture;
-}
-
-function isICopyBufferToBuffer(arg: any): arg is IGPUCopyBufferToBuffer
-{
-    const source = (arg as IGPUCopyBufferToBuffer).source;
-    const destination = (arg as IGPUCopyBufferToBuffer).destination;
-
-    // 缓冲区必定给出尺寸 或者 数据。
-    if (!(source.size || source.data)) return false;
-    if (!(destination.size || destination.data)) return false;
-
-    return true;
-}
-
-function getIGPUCopyTextureToTexture(v: IGPUCopyTextureToTexture)
+export function getIGPUCopyTextureToTexture(v: IGPUCopyTextureToTexture)
 {
     const sourceTexture = v.source.texture;
     const destinationTexture = v.destination.texture;
@@ -93,7 +18,7 @@ function getIGPUCopyTextureToTexture(v: IGPUCopyTextureToTexture)
     return gpuCopyTextureToTexture;
 }
 
-function getIGPUCopyBufferToBuffer(v: IGPUCopyBufferToBuffer)
+export function getIGPUCopyBufferToBuffer(v: IGPUCopyBufferToBuffer)
 {
     const source = v.source;
     const destination = v.destination;
@@ -115,7 +40,7 @@ function getIGPUCopyBufferToBuffer(v: IGPUCopyBufferToBuffer)
     return gpuCopyTextureToTexture;
 }
 
-function getIComputePassEncoder(computePassEncoder: IGPUComputePassEncoder)
+export function getIComputePassEncoder(computePassEncoder: IGPUComputePassEncoder)
 {
     const computePass = computePassEncoder.computePass;
 
@@ -134,7 +59,7 @@ import { IGPURenderObject } from "../data/IGPURenderObject";
 import { getIGPURenderObject } from "./getIGPURenderObject";
 import { getIGPURenderPass } from "./getIGPURenderPass";
 
-function getIGPURenderPassEncoder(device: GPUDevice, renderPassEncoder: IGPURenderPassEncoder)
+export function getIGPURenderPassEncoder(device: GPUDevice, renderPassEncoder: IGPURenderPassEncoder)
 {
     const renderPass = getIGPURenderPass(device, renderPassEncoder.renderPass);
 

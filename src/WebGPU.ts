@@ -4,7 +4,7 @@ import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPUTexture } from "./caches/getGPUTexture";
-import { getIGPUSubmit } from "./caches/getIGPUSubmit";
+import { getIComputePassEncoder, getIGPUCopyBufferToBuffer, getIGPUCopyTextureToTexture, getIGPURenderPassEncoder } from "./caches/getIGPUSubmit";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
@@ -80,11 +80,9 @@ export class WebGPU
      *
      * @see GPUQueue.submit
      */
-    submit(data?: IGPUSubmit)
+    submit(data: IGPUSubmit)
     {
-        const gpuSubmit = getIGPUSubmit(this.device, data);
-
-        const commandBuffers = gpuSubmit.commandEncoders.map((v) =>
+        const commandBuffers = data.commandEncoders.map((v) =>
         {
             const commandBuffer = this.commandEncode(v);
 
@@ -169,18 +167,22 @@ export class WebGPU
         {
             if (isRenderPass(v))
             {
+                v = getIGPURenderPassEncoder(this.device, v);
                 this.renderPass(gpuCommandEncoder, v, commands);
             }
             else if (isComputePass(v))
             {
+                v = getIComputePassEncoder(v);
                 this.computePass(gpuCommandEncoder, v, commands);
             }
             else if (isCopyTextureToTexture(v))
             {
+                v = getIGPUCopyTextureToTexture(v);
                 this.copyTextureToTexture(gpuCommandEncoder, v, commands);
             }
             else if (isCopyBufferToBuffer(v))
             {
+                v = getIGPUCopyBufferToBuffer(v);
                 this.copyBufferToBuffer(gpuCommandEncoder, v, commands);
             }
             else
