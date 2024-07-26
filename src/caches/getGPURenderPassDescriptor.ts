@@ -28,10 +28,14 @@ export function getGPURenderPassDescriptor(device: GPUDevice, renderPass: IGPURe
             {
                 resolveTarget = getGPUTextureView(device, v.resolveTarget);
             }
+            const loadOp = v.loadOp;
+            const storeOp = v.storeOp;
             const attachment: GPURenderPassColorAttachment = {
                 ...v,
                 view,
                 resolveTarget,
+                loadOp,
+                storeOp,
             };
 
             renderPassDescriptor.colorAttachments[i] = attachment;

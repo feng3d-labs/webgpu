@@ -2,7 +2,7 @@ import { watcher } from "@feng3d/watcher";
 import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
 import { IGPUTexture } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
-import { IAttachmentSize, IRenderPass, IRenderPassColorAttachment, IRenderPassDepthStencilAttachment } from "../data/IRenderPass";
+import { IAttachmentSize, IRenderPass, IRenderPassDepthStencilAttachment } from "../data/IRenderPass";
 import { updateIGPURenderPassAttachmentSize } from "./getGPURenderPassDescriptor";
 import { getGPUTextureFormat } from "./getGPUTexture";
 import { getGPUTextureSize, setITextureSize } from "./getIGPUTexture";
@@ -61,7 +61,7 @@ const renderPassMap = new Map<IRenderPass, IGPURenderPassDescriptor>();
  *
  * @returns 渲染通道附件上的纹理描述列表。
  */
-function getAttachmentTextures(colorAttachments: IRenderPassColorAttachment[], depthStencilAttachment?: IRenderPassDepthStencilAttachment)
+function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[], depthStencilAttachment?: IRenderPassDepthStencilAttachment)
 {
     const textures: IGPUTexture[] = [];
 
@@ -237,7 +237,7 @@ function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencil
  * @param multisample 多重采样次数。
  * @returns 颜色附件完整描述列表。
  */
-function getIGPURenderPassColorAttachments(device, colorAttachments: IRenderPassColorAttachment[], multisample: number)
+function getIGPURenderPassColorAttachments(device, colorAttachments: IGPURenderPassColorAttachment[], multisample: number)
 {
     const gpuColorAttachments: IGPURenderPassColorAttachment[] = colorAttachments.map((v) =>
     {
