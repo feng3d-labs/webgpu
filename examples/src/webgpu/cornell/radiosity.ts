@@ -116,7 +116,7 @@ export default class Radiosity
       },
     };
 
-    const lightmapSize = webgpu.getIGPUTextureSize(this.lightmap);
+    const lightmapSize = webgpu.getGPUTextureSize(this.lightmap);
 
     this.passEncoders = [{
       computeObjects: [

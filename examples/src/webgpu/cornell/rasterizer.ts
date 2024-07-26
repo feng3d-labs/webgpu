@@ -27,7 +27,7 @@ export default class Rasterizer
     this.common = common;
     this.scene = scene;
 
-    const framebufferSize = webgpu.getIGPUTextureSize(framebuffer);
+    const framebufferSize = webgpu.getGPUTextureSize(framebuffer);
 
     const depthTexture: IGPUTexture = {
       label: "RasterizerRenderer.depthTexture",

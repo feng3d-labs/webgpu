@@ -23,7 +23,7 @@ export default class Tonemapper
     webgpu: WebGPU,
   )
   {
-    const inputSize = webgpu.getIGPUTextureSize(input);
+    const inputSize = webgpu.getGPUTextureSize(input);
 
     this.width = inputSize[0];
     this.height = inputSize[1];

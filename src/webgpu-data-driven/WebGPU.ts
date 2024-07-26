@@ -4,6 +4,8 @@ import { getGPUComputePipeline } from "../caches/getGPUComputePipeline";
 import { getGPURenderPassDescriptor } from "../caches/getGPURenderPassDescriptor";
 import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPUTexture } from "../caches/getGPUTexture";
+import { getIGPUSubmit } from "../caches/getIGPUSubmit";
+import { getGPUTextureSize } from "../caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "../data/IGPUCommandEncoder";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
@@ -80,7 +82,9 @@ export class WebGPU
      */
     submit(data?: IGPUSubmit)
     {
-        const commandBuffers = data.commandEncoders.map((v) =>
+        const gpuSubmit = getIGPUSubmit(this.device, data);
+
+        const commandBuffers = gpuSubmit.commandEncoders.map((v) =>
         {
             const commandBuffer = this.commandEncode(v);
 
@@ -422,6 +426,11 @@ export class WebGPU
 
             commands.push("drawIndexed", indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
         }
+    }
+
+    getGPUTextureSize(input: IGPUTexture)
+    {
+        return getGPUTextureSize(this.device, input);
     }
 }
 

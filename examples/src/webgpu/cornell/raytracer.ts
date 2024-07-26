@@ -50,7 +50,7 @@ export default class Raytracer
       },
     };
 
-    const framebufferSize = webgpu.getIGPUTextureSize(this.framebuffer);
+    const framebufferSize = webgpu.getGPUTextureSize(this.framebuffer);
     //
     this.passEncoder = {
       computeObjects: [{

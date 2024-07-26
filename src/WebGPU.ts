@@ -1,11 +1,3 @@
-import { getIGPUSubmit } from "./caches/getIGPUSubmit";
-import { getGPUTextureSize } from "./caches/getIGPUTexture";
-import { IGPUComputeObject } from "./data/IGPUComputeObject";
-import { IGPUComputePassEncoder } from "./data/IGPUComputePassEncoder";
-import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
-import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
-import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPassDescriptor, IGPURenderPassEncoder } from "./data/IGPURenderPassEncoder";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture, IGPUTextureBase } from "./data/IGPUTexture";
 import { WebGPU as WebGPUBase } from "./webgpu-data-driven/WebGPU";
@@ -35,9 +27,7 @@ export class WebGPU
      */
     submit(data: IGPUSubmit)
     {
-        const gpuSubmit = getIGPUSubmit(this._webgpu.device, data);
-
-        this._webgpu.submit(gpuSubmit);
+        this._webgpu.submit(data);
     }
 
     /**
@@ -92,8 +82,8 @@ export class WebGPU
         this._webgpu.destoryTexture(texture);
     }
 
-    getIGPUTextureSize(input: IGPUTexture)
+    getGPUTextureSize(input: IGPUTexture)
     {
-        return getGPUTextureSize(this._webgpu.device, input);
+        return this._webgpu.getGPUTextureSize(input);
     }
 }
