@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, IGPUTexture, IGPUTextureFromContext, internal, WebGPU } from "webgpu-renderer";
+import { IBindingResources, ICommandEncoder, IGPUComputePipeline, IPassEncoder, IGPUTexture, IGPUTextureFromContext, internal, WebGPU } from "webgpu-renderer";
 
 import Common from "./common";
 import tonemapperWGSL from "./tonemapper.wgsl";
@@ -10,7 +10,7 @@ import tonemapperWGSL from "./tonemapper.wgsl";
 export default class Tonemapper
 {
   private readonly bindGroup: IBindingResources;
-  private readonly pipeline: IComputePipeline;
+  private readonly pipeline: IGPUComputePipeline;
   private readonly width: number;
   private readonly height: number;
   private readonly kWorkgroupSizeX = 16;

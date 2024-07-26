@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IComputePassEncoder, IGPUComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -273,7 +273,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   lightExtentData.set(lightExtentMax, 4);
   lightExtentBuffer.writeBuffers = [{ data: lightExtentData }];
 
-  const lightUpdateComputePipeline: IComputePipeline = {
+  const lightUpdateComputePipeline: IGPUComputePipeline = {
     compute: {
       code: lightUpdate,
     },

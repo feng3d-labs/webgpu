@@ -1,4 +1,3 @@
-import { IComputePipeline } from "../data/IComputeObject";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { getIGPUComputeStage } from "./getIGPUComputeStage";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
@@ -11,7 +10,7 @@ import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
  * @param computePipeline 计算管线描述。
  * @returns 完整的计算管线描述。
  */
-export function getIGPUComputePipeline(computePipeline: IComputePipeline)
+export function getIGPUComputePipeline(computePipeline: IGPUComputePipeline)
 {
     let result = computePipelineMap.get(computePipeline);
     if (result)
@@ -37,4 +36,4 @@ export function getIGPUComputePipeline(computePipeline: IComputePipeline)
     return result;
 }
 
-const computePipelineMap = new Map<IComputePipeline, { gpuComputePipeline: IGPUComputePipeline, bindingResourceInfoMap: WGSLBindingResourceInfoMap }>();
+const computePipelineMap = new Map<IGPUComputePipeline, { gpuComputePipeline: IGPUComputePipeline, bindingResourceInfoMap: WGSLBindingResourceInfoMap }>();

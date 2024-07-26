@@ -7,7 +7,7 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IComputePassEncoder, IGPUBuffer, IGPUComputePipeline, IGPUTexture, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -156,12 +156,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   // probabilities up to the top 1x1 mip level.
   // ////////////////////////////////////////////////////////////////////////////
   {
-    const probabilityMapImportLevelPipeline: IComputePipeline = {
+    const probabilityMapImportLevelPipeline: IGPUComputePipeline = {
       compute: {
         code: importLevelWGSL,
       },
     };
-    const probabilityMapExportLevelPipeline: IComputePipeline = {
+    const probabilityMapExportLevelPipeline: IGPUComputePipeline = {
       compute: {
         code: probabilityMapWGSL,
       },
@@ -266,7 +266,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     gui.add(simulationParams, k as any);
   });
 
-  const computePipeline: IComputePipeline = {
+  const computePipeline: IGPUComputePipeline = {
     compute: {
       code: simulateWGSL,
     },

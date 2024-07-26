@@ -8,6 +8,7 @@ export * from "./data/ICopyTextureToTexture";
 export * from "./data/IFragmentState";
 export * from "./data/IGPUBindGroup";
 export * from "./data/IGPUBuffer";
+export * from "./data/IGPUComputeObject";
 export * from "./data/IGPUSampler";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";

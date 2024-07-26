@@ -1,4 +1,3 @@
-import { IComputePipeline } from "../data/IComputeObject";
 import { IGPUShaderStageFlags, IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry } from "../data/IGPUBindGroup";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
@@ -11,7 +10,7 @@ import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo
  * @param pipeline GPU管线。
  * @returns 管线布局。
  */
-export function getIGPUPipelineLayout(pipeline: IRenderPipeline | IComputePipeline)
+export function getIGPUPipelineLayout(pipeline: IRenderPipeline | IGPUComputePipeline)
 {
     const vertexCode = (pipeline as IRenderPipeline).vertex?.code;
     const fragmentCode = (pipeline as IRenderPipeline).fragment?.code;

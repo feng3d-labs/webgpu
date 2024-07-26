@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
+import { IBindingResources, ICommandEncoder, IGPUComputePipeline, IPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -11,7 +11,7 @@ export default class Raytracer
 {
   private readonly common: Common;
   private readonly framebuffer: IGPUTexture;
-  private readonly pipeline: IComputePipeline;
+  private readonly pipeline: IGPUComputePipeline;
   private readonly bindGroup: IBindingResources;
 
   private readonly kWorkgroupSizeX = 16;
