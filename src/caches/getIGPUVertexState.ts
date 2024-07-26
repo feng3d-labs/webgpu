@@ -1,10 +1,10 @@
-import { IGPUVertexBuffer, IGPUVertexState } from 'webgpu-data-driven';
-
 import { watcher } from '@feng3d/watcher';
 import { IVertexAttributes } from '../data/IVertexAttributes';
 import { IVertexState } from '../data/IVertexState';
 import { gpuVertexFormatMap } from '../types/VertexFormat';
 import { ChainMap } from '../utils/ChainMap';
+import { IGPUVertexState } from '../webgpu-data-driven/data/IGPURenderObject';
+import { IGPUVertexBuffer } from '../webgpu-data-driven/data/IGPUVertexBuffer';
 import { getIGPUBuffer } from './getIGPUBuffer';
 import { WGSLVertexAttributeInfo, getWGSLReflectInfo } from './getWGSLReflectInfo';
 

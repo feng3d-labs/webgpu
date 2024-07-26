@@ -1,5 +1,4 @@
-import { IGPUSubmit } from 'webgpu-data-driven';
-
+import { IGPUSubmit } from '../webgpu-data-driven/data/IGPUSubmit';
 import { ICommandEncoder } from './ICommandEncoder';
 
 /**

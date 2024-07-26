@@ -1,4 +1,3 @@
-import { IGPUSubmit, WebGPU as WebGPUBase } from './webgpu-data-driven';
 import { getIGPUSubmit } from './caches/getIGPUSubmit';
 import { IComputeObject } from './data/IComputeObject';
 import { IComputePassEncoder } from './data/IComputePassEncoder';
@@ -10,6 +9,8 @@ import { IRenderPassEncoder } from './data/IRenderPassEncoder';
 import { ISubmit } from './data/ISubmit';
 import { ITexture, ITextureBase } from './data/ITexture';
 import { getIGPUTexture } from './internal';
+import { WebGPU as WebGPUBase } from './webgpu-data-driven/WebGPU';
+import { IGPUSubmit } from './webgpu-data-driven/data/IGPUSubmit';
 
 export class WebGPU
 {

@@ -1,4 +1,4 @@
-import { IGPUSetIndexBuffer } from 'webgpu-data-driven';
+import { IGPUSetIndexBuffer } from '../webgpu-data-driven/data/IGPURenderObject';
 import { IBuffer } from './IBuffer';
 
 /**

@@ -1,6 +1,5 @@
-import { IGPUComputeObject } from 'webgpu-data-driven';
-
 import { IComputeObject } from '../data/IComputeObject';
+import { IGPUComputeObject } from '../webgpu-data-driven/data/IGPUComputeObject';
 import { getIGPUComputePipeline } from './getIGPUComputePipeline';
 import { getIGPUSetBindGroups } from './getIGPUSetBindGroups';
 

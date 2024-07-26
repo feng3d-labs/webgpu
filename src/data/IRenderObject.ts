@@ -1,4 +1,4 @@
-import { IGPURenderObject } from 'webgpu-data-driven';
+import { IGPURenderObject } from '../webgpu-data-driven/data/IGPURenderObject';
 import { IBindingResources } from './IBindingResources';
 import { IRenderPipeline } from './IRenderPipeline';
 import { IVertexAttributes } from './IVertexAttributes';

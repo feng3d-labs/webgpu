@@ -1,8 +1,11 @@
 import { watcher } from '@feng3d/watcher';
-import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor, IGPUTexture, IGPUTextureView, internal } from 'webgpu-data-driven';
-
 import { IAttachmentSize, IRenderPass, IRenderPassColorAttachment, IRenderPassDepthStencilAttachment } from '../data/IRenderPass';
 import { ITexture } from '../data/ITexture';
+import { updateIGPURenderPassAttachmentSize } from '../webgpu-data-driven/caches/getGPURenderPassDescriptor';
+import { getGPUTextureFormat } from '../webgpu-data-driven/caches/getGPUTexture';
+import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from '../webgpu-data-driven/data/IGPURenderPassEncoder';
+import { IGPUTexture } from '../webgpu-data-driven/data/IGPUTexture';
+import { IGPUTextureView } from '../webgpu-data-driven/data/IGPUTextureView';
 import { getIGPUTextureSize, setITextureSize } from './getIGPUTexture';
 import { getIGPUTextureView } from './getIGPUTextureView';
 
@@ -35,7 +38,7 @@ export function getIGPURenderPass(renderPass: IRenderPass)
             // 更新所有纹理尺寸
             const iGPURenderPass = renderPassMap.get(renderPass);
             // 由于深度纹理与多重采样纹理可能是引擎自动生成的，这部分纹理需要更新。
-            internal.updateIGPURenderPassAttachmentSize(iGPURenderPass, renderPass.attachmentSize);
+            updateIGPURenderPassAttachmentSize(iGPURenderPass, renderPass.attachmentSize);
         });
 
         //
@@ -121,7 +124,7 @@ export function getIRenderPassDepthStencilAttachmentFormats(renderPass: IRenderP
     let depthStencilAttachmentTextureFormat: GPUTextureFormat;
     if (gpuRenderPass.depthStencilAttachment)
     {
-        depthStencilAttachmentTextureFormat = internal.getGPUTextureFormat(gpuRenderPass.depthStencilAttachment.view.texture);
+        depthStencilAttachmentTextureFormat = getGPUTextureFormat(gpuRenderPass.depthStencilAttachment.view.texture);
     }
 
     return depthStencilAttachmentTextureFormat;
@@ -141,7 +144,7 @@ export function getIRenderPassColorAttachmentFormats(renderPass: IRenderPass)
     {
         if (!v) return undefined;
 
-        return internal.getGPUTextureFormat(v.view.texture);
+        return getGPUTextureFormat(v.view.texture);
     });
 
     return colorAttachmentTextureFormats;
@@ -161,7 +164,7 @@ function getMultisampleTextureView(texture: IGPUTexture, multisample: number)
     {
         // 新增用于解决多重采样的纹理
         const size = getIGPUTextureSize(texture);
-        const format = internal.getGPUTextureFormat(texture);
+        const format = getGPUTextureFormat(texture);
         const multisampleTexture: IGPUTexture = {
             label: '自动生成多重采样的纹理',
             size,

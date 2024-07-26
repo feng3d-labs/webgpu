@@ -1,10 +1,14 @@
 import { watcher } from '@feng3d/watcher';
-import { IGPUBindGroupEntry, IGPUBindingResource, IGPUComputePipeline, IGPUExternalTexture, IGPUPipelineLayout, IGPURenderPipeline, IGPUSampler, IGPUSetBindGroup } from 'webgpu-data-driven';
 import { TemplateInfo, VariableInfo } from 'wgsl_reflect';
 import { IBindingResources, IBufferBinding } from '../data/IBindingResources';
 import { ITextureBase } from '../data/ITexture';
 import { ITextureView } from '../data/ITextureView';
 import { ChainMap } from '../utils/ChainMap';
+import { IGPUBindGroupEntry, IGPUBindingResource, IGPUExternalTexture } from '../webgpu-data-driven/data/IGPUBindGroup';
+import { IGPUComputePipeline } from '../webgpu-data-driven/data/IGPUComputeObject';
+import { IGPUPipelineLayout } from '../webgpu-data-driven/data/IGPUPipelineLayout';
+import { IGPURenderPipeline, IGPUSetBindGroup } from '../webgpu-data-driven/data/IGPURenderObject';
+import { IGPUSampler } from '../webgpu-data-driven/data/IGPUSampler';
 import { getIGPUBuffer } from './getIGPUBuffer';
 import { WGSLBindingResourceInfoMap } from './getWGSLReflectInfo';
 

@@ -1,6 +1,6 @@
-import { IGPUTexture, IGPUTextureSize } from 'webgpu-data-driven';
 import { IAttachmentSize } from '../data/IRenderPass';
 import { ITexture, ITextureFromContext } from '../data/ITexture';
+import { IGPUTexture, IGPUTextureSize } from '../webgpu-data-driven/data/IGPUTexture';
 import { getIGPUCanvasContext } from './getIGPUCanvasContext';
 
 export function getIGPUTexture(texture: ITexture)

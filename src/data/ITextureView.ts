@@ -1,5 +1,4 @@
-import { IGPUTextureView } from 'webgpu-data-driven';
-
+import { IGPUTextureView } from '../webgpu-data-driven/data/IGPUTextureView';
 import { ITexture } from './ITexture';
 
 /**

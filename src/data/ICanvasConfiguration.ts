@@ -1,4 +1,4 @@
-import { IGPUCanvasConfiguration } from 'webgpu-data-driven';
+import { IGPUCanvasConfiguration } from '../webgpu-data-driven/data/IGPUCanvasConfiguration';
 
 /**
  * @see IGPUCanvasConfiguration

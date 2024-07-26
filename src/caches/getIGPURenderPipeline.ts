@@ -1,9 +1,9 @@
-import { IGPURenderPipeline, IGPUVertexBuffer } from 'webgpu-data-driven';
-
 import { IRenderPass } from '../data/IRenderPass';
 import { IDepthStencilState, IRenderPipeline } from '../data/IRenderPipeline';
 import { IVertexAttributes } from '../data/IVertexAttributes';
 import { ChainMap } from '../utils/ChainMap';
+import { IGPURenderPipeline } from '../webgpu-data-driven/data/IGPURenderObject';
+import { IGPUVertexBuffer } from '../webgpu-data-driven/data/IGPUVertexBuffer';
 import { getIGPUFragmentState } from './getIGPUFragmentState';
 import { getIGPUPipelineLayout } from './getIGPUPipelineLayout';
 import { getIRenderPassDepthStencilAttachmentFormats } from './getIGPURenderPass';

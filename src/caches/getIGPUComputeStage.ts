@@ -1,5 +1,5 @@
-import { IGPUComputeStage } from 'webgpu-data-driven';
 import { IProgrammableStage } from '../data/IComputeObject';
+import { IGPUComputeStage } from '../webgpu-data-driven/data/IGPUComputeObject';
 import { getWGSLReflectInfo } from './getWGSLReflectInfo';
 
 /**

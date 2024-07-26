@@ -1,5 +1,5 @@
-import { IGPUBuffer } from 'webgpu-data-driven';
 import { IBuffer } from '../data/IBuffer';
+import { IGPUBuffer } from '../webgpu-data-driven/data/IGPUBuffer';
 
 const defaultGPUBufferUsage = (GPUBufferUsage.VERTEX | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.INDEX);
 

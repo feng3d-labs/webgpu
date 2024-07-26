@@ -1,5 +1,4 @@
-import { IGPUDepthStencilState, IGPUMultisampleState, IGPURenderPipeline } from 'webgpu-data-driven';
-
+import { IGPURenderPipeline, IGPUMultisampleState, IGPUDepthStencilState } from '../webgpu-data-driven/data/IGPURenderObject';
 import { IFragmentState } from './IFragmentState';
 import { IRenderPass } from './IRenderPass';
 import { IVertexState } from './IVertexState';

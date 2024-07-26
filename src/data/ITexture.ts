@@ -1,4 +1,4 @@
-import { IGPUTextureBase } from 'webgpu-data-driven';
+import { IGPUTextureBase } from '../webgpu-data-driven/data/IGPUTexture';
 import { ICanvasContext } from './ICanvasContext';
 
 /**

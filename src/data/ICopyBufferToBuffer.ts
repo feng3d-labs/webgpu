@@ -1,4 +1,4 @@
-import { IGPUCopyBufferToBuffer } from 'webgpu-data-driven';
+import { IGPUCopyBufferToBuffer } from '../webgpu-data-driven/data/IGPUCopyBufferToBuffer';
 import { IBuffer } from './IBuffer';
 
 /**

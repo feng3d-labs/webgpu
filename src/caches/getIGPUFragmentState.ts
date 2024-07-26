@@ -1,7 +1,7 @@
-import { IGPUFragmentState } from 'webgpu-data-driven';
 import { IFragmentState } from '../data/IFragmentState';
 import { IRenderPass } from '../data/IRenderPass';
 import { ChainMap } from '../utils/ChainMap';
+import { IGPUFragmentState } from '../webgpu-data-driven/data/IGPURenderObject';
 import { getIRenderPassColorAttachmentFormats } from './getIGPURenderPass';
 import { getWGSLReflectInfo } from './getWGSLReflectInfo';
 
