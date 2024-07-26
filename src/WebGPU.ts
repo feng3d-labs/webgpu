@@ -1,4 +1,4 @@
-import { IGPUSubmit, WebGPU as WebGPUBase } from 'webgpu-data-driven';
+import { IGPUSubmit, WebGPU as WebGPUBase } from './webgpu-data-driven';
 import { getIGPUSubmit } from './caches/getIGPUSubmit';
 import { IComputeObject } from './data/IComputeObject';
 import { IComputePassEncoder } from './data/IComputePassEncoder';
