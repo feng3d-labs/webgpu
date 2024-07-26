@@ -4,11 +4,12 @@ import { IComputePassEncoder } from "./data/IComputePassEncoder";
 import { ICopyBufferToBuffer } from "./data/ICopyBufferToBuffer";
 import { ICopyTextureToTexture } from "./data/ICopyTextureToTexture";
 import { IGPUSubmit } from "./data/IGPUSubmit";
+import { IGPUTextureBase } from "./data/IGPUTexture";
 import { IRenderObject } from "./data/IRenderObject";
 import { IRenderPass } from "./data/IRenderPass";
 import { IRenderPassEncoder } from "./data/IRenderPassEncoder";
 import { ISubmit } from "./data/ISubmit";
-import { ITexture, ITextureBase } from "./data/ITexture";
+import { ITexture } from "./data/ITexture";
 import { getIGPUTexture } from "./internal";
 import { WebGPU as WebGPUBase } from "./webgpu-data-driven/WebGPU";
 
@@ -112,7 +113,7 @@ export class WebGPU
      * @param invertY 是否Y轴翻转
      * @param premultiplyAlpha 是否预乘Alpha。
      */
-    textureInvertYPremultiplyAlpha(texture: ITextureBase, options: { invertY?: boolean, premultiplyAlpha?: boolean })
+    textureInvertYPremultiplyAlpha(texture: IGPUTextureBase, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
         const gTexture = getIGPUTexture(texture);
 
