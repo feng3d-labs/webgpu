@@ -5,7 +5,7 @@ import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor"
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPURenderObject } from "./caches/getIGPURenderObject";
-import { getIComputePassEncoder, getIGPUCopyBufferToBuffer, getIGPUCopyTextureToTexture, getIGPURenderBundle } from "./caches/getIGPUSubmit";
+import { getGPURenderBundleEncoderDescriptor, getIComputePassEncoder, getIGPUCopyBufferToBuffer, getIGPUCopyTextureToTexture } from "./caches/getIGPUSubmit";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
@@ -14,7 +14,7 @@ import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
 import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPassEncoder } from "./data/IGPURenderPassEncoder";
+import { IGPURenderPassDescriptor, IGPURenderPassEncoder } from "./data/IGPURenderPassEncoder";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
@@ -291,17 +291,15 @@ export class WebGPU
         const renderPipelines = renderPass.renderObjects;
         for (let i = 0; i < renderPipelines.length; i++)
         {
-            let element = renderPipelines[i];
+            const element = renderPipelines[i];
 
             if (isRenderBundle(element))
             {
-                element = getIGPURenderBundle(this.device, element, renderPass.renderPass);
-                this.executeBundles(passEncoder, element, commands);
+                this.executeBundles(passEncoder, renderPass.renderPass, element, commands);
             }
             else
             {
-                element = getIGPURenderObject(this.device, element, renderPass.renderPass);
-                this.renderPipeline(passEncoder, element, commands);
+                this.renderPipeline(passEncoder, element, renderPass.renderPass, commands);
             }
         }
 
@@ -310,23 +308,26 @@ export class WebGPU
         passEncoder.end();
     }
 
-    private executeBundles(passEncoder: GPURenderPassEncoder, renderBundle: IGPURenderBundleObject, commands: any[])
+    private executeBundles(passEncoder: GPURenderPassEncoder, renderPass: IGPURenderPassDescriptor, renderBundleObject: IGPURenderBundleObject, commands: any[])
     {
-        let gRenderBundle = renderBundle._GPURenderBundle;
+        let gRenderBundle = renderBundleObject._GPURenderBundle;
         if (!gRenderBundle)
         {
-            const renderBundleEncoder = this.device.createRenderBundleEncoder(renderBundle.renderBundle);
+            //
+            const renderBundle = getGPURenderBundleEncoderDescriptor(this.device, renderBundleObject.renderBundle, renderPass);
+
+            const renderBundleEncoder = this.device.createRenderBundleEncoder(renderBundle);
             renderBundleEncoder["_bindGroups"] = [];
             renderBundleEncoder["_vertexBuffers"] = [];
 
-            const renderPipelines = renderBundle.renderObjects;
+            const renderPipelines = renderBundleObject.renderObjects;
             for (let i = 0; i < renderPipelines.length; i++)
             {
-                this.renderPipeline(renderBundleEncoder, renderPipelines[i], []);
+                this.renderPipeline(renderBundleEncoder, renderPipelines[i], renderPass, []);
             }
 
             gRenderBundle = renderBundleEncoder.finish();
-            renderBundle._GPURenderBundle = gRenderBundle;
+            renderBundleObject._GPURenderBundle = gRenderBundle;
         }
 
         commands.push(["executeBundles", [gRenderBundle]]);
@@ -334,8 +335,10 @@ export class WebGPU
         passEncoder.executeBundles([gRenderBundle]);
     }
 
-    private renderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, p: IGPURenderObject, commands: any[])
+    private renderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, p: IGPURenderObject, renderPass: IGPURenderPassDescriptor, commands: any[])
     {
+        p = getIGPURenderObject(this.device, p, renderPass);
+
         if (passEncoder["_pipeline"] !== p.pipeline)
         {
             passEncoder["_pipeline"] = p.pipeline;

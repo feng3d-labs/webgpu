@@ -1,7 +1,6 @@
 import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
-import { IGPURenderPassEncoder } from "../data/IGPURenderPassEncoder";
 
 export function getIGPUCopyTextureToTexture(v: IGPUCopyTextureToTexture)
 {
@@ -54,14 +53,7 @@ export function getIComputePassEncoder(computePassEncoder: IGPUComputePassEncode
 }
 
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
-import { IGPURenderObject } from "../data/IGPURenderObject";
 import { getIGPURenderObject } from "./getIGPURenderObject";
-import { getIGPURenderPass } from "./getIGPURenderPass";
-
-function isRenderBundle(arg: IGPURenderObject | IGPURenderBundleObject): arg is IGPURenderBundleObject
-{
-    return !!(arg as IGPURenderBundleObject).renderObjects;
-}
 
 import { IGPUComputeObject, IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
@@ -171,33 +163,17 @@ import { IGPURenderBundleEncoderDescriptor } from "../data/IGPURenderBundleObjec
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
 import { getIRenderPassFormats } from "./getIGPURenderPass";
 
-export function getIGPURenderBundle(device: GPUDevice, renderBundleObject: IGPURenderBundleObject, renderPass: IGPURenderPassDescriptor)
+export function getGPURenderBundleEncoderDescriptor(device: GPUDevice, renderBundleEncoderDescriptor: IGPURenderBundleEncoderDescriptor, renderPass: IGPURenderPassDescriptor)
 {
-    let gpuRenderBundleObject: IGPURenderBundleObject = gpuRenderBundleObjectMap.get(renderBundleObject);
-    if (gpuRenderBundleObject)
-    {
-        return gpuRenderBundleObject;
-    }
-
     // 获取渲染通道附件纹理格式。
     const { colorAttachmentTextureFormats, depthStencilAttachmentTextureFormat } = getIRenderPassFormats(device, renderPass);
 
     const renderBundle: IGPURenderBundleEncoderDescriptor = {
-        ...renderBundleObject.renderBundle,
+        ...renderBundleEncoderDescriptor,
         colorFormats: colorAttachmentTextureFormats,
         depthStencilFormat: depthStencilAttachmentTextureFormat,
         sampleCount: renderPass.multisample,
     };
 
-    const renderObjects = renderBundleObject.renderObjects.map((v) => getIGPURenderObject(device, v, renderPass));
-
-    gpuRenderBundleObject = {
-        renderBundle,
-        renderObjects,
-    };
-
-    gpuRenderBundleObjectMap.set(renderBundleObject, gpuRenderBundleObject);
-
-    return gpuRenderBundleObject;
+    return renderBundle;
 }
-const gpuRenderBundleObjectMap = new WeakMap<IGPURenderBundleObject, IGPURenderBundleObject>();
