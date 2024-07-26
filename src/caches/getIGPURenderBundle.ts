@@ -1,6 +1,6 @@
+import { IGPURenderBundleObject, IGPURenderBundleEncoderDescriptor } from "../data/IGPURenderBundleObject";
 import { IRenderBundleObject } from "../data/IRenderBundleObject";
 import { IRenderPass } from "../data/IRenderPass";
-import { IGPURenderBundleObject, IGPURenderBundleEncoderDescriptor } from "../webgpu-data-driven/data/IGPURenderBundleObject";
 import { getIGPURenderObject } from "./getIGPURenderObject";
 import { getIRenderPassFormats } from "./getIGPURenderPass";
 

@@ -3,10 +3,10 @@ import { IVertexAttributes } from "../data/IVertexAttributes";
 import { IVertexState } from "../data/IVertexState";
 import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
-import { IGPUVertexState } from "../webgpu-data-driven/data/IGPURenderObject";
-import { IGPUVertexBuffer } from "../webgpu-data-driven/data/IGPUVertexBuffer";
 import { getIGPUBuffer } from "./getIGPUBuffer";
 import { WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
+import { IGPUVertexState } from "../data/IGPURenderObject";
+import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 
 /**
  * 获取完整的顶点阶段描述与顶点缓冲区列表。

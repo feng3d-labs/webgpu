@@ -1,6 +1,6 @@
-import { IGPUBufferBinding, IGPUExternalTexture } from "../webgpu-data-driven/data/IGPUBindGroup";
-import { IGPUSampler } from "../webgpu-data-driven/data/IGPUSampler";
 import { IBuffer } from "./IBuffer";
+import { IGPUExternalTexture, IGPUBufferBinding } from "./IGPUBindGroup";
+import { IGPUSampler } from "./IGPUSampler";
 import { ITextureView } from "./ITextureView";
 
 /**

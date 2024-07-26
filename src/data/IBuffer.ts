@@ -1,4 +1,4 @@
-import { IGPUBuffer } from "../webgpu-data-driven/data/IGPUBuffer";
+import { IGPUBuffer } from "./IGPUBuffer";
 
 /**
  * {@link IBuffer.size} 可以不赋值，将由 {@link IBuffer.data} 计算得出。

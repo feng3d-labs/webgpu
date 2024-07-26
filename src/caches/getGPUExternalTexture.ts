@@ -1,4 +1,4 @@
-import { IGPUBindingResource, IGPUExternalTexture } from "../data/IGPUBindGroup";
+import { IGPUExternalTexture, IGPUBindingResource } from "../data/IGPUBindGroup";
 
 /**
  * 获取 WebGPU外部纹理

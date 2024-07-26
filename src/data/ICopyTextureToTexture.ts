@@ -1,4 +1,4 @@
-import { IGPUCopyTextureToTexture, IGPUImageCopyTexture } from "../webgpu-data-driven/data/IGPUCopyTextureToTexture";
+import { IGPUCopyTextureToTexture, IGPUImageCopyTexture } from "./IGPUCopyTextureToTexture";
 import { ITexture } from "./ITexture";
 
 export interface ICopyTextureToTexture extends Omit<IGPUCopyTextureToTexture, "source" | "destination">

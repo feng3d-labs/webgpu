@@ -1,5 +1,5 @@
-import { IGPUCanvasContext } from "../webgpu-data-driven/data/IGPUTexture";
 import { ICanvasConfiguration } from "./ICanvasConfiguration";
+import { IGPUCanvasContext } from "./IGPUTexture";
 
 /**
  * @see IGPUCanvasContext

@@ -1,5 +1,5 @@
 import { IComputePipeline } from "../data/IComputeObject";
-import { IGPUComputePipeline } from "../webgpu-data-driven/data/IGPUComputeObject";
+import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { getIGPUComputeStage } from "./getIGPUComputeStage";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";

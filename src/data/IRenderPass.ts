@@ -1,5 +1,5 @@
-import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "../webgpu-data-driven/data/IGPURenderPassEncoder";
-import { IGPUTextureView } from "../webgpu-data-driven/data/IGPUTextureView";
+import { IGPURenderPassDescriptor, IGPURenderPassDepthStencilAttachment, IGPURenderPassColorAttachment } from "./IGPURenderPassEncoder";
+import { IGPUTextureView } from "./IGPUTextureView";
 import { ITextureView } from "./ITextureView";
 
 /**

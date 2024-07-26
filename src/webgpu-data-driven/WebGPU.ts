@@ -1,22 +1,22 @@
-import { getGPUBindGroup } from "./caches/getGPUBindGroup";
-import { getGPUBuffer } from "./caches/getGPUBuffer";
-import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
-import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
-import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
-import { getGPUTexture } from "./caches/getGPUTexture";
-import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
-import { IGPUComputeObject } from "./data/IGPUComputeObject";
-import { IGPUComputePassEncoder } from "./data/IGPUComputePassEncoder";
-import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
-import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
-import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
-import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPassEncoder } from "./data/IGPURenderPassEncoder";
-import { IGPUSubmit } from "./data/IGPUSubmit";
-import { IGPUTexture } from "./data/IGPUTexture";
-import { copyDepthTexture } from "./utils/copyDepthTexture";
-import { readPixels } from "./utils/readPixels";
-import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+import { getGPUBindGroup } from "../caches/getGPUBindGroup";
+import { getGPUBuffer } from "../caches/getGPUBuffer";
+import { getGPUComputePipeline } from "../caches/getGPUComputePipeline";
+import { getGPURenderPassDescriptor } from "../caches/getGPURenderPassDescriptor";
+import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
+import { getGPUTexture } from "../caches/getGPUTexture";
+import { IGPUCommandEncoder } from "../data/IGPUCommandEncoder";
+import { IGPUComputeObject } from "../data/IGPUComputeObject";
+import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
+import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
+import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
+import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
+import { IGPURenderObject } from "../data/IGPURenderObject";
+import { IGPURenderPassEncoder } from "../data/IGPURenderPassEncoder";
+import { IGPUSubmit } from "../data/IGPUSubmit";
+import { IGPUTexture } from "../data/IGPUTexture";
+import { copyDepthTexture } from "../utils/copyDepthTexture";
+import { readPixels } from "../utils/readPixels";
+import { textureInvertYPremultiplyAlpha } from "../utils/textureInvertYPremultiplyAlpha";
 
 /**
  * WebGPU 对象。

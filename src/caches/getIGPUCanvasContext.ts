@@ -1,6 +1,6 @@
 import { ICanvasContext } from "../data/ICanvasContext";
-import { IGPUCanvasConfiguration } from "../webgpu-data-driven/data/IGPUCanvasConfiguration";
-import { IGPUCanvasContext } from "../webgpu-data-driven/data/IGPUTexture";
+import { IGPUCanvasConfiguration } from "../data/IGPUCanvasConfiguration";
+import { IGPUCanvasContext } from "../data/IGPUTexture";
 
 let defaultConfiguration: IGPUCanvasConfiguration;
 

@@ -1,5 +1,5 @@
-import { IGPUComputeObject, IGPUComputePipeline, IGPUProgrammableStage } from "../webgpu-data-driven/data/IGPUComputeObject";
 import { IBindingResources } from "./IBindingResources";
+import { IGPUComputeObject, IGPUComputePipeline, IGPUProgrammableStage } from "./IGPUComputeObject";
 
 export interface IComputeObject extends Omit<IGPUComputeObject, "pipeline" | "bindGroups">
 {

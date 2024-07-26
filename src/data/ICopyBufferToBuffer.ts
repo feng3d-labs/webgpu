@@ -1,5 +1,5 @@
-import { IGPUCopyBufferToBuffer } from "../webgpu-data-driven/data/IGPUCopyBufferToBuffer";
 import { IBuffer } from "./IBuffer";
+import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
 
 /**
  * 拷贝GPU缓冲区。

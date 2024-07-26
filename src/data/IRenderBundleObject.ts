@@ -1,4 +1,4 @@
-import { IGPURenderBundleEncoderDescriptor, IGPURenderBundleObject } from "../webgpu-data-driven/data/IGPURenderBundleObject";
+import { IGPURenderBundleObject, IGPURenderBundleEncoderDescriptor } from "./IGPURenderBundleObject";
 import { IRenderObject } from "./IRenderObject";
 
 export interface IRenderBundleObject extends Omit<IGPURenderBundleObject, "renderObjects" | "renderBundle">

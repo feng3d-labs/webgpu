@@ -1,11 +1,11 @@
 import { watcher } from "@feng3d/watcher";
+import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
+import { IGPUTexture } from "../data/IGPUTexture";
+import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IAttachmentSize, IRenderPass, IRenderPassColorAttachment, IRenderPassDepthStencilAttachment } from "../data/IRenderPass";
 import { ITexture } from "../data/ITexture";
-import { updateIGPURenderPassAttachmentSize } from "../webgpu-data-driven/caches/getGPURenderPassDescriptor";
-import { getGPUTextureFormat } from "../webgpu-data-driven/caches/getGPUTexture";
-import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "../webgpu-data-driven/data/IGPURenderPassEncoder";
-import { IGPUTexture } from "../webgpu-data-driven/data/IGPUTexture";
-import { IGPUTextureView } from "../webgpu-data-driven/data/IGPUTextureView";
+import { updateIGPURenderPassAttachmentSize } from "./getGPURenderPassDescriptor";
+import { getGPUTextureFormat } from "./getGPUTexture";
 import { getIGPUTextureSize, setITextureSize } from "./getIGPUTexture";
 import { getIGPUTextureView } from "./getIGPUTextureView";
 

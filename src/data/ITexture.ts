@@ -1,5 +1,5 @@
-import { IGPUTextureBase } from "../webgpu-data-driven/data/IGPUTexture";
 import { ICanvasContext } from "./ICanvasContext";
+import { IGPUTextureBase } from "./IGPUTexture";
 
 /**
  * 纹理

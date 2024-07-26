@@ -1,8 +1,8 @@
 import { AnyEmitter, anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
-import { IGPUTexture, IGPUTextureFromContext } from "../data/IGPUTexture";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
+import { IGPUTexture, IGPUTextureFromContext } from "../data/IGPUTexture";
 
 /**
  * GPUTexture 相关事件。

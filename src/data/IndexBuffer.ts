@@ -1,5 +1,5 @@
-import { IGPUSetIndexBuffer } from "../webgpu-data-driven/data/IGPURenderObject";
 import { IBuffer } from "./IBuffer";
+import { IGPUSetIndexBuffer } from "./IGPURenderObject";
 
 /**
  * 顶点索引缓冲区。

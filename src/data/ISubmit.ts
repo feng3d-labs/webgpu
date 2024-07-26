@@ -1,5 +1,5 @@
-import { IGPUSubmit } from "../webgpu-data-driven/data/IGPUSubmit";
 import { ICommandEncoder } from "./ICommandEncoder";
+import { IGPUSubmit } from "./IGPUSubmit";
 
 /**
  * 一次 GPU 提交。

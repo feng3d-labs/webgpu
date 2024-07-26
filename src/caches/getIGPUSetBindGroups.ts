@@ -4,13 +4,13 @@ import { IBindingResources, IBufferBinding } from "../data/IBindingResources";
 import { ITextureBase } from "../data/ITexture";
 import { ITextureView } from "../data/ITextureView";
 import { ChainMap } from "../utils/ChainMap";
-import { IGPUBindGroupEntry, IGPUBindingResource, IGPUExternalTexture } from "../webgpu-data-driven/data/IGPUBindGroup";
-import { IGPUComputePipeline } from "../webgpu-data-driven/data/IGPUComputeObject";
-import { IGPUPipelineLayout } from "../webgpu-data-driven/data/IGPUPipelineLayout";
-import { IGPURenderPipeline, IGPUSetBindGroup } from "../webgpu-data-driven/data/IGPURenderObject";
-import { IGPUSampler } from "../webgpu-data-driven/data/IGPUSampler";
 import { getIGPUBuffer } from "./getIGPUBuffer";
 import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
+import { IGPUBindGroupEntry, IGPUBindingResource, IGPUExternalTexture } from "../data/IGPUBindGroup";
+import { IGPUComputePipeline } from "../data/IGPUComputeObject";
+import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
+import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
+import { IGPUSampler } from "../data/IGPUSampler";
 
 export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputePipeline, bindingResources: IBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
 {

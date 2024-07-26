@@ -3,6 +3,7 @@ import { IComputeObject } from "./data/IComputeObject";
 import { IComputePassEncoder } from "./data/IComputePassEncoder";
 import { ICopyBufferToBuffer } from "./data/ICopyBufferToBuffer";
 import { ICopyTextureToTexture } from "./data/ICopyTextureToTexture";
+import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IRenderObject } from "./data/IRenderObject";
 import { IRenderPass } from "./data/IRenderPass";
 import { IRenderPassEncoder } from "./data/IRenderPassEncoder";
@@ -10,7 +11,6 @@ import { ISubmit } from "./data/ISubmit";
 import { ITexture, ITextureBase } from "./data/ITexture";
 import { getIGPUTexture } from "./internal";
 import { WebGPU as WebGPUBase } from "./webgpu-data-driven/WebGPU";
-import { IGPUSubmit } from "./webgpu-data-driven/data/IGPUSubmit";
 
 export class WebGPU
 {

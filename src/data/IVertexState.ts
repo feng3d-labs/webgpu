@@ -1,4 +1,4 @@
-import { IGPUVertexState } from "../webgpu-data-driven/data/IGPURenderObject";
+import { IGPUVertexState } from "./IGPURenderObject";
 
 /**
  * 描述顶点着色器源码入口点以及顶点属性缓冲区布局。

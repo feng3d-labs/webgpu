@@ -1,8 +1,8 @@
 import { IComputePipeline } from "../data/IComputeObject";
+import { IGPUShaderStageFlags, IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry } from "../data/IGPUBindGroup";
+import { IGPUComputePipeline } from "../data/IGPUComputeObject";
+import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
 import { IRenderPipeline } from "../data/IRenderPipeline";
-import { IGPUShaderStageFlags, IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry } from "../webgpu-data-driven/data/IGPUBindGroup";
-import { IGPUComputePipeline } from "../webgpu-data-driven/data/IGPUComputeObject";
-import { IGPUPipelineLayout } from "../webgpu-data-driven/data/IGPUPipelineLayout";
 import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**

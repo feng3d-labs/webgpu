@@ -1,4 +1,4 @@
-import { IGPUFragmentState } from "../webgpu-data-driven/data/IGPURenderObject";
+import { IGPUFragmentState } from "./IGPURenderObject";
 
 /**
  * 片段着色器阶段描述。

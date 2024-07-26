@@ -2,7 +2,7 @@ import { IComputePassEncoder } from "./IComputePassEncoder";
 import { ICopyTextureToTexture } from "./ICopyTextureToTexture";
 import { IRenderPassEncoder } from "./IRenderPassEncoder";
 import { ICopyBufferToBuffer } from "./ICopyBufferToBuffer";
-import { IGPUCommandEncoder } from "../webgpu-data-driven/data/IGPUCommandEncoder";
+import { IGPUCommandEncoder } from "./IGPUCommandEncoder";
 
 /**
  * 命令编码器。
