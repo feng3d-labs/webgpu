@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IRenderPass, IRenderPassEncoder, IRenderPipeline, IGPUTexture, internal } from "webgpu-renderer";
+import { IBindingResources, ICommandEncoder, IGPUTexture, IRenderPass, IRenderPassEncoder, IRenderPipeline, WebGPU } from "webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -20,13 +20,14 @@ export default class Rasterizer
     common: Common,
     scene: Scene,
     radiosity: Radiosity,
-    framebuffer: IGPUTexture
+    framebuffer: IGPUTexture,
+    webgpu: WebGPU
   )
   {
     this.common = common;
     this.scene = scene;
 
-    const framebufferSize = internal.getIGPUTextureSize(framebuffer);
+    const framebufferSize = webgpu.getIGPUTextureSize(framebuffer);
 
     const depthTexture: IGPUTexture = {
       label: "RasterizerRenderer.depthTexture",

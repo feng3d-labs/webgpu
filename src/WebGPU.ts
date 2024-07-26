@@ -1,4 +1,5 @@
 import { getIGPUSubmit } from "./caches/getIGPUSubmit";
+import { getIGPUTextureSize } from "./caches/getIGPUTexture";
 import { IComputeObject } from "./data/IComputeObject";
 import { IComputePassEncoder } from "./data/IComputePassEncoder";
 import { ICopyBufferToBuffer } from "./data/ICopyBufferToBuffer";
@@ -164,5 +165,10 @@ export class WebGPU
     {
         const gTexture = texture;
         this._webgpu.destoryTexture(gTexture);
+    }
+
+    getIGPUTextureSize(input: IGPUTexture)
+    {
+        return getIGPUTextureSize(this._webgpu.device, input);
     }
 }

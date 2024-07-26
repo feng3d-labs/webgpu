@@ -19,7 +19,7 @@ export function getIGPURenderPass(device: GPUDevice, renderPass: IRenderPass)
     if (!iGPURenderPass)
     {
         // 更新渲染通道附件尺寸，使得附件上纹理尺寸一致。
-        updateAttachmentSize(renderPass);
+        updateAttachmentSize(device, renderPass);
 
         // 获取颜色附件完整描述列表。
         const colorAttachments = getIGPURenderPassColorAttachments(device, renderPass.colorAttachments, renderPass.multisample);
@@ -32,7 +32,7 @@ export function getIGPURenderPass(device: GPUDevice, renderPass: IRenderPass)
         watcher.watchobject(renderPass, watchProperty, () =>
         {
             // 更新所有纹理描述中的尺寸
-            updateAttachmentSize(renderPass);
+            updateAttachmentSize(device, renderPass);
             // 更新所有纹理尺寸
             const iGPURenderPass = renderPassMap.get(renderPass);
             // 由于深度纹理与多重采样纹理可能是引擎自动生成的，这部分纹理需要更新。
@@ -161,7 +161,7 @@ function getMultisampleTextureView(device: GPUDevice, texture: IGPUTexture, mult
     if (!multisampleTextureView)
     {
         // 新增用于解决多重采样的纹理
-        const size = getIGPUTextureSize(texture);
+        const size = getIGPUTextureSize(device, texture);
         const format = getGPUTextureFormat(device, texture);
         const multisampleTexture: IGPUTexture = {
             label: "自动生成多重采样的纹理",
@@ -269,12 +269,12 @@ function getIGPURenderPassColorAttachments(device, colorAttachments: IRenderPass
  *
  * @param renderPass 渲染通道描述。
  */
-function updateAttachmentSize(renderPass: IRenderPass)
+function updateAttachmentSize(device: GPUDevice, renderPass: IRenderPass)
 {
     const attachmentTextures = getAttachmentTextures(renderPass.colorAttachments, renderPass.depthStencilAttachment);
     if (!renderPass.attachmentSize)
     {
-        const textureSize = getIGPUTextureSize(attachmentTextures[0]);
+        const textureSize = getIGPUTextureSize(device, attachmentTextures[0]);
         renderPass.attachmentSize = { width: textureSize[0], height: textureSize[1] };
     }
     attachmentTextures.forEach((v) => setITextureSize(v, renderPass.attachmentSize));

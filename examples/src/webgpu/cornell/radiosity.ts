@@ -1,4 +1,4 @@
-import { IBindingResources, IGPUBuffer, ICommandEncoder, IComputePipeline, IPassEncoder, IGPUTexture, internal } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, ICommandEncoder, IComputePipeline, IPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";
@@ -48,7 +48,7 @@ export default class Radiosity
   // 'accumulation' are reduced to avoid integer overflows.
   private readonly kAccumulationMeanMax = 0x10000000;
 
-  constructor(common: Common, scene: Scene)
+  constructor(common: Common, scene: Scene, webgpu: WebGPU)
   {
     this.common = common;
     this.scene = scene;
@@ -116,7 +116,7 @@ export default class Radiosity
       },
     };
 
-    const lightmapSize = internal.getIGPUTextureSize(this.lightmap);
+    const lightmapSize = webgpu.getIGPUTextureSize(this.lightmap);
 
     this.passEncoders = [{
       computeObjects: [

@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, IGPUTexture, IGPUTextureFromContext, internal } from "webgpu-renderer";
+import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, IGPUTexture, IGPUTextureFromContext, internal, WebGPU } from "webgpu-renderer";
 
 import Common from "./common";
 import tonemapperWGSL from "./tonemapper.wgsl";
@@ -20,9 +20,10 @@ export default class Tonemapper
     common: Common,
     input: IGPUTexture,
     output: IGPUTextureFromContext,
+    webgpu: WebGPU,
   )
   {
-    const inputSize = internal.getIGPUTextureSize(input);
+    const inputSize = webgpu.getIGPUTextureSize(input);
 
     this.width = inputSize[0];
     this.height = inputSize[1];

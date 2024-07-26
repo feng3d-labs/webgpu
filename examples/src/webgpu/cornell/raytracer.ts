@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, IGPUTexture, internal } from "webgpu-renderer";
+import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -20,7 +20,8 @@ export default class Raytracer
   constructor(
     common: Common,
     radiosity: Radiosity,
-    framebuffer: IGPUTexture
+    framebuffer: IGPUTexture,
+    webgpu: WebGPU
   )
   {
     this.common = common;
@@ -49,7 +50,7 @@ export default class Raytracer
       },
     };
 
-    const framebufferSize = internal.getIGPUTextureSize(this.framebuffer);
+    const framebufferSize = webgpu.getIGPUTextureSize(this.framebuffer);
     //
     this.passEncoder = {
       computeObjects: [{

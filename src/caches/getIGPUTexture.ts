@@ -1,5 +1,6 @@
 import { IGPUTexture, IGPUTextureFromContext, IGPUTextureSize } from "../data/IGPUTexture";
 import { IAttachmentSize } from "../data/IRenderPass";
+import { getGPUTexture } from "./getGPUTexture";
 
 function isITextureFromContext(arg: any): arg is IGPUTextureFromContext
 {
@@ -12,19 +13,11 @@ function isITextureFromContext(arg: any): arg is IGPUTextureFromContext
  * @param texture 纹理。
  * @returns 纹理尺寸。
  */
-export function getIGPUTextureSize(texture: IGPUTexture)
+export function getIGPUTextureSize(device: GPUDevice, texture: IGPUTexture)
 {
-    let size: IGPUTextureSize;
-    if (isITextureFromContext(texture))
-    {
-        const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
-        console.assert(!!element, `在 document 上没有找到 canvasId 为 ${texture.context.canvasId} 的画布。`);
-        size = [element.width, element.height];
-    }
-    else
-    {
-        size = texture.size.concat() as any;
-    }
+    const gpuTexture = getGPUTexture(device, texture);
+
+    const size: IGPUTextureSize = [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers];
 
     return size;
 }
