@@ -1,12 +1,11 @@
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassEncoder } from "../data/IGPURenderPassEncoder";
-import { IRenderPassEncoder } from "../data/IRenderPassEncoder";
 import { getIGPURenderBundle } from "./getIGPURenderBundle";
 import { getIGPURenderObject } from "./getIGPURenderObject";
 import { getIGPURenderPass } from "./getIGPURenderPass";
 
-export function getIGPURenderPassEncoder(device: GPUDevice, renderPassEncoder: IRenderPassEncoder)
+export function getIGPURenderPassEncoder(device: GPUDevice, renderPassEncoder: IGPURenderPassEncoder)
 {
     const renderPass = getIGPURenderPass(device, renderPassEncoder.renderPass);
 

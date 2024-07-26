@@ -5,10 +5,9 @@ import { IGPUComputePassEncoder } from "./data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPassDescriptor } from "./data/IGPURenderPassEncoder";
+import { IGPURenderPassDescriptor, IGPURenderPassEncoder } from "./data/IGPURenderPassEncoder";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture, IGPUTextureBase } from "./data/IGPUTexture";
-import { IRenderPassEncoder } from "./data/IRenderPassEncoder";
 import { ISubmit } from "./data/ISubmit";
 import { WebGPU as WebGPUBase } from "./webgpu-data-driven/WebGPU";
 
@@ -25,7 +24,7 @@ export class WebGPU
 
     private _webgpu: WebGPUBase;
     private _currentSubmit: ISubmit;
-    private _currentRenderPassEncoder: IRenderPassEncoder;
+    private _currentRenderPassEncoder: IGPURenderPassEncoder;
     private _currentComputePassEncoder: IGPUComputePassEncoder;
 
     constructor(webGPUBase: WebGPUBase)

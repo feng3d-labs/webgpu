@@ -2,7 +2,7 @@ import { IGPUCommandEncoder } from "./IGPUCommandEncoder";
 import { IGPUComputePassEncoder } from "./IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./IGPUCopyTextureToTexture";
-import { IRenderPassEncoder } from "./IRenderPassEncoder";
+import { IGPURenderPassEncoder } from "./IGPURenderPassEncoder";
 
 /**
  * 命令编码器。
@@ -29,7 +29,7 @@ export interface ICommandEncoder extends Omit<IGPUCommandEncoder, "passEncoders"
  */
 export type IPassEncoder =
     | IGPUComputePassEncoder
-    | IRenderPassEncoder
+    | IGPURenderPassEncoder
     | IGPUCopyTextureToTexture
     | IGPUCopyBufferToBuffer
     ;

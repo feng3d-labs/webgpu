@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext,  IGPURenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, IGPURenderBundleObject } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext,  IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, IGPURenderBundleObject } from "webgpu-renderer";
 
 interface Renderable
 {
@@ -261,7 +261,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   // Render bundles function as partial, limited render passes, so we can use the
   // same code both to render the scene normally and to build the render bundle.
   function renderScene(
-    passEncoder: IRenderPassEncoder | IGPURenderBundleObject
+    passEncoder: IGPURenderPassEncoder | IGPURenderBundleObject
   )
   {
     // Loop through every renderable object and draw them individually.
@@ -325,7 +325,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     const transformationMatrix = getTransformationMatrix();
     uniformBuffer.writeBuffers = [{ data: transformationMatrix }];
 
-    const renderPass: IRenderPassEncoder = {
+    const renderPass: IGPURenderPassEncoder = {
       renderPass: renderPassDescriptor,
       renderObjects: [],
     };

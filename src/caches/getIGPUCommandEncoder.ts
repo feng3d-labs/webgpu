@@ -3,7 +3,7 @@ import { IGPUCommandEncoder, IGPUPassEncoder } from "../data/IGPUCommandEncoder"
 import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
-import { IRenderPassEncoder } from "../data/IRenderPassEncoder";
+import { IGPURenderPassEncoder } from "../data/IGPURenderPassEncoder";
 import { getIComputePassEncoder } from "./getIComputePassEncoder";
 import { getIGPURenderPassEncoder } from "./getIGPURenderPassEncoder";
 
@@ -48,9 +48,9 @@ function isIComputePassEncoder(arg: any): arg is IGPUComputePassEncoder
     return !!(arg as IGPUComputePassEncoder).computeObjects;
 }
 
-function isIRenderPassEncoder(arg: any): arg is IRenderPassEncoder
+function isIRenderPassEncoder(arg: any): arg is IGPURenderPassEncoder
 {
-    return !!(arg as IRenderPassEncoder).renderPass;
+    return !!(arg as IGPURenderPassEncoder).renderPass;
 }
 
 function isICopyTextureToTexture(arg: any): arg is IGPUCopyTextureToTexture

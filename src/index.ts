@@ -14,7 +14,6 @@ export * from "./data/IGPUSampler";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IGPUVertexAttributes";
-export * from "./data/IRenderPassEncoder";
 export * from "./data/ISubmit";
 
 /**

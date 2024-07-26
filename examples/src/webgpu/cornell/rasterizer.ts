@@ -1,4 +1,4 @@
-import { IGPUBindingResources, ICommandEncoder, IGPUTexture, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, ICommandEncoder, IGPUTexture, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, WebGPU } from "webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -91,7 +91,7 @@ export default class Rasterizer
       }],
     };
   }
-  private renderPassEncoder: IRenderPassEncoder;
+  private renderPassEncoder: IGPURenderPassEncoder;
 
   encode(commandEncoder: ICommandEncoder)
   {
