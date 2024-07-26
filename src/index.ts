@@ -1,6 +1,6 @@
 export * from "./WebGPU";
 
-export * from "./data/IBindingResources";
+export * from "./data/IGPUBindingResources";
 export * from "./data/ICommandEncoder";
 export * from "./data/IFragmentState";
 export * from "./data/IGPUBindGroup";

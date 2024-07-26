@@ -1,4 +1,4 @@
-import { IBindingResources, IGPUBuffer, ICommandEncoder, IGPUComputePipeline, IPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, ICommandEncoder, IGPUComputePipeline, IPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";
@@ -37,7 +37,7 @@ export default class Radiosity
   private readonly scene: Scene;
   private readonly radiosityPipeline: IGPUComputePipeline;
   private readonly accumulationToLightmapPipeline: IGPUComputePipeline;
-  private readonly bindGroup: IBindingResources;
+  private readonly bindGroup: IGPUBindingResources;
   private readonly accumulationBuffer: IGPUBuffer;
   private readonly uniformBuffer: IGPUBuffer;
 

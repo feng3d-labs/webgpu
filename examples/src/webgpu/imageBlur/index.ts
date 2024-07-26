@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -87,14 +87,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
     };
 
-    const computeConstants: IBindingResources = {
+    const computeConstants: IGPUBindingResources = {
         samp: sampler,
         params: {
             buffer: blurParamsBuffer,
         },
     };
 
-    const computeBindGroup0: IBindingResources = {
+    const computeBindGroup0: IGPUBindingResources = {
         inputTex: { texture: cubeTexture1 },
         outputTex: { texture: textures[0] },
         flip: {
@@ -102,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const computeBindGroup1: IBindingResources = {
+    const computeBindGroup1: IGPUBindingResources = {
         inputTex: { texture: textures[0] },
         outputTex: { texture: textures[1] },
         flip: {
@@ -110,7 +110,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const computeBindGroup2: IBindingResources = {
+    const computeBindGroup2: IGPUBindingResources = {
         inputTex: { texture: textures[1] },
         outputTex: { texture: textures[0] },
         flip: {
@@ -118,7 +118,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const showResultBindGroup1: IBindingResources = {
+    const showResultBindGroup1: IGPUBindingResources = {
         mySampler: sampler,
         myTexture: { texture: textures[1] },
     };
@@ -182,15 +182,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     };
 
-    const bindingResources0: IBindingResources = {
+    const bindingResources0: IGPUBindingResources = {
         ...computeConstants,
         ...computeBindGroup0,
     };
-    const bindingResources1: IBindingResources = {
+    const bindingResources1: IGPUBindingResources = {
         ...computeConstants,
         ...computeBindGroup1,
     };
-    const bindingResources2: IBindingResources = {
+    const bindingResources2: IGPUBindingResources = {
         ...computeConstants,
         ...computeBindGroup2,
     };

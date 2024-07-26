@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IGPUTexture, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, ICommandEncoder, IGPUTexture, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, WebGPU } from "webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -14,7 +14,7 @@ export default class Rasterizer
   private readonly scene: Scene;
   private readonly renderPassDescriptor: IGPURenderPassDescriptor;
   private readonly pipeline: IRenderPipeline;
-  private readonly bindGroup: IBindingResources;
+  private readonly bindGroup: IGPUBindingResources;
 
   constructor(
     common: Common,

@@ -1,4 +1,4 @@
-import { IBindingResources } from "./IBindingResources";
+import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPURenderObject } from "./IGPURenderObject";
 import { IRenderPipeline } from "./IRenderPipeline";
 import { IVertexAttributes } from "./IVertexAttributes";
@@ -24,5 +24,5 @@ export interface IRenderObject extends Omit<IGPURenderObject, "pipeline" | "inde
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
      */
-    bindingResources?: IBindingResources;
+    bindingResources?: IGPUBindingResources;
 }

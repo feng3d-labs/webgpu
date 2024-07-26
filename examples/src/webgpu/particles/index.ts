@@ -7,7 +7,7 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPUTexture, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPUTexture, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -80,7 +80,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   };
 
-  const uniformBindGroup: IBindingResources = {
+  const uniformBindGroup: IGPUBindingResources = {
     render_params: {
       buffer: uniformBuffer,
     },
@@ -199,7 +199,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       const levelWidth = textureWidth >> level;
       const levelHeight = textureHeight >> level;
-      const probabilityMapBindGroup: IBindingResources = {
+      const probabilityMapBindGroup: IGPUBindingResources = {
         ubo: { buffer: probabilityMapUBOBuffer },
         buf_in: { buffer: level & 1 ? bufferA : bufferB },
         buf_out: { buffer: level & 1 ? bufferB : bufferA },
@@ -271,7 +271,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       code: simulateWGSL,
     },
   };
-  const computeBindGroup: IBindingResources = {
+  const computeBindGroup: IGPUBindingResources = {
     sim_params: {
       buffer: simulationUBOBuffer,
     },

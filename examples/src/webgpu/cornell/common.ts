@@ -1,4 +1,4 @@
-import { IBindingResources, IGPUBuffer } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer } from "webgpu-renderer";
 import { mat4, vec3 } from "wgpu-matrix";
 import commonWGSL from "./common.wgsl";
 
@@ -11,7 +11,7 @@ export default class Common
   readonly wgsl = commonWGSL;
   /** The common uniform buffer bind group and layout */
   readonly uniforms: {
-    bindGroup: IBindingResources;
+    bindGroup: IGPUBindingResources;
   };
 
   private readonly uniformBuffer: IGPUBuffer;
@@ -30,7 +30,7 @@ export default class Common
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };
 
-    const bindGroup: IBindingResources = {
+    const bindGroup: IGPUBindingResources = {
       common_uniforms: {
         buffer: this.uniformBuffer,
         offset: 0,

@@ -6,7 +6,7 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IRenderPipeline, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IRenderPipeline, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const shadowDepthTextureSize = 1024;
 
@@ -140,13 +140,13 @@ const init = async (canvas: HTMLCanvasElement) =>
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     };
 
-    const sceneBindGroupForShadow: IBindingResources = {
+    const sceneBindGroupForShadow: IGPUBindingResources = {
         scene: {
             buffer: sceneUniformBuffer,
         },
     };
 
-    const sceneBindGroupForRender: IBindingResources = {
+    const sceneBindGroupForRender: IGPUBindingResources = {
         scene: {
             buffer: sceneUniformBuffer,
         },
@@ -156,7 +156,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const modelBindGroup: IBindingResources = {
+    const modelBindGroup: IGPUBindingResources = {
         model: {
             buffer: modelUniformBuffer,
         },

@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -213,7 +213,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   };
 
-  const sceneUniformBindGroup: IBindingResources = {
+  const sceneUniformBindGroup: IGPUBindingResources = {
     uniforms: {
       buffer: modelUniformBuffer,
     },
@@ -222,7 +222,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     },
   };
 
-  const gBufferTexturesBindGroup: IBindingResources = {
+  const gBufferTexturesBindGroup: IGPUBindingResources = {
     gBufferPosition: gBufferTextureViews[0],
     gBufferNormal: gBufferTextureViews[1],
     gBufferAlbedo: gBufferTextureViews[2],
@@ -278,7 +278,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       code: lightUpdate,
     },
   };
-  const lightsBufferBindGroup: IBindingResources = {
+  const lightsBufferBindGroup: IGPUBindingResources = {
     lightsBuffer: {
       buffer: lightsBuffer,
     },
@@ -286,7 +286,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       buffer: configUniformBuffer,
     },
   };
-  const lightsBufferComputeBindGroup: IBindingResources = {
+  const lightsBufferComputeBindGroup: IGPUBindingResources = {
     lightsBuffer: {
       buffer: lightsBuffer,
     },

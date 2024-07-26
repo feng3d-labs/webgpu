@@ -4,7 +4,7 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -83,13 +83,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             cell: { buffer: buffer1, stepMode: "instance" }
         };
 
-        const bindGroup0: IBindingResources = {
+        const bindGroup0: IGPUBindingResources = {
             size: { buffer: sizeBuffer },
             current: { buffer: buffer0 },
             next: { buffer: buffer1 },
         };
 
-        const bindGroup1: IBindingResources = {
+        const bindGroup1: IGPUBindingResources = {
             size: { buffer: sizeBuffer },
             current: { buffer: buffer1 },
             next: { buffer: buffer0 },
@@ -107,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         };
 
-        const uniformBindGroup: IBindingResources = {
+        const uniformBindGroup: IGPUBindingResources = {
             size: {
                 buffer: sizeBuffer,
                 offset: 0,

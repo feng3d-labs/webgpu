@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 interface Renderable
 {
@@ -14,7 +14,7 @@ interface Renderable
   vertexAttributes: IVertexAttributes;
   indices: IGPUBuffer;
   indexCount: number;
-  bindGroup?: IBindingResources;
+  bindGroup?: IGPUBindingResources;
 }
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
@@ -150,7 +150,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   function createSphereBindGroup1(
     texture: IGPUTexture,
     transform: Float32Array
-  ): IBindingResources
+  ): IGPUBindingResources
   {
     const uniformBufferSize = 4 * 16; // 4x4 matrix
     const uniformBuffer: IGPUBuffer = {
@@ -159,7 +159,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
       data: new Float32Array(transform),
     };
 
-    const bindGroup: IBindingResources = {
+    const bindGroup: IGPUBindingResources = {
       modelMatrix: {
         buffer: uniformBuffer,
       },
@@ -236,7 +236,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   );
   const modelViewProjectionMatrix = mat4.create();
 
-  const frameBindGroup: IBindingResources = {
+  const frameBindGroup: IGPUBindingResources = {
     uniforms: {
       buffer: uniformBuffer,
     },
