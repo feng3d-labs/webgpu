@@ -287,17 +287,35 @@ export interface IGPURenderPipeline extends Omit<GPURenderPipelineDescriptor, "l
 }
 
 /**
- * 完整的深度模板阶段描述。
+ * 深度模板阶段描述。
+ *
+ * `format` 将从深度附件 {@link IGPURenderPassDescriptor.depthStencilAttachment} 纹理上获取。
  */
-export interface IGPUDepthStencilState extends GPUDepthStencilState
+export interface IGPUDepthStencilState extends Omit<GPUDepthStencilState, "format">
 {
+    /**
+     * Indicates if this {@link GPURenderPipeline} can modify
+     * {@link GPURenderPassDescriptor#depthStencilAttachment} depth values.
+     *
+     * 默认为 `true` 。
+     */
+    depthWriteEnabled?: boolean;
 
+    /**
+     * The comparison operation used to test fragment depths against
+     * {@link GPURenderPassDescriptor#depthStencilAttachment} depth values.
+     *
+     * 默认 `'less'` 。
+     */
+    depthCompare?: GPUCompareFunction;
 }
 
 /**
- * 完整的多重采样阶段描述。
+ * 多重采样阶段描述。
+ *
+ * 多重采样次数将由 {@link IGPURenderPassDescriptor.multisample} 覆盖。
  */
-export interface IGPUMultisampleState extends GPUMultisampleState
+export interface IGPUMultisampleState extends Omit<GPUMultisampleState, "count">
 {
 
 }

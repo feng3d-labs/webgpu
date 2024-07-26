@@ -20,44 +20,11 @@ export interface IRenderPipeline extends Omit<IGPURenderPipeline, "vertex" | "fr
     /**
      * 深度模板阶段描述。
      */
-    depthStencil?: IDepthStencilState;
+    depthStencil?: IGPUDepthStencilState;
 
     /**
      * 多重采样阶段描述。
      */
-    multisample?: IMultisampleState;
+    multisample?: IGPUMultisampleState;
 }
 
-/**
- * 多重采样阶段描述。
- *
- * 多重采样次数将由 {@link IGPURenderPassDescriptor.multisample} 覆盖。
- */
-export interface IMultisampleState extends Omit<IGPUMultisampleState, "count">
-{
-
-}
-
-/**
- * 深度模板阶段描述。
- *
- * `format` 将从深度附件 {@link IGPURenderPassDescriptor.depthStencilAttachment} 纹理上获取。
- */
-export interface IDepthStencilState extends Omit<IGPUDepthStencilState, "format" | "depthWriteEnabled" | "depthCompare">
-{
-    /**
-     * Indicates if this {@link GPURenderPipeline} can modify
-     * {@link GPURenderPassDescriptor#depthStencilAttachment} depth values.
-     *
-     * 默认为 `true` 。
-     */
-    depthWriteEnabled?: boolean;
-
-    /**
-     * The comparison operation used to test fragment depths against
-     * {@link GPURenderPassDescriptor#depthStencilAttachment} depth values.
-     *
-     * 默认 `'less'` 。
-     */
-    depthCompare?: GPUCompareFunction;
-}

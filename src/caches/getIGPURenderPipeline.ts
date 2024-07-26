@@ -1,7 +1,7 @@
-import { IGPURenderPipeline } from "../data/IGPURenderObject";
+import { IGPUDepthStencilState, IGPURenderPipeline } from "../data/IGPURenderObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
-import { IDepthStencilState, IRenderPipeline } from "../data/IRenderPipeline";
+import { IRenderPipeline } from "../data/IRenderPipeline";
 import { IVertexAttributes } from "../data/IVertexAttributes";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUFragmentState } from "./getIGPUFragmentState";
@@ -83,7 +83,7 @@ const renderPipelineMap = new ChainMap<
  * @param depthStencilAttachmentTextureFormat 深度模板附件纹理格式。
  * @returns 深度模板阶段完整描述。
  */
-function getGPUDepthStencilState(device: GPUDevice, depthStencil: IDepthStencilState, renderPass: IGPURenderPassDescriptor)
+function getGPUDepthStencilState(device: GPUDevice, depthStencil: IGPUDepthStencilState, renderPass: IGPURenderPassDescriptor)
 {
     // 获取渲染通道附件纹理格式。
     const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormats(device, renderPass);

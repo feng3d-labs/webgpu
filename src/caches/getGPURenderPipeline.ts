@@ -20,7 +20,7 @@ export function getGPURenderPipeline(device: GPUDevice, descriptor: IGPURenderPi
             module: getGPUShaderModule(device, descriptor.vertex.code),
         },
         primitive: descriptor.primitive,
-        depthStencil: descriptor.depthStencil,
+        depthStencil: descriptor.depthStencil as any,
         multisample: descriptor.multisample,
     };
 
