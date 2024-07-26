@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 interface Renderable
 {
@@ -40,7 +40,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     canvasId: canvas.id,
   };
 
-  const pipeline: IRenderPipeline = {
+  const pipeline: IGPURenderPipeline = {
     vertex: {
       code: meshWGSL,
     },

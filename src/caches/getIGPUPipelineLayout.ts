@@ -1,7 +1,7 @@
-import { IGPUShaderStageFlags, IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry } from "../data/IGPUBindGroup";
+import { IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry, IGPUShaderStageFlags } from "../data/IGPUBindGroup";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
-import { IRenderPipeline } from "../data/IRenderPipeline";
+import { IGPURenderPipeline } from "../data/IGPURenderObject";
 import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -10,10 +10,10 @@ import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo
  * @param pipeline GPU管线。
  * @returns 管线布局。
  */
-export function getIGPUPipelineLayout(pipeline: IRenderPipeline | IGPUComputePipeline)
+export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUComputePipeline)
 {
-    const vertexCode = (pipeline as IRenderPipeline).vertex?.code;
-    const fragmentCode = (pipeline as IRenderPipeline).fragment?.code;
+    const vertexCode = (pipeline as IGPURenderPipeline).vertex?.code;
+    const fragmentCode = (pipeline as IGPURenderPipeline).fragment?.code;
     const computeCode = (pipeline as IGPUComputePipeline).compute?.code;
     //
     const code = vertexCode + fragmentCode + computeCode;

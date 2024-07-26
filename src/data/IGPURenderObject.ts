@@ -260,30 +260,29 @@ export interface IGPURenderPipeline extends Omit<GPURenderPipelineDescriptor, "l
     layout?: IGPUPipelineLayout | "auto";
 
     /**
-     * Describes the vertex shader entry point of the pipeline and its input buffer layouts.
-     */
-    vertex: IGPUVertexState;
-
-    /**
      * Describes the primitive-related properties of the pipeline.
      */
     primitive?: IGPUPrimitiveState;
 
     /**
-     * Describes the optional depth-stencil properties, including the testing, operations, and bias.
+     * 描述顶点着色器源码入口点以及顶点属性缓冲区布局。
+     */
+    vertex: IGPUVertexState;
+
+    /**
+     * 片段着色器阶段描述。
+     */
+    fragment?: IGPUFragmentState;
+
+    /**
+     * 深度模板阶段描述。
      */
     depthStencil?: IGPUDepthStencilState;
 
     /**
-     * Describes the multi-sampling properties of the pipeline.
+     * 多重采样阶段描述。
      */
     multisample?: IGPUMultisampleState;
-
-    /**
-     * Describes the fragment shader entry point of the pipeline and its output colors. If
-     * not map/exist|provided, the [[#no-color-output]] mode is enabled.
-     */
-    fragment?: IGPUFragmentState;
 }
 
 /**

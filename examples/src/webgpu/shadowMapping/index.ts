@@ -6,7 +6,7 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IRenderPipeline, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const shadowDepthTextureSize = 1024;
 
@@ -70,7 +70,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         cullMode: "back",
     };
 
-    const shadowPipeline: IRenderPipeline = {
+    const shadowPipeline: IGPURenderPipeline = {
         vertex: {
             code: vertexShadowWGSL,
         },
@@ -84,7 +84,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Create a bind group layout which holds the scene uniforms and
     // the texture+sampler for depth. We create it manually because the WebPU
     // implementation doesn't infer this from the shader (yet).
-    const pipeline: IRenderPipeline = {
+    const pipeline: IGPURenderPipeline = {
         vertex: {
             code: vertexWGSL,
         },

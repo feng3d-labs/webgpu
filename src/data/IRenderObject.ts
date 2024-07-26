@@ -1,6 +1,5 @@
 import { IGPUBindingResources } from "./IGPUBindingResources";
-import { IGPURenderObject } from "./IGPURenderObject";
-import { IRenderPipeline } from "./IRenderPipeline";
+import { IGPURenderObject, IGPURenderPipeline } from "./IGPURenderObject";
 import { IVertexAttributes } from "./IVertexAttributes";
 import { IIndexBuffer } from "./IndexBuffer";
 
@@ -9,7 +8,7 @@ import { IIndexBuffer } from "./IndexBuffer";
  */
 export interface IRenderObject extends Omit<IGPURenderObject, "pipeline" | "indexBuffer" | "vertexBuffers" | "bindGroups">
 {
-    pipeline: IRenderPipeline;
+    pipeline: IGPURenderPipeline;
 
     /**
      * 顶点属性数据映射。

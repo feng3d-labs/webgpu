@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const fullscreenQuadPipeline1: IRenderPipeline = {
+    const fullscreenQuadPipeline1: IGPURenderPipeline = {
         vertex: {
             code: fullscreenTexturedQuadWGSL,
         },

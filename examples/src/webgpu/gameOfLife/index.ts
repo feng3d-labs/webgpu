@@ -4,7 +4,7 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             next: { buffer: buffer0 },
         };
 
-        const renderPipeline: IRenderPipeline = {
+        const renderPipeline: IGPURenderPipeline = {
             primitive: {
                 topology: "triangle-strip",
             },

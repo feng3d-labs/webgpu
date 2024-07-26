@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IGPURenderPassDescriptor, IRenderPassEncoder, IGPURenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -96,7 +96,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     cullMode: "back",
   };
 
-  const writeGBuffersPipeline: IRenderPipeline = {
+  const writeGBuffersPipeline: IGPURenderPipeline = {
     vertex: {
       code: vertexWriteGBuffers,
     },
@@ -106,7 +106,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     primitive,
   };
 
-  const gBuffersDebugViewPipeline: IRenderPipeline = {
+  const gBuffersDebugViewPipeline: IGPURenderPipeline = {
     vertex: {
       code: vertexTextureQuad,
     },
@@ -119,7 +119,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     },
     primitive,
   };
-  const deferredRenderPipeline: IRenderPipeline = {
+  const deferredRenderPipeline: IGPURenderPipeline = {
     vertex: {
       code: vertexTextureQuad,
     },

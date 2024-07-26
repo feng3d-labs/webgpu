@@ -5,7 +5,7 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IRenderObject, IGPURenderPassDescriptor, IRenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IRenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -270,7 +270,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // "Debug" view of the actual texture contents
     //
 
-    const showTexturePipeline: IRenderPipeline = {
+    const showTexturePipeline: IGPURenderPipeline = {
         vertex: { code: showTextureWGSL }, fragment: { code: showTextureWGSL }
     };
 
@@ -278,7 +278,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Pipeline for drawing the test squares
     //
 
-    const texturedSquarePipeline: IRenderPipeline = {
+    const texturedSquarePipeline: IGPURenderPipeline = {
         vertex: { code: texturedSquareWGSL, constants: { kTextureBaseSize, kViewportSize } }, fragment: { code: texturedSquareWGSL },
     };
 
