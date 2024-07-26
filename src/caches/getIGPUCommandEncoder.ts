@@ -3,7 +3,6 @@ import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPURenderPassEncoder } from "../data/IGPURenderPassEncoder";
-import { getIComputePassEncoder } from "./getIComputePassEncoder";
 import { getIGPURenderPassEncoder } from "./getIGPURenderPassEncoder";
 
 export function getIGPUCommandEncoder(device: GPUDevice, v: IGPUCommandEncoder)
@@ -103,4 +102,20 @@ function getIGPUCopyBufferToBuffer(v: IGPUCopyBufferToBuffer)
     };
 
     return gpuCopyTextureToTexture;
+}
+
+import { getIGPUComputeObject } from "./getIGPUComputeObject";
+
+function getIComputePassEncoder(computePassEncoder: IGPUComputePassEncoder)
+{
+    const computePass = computePassEncoder.computePass;
+
+    const computeObjects = computePassEncoder.computeObjects.map((v) => getIGPUComputeObject(v));
+
+    const gpuComputePassEncoder: IGPUComputePassEncoder = {
+        computePass,
+        computeObjects,
+    };
+
+    return gpuComputePassEncoder;
 }
