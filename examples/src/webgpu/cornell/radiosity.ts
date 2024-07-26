@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUBuffer, ICommandEncoder, IGPUComputePipeline, IPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, ICommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";
@@ -145,7 +145,7 @@ export default class Radiosity
       ],
     }];
   }
-  private passEncoders: IPassEncoder[];
+  private passEncoders: IGPUPassEncoder[];
 
   encode(commandEncoder: ICommandEncoder)
   {

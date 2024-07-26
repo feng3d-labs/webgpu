@@ -1,4 +1,4 @@
-import { IGPUBindingResources, ICommandEncoder, IGPUComputePipeline, IPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, ICommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal, WebGPU } from "webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -66,7 +66,7 @@ export default class Raytracer
       }],
     };
   }
-  private passEncoder: IPassEncoder;
+  private passEncoder: IGPUPassEncoder;
 
   encode(commandEncoder: ICommandEncoder)
   {

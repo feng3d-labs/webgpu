@@ -1,4 +1,4 @@
-import { IGPUBindingResources, ICommandEncoder, IGPUComputePipeline, IPassEncoder, IGPUTexture, IGPUTextureFromContext, internal, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, ICommandEncoder, IGPUComputePipeline, IGPUTexture, IGPUTextureFromContext, internal, WebGPU, IGPUPassEncoder } from "webgpu-renderer";
 
 import Common from "./common";
 import tonemapperWGSL from "./tonemapper.wgsl";
@@ -57,7 +57,7 @@ export default class Tonemapper
       }],
     };
   }
-  private passEncoder: IPassEncoder;
+  private passEncoder: IGPUPassEncoder;
 
   encode(commandEncoder: ICommandEncoder)
   {

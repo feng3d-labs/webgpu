@@ -4,6 +4,7 @@ export * from "./data/ICommandEncoder";
 export * from "./data/IGPUBindGroup";
 export * from "./data/IGPUBindingResources";
 export * from "./data/IGPUBuffer";
+export * from "./data/IGPUCommandEncoder";
 export * from "./data/IGPUComputeObject";
 export * from "./data/IGPUComputePassEncoder";
 export * from "./data/IGPUCopyTextureToTexture";
