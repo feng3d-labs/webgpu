@@ -7,7 +7,7 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -120,7 +120,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   // ////////////////////////////////////////////////////////////////////////////
   // Texture
   // ////////////////////////////////////////////////////////////////////////////
-  let texture: ITexture;
+  let texture: IGPUTexture;
   let textureWidth = 1;
   let textureHeight = 1;
   let numMipLevels = 1;

@@ -1,5 +1,5 @@
 import { IGPUCopyTextureToTexture, IGPUImageCopyTexture } from "./IGPUCopyTextureToTexture";
-import { ITexture } from "./ITexture";
+import { IGPUTexture } from "./IGPUTexture";
 
 export interface ICopyTextureToTexture extends Omit<IGPUCopyTextureToTexture, "source" | "destination">
 {
@@ -12,5 +12,5 @@ export interface IImageCopyTexture extends Omit<IGPUImageCopyTexture, "texture">
     /**
      * Texture to copy to/from.
      */
-    texture: ITexture;
+    texture: IGPUTexture;
 }

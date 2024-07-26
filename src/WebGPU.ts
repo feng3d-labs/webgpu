@@ -4,12 +4,11 @@ import { IComputePassEncoder } from "./data/IComputePassEncoder";
 import { ICopyBufferToBuffer } from "./data/ICopyBufferToBuffer";
 import { ICopyTextureToTexture } from "./data/ICopyTextureToTexture";
 import { IGPUSubmit } from "./data/IGPUSubmit";
-import { IGPUTextureBase } from "./data/IGPUTexture";
+import { IGPUTexture, IGPUTextureBase } from "./data/IGPUTexture";
 import { IRenderObject } from "./data/IRenderObject";
 import { IRenderPass } from "./data/IRenderPass";
 import { IRenderPassEncoder } from "./data/IRenderPassEncoder";
 import { ISubmit } from "./data/ISubmit";
-import { ITexture } from "./data/ITexture";
 import { getIGPUTexture } from "./internal";
 import { WebGPU as WebGPUBase } from "./webgpu-data-driven/WebGPU";
 
@@ -131,7 +130,7 @@ export class WebGPU
      *
      * @returns 读取到的数据。
      */
-    async readPixels(params: { texture: ITexture, origin: GPUOrigin3D, copySize: { width: number, height: number } })
+    async readPixels(params: { texture: IGPUTexture, origin: GPUOrigin3D, copySize: { width: number, height: number } })
     {
         const gTexture = getIGPUTexture(params.texture);
         const result = await this._webgpu.readPixels({
@@ -149,7 +148,7 @@ export class WebGPU
      * @param sourceTexture 源纹理。
      * @param targetTexture 目标纹理。
      */
-    copyDepthTexture(sourceTexture: ITexture, targetTexture: ITexture)
+    copyDepthTexture(sourceTexture: IGPUTexture, targetTexture: IGPUTexture)
     {
         const gSourceTexture = getIGPUTexture(sourceTexture);
         const gTargetTexture = getIGPUTexture(targetTexture);
@@ -162,7 +161,7 @@ export class WebGPU
      *
      * @param texture 需要被销毁的纹理。
      */
-    destoryTexture(texture: ITexture)
+    destoryTexture(texture: IGPUTexture)
     {
         const gTexture = getIGPUTexture(texture);
         this._webgpu.destoryTexture(gTexture);

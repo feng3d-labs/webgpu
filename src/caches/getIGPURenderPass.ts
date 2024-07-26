@@ -3,7 +3,6 @@ import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IG
 import { IGPUTexture } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IAttachmentSize, IRenderPass, IRenderPassColorAttachment, IRenderPassDepthStencilAttachment } from "../data/IRenderPass";
-import { ITexture } from "../data/ITexture";
 import { updateIGPURenderPassAttachmentSize } from "./getGPURenderPassDescriptor";
 import { getGPUTextureFormat } from "./getGPUTexture";
 import { getIGPUTextureSize, setITextureSize } from "./getIGPUTexture";
@@ -65,7 +64,7 @@ const renderPassMap = new Map<IRenderPass, IGPURenderPassDescriptor>();
  */
 function getAttachmentTextures(colorAttachments: IRenderPassColorAttachment[], depthStencilAttachment?: IRenderPassDepthStencilAttachment)
 {
-    const textures: ITexture[] = [];
+    const textures: IGPUTexture[] = [];
 
     for (let i = 0; i < colorAttachments.length; i++)
     {

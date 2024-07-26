@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, ITextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -67,19 +67,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   }
 
   // GBuffer texture render targets
-  const gBufferTexture2DFloat32: ITexture = {
+  const gBufferTexture2DFloat32: IGPUTexture = {
     size: [canvas.width, canvas.height],
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     format: "rgba32float",
     sampleType: "unfilterable-float",
   };
-  const gBufferTexture2DFloat16: ITexture = {
+  const gBufferTexture2DFloat16: IGPUTexture = {
     size: [canvas.width, canvas.height],
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     format: "rgba16float",
     sampleType: "unfilterable-float",
   };
-  const gBufferTextureAlbedo: ITexture = {
+  const gBufferTextureAlbedo: IGPUTexture = {
     size: [canvas.width, canvas.height],
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     format: "bgra8unorm",
@@ -129,7 +129,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     primitive,
   };
 
-  const depthTexture: ITexture = {
+  const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
     usage: GPUTextureUsage.RENDER_ATTACHMENT,

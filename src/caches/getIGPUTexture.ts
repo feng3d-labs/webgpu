@@ -1,8 +1,7 @@
-import { IGPUTexture, IGPUTextureSize } from "../data/IGPUTexture";
+import { IGPUTexture, IGPUTextureFromContext, IGPUTextureSize } from "../data/IGPUTexture";
 import { IAttachmentSize } from "../data/IRenderPass";
-import { ITexture, ITextureFromContext } from "../data/ITexture";
 
-export function getIGPUTexture(texture: ITexture)
+export function getIGPUTexture(texture: IGPUTexture)
 {
     let gpuTexture: IGPUTexture;
 
@@ -24,9 +23,9 @@ export function getIGPUTexture(texture: ITexture)
     return gpuTexture;
 }
 
-function isITextureFromContext(arg: any): arg is ITextureFromContext
+function isITextureFromContext(arg: any): arg is IGPUTextureFromContext
 {
-    return !!(arg as ITextureFromContext).context;
+    return !!(arg as IGPUTextureFromContext).context;
 }
 
 /**
@@ -35,7 +34,7 @@ function isITextureFromContext(arg: any): arg is ITextureFromContext
  * @param texture 纹理。
  * @returns 纹理尺寸。
  */
-export function getIGPUTextureSize(texture: ITexture)
+export function getIGPUTextureSize(texture: IGPUTexture)
 {
     let size: IGPUTextureSize;
     if (isITextureFromContext(texture))
@@ -58,7 +57,7 @@ export function getIGPUTextureSize(texture: ITexture)
  * @param texture 纹理描述。
  * @param attachmentSize 附件尺寸。
  */
-export function setITextureSize(texture: ITexture, attachmentSize: IAttachmentSize)
+export function setITextureSize(texture: IGPUTexture, attachmentSize: IAttachmentSize)
 {
     if (isITextureFromContext(texture))
     {
@@ -68,7 +67,7 @@ export function setITextureSize(texture: ITexture, attachmentSize: IAttachmentSi
         element.height = attachmentSize.height;
     }
     else
-    if (texture.size[2])
+        if (texture.size[2])
         {
             texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
         }

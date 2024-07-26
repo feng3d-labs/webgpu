@@ -1,4 +1,4 @@
-import { IBindingResources, IGPUBuffer, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, internal } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, ICommandEncoder, IComputePipeline, IPassEncoder, IGPUTexture, internal } from "webgpu-renderer";
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";
@@ -15,7 +15,7 @@ export default class Radiosity
   static readonly lightmapHeight = 256;
 
   // The output lightmap.
-  readonly lightmap: ITexture;
+  readonly lightmap: IGPUTexture;
 
   // Number of photons emitted per workgroup.
   // This is equal to the workgroup size (one photon per invocation)

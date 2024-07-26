@@ -4,7 +4,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleCubemapWGSL from "./sampleCubemap.frag.wgsl";
 
-import { IBufferBinding, IGPUCopyExternalImageToTexture, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from "webgpu-renderer";
+import { IBufferBinding, IGPUCopyExternalImageToTexture, IRenderObject, IRenderPass, ISampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -16,7 +16,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Fetch the 6 separate images for negative/positive x, y, z axis of a cubemap
     // and upload it into a GPUTexture.
-    let cubemapTexture: ITexture;
+    let cubemapTexture: IGPUTexture;
     {
         // The order of the array layers is [+X, -X, +Y, -Y, +Z, -Z]
         const imgSrcs = [

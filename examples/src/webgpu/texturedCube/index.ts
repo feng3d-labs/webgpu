@@ -5,7 +5,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleTextureMixColorWGSL from "../../shaders/sampleTextureMixColor.frag.wgsl";
 
-import { IBufferBinding, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from "webgpu-renderer";
+import { IBufferBinding, IRenderObject, IRenderPass, ISampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     ).toString();
     await img.decode();
     const imageBitmap = await createImageBitmap(img);
-    const cubeTexture: ITexture = {
+    const cubeTexture: IGPUTexture = {
         size: [imageBitmap.width, imageBitmap.height],
         format: "rgba8unorm",
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,

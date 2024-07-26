@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 interface Renderable
 {
@@ -58,7 +58,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     // is rendered in front.
   };
 
-  const depthTexture: ITexture = {
+  const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
@@ -71,7 +71,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   };
 
   // Fetch the images and upload them into a GPUTexture.
-  let planetTexture: ITexture;
+  let planetTexture: IGPUTexture;
   {
     const response = await fetch(
       new URL("../../../assets/img/saturn.jpg", import.meta.url).toString()
@@ -86,7 +86,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     };
   }
 
-  let moonTexture: ITexture;
+  let moonTexture: IGPUTexture;
   {
     const response = await fetch(
       new URL("../../../assets/img/moon.jpg", import.meta.url).toString()
@@ -148,7 +148,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   }
 
   function createSphereBindGroup1(
-    texture: ITexture,
+    texture: IGPUTexture,
     transform: Float32Array
   ): IBindingResources
   {

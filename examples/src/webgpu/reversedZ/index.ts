@@ -10,7 +10,7 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { IBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -192,13 +192,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: depthBufferFormat,
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     };
 
-    const defaultDepthTexture: ITexture = {
+    const defaultDepthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: depthBufferFormat,
         usage: GPUTextureUsage.RENDER_ATTACHMENT,

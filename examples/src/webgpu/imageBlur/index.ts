@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -46,19 +46,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const imageBitmap = await createImageBitmap(img);
 
     const [srcWidth, srcHeight] = [imageBitmap.width, imageBitmap.height];
-    const cubeTexture1: ITexture = {
+    const cubeTexture1: IGPUTexture = {
         size: [srcWidth, srcHeight, 1],
         format: "rgba8unorm",
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
         source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
 
-    const textures: ITexture[] = [0, 1].map(() =>
+    const textures: IGPUTexture[] = [0, 1].map(() =>
     ({
         size: [srcWidth, srcHeight],
         format: "rgba8unorm",
         usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
-    } as ITexture));
+    } as IGPUTexture));
 
     const buffer0 = (() =>
     {

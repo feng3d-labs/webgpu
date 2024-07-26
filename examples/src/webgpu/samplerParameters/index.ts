@@ -5,7 +5,7 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { IBindingResources, IGPUBuffer, IRenderObject, IRenderPass, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IRenderObject, IRenderPass, IRenderPipeline, ISampler, ISubmit, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -230,7 +230,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kTextureMipLevels = 4;
     const kTextureBaseSize = 16;
 
-    const checkerboard: ITexture = {
+    const checkerboard: IGPUTexture = {
         format: "rgba8unorm",
         usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.TEXTURE_BINDING,
         size: [kTextureBaseSize, kTextureBaseSize],

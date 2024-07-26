@@ -2,7 +2,7 @@ import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import { IBufferBinding, IGPUCanvasContext, ICopyTextureToTexture, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from "webgpu-renderer";
+import { IBufferBinding, IGPUCanvasContext, ICopyTextureToTexture, IRenderObject, IRenderPass, ISampler, IGPUTexture, WebGPU } from "webgpu-renderer";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleSelfWGSL from "./sampleSelf.frag.wgsl";
 
@@ -17,7 +17,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // We will copy the frame's rendering results into this texture and
     // sample it on the next frame.
-    const cubeTexture: ITexture = {
+    const cubeTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: presentationFormat,
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,

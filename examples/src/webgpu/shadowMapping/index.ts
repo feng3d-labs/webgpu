@@ -6,7 +6,7 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IBindingResources, IGPUBuffer, IRenderPass, IRenderPipeline, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IRenderPass, IRenderPipeline, ISubmit, IGPUTexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const shadowDepthTextureSize = 1024;
 
@@ -57,7 +57,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 
     // Create the depth texture for rendering/sampling the shadow map.
-    const shadowDepthTexture: ITexture = {
+    const shadowDepthTexture: IGPUTexture = {
         size: [shadowDepthTextureSize, shadowDepthTextureSize, 1],
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
         format: "depth32float",
@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         primitive,
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus-stencil8",
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
