@@ -1,4 +1,4 @@
-import { ICommandEncoder } from "./ICommandEncoder";
+import { IGPUCommandEncoder } from "./IGPUCommandEncoder";
 import { IGPUSubmit } from "./IGPUSubmit";
 
 /**
@@ -11,5 +11,5 @@ export interface ISubmit extends Omit<IGPUSubmit, "commandEncoders">
     /**
      * 命令编码器列表。
      */
-    commandEncoders: ICommandEncoder[];
+    commandEncoders: IGPUCommandEncoder[];
 }

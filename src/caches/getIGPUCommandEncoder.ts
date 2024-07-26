@@ -1,4 +1,3 @@
-import { ICommandEncoder } from "../data/ICommandEncoder";
 import { IGPUCommandEncoder, IGPUPassEncoder } from "../data/IGPUCommandEncoder";
 import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
@@ -7,7 +6,7 @@ import { IGPURenderPassEncoder } from "../data/IGPURenderPassEncoder";
 import { getIComputePassEncoder } from "./getIComputePassEncoder";
 import { getIGPURenderPassEncoder } from "./getIGPURenderPassEncoder";
 
-export function getIGPUCommandEncoder(device: GPUDevice, v: ICommandEncoder)
+export function getIGPUCommandEncoder(device: GPUDevice, v: IGPUCommandEncoder)
 {
     const passEncoders = v.passEncoders.map((v) =>
     {

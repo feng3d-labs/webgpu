@@ -7,7 +7,7 @@ import Raytracer from "./raytracer";
 import Scene from "./scene";
 import Tonemapper from "./tonemapper";
 
-import { ICommandEncoder, IGPUCanvasContext, IGPUTexture, ISubmit, WebGPU } from "webgpu-renderer";
+import { IGPUCommandEncoder, IGPUCanvasContext, IGPUTexture, ISubmit, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -55,13 +55,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const tonemapper = new Tonemapper(common, framebuffer, { context }, webgpu);
 
   // 光栅化渲染
-  const rasterizerCommandEncoder: ICommandEncoder = { passEncoders: [] };
+  const rasterizerCommandEncoder: IGPUCommandEncoder = { passEncoders: [] };
   radiosity.encode(rasterizerCommandEncoder);
   rasterizer.encode(rasterizerCommandEncoder);
   tonemapper.encode(rasterizerCommandEncoder);
 
   // 光线追踪渲染
-  const raytracerCommandEncoder: ICommandEncoder = { passEncoders: [] };
+  const raytracerCommandEncoder: IGPUCommandEncoder = { passEncoders: [] };
   radiosity.encode(raytracerCommandEncoder);
   raytracer.encode(raytracerCommandEncoder);
   tonemapper.encode(raytracerCommandEncoder);
