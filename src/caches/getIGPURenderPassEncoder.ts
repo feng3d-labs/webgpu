@@ -6,20 +6,20 @@ import { getIGPURenderBundle } from "./getIGPURenderBundle";
 import { getIGPURenderObject } from "./getIGPURenderObject";
 import { getIGPURenderPass } from "./getIGPURenderPass";
 
-export function getIGPURenderPassEncoder(renderPassEncoder: IRenderPassEncoder)
+export function getIGPURenderPassEncoder(device: GPUDevice, renderPassEncoder: IRenderPassEncoder)
 {
-    const renderPass = getIGPURenderPass(renderPassEncoder.renderPass);
+    const renderPass = getIGPURenderPass(device, renderPassEncoder.renderPass);
 
     const renderObjects = renderPassEncoder.renderObjects.map((v) =>
     {
         if (isRenderBundle(v))
         {
-            const gpuRenderObject = getIGPURenderBundle(v, renderPassEncoder.renderPass);
+            const gpuRenderObject = getIGPURenderBundle(device, v, renderPassEncoder.renderPass);
 
             return gpuRenderObject;
         }
 
-        const gpuRenderObject = getIGPURenderObject(v, renderPassEncoder.renderPass);
+        const gpuRenderObject = getIGPURenderObject(device, v, renderPassEncoder.renderPass);
 
         return gpuRenderObject;
     });

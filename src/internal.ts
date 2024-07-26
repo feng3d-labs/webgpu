@@ -1,4 +1,3 @@
-export * from "./caches/getIGPUCanvasContext";
 export * from "./caches/getIGPUCommandEncoder";
 export * from "./caches/getIGPUFragmentState";
 export * from "./caches/getIGPURenderObject";

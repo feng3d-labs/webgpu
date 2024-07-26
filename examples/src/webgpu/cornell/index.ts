@@ -7,7 +7,7 @@ import Raytracer from "./raytracer";
 import Scene from "./scene";
 import Tonemapper from "./tonemapper";
 
-import { ICanvasContext, ICommandEncoder, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
+import { IGPUCanvasContext, ICommandEncoder, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -15,7 +15,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const requiredFeatures: GPUFeatureName[]
     = presentationFormat === "bgra8unorm" ? ["bgra8unorm-storage"] : [];
 
-  const context: ICanvasContext = {
+  const context: IGPUCanvasContext = {
     canvasId: canvas.id,
     configuration: {
       format: "rgba16float",

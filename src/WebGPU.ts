@@ -91,12 +91,12 @@ export class WebGPU
         let gpuSubmit: IGPUSubmit;
         if (data)
         {
-            gpuSubmit = getIGPUSubmit(data);
+            gpuSubmit = getIGPUSubmit(this._webgpu.device, data);
         }
         else
         {
             if (!this._currentSubmit) return;
-            gpuSubmit = getIGPUSubmit(this._currentSubmit);
+            gpuSubmit = getIGPUSubmit(this._webgpu.device, this._currentSubmit);
             this._currentSubmit = null;
             this._currentRenderPassEncoder = null;
             this._currentComputePassEncoder = null;

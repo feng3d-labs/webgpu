@@ -1,5 +1,4 @@
 import { ICanvasConfiguration } from "./ICanvasConfiguration";
-import { IGPUCanvasConfiguration } from "./IGPUCanvasConfiguration";
 
 /**
  * 纹理

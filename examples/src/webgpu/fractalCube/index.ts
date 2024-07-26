@@ -2,7 +2,7 @@ import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import { IBufferBinding, ICanvasContext, ICopyTextureToTexture, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from "webgpu-renderer";
+import { IBufferBinding, IGPUCanvasContext, ICopyTextureToTexture, IRenderObject, IRenderPass, ISampler, ITexture, WebGPU } from "webgpu-renderer";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleSelfWGSL from "./sampleSelf.frag.wgsl";
 
@@ -55,7 +55,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         return modelViewProjectionMatrix as Float32Array;
     }
 
-    const context: ICanvasContext = {
+    const context: IGPUCanvasContext = {
         canvasId: canvas.id,
         configuration: {
             usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT

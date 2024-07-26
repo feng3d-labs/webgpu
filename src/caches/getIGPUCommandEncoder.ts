@@ -10,14 +10,14 @@ import { getIComputePassEncoder } from "./getIComputePassEncoder";
 import { getIGPURenderPassEncoder } from "./getIGPURenderPassEncoder";
 import { getIGPUTexture } from "./getIGPUTexture";
 
-export function getIGPUCommandEncoder(v: ICommandEncoder)
+export function getIGPUCommandEncoder(device: GPUDevice, v: ICommandEncoder)
 {
     const passEncoders = v.passEncoders.map((v) =>
     {
         let gpuPassEncoder: IGPUPassEncoder;
         if (isIRenderPassEncoder(v))
         {
-            gpuPassEncoder = getIGPURenderPassEncoder(v);
+            gpuPassEncoder = getIGPURenderPassEncoder(device, v);
         }
         else if (isIComputePassEncoder(v))
         {

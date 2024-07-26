@@ -2,7 +2,6 @@ export * from "./WebGPU";
 
 export * from "./data/IBindingResources";
 export * from "./data/ICanvasConfiguration";
-export * from "./data/ICanvasContext";
 export * from "./data/ICommandEncoder";
 export * from "./data/IComputeObject";
 export * from "./data/IComputePassEncoder";
@@ -10,6 +9,7 @@ export * from "./data/ICopyBufferToBuffer";
 export * from "./data/ICopyTextureToTexture";
 export * from "./data/IFragmentState";
 export * from "./data/IGPUBuffer";
+export * from "./data/IGPUTexture";
 export * from "./data/IRenderBundleObject";
 export * from "./data/IRenderObject";
 export * from "./data/IRenderPass";

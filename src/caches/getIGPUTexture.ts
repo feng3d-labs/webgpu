@@ -1,7 +1,6 @@
 import { IGPUTexture, IGPUTextureSize } from "../data/IGPUTexture";
 import { IAttachmentSize } from "../data/IRenderPass";
 import { ITexture, ITextureFromContext } from "../data/ITexture";
-import { getIGPUCanvasContext } from "./getIGPUCanvasContext";
 
 export function getIGPUTexture(texture: ITexture)
 {
@@ -9,7 +8,7 @@ export function getIGPUTexture(texture: ITexture)
 
     if (isITextureFromContext(texture))
     {
-        const gpuCanvasContext = getIGPUCanvasContext(texture.context);
+        const gpuCanvasContext = texture.context;
 
         gpuCanvasContext["_gpuTexture"] = gpuCanvasContext["_gpuTexture"] || {
             ...texture,

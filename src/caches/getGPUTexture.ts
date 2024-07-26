@@ -165,14 +165,11 @@ export function isFromContext(arg: IGPUTexture): arg is IGPUTextureFromContext
  * @param texture 纹理。
  * @returns 纹理格式。
  */
-export function getGPUTextureFormat(texture: IGPUTexture)
+export function getGPUTextureFormat(device: GPUDevice, texture: IGPUTexture)
 {
-    if (isFromContext(texture))
-    {
-        return texture.context.configuration.format;
-    }
+    const gpuTexture = getGPUTexture(device, texture);
 
-    return texture.format;
+    return gpuTexture.format;
 }
 
 /**
@@ -190,7 +187,7 @@ export function setIGPUTextureSize(texture: IGPUTexture, attachmentSize: { width
         element.height = attachmentSize.height;
     }
     else
-    if (texture.size[2])
+        if (texture.size[2])
         {
             texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
         }

@@ -12,7 +12,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param colorAttachmentTextureFormats 颜色附件格式。
  * @returns 片段阶段完整描述。
  */
-export function getIGPUFragmentState(fragmentState: IFragmentState, renderPass: IRenderPass)
+export function getIGPUFragmentState(device: GPUDevice, fragmentState: IFragmentState, renderPass: IRenderPass)
 {
     if (!fragmentState)
     {
@@ -23,7 +23,7 @@ export function getIGPUFragmentState(fragmentState: IFragmentState, renderPass: 
     if (!gpuFragmentState)
     {
         // 获取渲染通道附件纹理格式。
-        const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(renderPass);
+        const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(device, renderPass);
 
         const code = fragmentState.code;
         let entryPoint = fragmentState.entryPoint;

@@ -5,7 +5,7 @@ import { ChainMap } from "../utils/ChainMap";
 import { getIGPURenderPipeline } from "./getIGPURenderPipeline";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 
-export function getIGPURenderObject(renderObject: IRenderObject, renderPass: IRenderPass)
+export function getIGPURenderObject(device: GPUDevice, renderObject: IRenderObject, renderPass: IRenderPass)
 {
     let iGPURenderObject = renderObjectMap.get([renderObject, renderPass]);
     if (iGPURenderObject)
@@ -13,7 +13,7 @@ export function getIGPURenderObject(renderObject: IRenderObject, renderPass: IRe
         return iGPURenderObject;
     }
 
-    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(renderObject.pipeline, renderPass, renderObject.vertices);
+    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(device, renderObject.pipeline, renderPass, renderObject.vertices);
 
     iGPURenderObject = {
         ...renderObject,

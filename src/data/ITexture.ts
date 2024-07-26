@@ -1,5 +1,4 @@
-import { ICanvasContext } from "./ICanvasContext";
-import { IGPUTextureBase } from "./IGPUTexture";
+import { IGPUCanvasContext, IGPUTextureBase } from "./IGPUTexture";
 
 /**
  * 纹理
@@ -11,7 +10,7 @@ export type ITexture = ITextureFromContext | ITextureBase;
  */
 export interface ITextureFromContext
 {
-    context: ICanvasContext;
+    context: IGPUCanvasContext;
 }
 
 /**

@@ -15,7 +15,7 @@ import { getIGPUTextureView } from "./getIGPUTextureView";
  * @param renderPass 渲染通道描述。
  * @returns 完整的渲染通道描述。
  */
-export function getIGPURenderPass(renderPass: IRenderPass)
+export function getIGPURenderPass(device: GPUDevice, renderPass: IRenderPass)
 {
     let iGPURenderPass = renderPassMap.get(renderPass);
     if (!iGPURenderPass)
@@ -24,10 +24,10 @@ export function getIGPURenderPass(renderPass: IRenderPass)
         updateAttachmentSize(renderPass);
 
         // 获取颜色附件完整描述列表。
-        const colorAttachments = getIGPURenderPassColorAttachments(renderPass.colorAttachments, renderPass.multisample);
+        const colorAttachments = getIGPURenderPassColorAttachments(device, renderPass.colorAttachments, renderPass.multisample);
 
         // 获取深度模板附件
-        const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(renderPass.depthStencilAttachment, renderPass.attachmentSize, renderPass.multisample);
+        const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(device, renderPass.depthStencilAttachment, renderPass.attachmentSize, renderPass.multisample);
 
         // 附件尺寸变化时，渲染通道描述失效。
         const watchProperty = { attachmentSize: { width: 0, height: 0 } }; // 被监听的属性
@@ -102,11 +102,11 @@ function getAttachmentTextures(colorAttachments: IRenderPassColorAttachment[], d
  * @param renderPass 渲染通道。
  * @returns 渲染通道附件纹理格式。
  */
-export function getIRenderPassFormats(renderPass: IRenderPass)
+export function getIRenderPassFormats(device: GPUDevice, renderPass: IRenderPass)
 {
-    const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(renderPass);
+    const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(device, renderPass);
 
-    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormats(renderPass);
+    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormats(device, renderPass);
 
     return { colorAttachmentTextureFormats, depthStencilAttachmentTextureFormat };
 }
@@ -117,14 +117,14 @@ export function getIRenderPassFormats(renderPass: IRenderPass)
  * @param renderPass 渲染通道。
  * @returns 渲染通道深度模板附件纹理格式。
  */
-export function getIRenderPassDepthStencilAttachmentFormats(renderPass: IRenderPass)
+export function getIRenderPassDepthStencilAttachmentFormats(device: GPUDevice, renderPass: IRenderPass)
 {
-    const gpuRenderPass = getIGPURenderPass(renderPass);
+    const gpuRenderPass = getIGPURenderPass(device, renderPass);
 
     let depthStencilAttachmentTextureFormat: GPUTextureFormat;
     if (gpuRenderPass.depthStencilAttachment)
     {
-        depthStencilAttachmentTextureFormat = getGPUTextureFormat(gpuRenderPass.depthStencilAttachment.view.texture);
+        depthStencilAttachmentTextureFormat = getGPUTextureFormat(device, gpuRenderPass.depthStencilAttachment.view.texture);
     }
 
     return depthStencilAttachmentTextureFormat;
@@ -136,15 +136,15 @@ export function getIRenderPassDepthStencilAttachmentFormats(renderPass: IRenderP
  * @param renderPass 渲染通道。
  * @returns 渲染通道颜色附件纹理格式。
  */
-export function getIRenderPassColorAttachmentFormats(renderPass: IRenderPass)
+export function getIRenderPassColorAttachmentFormats(device: GPUDevice, renderPass: IRenderPass)
 {
-    const gpuRenderPass = getIGPURenderPass(renderPass);
+    const gpuRenderPass = getIGPURenderPass(device, renderPass);
 
     const colorAttachmentTextureFormats = gpuRenderPass.colorAttachments.map((v) =>
     {
         if (!v) return undefined;
 
-        return getGPUTextureFormat(v.view.texture);
+        return getGPUTextureFormat(device, v.view.texture);
     });
 
     return colorAttachmentTextureFormats;
@@ -157,14 +157,14 @@ export function getIRenderPassColorAttachmentFormats(renderPass: IRenderPass)
  * @param multisample 多重采样数量。
  * @returns 用于解决多重采样的纹理视图。
  */
-function getMultisampleTextureView(texture: IGPUTexture, multisample: number)
+function getMultisampleTextureView(device: GPUDevice, texture: IGPUTexture, multisample: number)
 {
     let multisampleTextureView = multisampleTextureMap.get(texture);
     if (!multisampleTextureView)
     {
         // 新增用于解决多重采样的纹理
         const size = getIGPUTextureSize(texture);
-        const format = getGPUTextureFormat(texture);
+        const format = getGPUTextureFormat(device, texture);
         const multisampleTexture: IGPUTexture = {
             label: "自动生成多重采样的纹理",
             size,
@@ -189,7 +189,7 @@ const multisampleTextureMap = new WeakMap<IGPUTexture, IGPUTextureView>();
  * @param multisample 多重采样次数。
  * @returns 深度模板附件完整描述。
  */
-function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IRenderPassDepthStencilAttachment, attachmentSize: IAttachmentSize, multisample: number)
+function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencilAttachment: IRenderPassDepthStencilAttachment, attachmentSize: IAttachmentSize, multisample: number)
 {
     let gpuDepthStencilAttachment: IGPURenderPassDepthStencilAttachment;
     if (depthStencilAttachment)
@@ -211,7 +211,7 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IRender
         if (multisample && !resolveTarget)
         {
             resolveTarget = view;
-            view = getMultisampleTextureView(view.texture, multisample);
+            view = getMultisampleTextureView(device, view.texture, multisample);
         }
 
         const depthClearValue = depthStencilAttachment.depthClearValue;
@@ -239,7 +239,7 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IRender
  * @param multisample 多重采样次数。
  * @returns 颜色附件完整描述列表。
  */
-function getIGPURenderPassColorAttachments(colorAttachments: IRenderPassColorAttachment[], multisample: number)
+function getIGPURenderPassColorAttachments(device, colorAttachments: IRenderPassColorAttachment[], multisample: number)
 {
     const gpuColorAttachments: IGPURenderPassColorAttachment[] = colorAttachments.map((v) =>
     {
@@ -251,7 +251,7 @@ function getIGPURenderPassColorAttachments(colorAttachments: IRenderPassColorAtt
         if (multisample && !resolveTarget)
         {
             resolveTarget = view;
-            view = getMultisampleTextureView(view.texture, multisample);
+            view = getMultisampleTextureView(device, view.texture, multisample);
         }
 
         return {

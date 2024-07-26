@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IBindingResources, IGPUBuffer, ICanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPUCanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 interface Renderable
 {
@@ -36,7 +36,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   canvas.height = canvas.clientHeight * devicePixelRatio;
 
   const webgpu = await WebGPU.init();
-  const context: ICanvasContext = {
+  const context: IGPUCanvasContext = {
     canvasId: canvas.id,
   };
 
