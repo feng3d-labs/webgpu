@@ -18,11 +18,23 @@ export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContex
 
     // 附加上 GPUTextureUsage.RENDER_ATTACHMENT
     usage = usage | GPUTextureUsage.RENDER_ATTACHMENT;
+    //
+    const format = context.configuration.format || navigator.gpu.getPreferredCanvasFormat();
+    const viewFormats = context.configuration.viewFormats;
+    const colorSpace = context.configuration.colorSpace;
+    const toneMapping = context.configuration.toneMapping;
+    const alphaMode = context.configuration.alphaMode || "premultiplied";
 
+    //
     gpuCanvasContext.configure({
         ...context.configuration,
         device,
+        format,
         usage,
+        viewFormats,
+        colorSpace,
+        toneMapping,
+        alphaMode,
     });
 
     canvasContextMap.set(context, gpuCanvasContext);

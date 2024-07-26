@@ -28,8 +28,3 @@ export function getIGPUCanvasContext(canvasContext: ICanvasContext)
 }
 
 const canvasContextMap = new WeakMap<ICanvasContext, IGPUCanvasContext>();
-
-export function isICanvasContext(arg: any): arg is ICanvasContext
-{
-    return !!(arg as ICanvasContext).canvasId;
-}

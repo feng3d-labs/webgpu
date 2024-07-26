@@ -1,3 +1,4 @@
+import { ICanvasConfiguration } from "./ICanvasConfiguration";
 import { IGPUCanvasConfiguration } from "./IGPUCanvasConfiguration";
 
 /**
@@ -100,5 +101,5 @@ export interface IGPUCanvasContext
     /**
      * 画布配置。
      */
-    configuration: IGPUCanvasConfiguration;
+    configuration?: ICanvasConfiguration;
 }

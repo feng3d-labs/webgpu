@@ -1,13 +1,8 @@
-import { ICanvasConfiguration } from "./ICanvasConfiguration";
 import { IGPUCanvasContext } from "./IGPUTexture";
 
 /**
  * @see IGPUCanvasContext
  */
-export interface ICanvasContext extends Omit<IGPUCanvasContext, "configuration">
+export interface ICanvasContext extends IGPUCanvasContext
 {
-    /**
-     * 画布配置。
-     */
-    configuration?: ICanvasConfiguration;
 }
