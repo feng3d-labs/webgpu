@@ -13,7 +13,7 @@ function isITextureFromContext(arg: any): arg is IGPUTextureFromContext
  * @param texture 纹理。
  * @returns 纹理尺寸。
  */
-export function getIGPUTextureSize(device: GPUDevice, texture: IGPUTexture)
+export function getGPUTextureSize(device: GPUDevice, texture: IGPUTexture)
 {
     const gpuTexture = getGPUTexture(device, texture);
 
