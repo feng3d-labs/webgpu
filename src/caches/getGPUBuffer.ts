@@ -26,6 +26,7 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
 
     buffer.usage = buffer.usage ?? defaultGPUBufferUsage;
 
+    const label = buffer.label;
     const usage = buffer.usage;
 
     const size = Math.ceil(buffer.size / 4) * 4; // GPU缓冲区尺寸应该为4的倍数。
@@ -33,7 +34,7 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
     // 初始化时存在数据，则使用map方式上传第一次数据。
     const mappedAtCreation = buffer.data !== undefined;
 
-    gBuffer = device.createBuffer({ size, usage, mappedAtCreation });
+    gBuffer = device.createBuffer({ label, size, usage, mappedAtCreation });
 
     if (mappedAtCreation)
     {

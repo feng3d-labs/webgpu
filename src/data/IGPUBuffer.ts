@@ -4,8 +4,13 @@
  * {@link GPUBufferDescriptor}
  * {@link GPUBuffer}
  */
-export interface IGPUBuffer extends Omit<GPUBufferDescriptor, "mappedAtCreation" | "size" | "usage">
+export interface IGPUBuffer
 {
+    /**
+     * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
+     */
+    label?: string;
+
     /**
      * The size of the buffer in bytes.
      */
