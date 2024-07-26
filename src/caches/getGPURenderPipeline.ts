@@ -27,7 +27,7 @@ export function getGPURenderPipeline(device: GPUDevice, descriptor: IGPURenderPi
     if (descriptor.fragment)
     {
         gpuRenderPipelineDescriptor.fragment = {
-            ...descriptor.fragment,
+            ...descriptor.fragment as any,
             module: getGPUShaderModule(device, descriptor.fragment.code),
         };
     }

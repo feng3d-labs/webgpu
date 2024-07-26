@@ -368,8 +368,31 @@ export interface IGPUFragmentState extends Omit<GPUFragmentState, "module" | "ta
     code: string;
 
     /**
+     * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to
+     * perform its work.
+     *
+     * 入口函数可选。默认从着色器中进行反射获取。
+     */
+    entryPoint?: string;
+
+    /**
      * A list of {@link GPUColorTargetState} defining the formats and behaviors of the color targets
      * this pipeline writes to.
      */
-    targets: GPUColorTargetState[];
+    targets?: IGPUColorTargetState[];
+}
+
+/**
+ * 属性 `format` 将由渲染通道中附件给出。
+ */
+export interface IGPUColorTargetState extends Omit<GPUColorTargetState, "format">
+{
+    /**
+     * The {@link GPUTextureFormat} of this color target. The pipeline will only be compatible with
+     * {@link GPURenderPassEncoder}s which use a {@link GPUTextureView} of this format in the
+     * corresponding color attachment.
+     *
+     * 属性 `format` 将由渲染通道中附件给出。
+     */
+    format?: GPUTextureFormat;
 }
