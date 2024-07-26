@@ -6,10 +6,10 @@ import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
 import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUSampler } from "../data/IGPUSampler";
-import { ITextureView } from "../data/ITextureView";
+import { IGPUTextureBase } from "../data/IGPUTexture";
+import { IGPUTextureView } from "../data/IGPUTextureView";
 import { ChainMap } from "../utils/ChainMap";
 import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
-import { IGPUTextureBase } from "../data/IGPUTexture";
 
 export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputePipeline, bindingResources: IBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
 {
@@ -94,7 +94,7 @@ export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputeP
                 }
                 else if (type === "texture")
                 {
-                    const uniformData = bindingResource as ITextureView;
+                    const uniformData = bindingResource as IGPUTextureView;
 
                     // 设置纹理资源布局上的采样类型。
                     if ((uniformData.texture as IGPUTextureBase).sampleType === "unfilterable-float")
@@ -112,7 +112,7 @@ export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputeP
                 }
                 else if (type === "storageTexture")
                 {
-                    const uniformData = bindingResource as ITextureView;
+                    const uniformData = bindingResource as IGPUTextureView;
 
                     resource = uniformData;
                 }

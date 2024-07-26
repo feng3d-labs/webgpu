@@ -1,6 +1,5 @@
-import { IGPURenderPassDescriptor, IGPURenderPassDepthStencilAttachment, IGPURenderPassColorAttachment } from "./IGPURenderPassEncoder";
+import { IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "./IGPURenderPassEncoder";
 import { IGPUTextureView } from "./IGPUTextureView";
-import { ITextureView } from "./ITextureView";
 
 /**
  * 渲染通道描述。
@@ -58,12 +57,12 @@ export interface IRenderPassDepthStencilAttachment extends Omit<IGPURenderPassDe
      *
      * 当值为空时，将自动从颜色附件中获取尺寸来创建深度纹理。
      */
-    view?: ITextureView;
+    view?: IGPUTextureView;
 
     /**
      * 作为解决多重采样的纹理视图。
      */
-    resolveTarget?: ITextureView;
+    resolveTarget?: IGPUTextureView;
 }
 
 /**
@@ -75,7 +74,7 @@ export interface IRenderPassColorAttachment extends Omit<IGPURenderPassColorAtta
      * A {@link GPUTextureView} describing the texture subresource that will be output to for this
      * color attachment.
      */
-    view: ITextureView;
+    view: IGPUTextureView;
 
     /**
      * A {@link GPUTextureView} describing the texture subresource that will receive the resolved

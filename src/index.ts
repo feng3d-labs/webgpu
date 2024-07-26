@@ -16,7 +16,7 @@ export * from "./data/IRenderPass";
 export * from "./data/IRenderPassEncoder";
 export * from "./data/IRenderPipeline";
 export * from "./data/ISubmit";
-export * from "./data/ITextureView";
+export * from "./data/IGPUTextureView";
 export * from "./data/IVertexAttributes";
 export * from "./data/IVertexState";
 

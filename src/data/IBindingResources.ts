@@ -1,7 +1,7 @@
 import { IGPUBufferBinding, IGPUExternalTexture } from "./IGPUBindGroup";
 import { IGPUBuffer } from "./IGPUBuffer";
 import { IGPUSampler } from "./IGPUSampler";
-import { ITextureView } from "./ITextureView";
+import { IGPUTextureView } from "./IGPUTextureView";
 
 /**
  * GPU绑定的资源映射。
@@ -18,7 +18,7 @@ export interface IBindingResources
  */
 export type IBindingResource =
     | ISampler
-    | ITextureView
+    | IGPUTextureView
     | IBufferBinding
     | IGPUExternalTexture
     ;

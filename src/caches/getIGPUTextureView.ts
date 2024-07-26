@@ -1,7 +1,6 @@
 import { IGPUTextureView } from "../data/IGPUTextureView";
-import { ITextureView } from "../data/ITextureView";
 
-export function getIGPUTextureView(view: ITextureView)
+export function getIGPUTextureView(view: IGPUTextureView)
 {
     if (!view) return undefined;
 
