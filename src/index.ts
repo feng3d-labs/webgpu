@@ -2,13 +2,12 @@ export * from "./WebGPU";
 
 export * from "./data/IBindingResources";
 export * from "./data/ICommandEncoder";
-export * from "./data/IComputeObject";
-export * from "./data/IComputePassEncoder";
 export * from "./data/ICopyTextureToTexture";
 export * from "./data/IFragmentState";
 export * from "./data/IGPUBindGroup";
 export * from "./data/IGPUBuffer";
 export * from "./data/IGPUComputeObject";
+export * from "./data/IGPUComputePassEncoder";
 export * from "./data/IGPUSampler";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";

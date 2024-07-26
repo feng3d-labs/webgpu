@@ -1,7 +1,7 @@
 import { ICommandEncoder } from "../data/ICommandEncoder";
-import { IComputePassEncoder } from "../data/IComputePassEncoder";
 import { ICopyTextureToTexture } from "../data/ICopyTextureToTexture";
 import { IGPUCommandEncoder, IGPUPassEncoder } from "../data/IGPUCommandEncoder";
+import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IRenderPassEncoder } from "../data/IRenderPassEncoder";
@@ -44,9 +44,9 @@ export function getIGPUCommandEncoder(device: GPUDevice, v: ICommandEncoder)
     return gpuCommandEncoder;
 }
 
-function isIComputePassEncoder(arg: any): arg is IComputePassEncoder
+function isIComputePassEncoder(arg: any): arg is IGPUComputePassEncoder
 {
-    return !!(arg as IComputePassEncoder).computeObjects;
+    return !!(arg as IGPUComputePassEncoder).computeObjects;
 }
 
 function isIRenderPassEncoder(arg: any): arg is IRenderPassEncoder

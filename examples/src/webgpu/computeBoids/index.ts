@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { IGPUBuffer, IComputeObject, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import { IGPUBuffer, IGPUComputeObject, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -60,7 +60,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     }
 
-    const computeObject0: IComputeObject = {
+    const computeObject0: IGPUComputeObject = {
         pipeline: {
             compute: { code: updateSpritesWGSL }
         },
@@ -79,7 +79,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
     };
 
-    const computeObject1: IComputeObject = {
+    const computeObject1: IGPUComputeObject = {
         ...computeObject0,
         bindingResources: {
             ...computeObject0.bindingResources,

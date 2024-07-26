@@ -1,9 +1,8 @@
-import { IComputeObject } from "../data/IComputeObject";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { getIGPUComputePipeline } from "./getIGPUComputePipeline";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 
-export function getIGPUComputeObject(renderObject: IComputeObject)
+export function getIGPUComputeObject(renderObject: IGPUComputeObject)
 {
     const { gpuComputePipeline, bindingResourceInfoMap } = getIGPUComputePipeline(renderObject.pipeline);
 

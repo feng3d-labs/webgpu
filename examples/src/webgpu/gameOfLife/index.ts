@@ -4,7 +4,7 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IBindingResources, IGPUBuffer, IComputePassEncoder, IGPUComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -123,7 +123,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ],
         };
 
-        const passEncodersArray: (IComputePassEncoder | IRenderPassEncoder)[][] = [];
+        const passEncodersArray: (IGPUComputePassEncoder | IRenderPassEncoder)[][] = [];
         for (let i = 0; i < 2; i++)
         {
             const vertices1: IVertexAttributes = {};

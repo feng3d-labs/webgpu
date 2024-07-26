@@ -1,8 +1,7 @@
-import { IComputePassEncoder } from "../data/IComputePassEncoder";
 import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
 import { getIGPUComputeObject } from "./getIGPUComputeObject";
 
-export function getIComputePassEncoder(computePassEncoder: IComputePassEncoder)
+export function getIComputePassEncoder(computePassEncoder: IGPUComputePassEncoder)
 {
     const computePass = computePassEncoder.computePass;
 

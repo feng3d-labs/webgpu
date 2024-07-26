@@ -1,3 +1,4 @@
+import { IBindingResources } from "./IBindingResources";
 import { IGPUPipelineLayout } from "./IGPUPipelineLayout";
 import { IGPUSetBindGroup } from "./IGPURenderObject";
 
@@ -23,6 +24,11 @@ export interface IGPUComputeObject
      * {@link GPUBindingCommandsMixin.setBindGroup}
      */
     bindGroups?: IGPUSetBindGroup[];
+
+    /**
+     * 绑定资源。包含数值、纹理、采样、外部纹理。
+     */
+    bindingResources?: IBindingResources;
 
     /**
      * {@link GPUComputePassEncoder.dispatchWorkgroups}

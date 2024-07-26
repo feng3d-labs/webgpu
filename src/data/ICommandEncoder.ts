@@ -1,6 +1,6 @@
-import { IComputePassEncoder } from "./IComputePassEncoder";
 import { ICopyTextureToTexture } from "./ICopyTextureToTexture";
 import { IGPUCommandEncoder } from "./IGPUCommandEncoder";
+import { IGPUComputePassEncoder } from "./IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
 import { IRenderPassEncoder } from "./IRenderPassEncoder";
 
@@ -28,7 +28,7 @@ export interface ICommandEncoder extends Omit<IGPUCommandEncoder, "passEncoders"
  * 通道可以理解为源数据通过某种操作到目标数据的映射，该操作可以是计算模块、也可以是渲染模块、也可以是简单的拷贝或者转换。
  */
 export type IPassEncoder =
-    | IComputePassEncoder
+    | IGPUComputePassEncoder
     | IRenderPassEncoder
     | ICopyTextureToTexture
     | IGPUCopyBufferToBuffer

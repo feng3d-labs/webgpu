@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IBindingResources, IGPUBuffer, IComputePassEncoder, IGPUComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IBindingResources, IGPUBuffer, IGPUComputePassEncoder, IGPUComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, IGPUTexture, IGPUTextureView, IVertexAttributes, WebGPU } from "webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -364,7 +364,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     return viewProjMatrix as Float32Array;
   }
 
-  const passEncoders: (IComputePassEncoder | IRenderPassEncoder)[] = [];
+  const passEncoders: (IGPUComputePassEncoder | IRenderPassEncoder)[] = [];
   passEncoders.push({
     renderPass: writeGBufferPassDescriptor,
     renderObjects: [
@@ -391,7 +391,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ]
   });
 
-  const gBuffersPassEncoders: (IComputePassEncoder | IRenderPassEncoder)[] = passEncoders.concat();
+  const gBuffersPassEncoders: (IGPUComputePassEncoder | IRenderPassEncoder)[] = passEncoders.concat();
 
   gBuffersPassEncoders.push({
     renderPass: textureQuadPassDescriptor,

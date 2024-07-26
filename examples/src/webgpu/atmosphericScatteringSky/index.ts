@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import atmosphericScatteringSkyWGSL from "./atmosphericScatteringSky.wgsl";
 
-import { IGPUCanvasContext, IComputeObject, IGPUTexture, WebGPU } from "webgpu-renderer";
+import { IGPUCanvasContext, IGPUComputeObject, IGPUTexture, WebGPU } from "webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -44,7 +44,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         skyColor: [1, 1, 1, 1],
     };
 
-    const computeObject0: IComputeObject = {
+    const computeObject0: IGPUComputeObject = {
         pipeline: {
             compute: { code: atmosphericScatteringSkyWGSL }
         },
