@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUTexture, IGPUTextureFromContext, internal, WebGPU, IGPUPassEncoder } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, IGPUTextureFromContext, WebGPU } from "webgpu-renderer";
 
 import Common from "./common";
 import tonemapperWGSL from "./tonemapper.wgsl";
