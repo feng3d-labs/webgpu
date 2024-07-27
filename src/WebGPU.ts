@@ -299,7 +299,7 @@ export class WebGPU
             }
             else
             {
-                this.renderPipeline(passEncoder, element, renderPass.renderPass, commands);
+                this.renderObject(passEncoder, element, renderPass.renderPass, commands);
             }
         }
 
@@ -320,10 +320,10 @@ export class WebGPU
             renderBundleEncoder["_bindGroups"] = [];
             renderBundleEncoder["_vertexBuffers"] = [];
 
-            const renderPipelines = renderBundleObject.renderObjects;
-            for (let i = 0; i < renderPipelines.length; i++)
+            const renderObjects = renderBundleObject.renderObjects;
+            for (let i = 0; i < renderObjects.length; i++)
             {
-                this.renderPipeline(renderBundleEncoder, renderPipelines[i], renderPass, []);
+                this.renderObject(renderBundleEncoder, renderObjects[i], renderPass, []);
             }
 
             gRenderBundle = renderBundleEncoder.finish();
@@ -335,23 +335,23 @@ export class WebGPU
         passEncoder.executeBundles([gRenderBundle]);
     }
 
-    private renderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, p: IGPURenderObject, renderPass: IGPURenderPassDescriptor, commands: any[])
+    private renderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor, commands: any[])
     {
-        p = getIGPURenderObject(this.device, p, renderPass);
+        renderObject = getIGPURenderObject(this.device, renderObject, renderPass);
 
-        if (passEncoder["_pipeline"] !== p.pipeline)
+        if (passEncoder["_pipeline"] !== renderObject.pipeline)
         {
-            passEncoder["_pipeline"] = p.pipeline;
+            passEncoder["_pipeline"] = renderObject.pipeline;
             //
-            const pipeline = getGPURenderPipeline(this.device, p.pipeline);
+            const pipeline = getGPURenderPipeline(this.device, renderObject.pipeline);
             passEncoder.setPipeline(pipeline);
 
             commands.push("setPipeline", pipeline);
         }
 
-        if (p.bindGroups)
+        if (renderObject.bindGroups)
         {
-            p.bindGroups.forEach((bindGroup, index) =>
+            renderObject.bindGroups.forEach((bindGroup, index) =>
             {
                 if (passEncoder["_bindGroups"][index] === bindGroup) return;
                 passEncoder["_bindGroups"][index] = bindGroup;
@@ -363,9 +363,9 @@ export class WebGPU
             });
         }
 
-        if (p.vertexBuffers)
+        if (renderObject.vertexBuffers)
         {
-            p.vertexBuffers.forEach((vertexBuffer, index) =>
+            renderObject.vertexBuffers.forEach((vertexBuffer, index) =>
             {
                 if (passEncoder["_vertexBuffers"][index] === vertexBuffer) return;
                 passEncoder["_vertexBuffers"][index] = vertexBuffer;
@@ -377,13 +377,13 @@ export class WebGPU
             });
         }
 
-        if (p.index)
+        if (renderObject.index)
         {
-            if (passEncoder["_indexBuffer"] !== p.index)
+            if (passEncoder["_indexBuffer"] !== renderObject.index)
             {
-                passEncoder["_indexBuffer"] = p.index;
+                passEncoder["_indexBuffer"] = renderObject.index;
 
-                const { buffer, indexFormat, offset, size } = p.index;
+                const { buffer, indexFormat, offset, size } = renderObject.index;
                 const gBuffer = getGPUBuffer(this.device, buffer);
 
                 passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
@@ -392,43 +392,43 @@ export class WebGPU
             }
         }
 
-        if (p.viewport)
+        if (renderObject.viewport)
         {
-            if (passEncoder["_viewport"] !== p.viewport)
+            if (passEncoder["_viewport"] !== renderObject.viewport)
             {
-                passEncoder["_viewport"] = p.viewport;
+                passEncoder["_viewport"] = renderObject.viewport;
 
-                const { x, y, width, height, minDepth, maxDepth } = p.viewport;
+                const { x, y, width, height, minDepth, maxDepth } = renderObject.viewport;
                 (passEncoder as GPURenderPassEncoder).setViewport(x, y, width, height, minDepth, maxDepth);
 
                 commands.push("setViewport", x, y, width, height, minDepth, maxDepth);
             }
         }
 
-        if (p.scissorRect)
+        if (renderObject.scissorRect)
         {
-            if (passEncoder["_scissorRect"] !== p.scissorRect)
+            if (passEncoder["_scissorRect"] !== renderObject.scissorRect)
             {
-                passEncoder["_scissorRect"] = p.scissorRect;
+                passEncoder["_scissorRect"] = renderObject.scissorRect;
 
-                const { x, y, width, height } = p.scissorRect;
+                const { x, y, width, height } = renderObject.scissorRect;
                 (passEncoder as GPURenderPassEncoder).setScissorRect(x, y, width, height);
 
                 commands.push("setScissorRect", x, y, width, height);
             }
         }
 
-        if (p.draw)
+        if (renderObject.draw)
         {
-            const { vertexCount, instanceCount, firstVertex, firstInstance } = p.draw;
+            const { vertexCount, instanceCount, firstVertex, firstInstance } = renderObject.draw;
             passEncoder.draw(vertexCount, instanceCount, firstVertex, firstInstance);
 
             commands.push("draw", vertexCount, instanceCount, firstVertex, firstInstance);
         }
 
-        if (p.drawIndexed)
+        if (renderObject.drawIndexed)
         {
-            const { indexCount, instanceCount, firstIndex, baseVertex, firstInstance } = p.drawIndexed;
+            const { indexCount, instanceCount, firstIndex, baseVertex, firstInstance } = renderObject.drawIndexed;
             passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
 
             commands.push("drawIndexed", indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
