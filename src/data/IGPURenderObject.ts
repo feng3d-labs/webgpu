@@ -30,11 +30,6 @@ export interface IGPURenderObject
     vertexBuffers?: IGPUVertexBuffer[],
 
     /**
-     * GPU绘制时使用的索引缓冲区。
-     */
-    indexBuffer?: IGPUSetIndexBuffer,
-
-    /**
      * GPU绘制时视口尺寸。
      *
      * @see GPURenderPassEncoder.setViewport
@@ -66,7 +61,7 @@ export interface IGPURenderObject
     /**
      * GPU绘制时使用的索引缓冲区。
      */
-    index?: IGPUSetIndexBuffer,
+    index?: IGPUIndexBuffer,
 
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
@@ -232,7 +227,7 @@ export interface IGPUSetBindGroup
  *
  * {@link GPURenderCommandsMixin.setIndexBuffer}
  */
-export interface IGPUSetIndexBuffer
+export interface IGPUIndexBuffer
 {
     /**
      * Buffer containing index data to use for subsequent drawing commands.

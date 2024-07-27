@@ -377,13 +377,13 @@ export class WebGPU
             });
         }
 
-        if (p.indexBuffer)
+        if (p.index)
         {
-            if (passEncoder["_indexBuffer"] !== p.indexBuffer)
+            if (passEncoder["_indexBuffer"] !== p.index)
             {
-                passEncoder["_indexBuffer"] = p.indexBuffer;
+                passEncoder["_indexBuffer"] = p.index;
 
-                const { buffer, indexFormat, offset, size } = p.indexBuffer;
+                const { buffer, indexFormat, offset, size } = p.index;
                 const gBuffer = getGPUBuffer(this.device, buffer);
 
                 passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);

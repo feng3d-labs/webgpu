@@ -20,13 +20,6 @@ export function getIGPURenderObject(device: GPUDevice, renderObject: IGPURenderO
 
     iGPURenderObject.vertexBuffers = vertexBuffers;
 
-    if (renderObject.index)
-    {
-        const buffer = renderObject.index.buffer;
-
-        iGPURenderObject.indexBuffer = { ...renderObject.index, buffer };
-    }
-
     // 计算 bindGroups
     const bindGroups = getIGPUSetBindGroups(pipeline, renderObject.bindingResources, bindingResourceInfoMap);
 
