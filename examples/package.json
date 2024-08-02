@@ -25,7 +25,7 @@
     "dat.gui": "^0.7.6",
     "gl-matrix": "^3.4.3",
     "stanford-dragon": "^1.1.1",
-    "webgpu-renderer": "workspace:*",
+    "webgpu-renderer": "0.0.1",
     "wgpu-matrix": "^1.1.0"
   }
 }
