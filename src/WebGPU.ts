@@ -1,3 +1,4 @@
+import { IWebRenderer } from "@feng3d/renderer-common";
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
@@ -26,7 +27,7 @@ import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultipl
  *
  * 提供 `WebGPU` 操作入口 {@link WebGPU.submit}。
  */
-export class WebGPU
+export class WebGPU implements IWebRenderer
 {
     /**
      * 初始化 WebGPU 获取 GPUDevice 。
