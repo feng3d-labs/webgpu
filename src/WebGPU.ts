@@ -31,7 +31,7 @@ export class WebGPU
     /**
      * 初始化 WebGPU 获取 GPUDevice 。
      */
-    static async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
+    async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
     {
         if (!navigator.gpu)
         {
@@ -46,8 +46,6 @@ export class WebGPU
 
         const device = await adapter?.requestDevice(descriptor);
 
-        const webGPU = new WebGPU(device);
-
         device.lost.then(async (info) =>
         {
             console.error(`WebGPU device was lost: ${info.message}`);
@@ -56,22 +54,32 @@ export class WebGPU
             if (info.reason !== "destroyed")
             {
                 // try again
-                const newWebGPU = await WebGPU.init(options, descriptor);
-                webGPU.device = newWebGPU.device;
+                await this.init(options, descriptor);
             }
         });
 
-        return webGPU;
+        this.device = device;
+
+        return this;
     }
 
     public device: GPUDevice;
 
     /**
-     * 构建 WebGPU 对象。
+     * 默认画布。
      */
-    constructor(device: GPUDevice)
+    private _context: IGPUCanvasContext;
+
+    /**
+     * 使用方法前需要调用init进行初始化。
+     *
+     * 建议使用 `const webgpu = await new WebGPU().init();` 进行初始化。
+     *
+     * @param options
+     */
+    constructor(context?: IGPUCanvasContext)
     {
-        this.device = device;
+        this._context = context;
     }
 
     /**
@@ -98,14 +106,14 @@ export class WebGPU
      *
      * @param renderPassEncoder 渲染通道对象。
      */
-    runRenderPass(renderPassEncoder: IGPURenderPassEncoder, context: IGPUCanvasContext)
+    runRenderPass(renderPassEncoder: IGPURenderPassEncoder)
     {
         // 设置默认画布。
         renderPassEncoder.descriptor.colorAttachments.forEach((v) =>
         {
             if (!v.view)
             {
-                v.view = { texture: { context } };
+                v.view = { texture: { context: this._context } };
             }
         });
 
