@@ -16,7 +16,7 @@ import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
 import { IGPURenderObject } from "./data/IGPURenderObject";
 import { IGPURenderPassDescriptor, IGPURenderPassEncoder } from "./data/IGPURenderPassEncoder";
 import { IGPUSubmit } from "./data/IGPUSubmit";
-import { IGPUTexture } from "./data/IGPUTexture";
+import { IGPUCanvasContext, IGPUTexture } from "./data/IGPUTexture";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -91,6 +91,30 @@ export class WebGPU
         });
 
         this.device.queue.submit(commandBuffers);
+    }
+
+    /**
+     * 单独执行渲染通道。
+     *
+     * @param renderPassEncoder 渲染通道对象。
+     */
+    runRenderPass(renderPassEncoder: IGPURenderPassEncoder, context: IGPUCanvasContext)
+    {
+        // 设置默认画布。
+        renderPassEncoder.descriptor.colorAttachments.forEach((v) =>
+        {
+            if (!v.view)
+            {
+                v.view = { texture: { context } };
+            }
+        });
+
+        //
+        this.submit({
+            commandEncoders: [{
+                passEncoders: [renderPassEncoder],
+            }],
+        });
     }
 
     /**
@@ -280,7 +304,7 @@ export class WebGPU
 
     private renderPass(commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPassEncoder, commands: any[])
     {
-        const renderPassDescriptor = getGPURenderPassDescriptor(this.device, renderPass.renderPass);
+        const renderPassDescriptor = getGPURenderPassDescriptor(this.device, renderPass.descriptor);
 
         commands.push(["beginRenderPass", renderPassDescriptor]);
 
@@ -288,20 +312,17 @@ export class WebGPU
         passEncoder["_bindGroups"] = [];
         passEncoder["_vertexBuffers"] = [];
 
-        const renderPipelines = renderPass.renderObjects;
-        for (let i = 0; i < renderPipelines.length; i++)
+        renderPass.renderObjects?.forEach((element) =>
         {
-            const element = renderPipelines[i];
-
             if (isRenderBundle(element))
             {
-                this.executeBundles(passEncoder, renderPass.renderPass, element, commands);
+                this.executeBundles(passEncoder, renderPass.descriptor, element, commands);
             }
             else
             {
-                this.renderObject(passEncoder, element, renderPass.renderPass, commands);
+                this.renderObject(passEncoder, element, renderPass.descriptor, commands);
             }
-        }
+        });
 
         commands.push(["end"]);
 
@@ -443,7 +464,7 @@ export class WebGPU
 
 function isRenderPass(arg: any): arg is IGPURenderPassEncoder
 {
-    return !!(arg as IGPURenderPassEncoder).renderPass;
+    return !!(arg as IGPURenderPassEncoder).descriptor;
 }
 
 function isComputePass(arg: any): arg is IGPUComputePassEncoder

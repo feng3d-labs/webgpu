@@ -1,5 +1,5 @@
 {
-  "name": "webgpu-renderer",
+  "name": "@feng3d/webgpu-renderer",
   "version": "0.0.1",
   "description": "webgpu渲染库",
   "main": "src/index.ts",
@@ -8,6 +8,7 @@
   "author": "feng",
   "license": "MIT",
   "scripts": {
+    "dev": "cd examples && npm run dev",
     "clean": "rimraf \"{lib,dist,public}\"",
     "build": "vite build",
     "build:w": "vite build -w",
@@ -46,6 +47,7 @@
     "vitest": "^0.32.2"
   },
   "dependencies": {
+    "@feng3d/renderer-common": "0.0.1",
     "@feng3d/event": "^0.8.4",
     "@feng3d/watcher": "^0.8.0",
     "@webgpu/types": "^0.1.38",

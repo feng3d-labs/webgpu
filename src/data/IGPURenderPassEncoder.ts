@@ -14,12 +14,12 @@ export interface IGPURenderPassEncoder
     /**
      * 渲染通道描述。
      */
-    renderPass: IGPURenderPassDescriptor;
+    descriptor: IGPURenderPassDescriptor;
 
     /**
      * 渲染对象列表
      */
-    renderObjects: (IGPURenderObject | IGPURenderBundleObject)[];
+    renderObjects?: (IGPURenderObject | IGPURenderBundleObject)[];
 }
 
 /**
