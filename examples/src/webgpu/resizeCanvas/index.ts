@@ -6,9 +6,9 @@ import styles from "./animatedCanvasSize.module.css";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
-    const renderPass: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [{
             view: { texture: { context: { canvasId: canvas.id } } },
             clearValue: [0.0, 0.0, 0.0, 1.0],
@@ -30,13 +30,13 @@ const init = async (canvas: HTMLCanvasElement) =>
         // 画布尺寸发生变化时更改渲染通道附件尺寸。
         const currentWidth = canvas.clientWidth * devicePixelRatio;
         const currentHeight = canvas.clientHeight * devicePixelRatio;
-        renderPass.attachmentSize = { width: currentWidth, height: currentHeight };
+        renderPassDescriptor.attachmentSize = { width: currentWidth, height: currentHeight };
 
         const data: IGPUSubmit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { renderPass, renderObjects: [renderObject] },
+                        { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
                     ]
                 }
             ],

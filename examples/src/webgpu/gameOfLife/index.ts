@@ -12,7 +12,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     const GameOptions = {
         width: 128,
@@ -141,7 +141,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     }]
                 },
                 {
-                    renderPass,
+                    descriptor: renderPass,
                     renderObjects: [
                         {
                             pipeline: renderPipeline,

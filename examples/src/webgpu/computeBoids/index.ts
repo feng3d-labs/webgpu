@@ -11,7 +11,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     // prettier-ignore
     const vertexBufferData = new Float32Array([
@@ -141,7 +141,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     passEncoders: [
                         { computeObjects: [[computeObject0, computeObject1][t % 2]] },
-                        { renderPass, renderObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
+                        { descriptor: renderPass, renderObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
                     ]
                 }
             ],

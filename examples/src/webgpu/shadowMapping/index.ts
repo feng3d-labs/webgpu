@@ -17,7 +17,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     canvas.height = canvas.clientHeight * devicePixelRatio;
     const aspect = canvas.width / canvas.height;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     // Create the model vertex buffer.
     const vertexBuffer: IGPUBuffer = {
@@ -248,7 +248,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             {
                 passEncoders: [
                     {
-                        renderPass: shadowPassDescriptor,
+                        descriptor: shadowPassDescriptor,
                         renderObjects: [
                             {
                                 pipeline: shadowPipeline,
@@ -263,7 +263,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         ]
                     },
                     {
-                        renderPass: renderPassDescriptor,
+                        descriptor: renderPassDescriptor,
                         renderObjects: [
                             {
                                 pipeline,

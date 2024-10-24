@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   canvas.height = canvas.clientHeight * devicePixelRatio;
   const aspect = canvas.width / canvas.height;
 
-  const webgpu = await WebGPU.init();
+  const webgpu = await new WebGPU().init();
 
   // Create the model vertex buffer.
   const kVertexStride = 8;
@@ -366,7 +366,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const passEncoders: (IGPUComputePassEncoder | IGPURenderPassEncoder)[] = [];
   passEncoders.push({
-    renderPass: writeGBufferPassDescriptor,
+    descriptor: writeGBufferPassDescriptor,
     renderObjects: [
       {
         pipeline: writeGBuffersPipeline,
@@ -394,7 +394,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const gBuffersPassEncoders: (IGPUComputePassEncoder | IGPURenderPassEncoder)[] = passEncoders.concat();
 
   gBuffersPassEncoders.push({
-    renderPass: textureQuadPassDescriptor,
+    descriptor: textureQuadPassDescriptor,
     renderObjects: [
       {
         pipeline: gBuffersDebugViewPipeline,
@@ -407,7 +407,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   });
 
   passEncoders.push({
-    renderPass: textureQuadPassDescriptor,
+    descriptor: textureQuadPassDescriptor,
     renderObjects: [
       {
         pipeline: deferredRenderPipeline,

@@ -15,7 +15,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     const blurPipeline: IGPUComputePipeline = {
         compute: {
@@ -162,7 +162,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const gpuRenderPassEncoder: IGPURenderPassEncoder = {
-        renderPass: renderPassDescriptor,
+        descriptor: renderPassDescriptor,
         renderObjects: [{
             pipeline: fullscreenQuadPipeline1,
             bindingResources: showResultBindGroup1,

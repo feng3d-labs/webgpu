@@ -213,7 +213,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.height = kCanvasSize;
     canvas.style.minWidth = canvas.style.maxWidth = `${kCanvasCSSSize}px`;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     //
     // Initialize test texture
@@ -377,7 +377,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 passEncoders: [
                     {
-                        renderPass,
+                        descriptor: renderPass,
                         renderObjects,
                     }
                 ]

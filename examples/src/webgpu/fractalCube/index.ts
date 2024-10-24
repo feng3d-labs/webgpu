@@ -13,7 +13,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     canvas.height = canvas.clientHeight * devicePixelRatio;
     const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     // We will copy the frame's rendering results into this texture and
     // sample it on the next frame.
@@ -113,7 +113,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             commandEncoders: [
                 {
                     passEncoders: [
-                        { renderPass, renderObjects: [renderObject] },
+                        { descriptor: renderPass, renderObjects: [renderObject] },
                         copyTextureToTexture,
                     ]
                 }

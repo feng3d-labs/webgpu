@@ -1,3 +1,4 @@
+import { IRenderPass } from "@feng3d/renderer-common";
 import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderObject } from "./IGPURenderObject";
 import { IGPUTextureView } from "./IGPUTextureView";
@@ -9,7 +10,7 @@ import { IGPUTextureView } from "./IGPUTextureView";
  *
  * {@link GPURenderPassEncoder}
  */
-export interface IGPURenderPassEncoder
+export interface IGPURenderPassEncoder extends IRenderPass
 {
     /**
      * 渲染通道描述。

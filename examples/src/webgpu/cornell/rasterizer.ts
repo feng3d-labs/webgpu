@@ -78,7 +78,7 @@ export default class Rasterizer
 
     //
     this.renderPassEncoder = {
-      renderPass: this.renderPassDescriptor,
+      descriptor: this.renderPassDescriptor,
       renderObjects: [{
         pipeline: this.pipeline,
         vertices: this.scene.vertexAttributes,

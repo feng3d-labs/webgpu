@@ -35,7 +35,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
 
-  const webgpu = await WebGPU.init();
+  const webgpu = await new WebGPU().init();
   const context: IGPUCanvasContext = {
     canvasId: canvas.id,
   };
@@ -326,7 +326,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     uniformBuffer.writeBuffers = [{ data: transformationMatrix }];
 
     const renderPass: IGPURenderPassEncoder = {
-      renderPass: renderPassDescriptor,
+      descriptor: renderPassDescriptor,
       renderObjects: [],
     };
 

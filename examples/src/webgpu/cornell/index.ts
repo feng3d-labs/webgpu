@@ -38,7 +38,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
 
-  const webgpu = await WebGPU.init(undefined, { requiredFeatures });
+  const webgpu = await new WebGPU().init(undefined, { requiredFeatures });
 
   const framebuffer: IGPUTexture = {
     label: "framebuffer",

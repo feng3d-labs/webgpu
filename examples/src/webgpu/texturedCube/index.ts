@@ -13,7 +13,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     // Fetch the image and upload it into a GPUTexture.
     const img = document.createElement("img");
@@ -107,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             commandEncoders: [
                 {
                     passEncoders: [
-                        { renderPass, renderObjects: [renderObject] },
+                        { descriptor: renderPass, renderObjects: [renderObject] },
                     ]
                 }
             ],

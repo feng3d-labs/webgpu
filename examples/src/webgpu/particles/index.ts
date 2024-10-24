@@ -26,7 +26,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
 
-  const webgpu = await WebGPU.init();
+  const webgpu = await new WebGPU().init();
 
   const particlesBuffer: IGPUBuffer = {
     size: numParticles * particleInstanceByteSize,
@@ -307,7 +307,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       }]
     },
     {
-      renderPass: renderPassDescriptor,
+      descriptor: renderPassDescriptor,
       renderObjects: [{
         pipeline: renderPipeline,
         bindingResources: { ...uniformBindGroup },

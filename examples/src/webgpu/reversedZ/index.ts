@@ -76,7 +76,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const context: IGPUCanvasContext = { canvasId: canvas.id };
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     const verticesBuffer: IGPUBuffer = {
         size: geometryVertexArray.byteLength,
@@ -385,7 +385,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     for (const m of depthBufferModes)
     {
         colorPassEncoders.push({
-            renderPass: {
+            descriptor: {
                 ...drawPassDescriptors[m],
                 depthStencilAttachment: {
                     ...drawPassDescriptors[m].depthStencilAttachment,
@@ -413,7 +413,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     for (const m of depthBufferModes)
     {
         precisionErrorPassEncoders.push({
-            renderPass: {
+            descriptor: {
                 ...depthPrePassDescriptor,
                 depthStencilAttachment: {
                     ...depthPrePassDescriptor.depthStencilAttachment,
@@ -436,7 +436,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }]
         });
         precisionErrorPassEncoders.push({
-            renderPass: {
+            descriptor: {
                 ...drawPassDescriptors[m],
                 depthStencilAttachment: {
                     ...drawPassDescriptors[m].depthStencilAttachment,
@@ -464,7 +464,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     for (const m of depthBufferModes)
     {
         depthBufferPassEncoders.push({
-            renderPass: {
+            descriptor: {
                 ...depthPrePassDescriptor,
                 depthStencilAttachment: {
                     ...depthPrePassDescriptor.depthStencilAttachment,
@@ -487,7 +487,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }]
         });
         depthBufferPassEncoders.push({
-            renderPass: textureQuadPassDescriptors1[m],
+            descriptor: textureQuadPassDescriptors1[m],
             renderObjects: [{
                 pipeline: textureQuadPassPipline,
                 bindingResources: { ...depthTextureBindGroup },

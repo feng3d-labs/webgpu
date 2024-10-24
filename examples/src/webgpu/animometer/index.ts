@@ -27,7 +27,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     const vec4Size = 4 * Float32Array.BYTES_PER_ELEMENT;
 
@@ -163,14 +163,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             if (settings.renderBundles)
             {
                 renderPasss[0] = {
-                    renderPass,
+                    descriptor: renderPass,
                     renderObjects: [renderBundle],
                 };
             }
             else
             {
                 renderPasss[0] = {
-                    renderPass,
+                    descriptor: renderPass,
                     renderObjects,
                 };
             }

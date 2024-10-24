@@ -13,9 +13,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
-    const renderPass: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -135,7 +135,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             commandEncoders: [
                 {
                     passEncoders: [
-                        { renderPass, renderObjects: [renderObject, renderObject1] },
+                        { descriptor: renderPassDescriptor, renderObjects: [renderObject, renderObject1] },
                     ]
                 }
             ],
