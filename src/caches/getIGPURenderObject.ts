@@ -1,5 +1,5 @@
 import { IGPURenderObject } from "../data/IGPURenderObject";
-import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
+import { IGPURenderPassDescriptor } from "../data/IGPURenderPass";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 

@@ -9,7 +9,7 @@ export * from "./data/IGPUComputePassEncoder";
 export * from "./data/IGPUCopyTextureToTexture";
 export * from "./data/IGPURenderBundleObject";
 export * from "./data/IGPURenderObject";
-export * from "./data/IGPURenderPassEncoder";
+export * from "./data/IGPURenderPass";
 export * from "./data/IGPUSampler";
 export * from "./data/IGPUSubmit";
 export * from "./data/IGPUTexture";

@@ -15,7 +15,7 @@ import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
 import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPassDescriptor, IGPURenderPass } from "./data/IGPURenderPassEncoder";
+import { IGPURenderPassDescriptor, IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUCanvasContext, IGPUTexture } from "./data/IGPUTexture";
 import { copyDepthTexture } from "./utils/copyDepthTexture";

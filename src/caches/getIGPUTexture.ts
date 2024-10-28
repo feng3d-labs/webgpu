@@ -1,4 +1,4 @@
-import { IAttachmentSize } from "../data/IGPURenderPassEncoder";
+import { IAttachmentSize } from "../data/IGPURenderPass";
 import { IGPUTexture, IGPUTextureFromContext, IGPUTextureSize } from "../data/IGPUTexture";
 import { getGPUTexture } from "./getGPUTexture";
 

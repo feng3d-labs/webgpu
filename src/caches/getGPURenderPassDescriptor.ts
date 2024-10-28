@@ -1,4 +1,4 @@
-import { IGPURenderPassDescriptor, IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassEncoder";
+import { IGPURenderPassDescriptor, IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPass";
 import { IGPUTexture } from "../data/IGPUTexture";
 import { setIGPUTextureSize } from "./getGPUTexture";
 import { getGPUTextureView } from "./getGPUTextureView";

@@ -160,7 +160,7 @@ export function getIGPUComputeStage(computeStage: IGPUProgrammableStage)
 const computeStateMap = new Map<IGPUProgrammableStage, IGPUComputeStage>();
 
 import { IGPURenderBundleEncoderDescriptor } from "../data/IGPURenderBundleObject";
-import { IGPURenderPassDescriptor } from "../data/IGPURenderPassEncoder";
+import { IGPURenderPassDescriptor } from "../data/IGPURenderPass";
 import { getIRenderPassFormats } from "./getIGPURenderPass";
 
 export function getGPURenderBundleEncoderDescriptor(device: GPUDevice, renderBundleEncoderDescriptor: IGPURenderBundleEncoderDescriptor, renderPass: IGPURenderPassDescriptor)
