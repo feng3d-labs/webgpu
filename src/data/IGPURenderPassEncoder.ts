@@ -1,7 +1,8 @@
-import { IRenderPass } from "@feng3d/renderer-common";
+import { IPassDescriptor, IRenderPass } from "@feng3d/renderer-common";
 import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderObject } from "./IGPURenderObject";
 import { IGPUTextureView } from "./IGPUTextureView";
+import { IRenderPassColorAttachment } from "@feng3d/renderer-common/src/data/IRenderPassColorAttachment";
 
 /**
  * GPU渲染通道编码器。
@@ -28,7 +29,7 @@ export interface IGPURenderPassEncoder extends IRenderPass
  *
  * {@link GPURenderPassDescriptor}
  */
-export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, "colorAttachments" | "depthStencilAttachment">
+export interface IGPURenderPassDescriptor extends IPassDescriptor, Omit<GPURenderPassDescriptor, "colorAttachments" | "depthStencilAttachment">
 {
     /**
      * The set of {@link GPURenderPassColorAttachment} values in this sequence defines which
@@ -76,7 +77,7 @@ export interface IAttachmentSize
  *
  * {@link GPURenderPassColorAttachment}
  */
-export interface IGPURenderPassColorAttachment extends Omit<GPURenderPassColorAttachment, "view" | "resolveTarget" | "loadOp" | "storeOp">
+export interface IGPURenderPassColorAttachment extends IRenderPassColorAttachment, Omit<GPURenderPassColorAttachment, "view" | "resolveTarget" | "loadOp" | "storeOp">
 {
     /**
      * A {@link GPUTextureView} describing the texture subresource that will be output to for this
