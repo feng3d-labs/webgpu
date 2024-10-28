@@ -1,4 +1,3 @@
-import { IWebRenderer } from "@feng3d/renderer-common";
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
@@ -15,9 +14,10 @@ import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
 import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPassDescriptor, IGPURenderPass } from "./data/IGPURenderPass";
+import { IGPURenderPass } from "./data/IGPURenderPass";
+import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
-import { IGPUCanvasContext, IGPUTexture } from "./data/IGPUTexture";
+import { IGPUTexture } from "./data/IGPUTexture";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -27,7 +27,7 @@ import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultipl
  *
  * 提供 `WebGPU` 操作入口 {@link WebGPU.submit}。
  */
-export class WebGPU implements IWebRenderer
+export class WebGPU
 {
     /**
      * 初始化 WebGPU 获取 GPUDevice 。
@@ -67,23 +67,6 @@ export class WebGPU implements IWebRenderer
     public device: GPUDevice;
 
     /**
-     * 默认画布。
-     */
-    private _context: IGPUCanvasContext;
-
-    /**
-     * 使用方法前需要调用init进行初始化。
-     *
-     * 建议使用 `const webgpu = await new WebGPU().init();` 进行初始化。
-     *
-     * @param options
-     */
-    constructor(context?: IGPUCanvasContext)
-    {
-        this._context = context;
-    }
-
-    /**
      * 提交 GPU 。
      *
      * @param data 一次 GPU 提交内容。
@@ -100,30 +83,6 @@ export class WebGPU implements IWebRenderer
         });
 
         this.device.queue.submit(commandBuffers);
-    }
-
-    /**
-     * 单独执行渲染通道。
-     *
-     * @param renderPassEncoder 渲染通道对象。
-     */
-    runRenderPass(renderPassEncoder: IGPURenderPass)
-    {
-        // 设置默认画布。
-        renderPassEncoder.descriptor.colorAttachments.forEach((v) =>
-        {
-            if (!v.view)
-            {
-                v.view = { texture: { context: this._context } };
-            }
-        });
-
-        //
-        this.submit({
-            commandEncoders: [{
-                passEncoders: [renderPassEncoder],
-            }],
-        });
     }
 
     /**
