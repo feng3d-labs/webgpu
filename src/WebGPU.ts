@@ -15,7 +15,7 @@ import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
 import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPassDescriptor, IGPURenderPassEncoder } from "./data/IGPURenderPassEncoder";
+import { IGPURenderPassDescriptor, IGPURenderPass } from "./data/IGPURenderPassEncoder";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUCanvasContext, IGPUTexture } from "./data/IGPUTexture";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
@@ -107,7 +107,7 @@ export class WebGPU implements IWebRenderer
      *
      * @param renderPassEncoder 渲染通道对象。
      */
-    runRenderPass(renderPassEncoder: IGPURenderPassEncoder)
+    runRenderPass(renderPassEncoder: IGPURenderPass)
     {
         // 设置默认画布。
         renderPassEncoder.descriptor.colorAttachments.forEach((v) =>
@@ -311,7 +311,7 @@ export class WebGPU implements IWebRenderer
         commands.push(["dispatchWorkgroups", workgroupCountX, workgroupCountY, workgroupCountZ]);
     }
 
-    private renderPass(commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPassEncoder, commands: any[])
+    private renderPass(commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass, commands: any[])
     {
         const renderPassDescriptor = getGPURenderPassDescriptor(this.device, renderPass.descriptor);
 
@@ -471,9 +471,9 @@ export class WebGPU implements IWebRenderer
     }
 }
 
-function isRenderPass(arg: any): arg is IGPURenderPassEncoder
+function isRenderPass(arg: any): arg is IGPURenderPass
 {
-    return !!(arg as IGPURenderPassEncoder).descriptor;
+    return !!(arg as IGPURenderPass).descriptor;
 }
 
 function isComputePass(arg: any): arg is IGPUComputePassEncoder

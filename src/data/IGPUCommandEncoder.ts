@@ -1,7 +1,7 @@
 import { IGPUComputePassEncoder } from "./IGPUComputePassEncoder";
 import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./IGPUCopyTextureToTexture";
-import { IGPURenderPassEncoder } from "./IGPURenderPassEncoder";
+import { IGPURenderPass } from "./IGPURenderPassEncoder";
 
 /**
  * 命令编码器。
@@ -26,4 +26,4 @@ export interface IGPUCommandEncoder
  *
  * 通道可以理解为源数据通过某种操作到目标数据的映射，该操作可以是计算模块、也可以是渲染模块、也可以是简单的拷贝或者转换。
  */
-export type IGPUPassEncoder = IGPUComputePassEncoder | IGPURenderPassEncoder | IGPUCopyTextureToTexture | IGPUCopyBufferToBuffer;
+export type IGPUPassEncoder = IGPUComputePassEncoder | IGPURenderPass | IGPUCopyTextureToTexture | IGPUCopyBufferToBuffer;

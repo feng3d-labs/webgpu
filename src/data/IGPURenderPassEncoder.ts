@@ -11,7 +11,7 @@ import { IRenderPassColorAttachment } from "@feng3d/renderer-common/src/data/IRe
  *
  * {@link GPURenderPassEncoder}
  */
-export interface IGPURenderPassEncoder extends IRenderPass
+export interface IGPURenderPass extends IRenderPass
 {
     /**
      * 渲染通道描述。
