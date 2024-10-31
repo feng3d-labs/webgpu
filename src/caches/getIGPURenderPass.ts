@@ -1,5 +1,9 @@
 import { watcher } from "@feng3d/watcher";
-import { IAttachmentSize, IGPURenderPassColorAttachment, IGPURenderPassDepthStencilAttachment, IGPURenderPassDescriptor } from "../data/IGPURenderPass";
+
+import { IAttachmentSize } from "../data/IAttachmentSize";
+import { IGPURenderPassColorAttachment } from "../data/IGPURenderPassColorAttachment";
+import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
+import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPUTexture } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { updateIGPURenderPassAttachmentSize } from "./getGPURenderPassDescriptor";

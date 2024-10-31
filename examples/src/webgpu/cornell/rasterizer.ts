@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUCommandEncoder, IGPUTexture, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPUTexture, IGPURenderPassDescriptor, IGPURenderPass, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -91,7 +91,7 @@ export default class Rasterizer
       }],
     };
   }
-  private renderPassEncoder: IGPURenderPassEncoder;
+  private renderPassEncoder: IGPURenderPass;
 
   encode(commandEncoder: IGPUCommandEncoder)
   {

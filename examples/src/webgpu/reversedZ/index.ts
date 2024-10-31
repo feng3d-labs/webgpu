@@ -10,7 +10,7 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPassEncoder, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -380,7 +380,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
     gui.add(settings, "mode", ["color", "precision-error", "depth-texture"]);
 
-    const colorPassEncoders: IGPURenderPassEncoder[] = [];
+    const colorPassEncoders: IGPURenderPass[] = [];
 
     for (const m of depthBufferModes)
     {
@@ -409,7 +409,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    const precisionErrorPassEncoders: IGPURenderPassEncoder[] = [];
+    const precisionErrorPassEncoders: IGPURenderPass[] = [];
     for (const m of depthBufferModes)
     {
         precisionErrorPassEncoders.push({
@@ -460,7 +460,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    const depthBufferPassEncoders: IGPURenderPassEncoder[] = [];
+    const depthBufferPassEncoders: IGPURenderPass[] = [];
     for (const m of depthBufferModes)
     {
         depthBufferPassEncoders.push({
@@ -512,7 +512,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         writeBuffers.push({ data: mvpMatricesData });
         uniformBuffer.writeBuffers = writeBuffers;
 
-        let passEncoders: IGPURenderPassEncoder[];
+        let passEncoders: IGPURenderPass[];
 
         if (settings.mode === "color")
         {

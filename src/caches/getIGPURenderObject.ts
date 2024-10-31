@@ -1,5 +1,4 @@
 import { IGPURenderObject } from "../data/IGPURenderObject";
-import { IGPURenderPassDescriptor } from "../data/IGPURenderPass";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 
@@ -39,6 +38,7 @@ import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 import { getIRenderPassColorAttachmentFormats, getIRenderPassDepthStencilAttachmentFormats } from "./getIGPURenderPass";
 import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
+import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。

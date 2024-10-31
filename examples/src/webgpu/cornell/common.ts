@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUBuffer } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer } from "@feng3d/webgpu-renderer";
 import { mat4, vec3 } from "wgpu-matrix";
 import commonWGSL from "./common.wgsl";
 

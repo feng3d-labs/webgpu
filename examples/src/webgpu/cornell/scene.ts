@@ -1,4 +1,4 @@
-import { IGPUBuffer, IGPUVertexAttributes } from "webgpu-renderer";
+import { IGPUBuffer, IGPUVertexAttributes } from "@feng3d/webgpu-renderer";
 import { vec3 } from "wgpu-matrix";
 type Vec3 = vec3.default;
 
