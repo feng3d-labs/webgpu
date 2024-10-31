@@ -8,29 +8,32 @@
   "author": "feng",
   "license": "MIT",
   "scripts": {
+    "dev": "cd examples && npm run dev",
     "clean": "rimraf \"{lib,dist,public}\"",
     "build": "vite build",
-    "build:w": "vite build -w",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "types": "tsc",
     "watch": "tsc -w",
     "lint": "eslint --ext .js --ext .ts src test examples/src --ignore-path .gitignore --max-warnings 0",
     "lintfix": "npm run lint -- --fix",
-    "docs": "typedoc",
-    "examples": "cd examples && npm run build",
+    "docs": "typedoc && cd examples && vite build --outDir ../public",
     "release": "npm run clean && npm run lint && npm run docs && npm run build && npm run types && npm publish",
     "prepublishOnly": "node scripts/prepublish.js",
     "postpublish": "node scripts/postpublish.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/feng3d/webgpu-renderer.git"
+    "url": "https://gitee.com/feng3d/webgpu-renderer.git"
   },
   "files": [
     "dist/",
     "lib",
     "src"
+  ],
+  "workspaces": [
+    ".",
+    "./examples"
   ],
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.17.0",
@@ -49,7 +52,6 @@
     "@feng3d/event": "^0.8.4",
     "@feng3d/watcher": "^0.8.0",
     "@webgpu/types": "^0.1.38",
-    "webgpu-data-driven": "^0.0.1",
     "wgsl_reflect": "^0.1.1"
   }
 }

@@ -21,6 +21,6 @@
         "outDir": "lib"
     },
     "include": [
-        "src/**/*.ts", "../webgpu-data-driven/src/utils/textureInvertYPremultiplyAlpha.ts",
+        "src/**/*.ts"
     ]
 }
