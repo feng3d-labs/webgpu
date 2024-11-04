@@ -2,17 +2,17 @@ import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { getIGPUComputePipeline } from "./getIGPUComputePipeline";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 
-export function getIGPUComputeObject(renderObject: IGPUComputeObject)
+export function getIGPUComputeObject(computeObject: IGPUComputeObject)
 {
-    const { gpuComputePipeline, bindingResourceInfoMap } = getIGPUComputePipeline(renderObject.pipeline);
+    const { gpuComputePipeline, bindingResourceInfoMap } = getIGPUComputePipeline(computeObject.pipeline);
 
     const gpuComputeObject: IGPUComputeObject = {
-        ...renderObject,
+        ...computeObject,
         pipeline: gpuComputePipeline,
     };
 
     // 计算 bindGroups
-    const bindGroups = getIGPUSetBindGroups(gpuComputePipeline, renderObject.bindingResources, bindingResourceInfoMap);
+    const bindGroups = getIGPUSetBindGroups(gpuComputePipeline, computeObject.bindingResources, bindingResourceInfoMap);
 
     gpuComputeObject.bindGroups = bindGroups;
 

@@ -7,7 +7,7 @@ import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUComputeObject } from "./caches/getIGPUComputeObject";
 import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
 import { getIGPUCopyTextureToTexture } from "./caches/getIGPUCopyTextureToTexture";
-import { getIGPURenderBundleEncoderDescriptor } from "./caches/getIGPURenderBundleEncoderDescriptor";
+import { getGPURenderBundleEncoderDescriptor } from "./caches/getIGPURenderBundleEncoderDescriptor";
 import { getIGPURenderObject } from "./caches/getIGPURenderObject";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
@@ -272,15 +272,13 @@ export class WebGPU
         if (!gRenderBundle)
         {
             //
-            const renderBundle = getIGPURenderBundleEncoderDescriptor(this.device, renderBundleObject.renderBundle, renderPass);
+            const renderBundle = getGPURenderBundleEncoderDescriptor(this.device, renderBundleObject.renderBundle, renderPass);
 
             const renderBundleEncoder = this.device.createRenderBundleEncoder(renderBundle);
-
-            const renderObjects = renderBundleObject.renderObjects;
-            for (let i = 0; i < renderObjects.length; i++)
+            renderBundleObject.renderObjects.forEach((renderObject) =>
             {
-                this.renderObject(renderBundleEncoder, renderObjects[i], renderPass);
-            }
+                this.renderObject(renderBundleEncoder, renderObject, renderPass);
+            });
 
             gRenderBundle = renderBundleEncoder.finish();
             renderBundleObject._GPURenderBundle = gRenderBundle;

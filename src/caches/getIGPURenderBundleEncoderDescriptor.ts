@@ -3,12 +3,12 @@ import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { getIRenderPassColorAttachmentFormats } from "./getIRenderPassColorAttachmentFormats";
 import { getIRenderPassDepthStencilAttachmentFormats } from "./getIRenderPassDepthStencilAttachmentFormats";
 
-export function getIGPURenderBundleEncoderDescriptor(device: GPUDevice, renderBundleEncoderDescriptor: IGPURenderBundleEncoderDescriptor, renderPass: IGPURenderPassDescriptor)
+export function getGPURenderBundleEncoderDescriptor(device: GPUDevice, renderBundleEncoderDescriptor: IGPURenderBundleEncoderDescriptor, renderPass: IGPURenderPassDescriptor)
 {
     // 获取渲染通道附件纹理格式。
     const { colorAttachmentTextureFormats, depthStencilAttachmentTextureFormat } = getIRenderPassFormats(device, renderPass);
 
-    const renderBundle: IGPURenderBundleEncoderDescriptor = {
+    const renderBundle: GPURenderBundleEncoderDescriptor = {
         ...renderBundleEncoderDescriptor,
         colorFormats: colorAttachmentTextureFormats,
         depthStencilFormat: depthStencilAttachmentTextureFormat,
