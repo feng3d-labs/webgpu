@@ -7,7 +7,8 @@ import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
-import { getIRenderPassColorAttachmentFormats, getIRenderPassDepthStencilAttachmentFormats } from "./getIGPURenderPass";
+import { getIRenderPassColorAttachmentFormats } from "./getIRenderPassColorAttachmentFormats";
+import { getIRenderPassDepthStencilAttachmentFormats } from "./getIRenderPassDepthStencilAttachmentFormats";
 import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**

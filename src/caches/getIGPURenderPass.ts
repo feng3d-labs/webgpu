@@ -6,8 +6,8 @@ import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDept
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
-import { getGPUTextureSize, setITextureSize } from "./getIGPUTexture";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
+import { getGPUTextureSize } from "./getIGPUTexture";
 
 /**
  * 获取完整的渲染通道描述。
@@ -103,7 +103,7 @@ function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[]
  * @param renderPass 渲染通道描述。
  * @param attachmentSize 附件尺寸。
  */
-export function updateIGPURenderPassAttachmentSize(renderPass: IGPURenderPassDescriptor, attachmentSize: { width: number; height: number; })
+function updateIGPURenderPassAttachmentSize(renderPass: IGPURenderPassDescriptor, attachmentSize: { width: number; height: number; })
 {
     const attachmentTextures = getIGPURenderPassAttachmentTextures(renderPass.colorAttachments, renderPass.depthStencilAttachment);
     attachmentTextures.forEach((v) => setIGPUTextureSize(v, attachmentSize));
@@ -176,60 +176,6 @@ function getIGPURenderPassAttachmentTextures(colorAttachments: IGPURenderPassCol
     }
 
     return textures;
-}
-
-/**
- * 获取渲染通道附件纹理格式。
- *
- * @param renderPass 渲染通道。
- * @returns 渲染通道附件纹理格式。
- */
-export function getIRenderPassFormats(device: GPUDevice, renderPass: IGPURenderPassDescriptor)
-{
-    const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(device, renderPass);
-
-    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormats(device, renderPass);
-
-    return { colorAttachmentTextureFormats, depthStencilAttachmentTextureFormat };
-}
-
-/**
- * 获取渲染通道深度模板附件纹理格式。
- *
- * @param renderPass 渲染通道。
- * @returns 渲染通道深度模板附件纹理格式。
- */
-export function getIRenderPassDepthStencilAttachmentFormats(device: GPUDevice, renderPass: IGPURenderPassDescriptor)
-{
-    const gpuRenderPass = getIGPURenderPass(device, renderPass);
-
-    let depthStencilAttachmentTextureFormat: GPUTextureFormat;
-    if (gpuRenderPass.depthStencilAttachment)
-    {
-        depthStencilAttachmentTextureFormat = getGPUTextureFormat(device, gpuRenderPass.depthStencilAttachment.view.texture);
-    }
-
-    return depthStencilAttachmentTextureFormat;
-}
-
-/**
- * 获取渲染通道颜色附件纹理格式。
- *
- * @param renderPass 渲染通道。
- * @returns 渲染通道颜色附件纹理格式。
- */
-export function getIRenderPassColorAttachmentFormats(device: GPUDevice, renderPass: IGPURenderPassDescriptor)
-{
-    const gpuRenderPass = getIGPURenderPass(device, renderPass);
-
-    const colorAttachmentTextureFormats = gpuRenderPass.colorAttachments.map((v) =>
-    {
-        if (!v) return undefined;
-
-        return getGPUTextureFormat(device, v.view.texture);
-    });
-
-    return colorAttachmentTextureFormats;
 }
 
 /**
@@ -362,4 +308,36 @@ function updateAttachmentSize(device: GPUDevice, renderPass: IGPURenderPassDescr
         renderPass.attachmentSize = { width: textureSize[0], height: textureSize[1] };
     }
     attachmentTextures.forEach((v) => setITextureSize(v, renderPass.attachmentSize));
+}
+
+/**
+ * 设置纹理与附件相同尺寸。
+ *
+ * @param texture 纹理描述。
+ * @param attachmentSize 附件尺寸。
+ */
+function setITextureSize(texture: IGPUTexture, attachmentSize: IGPURenderPassAttachmentSize)
+{
+    if ((texture as IGPUTextureFromContext).context)
+    {
+        texture = texture as IGPUTextureFromContext;
+
+        const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
+        console.assert(!!element, `在 document 上没有找到 canvasId 为 ${texture.context.canvasId} 的画布。`);
+        element.width = attachmentSize.width;
+        element.height = attachmentSize.height;
+    }
+    else
+    {
+        texture = texture as IGPUTextureBase;
+
+        if (texture.size[2])
+        {
+            texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
+        }
+        else
+        {
+            texture.size = [attachmentSize.width, attachmentSize.height];
+        }
+    }
 }
