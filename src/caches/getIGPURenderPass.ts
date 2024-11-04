@@ -1,6 +1,6 @@
 import { watcher } from "@feng3d/watcher";
 
-import { IAttachmentSize } from "../data/IAttachmentSize";
+import { IGPURenderPassAttachmentSize } from "../data/IGPURenderPassAttachmentSize";
 import { IGPURenderPassColorAttachment } from "../data/IGPURenderPassColorAttachment";
 import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
@@ -190,7 +190,7 @@ const multisampleTextureMap = new WeakMap<IGPUTexture, IGPUTextureView>();
  * @param multisample 多重采样次数。
  * @returns 深度模板附件完整描述。
  */
-function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: IAttachmentSize, multisample: number)
+function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: IGPURenderPassAttachmentSize, multisample: number)
 {
     let gpuDepthStencilAttachment: IGPURenderPassDepthStencilAttachment;
     if (depthStencilAttachment)

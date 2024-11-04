@@ -1,4 +1,4 @@
-import { IAttachmentSize } from "../data/IAttachmentSize";
+import { IGPURenderPassAttachmentSize } from "../data/IGPURenderPassAttachmentSize";
 import { IGPUTexture, IGPUTextureFromContext, IGPUTextureSize } from "../data/IGPUTexture";
 import { getGPUTexture } from "./getGPUTexture";
 
@@ -28,7 +28,7 @@ export function getGPUTextureSize(device: GPUDevice, texture: IGPUTexture)
  * @param texture 纹理描述。
  * @param attachmentSize 附件尺寸。
  */
-export function setITextureSize(texture: IGPUTexture, attachmentSize: IAttachmentSize)
+export function setITextureSize(texture: IGPUTexture, attachmentSize: IGPURenderPassAttachmentSize)
 {
     if (isITextureFromContext(texture))
     {
