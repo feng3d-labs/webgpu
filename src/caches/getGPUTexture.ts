@@ -157,49 +157,6 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
 
 const textureMap = new Map<IGPUTexture, GPUTexture>();
 
-export function isFromContext(arg: IGPUTexture): arg is IGPUTextureFromContext
-{
-    return !!(arg as IGPUTextureFromContext).context;
-}
-
-/**
- * 获取纹理格式。
- *
- * @param texture 纹理。
- * @returns 纹理格式。
- */
-export function getGPUTextureFormat(device: GPUDevice, texture: IGPUTexture)
-{
-    const gpuTexture = getGPUTexture(device, texture);
-
-    return gpuTexture.format;
-}
-
-/**
- * 设置纹理与附件相同尺寸。
- *
- * @param texture 纹理描述。
- * @param attachmentSize 附件尺寸。
- */
-export function setIGPUTextureSize(texture: IGPUTexture, attachmentSize: { width: number, height: number })
-{
-    if (isFromContext(texture))
-    {
-        const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
-        element.width = attachmentSize.width;
-        element.height = attachmentSize.height;
-    }
-    else
-        if (texture.size[2])
-        {
-            texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
-        }
-        else
-        {
-            texture.size = [attachmentSize.width, attachmentSize.height];
-        }
-}
-
 /**
  * 获取 {@link GPUTexture} 数量。
  */

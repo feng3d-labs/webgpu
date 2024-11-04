@@ -4,10 +4,10 @@ import { IGPURenderPassAttachmentSize } from "../data/IGPURenderPassAttachmentSi
 import { IGPURenderPassColorAttachment } from "../data/IGPURenderPassColorAttachment";
 import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
-import { IGPUTexture } from "../data/IGPUTexture";
+import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
-import { getGPUTextureFormat, setIGPUTextureSize } from "./getGPUTexture";
 import { getGPUTextureSize, setITextureSize } from "./getIGPUTexture";
+import { getGPUTextureFormat } from "./getGPUTextureFormat";
 
 /**
  * 获取完整的渲染通道描述。
@@ -107,6 +107,36 @@ export function updateIGPURenderPassAttachmentSize(renderPass: IGPURenderPassDes
 {
     const attachmentTextures = getIGPURenderPassAttachmentTextures(renderPass.colorAttachments, renderPass.depthStencilAttachment);
     attachmentTextures.forEach((v) => setIGPUTextureSize(v, attachmentSize));
+}
+
+
+/**
+ * 设置纹理与附件相同尺寸。
+ *
+ * @param texture 纹理描述。
+ * @param attachmentSize 附件尺寸。
+ */
+function setIGPUTextureSize(texture: IGPUTexture, attachmentSize: { width: number, height: number })
+{
+    if ((texture as IGPUTextureFromContext).context)
+    {
+        texture = texture as IGPUTextureFromContext;
+        const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
+        element.width = attachmentSize.width;
+        element.height = attachmentSize.height;
+    }
+    else
+    {
+        texture = texture as IGPUTextureBase;
+        if (texture.size[2])
+        {
+            texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
+        }
+        else
+        {
+            texture.size = [attachmentSize.width, attachmentSize.height];
+        }
+    }
 }
 
 /**

@@ -1,12 +1,12 @@
 import { watcher } from "@feng3d/watcher";
 import { IGPUBindGroup, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroup";
 import { IGPUSampler } from "../data/IGPUSampler";
+import { IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 import { getGPUBufferBinding } from "./getGPUBufferBinding";
 import { getGPUExternalTexture } from "./getGPUExternalTexture";
 import { getGPUSampler } from "./getGPUSampler";
-import { isFromContext } from "./getGPUTexture";
 import { getGPUTextureView, gpuTextureViewEventEmitter } from "./getGPUTextureView";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
@@ -43,7 +43,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
             {
                 const iGPUTextureView = v.resource as IGPUTextureView;
                 resource = getGPUTextureView(device, iGPUTextureView);
-                if (isFromContext(iGPUTextureView.texture))
+                if ((iGPUTextureView.texture as IGPUTextureFromContext).context)
                 {
                     hasContextTexture = true;
                 }

@@ -1,6 +1,7 @@
 import { AnyEmitter, anyEmitter } from "@feng3d/event";
+import { IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
-import { getGPUTexture, gpuTextureEventEmitter, isFromContext } from "./getGPUTexture";
+import { getGPUTexture, gpuTextureEventEmitter } from "./getGPUTexture";
 
 /**
  * GPUTexture 相关事件。
@@ -20,7 +21,7 @@ export const gpuTextureViewEventEmitter: AnyEmitter<GPUTextureView, IGPUTextureV
 
 export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
 {
-    if (isFromContext(view.texture))
+    if ((view.texture as IGPUTextureFromContext).context)
     {
         const texture = getGPUTexture(device, view.texture);
 
