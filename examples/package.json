@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.6",
-    "@webgpu/types": "0.1.38",
+    "@webgpu/types": "0.1.49",
     "fast-glob": "^3.2.12",
     "fs-extra": "^10.1.0",
     "rimraf": "3.0.2",
