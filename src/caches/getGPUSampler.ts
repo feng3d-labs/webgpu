@@ -36,13 +36,3 @@ export function getGPUSampler(device: GPUDevice, sampler: IGPUSampler)
     return gSampler;
 }
 const samplerMap = new WeakMap<IGPUSampler, GPUSampler>();
-
-export function deleteGPUSampler(device: GPUDevice, sampler: IGPUSampler)
-{
-    samplerMap.delete(sampler);
-}
-
-export function isSampler(arg: any): arg is IGPUSampler
-{
-    return true;
-}

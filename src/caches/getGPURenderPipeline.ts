@@ -40,8 +40,3 @@ export function getGPURenderPipeline(device: GPUDevice, descriptor: IGPURenderPi
 }
 
 const pipelineMap = new Map<IGPURenderPipeline, GPURenderPipeline>();
-
-export function isRenderPipeline(arg: any): arg is IGPURenderPipeline
-{
-    return !!(arg as IGPURenderPipeline).vertex;
-}

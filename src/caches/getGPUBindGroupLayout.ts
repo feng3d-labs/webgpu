@@ -1,6 +1,8 @@
 import { IGPUBindGroupLayout, IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutFromPipeline } from "../data/IGPUBindGroup";
+import { IGPUComputePipeline } from "../data/IGPUComputeObject";
+import { IGPURenderPipeline } from "../data/IGPURenderObject";
 import { getGPUComputePipeline } from "./getGPUComputePipeline";
-import { getGPURenderPipeline, isRenderPipeline } from "./getGPURenderPipeline";
+import { getGPURenderPipeline } from "./getGPURenderPipeline";
 
 export function getGPUBindGroupLayout(device: GPUDevice, layout: IGPUBindGroupLayout)
 {
@@ -12,13 +14,15 @@ export function getGPUBindGroupLayout(device: GPUDevice, layout: IGPUBindGroupLa
     {
         layout = layout as IGPUBindGroupLayoutFromPipeline;
         let pipeline: GPUPipelineBase;
-        if (isRenderPipeline(layout.pipeline))
+        if ((layout.pipeline as IGPURenderPipeline).vertex)
         {
-            pipeline = getGPURenderPipeline(device, layout.pipeline);
+            const iGPURenderPipeline = layout.pipeline as IGPURenderPipeline;
+            pipeline = getGPURenderPipeline(device, iGPURenderPipeline);
         }
         else
         {
-            pipeline = getGPUComputePipeline(device, layout.pipeline);
+            const iGPUComputePipeline = layout.pipeline as IGPUComputePipeline;
+            pipeline = getGPUComputePipeline(device, iGPUComputePipeline);
         }
 
         gpuBindGroupLayout = pipeline.getBindGroupLayout(layout.index);
