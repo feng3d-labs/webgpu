@@ -1,6 +1,23 @@
+import { AnyEmitter, anyEmitter } from "@feng3d/event";
 import { IGPUBindingResource } from "../data/IGPUBindGroup";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { getGPUTexture, gpuTextureEventEmitter, isFromContext } from "./getGPUTexture";
+
+/**
+ * GPUTexture 相关事件。
+ */
+interface IGPUTextureViewEvent
+{
+    /**
+     * 销毁事件。
+     */
+    "destroy": undefined;
+}
+
+/**
+ * GPUTexture 事件派发器。
+ */
+export const gpuTextureViewEventEmitter: AnyEmitter<GPUTextureView, IGPUTextureViewEvent> = <any>anyEmitter;
 
 export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
 {
@@ -25,6 +42,7 @@ export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
     gpuTextureEventEmitter.once(gpuTexture, "destroy", () =>
     {
         textureViewMap.delete(view);
+        gpuTextureViewEventEmitter.emit(textureView, "destroy");
     });
 
     return textureView;

@@ -5,7 +5,7 @@ import { getGPUBufferBinding, isBufferBinding } from "./getGPUBufferBinding";
 import { getGPUExternalTexture, isExternalTexture } from "./getGPUExternalTexture";
 import { getGPUSampler, isSampler } from "./getGPUSampler";
 import { isFromContext } from "./getGPUTexture";
-import { getGPUTextureView, isTextureView } from "./getGPUTextureView";
+import { getGPUTextureView, gpuTextureViewEventEmitter, isTextureView } from "./getGPUTextureView";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
 {
@@ -43,6 +43,10 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
                 {
                     hasContextTexture = true;
                 }
+                gpuTextureViewEventEmitter.once(resource, "destroy", () =>
+                {
+                    bindGroupMap.delete(bindGroup);
+                });
             }
             else if (isExternalTexture(v.resource))
             {
