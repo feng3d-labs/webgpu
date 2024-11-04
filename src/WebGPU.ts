@@ -12,7 +12,7 @@ import { getIGPURenderObject } from "./caches/getIGPURenderObject";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
-import { IGPUComputePassEncoder } from "./data/IGPUComputePassEncoder";
+import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
@@ -165,9 +165,9 @@ export class WebGPU
             {
                 this.renderPass(gpuCommandEncoder, v as IGPURenderPass, commands);
             }
-            else if ((v as IGPUComputePassEncoder).computeObjects)
+            else if ((v as IGPUComputePass).computeObjects)
             {
-                v = getIComputePassEncoder(v as IGPUComputePassEncoder);
+                v = getIComputePassEncoder(v as IGPUComputePass);
                 this.computePass(gpuCommandEncoder, v, commands);
             }
             else if ((v as IGPUCopyTextureToTexture).source?.texture)
@@ -237,10 +237,10 @@ export class WebGPU
         );
     }
 
-    private computePass(commandEncoder: GPUCommandEncoder, v: IGPUComputePassEncoder, commands: any[])
+    private computePass(commandEncoder: GPUCommandEncoder, v: IGPUComputePass, commands: any[])
     {
-        const passEncoder = commandEncoder.beginComputePass(v.computePass);
-        commands.push(["beginComputePass", v.computePass]);
+        const passEncoder = commandEncoder.beginComputePass(v.descriptor);
+        commands.push(["beginComputePass", v.descriptor]);
 
         v.computeObjects.forEach((p) =>
         {

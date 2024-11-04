@@ -6,12 +6,12 @@ import { IGPUComputeObject } from "./IGPUComputeObject";
  * @see GPUCommandEncoder.beginComputePass
  * @see GPUComputePassEncoder
  */
-export interface IGPUComputePassEncoder
+export interface IGPUComputePass
 {
     /**
      * GPU计算通道描述。
      */
-    computePass?: IGPUComputePass;
+    descriptor?: IGPUComputePassDescriptor;
 
     /**
      * 计算对象列表。
@@ -22,7 +22,7 @@ export interface IGPUComputePassEncoder
 /**
  * GPU计算通道描述。
  */
-export interface IGPUComputePass extends GPUComputePassDescriptor
+export interface IGPUComputePassDescriptor extends GPUComputePassDescriptor
 {
 
 }

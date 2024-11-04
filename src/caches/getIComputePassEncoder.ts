@@ -1,15 +1,15 @@
 
-import { IGPUComputePassEncoder } from "../data/IGPUComputePassEncoder";
+import { IGPUComputePass } from "../data/IGPUComputePass";
 import { getIGPUComputeObject } from "./getIGPUComputeObject";
 
-export function getIComputePassEncoder(computePassEncoder: IGPUComputePassEncoder)
+export function getIComputePassEncoder(computePassEncoder: IGPUComputePass)
 {
-    const computePass = computePassEncoder.computePass;
+    const computePass = computePassEncoder.descriptor;
 
     const computeObjects = computePassEncoder.computeObjects.map((v) => getIGPUComputeObject(v));
 
-    const gpuComputePassEncoder: IGPUComputePassEncoder = {
-        computePass,
+    const gpuComputePassEncoder: IGPUComputePass = {
+        descriptor: computePass,
         computeObjects,
     };
 
