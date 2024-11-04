@@ -1,4 +1,4 @@
-import { IGPUBindGroupLayout, IGPUBindGroupLayoutFromPipeline } from "../data/IGPUBindGroup";
+import { IGPUBindGroupLayout, IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutFromPipeline } from "../data/IGPUBindGroup";
 import { getGPUComputePipeline } from "./getGPUComputePipeline";
 import { getGPURenderPipeline, isRenderPipeline } from "./getGPURenderPipeline";
 
@@ -8,8 +8,9 @@ export function getGPUBindGroupLayout(device: GPUDevice, layout: IGPUBindGroupLa
 
     if (gpuBindGroupLayout) return gpuBindGroupLayout;
 
-    if (isBindGroupLayoutFromPipeline(layout))
+    if ((layout as IGPUBindGroupLayoutFromPipeline).pipeline)
     {
+        layout = layout as IGPUBindGroupLayoutFromPipeline;
         let pipeline: GPUPipelineBase;
         if (isRenderPipeline(layout.pipeline))
         {
@@ -26,6 +27,8 @@ export function getGPUBindGroupLayout(device: GPUDevice, layout: IGPUBindGroupLa
         return gpuBindGroupLayout;
     }
 
+    //
+    layout = layout as IGPUBindGroupLayoutDescriptor;
     const entries: GPUBindGroupLayoutEntry[] = layout.entries.map((v) =>
     {
         const visibility = v.visibility.reduce((pv, cv) =>
@@ -53,8 +56,3 @@ export function getGPUBindGroupLayout(device: GPUDevice, layout: IGPUBindGroupLa
 }
 
 const bindGroupLayoutMap = new WeakMap<IGPUBindGroupLayout, GPUBindGroupLayout>();
-
-function isBindGroupLayoutFromPipeline(layout: IGPUBindGroupLayout): layout is IGPUBindGroupLayoutFromPipeline
-{
-    return !!(layout as IGPUBindGroupLayoutFromPipeline).pipeline;
-}

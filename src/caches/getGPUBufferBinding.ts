@@ -1,4 +1,4 @@
-import { IGPUBufferBinding, IGPUBindingResource } from "../data/IGPUBindGroup";
+import { IGPUBufferBinding } from "../data/IGPUBindGroup";
 import { getGPUBuffer } from "./getGPUBuffer";
 
 export function getGPUBufferBinding(device: GPUDevice, resource: IGPUBufferBinding): GPUBufferBinding
@@ -9,11 +9,4 @@ export function getGPUBufferBinding(device: GPUDevice, resource: IGPUBufferBindi
         ...resource,
         buffer,
     };
-}
-
-export function isBufferBinding(arg: IGPUBindingResource): arg is IGPUBufferBinding
-{
-    const a = arg as IGPUBufferBinding;
-
-    return !!a.buffer;
 }

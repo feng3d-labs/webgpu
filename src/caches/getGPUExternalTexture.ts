@@ -1,4 +1,4 @@
-import { IGPUExternalTexture, IGPUBindingResource } from "../data/IGPUBindGroup";
+import { IGPUExternalTexture } from "../data/IGPUBindGroup";
 
 /**
  * 获取 WebGPU外部纹理
@@ -14,9 +14,4 @@ export function getGPUExternalTexture(device: GPUDevice, resource: IGPUExternalT
     });
 
     return gExternalTexture;
-}
-
-export function isExternalTexture(arg: IGPUBindingResource): arg is IGPUExternalTexture
-{
-    return !!(arg as IGPUExternalTexture).source;
 }

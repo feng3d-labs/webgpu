@@ -1,11 +1,13 @@
 import { watcher } from "@feng3d/watcher";
-import { IGPUBindGroup } from "../data/IGPUBindGroup";
+import { IGPUBindGroup, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroup";
+import { IGPUSampler } from "../data/IGPUSampler";
+import { IGPUTextureView } from "../data/IGPUTextureView";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
-import { getGPUBufferBinding, isBufferBinding } from "./getGPUBufferBinding";
-import { getGPUExternalTexture, isExternalTexture } from "./getGPUExternalTexture";
-import { getGPUSampler, isSampler } from "./getGPUSampler";
+import { getGPUBufferBinding } from "./getGPUBufferBinding";
+import { getGPUExternalTexture } from "./getGPUExternalTexture";
+import { getGPUSampler } from "./getGPUSampler";
 import { isFromContext } from "./getGPUTexture";
-import { getGPUTextureView, gpuTextureViewEventEmitter, isTextureView } from "./getGPUTextureView";
+import { getGPUTextureView, gpuTextureViewEventEmitter } from "./getGPUTextureView";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
 {
@@ -32,14 +34,16 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
         const getGPUBindingResource = () =>
         {
             let resource: GPUBindingResource;
-            if (isBufferBinding(v.resource))
+            if ((v.resource as IGPUBufferBinding).buffer)
             {
-                resource = getGPUBufferBinding(device, v.resource);
+                const iGPUBufferBinding = v.resource as IGPUBufferBinding;
+                resource = getGPUBufferBinding(device, iGPUBufferBinding);
             }
-            else if (isTextureView(v.resource))
+            else if ((v.resource as IGPUTextureView).texture)
             {
-                resource = getGPUTextureView(device, v.resource);
-                if (isFromContext(v.resource.texture))
+                const iGPUTextureView = v.resource as IGPUTextureView;
+                resource = getGPUTextureView(device, iGPUTextureView);
+                if (isFromContext(iGPUTextureView.texture))
                 {
                     hasContextTexture = true;
                 }
@@ -48,19 +52,16 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
                     bindGroupMap.delete(bindGroup);
                 });
             }
-            else if (isExternalTexture(v.resource))
+            else if ((v.resource as IGPUExternalTexture).source)
             {
-                resource = getGPUExternalTexture(device, v.resource);
+                const iGPUExternalTexture = v.resource as IGPUExternalTexture;
+                resource = getGPUExternalTexture(device, iGPUExternalTexture);
                 hasExternalTexture = true;
             }
-            else if (isSampler(v.resource))
+            else 
             {
-                const gpuSampler = v.resource;
-                resource = getGPUSampler(device, gpuSampler);
-            }
-            else
-            {
-                throw `无法识别 BindGroup ${v}`;
+                const iGPUSampler = v.resource as IGPUSampler;
+                resource = getGPUSampler(device, iGPUSampler);
             }
 
             return resource;
