@@ -1,8 +1,7 @@
-import { getGPUBindGroup } from "../caches/getGPUBindGroup";
-import { getGPUComputePipeline } from "../caches/getGPUComputePipeline";
-import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
-import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
+import { runComputeBindGroup } from "./runComputeBindGroup";
+import { runComputePipeline } from "./runComputePipeline";
+import { runWorkgroups } from "./runWorkgroups";
 
 /**
  * 执行计算对象。
@@ -13,22 +12,9 @@ import { IGPUComputeObject } from "../data/IGPUComputeObject";
  */
 export function runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
 {
-    const { pipeline, bindingResources, workgroups } = computeObject;
+    runComputePipeline(device, passEncoder, computeObject.pipeline);
 
-    const { gpuComputePipeline: iGPUComputePipeline, bindingResourceInfoMap } = getIGPUComputePipeline(pipeline);
+    runComputeBindGroup(device, passEncoder, computeObject.pipeline, computeObject.bindingResources);
 
-    // 计算 bindGroups
-    const bindGroups = getIGPUSetBindGroups(iGPUComputePipeline, bindingResources, bindingResourceInfoMap);
-
-    const gpuComputePipeline = getGPUComputePipeline(device, iGPUComputePipeline);
-    passEncoder.setPipeline(gpuComputePipeline);
-
-    bindGroups?.forEach((bindGroup, index) =>
-    {
-        const gpuBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
-        passEncoder.setBindGroup(index, gpuBindGroup, bindGroup.dynamicOffsets);
-    });
-
-    const { workgroupCountX, workgroupCountY, workgroupCountZ } = workgroups;
-    passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
+    runWorkgroups(passEncoder, computeObject.workgroups);
 }

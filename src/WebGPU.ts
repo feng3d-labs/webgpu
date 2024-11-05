@@ -1,18 +1,14 @@
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
-import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPUTexture } from "./caches/getGPUTexture";
-import { getIGPUComputePipeline } from "./caches/getIGPUComputePipeline";
 import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
 import { getIGPUCopyTextureToTexture } from "./caches/getIGPUCopyTextureToTexture";
 import { getGPURenderBundleEncoderDescriptor } from "./caches/getIGPURenderBundleEncoderDescriptor";
 import { getIGPURenderObject } from "./caches/getIGPURenderObject";
-import { getIGPUSetBindGroups } from "./caches/getIGPUSetBindGroups";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
-import { IGPUComputeObject } from "./data/IGPUComputeObject";
 import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
@@ -22,7 +18,7 @@ import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
-import { runComputeObject } from "./runs/runComputeObject";
+import { runComputePass } from "./runs/runComputePass";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -167,7 +163,7 @@ export class WebGPU
             }
             else if ((v as IGPUComputePass).computeObjects)
             {
-                this.computePass(gpuCommandEncoder, v as IGPUComputePass);
+                runComputePass(this.device, gpuCommandEncoder, v as IGPUComputePass);
             }
             else if ((v as IGPUCopyTextureToTexture).source?.texture)
             {
@@ -216,18 +212,6 @@ export class WebGPU
             },
             v.copySize,
         );
-    }
-
-    private computePass(commandEncoder: GPUCommandEncoder, computePass: IGPUComputePass)
-    {
-        const passEncoder = commandEncoder.beginComputePass(computePass.descriptor);
-
-        computePass.computeObjects.forEach((computeObject) =>
-        {
-            runComputeObject(this.device, passEncoder, computeObject);
-        });
-
-        passEncoder.end();
     }
 
     private renderPass(commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
