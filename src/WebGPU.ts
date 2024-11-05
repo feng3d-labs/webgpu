@@ -19,6 +19,7 @@ import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { runComputePass } from "./runs/runComputePass";
+import { runRenderPipeline } from "./runs/runRenderPipeline";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -262,12 +263,19 @@ export class WebGPU
     }
 }
 
+/**
+ * 执行渲染对象。
+ * 
+ * @param device GPU设备。
+ * @param passEncoder 渲染通道编码器。
+ * @param renderObject 渲染对象。
+ * @param renderPass 渲染通道。
+ */
 export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor)
 {
     renderObject = getIGPURenderObject(device, renderObject, renderPass);
 
-    const pipeline = getGPURenderPipeline(device, renderObject.pipeline);
-    passEncoder.setPipeline(pipeline);
+    runRenderPipeline(device, passEncoder, renderObject.pipeline);
 
     if (renderObject.bindGroups)
     {
