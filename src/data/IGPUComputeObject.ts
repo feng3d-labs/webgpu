@@ -19,13 +19,6 @@ export interface IGPUComputeObject
     pipeline: IGPUComputePipeline;
 
     /**
-     * 绑定组列表。
-     *
-     * {@link GPUBindingCommandsMixin.setBindGroup}
-     */
-    bindGroups?: IGPUSetBindGroup[];
-
-    /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
      */
     bindingResources?: IGPUBindingResources;

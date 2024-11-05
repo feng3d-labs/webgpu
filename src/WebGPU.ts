@@ -4,11 +4,12 @@ import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPUTexture } from "./caches/getGPUTexture";
-import { getIGPUComputeObject } from "./caches/getIGPUComputeObject";
+import { getIGPUComputePipeline } from "./caches/getIGPUComputePipeline";
 import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
 import { getIGPUCopyTextureToTexture } from "./caches/getIGPUCopyTextureToTexture";
 import { getGPURenderBundleEncoderDescriptor } from "./caches/getIGPURenderBundleEncoderDescriptor";
 import { getIGPURenderObject } from "./caches/getIGPURenderObject";
+import { getIGPUSetBindGroups } from "./caches/getIGPUSetBindGroups";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
@@ -21,6 +22,7 @@ import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
+import { runComputeObject } from "./runs/runComputeObject";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -222,27 +224,10 @@ export class WebGPU
 
         computePass.computeObjects.forEach((computeObject) =>
         {
-            this.computePipeline(passEncoder, computeObject);
+            runComputeObject(this.device, passEncoder, computeObject);
         });
 
         passEncoder.end();
-    }
-
-    private computePipeline(passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
-    {
-        computeObject = getIGPUComputeObject(computeObject)
-
-        const pipeline = getGPUComputePipeline(this.device, computeObject.pipeline);
-        passEncoder.setPipeline(pipeline);
-
-        computeObject.bindGroups?.forEach((bindGroup, index) =>
-        {
-            const gpuBindGroup = getGPUBindGroup(this.device, bindGroup.bindGroup);
-            passEncoder.setBindGroup(index, gpuBindGroup, bindGroup.dynamicOffsets);
-        });
-
-        const { workgroupCountX, workgroupCountY, workgroupCountZ } = computeObject.workgroups;
-        passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
     }
 
     private renderPass(commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
