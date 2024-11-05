@@ -277,6 +277,8 @@ export class WebGPU
  */
 export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor)
 {
+    const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
+
     renderObject = getIGPURenderObject(device, renderObject, renderPass);
 
     runRenderPipeline(device, passEncoder, renderObject.pipeline);
@@ -293,13 +295,13 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
     });
 
-    runIndexBuffer(device, passEncoder, renderObject.index);
+    runIndexBuffer(device, passEncoder, index);
 
-    runViewport(passEncoder as GPURenderPassEncoder, renderObject.viewport);
+    runViewport(passEncoder as GPURenderPassEncoder, viewport);
 
-    runScissorRect(passEncoder as GPURenderPassEncoder, renderObject.scissorRect);
+    runScissorRect(passEncoder as GPURenderPassEncoder, scissorRect);
 
-    runDraw(passEncoder, renderObject.draw);
+    runDraw(passEncoder, draw);
 
-    runDrawIndexed(passEncoder, renderObject.drawIndexed);
+    runDrawIndexed(passEncoder, drawIndexed);
 }
