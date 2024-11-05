@@ -1,6 +1,7 @@
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
-import { getIGPURenderObject } from "../caches/getIGPURenderObject";
+import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
+import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { runRenderPipeline } from "./runRenderPipeline";
@@ -15,20 +16,20 @@ import { runRenderPipeline } from "./runRenderPipeline";
  */
 export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor)
 {
-    renderObject = getIGPURenderObject(device, renderObject, renderPass);
+    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(device, renderObject.pipeline, renderPass, renderObject.vertices);
 
-    runRenderPipeline(device, passEncoder, renderObject.pipeline);
+    runRenderPipeline(device, passEncoder, pipeline);
 
-    if (renderObject.bindGroups)
+    // 计算 bindGroups
+    const bindGroups = getIGPUSetBindGroups(pipeline, renderObject.bindingResources, bindingResourceInfoMap);
+
+    bindGroups?.forEach((bindGroup, index) =>
     {
-        renderObject.bindGroups.forEach((bindGroup, index) =>
-        {
-            const gBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
-            passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
-        });
-    }
+        const gBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
+        passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
+    });
 
-    renderObject.vertexBuffers?.forEach((vertexBuffer, index) =>
+    vertexBuffers?.forEach((vertexBuffer, index) =>
     {
         const gBuffer = getGPUBuffer(device, vertexBuffer.buffer);
         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);

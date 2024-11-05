@@ -16,20 +16,6 @@ export interface IGPURenderObject
     pipeline: IGPURenderPipeline;
 
     /**
-     * GPU绘制时使用的绑定组。
-     *
-     * 自动由反射流程进行填充。
-     */
-    bindGroups?: IGPUSetBindGroup[],
-
-    /**
-     * GPU绘制时使用的顶点缓冲区列表。
-     *
-     * 自动由反射流程进行填充。
-     */
-    vertexBuffers?: IGPUVertexBuffer[],
-
-    /**
      * GPU绘制时视口尺寸。
      *
      * @see GPURenderPassEncoder.setViewport
