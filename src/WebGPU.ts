@@ -12,7 +12,7 @@ import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
-import { IGPURenderObject, IGPUScissorRect } from "./data/IGPURenderObject";
+import { IGPUIndexBuffer, IGPURenderObject, IGPUViewport } from "./data/IGPURenderObject";
 import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
@@ -20,8 +20,10 @@ import { IGPUTexture } from "./data/IGPUTexture";
 import { runComputePass } from "./runs/runComputePass";
 import { runDraw } from "./runs/runDraw";
 import { runDrawIndexed } from "./runs/runDrawIndexed";
+import { runIndexBuffer } from "./runs/runIndexBuffer";
 import { runRenderPipeline } from "./runs/runRenderPipeline";
 import { runScissorRect } from "./runs/runScissorRect";
+import { runViewport } from "./runs/runViewport";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -279,14 +281,11 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 
     runRenderPipeline(device, passEncoder, renderObject.pipeline);
 
-    if (renderObject.bindGroups)
+    renderObject.bindGroups?.forEach((bindGroup, index) =>
     {
-        renderObject.bindGroups.forEach((bindGroup, index) =>
-        {
-            const gBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
-            passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
-        });
-    }
+        const gBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
+        passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
+    });
 
     renderObject.vertexBuffers?.forEach((vertexBuffer, index) =>
     {
@@ -294,19 +293,9 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
     });
 
-    if (renderObject.index)
-    {
-        const { buffer, indexFormat, offset, size } = renderObject.index;
-        const gBuffer = getGPUBuffer(device, buffer);
+    runIndexBuffer(device, passEncoder, renderObject.index);
 
-        passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
-    }
-
-    if (renderObject.viewport)
-    {
-        const { x, y, width, height, minDepth, maxDepth } = renderObject.viewport;
-        (passEncoder as GPURenderPassEncoder).setViewport(x, y, width, height, minDepth, maxDepth);
-    }
+    runViewport(passEncoder as GPURenderPassEncoder, renderObject.viewport);
 
     runScissorRect(passEncoder as GPURenderPassEncoder, renderObject.scissorRect);
 
