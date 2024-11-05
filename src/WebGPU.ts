@@ -1,9 +1,12 @@
+import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
+import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
 import { getIGPUCopyTextureToTexture } from "./caches/getIGPUCopyTextureToTexture";
 import { getGPURenderBundleEncoderDescriptor } from "./caches/getIGPURenderBundleEncoderDescriptor";
+import { getIGPURenderObject } from "./caches/getIGPURenderObject";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputePass } from "./data/IGPUComputePass";
@@ -16,7 +19,6 @@ import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { runComputePass } from "./runs/runComputePass";
-import { runRenderObject } from "./runs/runRenderObject";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -226,7 +228,7 @@ export class WebGPU
             }
             else
             {
-                runRenderObject(this.device, passEncoder, element as IGPURenderObject, renderPass.descriptor);
+                this.renderObject(passEncoder, element as IGPURenderObject, renderPass.descriptor);
             }
         });
 
@@ -244,7 +246,7 @@ export class WebGPU
             const renderBundleEncoder = this.device.createRenderBundleEncoder(renderBundle);
             renderBundleObject.renderObjects.forEach((renderObject) =>
             {
-                runRenderObject(this.device, renderBundleEncoder, renderObject, renderPass);
+                this.renderObject(renderBundleEncoder, renderObject, renderPass);
             });
 
             gRenderBundle = renderBundleEncoder.finish();
@@ -252,6 +254,61 @@ export class WebGPU
         }
 
         passEncoder.executeBundles([gRenderBundle]);
+    }
+
+    private renderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor)
+    {
+        renderObject = getIGPURenderObject(this.device, renderObject, renderPass);
+
+        const pipeline = getGPURenderPipeline(this.device, renderObject.pipeline);
+        passEncoder.setPipeline(pipeline);
+
+        if (renderObject.bindGroups)
+        {
+            renderObject.bindGroups.forEach((bindGroup, index) =>
+            {
+                const gBindGroup = getGPUBindGroup(this.device, bindGroup.bindGroup);
+                passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
+            });
+        }
+
+        renderObject.vertexBuffers?.forEach((vertexBuffer, index) =>
+        {
+            const gBuffer = getGPUBuffer(this.device, vertexBuffer.buffer);
+            passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
+        });
+
+        if (renderObject.index)
+        {
+            const { buffer, indexFormat, offset, size } = renderObject.index;
+            const gBuffer = getGPUBuffer(this.device, buffer);
+
+            passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
+        }
+
+        if (renderObject.viewport)
+        {
+            const { x, y, width, height, minDepth, maxDepth } = renderObject.viewport;
+            (passEncoder as GPURenderPassEncoder).setViewport(x, y, width, height, minDepth, maxDepth);
+        }
+
+        if (renderObject.scissorRect)
+        {
+            const { x, y, width, height } = renderObject.scissorRect;
+            (passEncoder as GPURenderPassEncoder).setScissorRect(x, y, width, height);
+        }
+
+        if (renderObject.draw)
+        {
+            const { vertexCount, instanceCount, firstVertex, firstInstance } = renderObject.draw;
+            passEncoder.draw(vertexCount, instanceCount, firstVertex, firstInstance);
+        }
+
+        if (renderObject.drawIndexed)
+        {
+            const { indexCount, instanceCount, firstIndex, baseVertex, firstInstance } = renderObject.drawIndexed;
+            passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
+        }
     }
 
     getGPUTextureSize(input: IGPUTexture)
