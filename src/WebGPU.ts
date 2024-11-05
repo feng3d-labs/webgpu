@@ -279,17 +279,17 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 {
     const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
 
-    renderObject = getIGPURenderObject(device, renderObject, renderPass);
+    const { pipeline, vertexBuffers, bindGroups } = getIGPURenderObject(device, renderObject, renderPass);
 
-    runRenderPipeline(device, passEncoder, renderObject.pipeline);
+    runRenderPipeline(device, passEncoder, pipeline);
 
-    renderObject.bindGroups?.forEach((bindGroup, index) =>
+    bindGroups?.forEach((bindGroup, index) =>
     {
         const gBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
         passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
     });
 
-    renderObject.vertexBuffers?.forEach((vertexBuffer, index) =>
+    vertexBuffers?.forEach((vertexBuffer, index) =>
     {
         const gBuffer = getGPUBuffer(device, vertexBuffer.buffer);
         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
