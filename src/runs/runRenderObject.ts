@@ -1,9 +1,9 @@
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
-import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getIGPURenderObject } from "../caches/getIGPURenderObject";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
+import { runRenderPipeline } from "./runRenderPipeline";
 
 /**
  * 执行渲染对象。
@@ -17,8 +17,7 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 {
     renderObject = getIGPURenderObject(device, renderObject, renderPass);
 
-    const pipeline = getGPURenderPipeline(device, renderObject.pipeline);
-    passEncoder.setPipeline(pipeline);
+    runRenderPipeline(device, passEncoder, renderObject.pipeline);
 
     if (renderObject.bindGroups)
     {
