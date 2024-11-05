@@ -1,7 +1,6 @@
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
-import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
 import { getIGPUCopyTextureToTexture } from "./caches/getIGPUCopyTextureToTexture";
@@ -13,13 +12,16 @@ import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
-import { IGPURenderObject } from "./data/IGPURenderObject";
+import { IGPURenderObject, IGPUScissorRect } from "./data/IGPURenderObject";
 import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { runComputePass } from "./runs/runComputePass";
+import { runDraw } from "./runs/runDraw";
+import { runDrawIndexed } from "./runs/runDrawIndexed";
 import { runRenderPipeline } from "./runs/runRenderPipeline";
+import { runScissorRect } from "./runs/runScissorRect";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -306,21 +308,9 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
         (passEncoder as GPURenderPassEncoder).setViewport(x, y, width, height, minDepth, maxDepth);
     }
 
-    if (renderObject.scissorRect)
-    {
-        const { x, y, width, height } = renderObject.scissorRect;
-        (passEncoder as GPURenderPassEncoder).setScissorRect(x, y, width, height);
-    }
+    runScissorRect(passEncoder as GPURenderPassEncoder, renderObject.scissorRect);
 
-    if (renderObject.draw)
-    {
-        const { vertexCount, instanceCount, firstVertex, firstInstance } = renderObject.draw;
-        passEncoder.draw(vertexCount, instanceCount, firstVertex, firstInstance);
-    }
+    runDraw(passEncoder, renderObject.draw);
 
-    if (renderObject.drawIndexed)
-    {
-        const { indexCount, instanceCount, firstIndex, baseVertex, firstInstance } = renderObject.drawIndexed;
-        passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
-    }
+    runDrawIndexed(passEncoder, renderObject.drawIndexed);
 }
