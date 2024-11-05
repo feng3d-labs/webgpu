@@ -5,7 +5,8 @@ import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
 import { getIGPUCopyTextureToTexture } from "./caches/getIGPUCopyTextureToTexture";
 import { getGPURenderBundleEncoderDescriptor } from "./caches/getIGPURenderBundleEncoderDescriptor";
-import { getIGPURenderObject } from "./caches/getIGPURenderObject";
+import { getIGPURenderPipeline } from "./caches/getIGPURenderPipeline";
+import { getIGPUSetBindGroups } from "./caches/getIGPUSetBindGroups";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputePass } from "./data/IGPUComputePass";
@@ -279,7 +280,10 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 {
     const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
 
-    const { pipeline, vertexBuffers, bindGroups } = getIGPURenderObject(device, renderObject, renderPass);
+    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(device, renderObject.pipeline, renderPass, renderObject.vertices);
+
+    // 计算 bindGroups
+    const bindGroups = getIGPUSetBindGroups(pipeline, renderObject.bindingResources, bindingResourceInfoMap);
 
     runRenderPipeline(device, passEncoder, pipeline);
 
