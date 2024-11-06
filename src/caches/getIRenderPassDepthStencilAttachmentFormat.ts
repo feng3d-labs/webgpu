@@ -1,3 +1,4 @@
+import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { getIGPURenderPass } from "./getIGPURenderPass";
@@ -8,14 +9,13 @@ import { getIGPURenderPass } from "./getIGPURenderPass";
  * @param renderPass 渲染通道。
  * @returns 渲染通道深度模板附件纹理格式。
  */
-export function getIRenderPassDepthStencilAttachmentFormats(renderPass: IGPURenderPassDescriptor)
+export function getIRenderPassDepthStencilAttachmentFormat(depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
 {
-    const gpuRenderPass = getIGPURenderPass(renderPass);
-
     let depthStencilAttachmentTextureFormat: GPUTextureFormat;
-    if (gpuRenderPass.depthStencilAttachment)
+    if (depthStencilAttachment)
     {
-        depthStencilAttachmentTextureFormat = getGPUTextureFormat(gpuRenderPass.depthStencilAttachment.view.texture);
+        const texture = depthStencilAttachment.view?.texture;
+        depthStencilAttachmentTextureFormat = texture ? getGPUTextureFormat(texture) : "depth24plus";
     }
 
     return depthStencilAttachmentTextureFormat;

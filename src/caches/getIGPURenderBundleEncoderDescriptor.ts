@@ -1,7 +1,7 @@
 import { IGPURenderBundleEncoderDescriptor } from "../data/IGPURenderBundleObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
-import { getIRenderPassColorAttachmentFormats } from "./getIRenderPassColorAttachmentFormats";
-import { getIRenderPassDepthStencilAttachmentFormats } from "./getIRenderPassDepthStencilAttachmentFormats";
+import { getGPUTextureFormat } from "./getGPUTextureFormat";
+import { getIRenderPassDepthStencilAttachmentFormat } from "./getIRenderPassDepthStencilAttachmentFormat";
 
 export function getGPURenderBundleEncoderDescriptor(renderBundleEncoderDescriptor: IGPURenderBundleEncoderDescriptor, renderPass: IGPURenderPassDescriptor)
 {
@@ -26,9 +26,12 @@ export function getGPURenderBundleEncoderDescriptor(renderBundleEncoderDescripto
  */
 function getIRenderPassFormats(renderPass: IGPURenderPassDescriptor)
 {
-    const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(renderPass);
+    const colorAttachmentTextureFormats = renderPass.colorAttachments.map((v) =>
+    {
+        return getGPUTextureFormat(v.view.texture);
+    });
 
-    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormats(renderPass);
+    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormat(renderPass.depthStencilAttachment);
 
     return { colorAttachmentTextureFormats, depthStencilAttachmentTextureFormat };
 }

@@ -6,9 +6,9 @@ import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
+import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
-import { getIRenderPassColorAttachmentFormats } from "./getIRenderPassColorAttachmentFormats";
-import { getIRenderPassDepthStencilAttachmentFormats } from "./getIRenderPassDepthStencilAttachmentFormats";
+import { getIRenderPassDepthStencilAttachmentFormat } from "./getIRenderPassDepthStencilAttachmentFormat";
 import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -88,7 +88,7 @@ const renderPipelineMap = new ChainMap<
 function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, renderPass: IGPURenderPassDescriptor)
 {
     // 获取渲染通道附件纹理格式。
-    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormats(renderPass);
+    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormat(renderPass.depthStencilAttachment);
 
     let gpuDepthStencilState: GPUDepthStencilState;
     if (depthStencilAttachmentTextureFormat)
@@ -296,7 +296,7 @@ function getIGPUFragmentState(fragmentState: IGPUFragmentState, renderPass: IGPU
     if (!gpuFragmentState)
     {
         // 获取渲染通道附件纹理格式。
-        const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(renderPass);
+        const colorAttachmentTextureFormats = renderPass.colorAttachments.map((v) => getGPUTextureFormat(v.view.texture));
 
         const code = fragmentState.code;
         let entryPoint = fragmentState.entryPoint;
