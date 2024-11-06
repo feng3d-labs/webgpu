@@ -1,5 +1,4 @@
 import { getGPUBuffer } from "./caches/getGPUBuffer";
-import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
 import { getIGPUCopyTextureToTexture } from "./caches/getIGPUCopyTextureToTexture";
@@ -8,14 +7,11 @@ import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
-import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
-import { IGPURenderObject } from "./data/IGPURenderObject";
 import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { runComputePass } from "./runs/runComputePass";
-import { runRenderBundle } from "./runs/runRenderBundle";
-import { runRenderObject } from "./runs/runRenderObject";
+import { runRenderPass } from "./runs/runRenderPass";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -156,7 +152,7 @@ export class WebGPU
         {
             if ((v as IGPURenderPass).descriptor)
             {
-                this.renderPass(gpuCommandEncoder, v as IGPURenderPass);
+                runRenderPass(this.device, gpuCommandEncoder, v as IGPURenderPass);
             }
             else if ((v as IGPUComputePass).computeObjects)
             {
@@ -209,27 +205,6 @@ export class WebGPU
             },
             v.copySize,
         );
-    }
-
-    private renderPass(commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
-    {
-        const renderPassDescriptor = getGPURenderPassDescriptor(this.device, renderPass.descriptor);
-
-        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-
-        renderPass.renderObjects?.forEach((element) =>
-        {
-            if ((element as IGPURenderBundleObject).renderObjects)
-            {
-                runRenderBundle(this.device, passEncoder, renderPass.descriptor, element as IGPURenderBundleObject);
-            }
-            else
-            {
-                runRenderObject(this.device, passEncoder, element as IGPURenderObject, renderPass.descriptor);
-            }
-        });
-
-        passEncoder.end();
     }
 
     getGPUTextureSize(input: IGPUTexture)
