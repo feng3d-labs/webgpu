@@ -1,12 +1,8 @@
-import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
 import { getIGPUCopyTextureToTexture } from "./caches/getIGPUCopyTextureToTexture";
-import { getGPURenderBundleEncoderDescriptor } from "./caches/getIGPURenderBundleEncoderDescriptor";
-import { getIGPURenderPipeline } from "./caches/getIGPURenderPipeline";
-import { getIGPUSetBindGroups } from "./caches/getIGPUSetBindGroups";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputePass } from "./data/IGPUComputePass";
@@ -15,17 +11,11 @@ import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
 import { IGPURenderObject } from "./data/IGPURenderObject";
 import { IGPURenderPass } from "./data/IGPURenderPass";
-import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { runComputePass } from "./runs/runComputePass";
-import { runDraw } from "./runs/runDraw";
-import { runDrawIndexed } from "./runs/runDrawIndexed";
-import { runIndexBuffer } from "./runs/runIndexBuffer";
+import { runRenderBundle } from "./runs/runRenderBundle";
 import { runRenderObject } from "./runs/runRenderObject";
-import { runRenderPipeline } from "./runs/runRenderPipeline";
-import { runScissorRect } from "./runs/runScissorRect";
-import { runViewport } from "./runs/runViewport";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -231,7 +221,7 @@ export class WebGPU
         {
             if ((element as IGPURenderBundleObject).renderObjects)
             {
-                this.executeBundles(passEncoder, renderPass.descriptor, element as IGPURenderBundleObject);
+                runRenderBundle(this.device, passEncoder, renderPass.descriptor, element as IGPURenderBundleObject);
             }
             else
             {
@@ -242,71 +232,8 @@ export class WebGPU
         passEncoder.end();
     }
 
-    private executeBundles(passEncoder: GPURenderPassEncoder, renderPass: IGPURenderPassDescriptor, renderBundleObject: IGPURenderBundleObject)
-    {
-        let gRenderBundle = renderBundleObject._GPURenderBundle;
-        if (!gRenderBundle)
-        {
-            //
-            const renderBundle = getGPURenderBundleEncoderDescriptor(this.device, renderBundleObject.renderBundle, renderPass);
-
-            const renderBundleEncoder = this.device.createRenderBundleEncoder(renderBundle);
-            renderBundleObject.renderObjects.forEach((renderObject) =>
-            {
-                runRenderObject(this.device, renderBundleEncoder, renderObject, renderPass);
-            });
-
-            gRenderBundle = renderBundleEncoder.finish();
-            renderBundleObject._GPURenderBundle = gRenderBundle;
-        }
-
-        passEncoder.executeBundles([gRenderBundle]);
-    }
-
     getGPUTextureSize(input: IGPUTexture)
     {
         return getGPUTextureSize(this.device, input);
     }
 }
-
-// /**
-//  * 执行渲染对象。
-//  * 
-//  * @param device GPU设备。
-//  * @param passEncoder 渲染通道编码器。
-//  * @param renderObject 渲染对象。
-//  * @param renderPass 渲染通道。
-//  */
-// export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor)
-// {
-//     const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
-
-//     const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(device, renderObject.pipeline, renderPass, renderObject.vertices);
-
-//     // 计算 bindGroups
-//     const bindGroups = getIGPUSetBindGroups(pipeline, renderObject.bindingResources, bindingResourceInfoMap);
-
-//     runRenderPipeline(device, passEncoder, pipeline);
-
-//     bindGroups?.forEach((bindGroup, index) =>
-//     {
-//         const gBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
-//         passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
-//     });
-
-//     vertexBuffers?.forEach((vertexBuffer, index) =>
-//     {
-//         const gBuffer = getGPUBuffer(device, vertexBuffer.buffer);
-//         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
-//     });
-
-//     runIndexBuffer(device, passEncoder, index);
-
-//     runViewport(passEncoder as GPURenderPassEncoder, viewport);
-
-//     runScissorRect(passEncoder as GPURenderPassEncoder, scissorRect);
-
-//     runDraw(passEncoder, draw);
-
-//     runDrawIndexed(passEncoder, drawIndexed);
-// }
