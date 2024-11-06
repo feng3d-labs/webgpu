@@ -24,9 +24,9 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 
     const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(device, renderObject.pipeline, renderPass, renderObject.vertices);
 
-    runRenderPipeline(device, passEncoder, pipeline);
-
     runBindGroup(device, passEncoder, pipeline.layout, renderObject.bindingResources, bindingResourceInfoMap);
+
+    runRenderPipeline(device, passEncoder, pipeline);
 
     vertexBuffers?.forEach((vertexBuffer, index) =>
     {
