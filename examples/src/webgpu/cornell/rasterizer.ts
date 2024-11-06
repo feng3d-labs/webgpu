@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUCommandEncoder, IGPUTexture, IGPURenderPassDescriptor, IGPURenderPass, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPUTexture, IGPURenderPassDescriptor, IGPURenderPass, IGPURenderPipeline, WebGPU, internal } from "@feng3d/webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -21,13 +21,12 @@ export default class Rasterizer
     scene: Scene,
     radiosity: Radiosity,
     framebuffer: IGPUTexture,
-    webgpu: WebGPU
   )
   {
     this.common = common;
     this.scene = scene;
 
-    const framebufferSize = webgpu.getGPUTextureSize(framebuffer);
+    const framebufferSize = internal.getGPUTextureSize(framebuffer);
 
     const depthTexture: IGPUTexture = {
       label: "RasterizerRenderer.depthTexture",

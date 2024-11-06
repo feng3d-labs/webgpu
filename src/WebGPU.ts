@@ -1,5 +1,5 @@
 import { destoryTexture, getGPUTexture } from "./caches/getGPUTexture";
-import { getGPUTextureSize } from "./caches/getIGPUTexture";
+import { getGPUTextureSize } from "./caches/getGPUTextureSize";
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
 import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
@@ -197,6 +197,6 @@ export class WebGPU
 
     getGPUTextureSize(input: IGPUTexture)
     {
-        return getGPUTextureSize(this.device, input);
+        return getGPUTextureSize(input);
     }
 }

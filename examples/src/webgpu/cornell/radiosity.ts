@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUBuffer, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal, WebGPU } from "@feng3d/webgpu-renderer";
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";
@@ -48,7 +48,7 @@ export default class Radiosity
   // 'accumulation' are reduced to avoid integer overflows.
   private readonly kAccumulationMeanMax = 0x10000000;
 
-  constructor(common: Common, scene: Scene, webgpu: WebGPU)
+  constructor(common: Common, scene: Scene)
   {
     this.common = common;
     this.scene = scene;
@@ -116,7 +116,7 @@ export default class Radiosity
       },
     };
 
-    const lightmapSize = webgpu.getGPUTextureSize(this.lightmap);
+    const lightmapSize = internal.getGPUTextureSize(this.lightmap);
 
     this.passEncoders = [{
       computeObjects: [

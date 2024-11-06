@@ -7,7 +7,7 @@ import Raytracer from "./raytracer";
 import Scene from "./scene";
 import Tonemapper from "./tonemapper";
 
-import { IGPUCommandEncoder, IGPUCanvasContext, IGPUTexture, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUCanvasContext, IGPUCommandEncoder, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -49,10 +49,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const scene = new Scene();
   const common = new Common(scene.quadBuffer);
-  const radiosity = new Radiosity(common, scene, webgpu);
-  const rasterizer = new Rasterizer(common, scene, radiosity, framebuffer, webgpu);
-  const raytracer = new Raytracer(common, radiosity, framebuffer, webgpu);
-  const tonemapper = new Tonemapper(common, framebuffer, { context }, webgpu);
+  const radiosity = new Radiosity(common, scene);
+  const rasterizer = new Rasterizer(common, scene, radiosity, framebuffer);
+  const raytracer = new Raytracer(common, radiosity, framebuffer);
+  const tonemapper = new Tonemapper(common, framebuffer, { context });
 
   // 光栅化渲染
   const rasterizerCommandEncoder: IGPUCommandEncoder = { passEncoders: [] };

@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal, WebGPU } from "@feng3d/webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -21,7 +21,6 @@ export default class Raytracer
     common: Common,
     radiosity: Radiosity,
     framebuffer: IGPUTexture,
-    webgpu: WebGPU
   )
   {
     this.common = common;
@@ -50,7 +49,7 @@ export default class Raytracer
       },
     };
 
-    const framebufferSize = webgpu.getGPUTextureSize(this.framebuffer);
+    const framebufferSize = internal.getGPUTextureSize(this.framebuffer);
     //
     this.passEncoder = {
       computeObjects: [{
