@@ -167,7 +167,7 @@ export function getGPUTextureNum()
 
 export function destoryTexture(device: GPUDevice, texture: IGPUTexture)
 {
-    const gpuTexture = getGPUTexture(this.device, texture, false);
+    const gpuTexture = getGPUTexture(device, texture, false);
     if (gpuTexture)
     {
         gpuTexture.destroy();

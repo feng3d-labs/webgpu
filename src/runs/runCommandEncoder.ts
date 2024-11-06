@@ -26,7 +26,7 @@ export function runCommandEncoder(device: GPUDevice, v: IGPUCommandEncoder)
         {
             runCopyTextureToTexture(device, gpuCommandEncoder, v as IGPUCopyTextureToTexture);
         }
-        else if ((v as IGPUCopyBufferToBuffer).source?.size)
+        else if ((v as IGPUCopyBufferToBuffer).source)
         {
             runCopyBufferToBuffer(device, gpuCommandEncoder, v as IGPUCopyBufferToBuffer);
         }
