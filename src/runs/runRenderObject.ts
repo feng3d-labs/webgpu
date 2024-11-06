@@ -2,6 +2,7 @@ import { getGPUBuffer } from "../caches/getGPUBuffer";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
+import { GPURenderPassFormat } from "../internal/GPURenderPassFormats";
 import { runBindGroup } from "./runComputeBindGroup";
 import { runDraw } from "./runDraw";
 import { runDrawIndexed } from "./runDrawIndexed";
@@ -18,11 +19,11 @@ import { runViewport } from "./runViewport";
  * @param renderObject 渲染对象。
  * @param renderPass 渲染通道。
  */
-export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor)
+export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPassFormats: GPURenderPassFormat)
 {
     const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
 
-    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(renderObject.pipeline, renderPass, renderObject.vertices);
+    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(renderObject.pipeline, renderPassFormats, renderObject.vertices);
 
     runBindGroup(device, passEncoder, pipeline.layout, renderObject.bindingResources, bindingResourceInfoMap);
 

@@ -1,13 +1,11 @@
 import { watcher } from "@feng3d/watcher";
 
 import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
-import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
-import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
+import { GPURenderPassFormat } from "../internal/GPURenderPassFormats";
 import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
-import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
@@ -19,19 +17,21 @@ import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getWGSLReflectInfo
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPass: IGPURenderPassDescriptor, vertices: IGPUVertexAttributes)
+export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPassFormat: GPURenderPassFormat, vertices: IGPUVertexAttributes)
 {
-    let result = renderPipelineMap.get([renderPipeline, renderPass, vertices]);
+    const renderPassFormatKey = renderPassFormat.colorFormats.toString() + renderPassFormat.depthStencilFormat + renderPassFormat.multisample;
+
+    let result = renderPipelineMap.get([renderPipeline, renderPassFormatKey, vertices]);
     if (!result)
     {
         // 获取完整的顶点阶段描述与顶点缓冲区列表。
         const { gpuVertexState, vertexBuffers } = getIGPUVertexState(renderPipeline.vertex, vertices);
 
         // 获取片段阶段完整描述。
-        const gpuFragmentState = getIGPUFragmentState(renderPipeline.fragment, renderPass);
+        const gpuFragmentState = getIGPUFragmentState(renderPipeline.fragment, renderPassFormat.colorFormats);
 
         // 获取深度模板阶段完整描述。
-        const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPass.depthStencilAttachment);
+        const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
 
         // 从GPU管线中获取管线布局。
         const { gpuPipelineLayout, bindingResourceInfoMap } = getIGPUPipelineLayout(renderPipeline);
@@ -39,7 +39,7 @@ export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
         // 从渲染通道上获取多重采样数量
         const multisample: GPUMultisampleState = {
             ...renderPipeline.multisample,
-            count: renderPass.multisample,
+            count: renderPassFormat.multisample,
         };
 
         //
@@ -53,14 +53,14 @@ export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
         };
 
         result = { pipeline, vertexBuffers, bindingResourceInfoMap };
-        renderPipelineMap.set([renderPipeline, renderPass, vertices], result);
+        renderPipelineMap.set([renderPipeline, renderPassFormatKey, vertices], result);
     }
 
     return result;
 }
 
 const renderPipelineMap = new ChainMap<
-    [IGPURenderPipeline, IGPURenderPassDescriptor, IGPUVertexAttributes],
+    [IGPURenderPipeline, string, IGPUVertexAttributes],
     {
         /**
          * GPU渲染管线描述。
@@ -82,27 +82,21 @@ const renderPipelineMap = new ChainMap<
  * 获取深度模板阶段完整描述。
  *
  * @param depthStencil 深度模板阶段描述。
- * @param depthStencilAttachmentTextureFormat 深度模板附件纹理格式。
+ * @param depthStencilFormat 深度模板附件纹理格式。
  * @returns 深度模板阶段完整描述。
  */
-function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
+function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, depthStencilFormat?: GPUTextureFormat)
 {
-    // 获取渲染通道附件纹理格式。
+    if (!depthStencilFormat) return undefined;
+    //
+    const depthWriteEnabled = depthStencil?.depthWriteEnabled ?? true;
+    const depthCompare = depthStencil?.depthCompare ?? "less";
 
-    let gpuDepthStencilState: GPUDepthStencilState;
-    if (depthStencilAttachment)
-    {
-        //
-        const depthWriteEnabled = depthStencil?.depthWriteEnabled ?? true;
-        const depthCompare = depthStencil?.depthCompare ?? "less";
-        const format = getGPUTextureFormat(depthStencilAttachment.view?.texture) || "depth24plus";
-
-        gpuDepthStencilState = {
-            depthWriteEnabled,
-            depthCompare,
-            format,
-        };
-    }
+    const gpuDepthStencilState = {
+        depthWriteEnabled,
+        depthCompare,
+        format: depthStencilFormat,
+    };
 
     return gpuDepthStencilState;
 }
@@ -285,19 +279,17 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
  * @param colorAttachmentTextureFormats 颜色附件格式。
  * @returns 片段阶段完整描述。
  */
-function getIGPUFragmentState(fragmentState: IGPUFragmentState, renderPass: IGPURenderPassDescriptor)
+function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments: GPUTextureFormat[])
 {
     if (!fragmentState)
     {
         return undefined;
     }
+    const colorAttachmentsKey = colorAttachments.toString();
 
-    let gpuFragmentState = fragmentStateMap.get([fragmentState, renderPass]);
+    let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
     if (!gpuFragmentState)
     {
-        // 获取渲染通道附件纹理格式。
-        const colorAttachmentTextureFormats = renderPass.colorAttachments.map((v) => getGPUTextureFormat(v.view.texture));
-
         const code = fragmentState.code;
         let entryPoint = fragmentState.entryPoint;
         if (!entryPoint)
@@ -313,7 +305,7 @@ function getIGPUFragmentState(fragmentState: IGPUFragmentState, renderPass: IGPU
             console.assert(!!reflect.fragmentEntryMap[entryPoint], `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
         }
 
-        const targets = colorAttachmentTextureFormats.map((v, i) =>
+        const targets = colorAttachments.map((v, i) =>
         {
             if (!v) return undefined;
 
@@ -339,10 +331,10 @@ function getIGPUFragmentState(fragmentState: IGPUFragmentState, renderPass: IGPU
             gpuFragmentState.constants = fragmentState.constants;
         }
 
-        fragmentStateMap.set([fragmentState, renderPass], gpuFragmentState);
+        fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
     }
 
     return gpuFragmentState;
 }
 
-const fragmentStateMap = new ChainMap<[IGPUFragmentState, IGPURenderPassDescriptor], IGPUFragmentState>();
+const fragmentStateMap = new ChainMap<[IGPUFragmentState, string], IGPUFragmentState>();
