@@ -25,10 +25,10 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 
     const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(device, renderObject.pipeline, renderPass, renderObject.vertices);
 
+    runRenderPipeline(device, passEncoder, pipeline);
+
     // 计算 bindGroups
     const bindGroups = getIGPUSetBindGroups(pipeline, renderObject.bindingResources, bindingResourceInfoMap);
-
-    runRenderPipeline(device, passEncoder, pipeline);
 
     bindGroups?.forEach((bindGroup, index) =>
     {
