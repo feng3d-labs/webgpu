@@ -63,9 +63,9 @@ export interface IGPUWorkgroups
 export interface IGPUComputePipeline extends Omit<GPUComputePipelineDescriptor, "layout" | "compute">
 {
     /**
-     * 默认 `'auto'` 。
+     * GPU管线布局描述。
      */
-    layout?: "auto" | IGPUPipelineLayout;
+    layout?: IGPUPipelineLayout;
 
     /**
      * 计算程序。

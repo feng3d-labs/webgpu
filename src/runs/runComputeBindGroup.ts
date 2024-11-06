@@ -17,7 +17,7 @@ export function runComputeBindGroup(device: GPUDevice, passEncoder: GPUComputePa
     const { gpuComputePipeline, bindingResourceInfoMap } = getIGPUComputePipeline(pipeline);
 
     // 计算 bindGroups
-    const bindGroups = getIGPUSetBindGroups(gpuComputePipeline, bindingResources, bindingResourceInfoMap);
+    const bindGroups = getIGPUSetBindGroups(gpuComputePipeline.layout, bindingResources, bindingResourceInfoMap);
 
     bindGroups?.forEach((bindGroup, index) =>
     {

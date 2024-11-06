@@ -7,12 +7,7 @@ export function getGPUComputePipeline(device: GPUDevice, descriptor: IGPUCompute
     let pipeline = computePipelineMap.get(descriptor);
     if (pipeline) return pipeline;
 
-    let layout: "auto" | GPUPipelineLayout = "auto";
-
-    if (descriptor.layout && descriptor.layout !== "auto")
-    {
-        layout = getGPUPipelineLayout(device, descriptor.layout);
-    }
+    const layout = getGPUPipelineLayout(device, descriptor.layout);
 
     pipeline = device.createComputePipeline({
         layout,

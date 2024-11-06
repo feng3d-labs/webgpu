@@ -11,15 +11,15 @@ import { IGPUTextureView } from "../data/IGPUTextureView";
 import { ChainMap } from "../utils/ChainMap";
 import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
 
-export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputePipeline, bindingResources: IGPUBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
+export function getIGPUSetBindGroups(layout: IGPUPipelineLayout, bindingResources: IGPUBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
 {
     //
-    let gpuSetBindGroups = bindGroupsMap.get([pipeline, bindingResources]);
+    let gpuSetBindGroups = bindGroupsMap.get([layout, bindingResources]);
     if (!gpuSetBindGroups)
     {
         gpuSetBindGroups = [];
 
-        const pipelineLayout = pipeline.layout as IGPUPipelineLayout;
+        const pipelineLayout = layout as IGPUPipelineLayout;
 
         for (const resourceName in bindingResourceInfoMap)
         {
@@ -133,13 +133,13 @@ export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputeP
             });
         }
 
-        bindGroupsMap.set([pipeline, bindingResources], gpuSetBindGroups);
+        bindGroupsMap.set([layout, bindingResources], gpuSetBindGroups);
     }
 
     return gpuSetBindGroups;
 }
 
-const bindGroupsMap = new ChainMap<[IGPURenderPipeline | IGPUComputePipeline, IGPUBindingResources], IGPUSetBindGroup[]>();
+const bindGroupsMap = new ChainMap<[IGPUPipelineLayout, IGPUBindingResources], IGPUSetBindGroup[]>();
 
 function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding)
 {

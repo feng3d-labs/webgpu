@@ -259,7 +259,7 @@ export interface IGPURenderPipeline extends Omit<GPURenderPipelineDescriptor, "l
      *
      * 默认 'auto' 。
      */
-    layout?: IGPUPipelineLayout | "auto";
+    layout?: IGPUPipelineLayout;
 
     /**
      * Describes the primitive-related properties of the pipeline.

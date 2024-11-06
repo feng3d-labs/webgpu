@@ -28,7 +28,7 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
     runRenderPipeline(device, passEncoder, pipeline);
 
     // 计算 bindGroups
-    const bindGroups = getIGPUSetBindGroups(pipeline, renderObject.bindingResources, bindingResourceInfoMap);
+    const bindGroups = getIGPUSetBindGroups(pipeline.layout, renderObject.bindingResources, bindingResourceInfoMap);
 
     bindGroups?.forEach((bindGroup, index) =>
     {

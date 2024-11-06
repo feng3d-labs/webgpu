@@ -7,11 +7,7 @@ export function getGPURenderPipeline(device: GPUDevice, descriptor: IGPURenderPi
     let pipeline = pipelineMap.get(descriptor);
     if (pipeline) return pipeline;
 
-    let layout: "auto" | GPUPipelineLayout = "auto";
-    if (descriptor.layout && descriptor.layout !== "auto")
-    {
-        layout = getGPUPipelineLayout(device, descriptor.layout);
-    }
+    let layout = getGPUPipelineLayout(device, descriptor.layout);
 
     const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
         layout,
