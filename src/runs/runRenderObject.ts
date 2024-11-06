@@ -1,9 +1,8 @@
-import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
-import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
+import { runBindGroup } from "./runComputeBindGroup";
 import { runDraw } from "./runDraw";
 import { runDrawIndexed } from "./runDrawIndexed";
 import { runIndexBuffer } from "./runIndexBuffer";
@@ -27,14 +26,7 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 
     runRenderPipeline(device, passEncoder, pipeline);
 
-    // 计算 bindGroups
-    const bindGroups = getIGPUSetBindGroups(pipeline.layout, renderObject.bindingResources, bindingResourceInfoMap);
-
-    bindGroups?.forEach((bindGroup, index) =>
-    {
-        const gBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
-        passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
-    });
+    runBindGroup(device, passEncoder, pipeline.layout, renderObject.bindingResources, bindingResourceInfoMap);
 
     vertexBuffers?.forEach((vertexBuffer, index) =>
     {
