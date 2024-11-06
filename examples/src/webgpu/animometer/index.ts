@@ -133,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ],
         };
 
-        const renderBundle: IGPURenderBundleObject = {
+        const renderBundleObject: IGPURenderBundleObject = {
             renderObjects
         };
 
@@ -164,7 +164,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 renderPasss[0] = {
                     descriptor: renderPass,
-                    renderObjects: [renderBundle],
+                    renderObjects: [renderBundleObject],
                 };
             }
             else

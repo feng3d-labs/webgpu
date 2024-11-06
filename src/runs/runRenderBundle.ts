@@ -5,11 +5,11 @@ import { runRenderObject } from "./runRenderObject";
 
 export function runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPass: IGPURenderPassDescriptor, renderBundleObject: IGPURenderBundleObject)
 {
-    let gRenderBundle = renderBundleObject._GPURenderBundle;
+    let gRenderBundle: GPURenderBundle = renderBundleObject[_GPURenderBundle];
     if (!gRenderBundle)
     {
         //
-        const renderBundle = getGPURenderBundleEncoderDescriptor(renderBundleObject.renderBundle, renderPass);
+        const renderBundle = getGPURenderBundleEncoderDescriptor(renderBundleObject.descriptor, renderPass);
 
         const renderBundleEncoder = device.createRenderBundleEncoder(renderBundle);
         renderBundleObject.renderObjects.forEach((renderObject) =>
@@ -18,8 +18,10 @@ export function runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEnc
         });
 
         gRenderBundle = renderBundleEncoder.finish();
-        renderBundleObject._GPURenderBundle = gRenderBundle;
+        renderBundleObject[_GPURenderBundle] = gRenderBundle;
     }
 
     passEncoder.executeBundles([gRenderBundle]);
 }
+
+const _GPURenderBundle = "_GPURenderBundle";

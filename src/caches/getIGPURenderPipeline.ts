@@ -1,6 +1,7 @@
 import { watcher } from "@feng3d/watcher";
 
 import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
+import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
@@ -8,7 +9,6 @@ import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
-import { getIRenderPassDepthStencilAttachmentFormat } from "./getIRenderPassDepthStencilAttachmentFormat";
 import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -31,7 +31,7 @@ export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
         const gpuFragmentState = getIGPUFragmentState(renderPipeline.fragment, renderPass);
 
         // 获取深度模板阶段完整描述。
-        const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPass);
+        const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPass.depthStencilAttachment);
 
         // 从GPU管线中获取管线布局。
         const { gpuPipelineLayout, bindingResourceInfoMap } = getIGPUPipelineLayout(renderPipeline);
@@ -85,17 +85,17 @@ const renderPipelineMap = new ChainMap<
  * @param depthStencilAttachmentTextureFormat 深度模板附件纹理格式。
  * @returns 深度模板阶段完整描述。
  */
-function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, renderPass: IGPURenderPassDescriptor)
+function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
 {
     // 获取渲染通道附件纹理格式。
-    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormat(renderPass.depthStencilAttachment);
 
     let gpuDepthStencilState: GPUDepthStencilState;
-    if (depthStencilAttachmentTextureFormat)
+    if (depthStencilAttachment)
     {
+        //
         const depthWriteEnabled = depthStencil?.depthWriteEnabled ?? true;
         const depthCompare = depthStencil?.depthCompare ?? "less";
-        const format = depthStencilAttachmentTextureFormat;
+        const format = getGPUTextureFormat(depthStencilAttachment.view?.texture) || "depth24plus";
 
         gpuDepthStencilState = {
             depthWriteEnabled,

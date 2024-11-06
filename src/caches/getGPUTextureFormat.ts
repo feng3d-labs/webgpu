@@ -8,6 +8,8 @@ import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IG
  */
 export function getGPUTextureFormat(texture: IGPUTexture)
 {
+    if (!texture) return undefined;
+
     if ((texture as IGPUTextureFromContext).context)
     {
         const format = (texture as IGPUTextureFromContext).context?.configuration?.format || navigator.gpu.getPreferredCanvasFormat();
