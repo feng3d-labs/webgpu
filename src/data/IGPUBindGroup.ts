@@ -13,9 +13,9 @@ import { IGPUTextureView } from "./IGPUTextureView";
 export interface IGPUBindGroup extends Omit<GPUBindGroupDescriptor, "layout" | "entries">
 {
     /**
-     * The {@link IGPUBindGroupLayout} the entries of this bind group will conform to.
+     * The {@link IGPUBindGroupLayoutDescriptor} the entries of this bind group will conform to.
      */
-    layout: IGPUBindGroupLayout;
+    layout: IGPUBindGroupLayoutDescriptor;
 
     /**
      * A list of entries describing the resources to expose to the shader for each binding
@@ -25,14 +25,6 @@ export interface IGPUBindGroup extends Omit<GPUBindGroupDescriptor, "layout" | "
      */
     entries: IGPUBindGroupEntry[];
 }
-
-/**
- * GPU绑定组布局。
- *
- * @see GPUPipelineBase.getBindGroupLayout
- * @see GPUDevice.createBindGroupLayout
- */
-export type IGPUBindGroupLayout = IGPUBindGroupLayoutFromPipeline | IGPUBindGroupLayoutDescriptor;
 
 /**
  * GPU绑定组布局描述。
@@ -66,27 +58,6 @@ export interface IGPUBindGroupLayoutEntry extends Omit<GPUBindGroupLayoutEntry, 
  * @see GPUShaderStage
  */
 export type IGPUShaderStageFlags = "VERTEX" | "FRAGMENT" | "COMPUTE";
-
-/**
- * 从GPU管线中自动生成指定位置的绑定组布局。
- *
- * @see GPUBindGroupLayout
- * @see GPUPipelineBase.getBindGroupLayout
- */
-export interface IGPUBindGroupLayoutFromPipeline
-{
-    /**
-     * 所属管线。
-     */
-    pipeline: IGPURenderPipeline | IGPUComputePipeline;
-
-    /**
-     * Index into the pipeline layout's {@link GPUPipelineLayout#[[bindGroupLayouts]]} sequence.
-     *
-     * @see GPUPipelineBase.getBindGroupLayout
-     */
-    index: number;
-}
 
 /**
  * 绑定资源入口，指定资源绑定的位置。
