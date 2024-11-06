@@ -22,6 +22,7 @@ import { runComputePass } from "./runs/runComputePass";
 import { runDraw } from "./runs/runDraw";
 import { runDrawIndexed } from "./runs/runDrawIndexed";
 import { runIndexBuffer } from "./runs/runIndexBuffer";
+import { runRenderObject } from "./runs/runRenderObject";
 import { runRenderPipeline } from "./runs/runRenderPipeline";
 import { runScissorRect } from "./runs/runScissorRect";
 import { runViewport } from "./runs/runViewport";
@@ -268,44 +269,44 @@ export class WebGPU
     }
 }
 
-/**
- * 执行渲染对象。
- * 
- * @param device GPU设备。
- * @param passEncoder 渲染通道编码器。
- * @param renderObject 渲染对象。
- * @param renderPass 渲染通道。
- */
-export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor)
-{
-    const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
+// /**
+//  * 执行渲染对象。
+//  * 
+//  * @param device GPU设备。
+//  * @param passEncoder 渲染通道编码器。
+//  * @param renderObject 渲染对象。
+//  * @param renderPass 渲染通道。
+//  */
+// export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPass: IGPURenderPassDescriptor)
+// {
+//     const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
 
-    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(device, renderObject.pipeline, renderPass, renderObject.vertices);
+//     const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(device, renderObject.pipeline, renderPass, renderObject.vertices);
 
-    // 计算 bindGroups
-    const bindGroups = getIGPUSetBindGroups(pipeline, renderObject.bindingResources, bindingResourceInfoMap);
+//     // 计算 bindGroups
+//     const bindGroups = getIGPUSetBindGroups(pipeline, renderObject.bindingResources, bindingResourceInfoMap);
 
-    runRenderPipeline(device, passEncoder, pipeline);
+//     runRenderPipeline(device, passEncoder, pipeline);
 
-    bindGroups?.forEach((bindGroup, index) =>
-    {
-        const gBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
-        passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
-    });
+//     bindGroups?.forEach((bindGroup, index) =>
+//     {
+//         const gBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
+//         passEncoder.setBindGroup(index, gBindGroup, bindGroup.dynamicOffsets);
+//     });
 
-    vertexBuffers?.forEach((vertexBuffer, index) =>
-    {
-        const gBuffer = getGPUBuffer(device, vertexBuffer.buffer);
-        passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
-    });
+//     vertexBuffers?.forEach((vertexBuffer, index) =>
+//     {
+//         const gBuffer = getGPUBuffer(device, vertexBuffer.buffer);
+//         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
+//     });
 
-    runIndexBuffer(device, passEncoder, index);
+//     runIndexBuffer(device, passEncoder, index);
 
-    runViewport(passEncoder as GPURenderPassEncoder, viewport);
+//     runViewport(passEncoder as GPURenderPassEncoder, viewport);
 
-    runScissorRect(passEncoder as GPURenderPassEncoder, scissorRect);
+//     runScissorRect(passEncoder as GPURenderPassEncoder, scissorRect);
 
-    runDraw(passEncoder, draw);
+//     runDraw(passEncoder, draw);
 
-    runDrawIndexed(passEncoder, drawIndexed);
-}
+//     runDrawIndexed(passEncoder, drawIndexed);
+// }
