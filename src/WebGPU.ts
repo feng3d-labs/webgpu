@@ -1,6 +1,4 @@
-import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUTexture } from "./caches/getGPUTexture";
-import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputePass } from "./data/IGPUComputePass";
@@ -10,6 +8,7 @@ import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { runComputePass } from "./runs/runComputePass";
+import { runCopyBufferToBuffer } from "./runs/runCopyBufferToBuffer";
 import { runCopyTextureToTexture } from "./runs/runCopyTextureToTexture";
 import { runRenderPass } from "./runs/runRenderPass";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
@@ -164,8 +163,7 @@ export class WebGPU
             }
             else if ((v as IGPUCopyBufferToBuffer).source?.size)
             {
-                v = getIGPUCopyBufferToBuffer(v as IGPUCopyBufferToBuffer);
-                this.copyBufferToBuffer(gpuCommandEncoder, v);
+                runCopyBufferToBuffer(this.device, gpuCommandEncoder, v as IGPUCopyBufferToBuffer);
             }
             else
             {
@@ -174,20 +172,6 @@ export class WebGPU
         });
 
         return gpuCommandEncoder.finish();
-    }
-
-    private copyBufferToBuffer(commandEncoder: GPUCommandEncoder, v: IGPUCopyBufferToBuffer)
-    {
-        const sourceBuffer = getGPUBuffer(this.device, v.source);
-        const destinationBuffer = getGPUBuffer(this.device, v.destination);
-
-        commandEncoder.copyBufferToBuffer(
-            sourceBuffer,
-            v.sourceOffset,
-            destinationBuffer,
-            v.destinationOffset,
-            v.size,
-        );
     }
 
     getGPUTextureSize(input: IGPUTexture)
