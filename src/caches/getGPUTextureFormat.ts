@@ -1,5 +1,4 @@
-import { IGPUTexture } from "../data/IGPUTexture";
-import { getGPUTexture } from "./getGPUTexture";
+import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
 
 /**
  * 获取纹理格式。
@@ -7,9 +6,14 @@ import { getGPUTexture } from "./getGPUTexture";
  * @param texture 纹理。
  * @returns 纹理格式。
  */
-export function getGPUTextureFormat(device: GPUDevice, texture: IGPUTexture)
+export function getGPUTextureFormat(texture: IGPUTexture)
 {
-    const gpuTexture = getGPUTexture(device, texture);
+    if ((texture as IGPUTextureFromContext).context)
+    {
+        const format = (texture as IGPUTextureFromContext).context?.configuration?.format || navigator.gpu.getPreferredCanvasFormat();
 
-    return gpuTexture.format;
+        return format;
+    }
+
+    return (texture as IGPUTextureBase).format;
 }

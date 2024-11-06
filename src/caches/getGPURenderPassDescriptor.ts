@@ -11,7 +11,7 @@ import { getIGPURenderPass } from "./getIGPURenderPass";
  */
 export function getGPURenderPassDescriptor(device: GPUDevice, renderPass: IGPURenderPassDescriptor): GPURenderPassDescriptor
 {
-    renderPass = getIGPURenderPass(device, renderPass);
+    renderPass = getIGPURenderPass(renderPass);
 
     const renderPassDescriptor: GPURenderPassDescriptor = {
         colorAttachments: [],

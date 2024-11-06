@@ -19,7 +19,7 @@ import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getWGSLReflectInfo
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getIGPURenderPipeline(device: GPUDevice, renderPipeline: IGPURenderPipeline, renderPass: IGPURenderPassDescriptor, vertices: IGPUVertexAttributes)
+export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPass: IGPURenderPassDescriptor, vertices: IGPUVertexAttributes)
 {
     let result = renderPipelineMap.get([renderPipeline, renderPass, vertices]);
     if (!result)
@@ -28,10 +28,10 @@ export function getIGPURenderPipeline(device: GPUDevice, renderPipeline: IGPURen
         const { gpuVertexState, vertexBuffers } = getIGPUVertexState(renderPipeline.vertex, vertices);
 
         // 获取片段阶段完整描述。
-        const gpuFragmentState = getIGPUFragmentState(device, renderPipeline.fragment, renderPass);
+        const gpuFragmentState = getIGPUFragmentState(renderPipeline.fragment, renderPass);
 
         // 获取深度模板阶段完整描述。
-        const gpuDepthStencilState = getGPUDepthStencilState(device, renderPipeline.depthStencil, renderPass);
+        const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPass);
 
         // 从GPU管线中获取管线布局。
         const { gpuPipelineLayout, bindingResourceInfoMap } = getIGPUPipelineLayout(renderPipeline);
@@ -85,10 +85,10 @@ const renderPipelineMap = new ChainMap<
  * @param depthStencilAttachmentTextureFormat 深度模板附件纹理格式。
  * @returns 深度模板阶段完整描述。
  */
-function getGPUDepthStencilState(device: GPUDevice, depthStencil: IGPUDepthStencilState, renderPass: IGPURenderPassDescriptor)
+function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, renderPass: IGPURenderPassDescriptor)
 {
     // 获取渲染通道附件纹理格式。
-    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormats(device, renderPass);
+    const depthStencilAttachmentTextureFormat = getIRenderPassDepthStencilAttachmentFormats(renderPass);
 
     let gpuDepthStencilState: GPUDepthStencilState;
     if (depthStencilAttachmentTextureFormat)
@@ -285,7 +285,7 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
  * @param colorAttachmentTextureFormats 颜色附件格式。
  * @returns 片段阶段完整描述。
  */
-function getIGPUFragmentState(device: GPUDevice, fragmentState: IGPUFragmentState, renderPass: IGPURenderPassDescriptor)
+function getIGPUFragmentState(fragmentState: IGPUFragmentState, renderPass: IGPURenderPassDescriptor)
 {
     if (!fragmentState)
     {
@@ -296,7 +296,7 @@ function getIGPUFragmentState(device: GPUDevice, fragmentState: IGPUFragmentStat
     if (!gpuFragmentState)
     {
         // 获取渲染通道附件纹理格式。
-        const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(device, renderPass);
+        const colorAttachmentTextureFormats = getIRenderPassColorAttachmentFormats(renderPass);
 
         const code = fragmentState.code;
         let entryPoint = fragmentState.entryPoint;

@@ -15,7 +15,7 @@ import { getGPUTextureSize } from "./getGPUTextureSize";
  * @param renderPass 渲染通道描述。
  * @returns 完整的渲染通道描述。
  */
-export function getIGPURenderPass(device: GPUDevice, renderPass: IGPURenderPassDescriptor)
+export function getIGPURenderPass(renderPass: IGPURenderPassDescriptor)
 {
     let iGPURenderPass = renderPassMap.get(renderPass);
     if (!iGPURenderPass)
@@ -24,10 +24,10 @@ export function getIGPURenderPass(device: GPUDevice, renderPass: IGPURenderPassD
         updateAttachmentSize(renderPass);
 
         // 获取颜色附件完整描述列表。
-        const colorAttachments = getIGPURenderPassColorAttachments(device, renderPass.colorAttachments, renderPass.multisample);
+        const colorAttachments = getIGPURenderPassColorAttachments(renderPass.colorAttachments, renderPass.multisample);
 
         // 获取深度模板附件
-        const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(device, renderPass.depthStencilAttachment, renderPass.attachmentSize, renderPass.multisample);
+        const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(renderPass.depthStencilAttachment, renderPass.attachmentSize, renderPass.multisample);
 
         // 附件尺寸变化时，渲染通道描述失效。
         const watchProperty = { attachmentSize: { width: 0, height: 0 } }; // 被监听的属性
@@ -185,14 +185,14 @@ function getIGPURenderPassAttachmentTextures(colorAttachments: IGPURenderPassCol
  * @param multisample 多重采样数量。
  * @returns 用于解决多重采样的纹理视图。
  */
-function getMultisampleTextureView(device: GPUDevice, texture: IGPUTexture, multisample: number)
+function getMultisampleTextureView(texture: IGPUTexture, multisample: number)
 {
     let multisampleTextureView = multisampleTextureMap.get(texture);
     if (!multisampleTextureView)
     {
         // 新增用于解决多重采样的纹理
         const size = getGPUTextureSize(texture);
-        const format = getGPUTextureFormat(device, texture);
+        const format = getGPUTextureFormat(texture);
         const multisampleTexture: IGPUTexture = {
             label: "自动生成多重采样的纹理",
             size,
@@ -217,7 +217,7 @@ const multisampleTextureMap = new WeakMap<IGPUTexture, IGPUTextureView>();
  * @param multisample 多重采样次数。
  * @returns 深度模板附件完整描述。
  */
-function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: IGPURenderPassAttachmentSize, multisample: number)
+function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: IGPURenderPassAttachmentSize, multisample: number)
 {
     let gpuDepthStencilAttachment: IGPURenderPassDepthStencilAttachment;
     if (depthStencilAttachment)
@@ -239,7 +239,7 @@ function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencil
         if (multisample && !resolveTarget)
         {
             resolveTarget = view;
-            view = getMultisampleTextureView(device, view.texture, multisample);
+            view = getMultisampleTextureView(view.texture, multisample);
         }
 
         const depthClearValue = depthStencilAttachment.depthClearValue;
@@ -267,7 +267,7 @@ function getIGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencil
  * @param multisample 多重采样次数。
  * @returns 颜色附件完整描述列表。
  */
-function getIGPURenderPassColorAttachments(device, colorAttachments: IGPURenderPassColorAttachment[], multisample: number)
+function getIGPURenderPassColorAttachments(colorAttachments: IGPURenderPassColorAttachment[], multisample: number)
 {
     const gpuColorAttachments: IGPURenderPassColorAttachment[] = colorAttachments.map((v) =>
     {
@@ -279,7 +279,7 @@ function getIGPURenderPassColorAttachments(device, colorAttachments: IGPURenderP
         if (multisample && !resolveTarget)
         {
             resolveTarget = view;
-            view = getMultisampleTextureView(device, view.texture, multisample);
+            view = getMultisampleTextureView(view.texture, multisample);
         }
 
         return {

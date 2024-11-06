@@ -9,7 +9,7 @@ export function runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEnc
     if (!gRenderBundle)
     {
         //
-        const renderBundle = getGPURenderBundleEncoderDescriptor(device, renderBundleObject.renderBundle, renderPass);
+        const renderBundle = getGPURenderBundleEncoderDescriptor(renderBundleObject.renderBundle, renderPass);
 
         const renderBundleEncoder = device.createRenderBundleEncoder(renderBundle);
         renderBundleObject.renderObjects.forEach((renderObject) =>

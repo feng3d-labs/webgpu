@@ -22,7 +22,7 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 {
     const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
 
-    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(device, renderObject.pipeline, renderPass, renderObject.vertices);
+    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(renderObject.pipeline, renderPass, renderObject.vertices);
 
     runBindGroup(device, passEncoder, pipeline.layout, renderObject.bindingResources, bindingResourceInfoMap);
 
