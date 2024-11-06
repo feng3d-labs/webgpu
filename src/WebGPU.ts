@@ -1,16 +1,8 @@
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
-import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
-import { IGPUComputePass } from "./data/IGPUComputePass";
-import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
-import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
-import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
-import { runComputePass } from "./runs/runComputePass";
-import { runCopyBufferToBuffer } from "./runs/runCopyBufferToBuffer";
-import { runCopyTextureToTexture } from "./runs/runCopyTextureToTexture";
-import { runRenderPass } from "./runs/runRenderPass";
+import { runCommandEncoder } from "./runs/runCommandEncoder";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -70,7 +62,7 @@ export class WebGPU
     {
         const commandBuffers = data.commandEncoders.map((v) =>
         {
-            const commandBuffer = this.commandEncode(v);
+            const commandBuffer = runCommandEncoder(this.device, v);
 
             return commandBuffer;
         });
@@ -141,37 +133,6 @@ export class WebGPU
         });
 
         return result;
-    }
-
-    private commandEncode(v: IGPUCommandEncoder)
-    {
-        const gpuCommandEncoder = this.device.createCommandEncoder();
-
-        v.passEncoders.forEach((v) =>
-        {
-            if ((v as IGPURenderPass).descriptor)
-            {
-                runRenderPass(this.device, gpuCommandEncoder, v as IGPURenderPass);
-            }
-            else if ((v as IGPUComputePass).computeObjects)
-            {
-                runComputePass(this.device, gpuCommandEncoder, v as IGPUComputePass);
-            }
-            else if ((v as IGPUCopyTextureToTexture).source?.texture)
-            {
-                runCopyTextureToTexture(this.device, gpuCommandEncoder, v as IGPUCopyTextureToTexture);
-            }
-            else if ((v as IGPUCopyBufferToBuffer).source?.size)
-            {
-                runCopyBufferToBuffer(this.device, gpuCommandEncoder, v as IGPUCopyBufferToBuffer);
-            }
-            else
-            {
-                console.error(`未处理 passEncoder`);
-            }
-        });
-
-        return gpuCommandEncoder.finish();
     }
 
     getGPUTextureSize(input: IGPUTexture)
