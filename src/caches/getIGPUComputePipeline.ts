@@ -43,7 +43,7 @@ const computePipelineMap = new Map<IGPUComputePipeline, { gpuComputePipeline: IG
 * @param computeStage 计算阶段描述。
 * @returns 计算阶段完整描述。
 */
-export function getIGPUComputeStage(computeStage: IGPUProgrammableStage)
+function getIGPUComputeStage(computeStage: IGPUProgrammableStage)
 {
     if (!computeStage.entryPoint)
     {
