@@ -1,7 +1,6 @@
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUCopyBufferToBuffer } from "./caches/getIGPUCopyBufferToBuffer";
-import { getIGPUCopyTextureToTexture } from "./caches/getIGPUCopyTextureToTexture";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
 import { IGPUComputePass } from "./data/IGPUComputePass";
@@ -11,6 +10,7 @@ import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { runComputePass } from "./runs/runComputePass";
+import { runCopyTextureToTexture } from "./runs/runCopyTextureToTexture";
 import { runRenderPass } from "./runs/runRenderPass";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
@@ -160,8 +160,7 @@ export class WebGPU
             }
             else if ((v as IGPUCopyTextureToTexture).source?.texture)
             {
-                v = getIGPUCopyTextureToTexture(v as IGPUCopyTextureToTexture);
-                this.copyTextureToTexture(gpuCommandEncoder, v);
+                runCopyTextureToTexture(this.device, gpuCommandEncoder, v as IGPUCopyTextureToTexture);
             }
             else if ((v as IGPUCopyBufferToBuffer).source?.size)
             {
@@ -188,22 +187,6 @@ export class WebGPU
             destinationBuffer,
             v.destinationOffset,
             v.size,
-        );
-    }
-
-    private copyTextureToTexture(commandEncoder: GPUCommandEncoder, v: IGPUCopyTextureToTexture)
-    {
-        const sourceTexture = getGPUTexture(this.device, v.source.texture);
-        const destinationTexture = getGPUTexture(this.device, v.destination.texture);
-
-        commandEncoder.copyTextureToTexture(
-            {
-                texture: sourceTexture,
-            },
-            {
-                texture: destinationTexture,
-            },
-            v.copySize,
         );
     }
 
