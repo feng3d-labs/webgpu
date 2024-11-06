@@ -2,7 +2,7 @@ import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
-import { runCommandEncoder } from "./runs/runCommandEncoder";
+import { runSubmit } from "./runs/runSubmit";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
@@ -54,20 +54,13 @@ export class WebGPU
     /**
      * 提交 GPU 。
      *
-     * @param data 一次 GPU 提交内容。
+     * @param submit 一次 GPU 提交内容。
      *
      * @see GPUQueue.submit
      */
-    submit(data: IGPUSubmit)
+    submit(submit: IGPUSubmit)
     {
-        const commandBuffers = data.commandEncoders.map((v) =>
-        {
-            const commandBuffer = runCommandEncoder(this.device, v);
-
-            return commandBuffer;
-        });
-
-        this.device.queue.submit(commandBuffers);
+        runSubmit(this.device, submit);
     }
 
     /**
@@ -83,6 +76,7 @@ export class WebGPU
             gpuTexture.destroy();
         }
     }
+
     /**
      * 操作纹理进行Y轴翻转或进行预乘Alpha。
      *
