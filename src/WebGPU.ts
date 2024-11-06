@@ -1,4 +1,4 @@
-import { getGPUTexture } from "./caches/getGPUTexture";
+import { destoryTexture, getGPUTexture } from "./caches/getGPUTexture";
 import { getGPUTextureSize } from "./caches/getIGPUTexture";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
@@ -70,11 +70,7 @@ export class WebGPU
      */
     destoryTexture(texture: IGPUTexture)
     {
-        const gpuTexture = getGPUTexture(this.device, texture, false);
-        if (gpuTexture)
-        {
-            gpuTexture.destroy();
-        }
+        destoryTexture(this.device, texture);
     }
 
     /**

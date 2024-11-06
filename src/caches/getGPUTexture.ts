@@ -164,3 +164,12 @@ export function getGPUTextureNum()
 {
     return textureMap.size;
 }
+
+export function destoryTexture(device: GPUDevice, texture: IGPUTexture)
+{
+    const gpuTexture = getGPUTexture(this.device, texture, false);
+    if (gpuTexture)
+    {
+        gpuTexture.destroy();
+    }
+}
