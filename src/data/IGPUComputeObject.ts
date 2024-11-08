@@ -1,5 +1,5 @@
 import { IGPUBindingResources } from "./IGPUBindingResources";
-import { IGPUPipelineLayout } from "./IGPUPipelineLayout";
+import { IGPUPipelineLayout } from "../internal/IGPUPipelineLayout";
 import { IGPUSetBindGroup } from "./IGPURenderObject";
 
 /**

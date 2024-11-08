@@ -1,4 +1,4 @@
-import { IGPUBindGroupLayoutDescriptor } from "./IGPUBindGroup";
+import { IGPUBindGroupLayoutDescriptor } from "./IGPUBindGroupLayoutDescriptor";
 
 /**
  * GPU管线布局描述。

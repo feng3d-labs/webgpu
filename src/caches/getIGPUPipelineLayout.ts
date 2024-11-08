@@ -1,7 +1,7 @@
-import { IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry, IGPUShaderStageFlags } from "../data/IGPUBindGroup";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
-import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
 import { IGPURenderPipeline } from "../data/IGPURenderObject";
+import { IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry, IGPUShaderStageFlags } from "../internal/IGPUBindGroupLayoutDescriptor";
+import { IGPUPipelineLayout } from "../internal/IGPUPipelineLayout";
 import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -19,10 +19,7 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     const code = vertexCode + fragmentCode + computeCode;
     //
     let result = gpuPipelineLayoutMap.get(code);
-    if (result)
-    {
-        return result;
-    }
+    if (result) return result;
 
     const bindingResourceInfoMap = {};
     const visibility: IGPUShaderStageFlags[] = [];

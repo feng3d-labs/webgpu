@@ -6,7 +6,7 @@ import { WGSLBindingResourceInfoMap } from "../caches/getWGSLReflectInfo";
 import { IGPUBindGroupEntry, IGPUBindingResource, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroup";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
-import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
+import { IGPUPipelineLayout } from "../internal/IGPUPipelineLayout";
 import { IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureBase } from "../data/IGPUTexture";

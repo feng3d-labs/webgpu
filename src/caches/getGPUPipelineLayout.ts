@@ -1,4 +1,4 @@
-import { IGPUPipelineLayout } from "../data/IGPUPipelineLayout";
+import { IGPUPipelineLayout } from "../internal/IGPUPipelineLayout";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 
 export function getGPUPipelineLayout(device: GPUDevice, layout: IGPUPipelineLayout)

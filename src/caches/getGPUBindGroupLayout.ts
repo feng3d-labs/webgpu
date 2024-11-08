@@ -1,4 +1,4 @@
-import { IGPUBindGroupLayoutDescriptor } from "../data/IGPUBindGroup";
+import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUBindGroupLayoutDescriptor";
 
 export function getGPUBindGroupLayout(device: GPUDevice, layout: IGPUBindGroupLayoutDescriptor)
 {

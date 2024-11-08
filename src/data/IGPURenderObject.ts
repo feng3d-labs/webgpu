@@ -1,7 +1,7 @@
 import { IGPUBindGroup } from "./IGPUBindGroup";
 import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPUBuffer } from "./IGPUBuffer";
-import { IGPUPipelineLayout } from "./IGPUPipelineLayout";
+import { IGPUPipelineLayout } from "../internal/IGPUPipelineLayout";
 import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "./IGPUVertexBuffer";
 

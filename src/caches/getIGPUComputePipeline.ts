@@ -12,10 +12,7 @@ import { getWGSLReflectInfo, WGSLBindingResourceInfoMap } from "./getWGSLReflect
 export function getIGPUComputePipeline(computePipeline: IGPUComputePipeline)
 {
     let result = computePipelineMap.get(computePipeline);
-    if (result)
-    {
-        return result;
-    }
+    if (result) return result;
 
     const gpuComputeStage = getIGPUComputeStage(computePipeline.compute);
 
