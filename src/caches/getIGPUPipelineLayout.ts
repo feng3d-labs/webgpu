@@ -20,7 +20,7 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     let result = gpuPipelineLayoutMap.get(code);
     if (result) return result;
 
-    const bindingResourceInfoMap = {};
+    const bindingResourceInfoMap: { [resourceName: string]: WGSLBindingResourceInfo } = {};
     let visibility: GPUShaderStageFlags = 0;
     if (vertexCode)
     {
@@ -56,12 +56,12 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
         {
             // 存在重复定义时，判断是否兼容
             const preEntry = groupMap[binding];
-            console.error(`在管线中 @group(${group}) @binding(${binding}) 处存在多个定义 ${preEntry.name} ${resourceName} 。`);
+            console.error(`在管线中 @group(${group}) @binding(${binding}) 处存在多个定义 ${preEntry.variableInfo.name} ${resourceName} 。`);
         }
         groupMap[binding] = bindingResourceInfo;
 
-        //
-        const entry = getIGPUBindGroupLayoutEntry(bindingResourceInfo, visibility);
+        bindingResourceInfo.visibility = visibility;
+        const entry = bindingResourceInfo;
         //
         const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
         (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).push(entry);
@@ -87,39 +87,3 @@ const gpuPipelineLayoutMap = new Map<string, {
      */
     bindingResourceInfoMap: WGSLBindingResourceInfoMap
 }>();
-
-function getIGPUBindGroupLayoutEntry(bindingResourceInfo: WGSLBindingResourceInfo, visibility: GPUShaderStageFlags)
-{
-    const { binding, buffer, texture, storageTexture, externalTexture, sampler } = bindingResourceInfo;
-
-    const entry: GPUBindGroupLayoutEntry = {
-        binding, visibility,
-    };
-
-    if (buffer)
-    {
-        entry.buffer = buffer.layout;
-    }
-    else if (sampler)
-    {
-        entry.sampler = sampler.layout;
-    }
-    else if (texture)
-    {
-        entry.texture = texture.layout;
-    }
-    else if (storageTexture)
-    {
-        entry.storageTexture = storageTexture.layout;
-    }
-    else if (externalTexture)
-    {
-        entry.externalTexture = externalTexture.layout;
-    }
-    else
-    {
-        throw ``;
-    }
-
-    return entry;
-}

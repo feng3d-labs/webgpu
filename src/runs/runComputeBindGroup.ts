@@ -1,5 +1,5 @@
 import { watcher } from "@feng3d/watcher";
-import { VariableInfo, TemplateInfo } from "wgsl_reflect";
+import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { WGSLBindingResourceInfoMap } from "../caches/getWGSLReflectInfo";
@@ -10,8 +10,8 @@ import { IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureBase } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
-import { ChainMap } from "../utils/ChainMap";
 import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
+import { ChainMap } from "../utils/ChainMap";
 
 /**
  * 执行计算绑定组。
@@ -54,7 +54,7 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
         {
             const bindingResourceInfo = bindingResourceInfoMap[resourceName];
 
-            const { group, binding, type } = bindingResourceInfo;
+            const { group, binding, variableInfo } = bindingResourceInfo;
 
             gpuSetBindGroups[group] = gpuSetBindGroups[group] || {
                 bindGroup: {
@@ -74,10 +74,9 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
 
                 let resource: IGPUBindingResource;
                 //
-                if (type === "buffer")
+                if (bindingResourceInfo.buffer)
                 {
-                    const variableInfo = bindingResourceInfo.buffer.variableInfo;
-                    const layoutType = bindingResourceInfo.buffer.layout.type;
+                    const layoutType = bindingResourceInfo.buffer.type;
 
                     //
                     const size = variableInfo.size;
@@ -115,31 +114,31 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
                     // 更新缓冲区绑定的数据。
                     updateBufferBinding(variableInfo, uniformData);
                 }
-                else if (type === "sampler")
+                else if (bindingResourceInfo.sampler)
                 {
                     const uniformData = bindingResource as IGPUSampler;
 
                     resource = uniformData;
                 }
-                else if (type === "texture")
+                else if (bindingResourceInfo.texture)
                 {
                     const uniformData = bindingResource as IGPUTextureView;
 
                     // 设置纹理资源布局上的采样类型。
                     if ((uniformData.texture as IGPUTextureBase).sampleType === "unfilterable-float")
                     {
-                        bindingResourceInfo.texture.layout.sampleType = "unfilterable-float";
+                        bindingResourceInfo.texture.sampleType = "unfilterable-float";
                     }
 
                     resource = uniformData;
                 }
-                else if (type === "externalTexture")
+                else if (bindingResourceInfo.externalTexture)
                 {
                     const uniformData = bindingResource as IGPUExternalTexture;
 
                     resource = uniformData;
                 }
-                else if (type === "storageTexture")
+                else if (bindingResourceInfo.storageTexture)
                 {
                     const uniformData = bindingResource as IGPUTextureView;
 
@@ -147,7 +146,7 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
                 }
                 else
                 {
-                    throw `未解析 ${type}`;
+                    throw `未解析 ${variableInfo.resourceType}`;
                 }
 
                 return resource;

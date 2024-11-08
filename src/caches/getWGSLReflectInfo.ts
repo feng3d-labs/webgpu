@@ -109,17 +109,10 @@ export interface WGSLVertexAttributeInfo
 /**
  * WebGPU着色器代码中获取的绑定资源信息。
  */
-export interface WGSLBindingResourceInfo
+export interface WGSLBindingResourceInfo extends GPUBindGroupLayoutEntry
 {
-    name: string,
     group: number,
-    binding: number,
-    type: "buffer" | "texture" | "storageTexture" | "externalTexture" | "sampler";
-    buffer?: { layout: GPUBufferBindingLayout, variableInfo: VariableInfo }
-    texture?: { layout: GPUTextureBindingLayout }
-    storageTexture?: { layout: GPUStorageTextureBindingLayout }
-    externalTexture?: { layout: GPUExternalTextureBindingLayout }
-    sampler?: { layout: GPUSamplerBindingLayout },
+    variableInfo: VariableInfo
 }
 
 /**
@@ -215,7 +208,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
             minBindingSize: uniform.size,
         };
 
-        bindingResourceLayoutMap[name] = { name, group, binding, buffer: { layout, variableInfo: uniform }, type: "buffer" };
+        bindingResourceLayoutMap[name] = { visibility: 0, group, binding, buffer: layout, variableInfo: uniform };
     }
 
     for (const storage of reflect.storage)
@@ -232,7 +225,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
                 type,
             };
 
-            bindingResourceLayoutMap[name] = { name, group, binding, buffer: { layout, variableInfo: storage }, type: "buffer" };
+            bindingResourceLayoutMap[name] = { visibility: 0, group, binding, buffer: layout, variableInfo: storage };
         }
         else if (storage.resourceType === ResourceType.StorageTexture)
         {
@@ -251,7 +244,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
                 viewDimension,
             };
 
-            bindingResourceLayoutMap[name] = { name, group, binding, storageTexture: { layout }, type: "storageTexture" };
+            bindingResourceLayoutMap[name] = { visibility: 0, group, binding, storageTexture: layout, variableInfo: storage };
         }
         else
         {
@@ -269,7 +262,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
 
         if (ExternalSampledTextureType[textureType])
         {
-            bindingResourceLayoutMap[name] = { name, group, binding, externalTexture: { layout: {} }, type: "externalTexture" };
+            bindingResourceLayoutMap[name] = { visibility: 0, group, binding, externalTexture: { layout: {} }, variableInfo: texture };
         }
         else if (StorageTextureType[textureType])
         {
@@ -284,7 +277,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
                 viewDimension,
             };
 
-            bindingResourceLayoutMap[name] = { name, group, binding, storageTexture: { layout }, type: "storageTexture" };
+            bindingResourceLayoutMap[name] = { visibility: 0, group, binding, storageTexture: layout, variableInfo: texture };
         }
         else
         {
@@ -323,7 +316,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
                 layout.multisampled = true;
             }
 
-            bindingResourceLayoutMap[name] = { name, group, binding, texture: { layout }, type: "texture" };
+            bindingResourceLayoutMap[name] = { visibility: 0, group, binding, texture: layout, variableInfo: texture };
         }
     }
 
@@ -338,7 +331,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
             layout.type = "comparison";
         }
 
-        bindingResourceLayoutMap[name] = { name, group, binding, sampler: { layout }, type: "sampler" };
+        bindingResourceLayoutMap[name] = { visibility: 0, group, binding, sampler: layout, variableInfo: sampler };
     }
 
     return bindingResourceLayoutMap;
