@@ -1,31 +1,13 @@
-import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUBindGroupLayoutDescriptor";
 
-export function getGPUBindGroupLayout(device: GPUDevice, layout: IGPUBindGroupLayoutDescriptor)
+export function getGPUBindGroupLayout(device: GPUDevice, layout: GPUBindGroupLayoutDescriptor)
 {
     let gpuBindGroupLayout = bindGroupLayoutMap.get(layout);
 
     if (gpuBindGroupLayout) return gpuBindGroupLayout;
 
     //
-    const entries: GPUBindGroupLayoutEntry[] = layout.entries.map((v) =>
-    {
-        const visibility = v.visibility.reduce((pv, cv) =>
-        {
-            pv = pv | GPUShaderStage[cv];
-
-            return pv;
-        }, 0);
-
-        const entity: GPUBindGroupLayoutEntry = {
-            ...v,
-            visibility,
-        };
-
-        return entity;
-    });
-
     gpuBindGroupLayout = device.createBindGroupLayout({
-        entries,
+        entries: layout.entries,
     });
 
     bindGroupLayoutMap.set(layout, gpuBindGroupLayout);
@@ -33,4 +15,4 @@ export function getGPUBindGroupLayout(device: GPUDevice, layout: IGPUBindGroupLa
     return gpuBindGroupLayout;
 }
 
-const bindGroupLayoutMap = new WeakMap<IGPUBindGroupLayoutDescriptor, GPUBindGroupLayout>();
+const bindGroupLayoutMap = new WeakMap<GPUBindGroupLayoutDescriptor, GPUBindGroupLayout>();

@@ -1,6 +1,5 @@
+import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { IGPUBindingResources } from "./IGPUBindingResources";
-import { IGPUPipelineLayout } from "../internal/IGPUPipelineLayout";
-import { IGPUSetBindGroup } from "./IGPURenderObject";
 
 /**
  * GPU计算对象，包含GPU一次计算所有数据。
@@ -65,7 +64,7 @@ export interface IGPUComputePipeline extends Omit<GPUComputePipelineDescriptor, 
     /**
      * GPU管线布局描述。
      */
-    layout?: IGPUPipelineLayout;
+    layout?: IGPUPipelineLayoutDescriptor;
 
     /**
      * 计算程序。

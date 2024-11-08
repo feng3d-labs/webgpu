@@ -1,5 +1,5 @@
 import { watcher } from "@feng3d/watcher";
-import { IGPUBindGroup, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroup";
+import { IGPUBindGroupDescriptor, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
@@ -9,7 +9,7 @@ import { getGPUExternalTexture } from "./getGPUExternalTexture";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView, gpuTextureViewEventEmitter } from "./getGPUTextureView";
 
-export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
+export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescriptor)
 {
     let gBindGroup = bindGroupMap.get(bindGroup);
     if (gBindGroup) return gBindGroup;
@@ -102,4 +102,4 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroup)
     return gBindGroup;
 }
 
-const bindGroupMap = new WeakMap<IGPUBindGroup, GPUBindGroup>();
+const bindGroupMap = new WeakMap<IGPUBindGroupDescriptor, GPUBindGroup>();

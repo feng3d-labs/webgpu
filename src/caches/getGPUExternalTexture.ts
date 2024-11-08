@@ -1,4 +1,4 @@
-import { IGPUExternalTexture } from "../data/IGPUBindGroup";
+import { IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
 
 /**
  * 获取 WebGPU外部纹理

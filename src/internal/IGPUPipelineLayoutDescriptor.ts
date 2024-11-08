@@ -1,5 +1,3 @@
-import { IGPUBindGroupLayoutDescriptor } from "./IGPUBindGroupLayoutDescriptor";
-
 /**
  * GPU管线布局描述。
  *
@@ -9,12 +7,12 @@ import { IGPUBindGroupLayoutDescriptor } from "./IGPUBindGroupLayoutDescriptor";
  *
  * {@link GPUPipelineLayout}
  */
-export interface IGPUPipelineLayout extends Omit<GPUPipelineLayoutDescriptor, "bindGroupLayouts">
+export interface IGPUPipelineLayoutDescriptor extends Omit<GPUPipelineLayoutDescriptor, "bindGroupLayouts">
 {
     /**
      * A list of {@link GPUBindGroupLayout}s the pipeline will use. Each element corresponds to a
      * @group attribute in the {@link GPUShaderModule}, with the `N`th element corresponding with
      * `@group(N)`.
      */
-    bindGroupLayouts: IGPUBindGroupLayoutDescriptor[];
+    bindGroupLayouts: GPUBindGroupLayoutDescriptor[];
 }

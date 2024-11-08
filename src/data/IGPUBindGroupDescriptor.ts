@@ -1,4 +1,3 @@
-import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUBindGroupLayoutDescriptor";
 import { IGPUBuffer } from "./IGPUBuffer";
 import { IGPUSampler } from "./IGPUSampler";
 import { IGPUTextureView } from "./IGPUTextureView";
@@ -9,12 +8,12 @@ import { IGPUTextureView } from "./IGPUTextureView";
  * @see GPUBindGroupDescriptor
  * @see GPUDevice.createBindGroup
  */
-export interface IGPUBindGroup extends Omit<GPUBindGroupDescriptor, "layout" | "entries">
+export interface IGPUBindGroupDescriptor extends Omit<GPUBindGroupDescriptor, "layout" | "entries">
 {
     /**
      * The {@link IGPUBindGroupLayoutDescriptor} the entries of this bind group will conform to.
      */
-    layout: IGPUBindGroupLayoutDescriptor;
+    layout: GPUBindGroupLayoutDescriptor;
 
     /**
      * A list of entries describing the resources to expose to the shader for each binding

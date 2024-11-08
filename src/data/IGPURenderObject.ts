@@ -1,9 +1,8 @@
-import { IGPUBindGroup } from "./IGPUBindGroup";
+import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
+import { IGPUBindGroupDescriptor } from "./IGPUBindGroupDescriptor";
 import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPUBuffer } from "./IGPUBuffer";
-import { IGPUPipelineLayout } from "../internal/IGPUPipelineLayout";
 import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
-import { IGPUVertexBuffer } from "./IGPUVertexBuffer";
 
 /**
  * GPU渲染对象，包含一次渲染时包含的所有数据。
@@ -200,7 +199,7 @@ export interface IGPUSetBindGroup
      *
      * Bind group to use for subsequent render or compute commands.
      */
-    bindGroup: IGPUBindGroup;
+    bindGroup: IGPUBindGroupDescriptor;
 
     /**
      * Array containing buffer offsets in bytes for each entry in `bindGroup` marked as {@link GPUBindGroupLayoutEntry#buffer}.{@link GPUBufferBindingLayout#hasDynamicOffset}.-->
@@ -259,7 +258,7 @@ export interface IGPURenderPipeline extends Omit<GPURenderPipelineDescriptor, "l
      *
      * 默认 'auto' 。
      */
-    layout?: IGPUPipelineLayout;
+    layout?: IGPUPipelineLayoutDescriptor;
 
     /**
      * Describes the primitive-related properties of the pipeline.

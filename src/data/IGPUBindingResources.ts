@@ -1,4 +1,4 @@
-import { IGPUBindingResource } from "./IGPUBindGroup";
+import { IGPUBindingResource } from "./IGPUBindGroupDescriptor";
 
 /**
  * GPU绑定的资源映射。

@@ -1,7 +1,6 @@
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderPipeline } from "../data/IGPURenderObject";
-import { IGPUBindGroupLayoutDescriptor, IGPUBindGroupLayoutEntry, IGPUShaderStageFlags } from "../internal/IGPUBindGroupLayoutDescriptor";
-import { IGPUPipelineLayout } from "../internal/IGPUPipelineLayout";
+import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -22,22 +21,22 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     if (result) return result;
 
     const bindingResourceInfoMap = {};
-    const visibility: IGPUShaderStageFlags[] = [];
+    let visibility: GPUShaderStageFlags = 0;
     if (vertexCode)
     {
-        visibility.push("VERTEX");
+        visibility |= GPUShaderStage.VERTEX;
         const vertexResourceInfoMap = getWGSLReflectInfo(vertexCode).bindingResourceLayoutMap;
         Object.assign(bindingResourceInfoMap, vertexResourceInfoMap);
     }
     if (fragmentCode)
     {
+        visibility |= GPUShaderStage.FRAGMENT;
         const fragmentResourceInfoMap = getWGSLReflectInfo(fragmentCode).bindingResourceLayoutMap;
-        visibility.push("FRAGMENT");
         Object.assign(bindingResourceInfoMap, fragmentResourceInfoMap);
     }
     if (computeCode)
     {
-        visibility.push("COMPUTE");
+        visibility |= GPUShaderStage.COMPUTE;
         const computeResourceInfoMap = getWGSLReflectInfo(computeCode).bindingResourceLayoutMap;
         Object.assign(bindingResourceInfoMap, computeResourceInfoMap);
     }
@@ -45,7 +44,7 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     // 用于判断是否重复
     const tempMap: { [group: string]: { [binding: string]: WGSLBindingResourceInfo } } = {};
     //
-    const bindGroupLayouts: IGPUBindGroupLayoutDescriptor[] = [];
+    const bindGroupLayouts: GPUBindGroupLayoutDescriptor[] = [];
     for (const resourceName in bindingResourceInfoMap)
     {
         const bindingResourceInfo = bindingResourceInfoMap[resourceName];
@@ -65,7 +64,7 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
         const entry = getIGPUBindGroupLayoutEntry(bindingResourceInfo, visibility);
         //
         const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
-        bindGroupLayout.entries.push(entry);
+        (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).push(entry);
     }
 
     result = {
@@ -82,18 +81,18 @@ const gpuPipelineLayoutMap = new Map<string, {
     /**
      * GPU管线布局。
      */
-    gpuPipelineLayout: IGPUPipelineLayout,
+    gpuPipelineLayout: IGPUPipelineLayoutDescriptor,
     /**
      * WebGPU着色器中绑定资源映射。
      */
     bindingResourceInfoMap: WGSLBindingResourceInfoMap
 }>();
 
-function getIGPUBindGroupLayoutEntry(bindingResourceInfo: WGSLBindingResourceInfo, visibility: IGPUShaderStageFlags[])
+function getIGPUBindGroupLayoutEntry(bindingResourceInfo: WGSLBindingResourceInfo, visibility: GPUShaderStageFlags)
 {
     const { binding, buffer, texture, storageTexture, externalTexture, sampler } = bindingResourceInfo;
 
-    const entry: IGPUBindGroupLayoutEntry = {
+    const entry: GPUBindGroupLayoutEntry = {
         binding, visibility,
     };
 

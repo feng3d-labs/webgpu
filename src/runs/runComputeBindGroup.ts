@@ -3,15 +3,15 @@ import { VariableInfo, TemplateInfo } from "wgsl_reflect";
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { WGSLBindingResourceInfoMap } from "../caches/getWGSLReflectInfo";
-import { IGPUBindGroupEntry, IGPUBindingResource, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroup";
+import { IGPUBindGroupEntry, IGPUBindingResource, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
-import { IGPUPipelineLayout } from "../internal/IGPUPipelineLayout";
 import { IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureBase } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { ChainMap } from "../utils/ChainMap";
+import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 
 /**
  * 执行计算绑定组。
@@ -28,7 +28,7 @@ export function runComputeBindGroup(device: GPUDevice, passEncoder: GPUComputePa
     runBindGroup(device, passEncoder, gpuComputePipeline.layout, bindingResources, bindingResourceInfoMap);
 }
 
-export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, layout: IGPUPipelineLayout, bindingResources: IGPUBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
+export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, layout: IGPUPipelineLayoutDescriptor, bindingResources: IGPUBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
 {
     // 计算 bindGroups
     const bindGroups = getIGPUSetBindGroups(layout, bindingResources, bindingResourceInfoMap);
@@ -40,7 +40,7 @@ export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsM
     });
 }
 
-function getIGPUSetBindGroups(layout: IGPUPipelineLayout, bindingResources: IGPUBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
+function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResources: IGPUBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
 {
     //
     let gpuSetBindGroups = bindGroupsMap.get([layout, bindingResources]);
@@ -48,7 +48,7 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayout, bindingResources: IGPU
     {
         gpuSetBindGroups = [];
 
-        const pipelineLayout = layout as IGPUPipelineLayout;
+        const pipelineLayout = layout as GPUPipelineLayoutDescriptor;
 
         for (const resourceName in bindingResourceInfoMap)
         {
@@ -168,7 +168,7 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayout, bindingResources: IGPU
     return gpuSetBindGroups;
 }
 
-const bindGroupsMap = new ChainMap<[IGPUPipelineLayout, IGPUBindingResources], IGPUSetBindGroup[]>();
+const bindGroupsMap = new ChainMap<[IGPUPipelineLayoutDescriptor, IGPUBindingResources], IGPUSetBindGroup[]>();
 
 function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding)
 {
