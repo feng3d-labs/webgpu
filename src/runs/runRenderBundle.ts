@@ -1,8 +1,8 @@
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
-import { GPURenderPassFormat } from "../internal/GPURenderPassFormats";
+import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { runRenderObject } from "./runRenderObject";
 
-export function runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: GPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
+export function runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
 {
     let gRenderBundle: GPURenderBundle = renderBundleObject[_GPURenderBundle];
     if (!gRenderBundle)

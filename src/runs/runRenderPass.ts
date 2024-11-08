@@ -4,7 +4,7 @@ import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPass } from "../data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
-import { GPURenderPassFormat } from "../internal/GPURenderPassFormats";
+import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { runRenderBundle } from "./runRenderBundle";
 import { runRenderObject } from "./runRenderObject";
 
@@ -39,7 +39,7 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
  */
 function getGPURenderPassFormats(descriptor: IGPURenderPassDescriptor)
 {
-    let gpuRenderPassFormats: GPURenderPassFormat = descriptor[_RenderPassFormats];
+    let gpuRenderPassFormats: IGPURenderPassFormat = descriptor[_RenderPassFormats];
     if (gpuRenderPassFormats) return gpuRenderPassFormats;
 
     const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => getGPUTextureFormat(v.view.texture));

@@ -1,6 +1,4 @@
 import { IGPUBuffer } from "./IGPUBuffer";
-import { IGPUComputePipeline } from "./IGPUComputeObject";
-import { IGPURenderPipeline } from "./IGPURenderObject";
 import { IGPUSampler } from "./IGPUSampler";
 import { IGPUTextureView } from "./IGPUTextureView";
 

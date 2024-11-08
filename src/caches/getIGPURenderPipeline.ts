@@ -3,7 +3,7 @@ import { watcher } from "@feng3d/watcher";
 import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
-import { GPURenderPassFormat } from "../internal/GPURenderPassFormats";
+import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
@@ -17,7 +17,7 @@ import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getWGSLReflectInfo
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPassFormat: GPURenderPassFormat, vertices: IGPUVertexAttributes)
+export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
 {
     const renderPassFormatKey = renderPassFormat.colorFormats.toString() + renderPassFormat.depthStencilFormat + renderPassFormat.multisample;
 
