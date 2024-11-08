@@ -54,7 +54,7 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
         {
             const bindingResourceInfo = bindingResourceInfoMap[resourceName];
 
-            const { group, binding, variableInfo } = bindingResourceInfo;
+            const { group, variableInfo, entry: entry1 } = bindingResourceInfo;
 
             gpuSetBindGroups[group] = gpuSetBindGroups[group] || {
                 bindGroup: {
@@ -63,7 +63,7 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
                 }
             };
 
-            const entry: IGPUBindGroupEntry = { binding, resource: null };
+            const entry: IGPUBindGroupEntry = { binding: entry1.binding, resource: null };
             gpuSetBindGroups[group].bindGroup.entries.push(entry);
 
             // eslint-disable-next-line no-loop-func
@@ -74,9 +74,9 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
 
                 let resource: IGPUBindingResource;
                 //
-                if (bindingResourceInfo.buffer)
+                if (entry1.buffer)
                 {
-                    const layoutType = bindingResourceInfo.buffer.type;
+                    const layoutType = entry1.buffer.type;
 
                     //
                     const size = variableInfo.size;
@@ -114,31 +114,31 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
                     // 更新缓冲区绑定的数据。
                     updateBufferBinding(variableInfo, uniformData);
                 }
-                else if (bindingResourceInfo.sampler)
+                else if (entry1.sampler)
                 {
                     const uniformData = bindingResource as IGPUSampler;
 
                     resource = uniformData;
                 }
-                else if (bindingResourceInfo.texture)
+                else if (entry1.texture)
                 {
                     const uniformData = bindingResource as IGPUTextureView;
 
                     // 设置纹理资源布局上的采样类型。
                     if ((uniformData.texture as IGPUTextureBase).sampleType === "unfilterable-float")
                     {
-                        bindingResourceInfo.texture.sampleType = "unfilterable-float";
+                        entry1.texture.sampleType = "unfilterable-float";
                     }
 
                     resource = uniformData;
                 }
-                else if (bindingResourceInfo.externalTexture)
+                else if (entry1.externalTexture)
                 {
                     const uniformData = bindingResource as IGPUExternalTexture;
 
                     resource = uniformData;
                 }
-                else if (bindingResourceInfo.storageTexture)
+                else if (entry1.storageTexture)
                 {
                     const uniformData = bindingResource as IGPUTextureView;
 

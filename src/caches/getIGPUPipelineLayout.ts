@@ -48,7 +48,8 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     for (const resourceName in bindingResourceInfoMap)
     {
         const bindingResourceInfo = bindingResourceInfoMap[resourceName];
-        const { group, binding } = bindingResourceInfo;
+        const { group, entry } = bindingResourceInfo;
+        const binding = entry.binding;
 
         // 检测相同位置是否存在多个定义
         const groupMap = tempMap[group] = tempMap[group] || {};
@@ -60,8 +61,7 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
         }
         groupMap[binding] = bindingResourceInfo;
 
-        bindingResourceInfo.visibility = visibility;
-        const entry = bindingResourceInfo;
+        entry.visibility = visibility;
         //
         const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
         (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).push(entry);
