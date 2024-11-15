@@ -1,3 +1,5 @@
+export { getIGPURenderPassAttachmentSize } from "./caches/getIGPURenderPass";
+
 export * from "./WebGPU";
 
 export * from "./data/IGPUBindGroupDescriptor";

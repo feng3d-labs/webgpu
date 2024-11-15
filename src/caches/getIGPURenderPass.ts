@@ -310,6 +310,13 @@ function updateAttachmentSize(renderPass: IGPURenderPassDescriptor)
     attachmentTextures.forEach((v) => setITextureSize(v, renderPass.attachmentSize));
 }
 
+export function getIGPURenderPassAttachmentSize(renderPass: IGPURenderPassDescriptor)
+{
+    const attachmentTextures = getAttachmentTextures(renderPass.colorAttachments, renderPass.depthStencilAttachment);
+    const textureSize = getGPUTextureSize(attachmentTextures[0]);
+    return textureSize
+}
+
 /**
  * 设置纹理与附件相同尺寸。
  *
