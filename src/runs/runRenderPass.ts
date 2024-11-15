@@ -11,10 +11,9 @@ import { runRenderObject } from "./runRenderObject";
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
 {
     const renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass.descriptor);
+    const renderPassFormats = getGPURenderPassFormats(renderPass.descriptor);
 
     const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-
-    const renderPassFormats = getGPURenderPassFormats(renderPass.descriptor);
 
     renderPass.renderObjects?.forEach((element) =>
     {
@@ -37,9 +36,9 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
  * @param descriptor 渲染通道描述。
  * @returns 
  */
-function getGPURenderPassFormats(descriptor: IGPURenderPassDescriptor)
+function getGPURenderPassFormats(descriptor: IGPURenderPassDescriptor): IGPURenderPassFormat
 {
-    let gpuRenderPassFormats: IGPURenderPassFormat = descriptor[_RenderPassFormats];
+    let gpuRenderPassFormats = descriptor[_RenderPassFormats];
     if (gpuRenderPassFormats) return gpuRenderPassFormats;
 
     const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => getGPUTextureFormat(v.view.texture));
@@ -51,8 +50,12 @@ function getGPURenderPassFormats(descriptor: IGPURenderPassDescriptor)
     }
 
     const multisample = descriptor.multisample;
-
-    gpuRenderPassFormats = descriptor[_RenderPassFormats] = { colorFormats: colorAttachmentTextureFormats, depthStencilFormat: depthStencilAttachmentTextureFormat, multisample };
+    gpuRenderPassFormats = descriptor[_RenderPassFormats] = {
+        attachmentSize: descriptor.attachmentSize,
+        colorFormats: colorAttachmentTextureFormats,
+        depthStencilFormat: depthStencilAttachmentTextureFormat,
+        multisample
+    };
 
     return gpuRenderPassFormats;
 }

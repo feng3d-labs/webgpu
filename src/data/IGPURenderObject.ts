@@ -127,6 +127,13 @@ export interface IGPUDraw
 export interface IGPUScissorRect
 {
     /**
+     * 数据是否来着WebGL。
+     *
+     * WebGL以左下角为起始点，WebGPU以左上角为起点。
+     */
+    fromWebGL?: boolean;
+
+    /**
      * Minimum X value of the scissor rectangle in pixels.
      */
     x: GPUIntegerCoordinate,
@@ -156,6 +163,13 @@ export interface IGPUScissorRect
  */
 export interface IGPUViewport
 {
+    /**
+     * 数据是否来着WebGL。
+     *
+     * WebGL以左下角为起始点，WebGPU以左上角为起点。
+     */
+    fromWebGL?: boolean;
+
     /**
      * Minimum X value of the viewport in pixels.
      */

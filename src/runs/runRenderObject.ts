@@ -2,6 +2,7 @@ import { getGPUBuffer } from "../caches/getGPUBuffer";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
+import { IGPUTextureSize } from "../data/IGPUTexture";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { runBindGroup } from "./runComputeBindGroup";
 import { runDraw } from "./runDraw";
@@ -37,9 +38,9 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 
     runIndexBuffer(device, passEncoder, index);
 
-    runViewport(passEncoder as GPURenderPassEncoder, viewport);
+    runViewport(passEncoder as GPURenderPassEncoder, renderPassFormats.attachmentSize, viewport);
 
-    runScissorRect(passEncoder as GPURenderPassEncoder, scissorRect);
+    runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormats.attachmentSize, scissorRect);
 
     runDraw(passEncoder, draw);
 
