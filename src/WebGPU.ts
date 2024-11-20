@@ -4,6 +4,7 @@ import { IGPUComputeObject } from "./data/IGPUComputeObject";
 import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
+import { IGPUReadPixels } from "./data/IGPUReadPixels";
 import { IGPURenderObject } from "./data/IGPURenderObject";
 import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
@@ -175,20 +176,16 @@ export class WebGPU
     /**
      * 从 GPU纹理 上读取数据。
      *
-     * @param texture GPU纹理
-     * @param x 纹理读取X坐标。
-     * @param y 纹理读取Y坐标。
-     * @param width 纹理读取宽度。
-     * @param height 纹理读取高度。
+     * @param gpuReadPixels
      *
      * @returns 读取到的数据。
      */
-    async readPixels(params: { texture: IGPUTexture, origin: GPUOrigin3D, copySize: { width: number, height: number } })
+    async readPixels(gpuReadPixels: IGPUReadPixels)
     {
-        const gpuTexture = getGPUTexture(this.device, params.texture, false);
+        const gpuTexture = getGPUTexture(this.device, gpuReadPixels.texture, false);
 
         const result = await readPixels(this.device, {
-            ...params,
+            ...gpuReadPixels,
             texture: gpuTexture,
         });
 
