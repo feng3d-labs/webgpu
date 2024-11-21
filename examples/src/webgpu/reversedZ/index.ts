@@ -10,7 +10,7 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -276,26 +276,29 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const uniformBufferSize = numInstances * matrixStride;
 
-    const uniformBuffer = new Uint8Array(uniformBufferSize);
-    const cameraMatrixBuffer = new Uint8Array(4 * 16);
-    const cameraMatrixReversedDepthBuffer = new Uint8Array(4 * 16);
+    const uniformBuffer = new Float32Array(uniformBufferSize / 4);
+    const cameraMatrixBuffer = new Float32Array(16);
+    const cameraMatrixReversedDepthBuffer = new Float32Array(16);
+
+    const uniforms = {
+        modelMatrix: uniformBuffer,
+    };
+
+    const camera0 = {
+        viewProjectionMatrix: cameraMatrixBuffer,
+    };
+    const camera1 = {
+        viewProjectionMatrix: cameraMatrixReversedDepthBuffer,
+    };
 
     const uniformBindGroups: IGPUBindingResources[] = [
         {
-            uniforms: {
-                bufferView: uniformBuffer,
-            },
-            camera: {
-                bufferView: cameraMatrixBuffer,
-            },
+            uniforms: uniforms,
+            camera: camera0,
         },
         {
-            uniforms: {
-                bufferView: uniformBuffer,
-            },
-            camera: {
-                bufferView: cameraMatrixReversedDepthBuffer,
-            },
+            uniforms: uniforms,
+            camera: camera1,
         },
     ];
 
@@ -338,8 +341,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         viewProjectionMatrix
     );
 
-    new Float32Array(cameraMatrixBuffer.buffer).set(viewProjectionMatrix);
-    new Float32Array(cameraMatrixReversedDepthBuffer.buffer).set(reversedRangeViewProjectionMatrix);
+    camera0.viewProjectionMatrix = viewProjectionMatrix;
+    camera1.viewProjectionMatrix = reversedRangeViewProjectionMatrix;
 
     const tmpMat4 = mat4.create();
     function updateTransformationMatrix()
@@ -491,11 +494,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         updateTransformationMatrix();
 
-        const buffer = getIGPUBuffer(uniformBuffer);
-
-        const writeBuffers = buffer.writeBuffers || [];
-        writeBuffers.push({ data: mvpMatricesData });
-        buffer.writeBuffers = writeBuffers;
+        uniforms.modelMatrix = mvpMatricesData.slice(0);
 
         let passEncoders: IGPURenderPass[];
 
