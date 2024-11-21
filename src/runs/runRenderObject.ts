@@ -3,7 +3,7 @@ import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
-import { runBindGroup } from "./runComputeBindGroup";
+import { runBindGroup } from "./runBindGroup";
 import { runDraw } from "./runDraw";
 import { runDrawIndexed } from "./runDrawIndexed";
 import { runIndices } from "./runIndices";

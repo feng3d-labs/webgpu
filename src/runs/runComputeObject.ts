@@ -1,6 +1,7 @@
+import { getGPUComputePipeline } from "../caches/getGPUComputePipeline";
+import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
-import { runComputeBindGroup } from "./runComputeBindGroup";
-import { runComputePipeline } from "./runComputePipeline";
+import { runBindGroup } from "./runBindGroup";
 import { runWorkgroups } from "./runWorkgroups";
 
 /**
@@ -12,9 +13,12 @@ import { runWorkgroups } from "./runWorkgroups";
  */
 export function runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
 {
-    runComputePipeline(device, passEncoder, computeObject.pipeline);
+    const { gpuComputePipeline, bindingResourceInfoMap } = getIGPUComputePipeline(computeObject.pipeline);
 
-    runComputeBindGroup(device, passEncoder, computeObject.pipeline, computeObject.bindingResources);
+    const computePipeline = getGPUComputePipeline(device, gpuComputePipeline);
+    passEncoder.setPipeline(computePipeline);
+
+    runBindGroup(device, passEncoder, gpuComputePipeline.layout, computeObject.bindingResources, bindingResourceInfoMap);
 
     runWorkgroups(passEncoder, computeObject.workgroups);
 }

@@ -1,12 +1,9 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
-import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { WGSLBindingResourceInfoMap } from "../caches/getWGSLReflectInfo";
 import { IGPUBindGroupEntry, IGPUBindingResource, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
-import { IGPUBuffer } from "../data/IGPUBuffer";
-import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureBase } from "../data/IGPUTexture";
@@ -14,21 +11,6 @@ import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
-
-/**
- * 执行计算绑定组。
- * 
- * @param device GPU设备。
- * @param passEncoder 计算通道编码器。
- * @param pipeline 计算管线。
- * @param bindingResources 绑定资源。
- */
-export function runComputeBindGroup(device: GPUDevice, passEncoder: GPUComputePassEncoder, pipeline: IGPUComputePipeline, bindingResources?: IGPUBindingResources)
-{
-    const { gpuComputePipeline, bindingResourceInfoMap } = getIGPUComputePipeline(pipeline);
-
-    runBindGroup(device, passEncoder, gpuComputePipeline.layout, bindingResources, bindingResourceInfoMap);
-}
 
 export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, layout: IGPUPipelineLayoutDescriptor, bindingResources: IGPUBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
 {
