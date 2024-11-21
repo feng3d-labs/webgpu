@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IGPUBuffer, IGPURenderBundleObject, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPURenderBundleObject, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -60,10 +60,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
         const alignedUniformBytes = Math.ceil(uniformBytes / 256) * 256;
         const alignedUniformFloats = alignedUniformBytes / Float32Array.BYTES_PER_ELEMENT;
-        const uniformBuffer: IGPUBuffer = {
-            size: numTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT,
-            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
-        };
+        const uniformBuffer = new Uint8Array(numTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT);
         const uniformBufferData = new Float32Array(
             numTriangles * alignedUniformFloats
         );
@@ -80,7 +77,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         // writeBuffer too large may OOM. TODO: The browser should internally chunk uploads.
         const maxMappingLength = (14 * 1024 * 1024) / Float32Array.BYTES_PER_ELEMENT;
-        const writeBuffers = uniformBuffer.writeBuffers || [];
+        const writeBuffers = getIGPUBuffer(uniformBuffer).writeBuffers || [];
         for (let offset = 0; offset < uniformBufferData.length; offset += maxMappingLength)
         {
             const uploadCount = Math.min(uniformBufferData.length - offset, maxMappingLength);
@@ -92,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 size: uploadCount * Float32Array.BYTES_PER_ELEMENT,
             });
         }
-        uniformBuffer.writeBuffers = writeBuffers;
+        getIGPUBuffer(uniformBuffer).writeBuffers = writeBuffers;
 
         const renderObjects: IGPURenderObject[] = [];
         for (let i = 0; i < numTriangles; ++i)
@@ -150,11 +147,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
             uniformTime[0] = (timestamp - startTime) / 1000;
 
-            const writeBuffers = uniformBuffer.writeBuffers || [];
+            const writeBuffers = getIGPUBuffer(uniformBuffer).writeBuffers || [];
             writeBuffers.push({
                 bufferOffset: timeOffset, data: uniformTime
             });
-            uniformBuffer.writeBuffers = writeBuffers;
+            getIGPUBuffer(uniformBuffer).writeBuffers = writeBuffers;
 
             if (settings.renderBundles)
             {
