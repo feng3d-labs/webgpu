@@ -178,7 +178,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const renderObject: IGPURenderObject = {
         pipeline: pipeline,
         vertices: {
-            position: { buffer: vertexBuf, offset: 0, vertexSize: 6 * 4 },
+            position: { buffer: vertexBuf, offset: 0, vertexSize: 6 * 4, numComponents: 3 },
             normal: { buffer: vertexBuf, offset: 12, vertexSize: 6 * 4 },
         },
         index: { buffer: indicesBuf, indexFormat: "uint16" },
@@ -266,7 +266,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
                 const buffer = (renderObjects[i].bindingResources.uni as IGPUBufferBinding).buffer;
-                buffer.data = new Float32Array( uniformValues);
+                buffer.data = new Float32Array(uniformValues);
 
                 // device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
 
