@@ -122,11 +122,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     );
 
     // Create a vertex buffer from the sphere data.
-    const vertices: IGPUBuffer = {
-      size: sphereMesh.vertices.byteLength,
-      usage: GPUBufferUsage.VERTEX,
-      data: sphereMesh.vertices,
-    };
+    const vertices = sphereMesh.vertices;
 
     const vertexAttributes: IGPUVertexAttributes = {
       position: { buffer: vertices, offset: SphereLayout.positionsOffset, vertexSize: SphereLayout.vertexStride },

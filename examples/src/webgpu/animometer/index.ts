@@ -47,16 +47,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ...pipelineDesc,
     };
 
-    const vertexBuffer: IGPUBuffer = {
-        size: 2 * 3 * vec4Size,
-        usage: GPUBufferUsage.VERTEX,
-        data: new Float32Array([
-            // position data  /**/ color data
-            0, 0.1, 0, 1, /**/ 1, 0, 0, 1,
-            -0.1, -0.1, 0, 1, /**/ 0, 1, 0, 1,
-            0.1, -0.1, 0, 1, /**/ 0, 0, 1, 1,
-        ])
-    };
+    const vertexBuffer = new Float32Array([
+        // position data  /**/ color data
+        0, 0.1, 0, 1, /**/ 1, 0, 0, 1,
+        -0.1, -0.1, 0, 1, /**/ 0, 1, 0, 1,
+        0.1, -0.1, 0, 1, /**/ 0, 0, 1, 1,
+    ]);
 
     function configure()
     {

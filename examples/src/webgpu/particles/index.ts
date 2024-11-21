@@ -7,7 +7,7 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -28,10 +28,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const webgpu = await new WebGPU().init();
 
-  const particlesBuffer: IGPUBuffer = {
-    size: numParticles * particleInstanceByteSize,
-    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
-  };
+  const particlesBuffer = new Float32Array(numParticles * particleInstanceByteSize / 4);
 
   const particlesVertices: IGPUVertexAttributes = {
     position: { buffer: particlesBuffer, offset: particlePositionOffset, vertexSize: particleInstanceByteSize, stepMode: "instance" },
@@ -107,11 +104,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const vertexData = [
     -1.0, -1.0, +1.0, -1.0, -1.0, +1.0, -1.0, +1.0, +1.0, -1.0, +1.0, +1.0,
   ];
-  const quadVertexBuffer: IGPUBuffer = {
-    size: 6 * 2 * 4, // 6x vec2<f32>
-    usage: GPUBufferUsage.VERTEX,
-    data: new Float32Array(vertexData),
-  };
+  const quadVertexBuffer = new Float32Array(vertexData);
 
   const quadVertices: IGPUVertexAttributes = {
     quad_pos: { buffer: quadVertexBuffer }
@@ -276,7 +269,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       buffer: simulationUBOBuffer,
     },
     data: {
-      buffer: particlesBuffer,
+      buffer: getIGPUBuffer(particlesBuffer),
       offset: 0,
       size: numParticles * particleInstanceByteSize,
     },

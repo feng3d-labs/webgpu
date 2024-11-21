@@ -231,9 +231,7 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
             index = vertexBufferLayouts.length;
             map.set(data, index);
 
-            const gpuBuffer = data;
-
-            vertexBuffers[index] = { buffer: gpuBuffer, offset: isIGPUVertexBufferOffset ? attributeOffset : 0 };
+            vertexBuffers[index] = { buffer: data, offset: isIGPUVertexBufferOffset ? attributeOffset : 0 };
 
             //
             vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [] };

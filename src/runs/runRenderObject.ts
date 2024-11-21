@@ -2,6 +2,7 @@ import { getGPUBuffer } from "../caches/getGPUBuffer";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 import { runBindGroup } from "./runComputeBindGroup";
 import { runDraw } from "./runDraw";
 import { runDrawIndexed } from "./runDrawIndexed";
@@ -30,7 +31,8 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 
     vertexBuffers?.forEach((vertexBuffer, index) =>
     {
-        const gBuffer = getGPUBuffer(device, vertexBuffer.buffer);
+        const buffer = getIGPUBuffer(vertexBuffer.buffer);
+        const gBuffer = getGPUBuffer(device, buffer);
         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
     });
 

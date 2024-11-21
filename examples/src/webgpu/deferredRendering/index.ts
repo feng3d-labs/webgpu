@@ -27,21 +27,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   // Create the model vertex buffer.
   const kVertexStride = 8;
-  const vertexBuffer: IGPUBuffer = {
-    // position: vec3, normal: vec3, uv: vec2
-    size: mesh.positions.length * kVertexStride * Float32Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.VERTEX,
-  };
+  const vertexBuffer = new Float32Array(mesh.positions.length * kVertexStride);
+  for (let i = 0; i < mesh.positions.length; ++i)
   {
-    const mapping = new Float32Array(mesh.positions.length * kVertexStride);
-    for (let i = 0; i < mesh.positions.length; ++i)
-    {
-      mapping.set(mesh.positions[i], kVertexStride * i);
-      mapping.set(mesh.normals[i], kVertexStride * i + 3);
-      mapping.set(mesh.uvs[i], kVertexStride * i + 6);
-    }
-
-    vertexBuffer.data = mapping;
+    vertexBuffer.set(mesh.positions[i], kVertexStride * i);
+    vertexBuffer.set(mesh.normals[i], kVertexStride * i + 3);
+    vertexBuffer.set(mesh.uvs[i], kVertexStride * i + 6);
   }
 
   const vertices: IGPUVertexAttributes = {

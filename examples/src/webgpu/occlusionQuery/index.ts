@@ -110,11 +110,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         20, 21, 22, 20, 22, 23, // -z face
     ]);
 
-    const vertexBuf: IGPUBuffer = {
-        data: vertexData,
-        usage: GPUBufferUsage.VERTEX,
-        label: 'vertexBuffer'
-    };
+    const vertexBuf = vertexData;
 
     const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [

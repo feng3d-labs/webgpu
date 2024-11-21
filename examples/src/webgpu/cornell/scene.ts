@@ -130,7 +130,7 @@ export default class Scene
 {
   readonly vertexCount: number;
   readonly indexCount: number;
-  readonly vertices: IGPUBuffer;
+  readonly vertices: Float32Array;
   readonly vertexAttributes: IGPUVertexAttributes;
   readonly indices: Uint16Array;
   readonly vertexBufferLayout: GPUVertexBufferLayout[];
@@ -284,11 +284,7 @@ export default class Scene
       data: quadData,
     };
 
-    const vertices: IGPUBuffer = {
-      size: vertexData.byteLength,
-      usage: GPUBufferUsage.VERTEX,
-      data: vertexData,
-    };
+    const vertices = vertexData;
 
     const vertexAttributes: IGPUVertexAttributes = {
       position: { buffer: vertices, offset: 0 * 4, vertexSize: vertexStride },

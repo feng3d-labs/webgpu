@@ -4,7 +4,7 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const squareVertices = new Uint32Array([0, 0, 0, 1, 1, 0, 1, 1]);
     const verticesSquareBuffer: IGPUVertexAttributes = {
-        pos: { buffer: { data: squareVertices } }
+        pos: { buffer: squareVertices }
     };
 
     function addGUI()
@@ -38,9 +38,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     let wholeTime = 0;
     let loopTimes = 0;
-    let buffer0: IGPUBuffer;
+    let buffer0: Uint32Array;
     let verticesBuffer0: IGPUVertexAttributes;
-    let buffer1: IGPUBuffer;
+    let buffer1: Uint32Array;
     let verticesBuffer1: IGPUVertexAttributes;
     let render: () => void;
     function resetGameData()
@@ -65,34 +65,27 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             cells[i] = Math.random() < 0.25 ? 1 : 0;
         }
 
-        buffer0 = {
-            size: cells.byteLength,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.VERTEX,
-            data: cells,
-        };
+        buffer0 = cells;
 
         verticesBuffer0 = {
             cell: { buffer: buffer0, stepMode: "instance" }
         };
 
-        buffer1 = {
-            size: cells.byteLength,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.VERTEX,
-        };
+        buffer1 = new Uint32Array(cells.byteLength);
         verticesBuffer1 = {
             cell: { buffer: buffer1, stepMode: "instance" }
         };
 
         const bindGroup0: IGPUBindingResources = {
             size: { buffer: sizeBuffer },
-            current: { buffer: buffer0 },
-            next: { buffer: buffer1 },
+            current: { buffer: getIGPUBuffer(buffer0) },
+            next: { buffer: getIGPUBuffer(buffer1) },
         };
 
         const bindGroup1: IGPUBindingResources = {
             size: { buffer: sizeBuffer },
-            current: { buffer: buffer1 },
-            next: { buffer: buffer0 },
+            current: { buffer: getIGPUBuffer(buffer1) },
+            next: { buffer: getIGPUBuffer(buffer0) },
         };
 
         const renderPipeline: IGPURenderPipeline = {

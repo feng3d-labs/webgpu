@@ -22,6 +22,8 @@ export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IGPUVertexAttributes";
 
+export * from "./runs/getIGPUIndexBuffer";
+
 /**
  * 内部
  */

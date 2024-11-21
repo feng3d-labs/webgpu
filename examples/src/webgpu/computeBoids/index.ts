@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { IGPUBuffer, IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBuffer, IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -50,14 +50,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         initialParticleData[4 * i + 3] = 2 * (Math.random() - 0.5) * 0.1;
     }
 
-    const particleBuffers: IGPUBuffer[] = new Array(2);
+    const particleBuffers: Float32Array[] = new Array(2);
     for (let i = 0; i < 2; ++i)
     {
-        particleBuffers[i] = {
-            size: initialParticleData.byteLength,
-            usage: GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE,
-            data: initialParticleData,
-        };
+        particleBuffers[i] = initialParticleData.slice();
     }
 
     const computeObject0: IGPUComputeObject = {
@@ -70,10 +66,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 map: simParams,
             },
             particlesA: {
-                buffer: particleBuffers[0],
+                buffer: getIGPUBuffer(particleBuffers[0]),
             },
             particlesB: {
-                buffer: particleBuffers[1],
+                buffer: getIGPUBuffer(particleBuffers[1]),
             },
         },
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
@@ -85,11 +81,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ...computeObject0.bindingResources,
             particlesA: {
                 ...computeObject0.bindingResources.particlesA,
-                buffer: particleBuffers[1],
+                buffer: getIGPUBuffer(particleBuffers[1]),
             },
             particlesB: {
                 ...computeObject0.bindingResources.particlesA,
-                buffer: particleBuffers[0],
+                buffer: getIGPUBuffer(particleBuffers[0]),
             },
         },
     };
@@ -113,7 +109,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         vertices: {
             a_particlePos: { buffer: particleBuffers[0], offset: 0, vertexSize: 4 * 4, stepMode: "instance" },
             a_particleVel: { buffer: particleBuffers[0], offset: 2 * 4, vertexSize: 4 * 4, stepMode: "instance" },
-            a_pos: { buffer: { data: vertexBufferData } },
+            a_pos: { buffer: vertexBufferData },
         },
         draw: { vertexCount: 3, instanceCount: numParticles }
     };

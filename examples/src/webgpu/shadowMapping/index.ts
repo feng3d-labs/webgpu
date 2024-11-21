@@ -20,19 +20,11 @@ const init = async (canvas: HTMLCanvasElement) =>
     const webgpu = await new WebGPU().init();
 
     // Create the model vertex buffer.
-    const vertexBuffer: IGPUBuffer = {
-        size: mesh.positions.length * 3 * 2 * Float32Array.BYTES_PER_ELEMENT,
-        usage: GPUBufferUsage.VERTEX,
-    };
+    const vertexBuffer = new Float32Array(mesh.positions.length * 3 * 2);
+    for (let i = 0; i < mesh.positions.length; ++i)
     {
-        const mapping = new Float32Array(mesh.positions.length * 3 * 2);
-        for (let i = 0; i < mesh.positions.length; ++i)
-        {
-            mapping.set(mesh.positions[i], 6 * i);
-            mapping.set(mesh.normals[i], 6 * i + 3);
-        }
-
-        vertexBuffer.data = mapping;
+        vertexBuffer.set(mesh.positions[i], 6 * i);
+        vertexBuffer.set(mesh.normals[i], 6 * i + 3);
     }
 
     const vertices: IGPUVertexAttributes = {
