@@ -2,7 +2,7 @@ import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 import solidColorLitWGSL from './solidColorLit.wgsl';
 
-import { IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBuffer, IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 type TypedArrayView =
     | Int8Array
@@ -72,6 +72,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const uniformBuffer: IGPUBuffer = {
             size: uniformBufferSize,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+            label: "uniformBuffer " + id,
         };
         const uniformValues = new Float32Array(uniformBufferSize / 4);
         const worldViewProjection = uniformValues.subarray(0, 16);
@@ -80,15 +81,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         colorValue.set(color);
 
-        const bindGroup = device.createBindGroup({
-            layout: pipeline.getBindGroupLayout(0),
-            entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
-        });
-
         return {
             id,
             position: position.map((v) => v * 10),
-            bindGroup,
             uniformBuffer,
             uniformValues,
             worldInverseTranspose,
@@ -101,18 +96,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     //     count: objectInfos.length,
     // });
 
-    const resolveBuf: IGPUBuffer = {
-        label: 'resolveBuffer',
-        // Query results are 64bit unsigned integers.
-        size: objectInfos.length * BigUint64Array.BYTES_PER_ELEMENT,
-        usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-    };
+    // const resolveBuf: IGPUBuffer = {
+    //     label: 'resolveBuffer',
+    //     // Query results are 64bit unsigned integers.
+    //     size: objectInfos.length * BigUint64Array.BYTES_PER_ELEMENT,
+    //     usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
+    // };
 
-    const resultBuf: IGPUBuffer = {
-        label: 'resultBuffer',
-        size: resolveBuf.size,
-        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-    };
+    // const resultBuf: IGPUBuffer = {
+    //     label: 'resultBuffer',
+    //     size: resolveBuf.size,
+    //     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+    // };
 
     // prettier-ignore
     const vertexData = new Float32Array([
@@ -186,12 +181,40 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             position: { buffer: vertexBuf, offset: 0, vertexSize: 6 * 4 },
             normal: { buffer: vertexBuf, offset: 12, vertexSize: 6 * 4 },
         },
+        index: { buffer: indicesBuf, indexFormat: "uint16" },
         bindingResources: {
             uni: {
-                buffer:
+                buffer: undefined,
             },
         },
-        draw: { vertexCount: cubeVertexCount },
+        drawIndexed: { indexCount: indices.length },
+    };
+
+    const renderObjects: IGPURenderObject[] = objectInfos.map((v) =>
+    {
+        const ro: IGPURenderObject = {
+            ...renderObject,
+            bindingResources: {
+                uni: {
+                    buffer: v.uniformBuffer,
+                },
+            },
+        };
+
+        return ro;
+    });
+
+    const submit: IGPUSubmit = {
+        commandEncoders: [
+            {
+                passEncoders: [
+                    {
+                        descriptor: renderPassDescriptor,
+                        renderObjects: renderObjects,
+                    }
+                ]
+            }
+        ]
     };
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -226,16 +249,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const view = mat4.inverse(m);
         const viewProjection = mat4.multiply(projection, view);
 
-        const encoder = device.createCommandEncoder();
-        const pass = encoder.beginRenderPass(renderPassDescriptor);
-        pass.setPipeline(pipeline);
-        pass.setVertexBuffer(0, vertexBuf);
-        pass.setIndexBuffer(indicesBuf, 'uint16');
-
         objectInfos.forEach(
             (
                 {
-                    bindGroup,
                     uniformBuffer,
                     uniformValues,
                     worldViewProjection,
@@ -249,14 +265,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
-                device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
+                const buffer = (renderObjects[i].bindingResources.uni as IGPUBufferBinding).buffer;
+                buffer.data = new Float32Array( uniformValues);
 
-                pass.setBindGroup(0, bindGroup);
-                pass.beginOcclusionQuery(i);
-                pass.drawIndexed(indices.length);
-                pass.endOcclusionQuery();
+                // device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
+
+                // pass.setBindGroup(0, bindGroup);
+                // pass.beginOcclusionQuery(i);
+                // pass.drawIndexed(indices.length);
+                // pass.endOcclusionQuery();
             }
         );
+
+        webgpu.submit(submit);
 
         // pass.end();
         // encoder.resolveQuerySet(querySet, 0, objectInfos.length, resolveBuf, 0);
