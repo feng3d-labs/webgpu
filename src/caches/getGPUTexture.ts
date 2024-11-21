@@ -1,23 +1,9 @@
-import { AnyEmitter, anyEmitter } from "@feng3d/event";
+import { anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
 import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
-
-/**
- * GPUTexture 相关事件。
- */
-interface IGPUTextureEvent
-{
-    /**
-     * 销毁事件。
-     */
-    "destroy": undefined;
-}
-/**
- * GPUTexture 事件派发器。
- */
-export const gpuTextureEventEmitter: AnyEmitter<GPUTexture, IGPUTextureEvent> = <any>anyEmitter;
+import { GPUTexture_destroy } from "../eventnames";
 
 /**
  * 获取GPU纹理 {@link GPUTexture} 。
@@ -152,7 +138,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
             //
             textureMap.delete(iGPUTextureBase);
             // 派发销毁事件
-            gpuTextureEventEmitter.emit(gpuTexture, "destroy");
+            anyEmitter.emit(gpuTexture, GPUTexture_destroy);
             //
             watcher.unwatch(iGPUTextureBase, "source", updateSource);
             watcher.unwatch(iGPUTextureBase, "writeTextures", writeTexture);

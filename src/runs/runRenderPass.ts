@@ -6,6 +6,7 @@ import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderOcclusionQueryObject } from "../data/IGPURenderOcclusionQueryObject";
 import { IGPURenderPass } from "../data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
+import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { runRenderBundle } from "./runRenderBundle";
 import { runRenderObject } from "./runRenderObject";
@@ -89,13 +90,13 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
                     renderPass._occlusionQueryResults = occlusionQueryObjects;
 
                     //
-                    anyEmitter.off(device.queue, "submit", getOcclusionQueryResult);
+                    anyEmitter.off(device.queue, GPUQueue_submit, getOcclusionQueryResult);
                 });
             }
         };
 
         // 监听提交WebGPU事件
-        anyEmitter.on(device.queue, "submit", getOcclusionQueryResult);
+        anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
     }
 }
 

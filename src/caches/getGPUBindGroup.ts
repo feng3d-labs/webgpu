@@ -1,3 +1,4 @@
+import { anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
 import { IGPUBindGroupDescriptor, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
 import { IGPUSampler } from "../data/IGPUSampler";
@@ -7,7 +8,8 @@ import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 import { getGPUBufferBinding } from "./getGPUBufferBinding";
 import { getGPUExternalTexture } from "./getGPUExternalTexture";
 import { getGPUSampler } from "./getGPUSampler";
-import { getGPUTextureView, gpuTextureViewEventEmitter } from "./getGPUTextureView";
+import { getGPUTextureView } from "./getGPUTextureView";
+import { GPUTextureView_destroy } from "../eventnames";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescriptor)
 {
@@ -47,7 +49,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
                 {
                     hasContextTexture = true;
                 }
-                gpuTextureViewEventEmitter.once(resource, "destroy", () =>
+                anyEmitter.once(resource, GPUTextureView_destroy, () =>
                 {
                     bindGroupMap.delete(bindGroup);
                 });

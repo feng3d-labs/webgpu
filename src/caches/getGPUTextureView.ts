@@ -1,31 +1,18 @@
-import { AnyEmitter, anyEmitter } from "@feng3d/event";
+import { anyEmitter } from "@feng3d/event";
 import { IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
-import { getGPUTexture, gpuTextureEventEmitter } from "./getGPUTexture";
-
-/**
- * GPUTexture 相关事件。
- */
-interface IGPUTextureViewEvent
-{
-    /**
-     * 销毁事件。
-     */
-    "destroy": undefined;
-}
-
-/**
- * GPUTexture 事件派发器。
- */
-export const gpuTextureViewEventEmitter: AnyEmitter<GPUTextureView, IGPUTextureViewEvent> = <any>anyEmitter;
+import { GPUTexture_destroy, GPUTextureView_destroy } from "../eventnames";
+import { getGPUTexture } from "./getGPUTexture";
 
 export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
 {
+    const textureViewMap: WeakMap<IGPUTextureView, GPUTextureView> = device["_textureViewMap"] = device["_textureViewMap"] || new WeakMap<IGPUTextureView, GPUTextureView>();
+
     if ((view.texture as IGPUTextureFromContext).context)
     {
         const texture = getGPUTexture(device, view.texture);
 
-        const textureView = texture.createView({ dimension: view.dimension });
+        const textureView = texture.createView(view);
 
         return textureView;
     }
@@ -39,13 +26,12 @@ export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
     textureView = gpuTexture.createView(view);
     textureViewMap.set(view, textureView);
     // 销毁纹理时清除对应的纹理视图。
-    gpuTextureEventEmitter.once(gpuTexture, "destroy", () =>
+    anyEmitter.once(gpuTexture, GPUTexture_destroy, () =>
     {
         textureViewMap.delete(view);
-        gpuTextureViewEventEmitter.emit(textureView, "destroy");
+        anyEmitter.emit(textureView, GPUTextureView_destroy);
     });
 
     return textureView;
 }
 
-const textureViewMap = new WeakMap<IGPUTextureView, GPUTextureView>();
