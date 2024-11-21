@@ -12,6 +12,7 @@ import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { runSubmit } from "./runs/runSubmit";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
+import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
 
@@ -27,20 +28,11 @@ export class WebGPU
      */
     async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
     {
-        if (!navigator.gpu)
-        {
-            throw "this browser does not support WebGPU";
-        }
-
-        const adapter = await navigator.gpu.requestAdapter(options);
-        if (!adapter)
-        {
-            throw "this browser supports webgpu but it appears disabled";
-        }
-
+        const adapter = await navigator.gpu?.requestAdapter(options);
         const device = await adapter?.requestDevice(descriptor);
+        quitIfWebGPUNotAvailable(adapter, device);
 
-        device.lost.then(async (info) =>
+        device?.lost.then(async (info) =>
         {
             console.error(`WebGPU device was lost: ${info.message}`);
 
