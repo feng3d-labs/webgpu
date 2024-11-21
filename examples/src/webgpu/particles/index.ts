@@ -7,7 +7,7 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -72,10 +72,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     + 3 * 4 // up : vec3<f32>
     + 4 // padding
     + 0;
-  const uniformBuffer: IGPUBuffer = {
-    size: uniformBufferSize,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  };
+  const uniformBuffer = new Uint8Array(uniformBufferSize);
 
   const uniformBindGroup: IGPUBindingResources = {
     render_params: {
@@ -164,19 +161,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       = 1 * 4 // stride
       + 3 * 4 // padding
       + 0;
-    const probabilityMapUBOBuffer: IGPUBuffer = {
-      size: probabilityMapUBOBufferSize,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    };
-    const bufferA: IGPUBuffer = {
-      size: textureWidth * textureHeight * 4,
-      usage: GPUBufferUsage.STORAGE,
-    };
-    const bufferB: IGPUBuffer = {
-      size: textureWidth * textureHeight * 4,
-      usage: GPUBufferUsage.STORAGE,
-    };
-    probabilityMapUBOBuffer.writeBuffers = [{ data: new Int32Array([textureWidth]) }];
+    const probabilityMapUBOBuffer = new Uint8Array(probabilityMapUBOBufferSize);
+    const bufferA = new Uint8Array(textureWidth * textureHeight * 4);
+    const bufferB = new Uint8Array(textureWidth * textureHeight * 4);
+    getIGPUBuffer(probabilityMapUBOBuffer).writeBuffers = [{ data: new Int32Array([textureWidth]) }];
 
     const passEncoders: IGPUComputePass[] = [];
 
@@ -249,10 +237,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     + 3 * 4 // padding
     + 4 * 4 // seed
     + 0;
-  const simulationUBOBuffer: IGPUBuffer = {
-    size: simulationUBOBufferSize,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  };
+  const simulationUBOBuffer = new Uint8Array(simulationUBOBufferSize);
 
   Object.keys(simulationParams).forEach((k) =>
   {
@@ -269,7 +254,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       bufferView: simulationUBOBuffer,
     },
     data: {
-      bufferView: getIGPUBuffer(particlesBuffer),
+      bufferView: particlesBuffer,
       offset: 0,
       size: numParticles * particleInstanceByteSize,
     },
@@ -312,7 +297,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   function frame()
   {
-    simulationUBOBuffer.writeBuffers = [{
+    getIGPUBuffer(simulationUBOBuffer).writeBuffers = [{
       data: new Float32Array([
         simulationParams.simulate ? simulationParams.deltaTime : 0.0,
         0.0,
@@ -331,7 +316,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     mat4.multiply(projection, view, mvp);
 
     // prettier-ignore
-    uniformBuffer.writeBuffers = [{
+    getIGPUBuffer(uniformBuffer).writeBuffers = [{
       data: new Float32Array([
         // modelViewProjectionMatrix
         mvp[0], mvp[1], mvp[2], mvp[3],
