@@ -1,9 +1,8 @@
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 import solidColorLitWGSL from './solidColorLit.wgsl';
-import { quitIfWebGPUNotAvailable } from '../util';
 
-import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu-renderer";
 
 type TypedArrayView =
     | Int8Array
@@ -40,39 +39,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const adapter = await navigator.gpu?.requestAdapter();
-    const device = await adapter?.requestDevice();
-    quitIfWebGPUNotAvailable(adapter, device);
-
-    const context = canvas.getContext('webgpu') as GPUCanvasContext;
-    const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-    context.configure({
-        device,
-        format: presentationFormat,
-    });
-    const depthFormat = 'depth24plus';
-
-    const module = device.createShaderModule({
-        code: solidColorLitWGSL,
-    });
-
-    const pipeline = device.createRenderPipeline({
-        layout: 'auto',
+    const pipeline: IGPURenderPipeline = {
         vertex: {
-            module,
-            buffers: [
-                {
-                    arrayStride: 6 * 4, // 3x2 floats, 4 bytes each
-                    attributes: [
-                        { shaderLocation: 0, offset: 0, format: 'float32x3' }, // position
-                        { shaderLocation: 1, offset: 12, format: 'float32x3' }, // normal
-                    ],
-                },
-            ],
+            code: solidColorLitWGSL,
         },
         fragment: {
-            module,
-            targets: [{ format: presentationFormat }],
+            code: solidColorLitWGSL,
         },
         primitive: {
             topology: 'triangle-list',
@@ -81,9 +53,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: 'less',
-            format: depthFormat,
         },
-    });
+    };
 
     // prettier-ignore
     const cubePositions = [
@@ -98,10 +69,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const objectInfos = cubePositions.map(({ position, id, color }) =>
     {
         const uniformBufferSize = (2 * 16 + 3 + 1 + 4) * 4;
-        const uniformBuffer = device.createBuffer({
+        const uniformBuffer: IGPUBuffer = {
             size: uniformBufferSize,
             usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
+        };
         const uniformValues = new Float32Array(uniformBufferSize / 4);
         const worldViewProjection = uniformValues.subarray(0, 16);
         const worldInverseTranspose = uniformValues.subarray(16, 32);
@@ -125,43 +96,23 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     });
 
-    const querySet = device.createQuerySet({
-        type: 'occlusion',
-        count: objectInfos.length,
-    });
+    // const querySet = device.createQuerySet({
+    //     type: 'occlusion',
+    //     count: objectInfos.length,
+    // });
 
-    const resolveBuf = device.createBuffer({
+    const resolveBuf: IGPUBuffer = {
         label: 'resolveBuffer',
         // Query results are 64bit unsigned integers.
         size: objectInfos.length * BigUint64Array.BYTES_PER_ELEMENT,
         usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-    });
+    };
 
-    const resultBuf = device.createBuffer({
+    const resultBuf: IGPUBuffer = {
         label: 'resultBuffer',
         size: resolveBuf.size,
         usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-    });
-
-    function createBufferWithData(
-        device: GPUDevice,
-        data: TypedArrayView,
-        usage: GPUBufferUsageFlags,
-        label: string
-    )
-    {
-        const buffer = device.createBuffer({
-            label,
-            size: data.byteLength,
-            usage,
-            mappedAtCreation: true,
-        });
-        const Ctor = data.constructor as TypedArrayConstructor;
-        const dst = new Ctor(buffer.getMappedRange());
-        dst.set(data);
-        buffer.unmap();
-        return buffer;
-    }
+    };
 
     // prettier-ignore
     const vertexData = new Float32Array([
@@ -201,43 +152,52 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         20, 21, 22, 20, 22, 23, // -z face
     ]);
 
-    const vertexBuf = createBufferWithData(
-        device,
-        vertexData,
-        GPUBufferUsage.VERTEX,
-        'vertexBuffer'
-    );
-    const indicesBuf = createBufferWithData(
-        device,
-        indices,
-        GPUBufferUsage.INDEX,
-        'indexBuffer'
-    );
+    const vertexBuf: IGPUBuffer = {
+        data: vertexData,
+        usage: GPUBufferUsage.VERTEX,
+        label: 'vertexBuffer'
+    };
+    const indicesBuf: IGPUBuffer = {
+        data: indices,
+        usage: GPUBufferUsage.INDEX,
+        label: 'indexBuffer'
+    };
 
-    const renderPassDescriptor: GPURenderPassDescriptor = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
-                view: undefined, // Assigned later
+                view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.5, 0.5, 0.5, 1.0],
                 loadOp: 'clear',
                 storeOp: 'store',
             },
         ],
         depthStencilAttachment: {
-            view: undefined, // Assigned later
             depthClearValue: 1.0,
             depthLoadOp: 'clear',
             depthStoreOp: 'store',
         },
-        occlusionQuerySet: querySet,
+        // occlusionQuerySet: querySet,
+    };
+
+    const renderObject: IGPURenderObject = {
+        pipeline: pipeline,
+        vertices: {
+            position: { buffer: vertexBuf, offset: 0, vertexSize: 6 * 4 },
+            normal: { buffer: vertexBuf, offset: 12, vertexSize: 6 * 4 },
+        },
+        bindingResources: {
+            uni: {
+                buffer:
+            },
+        },
+        draw: { vertexCount: cubeVertexCount },
     };
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
     const lerpV = (a: number[], b: number[], t: number) =>
         a.map((v, i) => lerp(v, b[i], t));
     const pingPongSine = (t: number) => Math.sin(t * Math.PI * 2) * 0.5 + 0.5;
-
-    let depthTexture: GPUTexture | undefined;
 
     let time = 0;
     let then = 0;
@@ -265,25 +225,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         mat4.translate(m, lerpV([0, 0, 5], [0, 0, 40], pingPongSine(time * 0.2)), m);
         const view = mat4.inverse(m);
         const viewProjection = mat4.multiply(projection, view);
-
-        const canvasTexture = context.getCurrentTexture();
-        if (
-            !depthTexture ||
-            depthTexture.width !== canvasTexture.width ||
-            depthTexture.height !== canvasTexture.height
-        )
-        {
-            depthTexture?.destroy();
-            depthTexture = device.createTexture({
-                size: canvasTexture, // canvasTexture has width, height, and depthOrArrayLayers properties
-                format: depthFormat,
-                usage: GPUTextureUsage.RENDER_ATTACHMENT,
-            });
-        }
-
-        const colorTexture = context.getCurrentTexture();
-        renderPassDescriptor.colorAttachments[0].view = colorTexture.createView();
-        renderPassDescriptor.depthStencilAttachment.view = depthTexture.createView();
 
         const encoder = device.createCommandEncoder();
         const pass = encoder.beginRenderPass(renderPassDescriptor);
@@ -317,30 +258,30 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
         );
 
-        pass.end();
-        encoder.resolveQuerySet(querySet, 0, objectInfos.length, resolveBuf, 0);
-        if (resultBuf.mapState === 'unmapped')
-        {
-            encoder.copyBufferToBuffer(resolveBuf, 0, resultBuf, 0, resultBuf.size);
-        }
+        // pass.end();
+        // encoder.resolveQuerySet(querySet, 0, objectInfos.length, resolveBuf, 0);
+        // if (resultBuf.mapState === 'unmapped')
+        // {
+        //     encoder.copyBufferToBuffer(resolveBuf, 0, resultBuf, 0, resultBuf.size);
+        // }
 
-        device.queue.submit([encoder.finish()]);
+        // device.queue.submit([encoder.finish()]);
 
-        if (resultBuf.mapState === 'unmapped')
-        {
-            resultBuf.mapAsync(GPUMapMode.READ).then(() =>
-            {
-                const results = new BigUint64Array(resultBuf.getMappedRange());
+        // if (resultBuf.mapState === 'unmapped')
+        // {
+        //     resultBuf.mapAsync(GPUMapMode.READ).then(() =>
+        //     {
+        //         const results = new BigUint64Array(resultBuf.getMappedRange());
 
-                const visible = objectInfos
-                    .filter((_, i) => results[i])
-                    .map(({ id }) => id)
-                    .join('');
-                info.textContent = `visible: ${visible}`;
+        //         const visible = objectInfos
+        //             .filter((_, i) => results[i])
+        //             .map(({ id }) => id)
+        //             .join('');
+        //         info.textContent = `visible: ${visible}`;
 
-                resultBuf.unmap();
-            });
-        }
+        //         resultBuf.unmap();
+        //     });
+        // }
 
         requestAnimationFrame(render);
     }
