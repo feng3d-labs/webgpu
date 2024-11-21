@@ -2,7 +2,8 @@ import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 import solidColorLitWGSL from './solidColorLit.wgsl';
 
-import { IGPUBuffer, IGPUBufferBinding, IGPURenderOcclusionQueryObject, IGPUOcclusionQuerySet, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { watcher } from '@feng3d/watcher';
+import { IGPUBuffer, IGPUBufferBinding, IGPURenderObject, IGPURenderOcclusionQueryObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const info = document.querySelector('#info');
 
@@ -71,23 +72,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     });
 
-    const querySet: IGPUOcclusionQuerySet = {
-        count: objectInfos.length,
-    };
-
-    // const resolveBuf: IGPUBuffer = {
-    //     label: 'resolveBuffer',
-    //     // Query results are 64bit unsigned integers.
-    //     size: objectInfos.length * BigUint64Array.BYTES_PER_ELEMENT,
-    //     usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-    // };
-
-    // const resultBuf: IGPUBuffer = {
-    //     label: 'resultBuffer',
-    //     size: resolveBuf.size,
-    //     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-    // };
-
     // prettier-ignore
     const vertexData = new Float32Array([
         // position             normal
@@ -151,7 +135,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             depthLoadOp: 'clear',
             depthStoreOp: 'store',
         },
-        occlusionQuerySet: querySet,
     };
 
     const renderObject: IGPURenderObject = {
@@ -188,15 +171,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return { type: "OcclusionQueryObject", renderObjects: [ro] };
     })
 
+    const renderPass: IGPURenderPass = {
+        descriptor: renderPassDescriptor,
+        // renderObjects: renderObjects,
+        renderObjects: occlusionQueryObjects,
+    }
+
     const submit: IGPUSubmit = {
         commandEncoders: [
             {
                 passEncoders: [
-                    {
-                        descriptor: renderPassDescriptor,
-                        // renderObjects: renderObjects,
-                        renderObjects: occlusionQueryObjects,
-                    }
+                    renderPass
                 ]
             }
         ]
@@ -251,43 +236,23 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
                 const buffer = (renderObjects[i].bindingResources.uni as IGPUBufferBinding).buffer;
-                buffer.data = new Float32Array(uniformValues);
-
-                // device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
-
-                // pass.setBindGroup(0, bindGroup);
-                // pass.beginOcclusionQuery(i);
-                // pass.drawIndexed(indices.length);
-                // pass.endOcclusionQuery();
+                buffer.data = uniformValues.slice();
             }
         );
 
         webgpu.submit(submit);
 
-        // pass.end();
-        // encoder.resolveQuerySet(querySet, 0, objectInfos.length, resolveBuf, 0);
-        // if (resultBuf.mapState === 'unmapped')
-        // {
-        //     encoder.copyBufferToBuffer(resolveBuf, 0, resultBuf, 0, resultBuf.size);
-        // }
+        // 监听查询结果。
+        watcher.watch(renderPass, "_occlusionQueryResults", (value) =>
+        {
+            const visible = objectInfos
+                .filter((_, i) => value[i].result)
+                .map(({ id }) => id)
+                .join('');
+            info.textContent = `visible: ${visible}`;
+        });
 
-        // device.queue.submit([encoder.finish()]);
-
-        // if (resultBuf.mapState === 'unmapped')
-        // {
-        //     resultBuf.mapAsync(GPUMapMode.READ).then(() =>
-        //     {
-        //         const results = new BigUint64Array(resultBuf.getMappedRange());
-
-        //         const visible = objectInfos
-        //             .filter((_, i) => results[i])
-        //             .map(({ id }) => id)
-        //             .join('');
-        //         info.textContent = `visible: ${visible}`;
-
-        //         resultBuf.unmap();
-        //     });
-        // }
+        renderPass._occlusionQueryResults
 
         requestAnimationFrame(render);
     }
