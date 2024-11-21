@@ -6,7 +6,7 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, IGPUSubmit, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
 
 const shadowDepthTextureSize = 1024;
 
@@ -110,19 +110,13 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const modelUniformBuffer: IGPUBuffer = {
-        size: 4 * 16, // 4x4 matrix
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    };
+    const modelUniformBuffer = new Uint8Array(4 * 16);
 
-    const sceneUniformBuffer: IGPUBuffer = {
-        // Two 4x4 viewProj matrices,
-        // one for the camera and one for the light.
-        // Then a vec3 for the light position.
-        // Rounded to the nearest multiple of 16.
-        size: 2 * 4 * 16 + 4 * 4,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    };
+    // Two 4x4 viewProj matrices,
+    // one for the camera and one for the light.
+    // Then a vec3 for the light position.
+    // Rounded to the nearest multiple of 16.
+    const sceneUniformBuffer = new Uint8Array(2 * 4 * 16 + 4 * 4);
 
     const sceneBindGroupForShadow: IGPUBindingResources = {
         scene: {
@@ -190,14 +184,14 @@ const init = async (canvas: HTMLCanvasElement) =>
         const lightMatrixData = lightViewProjMatrix as Float32Array;
         const cameraMatrixData = viewProjMatrix as Float32Array;
         const lightData = lightPosition as Float32Array;
-        sceneUniformBuffer.writeBuffers = [
+        getIGPUBuffer(sceneUniformBuffer).writeBuffers = [
             { bufferOffset: 0, data: lightMatrixData },
             { bufferOffset: 64, data: cameraMatrixData },
             { bufferOffset: 128, data: lightData },
         ];
 
         const modelData = modelMatrix as Float32Array;
-        modelUniformBuffer.writeBuffers = [{ data: modelData }];
+        getIGPUBuffer(modelUniformBuffer).writeBuffers = [{ data: modelData }];
     }
 
     // Rotates the camera around the origin based on time.
@@ -269,9 +263,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     function frame()
     {
         const cameraViewProj = getCameraViewProjMatrix();
-        const writeBuffers = sceneUniformBuffer.writeBuffers || [];
+        const writeBuffers = getIGPUBuffer(sceneUniformBuffer).writeBuffers || [];
         writeBuffers.push({ bufferOffset: 64, data: cameraViewProj });
-        sceneUniformBuffer.writeBuffers = writeBuffers;
+        getIGPUBuffer(sceneUniformBuffer).writeBuffers = writeBuffers;
 
         webgpu.submit(submit);
 

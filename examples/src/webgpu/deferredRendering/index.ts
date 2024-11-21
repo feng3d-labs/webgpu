@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -164,11 +164,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     mode: "rendering",
     numLights: 128,
   };
-  const configUniformBuffer: IGPUBuffer = {
-    size: Uint32Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    data: new Uint32Array([settings.numLights]),
-  };
+  const configUniformBuffer = new Uint32Array([settings.numLights]);
 
   gui.add(settings, "mode", ["rendering", "gBuffers view"]);
   gui
@@ -176,25 +172,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     .step(1)
     .onChange(() =>
     {
-      if (configUniformBuffer.writeBuffers)
+      if (getIGPUBuffer(configUniformBuffer).writeBuffers)
       {
-        configUniformBuffer.writeBuffers.push({ data: new Uint32Array([settings.numLights]) });
+        getIGPUBuffer(configUniformBuffer).writeBuffers.push({ data: new Uint32Array([settings.numLights]) });
       }
       else
       {
-        configUniformBuffer.writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
+        getIGPUBuffer(configUniformBuffer).writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
       }
     });
 
-  const modelUniformBuffer: IGPUBuffer = {
-    size: 4 * 16 * 2, // two 4x4 matrix
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  };
+  const modelUniformBuffer = new Uint8Array(4 * 16 * 2);
 
-  const cameraUniformBuffer: IGPUBuffer = {
-    size: 4 * 16, // 4x4 matrix
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  };
+  const cameraUniformBuffer = new Uint8Array(4 * 16);
 
   const sceneUniformBindGroup: IGPUBindingResources = {
     uniforms: {
@@ -216,10 +206,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const extent = vec3.sub(lightExtentMax, lightExtentMin);
   const lightDataStride = 8;
   const bufferSizeInByte = Float32Array.BYTES_PER_ELEMENT * lightDataStride * kMaxNumLights;
-  const lightsBuffer: IGPUBuffer = {
-    size: bufferSizeInByte,
-    usage: GPUBufferUsage.STORAGE,
-  };
+  const lightsBuffer = new Uint8Array(bufferSizeInByte);
 
   // We randomaly populate lights randomly in a box range
   // And simply move them along y-axis per frame to show they are
@@ -245,16 +232,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     tmpVec4[3] = 20.0;
     lightData.set(tmpVec4, offset + 4);
   }
-  lightsBuffer.data = lightData;
+  getIGPUBuffer(lightsBuffer).data = lightData;
 
-  const lightExtentBuffer: IGPUBuffer = {
-    size: 4 * 8,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  };
+  const lightExtentBuffer = new Uint8Array(4 * 8);
   const lightExtentData = new Float32Array(8);
   lightExtentData.set(lightExtentMin, 0);
   lightExtentData.set(lightExtentMax, 4);
-  lightExtentBuffer.writeBuffers = [{ data: lightExtentData }];
+  getIGPUBuffer(lightExtentBuffer).writeBuffers = [{ data: lightExtentData }];
 
   const lightUpdateComputePipeline: IGPUComputePipeline = {
     compute: {
@@ -302,33 +286,33 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const modelMatrix = mat4.translation([0, -45, 0]);
 
   const cameraMatrixData = viewProjMatrix as Float32Array;
-  if (cameraUniformBuffer.writeBuffers)
+  if (getIGPUBuffer(cameraUniformBuffer).writeBuffers)
   {
-    cameraUniformBuffer.writeBuffers.push({ data: cameraMatrixData });
+    getIGPUBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraMatrixData });
   }
   else
   {
-    cameraUniformBuffer.writeBuffers = [{ data: cameraMatrixData }];
+    getIGPUBuffer(cameraUniformBuffer).writeBuffers = [{ data: cameraMatrixData }];
   }
   const modelData = modelMatrix as Float32Array;
-  if (modelUniformBuffer.writeBuffers)
+  if (getIGPUBuffer(modelUniformBuffer).writeBuffers)
   {
-    modelUniformBuffer.writeBuffers.push({ data: modelData });
+    getIGPUBuffer(modelUniformBuffer).writeBuffers.push({ data: modelData });
   }
   else
   {
-    modelUniformBuffer.writeBuffers = [{ data: modelData }];
+    getIGPUBuffer(modelUniformBuffer).writeBuffers = [{ data: modelData }];
   }
   const invertTransposeModelMatrix = mat4.invert(modelMatrix);
   mat4.transpose(invertTransposeModelMatrix, invertTransposeModelMatrix);
   const normalModelData = invertTransposeModelMatrix as Float32Array;
-  if (modelUniformBuffer.writeBuffers)
+  if (getIGPUBuffer(modelUniformBuffer).writeBuffers)
   {
-    modelUniformBuffer.writeBuffers.push({ bufferOffset: 64, data: normalModelData });
+    getIGPUBuffer(modelUniformBuffer).writeBuffers.push({ bufferOffset: 64, data: normalModelData });
   }
   else
   {
-    modelUniformBuffer.writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
+    getIGPUBuffer(modelUniformBuffer).writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
   }
 
   // Rotates the camera around the origin based on time.
@@ -406,13 +390,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   function frame()
   {
     const cameraViewProj = getCameraViewProjMatrix();
-    if (cameraUniformBuffer.writeBuffers)
+    if (getIGPUBuffer(cameraUniformBuffer).writeBuffers)
     {
-      cameraUniformBuffer.writeBuffers.push({ data: cameraViewProj });
+      getIGPUBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraViewProj });
     }
     else
     {
-      cameraUniformBuffer.writeBuffers = [{ data: cameraViewProj }];
+      getIGPUBuffer(cameraUniformBuffer).writeBuffers = [{ data: cameraViewProj }];
     }
 
     const submit: IGPUSubmit = {

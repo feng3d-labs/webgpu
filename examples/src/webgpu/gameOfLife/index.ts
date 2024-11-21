@@ -54,10 +54,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
             },
         };
-        const sizeBuffer: IGPUBuffer = {
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.VERTEX,
-            data: new Uint32Array([GameOptions.width, GameOptions.height]),
-        };
+        const sizeBuffer = new Uint32Array([GameOptions.width, GameOptions.height]);
         const length = GameOptions.width * GameOptions.height;
         const cells = new Uint32Array(length);
         for (let i = 0; i < length; i++)
@@ -78,14 +75,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const bindGroup0: IGPUBindingResources = {
             size: { bufferView: sizeBuffer },
-            current: { bufferView: getIGPUBuffer(buffer0) },
-            next: { bufferView: getIGPUBuffer(buffer1) },
+            current: { bufferView: buffer0 },
+            next: { bufferView: buffer1 },
         };
 
         const bindGroup1: IGPUBindingResources = {
             size: { bufferView: sizeBuffer },
-            current: { bufferView: getIGPUBuffer(buffer1) },
-            next: { bufferView: getIGPUBuffer(buffer0) },
+            current: { bufferView: buffer1 },
+            next: { bufferView: buffer0 },
         };
 
         const renderPipeline: IGPURenderPipeline = {

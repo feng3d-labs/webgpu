@@ -29,12 +29,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         rule3Scale: 0.005,
     };
 
-    const simParamBufferSize = 7 * Float32Array.BYTES_PER_ELEMENT;
-    const simParamBuffer: IGPUBuffer = {
-        size: simParamBufferSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    };
-
     Object.keys(simParams).forEach((k) =>
     {
         gui.add(simParams, k as any);
@@ -61,15 +55,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             compute: { code: updateSpritesWGSL }
         },
         bindingResources: {
-            params: {
-                bufferView: simParamBuffer,
-                map: simParams,
-            },
+            params: simParams,
             particlesA: {
-                bufferView: getIGPUBuffer(particleBuffers[0]),
+                bufferView: particleBuffers[0],
             },
             particlesB: {
-                bufferView: getIGPUBuffer(particleBuffers[1]),
+                bufferView: particleBuffers[1],
             },
         },
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
@@ -81,11 +72,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ...computeObject0.bindingResources,
             particlesA: {
                 ...computeObject0.bindingResources.particlesA,
-                bufferView: getIGPUBuffer(particleBuffers[1]),
+                bufferView: particleBuffers[1],
             },
             particlesB: {
                 ...computeObject0.bindingResources.particlesA,
-                bufferView: getIGPUBuffer(particleBuffers[0]),
+                bufferView: particleBuffers[0],
             },
         },
     };
