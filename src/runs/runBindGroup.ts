@@ -190,6 +190,17 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
         let ClsName: "Float32Array" | "Int32Array";
         const update = () =>
         {
+            let data: Type;
+            const memberData = uniformData[member.name];
+            if (memberData === undefined)
+            {
+                if (!hasDefautValue)
+                {
+                    console.warn(`没有找到 binding ${member.name} 值！`);
+                }
+
+                return;
+            }
             if (member.type.name === "f32" || subTypeName === "f32" || subsubTypeName === "f32")
             {
                 Cls = Float32Array;
@@ -203,17 +214,6 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
             else
             {
                 console.error(`未处理缓冲区绑定类型为 ${member.type.name} 的 ${member.name} 成员！`);
-            }
-            let data: Type;
-            const memberData = uniformData[member.name];
-            if (memberData === undefined)
-            {
-                if (!hasDefautValue)
-                {
-                    console.warn(`没有找到 binding ${member.name} 值！`);
-                }
-
-                return;
             }
             if (typeof memberData === "number")
             {

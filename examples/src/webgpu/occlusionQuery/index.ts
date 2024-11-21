@@ -3,7 +3,7 @@ import { mat4 } from 'wgpu-matrix';
 import solidColorLitWGSL from './solidColorLit.wgsl';
 
 import { watcher } from '@feng3d/watcher';
-import { IGPUBuffer, IGPUBufferBinding, IGPURenderObject, IGPURenderOcclusionQueryObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPURenderObject, IGPURenderOcclusionQueryObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const info = document.querySelector('#info');
 
@@ -50,11 +50,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const objectInfos = cubePositions.map(({ position, id, color }) =>
     {
         const uniformBufferSize = (2 * 16 + 3 + 1 + 4) * 4;
-        const uniformBuffer: IGPUBuffer = {
-            size: uniformBufferSize,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            label: "uniformBuffer " + id,
-        };
+        const uniformBuffer = new Uint8Array(uniformBufferSize);
         const uniformValues = new Float32Array(uniformBufferSize / 4);
         const worldViewProjection = uniformValues.subarray(0, 16);
         const worldInverseTranspose = uniformValues.subarray(16, 32);
@@ -227,7 +223,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
                 const buffer = (renderObjects[i].bindingResources.uni as IGPUBufferBinding).bufferView;
-                buffer.data = uniformValues.slice();
+                getIGPUBuffer(buffer).data = uniformValues.slice();
             }
         );
 
