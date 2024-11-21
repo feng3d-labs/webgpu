@@ -1,26 +1,41 @@
 {
-	"webgpu": [
+	"Basic Graphics": [
 		"helloTriangle",
 		"helloTriangleMSAA",
-		"resizeCanvas",
 		"rotatingCube",
 		"twoCubes",
 		"texturedCube",
 		"instancedCube",
 		"fractalCube",
 		"cubemap",
-		"computeBoids",
-		"animometer",
-		"videoUploading",
-		"samplerParameters",
-		"imageBlur",
-		"shadowMapping",
+		""
+	],
+	"WebGPU Features": [
 		"reversedZ",
+		"renderBundles",
+		"samplerParameters",
+		""
+	],
+	"GPGPU Demos": [
+		"computeBoids",
+		"gameOfLife",
+		""
+	],
+	"Graphics Techniques": [
+		"shadowMapping",
 		"deferredRendering",
 		"particles",
+		"imageBlur",
 		"cornell",
-		"gameOfLife",
-		"renderBundles",
+		""
+	],
+	"Web Platform Integration": [
+		"resizeCanvas",
+		"videoUploading",
+		""
+	],
+	"Benchmarks": [
+		"animometer",
 		""
 	]
 }

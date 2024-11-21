@@ -43,7 +43,7 @@ async function init()
 
             if (file)
             {
-                validRedirects.set(file, `src/${key}/${file}/index.html`);
+                validRedirects.set(file, `src/webgpu/${file}/index.html`);
 
                 const link = createLink(file, tags[file]);
                 container.appendChild(link);
