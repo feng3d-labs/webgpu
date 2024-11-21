@@ -12,6 +12,8 @@ const defaultGPUBufferUsage = (GPUBufferUsage.VERTEX | GPUBufferUsage.UNIFORM | 
  */
 export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
 {
+    const gBufferMap: WeakMap<IGPUBuffer, GPUBuffer> = device["_gBufferMap"] = device["_gBufferMap"] || new WeakMap<IGPUBuffer, GPUBuffer>();
+
     let gBuffer: GPUBuffer = gBufferMap.get(buffer);
     if (gBuffer) return gBuffer;
 
@@ -41,7 +43,7 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
         const bufferData = buffer.data;
         if (ArrayBuffer.isView(bufferData))
         {
-            new (bufferData.constructor as any)(gBuffer.getMappedRange()).set(bufferData);
+            new Int8Array(gBuffer.getMappedRange()).set(new Int8Array(bufferData.buffer));
         }
         else
         {
@@ -146,5 +148,3 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
 
     return gBuffer;
 }
-
-const gBufferMap = new WeakMap<IGPUBuffer, GPUBuffer>();
