@@ -366,7 +366,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           ...sceneUniformBindGroup,
         },
         vertices,
-        index: indexBuffer,
+        indices: indexBuffer,
         drawIndexed: { indexCount },
       },
     ]

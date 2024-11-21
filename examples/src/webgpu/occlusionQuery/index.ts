@@ -138,7 +138,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             position: { buffer: vertexBuf, offset: 0, vertexSize: 6 * 4, numComponents: 3 },
             normal: { buffer: vertexBuf, offset: 12, vertexSize: 6 * 4 },
         },
-        index: indices,
+        indices: indices,
         bindingResources: {
             uni: {
                 buffer: undefined,

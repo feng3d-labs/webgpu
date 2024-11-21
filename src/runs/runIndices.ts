@@ -1,11 +1,11 @@
 import { getGPUBuffer } from "../caches/getGPUBuffer";
 import { getIGPUIndexBuffer } from "./getIGPUIndexBuffer";
 
-export function runIndexBuffer(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, index: Uint16Array | Uint32Array)
+export function runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array)
 {
-    if (!index) return;
+    if (!indices) return;
 
-    const indexBuffer = getIGPUIndexBuffer(index);
+    const indexBuffer = getIGPUIndexBuffer(indices);
 
     const { buffer, indexFormat, offset, size } = indexBuffer;
     const gBuffer = getGPUBuffer(device, buffer);

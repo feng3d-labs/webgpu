@@ -44,9 +44,9 @@ export interface IGPURenderObject
     vertices?: IGPUVertexAttributes;
 
     /**
-     * GPU绘制时使用的索引缓冲区。
+     * 索引数据。
      */
-    index?: Uint16Array | Uint32Array,
+    indices?: Uint16Array | Uint32Array,
 
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。

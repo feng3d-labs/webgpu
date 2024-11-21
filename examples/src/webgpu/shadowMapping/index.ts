@@ -249,7 +249,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 vertices,
-                                index: indexBuffer,
+                                indices: indexBuffer,
                                 drawIndexed: { indexCount },
                             },
                         ]
@@ -264,7 +264,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 vertices,
-                                index: indexBuffer,
+                                indices: indexBuffer,
                                 drawIndexed: { indexCount },
                             }
                         ],

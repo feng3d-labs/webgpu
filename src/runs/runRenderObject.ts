@@ -5,7 +5,7 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { runBindGroup } from "./runComputeBindGroup";
 import { runDraw } from "./runDraw";
 import { runDrawIndexed } from "./runDrawIndexed";
-import { runIndexBuffer } from "./runIndexBuffer";
+import { runIndices } from "./runIndices";
 import { runRenderPipeline } from "./runRenderPipeline";
 import { runScissorRect } from "./runScissorRect";
 import { runViewport } from "./runViewport";
@@ -20,7 +20,7 @@ import { runViewport } from "./runViewport";
  */
 export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObject: IGPURenderObject)
 {
-    const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
+    const { indices, viewport, scissorRect, draw, drawIndexed } = renderObject;
 
     const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(renderObject.pipeline, renderPassFormats, renderObject.vertices);
 
@@ -34,7 +34,7 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
     });
 
-    runIndexBuffer(device, passEncoder, index);
+    runIndices(device, passEncoder, indices);
 
     runViewport(passEncoder as GPURenderPassEncoder, renderPassFormats.attachmentSize, viewport);
 
