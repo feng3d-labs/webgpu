@@ -168,7 +168,8 @@ let autoIndex = 0;
 
 export function destoryTexture(device: GPUDevice, texture: IGPUTexture)
 {
-    const gpuTexture = getGPUTexture(device, texture, false);
+    const textureMap: Map<IGPUTexture, GPUTexture> = device["textureMap"] = device["textureMap"] || new Map<IGPUTexture, GPUTexture>();
+    let gpuTexture = textureMap.get(texture);
     if (gpuTexture)
     {
         gpuTexture.destroy();
