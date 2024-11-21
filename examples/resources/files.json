@@ -13,6 +13,7 @@
 	"WebGPU Features": [
 		"reversedZ",
 		"renderBundles",
+		"occlusionQuery",
 		"samplerParameters",
 		""
 	],
