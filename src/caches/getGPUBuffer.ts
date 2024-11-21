@@ -1,7 +1,21 @@
 import { watcher } from "@feng3d/watcher";
 import { IGPUBuffer } from "../data/IGPUBuffer";
 
-const defaultGPUBufferUsage = (GPUBufferUsage.VERTEX | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.INDEX);
+/**
+ * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。
+ */
+const defaultGPUBufferUsage = 0
+    // | GPUBufferUsage.MAP_READ
+    // | GPUBufferUsage.MAP_WRITE
+    | GPUBufferUsage.COPY_SRC
+    | GPUBufferUsage.COPY_DST
+    | GPUBufferUsage.INDEX
+    | GPUBufferUsage.VERTEX
+    | GPUBufferUsage.UNIFORM
+    | GPUBufferUsage.STORAGE
+    | GPUBufferUsage.INDIRECT
+    | GPUBufferUsage.QUERY_RESOLVE
+    ;
 
 /**
  * 获取 GPU 缓冲。
