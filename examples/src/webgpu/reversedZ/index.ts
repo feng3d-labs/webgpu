@@ -292,18 +292,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const uniformBindGroups: IGPUBindingResources[] = [
         {
             uniforms: {
-                buffer: uniformBuffer,
+                bufferView: uniformBuffer,
             },
             camera: {
-                buffer: cameraMatrixBuffer,
+                bufferView: cameraMatrixBuffer,
             },
         },
         {
             uniforms: {
-                buffer: uniformBuffer,
+                bufferView: uniformBuffer,
             },
             camera: {
-                buffer: cameraMatrixReversedDepthBuffer,
+                bufferView: cameraMatrixReversedDepthBuffer,
             },
         },
     ];

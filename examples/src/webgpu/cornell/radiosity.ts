@@ -80,12 +80,12 @@ export default class Radiosity
     };
     this.bindGroup = {
       accumulation: {
-        buffer: this.accumulationBuffer,
+        bufferView: this.accumulationBuffer,
         size: this.accumulationBuffer.size,
       },
       lightmap: { texture: this.lightmap },
       uniforms: {
-        buffer: this.uniformBuffer,
+        bufferView: this.uniformBuffer,
         size: this.uniformBuffer.size,
       },
     };

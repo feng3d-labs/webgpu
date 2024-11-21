@@ -36,7 +36,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         const getGPUBindingResource = () =>
         {
             let resource: GPUBindingResource;
-            if ((v.resource as IGPUBufferBinding).buffer)
+            if ((v.resource as IGPUBufferBinding).bufferView)
             {
                 const iGPUBufferBinding = v.resource as IGPUBufferBinding;
                 resource = getGPUBufferBinding(device, iGPUBufferBinding);

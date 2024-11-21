@@ -198,10 +198,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const sceneUniformBindGroup: IGPUBindingResources = {
     uniforms: {
-      buffer: modelUniformBuffer,
+      bufferView: modelUniformBuffer,
     },
     camera: {
-      buffer: cameraUniformBuffer,
+      bufferView: cameraUniformBuffer,
     },
   };
 
@@ -263,21 +263,21 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   };
   const lightsBufferBindGroup: IGPUBindingResources = {
     lightsBuffer: {
-      buffer: lightsBuffer,
+      bufferView: lightsBuffer,
     },
     config: {
-      buffer: configUniformBuffer,
+      bufferView: configUniformBuffer,
     },
   };
   const lightsBufferComputeBindGroup: IGPUBindingResources = {
     lightsBuffer: {
-      buffer: lightsBuffer,
+      bufferView: lightsBuffer,
     },
     config: {
-      buffer: configUniformBuffer,
+      bufferView: configUniformBuffer,
     },
     lightExtent: {
-      buffer: lightExtentBuffer,
+      bufferView: lightExtentBuffer,
     },
   };
   // --------------------

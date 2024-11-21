@@ -153,7 +153,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
     const bindGroup: IGPUBindingResources = {
       modelMatrix: {
-        buffer: uniformBuffer,
+        bufferView: uniformBuffer,
       },
       meshSampler: sampler,
       meshTexture: { texture },
@@ -230,7 +230,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
   const frameBindGroup: IGPUBindingResources = {
     uniforms: {
-      buffer: uniformBuffer,
+      bufferView: uniformBuffer,
     },
   };
 

@@ -79,7 +79,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const uniformBindGroup: IGPUBindingResources = {
     render_params: {
-      buffer: uniformBuffer,
+      bufferView: uniformBuffer,
     },
   };
 
@@ -193,9 +193,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       const levelWidth = textureWidth >> level;
       const levelHeight = textureHeight >> level;
       const probabilityMapBindGroup: IGPUBindingResources = {
-        ubo: { buffer: probabilityMapUBOBuffer },
-        buf_in: { buffer: level & 1 ? bufferA : bufferB },
-        buf_out: { buffer: level & 1 ? bufferB : bufferA },
+        ubo: { bufferView: probabilityMapUBOBuffer },
+        buf_in: { bufferView: level & 1 ? bufferA : bufferB },
+        buf_out: { bufferView: level & 1 ? bufferB : bufferA },
         tex_in: {
           texture,
           format: "rgba8unorm",
@@ -266,10 +266,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   };
   const computeBindGroup: IGPUBindingResources = {
     sim_params: {
-      buffer: simulationUBOBuffer,
+      bufferView: simulationUBOBuffer,
     },
     data: {
-      buffer: getIGPUBuffer(particlesBuffer),
+      bufferView: getIGPUBuffer(particlesBuffer),
       offset: 0,
       size: numParticles * particleInstanceByteSize,
     },

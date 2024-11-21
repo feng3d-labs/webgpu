@@ -5,6 +5,7 @@ import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { WGSLBindingResourceInfoMap } from "../caches/getWGSLReflectInfo";
 import { IGPUBindGroupEntry, IGPUBindingResource, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
+import { IGPUBuffer } from "../data/IGPUBuffer";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUSampler } from "../data/IGPUSampler";
@@ -12,6 +13,7 @@ import { IGPUTextureBase } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { ChainMap } from "../utils/ChainMap";
+import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 
 /**
  * 执行计算绑定组。
@@ -83,31 +85,24 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
 
                     const uniformData = bindingResource as IGPUBufferBinding;
 
-                    if (!uniformData.buffer)
+                    if (!uniformData.bufferView)
                     {
-                        uniformData.buffer = {
-                            size,
-                            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE,
-                        };
+                        uniformData.bufferView = new Uint8Array(size);
                     }
 
-                    const buffer = uniformData.buffer;
-                    const offset = uniformData.offset ?? 0; // 默认值为0
+                    const bufferView = uniformData.bufferView;
 
                     if (layoutType === "uniform")
                     {
                         resource = {
-                            buffer,
-                            offset,
-                            size,
+                            bufferView,
                         };
                     }
                     else
                     {
                         // 无法确定 storage 中数据的尺寸，不设置 size 属性。
                         resource = {
-                            buffer,
-                            offset,
+                            bufferView,
                         };
                     }
 
@@ -176,12 +171,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
         return;
     }
 
-    if (!uniformData.map)
-    {
-        return;
-    }
-
-    if (uniformData["_variableInfo"] === variableInfo)
+    if ((uniformData["_variableInfo"] as any as VariableInfo) === variableInfo)
     {
         // 已经做好数据映射。
         return;
@@ -193,10 +183,11 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
 
         return;
     }
-    uniformData["_variableInfo"] = variableInfo;
+    uniformData["_variableInfo"] = variableInfo as any;
 
-    const buffer = uniformData.buffer;
-    const offset = uniformData.offset ?? 0; // 默认值为0
+    const buffer = getIGPUBuffer(uniformData.bufferView);
+    buffer.label = buffer.label || ("uniformData " + autoVertexIndex++);
+    const offset = uniformData.bufferView.byteOffset;
 
     variableInfo.members.forEach((member) =>
     {
@@ -209,7 +200,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
             update = () =>
             {
                 let data: Float32Array;
-                const memberData = uniformData.map[member.name];
+                const memberData = uniformData[member.name];
                 if (memberData === undefined)
                 {
                     console.warn(`没有找到 binding ${member.name} 值！`);
@@ -220,9 +211,13 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
                 {
                     data = new Float32Array([memberData]);
                 }
+                else if ((memberData as ArrayBufferView).buffer)
+                {
+                    data = new Float32Array((memberData as ArrayBufferView).buffer);
+                }
                 else if (memberData.constructor !== Float32Array)
                 {
-                    data = new Float32Array(memberData);
+                    data = new Float32Array(memberData as ArrayLike<number>);
                 }
                 else
                 {
@@ -238,7 +233,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
             update = () =>
             {
                 let data: Int32Array;
-                const memberData = uniformData.map[member.name];
+                const memberData = uniformData[member.name];
                 if (memberData === undefined)
                 {
                     console.warn(`没有找到 binding ${member.name} 值！`);
@@ -249,9 +244,13 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
                 {
                     data = new Int32Array([memberData]);
                 }
+                else if ((memberData as ArrayBufferView).buffer)
+                {
+                    data = new Int32Array((memberData as ArrayBufferView).buffer);
+                }
                 else if (memberData.constructor !== Int32Array)
                 {
-                    data = new Int32Array(memberData);
+                    data = new Int32Array(memberData as ArrayLike<number>);
                 }
                 else
                 {
@@ -266,11 +265,13 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
         {
             console.error(`未处理缓冲区绑定类型为 ${member.type.name} 的成员！`);
         }
-        if (update && uniformData.map)
+        if (update)
         {
             update();
 
-            watcher.watch(uniformData.map, member.name, update);
+            watcher.watch(uniformData, member.name as any, update);
         }
     });
 }
+
+let autoVertexIndex = 0;

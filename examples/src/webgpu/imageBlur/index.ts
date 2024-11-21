@@ -90,7 +90,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const computeConstants: IGPUBindingResources = {
         samp: sampler,
         params: {
-            buffer: blurParamsBuffer,
+            bufferView: blurParamsBuffer,
         },
     };
 
@@ -98,7 +98,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         inputTex: { texture: cubeTexture1 },
         outputTex: { texture: textures[0] },
         flip: {
-            buffer: buffer0,
+            bufferView: buffer0,
         }
     };
 
@@ -106,7 +106,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         inputTex: { texture: textures[0] },
         outputTex: { texture: textures[1] },
         flip: {
-            buffer: buffer1,
+            bufferView: buffer1,
         },
     };
 
@@ -114,7 +114,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         inputTex: { texture: textures[1] },
         outputTex: { texture: textures[0] },
         flip: {
-            buffer: buffer0,
+            bufferView: buffer0,
         },
     };
 

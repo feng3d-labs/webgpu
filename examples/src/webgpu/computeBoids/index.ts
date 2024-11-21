@@ -62,14 +62,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
         bindingResources: {
             params: {
-                buffer: simParamBuffer,
+                bufferView: simParamBuffer,
                 map: simParams,
             },
             particlesA: {
-                buffer: getIGPUBuffer(particleBuffers[0]),
+                bufferView: getIGPUBuffer(particleBuffers[0]),
             },
             particlesB: {
-                buffer: getIGPUBuffer(particleBuffers[1]),
+                bufferView: getIGPUBuffer(particleBuffers[1]),
             },
         },
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
@@ -81,11 +81,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ...computeObject0.bindingResources,
             particlesA: {
                 ...computeObject0.bindingResources.particlesA,
-                buffer: getIGPUBuffer(particleBuffers[1]),
+                bufferView: getIGPUBuffer(particleBuffers[1]),
             },
             particlesB: {
                 ...computeObject0.bindingResources.particlesA,
-                buffer: getIGPUBuffer(particleBuffers[0]),
+                bufferView: getIGPUBuffer(particleBuffers[0]),
             },
         },
     };

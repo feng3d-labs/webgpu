@@ -126,13 +126,13 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const sceneBindGroupForShadow: IGPUBindingResources = {
         scene: {
-            buffer: sceneUniformBuffer,
+            bufferView: sceneUniformBuffer,
         },
     };
 
     const sceneBindGroupForRender: IGPUBindingResources = {
         scene: {
-            buffer: sceneUniformBuffer,
+            bufferView: sceneUniformBuffer,
         },
         shadowMap: { texture: shadowDepthTexture },
         shadowSampler: {
@@ -142,7 +142,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const modelBindGroup: IGPUBindingResources = {
         model: {
-            buffer: modelUniformBuffer,
+            bufferView: modelUniformBuffer,
         },
     };
 

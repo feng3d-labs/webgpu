@@ -105,11 +105,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 bindingResources: {
                     time: {
-                        buffer: uniformBuffer,
+                        bufferView: uniformBuffer,
                         offset: timeOffset,
                     },
                     uniforms: {
-                        buffer: uniformBuffer,
+                        bufferView: uniformBuffer,
                         offset: i * alignedUniformBytes,
                     }
                 },

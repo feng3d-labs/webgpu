@@ -137,7 +137,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         indices: indices,
         bindingResources: {
             uni: {
-                buffer: undefined,
+                bufferView: undefined,
             },
         },
         drawIndexed: { indexCount: indices.length },
@@ -149,7 +149,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ...renderObject,
             bindingResources: {
                 uni: {
-                    buffer: v.uniformBuffer,
+                    bufferView: v.uniformBuffer,
                 },
             },
         };
@@ -226,7 +226,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
-                const buffer = (renderObjects[i].bindingResources.uni as IGPUBufferBinding).buffer;
+                const buffer = (renderObjects[i].bindingResources.uni as IGPUBufferBinding).bufferView;
                 buffer.data = uniformValues.slice();
             }
         );

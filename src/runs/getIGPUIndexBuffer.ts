@@ -10,6 +10,8 @@ export function getIGPUIndexBuffer(index: Uint16Array | Uint32Array)
         size: index.byteLength,
     };
 
+    indexBuffer.buffer.label = indexBuffer.buffer.label || ("顶点索引 " + autoIndex++);
+
     return indexBuffer;
 }
 
@@ -22,7 +24,6 @@ export function getIGPUBuffer(bufferSource: BufferSource)
     }
 
     const gpuBuffer: IGPUBuffer = arrayBuffer["_IGPUBuffer"] = arrayBuffer["_IGPUBuffer"] || {
-        label: "顶点索引 " + autoIndex++,
         size: arrayBuffer.byteLength,
         data: arrayBuffer,
     };

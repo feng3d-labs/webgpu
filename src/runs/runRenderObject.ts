@@ -32,6 +32,7 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
     vertexBuffers?.forEach((vertexBuffer, index) =>
     {
         const buffer = getIGPUBuffer(vertexBuffer.data);
+        buffer.label = buffer.label || ("顶点索引 " + autoVertexIndex++);
         const gBuffer = getGPUBuffer(device, buffer);
         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
     });
@@ -46,3 +47,5 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 
     runDrawIndexed(passEncoder, drawIndexed);
 }
+
+let autoVertexIndex = 0;

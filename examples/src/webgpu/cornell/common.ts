@@ -32,12 +32,12 @@ export default class Common
 
     const bindGroup: IGPUBindingResources = {
       common_uniforms: {
-        buffer: this.uniformBuffer,
+        bufferView: this.uniformBuffer,
         offset: 0,
         size: this.uniformBuffer.size,
       },
       quads: {
-        buffer: quads,
+        bufferView: quads,
         offset: 0,
         size: quads.size,
       },

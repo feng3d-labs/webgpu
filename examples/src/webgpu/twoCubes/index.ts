@@ -33,16 +33,11 @@ const init = async (canvas: HTMLCanvasElement) =>
     const offset = 256; // uniformBindGroup offset must be 256-byte aligned
     const uniformBufferSize = offset + matrixSize;
 
-    const uniformBuffer: IGPUBuffer = {
-        size: uniformBufferSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    };
+    const uniformBuffer = new ArrayBuffer(uniformBufferSize);
 
     const uniforms: IGPUBufferBinding = {
-        buffer: uniformBuffer, offset: 0, size: matrixSize,
-        map: {
-            modelViewProjectionMatrix: null, // 在帧循环中设置
-        }
+        bufferView: new Uint8Array(uniformBuffer, 0, matrixSize),
+        modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
     const renderObject: IGPURenderObject = {
@@ -63,10 +58,8 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const uniforms1: IGPUBufferBinding = {
-        buffer: uniformBuffer, offset, size: matrixSize,
-        map: {
-            modelViewProjectionMatrix: null, // 在帧循环中设置
-        }
+        bufferView: new Uint8Array(uniformBuffer, offset, matrixSize),
+        modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
     const renderObject1: IGPURenderObject = {
@@ -128,8 +121,8 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         updateTransformationMatrix();
 
-        uniforms.map.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix1); // 需要赋值新对象才能触发数据变更上传GPU
-        uniforms1.map.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix2); // 需要赋值新对象才能触发数据变更上传GPU
+        uniforms.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix1); // 需要赋值新对象才能触发数据变更上传GPU
+        uniforms1.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix2); // 需要赋值新对象才能触发数据变更上传GPU
 
         const data: IGPUSubmit = {
             commandEncoders: [

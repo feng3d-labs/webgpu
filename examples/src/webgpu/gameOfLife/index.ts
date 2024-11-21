@@ -77,15 +77,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         const bindGroup0: IGPUBindingResources = {
-            size: { buffer: sizeBuffer },
-            current: { buffer: getIGPUBuffer(buffer0) },
-            next: { buffer: getIGPUBuffer(buffer1) },
+            size: { bufferView: sizeBuffer },
+            current: { bufferView: getIGPUBuffer(buffer0) },
+            next: { bufferView: getIGPUBuffer(buffer1) },
         };
 
         const bindGroup1: IGPUBindingResources = {
-            size: { buffer: sizeBuffer },
-            current: { buffer: getIGPUBuffer(buffer1) },
-            next: { buffer: getIGPUBuffer(buffer0) },
+            size: { bufferView: sizeBuffer },
+            current: { bufferView: getIGPUBuffer(buffer1) },
+            next: { bufferView: getIGPUBuffer(buffer0) },
         };
 
         const renderPipeline: IGPURenderPipeline = {
@@ -102,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const uniformBindGroup: IGPUBindingResources = {
             size: {
-                buffer: sizeBuffer,
+                bufferView: sizeBuffer,
                 offset: 0,
                 size: 2 * Uint32Array.BYTES_PER_ELEMENT,
             },

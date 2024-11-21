@@ -312,8 +312,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const renderObjects: IGPURenderObject[] = [];
 
     const bindingResources0: IGPUBindingResources = {
-        config: { buffer: bufConfig },
-        matrices: { buffer: bufMatrices },
+        config: { bufferView: bufConfig },
+        matrices: { bufferView: bufMatrices },
         samp: null, // 帧更新中设置
         tex: { texture: checkerboard },
     };
