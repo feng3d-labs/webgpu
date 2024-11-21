@@ -67,6 +67,8 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
 
                     const uniformData = bindingResource as IGPUBufferBinding;
 
+                    // 是否存在默认值。
+                    const hasDefautValue = !!uniformData.bufferView;
                     if (!uniformData.bufferView)
                     {
                         uniformData.bufferView = new Uint8Array(size);
@@ -89,7 +91,7 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
                     }
 
                     // 更新缓冲区绑定的数据。
-                    updateBufferBinding(variableInfo, uniformData);
+                    updateBufferBinding(variableInfo, uniformData, hasDefautValue);
                 }
                 else if (entry1.sampler)
                 {
@@ -146,7 +148,14 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
 
 const bindGroupsMap = new ChainMap<[IGPUPipelineLayoutDescriptor, IGPUBindingResources], IGPUSetBindGroup[]>();
 
-function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding)
+/**
+ * 
+ * @param variableInfo 
+ * @param uniformData 
+ * @param hasDefautValue 是否存在默认值。
+ * @returns 
+ */
+function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding, hasDefautValue: boolean)
 {
     if (!variableInfo.members)
     {
@@ -173,86 +182,62 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
 
     variableInfo.members.forEach((member) =>
     {
-        let update: () => void;
         const subTypeName = (member.type as TemplateInfo).format?.name;
         const subsubTypeName = (member.type as any).format?.format?.name;
 
-        if (member.type.name === "f32" || subTypeName === "f32" || subsubTypeName === "f32")
+        let Cls: Float32ArrayConstructor | Int32ArrayConstructor;
+        type Type = Float32Array | Int32Array;
+        let ClsName: "Float32Array" | "Int32Array";
+        const update = () =>
         {
-            update = () =>
+            if (member.type.name === "f32" || subTypeName === "f32" || subsubTypeName === "f32")
             {
-                let data: Float32Array;
-                const memberData = uniformData[member.name];
-                if (memberData === undefined)
+                Cls = Float32Array;
+                ClsName = "Float32Array";
+            }
+            else if (member.type.name === "i32" || subTypeName === "i32" || subsubTypeName === "i32")
+            {
+                Cls = Int32Array;
+                ClsName = "Int32Array";
+            }
+            else
+            {
+                console.error(`未处理缓冲区绑定类型为 ${member.type.name} 的 ${member.name} 成员！`);
+            }
+            let data: Type;
+            const memberData = uniformData[member.name];
+            if (memberData === undefined)
+            {
+                if (!hasDefautValue)
                 {
                     console.warn(`没有找到 binding ${member.name} 值！`);
+                }
 
-                    return;
-                }
-                if (typeof memberData === "number")
-                {
-                    data = new Float32Array([memberData]);
-                }
-                else if ((memberData as ArrayBufferView).buffer)
-                {
-                    data = new Float32Array((memberData as ArrayBufferView).buffer);
-                }
-                else if (memberData.constructor !== Float32Array)
-                {
-                    data = new Float32Array(memberData as ArrayLike<number>);
-                }
-                else
-                {
-                    data = memberData;
-                }
-                const writeBuffers = buffer.writeBuffers ?? [];
-                writeBuffers.push({ data: data.buffer, bufferOffset: offset + member.offset, size: member.size });
-                buffer.writeBuffers = writeBuffers;
-            };
-        }
-        else if (member.type.name === "i32" || subTypeName === "i32" || subsubTypeName === "i32")
-        {
-            update = () =>
+                return;
+            }
+            if (typeof memberData === "number")
             {
-                let data: Int32Array;
-                const memberData = uniformData[member.name];
-                if (memberData === undefined)
-                {
-                    console.warn(`没有找到 binding ${member.name} 值！`);
+                data = new Cls([memberData]);
+            }
+            else if ((memberData as ArrayBufferView).buffer)
+            {
+                data = new Cls((memberData as ArrayBufferView).buffer);
+            }
+            else if (memberData.constructor.name !== ClsName)
+            {
+                data = new Cls(memberData as ArrayLike<number>);
+            }
+            else
+            {
+                data = memberData as any;
+            }
+            const writeBuffers = buffer.writeBuffers ?? [];
+            writeBuffers.push({ data: data.buffer, bufferOffset: offset + member.offset, size: member.size });
+            buffer.writeBuffers = writeBuffers;
+        };
 
-                    return;
-                }
-                if (typeof memberData === "number")
-                {
-                    data = new Int32Array([memberData]);
-                }
-                else if ((memberData as ArrayBufferView).buffer)
-                {
-                    data = new Int32Array((memberData as ArrayBufferView).buffer);
-                }
-                else if (memberData.constructor !== Int32Array)
-                {
-                    data = new Int32Array(memberData as ArrayLike<number>);
-                }
-                else
-                {
-                    data = memberData;
-                }
-                const writeBuffers = buffer.writeBuffers ?? [];
-                writeBuffers.push({ data: data.buffer, bufferOffset: offset + member.offset, size: member.size });
-                buffer.writeBuffers = writeBuffers;
-            };
-        }
-        else
-        {
-            console.error(`未处理缓冲区绑定类型为 ${member.type.name} 的成员！`);
-        }
-        if (update)
-        {
-            update();
-
-            watcher.watch(uniformData, member.name as any, update);
-        }
+        update();
+        watcher.watch(uniformData, member.name as any, update);
     });
 }
 

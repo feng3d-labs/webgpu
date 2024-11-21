@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUCanvasContext,  IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPass, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, IGPURenderBundleObject } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundleObject, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
 
 interface Renderable
 {
@@ -65,10 +65,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   };
 
   const uniformBufferSize = 4 * 16; // 4x4 matrix
-  const uniformBuffer: IGPUBuffer = {
-    size: uniformBufferSize,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  };
+  const uniformBuffer = new Uint8Array(uniformBufferSize);
 
   // Fetch the images and upload them into a GPUTexture.
   let planetTexture: IGPUTexture;
@@ -144,12 +141,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     transform: Float32Array
   ): IGPUBindingResources
   {
-    const uniformBufferSize = 4 * 16; // 4x4 matrix
-    const uniformBuffer: IGPUBuffer = {
-      size: uniformBufferSize,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      data: new Float32Array(transform),
-    };
+    const uniformBuffer = new Float32Array(transform);
 
     const bindGroup: IGPUBindingResources = {
       modelMatrix: {
@@ -315,7 +307,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     stats.begin();
 
     const transformationMatrix = getTransformationMatrix();
-    uniformBuffer.writeBuffers = [{ data: transformationMatrix }];
+
+    getIGPUBuffer(uniformBuffer).writeBuffers = [{ data: transformationMatrix }];
 
     const renderPass: IGPURenderPass = {
       descriptor: renderPassDescriptor,
