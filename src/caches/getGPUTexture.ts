@@ -28,24 +28,28 @@ export const gpuTextureEventEmitter: AnyEmitter<GPUTexture, IGPUTextureEvent> = 
  */
 export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreate = true)
 {
+    const textureMap: Map<IGPUTexture, GPUTexture> = device["textureMap"] = device["textureMap"] || new Map<IGPUTexture, GPUTexture>();
+    let gpuTexture = textureMap.get(texture);
+    if (gpuTexture) 
+    {
+        return gpuTexture;
+    }
+
     if ((texture as IGPUTextureFromContext).context)
     {
         texture = texture as IGPUTextureFromContext;
         const context = getGPUCanvasContext(device, texture.context);
 
-        return context.getCurrentTexture();
+        gpuTexture = context.getCurrentTexture();
+
+        return gpuTexture;
     }
-
-    const iGPUTextureBase = texture as IGPUTextureBase;
-
-    let gpuTexture = textureMap.get(iGPUTextureBase);
-    if (gpuTexture) return gpuTexture;
 
     if (!autoCreate) return null;
 
-    const usage = iGPUTextureBase.usage;
+    const iGPUTextureBase = texture as IGPUTextureBase;
 
-    let mipLevelCount = iGPUTextureBase.mipLevelCount;
+    let { label, usage, mipLevelCount } = iGPUTextureBase;
 
     // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
     if (iGPUTextureBase.generateMipmap && mipLevelCount === undefined)
@@ -55,8 +59,14 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
         mipLevelCount = 1 + Math.log2(maxSize) | 0;
     }
 
+    if (label === undefined)
+    {
+        label = "GPUTexture " + autoIndex++;
+    }
+
     gpuTexture = device.createTexture({
         ...iGPUTextureBase,
+        label,
         mipLevelCount,
         usage,
     });
@@ -154,16 +164,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
 
     return gpuTexture;
 }
-
-const textureMap = new Map<IGPUTexture, GPUTexture>();
-
-/**
- * 获取 {@link GPUTexture} 数量。
- */
-export function getGPUTextureNum()
-{
-    return textureMap.size;
-}
+let autoIndex = 0;
 
 export function destoryTexture(device: GPUDevice, texture: IGPUTexture)
 {
