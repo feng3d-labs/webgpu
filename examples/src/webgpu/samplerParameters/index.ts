@@ -5,7 +5,7 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -51,13 +51,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             Number(config.highlightFlange),
         ]);
 
-        if (bufConfig.writeBuffers)
+        if (getIGPUBuffer(bufConfig).writeBuffers)
         {
-            bufConfig.writeBuffers.push({ bufferOffset: 64, data });
+            getIGPUBuffer(bufConfig).writeBuffers.push({ bufferOffset: 64, data });
         }
         else
         {
-            bufConfig.writeBuffers = [{ bufferOffset: 64, data }];
+            getIGPUBuffer(bufConfig).writeBuffers = [{ bufferOffset: 64, data }];
         }
     };
 
@@ -288,17 +288,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         mat4.perspective(2 * Math.atan(1 / kCameraDist), 1, 0.1, 100),
         [0, 0, -kCameraDist]
     );
-    const bufConfig: IGPUBuffer = {
-        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
-        size: 128,
-    };
-    bufConfig.writeBuffers = [{ data: viewProj }];
+    const bufConfig = new Uint8Array(128);
+    getIGPUBuffer(bufConfig).writeBuffers = [{ data: viewProj }];
 
-    const bufMatrices: IGPUBuffer = {
-        usage: GPUBufferUsage.STORAGE,
-        size: kMatrices.byteLength,
-        data: kMatrices,
-    };
+    const bufMatrices = kMatrices;
 
     const renderPass: IGPURenderPassDescriptor = {
         colorAttachments: [
