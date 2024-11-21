@@ -46,7 +46,7 @@ export interface IGPURenderObject
     /**
      * GPU绘制时使用的索引缓冲区。
      */
-    index?: IGPUIndexBuffer,
+    index?: Uint16Array | Uint32Array,
 
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。

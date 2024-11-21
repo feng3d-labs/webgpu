@@ -115,11 +115,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         usage: GPUBufferUsage.VERTEX,
         label: 'vertexBuffer'
     };
-    const indicesBuf: IGPUBuffer = {
-        data: indices,
-        usage: GPUBufferUsage.INDEX,
-        label: 'indexBuffer'
-    };
 
     const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
@@ -143,7 +138,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             position: { buffer: vertexBuf, offset: 0, vertexSize: 6 * 4, numComponents: 3 },
             normal: { buffer: vertexBuf, offset: 12, vertexSize: 6 * 4 },
         },
-        index: { buffer: indicesBuf, indexFormat: "uint16" },
+        index: indices,
         bindingResources: {
             uni: {
                 buffer: undefined,

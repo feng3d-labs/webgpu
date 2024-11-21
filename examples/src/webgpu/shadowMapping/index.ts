@@ -42,18 +42,10 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Create the model index buffer.
     const indexCount = mesh.triangles.length * 3;
-    const indexBuffer: IGPUBuffer = {
-        size: indexCount * Uint16Array.BYTES_PER_ELEMENT,
-        usage: GPUBufferUsage.INDEX,
-    };
+    const indexBuffer = new Uint16Array(indexCount);
+    for (let i = 0; i < mesh.triangles.length; ++i)
     {
-        const mapping = new Uint16Array(indexCount);
-        for (let i = 0; i < mesh.triangles.length; ++i)
-        {
-            mapping.set(mesh.triangles[i], 3 * i);
-        }
-
-        indexBuffer.data = mapping;
+        indexBuffer.set(mesh.triangles[i], 3 * i);
     }
 
     // Create the depth texture for rendering/sampling the shadow map.
@@ -257,7 +249,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 vertices,
-                                index: { buffer: indexBuffer, indexFormat: "uint16" },
+                                index: indexBuffer,
                                 drawIndexed: { indexCount },
                             },
                         ]
@@ -272,7 +264,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 vertices,
-                                index: { buffer: indexBuffer, indexFormat: "uint16" },
+                                index: indexBuffer,
                                 drawIndexed: { indexCount },
                             }
                         ],

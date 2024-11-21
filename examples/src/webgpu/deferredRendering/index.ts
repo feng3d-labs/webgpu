@@ -52,18 +52,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   // Create the model index buffer.
   const indexCount = mesh.triangles.length * 3;
-  const indexBuffer: IGPUBuffer = {
-    size: indexCount * Uint16Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.INDEX,
-  };
+  const indexBuffer = new Uint16Array(indexCount);
+  for (let i = 0; i < mesh.triangles.length; ++i)
   {
-    const mapping = new Uint16Array(indexCount);
-    for (let i = 0; i < mesh.triangles.length; ++i)
-    {
-      mapping.set(mesh.triangles[i], 3 * i);
-    }
-
-    indexBuffer.data = mapping;
+    indexBuffer.set(mesh.triangles[i], 3 * i);
   }
 
   // GBuffer texture render targets
@@ -374,7 +366,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           ...sceneUniformBindGroup,
         },
         vertices,
-        index: { buffer: indexBuffer, indexFormat: "uint16" },
+        index: indexBuffer,
         drawIndexed: { indexCount },
       },
     ]

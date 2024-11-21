@@ -81,7 +81,7 @@ export default class Rasterizer
       renderObjects: [{
         pipeline: this.pipeline,
         vertices: this.scene.vertexAttributes,
-        index: { buffer: this.scene.indices, indexFormat: "uint16" },
+        index: this.scene.indices,
         bindingResources: {
           ...this.common.uniforms.bindGroup,
           ...this.bindGroup,

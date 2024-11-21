@@ -12,7 +12,7 @@ interface Renderable
 {
   renderObject?: IGPURenderObject;
   vertexAttributes: IGPUVertexAttributes;
-  indices: IGPUBuffer;
+  indices: Uint16Array;
   indexCount: number;
   bindGroup?: IGPUBindingResources;
 }
@@ -134,11 +134,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
       uv: { buffer: vertices, offset: SphereLayout.uvOffset, vertexSize: SphereLayout.vertexStride },
     };
 
-    const indices: IGPUBuffer = {
-      size: sphereMesh.indices.byteLength,
-      usage: GPUBufferUsage.INDEX,
-      data: sphereMesh.indices,
-    };
+    const indices = sphereMesh.indices;
 
     return {
       vertexAttributes,
@@ -279,7 +275,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
           pipeline,
           bindingResources: { ...frameBindGroup, ...renderable.bindGroup },
           vertices: renderable.vertexAttributes,
-          index: { buffer: renderable.indices, indexFormat: "uint16" },
+          index: renderable.indices,
           drawIndexed: { indexCount: renderable.indexCount },
         };
       }

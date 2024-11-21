@@ -132,7 +132,7 @@ export default class Scene
   readonly indexCount: number;
   readonly vertices: IGPUBuffer;
   readonly vertexAttributes: IGPUVertexAttributes;
-  readonly indices: IGPUBuffer;
+  readonly indices: Uint16Array;
   readonly vertexBufferLayout: GPUVertexBufferLayout[];
   readonly quadBuffer: IGPUBuffer;
   readonly quads = [
@@ -296,11 +296,7 @@ export default class Scene
       emissive: { buffer: vertices, offset: 7 * 4, vertexSize: vertexStride },
     };
 
-    const indices: IGPUBuffer = {
-      size: indexData.byteLength,
-      usage: GPUBufferUsage.INDEX,
-      data: indexData,
-    };
+    const indices = indexData;
 
     const vertexBufferLayout: GPUVertexBufferLayout[] = [
       {
