@@ -25,6 +25,8 @@ export interface IGPUBuffer
 
     /**
      * The allowed usages for the buffer.
+     * 
+     * 默认 GPUBufferUsage.VERTEX | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.INDEX 。
      */
     usage?: GPUBufferUsageFlags;
 

@@ -20,7 +20,7 @@ export function runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEnc
 
         renderBundleObject.renderObjects.forEach((renderObject) =>
         {
-            runRenderObject(device, renderBundleEncoder, renderObject, renderPassFormat);
+            runRenderObject(device, renderBundleEncoder, renderPassFormat, renderObject);
         });
 
         gRenderBundle = renderBundleEncoder.finish();

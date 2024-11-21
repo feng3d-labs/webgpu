@@ -20,7 +20,7 @@ import { runViewport } from "./runViewport";
  * @param renderObject 渲染对象。
  * @param renderPass 渲染通道。
  */
-export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: IGPURenderObject, renderPassFormats: IGPURenderPassFormat)
+export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObject: IGPURenderObject)
 {
     const { index, viewport, scissorRect, draw, drawIndexed } = renderObject;
 

@@ -1,3 +1,4 @@
+import { IGPURenderOcclusionQueryObject } from "./IGPURenderOcclusionQueryObject";
 import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderObject } from "./IGPURenderObject";
 import { IGPURenderPassDescriptor } from "./IGPURenderPassDescriptor";
@@ -19,5 +20,5 @@ export interface IGPURenderPass
     /**
      * 渲染对象列表
      */
-    renderObjects?: (IGPURenderObject | IGPURenderBundleObject)[];
+    renderObjects?: (IGPURenderObject | IGPURenderBundleObject | IGPURenderOcclusionQueryObject)[];
 }

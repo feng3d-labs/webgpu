@@ -2,11 +2,13 @@ import { getGPURenderPassDescriptor } from "../caches/getGPURenderPassDescriptor
 import { getGPUTextureFormat } from "../caches/getGPUTextureFormat";
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderObject } from "../data/IGPURenderObject";
+import { IGPURenderOcclusionQueryObject } from "../data/IGPURenderOcclusionQueryObject";
 import { IGPURenderPass } from "../data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { runRenderBundle } from "./runRenderBundle";
 import { runRenderObject } from "./runRenderObject";
+import { runRenderOcclusionQueryObject } from "./runRenderOcclusionQueryObject";
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
 {
@@ -17,13 +19,17 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
 
     renderPass.renderObjects?.forEach((element) =>
     {
-        if ((element as IGPURenderBundleObject).renderObjects)
+        if ((element as IGPURenderOcclusionQueryObject).type === "OcclusionQueryObject")
+        {
+            runRenderOcclusionQueryObject(device, passEncoder, renderPassFormats, element as IGPURenderOcclusionQueryObject);
+        }
+        else if ((element as IGPURenderBundleObject).renderObjects)
         {
             runRenderBundle(device, passEncoder, renderPassFormats, element as IGPURenderBundleObject);
         }
         else
         {
-            runRenderObject(device, passEncoder, element as IGPURenderObject, renderPassFormats);
+            runRenderObject(device, passEncoder, renderPassFormats, element as IGPURenderObject);
         }
     });
 

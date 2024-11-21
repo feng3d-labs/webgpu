@@ -1,3 +1,4 @@
+import { IGPUOcclusionQuerySet } from "./IGPUOcclusionQuerySet";
 import { IGPURenderPassColorAttachment } from "./IGPURenderPassColorAttachment";
 import { IGPURenderPassDepthStencilAttachment } from "./IGPURenderPassDepthStencilAttachment";
 
@@ -6,7 +7,7 @@ import { IGPURenderPassDepthStencilAttachment } from "./IGPURenderPassDepthStenc
  *
  * {@link GPURenderPassDescriptor}
  */
-export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, "colorAttachments" | "depthStencilAttachment">
+export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, "colorAttachments" | "depthStencilAttachment" | "occlusionQuerySet">
 {
     /**
      * The set of {@link GPURenderPassColorAttachment} values in this sequence defines which
@@ -25,6 +26,8 @@ export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 
      * 当使用深度附件时，必须设置，使用默认值可设置为 `{}` 。
      */
     depthStencilAttachment?: IGPURenderPassDepthStencilAttachment;
+
+    occlusionQuerySet: IGPUOcclusionQuerySet;
 
     /**
      * 是否开启多重采样。WebGPU貌似只支持4重采样。如果在颜色附件中没有给出支持多重采样的纹理时则引擎将会自动为其添加。

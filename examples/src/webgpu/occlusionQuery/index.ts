@@ -2,27 +2,7 @@ import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 import solidColorLitWGSL from './solidColorLit.wgsl';
 
-import { IGPUBuffer, IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
-
-type TypedArrayView =
-    | Int8Array
-    | Uint8Array
-    | Int16Array
-    | Uint16Array
-    | Int32Array
-    | Uint32Array
-    | Float32Array
-    | Float64Array;
-
-export type TypedArrayConstructor =
-    | Int8ArrayConstructor
-    | Uint8ArrayConstructor
-    | Int16ArrayConstructor
-    | Uint16ArrayConstructor
-    | Int32ArrayConstructor
-    | Uint32ArrayConstructor
-    | Float32ArrayConstructor
-    | Float64ArrayConstructor;
+import { IGPUBuffer, IGPUBufferBinding, IGPURenderOcclusionQueryObject, IGPUOcclusionQuerySet, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const info = document.querySelector('#info');
 
@@ -91,10 +71,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     });
 
-    // const querySet = device.createQuerySet({
-    //     type: 'occlusion',
-    //     count: objectInfos.length,
-    // });
+    const querySet: IGPUOcclusionQuerySet = {
+        count: objectInfos.length,
+    };
 
     // const resolveBuf: IGPUBuffer = {
     //     label: 'resolveBuffer',
@@ -172,7 +151,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             depthLoadOp: 'clear',
             depthStoreOp: 'store',
         },
-        // occlusionQuerySet: querySet,
+        occlusionQuerySet: querySet,
     };
 
     const renderObject: IGPURenderObject = {
@@ -204,13 +183,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return ro;
     });
 
+    const occlusionQueryObjects: IGPURenderOcclusionQueryObject[] = renderObjects.map((ro) =>
+    {
+        return { type: "OcclusionQueryObject", renderObjects: [ro] };
+    })
+
     const submit: IGPUSubmit = {
         commandEncoders: [
             {
                 passEncoders: [
                     {
                         descriptor: renderPassDescriptor,
-                        renderObjects: renderObjects,
+                        // renderObjects: renderObjects,
+                        renderObjects: occlusionQueryObjects,
                     }
                 ]
             }
