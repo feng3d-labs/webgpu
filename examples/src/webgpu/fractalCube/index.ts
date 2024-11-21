@@ -89,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         bindingResources: {
             uniforms: {
-                map: { modelViewProjectionMatrix: new Float32Array(16) }
+                modelViewProjectionMatrix: new Float32Array(16)
             },
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
@@ -107,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        (renderObject.bindingResources.uniforms as IGPUBufferBinding).map.modelViewProjectionMatrix = new Float32Array(transformationMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        (renderObject.bindingResources.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(transformationMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
         const data: IGPUSubmit = {
             commandEncoders: [
