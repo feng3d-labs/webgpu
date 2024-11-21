@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -60,32 +60,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
     } as IGPUTexture));
 
-    const buffer0 = (() =>
-    {
-        const buffer: IGPUBuffer = {
-            size: 4,
-            usage: GPUBufferUsage.UNIFORM,
-            data: new Uint32Array([0]),
-        };
+    const buffer0 = new Uint32Array([0]);
 
-        return buffer;
-    })();
+    const buffer1 = new Uint32Array([1]);
 
-    const buffer1 = (() =>
-    {
-        const buffer: IGPUBuffer = {
-            size: 4,
-            usage: GPUBufferUsage.UNIFORM,
-            data: new Uint32Array([1]),
-        };
-
-        return buffer;
-    })();
-
-    const blurParamsBuffer: IGPUBuffer = {
-        size: 8,
-        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
-    };
+    const blurParamsBuffer = new Uint8Array(8);
 
     const computeConstants: IGPUBindingResources = {
         samp: sampler,
@@ -134,13 +113,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const updateSettings = () =>
     {
         blockDim = tileDim - (settings.filterSize - 1);
-        if (blurParamsBuffer.writeBuffers)
+        if (getIGPUBuffer(blurParamsBuffer).writeBuffers)
         {
-            blurParamsBuffer.writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
+            getIGPUBuffer(blurParamsBuffer).writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
         }
         else
         {
-            blurParamsBuffer.writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
+            getIGPUBuffer(blurParamsBuffer).writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
         }
         needUpdateEncoder = true;
     };
