@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUBuffer, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal } from "@feng3d/webgpu-renderer";
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";
@@ -38,8 +38,8 @@ export default class Radiosity
   private readonly radiosityPipeline: IGPUComputePipeline;
   private readonly accumulationToLightmapPipeline: IGPUComputePipeline;
   private readonly bindGroup: IGPUBindingResources;
-  private readonly accumulationBuffer: IGPUBuffer;
-  private readonly uniformBuffer: IGPUBuffer;
+  private readonly accumulationBuffer: ArrayBufferView;
+  private readonly uniformBuffer: ArrayBufferView;
 
   // The 'accumulation' buffer average value
   private accumulationMean = 0;
@@ -62,31 +62,20 @@ export default class Radiosity
       format: Radiosity.lightmapFormat,
       usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
     };
-    this.accumulationBuffer = {
-      label: "Radiosity.accumulationBuffer",
-      size:
-        Radiosity.lightmapWidth
-        * Radiosity.lightmapHeight
-        * scene.quads.length
-        * 16,
-      usage: GPUBufferUsage.STORAGE,
-    };
+    this.accumulationBuffer = new Uint8Array(Radiosity.lightmapWidth
+      * Radiosity.lightmapHeight
+      * scene.quads.length
+      * 16);
     this.kTotalLightmapTexels
       = Radiosity.lightmapWidth * Radiosity.lightmapHeight * scene.quads.length;
-    this.uniformBuffer = {
-      label: "Radiosity.uniformBuffer",
-      size: 8 * 4, // 8 x f32
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    };
+    this.uniformBuffer = new Uint8Array(8 * 4);
     this.bindGroup = {
       accumulation: {
         bufferView: this.accumulationBuffer,
-        size: this.accumulationBuffer.size,
       },
       lightmap: { texture: this.lightmap },
       uniforms: {
         bufferView: this.uniformBuffer,
-        size: this.uniformBuffer.size,
       },
     };
 
@@ -170,7 +159,7 @@ export default class Radiosity
     this.accumulationMean *= accumulationBufferScale;
 
     // Update the radiosity uniform buffer data.
-    const uniformDataF32 = new Float32Array(this.uniformBuffer.size / 4);
+    const uniformDataF32 = new Float32Array(this.uniformBuffer.byteLength / 4);
     uniformDataF32[0] = accumulationToLightmapScale;
     uniformDataF32[1] = accumulationBufferScale;
     uniformDataF32[2] = this.scene.lightWidth;
@@ -178,6 +167,6 @@ export default class Radiosity
     uniformDataF32[4] = this.scene.lightCenter[0];
     uniformDataF32[5] = this.scene.lightCenter[1];
     uniformDataF32[6] = this.scene.lightCenter[2];
-    this.uniformBuffer.writeBuffers = [{ data: uniformDataF32 }];
+    getIGPUBuffer(this.uniformBuffer).writeBuffers = [{ data: uniformDataF32 }];
   }
 }

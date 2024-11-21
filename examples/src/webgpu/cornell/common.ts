@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUBuffer } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer } from "@feng3d/webgpu-renderer";
 import { mat4, vec3 } from "wgpu-matrix";
 import commonWGSL from "./common.wgsl";
 
@@ -14,32 +14,23 @@ export default class Common
     bindGroup: IGPUBindingResources;
   };
 
-  private readonly uniformBuffer: IGPUBuffer;
+  private readonly uniformBuffer: ArrayBufferView;
 
   private frame = 0;
 
-  constructor(quads: IGPUBuffer)
+  constructor(quads: ArrayBufferView)
   {
-    this.uniformBuffer = {
-      label: "Common.uniformBuffer",
-      size:
-        0 //
-        + 4 * 16 // mvp
-        + 4 * 16 // inv_mvp
-        + 4 * 4, // seed
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    };
+    this.uniformBuffer = new Uint8Array(0 //
+      + 4 * 16 // mvp
+      + 4 * 16 // inv_mvp
+      + 4 * 4);
 
     const bindGroup: IGPUBindingResources = {
       common_uniforms: {
         bufferView: this.uniformBuffer,
-        offset: 0,
-        size: this.uniformBuffer.size,
       },
       quads: {
         bufferView: quads,
-        offset: 0,
-        size: quads.size,
       },
     };
 
@@ -71,7 +62,7 @@ export default class Common
     const mvp = mat4.multiply(projectionMatrix, viewMatrix);
     const invMVP = mat4.invert(mvp);
 
-    const uniformDataF32 = new Float32Array(this.uniformBuffer.size / 4);
+    const uniformDataF32 = new Float32Array(this.uniformBuffer.byteLength / 4);
     const uniformDataU32 = new Uint32Array(uniformDataF32.buffer);
     for (let i = 0; i < 16; i++)
     {
@@ -85,7 +76,7 @@ export default class Common
     uniformDataU32[33] = 0xffffffff * Math.random();
     uniformDataU32[34] = 0xffffffff * Math.random();
 
-    this.uniformBuffer.writeBuffers = [{ data: uniformDataF32 }];
+    getIGPUBuffer(this.uniformBuffer).writeBuffers = [{ data: uniformDataF32 }];
 
     this.frame++;
   }

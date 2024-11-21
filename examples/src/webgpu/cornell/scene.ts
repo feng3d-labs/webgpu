@@ -134,7 +134,7 @@ export default class Scene
   readonly vertexAttributes: IGPUVertexAttributes;
   readonly indices: Uint16Array;
   readonly vertexBufferLayout: GPUVertexBufferLayout[];
-  readonly quadBuffer: IGPUBuffer;
+  readonly quadBuffer: ArrayBufferView;
   readonly quads = [
     ...box({
       center: vec3.fromValues(0, 5, 0),
@@ -278,11 +278,7 @@ export default class Scene
       vertexCount += 4;
     }
 
-    const quadBuffer: IGPUBuffer = {
-      size: quadStride * this.quads.length,
-      usage: GPUBufferUsage.STORAGE,
-      data: quadData,
-    };
+    const quadBuffer = quadData;
 
     const vertices = vertexData;
 
