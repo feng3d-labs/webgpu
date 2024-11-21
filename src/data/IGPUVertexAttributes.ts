@@ -41,9 +41,4 @@ export interface IGPUVertexAttribute
      * 默认 `"vertex"` 。
      */
     stepMode?: GPUVertexStepMode;
-
-    /**
-     * GPU顶点数据格式。默认由 着色器反射获得。
-     */
-    format?: GPUVertexFormat;
 }

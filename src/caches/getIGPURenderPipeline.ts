@@ -184,25 +184,17 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
         let attributeOffset = vertexAttribute.offset;
         let arrayStride = vertexAttribute.vertexSize;
         const stepMode = vertexAttribute.stepMode;
-        //
-        if (vertexAttribute.format)
+        // 根据顶点数据调整 布局中的数据格式。
+        if (vertexAttribute.numComponents !== undefined)
         {
-            format = vertexAttribute.format;
-        }
-        else
-        {
-            // 根据顶点数据调整 布局中的数据格式。
-            if (vertexAttribute.numComponents !== undefined)
+            const formats = format.split("x");
+            if (vertexAttribute.numComponents > 1)
             {
-                const formats = format.split("x");
-                if (vertexAttribute.numComponents > 1)
-                {
-                    format = [formats[0], vertexAttribute.numComponents].join("x") as any;
-                }
-                else
-                {
-                    format = formats[0] as any;
-                }
+                format = [formats[0], vertexAttribute.numComponents].join("x") as any;
+            }
+            else
+            {
+                format = formats[0] as any;
             }
         }
 
