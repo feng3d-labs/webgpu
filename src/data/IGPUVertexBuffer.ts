@@ -14,7 +14,7 @@ export interface IGPUVertexBuffer
      *
      * GPU缓冲区，包含后续绘制命令所包含的顶点数据的
      */
-    buffer: ArrayBufferView;
+    data: ArrayBufferView;
 
     /**
      * Offset in bytes into `buffer` where the vertex data begins. Defaults to `0`.

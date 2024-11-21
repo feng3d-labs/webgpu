@@ -100,8 +100,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects[i] = {
                 pipeline,
                 vertices: {
-                    position: { buffer: vertexBuffer, offset: 0, vertexSize: 2 * vec4Size },
-                    color: { buffer: vertexBuffer, offset: vec4Size, vertexSize: 2 * vec4Size },
+                    position: { data: vertexBuffer, offset: 0, vertexSize: 2 * vec4Size },
+                    color: { data: vertexBuffer, offset: vec4Size, vertexSize: 2 * vec4Size },
                 },
                 bindingResources: {
                     time: {

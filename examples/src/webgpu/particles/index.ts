@@ -31,8 +31,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const particlesBuffer = new Float32Array(numParticles * particleInstanceByteSize / 4);
 
   const particlesVertices: IGPUVertexAttributes = {
-    position: { buffer: particlesBuffer, offset: particlePositionOffset, vertexSize: particleInstanceByteSize, stepMode: "instance" },
-    color: { buffer: particlesBuffer, offset: particleColorOffset, vertexSize: particleInstanceByteSize, stepMode: "instance" },
+    position: { data: particlesBuffer, offset: particlePositionOffset, vertexSize: particleInstanceByteSize, stepMode: "instance" },
+    color: { data: particlesBuffer, offset: particleColorOffset, vertexSize: particleInstanceByteSize, stepMode: "instance" },
   };
 
   const renderPipeline: IGPURenderPipeline = {
@@ -107,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const quadVertexBuffer = new Float32Array(vertexData);
 
   const quadVertices: IGPUVertexAttributes = {
-    quad_pos: { buffer: quadVertexBuffer }
+    quad_pos: { data: quadVertexBuffer }
   };
 
   // ////////////////////////////////////////////////////////////////////////////

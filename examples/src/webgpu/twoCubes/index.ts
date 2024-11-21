@@ -53,8 +53,8 @@ const init = async (canvas: HTMLCanvasElement) =>
             },
         },
         vertices: {
-            position: { buffer: cubeVertexArray, offset: cubePositionOffset, vertexSize: cubeVertexSize },
-            uv: { buffer: cubeVertexArray, offset: cubeUVOffset, vertexSize: cubeVertexSize },
+            position: { data: cubeVertexArray, offset: cubePositionOffset, vertexSize: cubeVertexSize },
+            uv: { data: cubeVertexArray, offset: cubeUVOffset, vertexSize: cubeVertexSize },
         },
         bindingResources: {
             uniforms,

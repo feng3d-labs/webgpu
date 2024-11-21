@@ -79,8 +79,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const webgpu = await new WebGPU().init();
 
     const vertices: IGPUVertexAttributes = {
-        position: { buffer: geometryVertexArray, offset: geometryPositionOffset, vertexSize: geometryVertexSize },
-        color: { buffer: geometryVertexArray, offset: geometryColorOffset, vertexSize: geometryVertexSize },
+        position: { data: geometryVertexArray, offset: geometryPositionOffset, vertexSize: geometryVertexSize },
+        color: { data: geometryVertexArray, offset: geometryColorOffset, vertexSize: geometryVertexSize },
     };
 
     const depthBufferFormat = "depth32float";

@@ -16,7 +16,7 @@ export interface IGPUVertexAttribute
     /**
      * 顶点数据。
      */
-    buffer: ArrayBufferView;
+    data: ArrayBufferView;
 
     /**
      * 顶点数据元素数量。

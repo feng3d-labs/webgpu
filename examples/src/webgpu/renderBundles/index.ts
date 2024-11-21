@@ -125,9 +125,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     const vertices = sphereMesh.vertices;
 
     const vertexAttributes: IGPUVertexAttributes = {
-      position: { buffer: vertices, offset: SphereLayout.positionsOffset, vertexSize: SphereLayout.vertexStride },
-      normal: { buffer: vertices, offset: SphereLayout.normalOffset, vertexSize: SphereLayout.vertexStride },
-      uv: { buffer: vertices, offset: SphereLayout.uvOffset, vertexSize: SphereLayout.vertexStride },
+      position: { data: vertices, offset: SphereLayout.positionsOffset, vertexSize: SphereLayout.vertexStride },
+      normal: { data: vertices, offset: SphereLayout.normalOffset, vertexSize: SphereLayout.vertexStride },
+      uv: { data: vertices, offset: SphereLayout.uvOffset, vertexSize: SphereLayout.vertexStride },
     };
 
     const indices = sphereMesh.indices;

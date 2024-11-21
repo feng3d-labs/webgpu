@@ -107,9 +107,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         },
         vertices: {
-            a_particlePos: { buffer: particleBuffers[0], offset: 0, vertexSize: 4 * 4, stepMode: "instance" },
-            a_particleVel: { buffer: particleBuffers[0], offset: 2 * 4, vertexSize: 4 * 4, stepMode: "instance" },
-            a_pos: { buffer: vertexBufferData },
+            a_particlePos: { data: particleBuffers[0], offset: 0, vertexSize: 4 * 4, stepMode: "instance" },
+            a_particleVel: { data: particleBuffers[0], offset: 2 * 4, vertexSize: 4 * 4, stepMode: "instance" },
+            a_pos: { data: vertexBufferData },
         },
         draw: { vertexCount: 3, instanceCount: numParticles }
     };
@@ -120,11 +120,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ...renderObject.vertices,
             a_particlePos: {
                 ...renderObject.vertices.a_particlePos,
-                buffer: particleBuffers[1],
+                data: particleBuffers[1],
             },
             a_particleVel: {
                 ...renderObject.vertices.a_particleVel,
-                buffer: particleBuffers[1],
+                data: particleBuffers[1],
             },
         },
     };

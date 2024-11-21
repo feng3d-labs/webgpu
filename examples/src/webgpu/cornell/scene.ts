@@ -287,9 +287,9 @@ export default class Scene
     const vertices = vertexData;
 
     const vertexAttributes: IGPUVertexAttributes = {
-      position: { buffer: vertices, offset: 0 * 4, vertexSize: vertexStride },
-      uv: { buffer: vertices, offset: 4 * 4, vertexSize: vertexStride },
-      emissive: { buffer: vertices, offset: 7 * 4, vertexSize: vertexStride },
+      position: { data: vertices, offset: 0 * 4, vertexSize: vertexStride },
+      uv: { data: vertices, offset: 4 * 4, vertexSize: vertexStride },
+      emissive: { data: vertices, offset: 7 * 4, vertexSize: vertexStride },
     };
 
     const indices = indexData;

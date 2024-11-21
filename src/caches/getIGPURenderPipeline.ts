@@ -180,7 +180,7 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
         console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
         let isIGPUVertexBufferOffset = false;
         //
-        const data = vertexAttribute.buffer;
+        const data = vertexAttribute.data;
         let attributeOffset = vertexAttribute.offset;
         let arrayStride = vertexAttribute.vertexSize;
         const stepMode = vertexAttribute.stepMode;
@@ -205,12 +205,12 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
             isIGPUVertexBufferOffset = true;
         }
 
-        watcher.watch(vertexAttribute, "buffer", () =>
+        watcher.watch(vertexAttribute, "data", () =>
         {
             const index = map.get(data);
-            const buffer = vertexAttribute.buffer;
+            const buffer = vertexAttribute.data;
 
-            vertexBuffers[index].buffer = buffer;
+            vertexBuffers[index].data = buffer;
         });
 
         //
@@ -231,19 +231,19 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
             index = vertexBufferLayouts.length;
             map.set(data, index);
 
-            vertexBuffers[index] = { buffer: data, offset: isIGPUVertexBufferOffset ? attributeOffset : 0 };
+            vertexBuffers[index] = { data: data, offset: isIGPUVertexBufferOffset ? attributeOffset : 0 };
 
             //
             vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [] };
         }
         else if (isIGPUVertexBufferOffset)
         {
-            const gpuBuffer = vertexBuffers[index].buffer;
+            const gpuBuffer = vertexBuffers[index].data;
 
             // 使用相同 data 共用 gpuBuffer。
             index = vertexBufferLayouts.length;
 
-            vertexBuffers[index] = { buffer: gpuBuffer, offset: isIGPUVertexBufferOffset ? attributeOffset : 0 };
+            vertexBuffers[index] = { data: gpuBuffer, offset: isIGPUVertexBufferOffset ? attributeOffset : 0 };
 
             //
             vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [] };

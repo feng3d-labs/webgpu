@@ -31,7 +31,7 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 
     vertexBuffers?.forEach((vertexBuffer, index) =>
     {
-        const buffer = getIGPUBuffer(vertexBuffer.buffer);
+        const buffer = getIGPUBuffer(vertexBuffer.data);
         const gBuffer = getGPUBuffer(device, buffer);
         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
     });
