@@ -54,19 +54,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     size: [canvas.width, canvas.height],
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     format: "rgba32float",
-    sampleType: "unfilterable-float",
   };
   const gBufferTexture2DFloat16: IGPUTexture = {
     size: [canvas.width, canvas.height],
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     format: "rgba16float",
-    sampleType: "unfilterable-float",
   };
   const gBufferTextureAlbedo: IGPUTexture = {
     size: [canvas.width, canvas.height],
     usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     format: "bgra8unorm",
-    sampleType: "unfilterable-float",
   };
   const gBufferTextureViews: IGPUTextureView[] = [
     { texture: gBufferTexture2DFloat32 },

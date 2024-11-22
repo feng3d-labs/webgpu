@@ -7,8 +7,6 @@ import { IGPUBindGroupEntry, IGPUBufferBinding } from "../data/IGPUBindGroupDesc
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
-import { IGPUTextureBase } from "../data/IGPUTexture";
-import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
@@ -51,7 +49,6 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
         const entry: IGPUBindGroupEntry = { binding: entry1.binding, resource: null };
         gpuSetBindGroups[group].bindGroup.entries.push(entry);
 
-        // eslint-disable-next-line no-loop-func
         const getResource = () =>
         {
             const bindingResource = bindingResources[resourceName];
@@ -74,16 +71,6 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
 
                 // 更新缓冲区绑定的数据。
                 updateBufferBinding(variableInfo, uniformData, hasDefautValue);
-            }
-            else if (entry1.texture)
-            {
-                const uniformData = bindingResource as IGPUTextureView;
-
-                // 设置纹理资源布局上的采样类型。
-                if ((uniformData.texture as IGPUTextureBase).sampleType === "unfilterable-float")
-                {
-                    entry1.texture.sampleType = "unfilterable-float";
-                }
             }
 
             return bindingResource;

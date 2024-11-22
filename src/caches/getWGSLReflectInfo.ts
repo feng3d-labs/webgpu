@@ -130,10 +130,7 @@ export type WGSLBindingResourceInfoMap = { [name: string]: WGSLBindingResourceIn
 export function getWGSLReflectInfo(code: string)
 {
     let reflectInfo = reflectMap.get(code);
-    if (reflectInfo)
-    {
-        return reflectInfo;
-    }
+    if (reflectInfo) return reflectInfo;
 
     const reflect = new WgslReflect(code);
 
@@ -181,7 +178,7 @@ export function getWGSLReflectInfo(code: string)
     });
 
     //
-    reflectInfo.bindingResourceLayoutMap = getWGSLBindingResourceInfoMap(reflect);
+    reflectInfo.bindingResourceLayoutMap = getWGSLBindingResourceInfoMap(reflect, code);
 
     //
     reflectMap.set(code, reflectInfo);
@@ -196,7 +193,7 @@ const reflectMap = new Map<string, WGSLReflectInfo>();
  * @param code WebGPU着色器代码。
  * @returns 从WebGPU着色器代码获取的绑定资源信息表。
  */
-function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
+function getWGSLBindingResourceInfoMap(reflect: WgslReflect, code: string)
 {
     const bindingResourceLayoutMap: WGSLBindingResourceInfoMap = {};
 
@@ -307,6 +304,12 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
             else if (textureSecondType === "f32")
             {
                 sampleType = "float";
+                // 判断是否使用 `textureLoad` 函数 对当前纹理进行非过滤采样。
+                const result = new RegExp(`\\s*textureLoad\\s*\\(\\s*${name}`).exec(code);
+                if (result)
+                {
+                    sampleType = "unfilterable-float";
+                }
             }
             else if (textureSecondType === "u32")
             {
