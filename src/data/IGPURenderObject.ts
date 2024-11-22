@@ -10,11 +10,6 @@ import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
 export interface IGPURenderObject
 {
     /**
-     * GPU渲染管线描述。
-     */
-    pipeline: IGPURenderPipeline;
-
-    /**
      * GPU绘制时视口尺寸。
      *
      * @see GPURenderPassEncoder.setViewport
@@ -27,6 +22,11 @@ export interface IGPURenderObject
      * @see GPURenderPassEncoder.setScissorRect
      */
     scissorRect?: IGPUScissorRect;
+    
+    /**
+     * GPU渲染管线描述。
+     */
+    pipeline: IGPURenderPipeline;
 
     /**
      * 顶点属性数据映射。

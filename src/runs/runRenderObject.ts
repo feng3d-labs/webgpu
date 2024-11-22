@@ -19,7 +19,11 @@ import { runViewport } from "./runViewport";
  */
 export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
 {
-    const { pipeline, viewport, scissorRect, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
+    const { viewport, scissorRect, pipeline, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
+
+    runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, viewport);
+
+    runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
 
     runBindGroup(device, passEncoder, pipeline, bindingResources);
 
@@ -28,10 +32,6 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
     runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
 
     runIndices(device, passEncoder, indices);
-
-    runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, viewport);
-
-    runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
 
     runDraw(passEncoder, draw);
 

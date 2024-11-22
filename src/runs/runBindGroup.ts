@@ -78,21 +78,7 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
                         uniformData.bufferView = new Uint8Array(size);
                     }
 
-                    const bufferView = uniformData.bufferView;
-
-                    if (layoutType === "uniform")
-                    {
-                        resource = {
-                            bufferView,
-                        };
-                    }
-                    else
-                    {
-                        // 无法确定 storage 中数据的尺寸，不设置 size 属性。
-                        resource = {
-                            bufferView,
-                        };
-                    }
+                    resource = uniformData;
 
                     // 更新缓冲区绑定的数据。
                     updateBufferBinding(variableInfo, uniformData, hasDefautValue);
