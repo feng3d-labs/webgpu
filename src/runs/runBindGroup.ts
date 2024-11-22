@@ -31,77 +31,74 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
 {
     //
     let gpuSetBindGroups = bindGroupsMap.get([layout, bindingResources]);
-    if (!gpuSetBindGroups)
+    if (gpuSetBindGroups) return gpuSetBindGroups;
+
+    gpuSetBindGroups = [];
+
+    for (const resourceName in bindingResourceInfoMap)
     {
-        gpuSetBindGroups = [];
+        const bindingResourceInfo = bindingResourceInfoMap[resourceName];
 
-        const pipelineLayout = layout as GPUPipelineLayoutDescriptor;
+        const { group, variableInfo, entry: entry1 } = bindingResourceInfo;
 
-        for (const resourceName in bindingResourceInfoMap)
+        gpuSetBindGroups[group] = gpuSetBindGroups[group] || {
+            bindGroup: {
+                layout: layout.bindGroupLayouts[group],
+                entries: [],
+            }
+        };
+
+        const entry: IGPUBindGroupEntry = { binding: entry1.binding, resource: null };
+        gpuSetBindGroups[group].bindGroup.entries.push(entry);
+
+        // eslint-disable-next-line no-loop-func
+        const getResource = () =>
         {
-            const bindingResourceInfo = bindingResourceInfoMap[resourceName];
-
-            const { group, variableInfo, entry: entry1 } = bindingResourceInfo;
-
-            gpuSetBindGroups[group] = gpuSetBindGroups[group] || {
-                bindGroup: {
-                    layout: { ...pipelineLayout.bindGroupLayouts[group] },
-                    entries: [],
-                }
-            };
-
-            const entry: IGPUBindGroupEntry = { binding: entry1.binding, resource: null };
-            gpuSetBindGroups[group].bindGroup.entries.push(entry);
-
-            // eslint-disable-next-line no-loop-func
-            const getResource = () =>
-            {
-                const bindingResource = bindingResources[resourceName];
-                console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
-
-                //
-                if (entry1.buffer)
-                {
-                    //
-                    const size = variableInfo.size;
-
-                    const uniformData = bindingResource as IGPUBufferBinding;
-
-                    // 是否存在默认值。
-                    const hasDefautValue = !!uniformData.bufferView;
-                    if (!uniformData.bufferView)
-                    {
-                        uniformData.bufferView = new Uint8Array(size);
-                    }
-
-                    // 更新缓冲区绑定的数据。
-                    updateBufferBinding(variableInfo, uniformData, hasDefautValue);
-                }
-                else if (entry1.texture)
-                {
-                    const uniformData = bindingResource as IGPUTextureView;
-
-                    // 设置纹理资源布局上的采样类型。
-                    if ((uniformData.texture as IGPUTextureBase).sampleType === "unfilterable-float")
-                    {
-                        entry1.texture.sampleType = "unfilterable-float";
-                    }
-                }
-
-                return bindingResource;
-            };
-
-            entry.resource = getResource();
+            const bindingResource = bindingResources[resourceName];
+            console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
 
             //
-            watcher.watch(bindingResources, resourceName, () =>
+            if (entry1.buffer)
             {
-                entry.resource = getResource();
-            });
-        }
+                //
+                const size = variableInfo.size;
 
-        bindGroupsMap.set([layout, bindingResources], gpuSetBindGroups);
+                const uniformData = bindingResource as IGPUBufferBinding;
+
+                // 是否存在默认值。
+                const hasDefautValue = !!uniformData.bufferView;
+                if (!uniformData.bufferView)
+                {
+                    uniformData.bufferView = new Uint8Array(size);
+                }
+
+                // 更新缓冲区绑定的数据。
+                updateBufferBinding(variableInfo, uniformData, hasDefautValue);
+            }
+            else if (entry1.texture)
+            {
+                const uniformData = bindingResource as IGPUTextureView;
+
+                // 设置纹理资源布局上的采样类型。
+                if ((uniformData.texture as IGPUTextureBase).sampleType === "unfilterable-float")
+                {
+                    entry1.texture.sampleType = "unfilterable-float";
+                }
+            }
+
+            return bindingResource;
+        };
+
+        entry.resource = getResource();
+
+        //
+        watcher.watch(bindingResources, resourceName, () =>
+        {
+            entry.resource = getResource();
+        });
     }
+
+    bindGroupsMap.set([layout, bindingResources], gpuSetBindGroups);
 
     return gpuSetBindGroups;
 }
