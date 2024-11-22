@@ -3,11 +3,10 @@ import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
 import { WGSLBindingResourceInfoMap } from "../caches/getWGSLReflectInfo";
-import { IGPUBindGroupEntry, IGPUBindingResource, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
+import { IGPUBindGroupEntry, IGPUBufferBinding } from "../data/IGPUBindGroupDescriptor";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
-import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureBase } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
@@ -60,12 +59,9 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
                 const bindingResource = bindingResources[resourceName];
                 console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
 
-                let resource: IGPUBindingResource;
                 //
                 if (entry1.buffer)
                 {
-                    const layoutType = entry1.buffer.type;
-
                     //
                     const size = variableInfo.size;
 
@@ -78,16 +74,8 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
                         uniformData.bufferView = new Uint8Array(size);
                     }
 
-                    resource = uniformData;
-
                     // 更新缓冲区绑定的数据。
                     updateBufferBinding(variableInfo, uniformData, hasDefautValue);
-                }
-                else if (entry1.sampler)
-                {
-                    const uniformData = bindingResource as IGPUSampler;
-
-                    resource = uniformData;
                 }
                 else if (entry1.texture)
                 {
@@ -98,27 +86,9 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
                     {
                         entry1.texture.sampleType = "unfilterable-float";
                     }
-
-                    resource = uniformData;
-                }
-                else if (entry1.externalTexture)
-                {
-                    const uniformData = bindingResource as IGPUExternalTexture;
-
-                    resource = uniformData;
-                }
-                else if (entry1.storageTexture)
-                {
-                    const uniformData = bindingResource as IGPUTextureView;
-
-                    resource = uniformData;
-                }
-                else
-                {
-                    throw `未解析 ${variableInfo.resourceType}`;
                 }
 
-                return resource;
+                return bindingResource;
             };
 
             entry.resource = getResource();
