@@ -1,14 +1,13 @@
-import { getGPUBuffer } from "../caches/getGPUBuffer";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
-import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 import { runBindGroup } from "./runBindGroup";
 import { runDraw } from "./runDraw";
 import { runDrawIndexed } from "./runDrawIndexed";
 import { runIndices } from "./runIndices";
 import { runRenderPipeline } from "./runRenderPipeline";
 import { runScissorRect } from "./runScissorRect";
+import { runVertices } from "./runVertices";
 import { runViewport } from "./runViewport";
 
 /**
@@ -19,33 +18,25 @@ import { runViewport } from "./runViewport";
  * @param renderObject 渲染对象。
  * @param renderPass 渲染通道。
  */
-export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObject: IGPURenderObject)
+export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
 {
     const { indices, viewport, scissorRect, draw, drawIndexed } = renderObject;
 
-    const { pipeline, vertexBuffers, bindingResourceInfoMap } = getIGPURenderPipeline(renderObject.pipeline, renderPassFormats, renderObject.vertices);
+    const { pipeline, bindingResourceInfoMap } = getIGPURenderPipeline(renderObject.pipeline, renderPassFormat, renderObject.vertices);
 
     runBindGroup(device, passEncoder, pipeline.layout, renderObject.bindingResources, bindingResourceInfoMap);
 
-    runRenderPipeline(device, passEncoder, pipeline);
+    runRenderPipeline(device, passEncoder, renderObject.pipeline, renderPassFormat, renderObject.vertices);
 
-    vertexBuffers?.forEach((vertexBuffer, index) =>
-    {
-        const buffer = getIGPUBuffer(vertexBuffer.data);
-        buffer.label = buffer.label || ("顶点索引 " + autoVertexIndex++);
-        const gBuffer = getGPUBuffer(device, buffer);
-        passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
-    });
+    runVertices(device, passEncoder, renderObject.pipeline, renderPassFormat, renderObject.vertices);
 
     runIndices(device, passEncoder, indices);
 
-    runViewport(passEncoder as GPURenderPassEncoder, renderPassFormats.attachmentSize, viewport);
+    runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, viewport);
 
-    runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormats.attachmentSize, scissorRect);
+    runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
 
     runDraw(passEncoder, draw);
 
     runDrawIndexed(passEncoder, drawIndexed);
 }
-
-let autoVertexIndex = 0;
