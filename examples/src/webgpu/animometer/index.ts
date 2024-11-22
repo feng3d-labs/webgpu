@@ -54,6 +54,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         0.1, -0.1, 0, 1, /**/ 0, 0, 1, 1,
     ]);
 
+    const renderObject: IGPURenderObject = {
+        pipeline,
+        vertices: {
+            position: { data: vertexBuffer, offset: 0, vertexSize: 2 * vec4Size },
+            color: { data: vertexBuffer, offset: vec4Size, vertexSize: 2 * vec4Size },
+        },
+        bindingResources: {},
+        draw: { vertexCount: 3, instanceCount: 1 },
+    };
+
     function configure()
     {
         const numTriangles = settings.numTriangles;
@@ -95,24 +105,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         for (let i = 0; i < numTriangles; ++i)
         {
             renderObjects[i] = {
-                pipeline,
-                vertices: {
-                    position: { data: vertexBuffer, offset: 0, vertexSize: 2 * vec4Size },
-                    color: { data: vertexBuffer, offset: vec4Size, vertexSize: 2 * vec4Size },
-                },
+                ...renderObject,
                 bindingResources: {
                     time: {
-                        // bufferView: uniformBuffer,
-                        // offset: timeOffset,
                         bufferView: new Float32Array(uniformBuffer.buffer, timeOffset, 1),
                     },
                     uniforms: {
-                        // bufferView: uniformBuffer,
-                        // offset: i * alignedUniformBytes,
                         bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
                     }
                 },
-                draw: { vertexCount: 3, instanceCount: 1 },
             };
         }
 
