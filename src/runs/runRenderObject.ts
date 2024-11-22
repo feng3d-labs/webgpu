@@ -1,6 +1,4 @@
-import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
-import { IGPUBindingResources } from "../data/IGPUBindingResources";
-import { IGPURenderObject, IGPURenderPipeline } from "../data/IGPURenderObject";
+import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { runBindGroup } from "./runBindGroup";
 import { runDraw } from "./runDraw";
@@ -23,7 +21,7 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 {
     const { pipeline, viewport, scissorRect, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
 
-    runRenderBindGroup(device, passEncoder, pipeline, bindingResources);
+    runBindGroup(device, passEncoder, pipeline, bindingResources);
 
     runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
 
@@ -38,11 +36,4 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
     runDraw(passEncoder, draw);
 
     runDrawIndexed(passEncoder, drawIndexed);
-}
-
-function runRenderBindGroup(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline0: IGPURenderPipeline, bindingResources?: IGPUBindingResources)
-{
-    const { gpuPipelineLayout, bindingResourceInfoMap } = getIGPUPipelineLayout(pipeline0);
-
-    runBindGroup(device, passEncoder, gpuPipelineLayout, bindingResources, bindingResourceInfoMap);
 }

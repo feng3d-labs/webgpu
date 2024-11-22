@@ -1,10 +1,12 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
+import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
 import { WGSLBindingResourceInfoMap } from "../caches/getWGSLReflectInfo";
 import { IGPUBindGroupEntry, IGPUBindingResource, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
-import { IGPUSetBindGroup } from "../data/IGPURenderObject";
+import { IGPUComputePipeline } from "../data/IGPUComputeObject";
+import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureBase } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
@@ -12,10 +14,12 @@ import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDesc
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 
-export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, layout: IGPUPipelineLayoutDescriptor, bindingResources: IGPUBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
+export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
 {
+    const { gpuPipelineLayout, bindingResourceInfoMap } = getIGPUPipelineLayout(pipeline);
+
     // 计算 bindGroups
-    const bindGroups = getIGPUSetBindGroups(layout, bindingResources, bindingResourceInfoMap);
+    const bindGroups = getIGPUSetBindGroups(gpuPipelineLayout, bindingResources, bindingResourceInfoMap);
 
     bindGroups?.forEach((bindGroup, index) =>
     {
