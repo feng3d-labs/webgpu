@@ -29,16 +29,6 @@ export interface IGPURenderObject
     scissorRect?: IGPUScissorRect;
 
     /**
-     * 绘制图元相关参数。
-     */
-    draw?: IGPUDraw;
-
-    /**
-     * 根据索引数据绘制图元相关参数。
-     */
-    drawIndexed?: IGPUDrawIndexed;
-
-    /**
      * 顶点属性数据映射。
      */
     vertices?: IGPUVertexAttributes;
@@ -52,6 +42,16 @@ export interface IGPURenderObject
      * 绑定资源。包含数值、纹理、采样、外部纹理。
      */
     bindingResources?: IGPUBindingResources;
+
+    /**
+     * 绘制图元相关参数。
+     */
+    draw?: IGPUDraw;
+
+    /**
+     * 根据索引数据绘制图元相关参数。
+     */
+    drawIndexed?: IGPUDrawIndexed;
 }
 
 /**

@@ -22,13 +22,13 @@ import { runViewport } from "./runViewport";
  */
 export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
 {
-    const { indices, viewport, scissorRect, draw, drawIndexed } = renderObject;
+    const { pipeline, viewport, scissorRect, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
 
-    runRenderBindGroup(device, passEncoder, renderObject.pipeline, renderPassFormat, renderObject.vertices, renderObject.bindingResources);
+    runRenderBindGroup(device, passEncoder, pipeline, renderPassFormat, vertices, bindingResources);
 
-    runRenderPipeline(device, passEncoder, renderObject.pipeline, renderPassFormat, renderObject.vertices);
+    runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
 
-    runVertices(device, passEncoder, renderObject.pipeline, renderPassFormat, renderObject.vertices);
+    runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
 
     runIndices(device, passEncoder, indices);
 
