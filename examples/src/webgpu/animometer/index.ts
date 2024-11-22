@@ -102,12 +102,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 bindingResources: {
                     time: {
-                        bufferView: uniformBuffer,
-                        offset: timeOffset,
+                        // bufferView: uniformBuffer,
+                        // offset: timeOffset,
+                        bufferView: new Float32Array(uniformBuffer.buffer, timeOffset, 1),
                     },
                     uniforms: {
-                        bufferView: uniformBuffer,
-                        offset: i * alignedUniformBytes,
+                        // bufferView: uniformBuffer,
+                        // offset: i * alignedUniformBytes,
+                        bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
                     }
                 },
                 draw: { vertexCount: 3, instanceCount: 1 },

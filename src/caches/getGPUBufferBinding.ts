@@ -8,9 +8,11 @@ export function getGPUBufferBinding(device: GPUDevice, resource: IGPUBufferBindi
     const buffer = getGPUBuffer(device, b);
 
     const offset = resource.bufferView.byteOffset;
+    const size = resource.bufferView.byteLength;
 
     return {
         buffer,
         offset,
+        size,
     };
 }
