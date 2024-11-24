@@ -39,22 +39,7 @@ export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceIn
 
     const reflect = getWGSLReflectInfo(code);
 
-    const info = bindingResourceInfoMap[code] = getWGSLBindingResourceInfoMap(reflect, code);
-
-    return info;
-}
-
-const bindingResourceInfoMap: { [code: string]: WGSLBindingResourceInfoMap } = {};
-
-/**
- * 从WebGPU着色器代码获取绑定资源信息表。
- *
- * @param code WebGPU着色器代码。
- * @returns 从WebGPU着色器代码获取的绑定资源信息表。
- */
-function getWGSLBindingResourceInfoMap(reflect: WgslReflect, code: string)
-{
-    const bindingResourceLayoutMap: WGSLBindingResourceInfoMap = {};
+    const bindingResourceLayoutMap: WGSLBindingResourceInfoMap = bindingResourceInfoMap[code] = {};
 
     for (const uniform of reflect.uniforms)
     {
@@ -202,6 +187,8 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect, code: string)
 
     return bindingResourceLayoutMap;
 }
+
+const bindingResourceInfoMap: { [code: string]: WGSLBindingResourceInfoMap } = {};
 
 /**
  * 片段与计算着色器可见。
