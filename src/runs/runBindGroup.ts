@@ -2,7 +2,6 @@ import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
-import { WGSLBindingResourceInfoMap } from "../caches/getWGSLReflectInfo";
 import { IGPUBindGroupEntry, IGPUBufferBinding } from "../data/IGPUBindGroupDescriptor";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
@@ -13,10 +12,10 @@ import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 
 export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
 {
-    const { gpuPipelineLayout, bindingResourceInfoMap } = getIGPUPipelineLayout(pipeline);
+    const gpuPipelineLayout = getIGPUPipelineLayout(pipeline);
 
     // 计算 bindGroups
-    const bindGroups = getIGPUSetBindGroups(gpuPipelineLayout, bindingResources, bindingResourceInfoMap);
+    const bindGroups = getIGPUSetBindGroups(gpuPipelineLayout, bindingResources);
 
     bindGroups?.forEach((bindGroup, index) =>
     {
@@ -25,7 +24,7 @@ export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsM
     });
 }
 
-function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResources: IGPUBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
+function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResources: IGPUBindingResources)
 {
     //
     let gpuSetBindGroups = bindGroupsMap.get([layout, bindingResources]);
@@ -33,57 +32,57 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
 
     gpuSetBindGroups = [];
 
-    for (const resourceName in bindingResourceInfoMap)
+    layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
     {
-        const bindingResourceInfo = bindingResourceInfoMap[resourceName];
+        const entries: IGPUBindGroupEntry[] = [];
+        gpuSetBindGroups[group] = { bindGroup: { layout: layout.bindGroupLayouts[group], entries: entries, } };
 
-        const { group, variableInfo, entry: entry1 } = bindingResourceInfo;
-
-        gpuSetBindGroups[group] = gpuSetBindGroups[group] || {
-            bindGroup: {
-                layout: layout.bindGroupLayouts[group],
-                entries: [],
-            }
-        };
-
-        const entry: IGPUBindGroupEntry = { binding: entry1.binding, resource: null };
-        gpuSetBindGroups[group].bindGroup.entries.push(entry);
-
-        const getResource = () =>
+        bindGroupLayout.entries.forEach((entry1, binding) =>
         {
-            const bindingResource = bindingResources[resourceName];
-            console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
-
+            const { variableInfo } = entry1;
             //
-            if (entry1.buffer)
+            const entry: IGPUBindGroupEntry = { binding: binding, resource: null };
+
+            entries[binding] = entry;
+
+            const resourceName = variableInfo.name;
+
+            const getResource = () =>
             {
+                const bindingResource = bindingResources[resourceName];
+                console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
+
                 //
-                const size = variableInfo.size;
-
-                const uniformData = bindingResource as IGPUBufferBinding;
-
-                // 是否存在默认值。
-                const hasDefautValue = !!uniformData.bufferView;
-                if (!uniformData.bufferView)
+                if (entry1.buffer)
                 {
-                    uniformData.bufferView = new Uint8Array(size);
+                    //
+                    const size = variableInfo.size;
+
+                    const uniformData = bindingResource as IGPUBufferBinding;
+
+                    // 是否存在默认值。
+                    const hasDefautValue = !!uniformData.bufferView;
+                    if (!uniformData.bufferView)
+                    {
+                        uniformData.bufferView = new Uint8Array(size);
+                    }
+
+                    // 更新缓冲区绑定的数据。
+                    updateBufferBinding(variableInfo, uniformData, hasDefautValue);
                 }
 
-                // 更新缓冲区绑定的数据。
-                updateBufferBinding(variableInfo, uniformData, hasDefautValue);
-            }
+                return bindingResource;
+            };
 
-            return bindingResource;
-        };
-
-        entry.resource = getResource();
-
-        //
-        watcher.watch(bindingResources, resourceName, () =>
-        {
             entry.resource = getResource();
+
+            //
+            watcher.watch(bindingResources, resourceName, () =>
+            {
+                entry.resource = getResource();
+            });
         });
-    }
+    });
 
     bindGroupsMap.set([layout, bindingResources], gpuSetBindGroups);
 

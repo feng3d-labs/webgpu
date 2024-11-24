@@ -1,20 +1,6 @@
-import { ResourceType, TemplateInfo, VariableInfo, WgslReflect } from "wgsl_reflect";
+import { ResourceType, TemplateInfo, WgslReflect } from "wgsl_reflect";
+import { IGPUBindGroupLayoutDescriptor, IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from "../types/TextureType";
-
-/**
- * WebGPU着色器代码中获取的绑定资源信息。
- */
-export interface WGSLBindingResourceInfo
-{
-    group: number,
-    variableInfo: VariableInfo
-    entry: GPUBindGroupLayoutEntry
-}
-
-/**
- * 从WebGPU着色器代码获取的绑定资源信息表。
- */
-export type WGSLBindingResourceInfoMap = { [name: string]: WGSLBindingResourceInfo };
 
 /**
  * 从WebGPU着色器代码中获取反射信息。
@@ -33,32 +19,35 @@ export function getWGSLReflectInfo(code: string): WgslReflect
 }
 const reflectMap: { [code: string]: WgslReflect } = {};
 
-export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceInfoMap
+export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
 {
-    if (bindingResourceInfoMap[code]) return bindingResourceInfoMap[code];
+    if (shaderLayoutMap[code]) return shaderLayoutMap[code];
 
     const reflect = getWGSLReflectInfo(code);
 
-    const bindingResourceLayoutMap: WGSLBindingResourceInfoMap = bindingResourceInfoMap[code] = {};
+    const bindGroupLayouts: IGPUBindGroupLayoutDescriptor[] = [];
 
     for (const uniform of reflect.uniforms)
     {
-        const { group, binding, name } = uniform;
+        const { group, binding } = uniform;
+
+        bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
 
         const layout: GPUBufferBindingLayout = {
             type: "uniform",
             minBindingSize: uniform.size,
         };
 
-        bindingResourceLayoutMap[name] = {
-            group, variableInfo: uniform,
-            entry: { visibility: Visibility_ALL, binding, buffer: layout, },
+        bindGroupLayouts[group].entries[binding] = {
+            variableInfo: uniform,
+            visibility: Visibility_ALL, binding, buffer: layout,
         };
     }
 
     for (const storage of reflect.storage)
     {
         const { group, binding, name } = storage;
+        bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
 
         let layout: GPUBufferBindingLayout;
         if (storage.resourceType === ResourceType.Storage)
@@ -70,9 +59,9 @@ export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceIn
                 type,
             };
 
-            bindingResourceLayoutMap[name] = {
-                group, variableInfo: storage,
-                entry: { visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout },
+            bindGroupLayouts[group].entries[binding] = {
+                variableInfo: storage,
+                visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout
             };
         }
         else if (storage.resourceType === ResourceType.StorageTexture)
@@ -92,9 +81,9 @@ export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceIn
                 viewDimension,
             };
 
-            bindingResourceLayoutMap[name] = {
-                group, variableInfo: storage,
-                entry: { visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout },
+            bindGroupLayouts[group].entries[binding] = {
+                variableInfo: storage,
+                visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout
             };
         }
         else
@@ -106,6 +95,7 @@ export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceIn
     for (const texture of reflect.textures)
     {
         const { group, binding, name } = texture;
+        bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
 
         const textureType = texture.type.name as TextureType;
 
@@ -113,9 +103,9 @@ export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceIn
 
         if (ExternalSampledTextureType[textureType])
         {
-            bindingResourceLayoutMap[name] = {
-                group, variableInfo: texture,
-                entry: { visibility: Visibility_ALL, binding, externalTexture: { layout: {} } },
+            bindGroupLayouts[group].entries[binding] = {
+                variableInfo: texture,
+                visibility: Visibility_ALL, binding, externalTexture: {}
             };
         }
         else
@@ -161,9 +151,9 @@ export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceIn
                 layout.multisampled = true;
             }
 
-            bindingResourceLayoutMap[name] = {
-                group, variableInfo: texture,
-                entry: { visibility: Visibility_ALL, binding, texture: layout },
+            bindGroupLayouts[group].entries[binding] = {
+                variableInfo: texture,
+                visibility: Visibility_ALL, binding, texture: layout
             };
         }
     }
@@ -171,6 +161,7 @@ export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceIn
     for (const sampler of reflect.samplers)
     {
         const { group, binding, name } = sampler;
+        bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
 
         const layout: GPUSamplerBindingLayout = {};
 
@@ -179,16 +170,18 @@ export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceIn
             layout.type = "comparison";
         }
 
-        bindingResourceLayoutMap[name] = {
-            group, variableInfo: sampler,
-            entry: { visibility: Visibility_ALL, binding, sampler: layout },
+        bindGroupLayouts[group].entries[binding] = {
+            variableInfo: sampler,
+            visibility: Visibility_ALL, binding, sampler: layout
         };
     }
 
-    return bindingResourceLayoutMap;
+    const gpuPipelineLayout: IGPUPipelineLayoutDescriptor = { bindGroupLayouts };
+
+    return gpuPipelineLayout;
 }
 
-const bindingResourceInfoMap: { [code: string]: WGSLBindingResourceInfoMap } = {};
+const shaderLayoutMap: { [code: string]: IGPUPipelineLayoutDescriptor } = {};
 
 /**
  * 片段与计算着色器可见。

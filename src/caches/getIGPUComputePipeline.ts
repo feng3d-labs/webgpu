@@ -1,7 +1,7 @@
 import { FunctionInfo } from "wgsl_reflect";
 import { IGPUComputePipeline, IGPUProgrammableStage } from "../data/IGPUComputeObject";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
-import { getWGSLReflectInfo, WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
+import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。
@@ -10,30 +10,28 @@ import { getWGSLReflectInfo, WGSLBindingResourceInfoMap } from "./getWGSLReflect
  * @param computePipeline 计算管线描述。
  * @returns 完整的计算管线描述。
  */
-export function getIGPUComputePipeline(computePipeline: IGPUComputePipeline)
+export function getIGPUComputePipeline(computePipeline: IGPUComputePipeline): IGPUComputePipeline
 {
-    let result = computePipelineMap.get(computePipeline);
-    if (result) return result;
+    let gpuComputePipeline = computePipelineMap.get(computePipeline);
+    if (gpuComputePipeline) return gpuComputePipeline;
 
     const gpuComputeStage = getIGPUComputeStage(computePipeline.compute);
 
     // 从GPU管线中获取管线布局。
-    const { gpuPipelineLayout, bindingResourceInfoMap } = getIGPUPipelineLayout(computePipeline);
+    const gpuPipelineLayout = getIGPUPipelineLayout(computePipeline);
 
-    const gpuComputePipeline: IGPUComputePipeline = {
+    gpuComputePipeline = {
         ...computePipeline,
         layout: gpuPipelineLayout,
         compute: gpuComputeStage,
     };
 
-    result = { gpuComputePipeline, bindingResourceInfoMap };
+    computePipelineMap.set(computePipeline, gpuComputePipeline);
 
-    computePipelineMap.set(computePipeline, result);
-
-    return result;
+    return gpuComputePipeline;
 }
 
-const computePipelineMap = new Map<IGPUComputePipeline, { gpuComputePipeline: IGPUComputePipeline, bindingResourceInfoMap: WGSLBindingResourceInfoMap }>();
+const computePipelineMap = new Map<IGPUComputePipeline, IGPUComputePipeline>();
 
 /**
 * 获取计算阶段完整描述。

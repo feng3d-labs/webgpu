@@ -8,7 +8,7 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { gpuVertexFormatMap, WGSLVertexType, wgslVertexTypeMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
-import { getWGSLReflectInfo, WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
+import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。
@@ -35,7 +35,7 @@ export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
         const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
 
         // 从GPU管线中获取管线布局。
-        const { gpuPipelineLayout, bindingResourceInfoMap } = getIGPUPipelineLayout(renderPipeline);
+        const gpuPipelineLayout = getIGPUPipelineLayout(renderPipeline);
 
         // 从渲染通道上获取多重采样数量
         const multisample: GPUMultisampleState = {
@@ -53,7 +53,7 @@ export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
             multisample,
         };
 
-        result = { pipeline, vertexBuffers, bindingResourceInfoMap };
+        result = { pipeline, vertexBuffers };
         renderPipelineMap.set([renderPipeline, renderPassFormatKey, vertices], result);
     }
 
@@ -71,10 +71,6 @@ const renderPipelineMap = new ChainMap<
          * GPU渲染时使用的顶点缓冲区列表。
          */
         vertexBuffers: IGPUVertexBuffer[];
-        /**
-         * WebGPU着色器中绑定资源映射。
-         */
-        bindingResourceInfoMap: WGSLBindingResourceInfoMap;
     }
 >();
 

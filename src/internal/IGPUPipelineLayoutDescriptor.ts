@@ -1,3 +1,5 @@
+import { VariableInfo } from "wgsl_reflect";
+
 /**
  * GPU管线布局描述。
  *
@@ -24,5 +26,5 @@ export interface IGPUBindGroupLayoutDescriptor extends GPUBindGroupLayoutDescrip
 
 export interface IGPUBindGroupLayoutEntry extends GPUBindGroupLayoutEntry
 {
-
+    variableInfo: VariableInfo;
 }

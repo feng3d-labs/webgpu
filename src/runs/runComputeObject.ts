@@ -24,7 +24,7 @@ export function runComputeObject(device: GPUDevice, passEncoder: GPUComputePassE
 
 export function runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, pipeline: IGPUComputePipeline)
 {
-    const { gpuComputePipeline } = getIGPUComputePipeline(pipeline);
+    const gpuComputePipeline = getIGPUComputePipeline(pipeline);
 
     const computePipeline = getGPUComputePipeline(device, gpuComputePipeline);
     passEncoder.setPipeline(computePipeline);
