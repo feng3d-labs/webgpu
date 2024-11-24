@@ -59,7 +59,7 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
 
         //
         const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
-        (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).push(entry);
+        bindGroupLayout.entries[entry.binding] = entry;
     }
 
     result = {

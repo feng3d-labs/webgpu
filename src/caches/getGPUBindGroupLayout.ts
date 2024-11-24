@@ -5,10 +5,18 @@ export function getGPUBindGroupLayout(device: GPUDevice, layout: GPUBindGroupLay
 
     if (gpuBindGroupLayout) return gpuBindGroupLayout;
 
+    // 排除 undefined 元素。
+    const entries = layout.entries as GPUBindGroupLayoutEntry[];
+    for (let i = entries.length - 1; i >= 0; i--)
+    {
+        if (!entries[i])
+        {
+            entries.splice(i, 1);
+        }
+    }
+
     //
-    gpuBindGroupLayout = device.createBindGroupLayout({
-        entries: layout.entries,
-    });
+    gpuBindGroupLayout = device.createBindGroupLayout(layout);
 
     bindGroupLayoutMap.set(layout, gpuBindGroupLayout);
 
