@@ -1,17 +1,3 @@
-((configure) =>
-{
-    GPUCanvasContext.prototype.configure = function (configuration: GPUCanvasConfiguration)
-    {
-        if (configuration.device.constructor.name !== "GPUDevice")
-        {
-            configuration.device = configuration.device['_device'];
-            console.assert(configuration.device.constructor.name === "GPUDevice");
-        }
-
-        configure.call(this, configuration);
-    };
-})(GPUCanvasContext.prototype.configure);
-
 /**
  * 优化性能
  */
@@ -120,3 +106,18 @@ export class GPUDeviceYouHua implements GPUDevice
         return this._device.removeEventListener(type, callback, options);
     }
 }
+
+// 处理 configure 函数，兼容 GPUDeviceYouHua
+((configure) =>
+{
+    GPUCanvasContext.prototype.configure = function (configuration: GPUCanvasConfiguration)
+    {
+        if (configuration.device.constructor.name !== "GPUDevice")
+        {
+            configuration.device = configuration.device['_device'];
+            console.assert(configuration.device.constructor.name === "GPUDevice");
+        }
+
+        configure.call(this, configuration);
+    };
+})(GPUCanvasContext.prototype.configure);
