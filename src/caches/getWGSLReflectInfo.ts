@@ -208,7 +208,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect, code: string)
 
         bindingResourceLayoutMap[name] = {
             group, variableInfo: uniform,
-            entry: { visibility: 0, binding, buffer: layout, },
+            entry: { visibility: Visibility_ALL, binding, buffer: layout, },
         };
     }
 
@@ -228,7 +228,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect, code: string)
 
             bindingResourceLayoutMap[name] = {
                 group, variableInfo: storage,
-                entry: { visibility: 0, binding, buffer: layout },
+                entry: { visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout },
             };
         }
         else if (storage.resourceType === ResourceType.StorageTexture)
@@ -250,7 +250,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect, code: string)
 
             bindingResourceLayoutMap[name] = {
                 group, variableInfo: storage,
-                entry: { visibility: 0, binding, storageTexture: layout },
+                entry: { visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout },
             };
         }
         else
@@ -271,25 +271,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect, code: string)
         {
             bindingResourceLayoutMap[name] = {
                 group, variableInfo: texture,
-                entry: { visibility: 0, binding, externalTexture: { layout: {} } },
-            };
-        }
-        else if (StorageTextureType[textureType])
-        {
-            const textureSecondType = (texture.type as TemplateInfo)?.format?.name as GPUTextureFormat;
-
-            const access = (texture.type as TemplateInfo).access;
-            console.assert(access === "write");
-
-            const layout: GPUStorageTextureBindingLayout = {
-                access: "write-only",
-                format: textureSecondType as any,
-                viewDimension,
-            };
-
-            bindingResourceLayoutMap[name] = {
-                group, variableInfo: texture,
-                entry: { visibility: 0, binding, storageTexture: layout },
+                entry: { visibility: Visibility_ALL, binding, externalTexture: { layout: {} } },
             };
         }
         else
@@ -337,7 +319,7 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect, code: string)
 
             bindingResourceLayoutMap[name] = {
                 group, variableInfo: texture,
-                entry: { visibility: 0, binding, texture: layout },
+                entry: { visibility: Visibility_ALL, binding, texture: layout },
             };
         }
     }
@@ -355,12 +337,21 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect, code: string)
 
         bindingResourceLayoutMap[name] = {
             group, variableInfo: sampler,
-            entry: { visibility: 0, binding, sampler: layout },
+            entry: { visibility: Visibility_ALL, binding, sampler: layout },
         };
     }
 
     return bindingResourceLayoutMap;
 }
+
+/**
+ * 片段与计算着色器可见。
+ */
+const Visibility_FRAGMENT_COMPUTE = GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
+/**
+ * 全部着色器可见。
+ */
+const Visibility_ALL = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
 
 /**
  * 从顶点入口函数信息中获取顶点属性信息。

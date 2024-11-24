@@ -57,17 +57,6 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
         }
         groupMap[binding] = bindingResourceInfo;
 
-        if ((bindingResourceInfo.variableInfo.access === "read_write" && bindingResourceInfo.entry.buffer?.type === "storage") // <storage, read_write>
-            || bindingResourceInfo.entry.storageTexture?.access // texture_storage
-        )
-        {
-            entry.visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
-        }
-        else
-        {
-            entry.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
-        }
-
         //
         const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
         (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).push(entry);
