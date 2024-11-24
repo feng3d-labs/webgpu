@@ -1,6 +1,6 @@
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderPipeline } from "../data/IGPURenderObject";
-import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
+import { IGPUBindGroupLayoutDescriptor, IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -21,22 +21,18 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     if (result) return result;
 
     const bindingResourceInfoMap: { [resourceName: string]: WGSLBindingResourceInfo } = {};
-    let visibility: GPUShaderStageFlags = 0;
     if (vertexCode)
     {
-        visibility |= GPUShaderStage.VERTEX;
         const vertexResourceInfoMap = getWGSLReflectInfo(vertexCode).bindingResourceLayoutMap;
         Object.assign(bindingResourceInfoMap, vertexResourceInfoMap);
     }
     if (fragmentCode)
     {
-        visibility |= GPUShaderStage.FRAGMENT;
         const fragmentResourceInfoMap = getWGSLReflectInfo(fragmentCode).bindingResourceLayoutMap;
         Object.assign(bindingResourceInfoMap, fragmentResourceInfoMap);
     }
     if (computeCode)
     {
-        visibility |= GPUShaderStage.COMPUTE;
         const computeResourceInfoMap = getWGSLReflectInfo(computeCode).bindingResourceLayoutMap;
         Object.assign(bindingResourceInfoMap, computeResourceInfoMap);
     }
@@ -44,7 +40,7 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     // 用于判断是否重复
     const tempMap: { [group: string]: { [binding: string]: WGSLBindingResourceInfo } } = {};
     //
-    const bindGroupLayouts: GPUBindGroupLayoutDescriptor[] = [];
+    const bindGroupLayouts: IGPUBindGroupLayoutDescriptor[] = [];
     for (const resourceName in bindingResourceInfoMap)
     {
         const bindingResourceInfo = bindingResourceInfoMap[resourceName];
@@ -61,7 +57,17 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
         }
         groupMap[binding] = bindingResourceInfo;
 
-        entry.visibility = visibility;
+        if ((bindingResourceInfo.variableInfo.access === "read_write" && bindingResourceInfo.entry.buffer?.type === "storage") // <storage, read_write>
+            || bindingResourceInfo.entry.storageTexture?.access // texture_storage
+        )
+        {
+            entry.visibility = GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
+        }
+        else
+        {
+            entry.visibility = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
+        }
+
         //
         const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
         (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).push(entry);

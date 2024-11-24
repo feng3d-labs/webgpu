@@ -14,5 +14,15 @@ export interface IGPUPipelineLayoutDescriptor extends Omit<GPUPipelineLayoutDesc
      * @group attribute in the {@link GPUShaderModule}, with the `N`th element corresponding with
      * `@group(N)`.
      */
-    bindGroupLayouts: GPUBindGroupLayoutDescriptor[];
+    bindGroupLayouts: IGPUBindGroupLayoutDescriptor[];
+}
+
+export interface IGPUBindGroupLayoutDescriptor extends GPUBindGroupLayoutDescriptor
+{
+    entries: IGPUBindGroupLayoutEntry[];
+}
+
+export interface IGPUBindGroupLayoutEntry extends GPUBindGroupLayoutEntry
+{
+
 }
