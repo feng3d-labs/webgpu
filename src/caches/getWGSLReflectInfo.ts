@@ -1,5 +1,5 @@
 import { ResourceType, TemplateInfo, WgslReflect } from "wgsl_reflect";
-import { IGPUBindGroupLayoutDescriptor, IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
+import { IGPUBindGroupLayoutEntry } from "../internal/IGPUPipelineLayoutDescriptor";
 import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from "../types/TextureType";
 
 /**
@@ -19,26 +19,26 @@ export function getWGSLReflectInfo(code: string): WgslReflect
 }
 const reflectMap: { [code: string]: WgslReflect } = {};
 
-export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
+export type IGPUBindGroupLayoutEntryMap = { [name: string]: IGPUBindGroupLayoutEntry; }
+
+export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayoutEntryMap
 {
     if (shaderLayoutMap[code]) return shaderLayoutMap[code];
 
     const reflect = getWGSLReflectInfo(code);
 
-    const bindGroupLayouts: IGPUBindGroupLayoutDescriptor[] = [];
+    const entryMap: IGPUBindGroupLayoutEntryMap = shaderLayoutMap[code] = {};
 
     for (const uniform of reflect.uniforms)
     {
-        const { group, binding } = uniform;
-
-        bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
+        const { binding, name } = uniform;
 
         const layout: GPUBufferBindingLayout = {
             type: "uniform",
             minBindingSize: uniform.size,
         };
 
-        bindGroupLayouts[group].entries[binding] = {
+        entryMap[name] = {
             variableInfo: uniform,
             visibility: Visibility_ALL, binding, buffer: layout,
         };
@@ -47,7 +47,6 @@ export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
     for (const storage of reflect.storage)
     {
         const { group, binding, name } = storage;
-        bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
 
         let layout: GPUBufferBindingLayout;
         if (storage.resourceType === ResourceType.Storage)
@@ -59,7 +58,7 @@ export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
                 type,
             };
 
-            bindGroupLayouts[group].entries[binding] = {
+            entryMap[name] = {
                 variableInfo: storage,
                 visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout
             };
@@ -81,7 +80,7 @@ export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
                 viewDimension,
             };
 
-            bindGroupLayouts[group].entries[binding] = {
+            entryMap[name] = {
                 variableInfo: storage,
                 visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout
             };
@@ -95,7 +94,6 @@ export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
     for (const texture of reflect.textures)
     {
         const { group, binding, name } = texture;
-        bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
 
         const textureType = texture.type.name as TextureType;
 
@@ -103,7 +101,7 @@ export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
 
         if (ExternalSampledTextureType[textureType])
         {
-            bindGroupLayouts[group].entries[binding] = {
+            entryMap[name] = {
                 variableInfo: texture,
                 visibility: Visibility_ALL, binding, externalTexture: {}
             };
@@ -151,7 +149,7 @@ export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
                 layout.multisampled = true;
             }
 
-            bindGroupLayouts[group].entries[binding] = {
+            entryMap[name] = {
                 variableInfo: texture,
                 visibility: Visibility_ALL, binding, texture: layout
             };
@@ -161,7 +159,6 @@ export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
     for (const sampler of reflect.samplers)
     {
         const { group, binding, name } = sampler;
-        bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
 
         const layout: GPUSamplerBindingLayout = {};
 
@@ -170,18 +167,16 @@ export function getGPUShaderLayout(code: string): IGPUPipelineLayoutDescriptor
             layout.type = "comparison";
         }
 
-        bindGroupLayouts[group].entries[binding] = {
+        entryMap[name] = {
             variableInfo: sampler,
             visibility: Visibility_ALL, binding, sampler: layout
         };
     }
 
-    const gpuPipelineLayout: IGPUPipelineLayoutDescriptor = { bindGroupLayouts };
-
-    return gpuPipelineLayout;
+    return entryMap;
 }
 
-const shaderLayoutMap: { [code: string]: IGPUPipelineLayoutDescriptor } = {};
+const shaderLayoutMap: { [code: string]: IGPUBindGroupLayoutEntryMap } = {};
 
 /**
  * 片段与计算着色器可见。

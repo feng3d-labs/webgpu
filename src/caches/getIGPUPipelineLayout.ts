@@ -1,7 +1,7 @@
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderPipeline } from "../data/IGPURenderObject";
 import { IGPUBindGroupLayoutDescriptor, IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
-import { getGPUShaderLayout } from "./getWGSLReflectInfo";
+import { getIGPUBindGroupLayoutEntryMap, IGPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 
 /**
  * 从GPU管线中获取管线布局。
@@ -20,21 +20,42 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     let gpuPipelineLayout = gpuPipelineLayoutMap[code];
     if (gpuPipelineLayout) return gpuPipelineLayout;
 
-    let bindGroupLayouts: IGPUBindGroupLayoutDescriptor[] = [];
+    let entryMap: IGPUBindGroupLayoutEntryMap = {};
     if (vertexCode)
     {
-        const shaderLayout = getGPUShaderLayout(vertexCode);
-        bindGroupLayouts = mergeBindGroupLayouts(bindGroupLayouts, shaderLayout.bindGroupLayouts);
+        const vertexEntryMap = getIGPUBindGroupLayoutEntryMap(vertexCode);
+        entryMap = mergeBindGroupLayouts(entryMap, vertexEntryMap);
     }
-    if (fragmentCode)
+    if (fragmentCode && fragmentCode !== vertexCode)
     {
-        const shaderLayout = getGPUShaderLayout(fragmentCode);
-        bindGroupLayouts = mergeBindGroupLayouts(bindGroupLayouts, shaderLayout.bindGroupLayouts);
+        const fragmentEntryMap = getIGPUBindGroupLayoutEntryMap(fragmentCode);
+        entryMap = mergeBindGroupLayouts(entryMap, fragmentEntryMap);
     }
-    if (computeCode)
+    if (computeCode && computeCode !== vertexCode && computeCode !== fragmentCode)
     {
-        const shaderLayout = getGPUShaderLayout(computeCode);
-        bindGroupLayouts = mergeBindGroupLayouts(bindGroupLayouts, shaderLayout.bindGroupLayouts);
+        const computeEntryMap = getIGPUBindGroupLayoutEntryMap(computeCode);
+        entryMap = mergeBindGroupLayouts(entryMap, computeEntryMap);
+    }
+
+    //
+    const bindGroupLayouts: IGPUBindGroupLayoutDescriptor[] = [];
+    for (const resourceName in entryMap)
+    {
+        const bindGroupLayoutEntry = entryMap[resourceName];
+        const { group, binding } = bindGroupLayoutEntry.variableInfo;
+        //
+        const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
+
+        // 检测相同位置是否存在多个定义
+        if (bindGroupLayout.entries[binding])
+        {
+            // 存在重复定义时，判断是否兼容
+            const preEntry = bindGroupLayout.entries[binding];
+            console.error(`在管线中 @group(${group}) @binding(${binding}) 处存在多个定义 ${preEntry.variableInfo.name} ${resourceName} 。`);
+        }
+
+        //
+        bindGroupLayout.entries[binding] = bindGroupLayoutEntry;
     }
 
     // 排除 undefined 元素。
@@ -56,31 +77,28 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     return gpuPipelineLayout;
 }
 
-function mergeBindGroupLayouts(bindGroupLayouts: IGPUBindGroupLayoutDescriptor[], bindGroupLayouts1: IGPUBindGroupLayoutDescriptor[]): IGPUBindGroupLayoutDescriptor[]
+function mergeBindGroupLayouts(entryMap: IGPUBindGroupLayoutEntryMap, entryMap1: IGPUBindGroupLayoutEntryMap): IGPUBindGroupLayoutEntryMap
 {
-    bindGroupLayouts1.forEach((bindGroupLayout: IGPUBindGroupLayoutDescriptor, group: number) =>
+    for (const resourceName in entryMap1)
     {
-        bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
-        const entries = bindGroupLayouts[group].entries;
-
-        bindGroupLayout.entries.forEach((entry) =>
+        // 检测相同名称是否被定义在多个地方
+        if (entryMap[resourceName])
         {
-            const binding = entry.binding;
-            if (!entries[binding])
-            {
-                entries[binding] = entry;
-            }
-            else
-            {
-                if (entry.variableInfo.name !== entry.variableInfo.name)
-                {
-                    console.error(`在管线中 @group(${group}) @binding(${binding}) 处存在多个定义 ${entries[binding].variableInfo.name} ${entry.variableInfo.name} 。`);
-                }
-            }
-        });
-    });
+            const preEntry = entryMap[resourceName].variableInfo;
+            const currentEntry = entryMap1[resourceName].variableInfo;
 
-    return bindGroupLayouts;
+            if (preEntry.group !== currentEntry.group
+                || preEntry.binding !== currentEntry.binding
+                || preEntry.resourceType !== currentEntry.resourceType
+            )
+            {
+                console.warn(`分别在 着色器 @group(${preEntry.group}) @binding(${preEntry.binding}) 与 @group(${currentEntry.group}) @binding(${currentEntry.binding}) 处存在相同名称的变量 ${currentEntry.name} 。`);
+            }
+        }
+        entryMap[resourceName] = entryMap1[resourceName];
+    }
+
+    return entryMap;
 }
 
 

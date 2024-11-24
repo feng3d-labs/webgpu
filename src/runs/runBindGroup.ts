@@ -105,15 +105,17 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
         return;
     }
 
-    if ((uniformData["_variableInfo"] as any as VariableInfo) === variableInfo)
-    {
-        // 已经做好数据映射。
-        return;
-    }
-
     if (uniformData["_variableInfo"] !== undefined)
     {
-        console.error(`updateBufferBinding 出现一份数据对应多个 variableInfo`);
+        const preVariableInfo = uniformData["_variableInfo"] as any as VariableInfo;
+        if (preVariableInfo.group !== variableInfo.group
+            || preVariableInfo.binding !== variableInfo.binding
+            || preVariableInfo.resourceType !== variableInfo.resourceType
+            || preVariableInfo.size !== variableInfo.size
+        )
+        {
+            console.error(`updateBufferBinding 出现一份数据对应多个 variableInfo`);
+        }
 
         return;
     }
