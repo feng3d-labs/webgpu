@@ -63,13 +63,20 @@ function mergeBindGroupLayouts(bindGroupLayouts: IGPUBindGroupLayoutDescriptor[]
         bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
         const entries = bindGroupLayouts[group].entries;
 
-        bindGroupLayout.entries.forEach((entry, binding) =>
+        bindGroupLayout.entries.forEach((entry) =>
         {
-            if (entries[binding])
+            const binding = entry.binding;
+            if (!entries[binding])
             {
-                console.error(`在管线中 @group(${group}) @binding(${binding}) 处存在多个定义 ${entries[binding].variableInfo.name} ${entry.variableInfo.name} 。`);
+                entries[binding] = entry;
             }
-            entries[binding] = entry;
+            else
+            {
+                if (entry.variableInfo.name !== entry.variableInfo.name)
+                {
+                    console.error(`在管线中 @group(${group}) @binding(${binding}) 处存在多个定义 ${entries[binding].variableInfo.name} ${entry.variableInfo.name} 。`);
+                }
+            }
         });
     });
 
