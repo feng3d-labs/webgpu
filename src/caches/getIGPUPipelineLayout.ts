@@ -37,6 +37,20 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
         bindGroupLayouts = mergeBindGroupLayouts(bindGroupLayouts, shaderLayout.bindGroupLayouts);
     }
 
+    // 排除 undefined 元素。
+    for (let i = 0; i < bindGroupLayouts.length; i++)
+    {
+        const entries = bindGroupLayouts[i].entries as GPUBindGroupLayoutEntry[];
+        for (let i = entries.length - 1; i >= 0; i--)
+        {
+            if (!entries[i])
+            {
+                entries.splice(i, 1);
+            }
+        }
+    }
+
+    //
     gpuPipelineLayout = gpuPipelineLayoutMap[code] = { bindGroupLayouts };
 
     return gpuPipelineLayout;

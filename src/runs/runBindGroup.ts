@@ -15,12 +15,12 @@ export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsM
     const gpuPipelineLayout = getIGPUPipelineLayout(pipeline);
 
     // 计算 bindGroups
-    const bindGroups = getIGPUSetBindGroups(gpuPipelineLayout, bindingResources);
+    const setBindGroups = getIGPUSetBindGroups(gpuPipelineLayout, bindingResources);
 
-    bindGroups?.forEach((bindGroup, index) =>
+    setBindGroups?.forEach((setBindGroup, index) =>
     {
-        const gpuBindGroup = getGPUBindGroup(device, bindGroup.bindGroup);
-        passEncoder.setBindGroup(index, gpuBindGroup, bindGroup.dynamicOffsets);
+        const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup);
+        passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
     });
 }
 
@@ -37,13 +37,13 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
         const entries: IGPUBindGroupEntry[] = [];
         gpuSetBindGroups[group] = { bindGroup: { layout: layout.bindGroupLayouts[group], entries: entries, } };
 
-        bindGroupLayout.entries.forEach((entry1, binding) =>
+        bindGroupLayout.entries.forEach((entry1) =>
         {
-            const { variableInfo } = entry1;
+            const { variableInfo, binding } = entry1;
             //
             const entry: IGPUBindGroupEntry = { binding: binding, resource: null };
 
-            entries[binding] = entry;
+            entries.push(entry);
 
             const resourceName = variableInfo.name;
 
