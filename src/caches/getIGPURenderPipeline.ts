@@ -123,13 +123,13 @@ function getIGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAt
         let entryPoint = vertexState.entryPoint;
         if (!entryPoint)
         {
-            vertex = reflect.reflect.entry.vertex[0];
+            vertex = reflect.entry.vertex[0];
             console.assert(!!vertex, `WGSL着色器 ${code} 中不存在顶点入口点。`);
             entryPoint = vertex.name;
         }
         else
         {
-            vertex = reflect.reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
+            vertex = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
             console.assert(!!vertex, `WGSL着色器 ${code} 中不存在指定顶点入口点 ${entryPoint} 。`);
         }
 
@@ -285,18 +285,17 @@ function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments
         const code = fragmentState.code;
         let entryPoint = fragmentState.entryPoint;
         let fragment: FunctionInfo;
+        const reflect = getWGSLReflectInfo(code);
         if (!entryPoint)
         {
-            const reflect = getWGSLReflectInfo(code);
-            fragment = reflect.reflect.entry.fragment[0];
+            fragment = reflect.entry.fragment[0];
             console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
             entryPoint = fragment.name;
         }
         else
         {
             // 验证着色器中包含指定片段入口函数。
-            const reflect = getWGSLReflectInfo(code);
-            fragment = reflect.reflect.entry.fragment.filter((v) => v.name === entryPoint)[0];
+            fragment = reflect.entry.fragment.filter((v) => v.name === entryPoint)[0];
             console.assert(!!fragment, `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
         }
 

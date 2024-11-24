@@ -1,19 +1,5 @@
-import { FunctionInfo, ResourceType, TemplateInfo, TypeInfo, VariableInfo, WgslReflect } from "wgsl_reflect";
-import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, StorageTextureType, TextureType } from "../types/TextureType";
-import { WGSLVertexType, wgslVertexTypeMap } from "../types/VertexFormat";
-
-/**
- * WGSL着色器反射信息。
- */
-export interface WGSLReflectInfo
-{
-    reflect: WgslReflect
-    
-    /**
-     * 从WebGPU着色器代码获取的绑定资源信息表。
-     */
-    bindingResourceLayoutMap: WGSLBindingResourceInfoMap;
-}
+import { ResourceType, TemplateInfo, VariableInfo, WgslReflect } from "wgsl_reflect";
+import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from "../types/TextureType";
 
 /**
  * WebGPU着色器代码中获取的绑定资源信息。
@@ -36,28 +22,29 @@ export type WGSLBindingResourceInfoMap = { [name: string]: WGSLBindingResourceIn
  * @param code WebGPU着色器代码。
  * @returns 从WebGPU着色器代码中获取的反射信息。
  */
-export function getWGSLReflectInfo(code: string)
+export function getWGSLReflectInfo(code: string): WgslReflect
 {
-    let reflectInfo = reflectMap.get(code);
-    if (reflectInfo) return reflectInfo;
+    let reflect = reflectMap[code];
+    if (reflect) return reflect;
 
-    const reflect = new WgslReflect(code);
+    reflect = reflectMap[code] = new WgslReflect(code);
 
-    //
-    reflectInfo = {
-        reflect,
-        bindingResourceLayoutMap: {},
-    };
-
-    //
-    reflectInfo.bindingResourceLayoutMap = getWGSLBindingResourceInfoMap(reflect, code);
-
-    //
-    reflectMap.set(code, reflectInfo);
-
-    return reflectInfo;
+    return reflect;
 }
-const reflectMap = new Map<string, WGSLReflectInfo>();
+const reflectMap: { [code: string]: WgslReflect } = {};
+
+export function getBindingResourceLayoutMap(code: string): WGSLBindingResourceInfoMap
+{
+    if (bindingResourceInfoMap[code]) return bindingResourceInfoMap[code];
+
+    const reflect = getWGSLReflectInfo(code);
+
+    const info = bindingResourceInfoMap[code] = getWGSLBindingResourceInfoMap(reflect, code);
+
+    return info;
+}
+
+const bindingResourceInfoMap: { [code: string]: WGSLBindingResourceInfoMap } = {};
 
 /**
  * 从WebGPU着色器代码获取绑定资源信息表。

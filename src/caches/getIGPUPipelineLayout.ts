@@ -1,7 +1,7 @@
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderPipeline } from "../data/IGPURenderObject";
 import { IGPUBindGroupLayoutDescriptor, IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
-import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getWGSLReflectInfo } from "./getWGSLReflectInfo";
+import { WGSLBindingResourceInfo, WGSLBindingResourceInfoMap, getBindingResourceLayoutMap, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
  * 从GPU管线中获取管线布局。
@@ -23,17 +23,17 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
     const bindingResourceInfoMap: { [resourceName: string]: WGSLBindingResourceInfo } = {};
     if (vertexCode)
     {
-        const vertexResourceInfoMap = getWGSLReflectInfo(vertexCode).bindingResourceLayoutMap;
+        const vertexResourceInfoMap = getBindingResourceLayoutMap(vertexCode);
         Object.assign(bindingResourceInfoMap, vertexResourceInfoMap);
     }
     if (fragmentCode)
     {
-        const fragmentResourceInfoMap = getWGSLReflectInfo(fragmentCode).bindingResourceLayoutMap;
+        const fragmentResourceInfoMap = getBindingResourceLayoutMap(fragmentCode);
         Object.assign(bindingResourceInfoMap, fragmentResourceInfoMap);
     }
     if (computeCode)
     {
-        const computeResourceInfoMap = getWGSLReflectInfo(computeCode).bindingResourceLayoutMap;
+        const computeResourceInfoMap = getBindingResourceLayoutMap(computeCode);
         Object.assign(bindingResourceInfoMap, computeResourceInfoMap);
     }
 

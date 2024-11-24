@@ -47,14 +47,14 @@ function getIGPUComputeStage(computeStage: IGPUProgrammableStage)
     let compute: FunctionInfo;
     if (!computeStage.entryPoint)
     {
-        compute = reflect.reflect.entry.compute[0];
+        compute = reflect.entry.compute[0];
         console.assert(!!compute, `WGSL着色器 ${computeStage.code} 中不存在计算入口点。`);
         computeStage.entryPoint = compute.name;
     }
     else
     {
         // 验证着色器中包含指定片段入口函数。
-        compute = reflect.reflect.entry.compute.filter((v) => v.name === computeStage.entryPoint)[0];
+        compute = reflect.entry.compute.filter((v) => v.name === computeStage.entryPoint)[0];
         console.assert(!!compute, `WGSL着色器 ${computeStage.code} 中不存在指定的计算入口点 ${computeStage.entryPoint}`);
     }
 
