@@ -15,6 +15,7 @@ import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+import { GPUDeviceYouHua } from "./youhua/GPUDeviceYouHua";
 
 /**
  * WebGPU 对象。
@@ -23,6 +24,13 @@ import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultipl
  */
 export class WebGPU
 {
+    private _是否优化: boolean;
+
+    constructor(是否优化 = true)
+    {
+        this._是否优化 = 是否优化;
+    }
+
     /**
      * 初始化 WebGPU 获取 GPUDevice 。
      */
@@ -44,7 +52,7 @@ export class WebGPU
             }
         });
 
-        this.device = device;
+        this.device = this._是否优化 ? new GPUDeviceYouHua(device) : device;
 
         return this;
     }
