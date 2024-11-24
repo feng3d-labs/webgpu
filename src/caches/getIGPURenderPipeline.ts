@@ -1,14 +1,14 @@
 import { watcher } from "@feng3d/watcher";
 
-import { FunctionInfo } from "wgsl_reflect";
+import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
-import { gpuVertexFormatMap } from "../types/VertexFormat";
+import { gpuVertexFormatMap, WGSLVertexType, wgslVertexTypeMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
-import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getAttributeInfos, getWGSLReflectInfo } from "./getWGSLReflectInfo";
+import { getWGSLReflectInfo, WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。
@@ -133,9 +133,7 @@ function getIGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAt
             console.assert(!!vertex, `WGSL着色器 ${code} 中不存在指定顶点入口点 ${entryPoint} 。`);
         }
 
-        const attributeInfos = getAttributeInfos(vertex);
-
-        const { vertexBufferLayouts, vertexBuffers } = getVertexBuffers(attributeInfos, vertices);
+        const { vertexBufferLayouts, vertexBuffers } = getVertexBuffers(vertex, vertices);
 
         const gpuVertexState: IGPUVertexState = {
             code,
@@ -162,11 +160,11 @@ const vertexStateMap = new ChainMap<[IGPUVertexState, IGPUVertexAttributes], {
 /**
  * 从顶点属性信息与顶点数据中获取顶点缓冲区布局数组以及顶点缓冲区数组。
  *
- * @param attributeInfos 顶点属性信息。
+ * @param vertex 顶点着色器函数信息。
  * @param vertices 顶点数据。
  * @returns 顶点缓冲区布局数组以及顶点缓冲区数组。
  */
-function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: IGPUVertexAttributes)
+function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
 {
     const vertexBufferLayouts: GPUVertexBufferLayout[] = [];
 
@@ -174,11 +172,17 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
 
     const map: WeakMap<any, number> = new WeakMap();
 
-    attributeInfos.forEach((v) =>
+    vertex.inputs.forEach((v) =>
     {
-        let format: GPUVertexFormat = v.format;
-        const shaderLocation = v.shaderLocation;
+        // 跳过内置属性。
+        if (v.locationType === "builtin") return;
+
+        const shaderLocation = v.location as number;
         const attributeName = v.name;
+
+        const wgslType = getWGSLType(v.type);
+
+        let format = wgslVertexTypeMap[wgslType].format;
 
         const vertexAttribute = vertices[attributeName];
         console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
@@ -192,13 +196,9 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
         if (vertexAttribute.numComponents !== undefined)
         {
             const formats = format.split("x");
-            if (vertexAttribute.numComponents > 1)
+            if (Number(formats[1]) !== vertexAttribute.numComponents)
             {
-                format = [formats[0], vertexAttribute.numComponents].join("x") as any;
-            }
-            else
-            {
-                format = formats[0] as any;
+                format = `${formats[0]}x${vertexAttribute.numComponents}` as any;
             }
         }
 
@@ -275,10 +275,8 @@ function getVertexBuffers(attributeInfos: WGSLVertexAttributeInfo[], vertices: I
  */
 function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments: GPUTextureFormat[])
 {
-    if (!fragmentState)
-    {
-        return undefined;
-    }
+    if (!fragmentState) return undefined;
+
     const colorAttachmentsKey = colorAttachments.toString();
 
     let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
@@ -335,3 +333,19 @@ function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments
 }
 
 const fragmentStateMap = new ChainMap<[IGPUFragmentState, string], IGPUFragmentState>();
+
+function getWGSLType(type: TypeInfo)
+{
+    let wgslType = type.name;
+    if (isTemplateType(type))
+    {
+        wgslType += `<${type.format.name}>`;
+    }
+
+    return wgslType as WGSLVertexType;
+}
+
+function isTemplateType(type: TypeInfo): type is TemplateInfo
+{
+    return !!(type as TemplateInfo).format;
+}

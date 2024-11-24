@@ -16,37 +16,6 @@ export interface WGSLReflectInfo
 }
 
 /**
- * WGSL中顶点属性信息。
- */
-export interface WGSLVertexAttributeInfo
-{
-    /**
-     * 属性名称
-     */
-    name: string;
-
-    /**
-     * 所在着色器位置。
-     */
-    shaderLocation: number;
-
-    /**
-     * GPU顶点数据格式。
-     */
-    format: GPUVertexFormat;
-
-    /**
-     * 顶点数据在WGSL中的类型。
-     */
-    wgslType: WGSLVertexType;
-
-    /**
-     * 可能对应的GPU顶点数据格式列表。
-     */
-    possibleFormats: GPUVertexFormat[];
-}
-
-/**
  * WebGPU着色器代码中获取的绑定资源信息。
  */
 export interface WGSLBindingResourceInfo
@@ -255,51 +224,3 @@ const Visibility_FRAGMENT_COMPUTE = GPUShaderStage.FRAGMENT | GPUShaderStage.COM
  * 全部着色器可见。
  */
 const Visibility_ALL = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
-
-/**
- * 从顶点入口函数信息中获取顶点属性信息。
- *
- * @param vertexFunctionInfo 顶点入口函数信息。
- * @returns 顶点属性信息。
- */
-export function getAttributeInfos(vertexFunctionInfo: FunctionInfo)
-{
-    const attributeInfos: WGSLVertexAttributeInfo[] = [];
-
-    vertexFunctionInfo.inputs.forEach((v) =>
-    {
-        // 跳过内置属性。
-        if (v.locationType === "builtin")
-        {
-            return;
-        }
-
-        const shaderLocation = v.location as number;
-        const attributeName = v.name;
-
-        const wgslType = getWGSLType(v.type);
-
-        const format = wgslVertexTypeMap[wgslType].format;
-        const possibleFormats = wgslVertexTypeMap[wgslType].possibleFormats;
-
-        attributeInfos.push({ name: attributeName, shaderLocation, format, wgslType, possibleFormats });
-    });
-
-    return attributeInfos;
-}
-
-function getWGSLType(type: TypeInfo)
-{
-    let wgslType = type.name;
-    if (isTemplateType(type))
-    {
-        wgslType += `<${type.format.name}>`;
-    }
-
-    return wgslType as WGSLVertexType;
-}
-
-function isTemplateType(type: TypeInfo): type is TemplateInfo
-{
-    return !!(type as TemplateInfo).format;
-}
