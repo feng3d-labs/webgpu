@@ -1,5 +1,6 @@
 import { watcher } from "@feng3d/watcher";
 
+import { FunctionInfo } from "wgsl_reflect";
 import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
@@ -7,7 +8,7 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { gpuVertexFormatMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
-import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getWGSLReflectInfo } from "./getWGSLReflectInfo";
+import { WGSLBindingResourceInfoMap, WGSLVertexAttributeInfo, getAttributeInfos, getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。
@@ -117,19 +118,22 @@ function getIGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAt
 
         // 解析顶点着色器
         const reflect = getWGSLReflectInfo(code);
+        let vertex: FunctionInfo;
         //
         let entryPoint = vertexState.entryPoint;
         if (!entryPoint)
         {
-            console.assert(reflect.vertexEntryList.length > 0, `WGSL着色器 ${code} 中不存在顶点入口点。`);
-            entryPoint = reflect.vertexEntryList[0].entryPoint;
+            vertex = reflect.reflect.entry.vertex[0];
+            console.assert(!!vertex, `WGSL着色器 ${code} 中不存在顶点入口点。`);
+            entryPoint = vertex.name;
         }
         else
         {
-            console.assert(!!reflect.vertexEntryMap[entryPoint], `WGSL着色器 ${code} 中不存在指定顶点入口点 ${entryPoint} 。`);
+            vertex = reflect.reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
+            console.assert(!!vertex, `WGSL着色器 ${code} 中不存在指定顶点入口点 ${entryPoint} 。`);
         }
-        //
-        const attributeInfos = reflect.vertexEntryMap[entryPoint].attributeInfos;
+
+        const attributeInfos = getAttributeInfos(vertex);
 
         const { vertexBufferLayouts, vertexBuffers } = getVertexBuffers(attributeInfos, vertices);
 
@@ -282,17 +286,20 @@ function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments
     {
         const code = fragmentState.code;
         let entryPoint = fragmentState.entryPoint;
+        let fragment: FunctionInfo;
         if (!entryPoint)
         {
             const reflect = getWGSLReflectInfo(code);
-            console.assert(reflect.fragmentEntryList.length > 0, `WGSL着色器 ${code} 中不存在片元入口点。`);
-            entryPoint = reflect.fragmentEntryList[0].entryPoint;
+            fragment = reflect.reflect.entry.fragment[0];
+            console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
+            entryPoint = fragment.name;
         }
         else
         {
             // 验证着色器中包含指定片段入口函数。
             const reflect = getWGSLReflectInfo(code);
-            console.assert(!!reflect.fragmentEntryMap[entryPoint], `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
+            fragment = reflect.reflect.entry.fragment.filter((v) => v.name === entryPoint)[0];
+            console.assert(!!fragment, `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
         }
 
         const targets = colorAttachments.map((v, i) =>

@@ -7,72 +7,12 @@ import { WGSLVertexType, wgslVertexTypeMap } from "../types/VertexFormat";
  */
 export interface WGSLReflectInfo
 {
-    /**
-     * 入口函数映射。
-     */
-    entryMap: { [entryName: string]: WGSLEntryInfo };
-
-    /**
-     * 顶点入口信息。当存在多个时取第一个。
-     */
-    vertexEntryList: WGSLVertexEntryInfo[];
-
-    /**
-     * 顶点入口信息映射。
-     */
-    vertexEntryMap: { [entryPoint: string]: WGSLVertexEntryInfo };
-
-    /**
-     * 片元入口函数。当存在多个时取第一个。
-     */
-    fragmentEntryList: WGSLEntryInfo[];
-
-    /**
-     * 计算入口信息映射。
-     */
-    fragmentEntryMap: { [entryPoint: string]: WGSLEntryInfo };
-
-    /**
-     * 计算入口函数。当存在多个时取第一个。
-     */
-    computeEntryList: WGSLEntryInfo[];
-
-    /**
-     * 计算入口信息映射。
-     */
-    computeEntryMap: { [entryPoint: string]: WGSLEntryInfo };
-
+    reflect: WgslReflect
+    
     /**
      * 从WebGPU着色器代码获取的绑定资源信息表。
      */
     bindingResourceLayoutMap: WGSLBindingResourceInfoMap;
-}
-
-/**
- * WGSL着色器入口信息。
- */
-export interface WGSLEntryInfo
-{
-    /**
-     * 入口点名称
-     */
-    entryPoint: string;
-}
-
-/**
- * 顶点入口点信息。
- */
-export interface WGSLVertexEntryInfo extends WGSLEntryInfo
-{
-    /**
-     * 入口点名称
-     */
-    entryPoint: string;
-
-    /**
-     * 属性信息列表。
-     */
-    attributeInfos: WGSLVertexAttributeInfo[];
 }
 
 /**
@@ -136,46 +76,9 @@ export function getWGSLReflectInfo(code: string)
 
     //
     reflectInfo = {
-        entryMap: {},
-        vertexEntryList: [],
-        vertexEntryMap: {},
-        fragmentEntryList: [],
-        fragmentEntryMap: {},
-        computeEntryList: [],
-        computeEntryMap: {},
+        reflect,
         bindingResourceLayoutMap: {},
     };
-
-    //
-    reflect.entry.vertex.forEach((v) =>
-    {
-        const name = v.name;
-        const attributeInfos = getAttributeInfos(v);
-
-        const vertexEntry: WGSLVertexEntryInfo = { entryPoint: name, attributeInfos };
-
-        reflectInfo.entryMap[vertexEntry.entryPoint] = vertexEntry;
-        reflectInfo.vertexEntryMap[vertexEntry.entryPoint] = vertexEntry;
-        reflectInfo.vertexEntryList.push(vertexEntry);
-    });
-    reflect.entry.fragment.forEach((v) =>
-    {
-        const name = v.name;
-        const entryInfo: WGSLEntryInfo = { entryPoint: name };
-
-        reflectInfo.entryMap[entryInfo.entryPoint] = entryInfo;
-        reflectInfo.fragmentEntryMap[entryInfo.entryPoint] = entryInfo;
-        reflectInfo.fragmentEntryList.push(entryInfo);
-    });
-    reflect.entry.compute.forEach((v) =>
-    {
-        const name = v.name;
-        const entryInfo: WGSLEntryInfo = { entryPoint: name };
-
-        reflectInfo.entryMap[entryInfo.entryPoint] = entryInfo;
-        reflectInfo.computeEntryMap[entryInfo.entryPoint] = entryInfo;
-        reflectInfo.computeEntryList.push(entryInfo);
-    });
 
     //
     reflectInfo.bindingResourceLayoutMap = getWGSLBindingResourceInfoMap(reflect, code);
@@ -359,7 +262,7 @@ const Visibility_ALL = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShad
  * @param vertexFunctionInfo 顶点入口函数信息。
  * @returns 顶点属性信息。
  */
-function getAttributeInfos(vertexFunctionInfo: FunctionInfo)
+export function getAttributeInfos(vertexFunctionInfo: FunctionInfo)
 {
     const attributeInfos: WGSLVertexAttributeInfo[] = [];
 

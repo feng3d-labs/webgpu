@@ -1,3 +1,4 @@
+import { FunctionInfo } from "wgsl_reflect";
 import { IGPUComputePipeline, IGPUProgrammableStage } from "../data/IGPUComputeObject";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 import { getWGSLReflectInfo, WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
@@ -42,17 +43,19 @@ const computePipelineMap = new Map<IGPUComputePipeline, { gpuComputePipeline: IG
 */
 function getIGPUComputeStage(computeStage: IGPUProgrammableStage)
 {
+    const reflect = getWGSLReflectInfo(computeStage.code);
+    let compute: FunctionInfo;
     if (!computeStage.entryPoint)
     {
-        const reflect = getWGSLReflectInfo(computeStage.code);
-        console.assert(reflect.computeEntryList.length > 0, `WGSL着色器 ${computeStage.code} 中不存在计算入口点。`);
-        computeStage.entryPoint = reflect.computeEntryList[0].entryPoint;
+        compute = reflect.reflect.entry.compute[0];
+        console.assert(!!compute, `WGSL着色器 ${computeStage.code} 中不存在计算入口点。`);
+        computeStage.entryPoint = compute.name;
     }
     else
     {
         // 验证着色器中包含指定片段入口函数。
-        const reflect = getWGSLReflectInfo(computeStage.code);
-        console.assert(!!reflect.computeEntryMap[computeStage.entryPoint], `WGSL着色器 ${computeStage.code} 中不存在指定的计算入口点 ${computeStage.entryPoint}`);
+        compute = reflect.reflect.entry.compute.filter((v) => v.name === computeStage.entryPoint)[0];
+        console.assert(!!compute, `WGSL着色器 ${computeStage.code} 中不存在指定的计算入口点 ${computeStage.entryPoint}`);
     }
 
     return computeStage;
