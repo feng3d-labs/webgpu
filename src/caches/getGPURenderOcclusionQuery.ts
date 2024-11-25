@@ -7,8 +7,12 @@ import { GPUQueue_submit } from "../eventnames";
 
 export function getGPURenderOcclusionQuery(renderObjects?: (IGPURenderOcclusionQueryObject | IGPURenderObject | IGPURenderBundleObject)[])
 {
-    const occlusionQueryObjects: IGPURenderOcclusionQueryObject[] = renderObjects?.filter((cv) => (cv as IGPURenderOcclusionQueryObject).type === "OcclusionQueryObject") as any;
-    if (occlusionQueryObjects.length == 0) return null;
+    if (!renderObjects) return undefined;
+    let renderOcclusionQuery: GPURenderOcclusionQuery = renderObjects["_GPURenderOcclusionQuery"];
+    if (renderOcclusionQuery) return renderOcclusionQuery;
+
+    const occlusionQueryObjects: IGPURenderOcclusionQueryObject[] = renderObjects.filter((cv) => (cv as IGPURenderOcclusionQueryObject).type === "OcclusionQueryObject") as any;
+    if (occlusionQueryObjects.length == 0) return undefined;
 
     occlusionQueryObjects.forEach((v, i) => { v._queryIndex = i; })
 
@@ -71,7 +75,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: (IGPURenderOcclusionQ
 
                     resultBuf.unmap();
 
-                    renderPass.occlusionQueryResults = occlusionQueryObjects;
+                    renderPass.occlusionQueryResults = occlusionQueryObjects.concat();
 
                     //
                     anyEmitter.off(device.queue, GPUQueue_submit, getOcclusionQueryResult);
@@ -83,5 +87,13 @@ export function getGPURenderOcclusionQuery(renderObjects?: (IGPURenderOcclusionQ
         anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
     };
 
-    return { init, queryResult };
+    renderObjects["_GPURenderOcclusionQuery"] = renderOcclusionQuery = { init, queryResult };
+
+    return renderOcclusionQuery;
+}
+
+interface GPURenderOcclusionQuery
+{
+    init: (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) => void
+    queryResult: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass) => void
 }
