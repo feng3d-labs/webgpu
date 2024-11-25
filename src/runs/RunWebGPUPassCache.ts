@@ -5,6 +5,9 @@ import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { RunWebGPU } from "./RunWebGPU";
 
+/**
+ * 对比已提交的数据，较少重复提交来提升性能。
+ */
 export class RunWebGPUPassCache extends RunWebGPU
 {
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport?: IGPUViewport)
