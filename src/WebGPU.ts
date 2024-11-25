@@ -114,18 +114,16 @@ export class WebGPU
      */
     submit(submit?: IGPUSubmit)
     {
-        if (submit)
-        {
-            this.runWebGPU.runSubmit(this.device, submit);
-        }
-        else
+        if (!submit)
         {
             if (!this._currentSubmit) return;
-            this.runWebGPU.runSubmit(this.device, this._currentSubmit);
+            submit = this._currentSubmit;
             this._currentSubmit = null;
             this._currentRenderPassEncoder = null;
             this._currentComputePassEncoder = null;
         }
+
+        this.runWebGPU.runSubmit(this.device, submit);
     }
 
     /**
