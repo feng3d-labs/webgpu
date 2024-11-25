@@ -4,15 +4,17 @@ import { IGPUBindGroupDescriptor, IGPUBufferBinding, IGPUExternalTexture } from 
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
+import { GPUTextureView_destroy } from "../eventnames";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 import { getGPUBufferBinding } from "./getGPUBufferBinding";
 import { getGPUExternalTexture } from "./getGPUExternalTexture";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
-import { GPUTextureView_destroy } from "../eventnames";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescriptor)
 {
+    const bindGroupMap: WeakMap<IGPUBindGroupDescriptor, GPUBindGroup> = device["_bindGroupMap"] = device["_bindGroupMap"] || new WeakMap();
+
     let gBindGroup = bindGroupMap.get(bindGroup);
     if (gBindGroup) return gBindGroup;
 
@@ -103,5 +105,3 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
     return gBindGroup;
 }
-
-const bindGroupMap = new WeakMap<IGPUBindGroupDescriptor, GPUBindGroup>();
