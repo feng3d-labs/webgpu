@@ -45,7 +45,7 @@ export class RunWebGPU
         anyEmitter.emit(device.queue, GPUQueue_submit);
     }
 
-    runCommandEncoder(device: GPUDevice, commandEncoder: IGPUCommandEncoder)
+    protected runCommandEncoder(device: GPUDevice, commandEncoder: IGPUCommandEncoder)
     {
         const gpuCommandEncoder = device.createCommandEncoder();
 
@@ -76,7 +76,7 @@ export class RunWebGPU
         return gpuCommandEncoder.finish();
     }
 
-    runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
+    protected runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
     {
         const renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass.descriptor);
         const renderPassFormats = getGPURenderPassFormats(renderPass.descriptor);
@@ -117,7 +117,7 @@ export class RunWebGPU
      * @param commandEncoder 命令编码器。
      * @param computePass 计算通道。
      */
-    runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: IGPUComputePass)
+    protected runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: IGPUComputePass)
     {
         const passEncoder = commandEncoder.beginComputePass(computePass.descriptor);
 
@@ -129,7 +129,7 @@ export class RunWebGPU
         passEncoder.end();
     }
 
-    runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: IGPUCopyTextureToTexture)
+    protected runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: IGPUCopyTextureToTexture)
     {
         const sourceTexture = getGPUTexture(device, copyTextureToTexture.source.texture);
         const destinationTexture = getGPUTexture(device, copyTextureToTexture.destination.texture);
@@ -151,7 +151,7 @@ export class RunWebGPU
         );
     }
 
-    runCopyBufferToBuffer(device: GPUDevice, commandEncoder: GPUCommandEncoder, v: IGPUCopyBufferToBuffer)
+    protected runCopyBufferToBuffer(device: GPUDevice, commandEncoder: GPUCommandEncoder, v: IGPUCopyBufferToBuffer)
     {
         v.sourceOffset ||= 0;
         v.destinationOffset ||= 0;
@@ -170,7 +170,7 @@ export class RunWebGPU
         );
     }
 
-    runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderOcclusionQueryObject: IGPURenderOcclusionQueryObject)
+    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderOcclusionQueryObject: IGPURenderOcclusionQueryObject)
     {
         passEncoder.beginOcclusionQuery(renderOcclusionQueryObject._queryIndex);
         renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>
@@ -180,7 +180,7 @@ export class RunWebGPU
         passEncoder.endOcclusionQuery();
     }
 
-    runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
+    protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
     {
         const gRenderBundle = getGPURenderBundle(this, device, renderBundleObject, renderPassFormat);
 
@@ -194,7 +194,7 @@ export class RunWebGPU
      * @param passEncoder 计算通道编码器。
      * @param computeObject 计算对象。
      */
-    runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
+    protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
     {
         const { pipeline, bindingResources, workgroups } = computeObject;
 
@@ -205,7 +205,7 @@ export class RunWebGPU
         this.runWorkgroups(passEncoder, workgroups);
     }
 
-    runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, pipeline: IGPUComputePipeline)
+    protected runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, pipeline: IGPUComputePipeline)
     {
         const gpuComputePipeline = getIGPUComputePipeline(pipeline);
 
@@ -219,7 +219,7 @@ export class RunWebGPU
      * @param passEncoder 计算通道编码器。 
      * @param workgroups 计算工作组。
      */
-    runWorkgroups(passEncoder: GPUComputePassEncoder, workgroups?: IGPUWorkgroups)
+    protected runWorkgroups(passEncoder: GPUComputePassEncoder, workgroups?: IGPUWorkgroups)
     {
         const { workgroupCountX, workgroupCountY, workgroupCountZ } = workgroups;
         passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
@@ -233,7 +233,7 @@ export class RunWebGPU
      * @param renderObject 渲染对象。
      * @param renderPass 渲染通道。
      */
-    runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
+    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
     {
         const { viewport, scissorRect, pipeline, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
 
@@ -254,7 +254,7 @@ export class RunWebGPU
         this.runDrawIndexed(passEncoder, drawIndexed);
     }
 
-    runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport?: IGPUViewport)
+    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport?: IGPUViewport)
     {
         if (!viewport) return;
         if (passEncoder["_viewport"] === viewport) return;
@@ -269,7 +269,7 @@ export class RunWebGPU
         passEncoder["_viewport"] = viewport;
     }
 
-    runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect?: IGPUScissorRect)
+    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect?: IGPUScissorRect)
     {
         if (!scissorRect) return;
         if (passEncoder["_scissorRect"] === scissorRect) return;
@@ -293,7 +293,7 @@ export class RunWebGPU
      * @param passEncoder 渲染通道编码器。
      * @param pipeline 渲染管线。
      */
-    runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
     {
         if (passEncoder["_renderPipeline"] === renderPipeline)
         {
@@ -308,7 +308,7 @@ export class RunWebGPU
         passEncoder["_renderPipeline"] = renderPipeline;
     }
 
-    runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
+    protected runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
     {
         if (passEncoder["_bindingResources"] === bindingResources)
         {
@@ -327,7 +327,7 @@ export class RunWebGPU
         passEncoder["_bindingResources"] = bindingResources
     }
 
-    runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
     {
         if (passEncoder["_vertices"] === vertices)
         {
@@ -347,7 +347,7 @@ export class RunWebGPU
         passEncoder["_vertices"] = vertices;
     }
 
-    runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array)
+    protected runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array)
     {
         if (!indices) return;
         if (passEncoder["_indices"] === indices)
@@ -366,7 +366,7 @@ export class RunWebGPU
         passEncoder["_indices"] = indices;
     }
 
-    runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDraw)
+    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDraw)
     {
         if (!draw) return;
 
@@ -374,7 +374,7 @@ export class RunWebGPU
         passEncoder.draw(vertexCount, instanceCount, firstVertex, firstInstance);
     }
 
-    runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed?: IGPUDrawIndexed)
+    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed?: IGPUDrawIndexed)
     {
         if (!drawIndexed) return;
 

@@ -23,7 +23,7 @@ export function getGPURenderBundle(runWebGPU: RunWebGPU, device: GPUDevice, rend
 
     renderBundleObject.renderObjects.forEach((renderObject) =>
     {
-        runWebGPU.runRenderObject(device, renderBundleEncoder, renderPassFormat, renderObject);
+        runWebGPU["runRenderObject"](device, renderBundleEncoder, renderPassFormat, renderObject);
     });
 
     gpuRenderBundle = renderBundleEncoder.finish();
