@@ -10,7 +10,7 @@ import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
-import { runSubmit } from "./runs/runSubmit";
+import { RunWebGPU } from "./RunWebGPU";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
 import { readPixels } from "./utils/readPixels";
@@ -23,6 +23,8 @@ import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultipl
  */
 export class WebGPU
 {
+    runWebGPU = new RunWebGPU();
+
     /**
      * 初始化 WebGPU 获取 GPUDevice 。
      */
@@ -114,12 +116,12 @@ export class WebGPU
     {
         if (submit)
         {
-            runSubmit(this.device, submit);
+            this.runWebGPU.runSubmit(this.device, submit);
         }
         else
         {
             if (!this._currentSubmit) return;
-            runSubmit(this.device, this._currentSubmit);
+            this.runWebGPU.runSubmit(this.device, this._currentSubmit);
             this._currentSubmit = null;
             this._currentRenderPassEncoder = null;
             this._currentComputePassEncoder = null;
