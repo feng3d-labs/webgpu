@@ -12,10 +12,8 @@ import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 
 export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
 {
-    const gpuPipelineLayout = getIGPUPipelineLayout(pipeline);
-
     // 计算 bindGroups
-    const setBindGroups = getIGPUSetBindGroups(gpuPipelineLayout, bindingResources);
+    const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);
 
     setBindGroups?.forEach((setBindGroup, index) =>
     {
@@ -24,14 +22,17 @@ export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsM
     });
 }
 
-function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResources: IGPUBindingResources)
+function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
 {
     //
-    let gpuSetBindGroups = bindGroupsMap.get([layout, bindingResources]);
+    let gpuSetBindGroups = bindGroupsMap.get([pipeline, bindingResources]);
     if (gpuSetBindGroups) return gpuSetBindGroups;
 
     gpuSetBindGroups = [];
+    bindGroupsMap.set([pipeline, bindingResources], gpuSetBindGroups);
 
+    //
+    const layout = getIGPUPipelineLayout(pipeline);
     layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
     {
         const entries: IGPUBindGroupEntry[] = [];
@@ -84,12 +85,10 @@ function getIGPUSetBindGroups(layout: IGPUPipelineLayoutDescriptor, bindingResou
         });
     });
 
-    bindGroupsMap.set([layout, bindingResources], gpuSetBindGroups);
-
     return gpuSetBindGroups;
 }
 
-const bindGroupsMap = new ChainMap<[IGPUPipelineLayoutDescriptor, IGPUBindingResources], IGPUSetBindGroup[]>();
+const bindGroupsMap = new ChainMap<[IGPUComputePipeline | IGPURenderPipeline, IGPUBindingResources], IGPUSetBindGroup[]>();
 
 /**
  * 
