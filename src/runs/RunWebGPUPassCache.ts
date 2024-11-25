@@ -1,6 +1,8 @@
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
-import { IGPURenderPipeline, IGPUScissorRect, IGPUViewport } from "../data/IGPURenderObject";
+import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
+import { IGPURenderObject, IGPURenderPipeline, IGPUScissorRect, IGPUSetBindGroup, IGPUViewport } from "../data/IGPURenderObject";
+import { IGPURenderOcclusionQueryObject } from "../data/IGPURenderOcclusionQueryObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { RunWebGPU } from "./RunWebGPU";
@@ -10,6 +12,20 @@ import { RunWebGPU } from "./RunWebGPU";
  */
 export class RunWebGPUPassCache extends RunWebGPU
 {
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: (IGPURenderOcclusionQueryObject | IGPURenderObject | IGPURenderBundleObject)[])
+    {
+        passEncoder["_setBindGroup"] = passEncoder["_setBindGroup"] || [];
+
+        super.runRenderPassObjects(device, passEncoder, renderPassFormats, renderObjects);
+    }
+
+    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
+    {
+        bundleEncoder["_setBindGroup"] = bundleEncoder["_setBindGroup"] || [];
+
+        super.runRenderBundleObjects(device, bundleEncoder, renderPassFormats, renderObjects);
+    }
+
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport?: IGPUViewport)
     {
         if (!viewport) return;
@@ -42,6 +58,17 @@ export class RunWebGPUPassCache extends RunWebGPU
         if (bindingResources) passEncoder["_bindingResources"] = bindingResources;
 
         super.runBindingResources(device, passEncoder, pipeline, bindingResources);
+    }
+
+    protected runSetBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, index: number, setBindGroup: IGPUSetBindGroup)
+    {
+        if (passEncoder["_setBindGroup"][index] === setBindGroup)
+        {
+            return;
+        }
+        passEncoder["_setBindGroup"][index] = setBindGroup;
+
+        super.runSetBindGroup(device, passEncoder, index, setBindGroup);
     }
 
     protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)

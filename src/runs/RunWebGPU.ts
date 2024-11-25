@@ -20,7 +20,7 @@ import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
-import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline, IGPUScissorRect, IGPUViewport } from "../data/IGPURenderObject";
+import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline, IGPUScissorRect, IGPUSetBindGroup, IGPUViewport } from "../data/IGPURenderObject";
 import { IGPURenderOcclusionQueryObject } from "../data/IGPURenderOcclusionQueryObject";
 import { IGPURenderPass } from "../data/IGPURenderPass";
 import { IGPUSubmit } from "../data/IGPUSubmit";
@@ -78,17 +78,30 @@ export class RunWebGPU
 
     protected runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
     {
-        const renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass.descriptor);
-        const renderPassFormats = getGPURenderPassFormats(renderPass.descriptor);
+        const { descriptor, renderObjects } = renderPass;
+
+        const renderPassDescriptor = getGPURenderPassDescriptor(device, descriptor);
+        const renderPassFormats = getGPURenderPassFormats(descriptor);
 
         // 处理不被遮挡查询。
-        const occlusionQuery = getGPURenderOcclusionQuery(renderPass.renderObjects);
+        const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
         occlusionQuery?.init(device, renderPassDescriptor)
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
+        this.runRenderPassObjects(device, passEncoder, renderPassFormats, renderObjects);
+
+        passEncoder.end();
+
         //
-        renderPass.renderObjects?.forEach((element) =>
+        occlusionQuery?.queryResult(device, commandEncoder, renderPass);
+    }
+
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: (IGPURenderOcclusionQueryObject | IGPURenderObject | IGPURenderBundleObject)[])
+    {
+        if (!renderObjects) return;
+        //
+        renderObjects.forEach((element) =>
         {
             if ((element as IGPURenderOcclusionQueryObject).type === "OcclusionQueryObject")
             {
@@ -103,11 +116,15 @@ export class RunWebGPU
                 this.runRenderObject(device, passEncoder, renderPassFormats, element as IGPURenderObject);
             }
         });
+    }
 
-        passEncoder.end();
-
+    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
+    {
         //
-        occlusionQuery?.queryResult(device, commandEncoder, renderPass);
+        renderObjects.forEach((element) =>
+        {
+            this.runRenderObject(device, passEncoder, renderPassFormats, element as IGPURenderObject);
+        });
     }
 
     /**
@@ -301,9 +318,14 @@ export class RunWebGPU
 
         setBindGroups?.forEach((setBindGroup, index) =>
         {
-            const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup);
-            passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
+            this.runSetBindGroup(device, passEncoder, index, setBindGroup);
         });
+    }
+
+    protected runSetBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, index: number, setBindGroup: IGPUSetBindGroup)
+    {
+        const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup);
+        passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
     }
 
     protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
