@@ -1,6 +1,7 @@
 import { anyEmitter } from "@feng3d/event";
 
 import { getGPUBuffer } from "./caches/getGPUBuffer";
+import { getGPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
@@ -73,12 +74,8 @@ export class RunWebGPU
         const renderPassFormats = getGPURenderPassFormats(renderPass.descriptor);
 
         // 处理不被遮挡查询。
-        const occlusionQueryObjects: IGPURenderOcclusionQueryObject[] = renderPass.renderObjects.filter((cv) => (cv as IGPURenderOcclusionQueryObject).type === "OcclusionQueryObject") as any;
-        if (occlusionQueryObjects.length > 0)
-        {
-            renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: 'occlusion', count: occlusionQueryObjects.length });
-            occlusionQueryObjects.forEach((v, i) => { v._queryIndex = i; })
-        }
+        const occlusionQuery = getGPURenderOcclusionQuery(renderPass.renderObjects);
+        occlusionQuery?.init(device, renderPassDescriptor)
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
@@ -101,55 +98,8 @@ export class RunWebGPU
 
         passEncoder.end();
 
-        // 处理不被遮挡查询。
-        if (occlusionQueryObjects.length > 0)
-        {
-            const resolveBuf: GPUBuffer = renderPass["resolveBuffer"] = renderPass["resolveBuffer"] || device.createBuffer({
-                label: 'resolveBuffer',
-                // Query results are 64bit unsigned integers.
-                size: occlusionQueryObjects.length * BigUint64Array.BYTES_PER_ELEMENT,
-                usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-            });
-
-            commandEncoder.resolveQuerySet(renderPassDescriptor.occlusionQuerySet, 0, occlusionQueryObjects.length, resolveBuf, 0);
-
-            const resultBuf = renderPass["resultBuffer"] = renderPass["resultBuffer"] || device.createBuffer({
-                label: 'resultBuffer',
-                size: resolveBuf.size,
-                usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-            });
-
-            if (resultBuf.mapState === 'unmapped')
-            {
-                commandEncoder.copyBufferToBuffer(resolveBuf, 0, resultBuf, 0, resultBuf.size);
-            }
-
-            const getOcclusionQueryResult = () =>
-            {
-                if (resultBuf.mapState === 'unmapped')
-                {
-                    resultBuf.mapAsync(GPUMapMode.READ).then(() =>
-                    {
-                        const results = new BigUint64Array(resultBuf.getMappedRange());
-
-                        occlusionQueryObjects.forEach((v, i) =>
-                        {
-                            v.result = results[i] as any;
-                        });
-
-                        resultBuf.unmap();
-
-                        renderPass.occlusionQueryResults = occlusionQueryObjects;
-
-                        //
-                        anyEmitter.off(device.queue, GPUQueue_submit, getOcclusionQueryResult);
-                    });
-                }
-            };
-
-            // 监听提交WebGPU事件
-            anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
-        }
+        //
+        occlusionQuery?.queryResult(device, commandEncoder, renderPass);
     }
 
     /**
