@@ -1,3 +1,5 @@
+import { GPUCommandEncoderYouHua } from "./GPUCommandEncoderYouHua";
+
 /**
  * 优化性能
  */
@@ -75,7 +77,8 @@ export class GPUDeviceYouHua implements GPUDevice
     }
     createCommandEncoder(descriptor?: GPUCommandEncoderDescriptor): GPUCommandEncoder
     {
-        return this._device.createCommandEncoder(descriptor);
+        const commandEncoder = this._device.createCommandEncoder(descriptor);
+        return new GPUCommandEncoderYouHua(commandEncoder);
     }
     createRenderBundleEncoder(descriptor: GPURenderBundleEncoderDescriptor): GPURenderBundleEncoder
     {
