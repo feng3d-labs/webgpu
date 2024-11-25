@@ -336,9 +336,21 @@ function getWGSLType(type: TypeInfo)
     {
         wgslType += `<${type.format.name}>`;
     }
+    if (wgslTypeMap[wgslType])
+    {
+        wgslType = wgslTypeMap[wgslType]
+    }
 
     return wgslType as WGSLVertexType;
 }
+
+/**
+ * 别名
+ */
+const wgslTypeMap = {
+    vec3f: "vec3<f32>",
+    vec4f: "vec4<f32>",
+};
 
 function isTemplateType(type: TypeInfo): type is TemplateInfo
 {

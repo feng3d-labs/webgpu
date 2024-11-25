@@ -32,9 +32,6 @@ export type WGSLVertexType =
     | "vec3<u32>"
     | "i32"
     | "vec3<i32>"
-    // 别名
-    | "vec3f"
-    | "vec4f"
     ;
 
 /**
@@ -141,7 +138,4 @@ export const wgslVertexTypeMap: Record<WGSLVertexType, WGSLVertexTypeValue> = {
     "vec3<u32>": { format: "uint32x3", possibleFormats: ["uint32x3"] },
     i32: { format: "sint32", possibleFormats: ["sint32"] },
     "vec3<i32>": { format: "sint32x3", possibleFormats: ["sint32x3"] },
-    // 别名
-    "vec3f": { format: "float32x3", possibleFormats: ["float32x3"] },
-    "vec4f": { format: "float32x4", possibleFormats: ["unorm8x4", "snorm8x4", "unorm16x4", "snorm16x4", "float32x4"] },
 };
