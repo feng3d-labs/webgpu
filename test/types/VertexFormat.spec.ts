@@ -53,6 +53,7 @@ describe("VertexFormat", () =>
         "sint32x2",
         "sint32x3",
         "sint32x4",
+        "unorm10-10-10-2",
     ];
 
     it("constructor", () =>
