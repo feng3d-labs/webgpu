@@ -4,6 +4,8 @@ import { getGPUShaderModule } from "./getGPUShaderModule";
 
 export function getGPUComputePipeline(device: GPUDevice, descriptor: IGPUComputePipeline)
 {
+    const computePipelineMap: WeakMap<IGPUComputePipeline, GPUComputePipeline> = device["_computePipelineMap"] = device["_computePipelineMap"] || new WeakMap();
+
     let pipeline = computePipelineMap.get(descriptor);
     if (pipeline) return pipeline;
 
@@ -21,4 +23,3 @@ export function getGPUComputePipeline(device: GPUDevice, descriptor: IGPUCompute
     return pipeline;
 }
 
-const computePipelineMap = new WeakMap<IGPUComputePipeline, GPUComputePipeline>();

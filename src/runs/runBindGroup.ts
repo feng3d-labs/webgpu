@@ -6,7 +6,6 @@ import { IGPUBindGroupEntry, IGPUBufferBinding } from "../data/IGPUBindGroupDesc
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
-import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 
