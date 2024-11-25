@@ -70,36 +70,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
         const alignedUniformBytes = Math.ceil(uniformBytes / 256) * 256;
         const alignedUniformFloats = alignedUniformBytes / Float32Array.BYTES_PER_ELEMENT;
-        const uniformBuffer = new Uint8Array(numTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT);
-        const uniformBufferData = new Float32Array(
-            numTriangles * alignedUniformFloats
+        const uniformBuffer = new Float32Array(
+            numTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT
         );
         for (let i = 0; i < numTriangles; ++i)
         {
-            uniformBufferData[alignedUniformFloats * i + 0] = Math.random() * 0.2 + 0.2; // scale
-            uniformBufferData[alignedUniformFloats * i + 1] = 0.9 * 2 * (Math.random() - 0.5); // offsetX
-            uniformBufferData[alignedUniformFloats * i + 2] = 0.9 * 2 * (Math.random() - 0.5); // offsetY
-            uniformBufferData[alignedUniformFloats * i + 3] = Math.random() * 1.5 + 0.5; // scalar
-            uniformBufferData[alignedUniformFloats * i + 4] = Math.random() * 10; // scalarOffset
+            uniformBuffer[alignedUniformFloats * i + 0] = Math.random() * 0.2 + 0.2; // scale
+            uniformBuffer[alignedUniformFloats * i + 1] = 0.9 * 2 * (Math.random() - 0.5); // offsetX
+            uniformBuffer[alignedUniformFloats * i + 2] = 0.9 * 2 * (Math.random() - 0.5); // offsetY
+            uniformBuffer[alignedUniformFloats * i + 3] = Math.random() * 1.5 + 0.5; // scalar
+            uniformBuffer[alignedUniformFloats * i + 4] = Math.random() * 10; // scalarOffset
         }
 
         const timeOffset = numTriangles * alignedUniformBytes;
-
-        // writeBuffer too large may OOM. TODO: The browser should internally chunk uploads.
-        const maxMappingLength = (14 * 1024 * 1024) / Float32Array.BYTES_PER_ELEMENT;
-        const writeBuffers = getIGPUBuffer(uniformBuffer).writeBuffers || [];
-        for (let offset = 0; offset < uniformBufferData.length; offset += maxMappingLength)
-        {
-            const uploadCount = Math.min(uniformBufferData.length - offset, maxMappingLength);
-
-            writeBuffers.push({
-                bufferOffset: offset * Float32Array.BYTES_PER_ELEMENT,
-                data: uniformBufferData.buffer,
-                dataOffset: uniformBufferData.byteOffset + offset * Float32Array.BYTES_PER_ELEMENT,
-                size: uploadCount * Float32Array.BYTES_PER_ELEMENT,
-            });
-        }
-        getIGPUBuffer(uniformBuffer).writeBuffers = writeBuffers;
 
         const time = {
             bufferView: new Float32Array(uniformBuffer.buffer, timeOffset, 1),
