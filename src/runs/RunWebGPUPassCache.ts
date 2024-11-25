@@ -36,12 +36,12 @@ export class RunWebGPUPassCache extends RunWebGPU
         super.runRenderPipeline(device, passEncoder, renderPipeline, renderPassFormat, vertices);
     }
 
-    protected runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
     {
         if (passEncoder["_bindingResources"] === bindingResources) return;
         if (bindingResources) passEncoder["_bindingResources"] = bindingResources;
 
-        super.runBindGroup(device, passEncoder, pipeline, bindingResources);
+        super.runBindingResources(device, passEncoder, pipeline, bindingResources);
     }
 
     protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)

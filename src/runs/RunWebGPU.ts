@@ -200,7 +200,7 @@ export class RunWebGPU
 
         this.runComputePipeline(device, passEncoder, pipeline);
 
-        this.runBindGroup(device, passEncoder, pipeline, bindingResources);
+        this.runBindingResources(device, passEncoder, pipeline, bindingResources);
 
         this.runWorkgroups(passEncoder, workgroups);
     }
@@ -243,7 +243,7 @@ export class RunWebGPU
 
         this.runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
 
-        this.runBindGroup(device, passEncoder, pipeline, bindingResources);
+        this.runBindingResources(device, passEncoder, pipeline, bindingResources);
 
         this.runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
 
@@ -294,7 +294,7 @@ export class RunWebGPU
         passEncoder.setPipeline(gpuRenderPipeline);
     }
 
-    protected runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
     {
         // 计算 bindGroups
         const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);
