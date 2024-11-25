@@ -9,6 +9,10 @@ import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
+import { getGPURenderBundle } from "../data/getGPURenderBundle";
+import { getGPURenderPassFormats } from "../data/getGPURenderPassFormats";
+import { getIGPUBuffer, getIGPUIndexBuffer } from "../data/getIGPUIndexBuffer";
+import { getIGPUSetBindGroups } from "../data/getIGPUSetBindGroups";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUCommandEncoder } from "../data/IGPUCommandEncoder";
 import { IGPUComputeObject, IGPUComputePipeline, IGPUWorkgroups } from "../data/IGPUComputeObject";
@@ -23,10 +27,6 @@ import { IGPUSubmit } from "../data/IGPUSubmit";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
-import { getGPURenderBundle } from "../data/getGPURenderBundle";
-import { getGPURenderPassFormats } from "../data/getGPURenderPassFormats";
-import { getIGPUBuffer, getIGPUIndexBuffer } from "../data/getIGPUIndexBuffer";
-import { getIGPUSetBindGroups } from "../data/getIGPUSetBindGroups";
 
 export class RunWebGPU
 {
@@ -257,7 +257,6 @@ export class RunWebGPU
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport?: IGPUViewport)
     {
         if (!viewport) return;
-        if (passEncoder["_viewport"] === viewport) return;
 
         let { fromWebGL, x, y, width, height, minDepth, maxDepth } = viewport;
         if (fromWebGL)
@@ -265,14 +264,11 @@ export class RunWebGPU
             y = attachmentSize.height - y - height
         }
         passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
-
-        passEncoder["_viewport"] = viewport;
     }
 
     protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect?: IGPUScissorRect)
     {
         if (!scissorRect) return;
-        if (passEncoder["_scissorRect"] === scissorRect) return;
 
         let { fromWebGL, x, y, width, height } = scissorRect;
         if (fromWebGL)
@@ -281,9 +277,6 @@ export class RunWebGPU
         }
 
         passEncoder.setScissorRect(x, y, width, height);
-
-        //
-        passEncoder["_scissorRect"] = scissorRect;
     }
 
     /**
@@ -295,26 +288,14 @@ export class RunWebGPU
      */
     protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
     {
-        if (passEncoder["_renderPipeline"] === renderPipeline)
-        {
-            return;
-        }
-
         const { pipeline } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
 
         const gpuRenderPipeline = getGPURenderPipeline(device, pipeline);
         passEncoder.setPipeline(gpuRenderPipeline);
-
-        passEncoder["_renderPipeline"] = renderPipeline;
     }
 
     protected runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
     {
-        if (passEncoder["_bindingResources"] === bindingResources)
-        {
-            return;
-        }
-
         // 计算 bindGroups
         const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);
 
@@ -323,16 +304,11 @@ export class RunWebGPU
             const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup);
             passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
         });
-
-        passEncoder["_bindingResources"] = bindingResources
     }
 
     protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
     {
-        if (passEncoder["_vertices"] === vertices)
-        {
-            return;
-        }
+        if (!vertices) return;
 
         const { vertexBuffers } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
 
@@ -343,17 +319,11 @@ export class RunWebGPU
             const gBuffer = getGPUBuffer(device, buffer);
             passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
         });
-
-        passEncoder["_vertices"] = vertices;
     }
 
     protected runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array)
     {
         if (!indices) return;
-        if (passEncoder["_indices"] === indices)
-        {
-            return;
-        }
 
         const indexBuffer = getIGPUIndexBuffer(indices);
 
@@ -361,9 +331,6 @@ export class RunWebGPU
         const gBuffer = getGPUBuffer(device, buffer);
 
         passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
-
-        //
-        passEncoder["_indices"] = indices;
     }
 
     protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDraw)
