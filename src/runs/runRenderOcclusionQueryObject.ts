@@ -2,9 +2,9 @@ import { IGPURenderOcclusionQueryObject } from "../data/IGPURenderOcclusionQuery
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { runRenderObject } from "./runRenderObject";
 
-export function runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, queryIndex: GPUSize32, renderOcclusionQueryObject: IGPURenderOcclusionQueryObject)
+export function runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderOcclusionQueryObject: IGPURenderOcclusionQueryObject)
 {
-    passEncoder.beginOcclusionQuery(queryIndex);
+    passEncoder.beginOcclusionQuery(renderOcclusionQueryObject._queryIndex);
     renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>
     {
         runRenderObject(device, passEncoder, renderPassFormats, renderObject);

@@ -13,7 +13,14 @@ export interface IGPURenderOcclusionQueryObject
     renderObjects: IGPURenderObject[];
 
     /**
-     * 渲染完成后有引擎自动填充。
+     * 执行过程中由引擎自动填充
+     * 
+     * @internal
+     */
+    _queryIndex?: GPUSize32;
+
+    /**
+     * 渲染完成后由引擎自动填充。
      */
     result?: boolean;
 }
