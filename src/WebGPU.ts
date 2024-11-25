@@ -1,4 +1,4 @@
-import { destoryTexture, getGPUTexture } from "./caches/getGPUTexture";
+import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGPUTextureSize } from "./caches/getGPUTextureSize";
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
 import { IGPUComputePass } from "./data/IGPUComputePass";
@@ -133,7 +133,7 @@ export class WebGPU
      */
     destoryTexture(texture: IGPUTexture)
     {
-        destoryTexture(this.device, texture);
+        getGPUTexture(this.device, texture, false)?.destroy();
     }
 
     /**
@@ -180,6 +180,8 @@ export class WebGPU
             ...gpuReadPixels,
             texture: gpuTexture,
         });
+
+        gpuReadPixels.result = result;
 
         return result;
     }

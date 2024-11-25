@@ -19,4 +19,9 @@ export interface IGPUReadPixels
      * 读取尺寸
      */
     copySize: { width: number, height: number }
+
+    /**
+     * 用于保存最后结果。
+     */
+    result?: Uint8Array;
 }

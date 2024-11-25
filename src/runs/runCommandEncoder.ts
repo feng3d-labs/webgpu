@@ -8,27 +8,27 @@ import { runCopyBufferToBuffer } from "./runCopyBufferToBuffer";
 import { runCopyTextureToTexture } from "./runCopyTextureToTexture";
 import { runRenderPass } from "./runRenderPass";
 
-export function runCommandEncoder(device: GPUDevice, v: IGPUCommandEncoder)
+export function runCommandEncoder(device: GPUDevice, commandEncoder: IGPUCommandEncoder)
 {
     const gpuCommandEncoder = device.createCommandEncoder();
 
-    v.passEncoders.forEach((v) =>
+    commandEncoder.passEncoders.forEach((passEncoder) =>
     {
-        if ((v as IGPURenderPass).descriptor)
+        if ((passEncoder as IGPURenderPass).descriptor)
         {
-            runRenderPass(device, gpuCommandEncoder, v as IGPURenderPass);
+            runRenderPass(device, gpuCommandEncoder, passEncoder as IGPURenderPass);
         }
-        else if ((v as IGPUComputePass).computeObjects)
+        else if ((passEncoder as IGPUComputePass).computeObjects)
         {
-            runComputePass(device, gpuCommandEncoder, v as IGPUComputePass);
+            runComputePass(device, gpuCommandEncoder, passEncoder as IGPUComputePass);
         }
-        else if ((v as IGPUCopyTextureToTexture).source?.texture)
+        else if ((passEncoder as IGPUCopyTextureToTexture).source?.texture)
         {
-            runCopyTextureToTexture(device, gpuCommandEncoder, v as IGPUCopyTextureToTexture);
+            runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder as IGPUCopyTextureToTexture);
         }
-        else if ((v as IGPUCopyBufferToBuffer).source)
+        else if ((passEncoder as IGPUCopyBufferToBuffer).source)
         {
-            runCopyBufferToBuffer(device, gpuCommandEncoder, v as IGPUCopyBufferToBuffer);
+            runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder as IGPUCopyBufferToBuffer);
         }
         else
         {

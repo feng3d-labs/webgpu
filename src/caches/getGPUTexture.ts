@@ -14,7 +14,7 @@ import { getGPUCanvasContext } from "./getGPUCanvasContext";
  */
 export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreate = true)
 {
-    const textureMap: Map<IGPUTexture, GPUTexture> = device["textureMap"] = device["textureMap"] || new Map<IGPUTexture, GPUTexture>();
+    const textureMap: Map<IGPUTexture, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<IGPUTexture, GPUTexture>();
     let gpuTexture = textureMap.get(texture);
     if (gpuTexture) return gpuTexture;
 
@@ -151,12 +151,4 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
 }
 let autoIndex = 0;
 
-export function destoryTexture(device: GPUDevice, texture: IGPUTexture)
-{
-    const textureMap: Map<IGPUTexture, GPUTexture> = device["textureMap"] = device["textureMap"] || new Map<IGPUTexture, GPUTexture>();
-    let gpuTexture = textureMap.get(texture);
-    if (gpuTexture)
-    {
-        gpuTexture.destroy();
-    }
-}
+const _GPUTextureMap = "_GPUTextureMap";
