@@ -1,5 +1,5 @@
 import { FunctionInfo } from "wgsl_reflect";
-import { IGPUComputePipeline, IGPUProgrammableStage } from "../data/IGPUComputeObject";
+import { IGPUComputePipeline, IGPUComputeStage, IGPUProgrammableStage } from "../data/IGPUComputeObject";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
@@ -39,7 +39,7 @@ const computePipelineMap = new Map<IGPUComputePipeline, IGPUComputePipeline>();
 * @param computeStage 计算阶段描述。
 * @returns 计算阶段完整描述。
 */
-function getIGPUComputeStage(computeStage: IGPUProgrammableStage)
+function getIGPUComputeStage(computeStage: IGPUComputeStage)
 {
     const reflect = getWGSLReflectInfo(computeStage.code);
     let compute: FunctionInfo;

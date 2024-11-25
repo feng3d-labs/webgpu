@@ -1,9 +1,9 @@
 import { anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
 import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
+import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
-import { GPUTexture_destroy } from "../eventnames";
 
 /**
  * 获取GPU纹理 {@link GPUTexture} 。
@@ -16,10 +16,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
 {
     const textureMap: Map<IGPUTexture, GPUTexture> = device["textureMap"] = device["textureMap"] || new Map<IGPUTexture, GPUTexture>();
     let gpuTexture = textureMap.get(texture);
-    if (gpuTexture) 
-    {
-        return gpuTexture;
-    }
+    if (gpuTexture) return gpuTexture;
 
     if ((texture as IGPUTextureFromContext).context)
     {
@@ -120,6 +117,8 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
         }
 
         gpuTexture.destroy();
+        //
+        anyEmitter.emit(texture, IGPUTexture_resize);
     };
     watcher.watch(iGPUTextureBase, "size", resize);
 
