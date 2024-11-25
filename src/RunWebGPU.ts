@@ -77,7 +77,7 @@ export class RunWebGPU
         if (occlusionQueryObjects.length > 0)
         {
             renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: 'occlusion', count: occlusionQueryObjects.length });
-            occlusionQueryObjects.forEach((v, i) => { v.result = null; v._queryIndex = i; })
+            occlusionQueryObjects.forEach((v, i) => { v._queryIndex = i; })
         }
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
@@ -139,7 +139,7 @@ export class RunWebGPU
 
                         resultBuf.unmap();
 
-                        renderPass._occlusionQueryResults = occlusionQueryObjects;
+                        renderPass.occlusionQueryResults = occlusionQueryObjects;
 
                         //
                         anyEmitter.off(device.queue, GPUQueue_submit, getOcclusionQueryResult);

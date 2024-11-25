@@ -27,5 +27,5 @@ export interface IGPURenderPass
      * 
      * 当提交WebGPU后自动获取结果后填充该属性。
      */
-    _occlusionQueryResults?: IGPURenderOcclusionQueryObject[];
+    occlusionQueryResults?: IGPURenderOcclusionQueryObject[];
 }

@@ -230,16 +230,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         webgpu.submit(submit);
 
         // 监听查询结果。
-        watcher.watch(renderPass, "_occlusionQueryResults", (value) =>
+        watcher.watch(renderPass, "occlusionQueryResults", () =>
         {
             const visible = objectInfos
-                .filter((_, i) => value[i].result)
+                .filter((_, i) => renderPass.occlusionQueryResults[i].result)
                 .map(({ id }) => id)
                 .join('');
             info.textContent = `visible: ${visible}`;
         });
-
-        renderPass._occlusionQueryResults
 
         requestAnimationFrame(render);
     }
