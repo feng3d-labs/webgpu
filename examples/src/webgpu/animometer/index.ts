@@ -101,15 +101,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
         getIGPUBuffer(uniformBuffer).writeBuffers = writeBuffers;
 
+        const time = {
+            bufferView: new Float32Array(uniformBuffer.buffer, timeOffset, 1),
+            value: 0,
+        };
+
         const renderObjects: IGPURenderObject[] = [];
         for (let i = 0; i < numTriangles; ++i)
         {
             renderObjects[i] = {
                 ...renderObject,
                 bindingResources: {
-                    time: {
-                        bufferView: new Float32Array(uniformBuffer.buffer, timeOffset, 1),
-                    },
+                    time: time,
                     uniforms: {
                         bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
                     }
@@ -150,11 +153,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
             uniformTime[0] = (timestamp - startTime) / 1000;
 
-            const writeBuffers = getIGPUBuffer(uniformBuffer).writeBuffers || [];
-            writeBuffers.push({
-                bufferOffset: timeOffset, data: uniformTime
-            });
-            getIGPUBuffer(uniformBuffer).writeBuffers = writeBuffers;
+            time.value = uniformTime[0];
 
             if (settings.renderBundles)
             {

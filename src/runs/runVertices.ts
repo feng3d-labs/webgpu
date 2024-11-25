@@ -7,6 +7,11 @@ import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 
 export function runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
 {
+    if (passEncoder["_vertices"] === vertices)
+    {
+        return;
+    }
+
     const { vertexBuffers } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
 
     vertexBuffers?.forEach((vertexBuffer, index) =>
@@ -16,6 +21,8 @@ export function runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder
         const gBuffer = getGPUBuffer(device, buffer);
         passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
     });
+
+    passEncoder["_vertices"] = vertices;
 }
 
 let autoVertexIndex = 0;

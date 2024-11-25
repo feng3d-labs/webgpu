@@ -13,8 +13,15 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
  */
 export function runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
 {
+    if (passEncoder["_renderPipeline"] === renderPipeline)
+    {
+        return;
+    }
+
     const { pipeline } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
 
     const gpuRenderPipeline = getGPURenderPipeline(device, pipeline);
     passEncoder.setPipeline(gpuRenderPipeline);
+
+    passEncoder["_renderPipeline"] = renderPipeline;
 }

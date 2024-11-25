@@ -25,9 +25,9 @@ export function runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEnc
 
     runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
 
-    runBindGroup(device, passEncoder, pipeline, bindingResources);
-
     runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
+
+    runBindGroup(device, passEncoder, pipeline, bindingResources);
 
     runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
 
