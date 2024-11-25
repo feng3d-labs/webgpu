@@ -2,10 +2,10 @@ import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
-import { IGPUBindGroupEntry, IGPUBufferBinding } from "../data/IGPUBindGroupDescriptor";
-import { IGPUBindingResources } from "../data/IGPUBindingResources";
-import { IGPUComputePipeline } from "../data/IGPUComputeObject";
-import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
+import { IGPUBindGroupEntry, IGPUBufferBinding } from "./IGPUBindGroupDescriptor";
+import { IGPUBindingResources } from "./IGPUBindingResources";
+import { IGPUComputePipeline } from "./IGPUComputeObject";
+import { IGPURenderPipeline, IGPUSetBindGroup } from "./IGPURenderObject";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 

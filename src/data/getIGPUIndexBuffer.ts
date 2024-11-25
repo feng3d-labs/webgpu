@@ -1,5 +1,5 @@
-import { IGPUBuffer } from "../data/IGPUBuffer";
-import { IGPUIndexBuffer } from "../data/IGPURenderObject";
+import { IGPUBuffer } from "./IGPUBuffer";
+import { IGPUIndexBuffer } from "./IGPURenderObject";
 
 export function getIGPUIndexBuffer(index: Uint16Array | Uint32Array)
 {

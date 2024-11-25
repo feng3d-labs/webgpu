@@ -1,4 +1,4 @@
-import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
+import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import type { RunWebGPU } from "../RunWebGPU";
 import { ChainMap } from "../utils/ChainMap";

@@ -23,10 +23,10 @@ import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUVertexAttributes } from "./data/IGPUVertexAttributes";
 import { GPUQueue_submit } from "./eventnames";
 import { IGPURenderPassFormat } from "./internal/IGPURenderPassFormat";
-import { getGPURenderBundle } from "./runs/getGPURenderBundle";
-import { getGPURenderPassFormats } from "./runs/getGPURenderPassFormats";
-import { getIGPUBuffer, getIGPUIndexBuffer } from "./runs/getIGPUIndexBuffer";
-import { getIGPUSetBindGroups } from "./runs/getIGPUSetBindGroups";
+import { getGPURenderBundle } from "./data/getGPURenderBundle";
+import { getGPURenderPassFormats } from "./data/getGPURenderPassFormats";
+import { getIGPUBuffer, getIGPUIndexBuffer } from "./data/getIGPUIndexBuffer";
+import { getIGPUSetBindGroups } from "./data/getIGPUSetBindGroups";
 
 export class RunWebGPU
 {
