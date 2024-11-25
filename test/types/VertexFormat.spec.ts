@@ -68,7 +68,7 @@ describe("VertexFormat", () =>
         wgslVertexTypes.forEach((wgslVertexType) =>
         {
             const wgslVertexTypeValue = wgslVertexTypeMap[wgslVertexType];
-            ok(wgslVertexTypeValue.possibleFormats.includes(wgslVertexTypeValue.format));
+            equal(wgslVertexTypeValue.possibleFormats.includes(wgslVertexTypeValue.format), true);
 
             wgslVertexTypeValue.possibleFormats.forEach((gpuVertexFormat) =>
             {
