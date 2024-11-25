@@ -14,11 +14,18 @@ import { IGPURenderOcclusionQueryObject } from "./data/IGPURenderOcclusionQueryO
 import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { GPUQueue_submit } from "./eventnames";
+import { IGPURenderPassFormat } from "./internal/IGPURenderPassFormat";
+import { getGPURenderBundle } from "./runs/getGPURenderBundle";
 import { getGPURenderPassFormats } from "./runs/getGPURenderPassFormats";
+import { runBindGroup } from "./runs/runBindGroup";
 import { runComputeObject } from "./runs/runComputeObject";
-import { runRenderBundle } from "./runs/runRenderBundle";
-import { runRenderObject } from "./runs/runRenderObject";
-import { runRenderOcclusionQueryObject } from "./runs/runRenderOcclusionQueryObject";
+import { runDraw } from "./runs/runDraw";
+import { runDrawIndexed } from "./runs/runDrawIndexed";
+import { runIndices } from "./runs/runIndices";
+import { runRenderPipeline } from "./runs/runRenderPipeline";
+import { runScissorRect } from "./runs/runScissorRect";
+import { runVertices } from "./runs/runVertices";
+import { runViewport } from "./runs/runViewport";
 
 export class RunWebGPU
 {
@@ -84,15 +91,15 @@ export class RunWebGPU
         {
             if ((element as IGPURenderOcclusionQueryObject).type === "OcclusionQueryObject")
             {
-                runRenderOcclusionQueryObject(device, passEncoder, renderPassFormats, element as IGPURenderOcclusionQueryObject);
+                this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormats, element as IGPURenderOcclusionQueryObject);
             }
             else if ((element as IGPURenderBundleObject).renderObjects)
             {
-                runRenderBundle(device, passEncoder, renderPassFormats, element as IGPURenderBundleObject);
+                this.runRenderBundle(device, passEncoder, renderPassFormats, element as IGPURenderBundleObject);
             }
             else
             {
-                runRenderObject(device, passEncoder, renderPassFormats, element as IGPURenderObject);
+                this.runRenderObject(device, passEncoder, renderPassFormats, element as IGPURenderObject);
             }
         });
 
@@ -161,4 +168,51 @@ export class RunWebGPU
             v.size,
         );
     }
+
+    runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderOcclusionQueryObject: IGPURenderOcclusionQueryObject)
+    {
+        passEncoder.beginOcclusionQuery(renderOcclusionQueryObject._queryIndex);
+        renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>
+        {
+            this.runRenderObject(device, passEncoder, renderPassFormats, renderObject);
+        });
+        passEncoder.endOcclusionQuery();
+    }
+
+    runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
+    {
+        const gRenderBundle = getGPURenderBundle(this, device, renderBundleObject, renderPassFormat);
+
+        passEncoder.executeBundles([gRenderBundle]);
+    }
+
+    /**
+     * 执行渲染对象。
+     * 
+     * @param device GPU设备。
+     * @param passEncoder 渲染通道编码器。
+     * @param renderObject 渲染对象。
+     * @param renderPass 渲染通道。
+     */
+    runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
+    {
+        const { viewport, scissorRect, pipeline, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
+
+        runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, viewport);
+
+        runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
+
+        runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
+
+        runBindGroup(device, passEncoder, pipeline, bindingResources);
+
+        runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
+
+        runIndices(device, passEncoder, indices);
+
+        runDraw(passEncoder, draw);
+
+        runDrawIndexed(passEncoder, drawIndexed);
+    }
+
 }

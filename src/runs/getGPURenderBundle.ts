@@ -1,16 +1,9 @@
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import type { RunWebGPU } from "../RunWebGPU";
 import { ChainMap } from "../utils/ChainMap";
-import { runRenderObject } from "./runRenderObject";
 
-export function runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
-{
-    const gRenderBundle = getGPURenderBundle(device, renderBundleObject, renderPassFormat);
-
-    passEncoder.executeBundles([gRenderBundle]);
-}
-
-export function getGPURenderBundle(device: GPUDevice, renderBundleObject: IGPURenderBundleObject, renderPassFormat: IGPURenderPassFormat)
+export function getGPURenderBundle(runWebGPU: RunWebGPU, device: GPUDevice, renderBundleObject: IGPURenderBundleObject, renderPassFormat: IGPURenderPassFormat)
 {
     const map: ChainMap<[IGPURenderBundleObject, IGPURenderPassFormat], GPURenderBundle> = device[_RenderBundleMap] = device[_RenderBundleMap] || new ChainMap();
     //
@@ -30,7 +23,7 @@ export function getGPURenderBundle(device: GPUDevice, renderBundleObject: IGPURe
 
     renderBundleObject.renderObjects.forEach((renderObject) =>
     {
-        runRenderObject(device, renderBundleEncoder, renderPassFormat, renderObject);
+        runWebGPU.runRenderObject(device, renderBundleEncoder, renderPassFormat, renderObject);
     });
 
     gpuRenderBundle = renderBundleEncoder.finish();
