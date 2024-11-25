@@ -1,6 +1,6 @@
 import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
-import type { RunWebGPU } from "../RunWebGPU";
+import type { RunWebGPU } from "../runs/RunWebGPU";
 import { ChainMap } from "../utils/ChainMap";
 
 export function getGPURenderBundle(runWebGPU: RunWebGPU, device: GPUDevice, renderBundleObject: IGPURenderBundleObject, renderPassFormat: IGPURenderPassFormat)

@@ -10,7 +10,7 @@ import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
-import { RunWebGPU } from "./RunWebGPU";
+import { RunWebGPU } from "./runs/RunWebGPU";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
 import { readPixels } from "./utils/readPixels";
