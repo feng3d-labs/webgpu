@@ -22,6 +22,7 @@ export interface IGPUPipelineLayoutDescriptor extends Omit<GPUPipelineLayoutDesc
 export interface IGPUBindGroupLayoutDescriptor extends GPUBindGroupLayoutDescriptor
 {
     entries: IGPUBindGroupLayoutEntry[];
+    entryNames: string[],
 }
 
 export interface IGPUBindGroupLayoutEntry extends GPUBindGroupLayoutEntry

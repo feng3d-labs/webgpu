@@ -44,7 +44,7 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
         const bindGroupLayoutEntry = entryMap[resourceName];
         const { group, binding } = bindGroupLayoutEntry.variableInfo;
         //
-        const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [] };
+        const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [], entryNames: [] };
 
         // 检测相同位置是否存在多个定义
         if (bindGroupLayout.entries[binding])
@@ -56,6 +56,7 @@ export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUCompute
 
         //
         bindGroupLayout.entries[binding] = bindGroupLayoutEntry;
+        bindGroupLayout.entryNames.push(resourceName);
     }
 
     // 排除 undefined 元素。

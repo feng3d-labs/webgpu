@@ -1,13 +1,13 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
-import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
+import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
+import { ChainMap } from "../utils/ChainMap";
+import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 import { IGPUBindGroupEntry, IGPUBufferBinding } from "./IGPUBindGroupDescriptor";
 import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPUComputePipeline } from "./IGPUComputeObject";
 import { IGPURenderPipeline, IGPUSetBindGroup } from "./IGPURenderObject";
-import { ChainMap } from "../utils/ChainMap";
-import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 
 export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
 {
@@ -22,60 +22,74 @@ export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderP
     const layout = getIGPUPipelineLayout(pipeline);
     layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
     {
-        const entries: IGPUBindGroupEntry[] = [];
-        gpuSetBindGroups[group] = { bindGroup: { layout: layout.bindGroupLayouts[group], entries: entries, } };
-
-        bindGroupLayout.entries.forEach((entry1) =>
-        {
-            const { variableInfo, binding } = entry1;
-            //
-            const entry: IGPUBindGroupEntry = { binding: binding, resource: null };
-
-            entries.push(entry);
-
-            const resourceName = variableInfo.name;
-
-            const getResource = () =>
-            {
-                const bindingResource = bindingResources[resourceName];
-                console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
-
-                //
-                if (entry1.buffer)
-                {
-                    //
-                    const size = variableInfo.size;
-
-                    const uniformData = bindingResource as IGPUBufferBinding;
-
-                    // 是否存在默认值。
-                    const hasDefautValue = !!uniformData.bufferView;
-                    if (!uniformData.bufferView)
-                    {
-                        uniformData.bufferView = new Uint8Array(size);
-                    }
-
-                    // 更新缓冲区绑定的数据。
-                    updateBufferBinding(variableInfo, uniformData, hasDefautValue);
-                }
-
-                return bindingResource;
-            };
-
-            entry.resource = getResource();
-
-            //
-            watcher.watch(bindingResources, resourceName, () =>
-            {
-                entry.resource = getResource();
-            });
-        });
+        gpuSetBindGroups[group] = getIGPUSetBindGroup(bindGroupLayout, bindingResources);
     });
 
     return gpuSetBindGroups;
 }
 
 const bindGroupsMap = new ChainMap<[IGPUComputePipeline | IGPURenderPipeline, IGPUBindingResources], IGPUSetBindGroup[]>();
+
+function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bindingResources: IGPUBindingResources): IGPUSetBindGroup
+{
+    const map: ChainMap<Array<any>, IGPUSetBindGroup> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
+    const subBindingResources = bindGroupLayout.entryNames.map((v) => bindingResources[v]);
+    let setBindGroup: IGPUSetBindGroup = map.get(subBindingResources);
+    if (setBindGroup) return setBindGroup;
+
+    const entries: IGPUBindGroupEntry[] = [];
+    setBindGroup = { bindGroup: { layout: bindGroupLayout, entries: entries, } };
+    map.set(subBindingResources, setBindGroup);
+
+    //
+    bindGroupLayout.entries.forEach((entry1) =>
+    {
+        const { variableInfo, binding } = entry1;
+        //
+        const entry: IGPUBindGroupEntry = { binding: binding, resource: null };
+
+        entries.push(entry);
+
+        const resourceName = variableInfo.name;
+
+        const getResource = () =>
+        {
+            const bindingResource = bindingResources[resourceName];
+            console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
+
+            //
+            if (entry1.buffer)
+            {
+                //
+                const size = variableInfo.size;
+
+                const uniformData = bindingResource as IGPUBufferBinding;
+
+                // 是否存在默认值。
+                const hasDefautValue = !!uniformData.bufferView;
+                if (!uniformData.bufferView)
+                {
+                    uniformData.bufferView = new Uint8Array(size);
+                }
+
+                // 更新缓冲区绑定的数据。
+                updateBufferBinding(variableInfo, uniformData, hasDefautValue);
+            }
+
+            return bindingResource;
+        };
+
+        entry.resource = getResource();
+
+        //
+        watcher.watch(bindingResources, resourceName, () =>
+        {
+            entry.resource = getResource();
+        });
+    });
+
+    return setBindGroup;
+}
 
 /**
  * 
