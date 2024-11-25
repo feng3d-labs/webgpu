@@ -2,8 +2,8 @@ import { assert, describe, it } from "vitest";
 const { ok, equal, deepEqual, strictEqual } = assert;
 
 import { ChainMap } from "../../src/utils/ChainMap";
-import { ChainObjectMap } from "../../src/utils/ChainObjectMap";
-import { ChainMap3 } from "../../src/utils/ChainMap3";
+import { ChainObjectMap } from "./ChainObjectMap";
+import { ChainMap3 } from "./ChainMap3";
 
 describe("ChainMap", () =>
 {
