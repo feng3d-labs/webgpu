@@ -1,31 +1,32 @@
 import { anyEmitter } from "@feng3d/event";
 
+import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
+import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
+import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPUTexture } from "./caches/getGPUTexture";
+import { getIGPUComputePipeline } from "./caches/getIGPUComputePipeline";
+import { getIGPURenderPipeline } from "./caches/getIGPURenderPipeline";
+import { IGPUBindingResources } from "./data/IGPUBindingResources";
 import { IGPUCommandEncoder } from "./data/IGPUCommandEncoder";
+import { IGPUComputeObject, IGPUComputePipeline, IGPUWorkgroups } from "./data/IGPUComputeObject";
 import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "./data/IGPURenderBundleObject";
-import { IGPURenderObject } from "./data/IGPURenderObject";
+import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline, IGPUScissorRect, IGPUViewport } from "./data/IGPURenderObject";
 import { IGPURenderOcclusionQueryObject } from "./data/IGPURenderOcclusionQueryObject";
 import { IGPURenderPass } from "./data/IGPURenderPass";
 import { IGPUSubmit } from "./data/IGPUSubmit";
+import { IGPUVertexAttributes } from "./data/IGPUVertexAttributes";
 import { GPUQueue_submit } from "./eventnames";
 import { IGPURenderPassFormat } from "./internal/IGPURenderPassFormat";
 import { getGPURenderBundle } from "./runs/getGPURenderBundle";
 import { getGPURenderPassFormats } from "./runs/getGPURenderPassFormats";
-import { runBindGroup } from "./runs/runBindGroup";
-import { runComputeObject } from "./runs/runComputeObject";
-import { runDraw } from "./runs/runDraw";
-import { runDrawIndexed } from "./runs/runDrawIndexed";
-import { runIndices } from "./runs/runIndices";
-import { runRenderPipeline } from "./runs/runRenderPipeline";
-import { runScissorRect } from "./runs/runScissorRect";
-import { runVertices } from "./runs/runVertices";
-import { runViewport } from "./runs/runViewport";
+import { getIGPUBuffer, getIGPUIndexBuffer } from "./runs/getIGPUIndexBuffer";
+import { getIGPUSetBindGroups } from "./runs/getIGPUSetBindGroups";
 
 export class RunWebGPU
 {
@@ -122,7 +123,7 @@ export class RunWebGPU
 
         computePass.computeObjects.forEach((computeObject) =>
         {
-            runComputeObject(device, passEncoder, computeObject);
+            this.runComputeObject(device, passEncoder, computeObject);
         });
 
         passEncoder.end();
@@ -187,6 +188,44 @@ export class RunWebGPU
     }
 
     /**
+     * 执行计算对象。
+     * 
+     * @param device GPU设备。
+     * @param passEncoder 计算通道编码器。
+     * @param computeObject 计算对象。
+     */
+    runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
+    {
+        const { pipeline, bindingResources, workgroups } = computeObject;
+
+        this.runComputePipeline(device, passEncoder, pipeline);
+
+        this.runBindGroup(device, passEncoder, pipeline, bindingResources);
+
+        this.runWorkgroups(passEncoder, workgroups);
+    }
+
+    runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, pipeline: IGPUComputePipeline)
+    {
+        const gpuComputePipeline = getIGPUComputePipeline(pipeline);
+
+        const computePipeline = getGPUComputePipeline(device, gpuComputePipeline);
+        passEncoder.setPipeline(computePipeline);
+    }
+
+    /**
+     * 执行计算工作组。
+     * 
+     * @param passEncoder 计算通道编码器。 
+     * @param workgroups 计算工作组。
+     */
+    runWorkgroups(passEncoder: GPUComputePassEncoder, workgroups?: IGPUWorkgroups)
+    {
+        const { workgroupCountX, workgroupCountY, workgroupCountZ } = workgroups;
+        passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
+    }
+
+    /**
      * 执行渲染对象。
      * 
      * @param device GPU设备。
@@ -198,21 +237,150 @@ export class RunWebGPU
     {
         const { viewport, scissorRect, pipeline, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
 
-        runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, viewport);
+        this.runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, viewport);
 
-        runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
+        this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
 
-        runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
+        this.runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
 
-        runBindGroup(device, passEncoder, pipeline, bindingResources);
+        this.runBindGroup(device, passEncoder, pipeline, bindingResources);
 
-        runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
+        this.runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
 
-        runIndices(device, passEncoder, indices);
+        this.runIndices(device, passEncoder, indices);
 
-        runDraw(passEncoder, draw);
+        this.runDraw(passEncoder, draw);
 
-        runDrawIndexed(passEncoder, drawIndexed);
+        this.runDrawIndexed(passEncoder, drawIndexed);
     }
 
+    runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport?: IGPUViewport)
+    {
+        if (!viewport) return;
+        if (passEncoder["_viewport"] === viewport) return;
+
+        let { fromWebGL, x, y, width, height, minDepth, maxDepth } = viewport;
+        if (fromWebGL)
+        {
+            y = attachmentSize.height - y - height
+        }
+        passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
+
+        passEncoder["_viewport"] = viewport;
+    }
+
+    runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect?: IGPUScissorRect)
+    {
+        if (!scissorRect) return;
+        if (passEncoder["_scissorRect"] === scissorRect) return;
+
+        let { fromWebGL, x, y, width, height } = scissorRect;
+        if (fromWebGL)
+        {
+            y = attachmentSize.height - y - height
+        }
+
+        passEncoder.setScissorRect(x, y, width, height);
+
+        //
+        passEncoder["_scissorRect"] = scissorRect;
+    }
+
+    /**
+     * 执行渲染管线。
+     * 
+     * @param device GPU设备。
+     * @param passEncoder 渲染通道编码器。
+     * @param pipeline 渲染管线。
+     */
+    runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+    {
+        if (passEncoder["_renderPipeline"] === renderPipeline)
+        {
+            return;
+        }
+
+        const { pipeline } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
+
+        const gpuRenderPipeline = getGPURenderPipeline(device, pipeline);
+        passEncoder.setPipeline(gpuRenderPipeline);
+
+        passEncoder["_renderPipeline"] = renderPipeline;
+    }
+
+    runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
+    {
+        if (passEncoder["_bindingResources"] === bindingResources)
+        {
+            return;
+        }
+
+        // 计算 bindGroups
+        const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);
+
+        setBindGroups?.forEach((setBindGroup, index) =>
+        {
+            const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup);
+            passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
+        });
+
+        passEncoder["_bindingResources"] = bindingResources
+    }
+
+    runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+    {
+        if (passEncoder["_vertices"] === vertices)
+        {
+            return;
+        }
+
+        const { vertexBuffers } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
+
+        vertexBuffers?.forEach((vertexBuffer, index) =>
+        {
+            const buffer = getIGPUBuffer(vertexBuffer.data);
+            buffer.label = buffer.label || ("顶点索引 " + autoVertexIndex++);
+            const gBuffer = getGPUBuffer(device, buffer);
+            passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
+        });
+
+        passEncoder["_vertices"] = vertices;
+    }
+
+    runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array)
+    {
+        if (!indices) return;
+        if (passEncoder["_indices"] === indices)
+        {
+            return;
+        }
+
+        const indexBuffer = getIGPUIndexBuffer(indices);
+
+        const { buffer, indexFormat, offset, size } = indexBuffer;
+        const gBuffer = getGPUBuffer(device, buffer);
+
+        passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
+
+        //
+        passEncoder["_indices"] = indices;
+    }
+
+    runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDraw)
+    {
+        if (!draw) return;
+
+        const { vertexCount, instanceCount, firstVertex, firstInstance } = draw;
+        passEncoder.draw(vertexCount, instanceCount, firstVertex, firstInstance);
+    }
+
+    runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed?: IGPUDrawIndexed)
+    {
+        if (!drawIndexed) return;
+
+        const { indexCount, instanceCount, firstIndex, baseVertex, firstInstance } = drawIndexed;
+        passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
+    }
 }
+
+let autoVertexIndex = 0;

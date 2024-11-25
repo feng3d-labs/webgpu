@@ -9,26 +9,7 @@ import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 
-export function runBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
-{
-    if (passEncoder["_bindingResources"] === bindingResources)
-    {
-        return;
-    }
-
-    // 计算 bindGroups
-    const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);
-
-    setBindGroups?.forEach((setBindGroup, index) =>
-    {
-        const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup);
-        passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
-    });
-
-    passEncoder["_bindingResources"] = bindingResources
-}
-
-function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
+export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
 {
     //
     let gpuSetBindGroups = bindGroupsMap.get([pipeline, bindingResources]);
