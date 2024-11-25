@@ -19,7 +19,7 @@ export class ChainMap<K extends Array<any>, V>
     {
         let map = this._map;
 
-        for (let i = 0; i < keys.length - 1; i++)
+        for (let i = 0, n = keys.length - 1; i < n; i++)
         {
             map = map.get(keys[i]);
 
@@ -57,7 +57,7 @@ export class ChainMap<K extends Array<any>, V>
      * @param keys 键。
      * @returns 如果找到目标值且被删除返回 `true` ，否则返回 `false` 。
      */
-    delete(keys: K)
+    delete(keys: K): boolean
     {
         let map = this._map;
 

@@ -181,8 +181,8 @@ const shaderLayoutMap: { [code: string]: IGPUBindGroupLayoutEntryMap } = {};
 /**
  * 片段与计算着色器可见。
  */
-const Visibility_FRAGMENT_COMPUTE = GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
+const Visibility_FRAGMENT_COMPUTE = 6; // GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
 /**
  * 全部着色器可见。
  */
-const Visibility_ALL = GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
+const Visibility_ALL = 7; //GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
