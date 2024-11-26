@@ -9,7 +9,6 @@ import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
-import { getGPURenderBundle } from "../data/getGPURenderBundle";
 import { getGPURenderPassFormat } from "../data/getGPURenderPassFormats";
 import { getIGPUBuffer, getIGPUIndexBuffer } from "../data/getIGPUIndexBuffer";
 import { getIGPUSetBindGroups } from "../data/getIGPUSetBindGroups";
@@ -29,6 +28,7 @@ import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUViewport } from "../data/IGPUViewport";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import { ChainMap } from "../utils/ChainMap";
 
 export class RunWebGPU
 {
@@ -214,9 +214,23 @@ export class RunWebGPU
 
     protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
     {
-        const gRenderBundle = getGPURenderBundle(this, device, renderBundleObject, renderPassFormat);
+        const map: ChainMap<[IGPURenderBundleObject, IGPURenderPassFormat], GPURenderBundle> = device[_RenderBundleMap] = device[_RenderBundleMap] || new ChainMap();
+        //
+        let gpuRenderBundle: GPURenderBundle = map.get([renderBundleObject, renderPassFormat]);
+        if (!gpuRenderBundle)
+        {
+            const descriptor: GPURenderBundleEncoderDescriptor = { ...renderBundleObject.descriptor, ...renderPassFormat };
 
-        passEncoder.executeBundles([gRenderBundle]);
+            //
+            const renderBundleEncoder = device.createRenderBundleEncoder(descriptor);
+
+            this.runRenderBundleObjects(device, renderBundleEncoder, renderPassFormat, renderBundleObject.renderObjects);
+
+            gpuRenderBundle = renderBundleEncoder.finish();
+            map.set([renderBundleObject, renderPassFormat], gpuRenderBundle);
+        }
+
+        passEncoder.executeBundles([gpuRenderBundle]);
     }
 
     /**
@@ -382,5 +396,6 @@ export class RunWebGPU
         passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
     }
 }
+const _RenderBundleMap = "_RenderBundleMap";
 
 let autoVertexIndex = 0;
