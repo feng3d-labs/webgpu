@@ -35,23 +35,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
         let commands = map.get(computeObject);
         if (commands)
         {
-            let _passEncoder = (passEncoder as GPUComputePassEncoderCommandCache)._passEncoder;
-            commands.forEach((v) =>
-            {
-                if (v[0] === "setBindGroup")
-                {
-                    const temp = v[1][1];
-                    v[1][1] = v[1][1][getRealGPUBindGroup]();
-                    //
-                    _passEncoder[v[0]].apply(_passEncoder, v[1]);
-                    //
-                    v[1][1] = temp;
-                }
-                else
-                {
-                    _passEncoder[v[0]].apply(_passEncoder, v[1]);
-                }
-            });
+            runCommands((passEncoder as GPUComputePassEncoderCommandCache)._passEncoder, commands);
 
             return;
         }
@@ -70,23 +54,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
         let commands = map.get([renderPassFormat, renderObject]);
         if (commands)
         {
-            let _passEncoder = (passEncoder as GPURenderPassEncoderCommandCache)._passEncoder;
-            commands.forEach((v) =>
-            {
-                if (v[0] === "setBindGroup")
-                {
-                    const temp = v[1][1];
-                    v[1][1] = v[1][1][getRealGPUBindGroup]();
-                    //
-                    _passEncoder[v[0]].apply(_passEncoder, v[1]);
-                    //
-                    v[1][1] = temp;
-                }
-                else
-                {
-                    _passEncoder[v[0]].apply(_passEncoder, v[1]);
-                }
-            });
+            runCommands((passEncoder as GPURenderPassEncoderCommandCache)._passEncoder, commands);
 
             return;
         }
@@ -341,4 +309,24 @@ class GPUComputePassEncoderCommandCache extends GPUPassEncoderCommandCache imple
     {
         return this._passEncoder.end();
     }
+}
+
+function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder, commands: any[])
+{
+    commands.forEach((v) =>
+    {
+        if (v[0] === "setBindGroup")
+        {
+            const temp = v[1][1];
+            v[1][1] = v[1][1][getRealGPUBindGroup]();
+            //
+            _passEncoder[v[0]].apply(_passEncoder, v[1]);
+            //
+            v[1][1] = temp;
+        }
+        else
+        {
+            _passEncoder[v[0]].apply(_passEncoder, v[1]);
+        }
+    });
 }
