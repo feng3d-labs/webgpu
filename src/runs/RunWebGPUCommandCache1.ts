@@ -63,13 +63,13 @@ type FunctionPropertyNames<T> = TypePropertyNames<T, Function>;
 
 const CacheName = "_obj";
 
-function apply<T, K extends FunctionPropertyNames<T>>(object: T, funcName: K, call)
+function apply<T, K extends FunctionPropertyNames<T>>(object: T, funcName: K, call: (_obj: any, name: string, args: any[]) => boolean)
 {
     object[funcName] = ((oldFunc: Function) =>
     {
-        return function (...args: any)
+        return function (...args: any[])
         {
-            if (call(object[CacheName], funcName, args)) return;
+            if (call(object[CacheName], funcName as any, args)) return;
 
             return oldFunc.apply(this, args);
         };
