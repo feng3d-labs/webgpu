@@ -12,6 +12,7 @@ import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { RunWebGPU } from "./runs/RunWebGPU";
 import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
+import { RunWebGPUCommandCache1 } from "./runs/RunWebGPUCommandCache1";
 import { RunWebGPUStateCache } from "./runs/RunWebGPUStateCache";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
@@ -38,6 +39,7 @@ export class WebGPU
         else if (v === "CommandCache")
         {
             this._runWebGPU = new RunWebGPUCommandCache();
+            // this._runWebGPU = new RunWebGPUCommandCache1();
         }
         else
         {

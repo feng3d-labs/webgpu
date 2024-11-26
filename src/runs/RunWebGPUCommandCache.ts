@@ -4,6 +4,9 @@ import { IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { RunWebGPUStateCache } from "./RunWebGPUStateCache";
 
+/**
+ * 继承模式（RunWebGPUCommandCache）优于覆盖函数(RunWebGPUCommandCache1)的形式。
+ */
 export class RunWebGPUCommandCache extends RunWebGPUStateCache
 {
     protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: IGPUComputeObject[])
@@ -114,10 +117,6 @@ class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMi
 class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURenderCommandsMixin
 {
     protected _passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin & GPURenderCommandsMixin;
-    constructor(passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin & GPURenderCommandsMixin)
-    {
-        super(passEncoder);
-    }
 
     setPipeline(pipeline: GPURenderPipeline): undefined
     {
@@ -180,10 +179,6 @@ class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements
 {
     __brand: "GPURenderPassEncoder" = "GPURenderPassEncoder";
     protected _passEncoder: GPURenderPassEncoder;
-    constructor(passEncoder: GPURenderPassEncoder)
-    {
-        super(passEncoder);
-    }
 
     setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined
     setViewport(...args: any): undefined
@@ -234,11 +229,6 @@ class GPUComputePassEncoderCommandCache extends GPUPassEncoderCommandCache imple
 {
     __brand: "GPUComputePassEncoder" = "GPUComputePassEncoder";
     protected _passEncoder: GPUComputePassEncoder;
-
-    constructor(passEncoder: GPUComputePassEncoder)
-    {
-        super(passEncoder);
-    }
 
     setPipeline(pipeline: GPUComputePipeline): undefined
     setPipeline(...args: any): undefined
