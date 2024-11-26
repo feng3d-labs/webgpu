@@ -10,9 +10,9 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { RunWebGPU } from "./RunWebGPU";
 
 /**
- * 对比已提交的数据，较少重复提交来提升性能。
+ * 通过对编码器的状态进行缓存对比，避免重复提交GPU命令，来提升WebGPU性能。
  */
-export class RunWebGPUPassCache extends RunWebGPU
+export class RunWebGPUStateCache extends RunWebGPU
 {
     protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: IGPUComputeObject[])
     {
