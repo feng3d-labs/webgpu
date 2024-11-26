@@ -140,15 +140,6 @@ export class RunWebGPU
         });
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
-    {
-        //
-        renderObjects.forEach((element) =>
-        {
-            this.runRenderObject(device, passEncoder, renderPassFormats, element as IGPURenderObject);
-        });
-    }
-
     /**
      * 执行计算通道。
      *
@@ -243,6 +234,15 @@ export class RunWebGPU
         }
 
         passEncoder.executeBundles([gpuRenderBundle]);
+    }
+
+    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
+    {
+        //
+        renderObjects.forEach((element) =>
+        {
+            this.runRenderObject(device, passEncoder, renderPassFormats, element as IGPURenderObject);
+        });
     }
 
     /**
