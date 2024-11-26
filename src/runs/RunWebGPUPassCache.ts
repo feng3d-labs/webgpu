@@ -1,8 +1,8 @@
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputeObject, IGPUComputePipeline } from "../data/IGPUComputeObject";
+import { IGPUOcclusionQueryObject } from "../data/IGPUOcclusionQueryObject";
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderObject, IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
-import { IGPUOcclusionQueryObject } from "../data/IGPUOcclusionQueryObject";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUViewport } from "../data/IGPUViewport";
@@ -53,23 +53,23 @@ export class RunWebGPUPassCache extends RunWebGPU
         super.runScissorRect(passEncoder, attachmentSize, scissorRect);
     }
 
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, commands: any[])
     {
         if (passEncoder["_renderPipeline"] === renderPipeline) return;
         if (renderPipeline) passEncoder["_renderPipeline"] = renderPipeline;
 
-        super.runRenderPipeline(device, passEncoder, renderPipeline, renderPassFormat, vertices);
+        super.runRenderPipeline(device, passEncoder, renderPipeline, renderPassFormat, vertices, commands);
     }
 
-    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources, commands: any[])
     {
         if (passEncoder["_bindingResources"] === bindingResources) return;
         if (bindingResources) passEncoder["_bindingResources"] = bindingResources;
 
-        super.runBindingResources(device, passEncoder, pipeline, bindingResources);
+        super.runBindingResources(device, passEncoder, pipeline, bindingResources, commands);
     }
 
-    protected runSetBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, index: number, setBindGroup: IGPUSetBindGroup)
+    protected runSetBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, index: number, setBindGroup: IGPUSetBindGroup, commands: any[])
     {
         if (passEncoder["_setBindGroup"][index] === setBindGroup)
         {
@@ -77,22 +77,22 @@ export class RunWebGPUPassCache extends RunWebGPU
         }
         passEncoder["_setBindGroup"][index] = setBindGroup;
 
-        super.runSetBindGroup(device, passEncoder, index, setBindGroup);
+        super.runSetBindGroup(device, passEncoder, index, setBindGroup, commands);
     }
 
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, commands: any[])
     {
         if (passEncoder["_vertices"] === vertices) return;
         if (vertices) passEncoder["_vertices"] = vertices;
 
-        super.runVertices(device, passEncoder, renderPipeline, renderPassFormat, vertices);
+        super.runVertices(device, passEncoder, renderPipeline, renderPassFormat, vertices, commands);
     }
 
-    protected runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array)
+    protected runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array, commands: any[])
     {
         if (passEncoder["_indices"] === indices) return;
         if (indices) passEncoder["_indices"] = indices;
 
-        super.runIndices(device, passEncoder, indices);
+        super.runIndices(device, passEncoder, indices, commands);
     }
 }
