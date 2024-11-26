@@ -180,6 +180,8 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
     {
         if (this.arrayEq0("setIndexBuffer", args)) return;
 
+        this["_commands"].push(["setIndexBuffer", args]);
+
         return this._passEncoder.setIndexBuffer.apply(this._passEncoder, args);
     }
     setVertexBuffer(slot: GPUIndex32, buffer: GPUBuffer | null, offset?: GPUSize64, size?: GPUSize64): undefined
