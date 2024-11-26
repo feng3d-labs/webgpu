@@ -2,6 +2,7 @@ import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import { ChainMap } from "../utils/ChainMap";
 import { RunWebGPUStateCache } from "./RunWebGPUStateCache";
 
 /**
@@ -26,6 +27,29 @@ export class RunWebGPUCommandCache extends RunWebGPUStateCache
         bundleEncoder = new GPURenderBundleEncoderCommandCache(bundleEncoder);
         super.runRenderBundleObjects(device, bundleEncoder, renderPassFormats, renderObjects);
     }
+
+    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
+    {
+        const map: ChainMap<[IGPURenderPassFormat, IGPURenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
+        let commands = map.get([renderPassFormat, renderObject]);
+        if (commands)
+        {
+            let _passEncoder = (passEncoder as GPURenderPassEncoderCommandCache)._passEncoder;
+            commands.forEach((v) =>
+            {
+                _passEncoder[v[0]].apply(_passEncoder, v[1]);
+            });
+
+            return;
+        }
+        passEncoder["_commands"] = commands = [];
+
+        map.set([renderPassFormat, renderObject], commands);
+
+        super.runRenderObject(device, passEncoder, renderPassFormat, renderObject);
+
+        passEncoder["_commands"] = undefined;
+    }
 }
 
 class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMixin, GPUBindingCommandsMixin
@@ -40,6 +64,8 @@ class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMi
     setBindGroup(...args: any): undefined
     {
         if (this.arrayEq1("setBindGroup", args[0], args)) return;
+
+        this["_commands"].push(["setBindGroup", args]);
 
         return this._passEncoder.setBindGroup.apply(this._passEncoder, args);
     }
@@ -122,6 +148,8 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
     {
         if (this.valueEq("setPipeline", pipeline)) return;
 
+        this["_commands"].push(["setPipeline", [pipeline]]);
+
         return this._passEncoder.setPipeline(pipeline);
     }
     setIndexBuffer(buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64): undefined
@@ -136,17 +164,23 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
     {
         if (this.arrayEq1("setVertexBuffer", args[0], args)) return;
 
+        this["_commands"].push(["setVertexBuffer", args]);
+
         return this._passEncoder.setVertexBuffer.apply(this._passEncoder, args);
     }
     draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32): undefined
     draw(...args: any): undefined
     {
+        this["_commands"].push(["draw", args]);
+        
         return this._passEncoder.draw.apply(this._passEncoder, args);
     }
 
     drawIndexed(indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32): undefined
     drawIndexed(...args: any): undefined
     {
+        this["_commands"].push(["drawIndexed", args]);
+        
         return this._passEncoder.drawIndexed.apply(this._passEncoder, args);
     }
     drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
@@ -164,7 +198,7 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
 class GPURenderBundleEncoderCommandCache extends GPURenderCommandsCache implements GPURenderBundleEncoder
 {
     __brand: "GPURenderBundleEncoder" = "GPURenderBundleEncoder";
-    protected _passEncoder: GPURenderBundleEncoder;
+    _passEncoder: GPURenderBundleEncoder;
     constructor(passEncoder: GPURenderBundleEncoder)
     {
         super(passEncoder);
@@ -178,7 +212,7 @@ class GPURenderBundleEncoderCommandCache extends GPURenderCommandsCache implemen
 class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements GPURenderPassEncoder
 {
     __brand: "GPURenderPassEncoder" = "GPURenderPassEncoder";
-    protected _passEncoder: GPURenderPassEncoder;
+    _passEncoder: GPURenderPassEncoder;
 
     setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined
     setViewport(...args: any): undefined

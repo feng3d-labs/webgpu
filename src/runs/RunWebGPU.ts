@@ -258,7 +258,7 @@ export class RunWebGPU
 
         this.runComputePipeline(device, passEncoder, pipeline);
 
-        this.runBindingResources(device, passEncoder, pipeline, bindingResources, []);
+        this.runBindingResources(device, passEncoder, pipeline, bindingResources);
 
         this.runWorkgroups(passEncoder, workgroups);
     }
@@ -293,33 +293,19 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
     {
-        const map: ChainMap<[IGPURenderPassFormat, IGPURenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
-        let commands = map.get([renderPassFormat, renderObject]);
-        if (commands)
-        {
-            commands.forEach((v) =>
-            {
-                passEncoder[v[0]].apply(passEncoder, v[1]);
-            });
-
-            return;
-        }
-        commands = [];
-        // map.set([renderPassFormat, renderObject], commands);
-
         const { pipeline, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
 
-        this.runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices, commands);
+        this.runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
 
-        this.runBindingResources(device, passEncoder, pipeline, bindingResources, commands);
+        this.runBindingResources(device, passEncoder, pipeline, bindingResources);
 
-        this.runVertices(device, passEncoder, pipeline, renderPassFormat, vertices, commands);
+        this.runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
 
-        this.runIndices(device, passEncoder, indices, commands);
+        this.runIndices(device, passEncoder, indices);
 
-        this.runDraw(passEncoder, draw, commands);
+        this.runDraw(passEncoder, draw);
 
-        this.runDrawIndexed(passEncoder, drawIndexed, commands);
+        this.runDrawIndexed(passEncoder, drawIndexed);
     }
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)
@@ -350,36 +336,32 @@ export class RunWebGPU
      * @param passEncoder 渲染通道编码器。
      * @param pipeline 渲染管线。
      */
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, commands: any[])
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
     {
         const { pipeline } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
 
         const gpuRenderPipeline = getGPURenderPipeline(device, pipeline);
         passEncoder.setPipeline(gpuRenderPipeline);
-        //
-        commands.push(["setPipeline", [gpuRenderPipeline]]);
     }
 
-    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources, commands: any[])
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
     {
         // 计算 bindGroups
         const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);
 
         setBindGroups?.forEach((setBindGroup, index) =>
         {
-            this.runSetBindGroup(device, passEncoder, index, setBindGroup, commands);
+            this.runSetBindGroup(device, passEncoder, index, setBindGroup);
         });
     }
 
-    protected runSetBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, index: number, setBindGroup: IGPUSetBindGroup, commands: any[])
+    protected runSetBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, index: number, setBindGroup: IGPUSetBindGroup)
     {
         const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup);
         passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
-        //
-        commands.push(["setBindGroup", [index, gpuBindGroup, setBindGroup.dynamicOffsets]])
     }
 
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, commands: any[])
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
     {
         if (!vertices) return;
 
@@ -391,13 +373,10 @@ export class RunWebGPU
             buffer.label = buffer.label || ("顶点索引 " + autoVertexIndex++);
             const gBuffer = getGPUBuffer(device, buffer);
             passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
-
-            //
-            commands.push(["setVertexBuffer", [index, gBuffer, vertexBuffer.offset, vertexBuffer.size]]);
         });
     }
 
-    protected runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array, commands: any[])
+    protected runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array)
     {
         if (!indices) return;
 
@@ -407,28 +386,22 @@ export class RunWebGPU
         const gBuffer = getGPUBuffer(device, buffer);
 
         passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
-
-        commands.push(["setIndexBuffer", [gBuffer, indexFormat, offset, size]]);
     }
 
-    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDraw, commands?: any[])
+    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDraw)
     {
         if (!draw) return;
 
         const { vertexCount, instanceCount, firstVertex, firstInstance } = draw;
         passEncoder.draw(vertexCount, instanceCount, firstVertex, firstInstance);
-
-        commands.push(["draw", [vertexCount, instanceCount, firstVertex, firstInstance]]);
     }
 
-    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed?: IGPUDrawIndexed, commands?: any[])
+    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed?: IGPUDrawIndexed)
     {
         if (!drawIndexed) return;
 
         const { indexCount, instanceCount, firstIndex, baseVertex, firstInstance } = drawIndexed;
         passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
-
-        commands.push(["drawIndexed", [indexCount, instanceCount, firstIndex, baseVertex, firstInstance]]);
     }
 }
 
