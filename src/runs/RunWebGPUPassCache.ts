@@ -1,5 +1,5 @@
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
-import { IGPUComputePipeline } from "../data/IGPUComputeObject";
+import { IGPUComputeObject, IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderObject, IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPURenderOcclusionQueryObject } from "../data/IGPURenderOcclusionQueryObject";
@@ -14,6 +14,13 @@ import { RunWebGPU } from "./RunWebGPU";
  */
 export class RunWebGPUPassCache extends RunWebGPU
 {
+    protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: IGPUComputeObject[])
+    {
+        passEncoder["_setBindGroup"] = passEncoder["_setBindGroup"] || [];
+
+        super.runComputeObjects(device, passEncoder, computeObjects);
+    }
+
     protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: (IGPURenderOcclusionQueryObject | IGPURenderObject | IGPURenderBundleObject)[])
     {
         passEncoder["_setBindGroup"] = passEncoder["_setBindGroup"] || [];

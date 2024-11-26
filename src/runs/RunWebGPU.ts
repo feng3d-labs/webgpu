@@ -148,12 +148,17 @@ export class RunWebGPU
     {
         const passEncoder = commandEncoder.beginComputePass(computePass.descriptor);
 
-        computePass.computeObjects.forEach((computeObject) =>
+        this.runComputeObjects(device, passEncoder, computePass.computeObjects)
+
+        passEncoder.end();
+    }
+
+    protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: IGPUComputeObject[])
+    {
+        computeObjects.forEach((computeObject) =>
         {
             this.runComputeObject(device, passEncoder, computeObject);
         });
-
-        passEncoder.end();
     }
 
     protected runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: IGPUCopyTextureToTexture)
