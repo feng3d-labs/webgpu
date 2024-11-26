@@ -319,7 +319,7 @@ export class RunWebGPU
 
         this.runDraw(passEncoder, draw, commands);
 
-        this.runDrawIndexed(passEncoder, drawIndexed);
+        this.runDrawIndexed(passEncoder, drawIndexed, commands);
     }
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport?: IGPUViewport)
