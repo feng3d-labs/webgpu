@@ -4,12 +4,12 @@ import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
-import { RunWebGPUStateCache } from "./RunWebGPUStateCache";
+import { RunWebGPU } from "./RunWebGPU";
 
 /**
  * 套壳模式（RunWebGPUCommandCache）优于覆盖函数(RunWebGPUCommandCache1)的形式。
  */
-export class RunWebGPUCommandCache extends RunWebGPUStateCache
+export class RunWebGPUCommandCache extends RunWebGPU
 {
     protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: IGPUComputeObject[])
     {

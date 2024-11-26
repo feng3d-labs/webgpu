@@ -29,6 +29,7 @@ import { IGPUViewport } from "../data/IGPUViewport";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
+import { getRealGPUBindGroup } from "../const";
 
 export class RunWebGPU
 {
@@ -357,7 +358,7 @@ export class RunWebGPU
 
     protected runSetBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, index: number, setBindGroup: IGPUSetBindGroup)
     {
-        const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup);
+        const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup)[getRealGPUBindGroup]();
         passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
     }
 

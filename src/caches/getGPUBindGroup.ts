@@ -99,26 +99,25 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
             entries,
         });
 
-        // 由于外部纹理 与画布上下文获取的纹理 每帧都会被释放，GPUBindGroup将会失效，因此不进行缓存
-        if (!hasExternalTexture && !hasContextTexture)
-        {
-            bindGroupMap.set(bindGroup, gBindGroup);
-        }
+        bindGroupMap.set(bindGroup, gBindGroup);
     };
 
     createBindGroup();
 
-    // 设置更新外部纹理/画布纹理视图
-    gBindGroup[getRealGPUBindGroup] = () =>
+    const getReal = () =>
     {
         if (hasExternalTexture || hasContextTexture)
         {
             updateFuncs.forEach((v) => v());
             createBindGroup();
+            gBindGroup[getRealGPUBindGroup] = getReal;
         }
 
         return gBindGroup;
     };
+
+    // 设置更新外部纹理/画布纹理视图
+    gBindGroup[getRealGPUBindGroup] = getReal;
 
     return gBindGroup;
 }
