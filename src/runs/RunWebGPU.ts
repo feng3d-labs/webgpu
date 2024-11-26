@@ -20,7 +20,7 @@ import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
-import { IGPURenderOcclusionQueryObject } from "../data/IGPURenderOcclusionQueryObject";
+import { IGPUOcclusionQueryObject } from "../data/IGPUOcclusionQueryObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUSubmit } from "../data/IGPUSubmit";
@@ -53,25 +53,29 @@ export class RunWebGPU
 
         commandEncoder.passEncoders.forEach((passEncoder) =>
         {
-            if ((passEncoder as IGPURenderPass).descriptor)
+            if (!passEncoder.__type)
             {
                 this.runRenderPass(device, gpuCommandEncoder, passEncoder as IGPURenderPass);
             }
-            else if ((passEncoder as IGPUComputePass).computeObjects)
+            else if (passEncoder.__type === "IGPURenderPass")
             {
-                this.runComputePass(device, gpuCommandEncoder, passEncoder as IGPUComputePass);
+                this.runRenderPass(device, gpuCommandEncoder, passEncoder);
             }
-            else if ((passEncoder as IGPUCopyTextureToTexture).source?.texture)
+            else if (passEncoder.__type === "IGPUComputePass")
             {
-                this.runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder as IGPUCopyTextureToTexture);
+                this.runComputePass(device, gpuCommandEncoder, passEncoder);
             }
-            else if ((passEncoder as IGPUCopyBufferToBuffer).source)
+            else if (passEncoder.__type === "IGPUCopyTextureToTexture")
             {
-                this.runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder as IGPUCopyBufferToBuffer);
+                this.runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder);
+            }
+            else if (passEncoder.__type === "IGPUCopyBufferToBuffer")
+            {
+                this.runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder);
             }
             else
             {
-                console.error(`未处理 passEncoder`);
+                console.error(`未处理 passEncoder ${passEncoder}`);
             }
         });
 
@@ -105,9 +109,13 @@ export class RunWebGPU
         //
         renderObjects.forEach((element) =>
         {
-            if (element.__type === "OcclusionQueryObject")
+            if (!element.__type)
             {
-                this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
+                this.runRenderObject(device, passEncoder, renderPassFormat, element as IGPURenderObject);
+            }
+            else if (element.__type === "IGPURenderObject")
+            {
+                this.runRenderObject(device, passEncoder, renderPassFormat, element);
             }
             else if (element.__type === "IGPUViewport")
             {
@@ -120,6 +128,10 @@ export class RunWebGPU
             else if (element.__type === "IGPURenderBundleObject")
             {
                 this.runRenderBundle(device, passEncoder, renderPassFormat, element);
+            }
+            else if (element.__type === "IGPUOcclusionQueryObject")
+            {
+                this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
             }
             else
             {
@@ -202,7 +214,7 @@ export class RunWebGPU
         );
     }
 
-    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderOcclusionQueryObject: IGPURenderOcclusionQueryObject)
+    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderOcclusionQueryObject: IGPUOcclusionQueryObject)
     {
         passEncoder.beginOcclusionQuery(renderOcclusionQueryObject._queryIndex);
         renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>

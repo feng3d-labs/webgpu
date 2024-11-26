@@ -127,7 +127,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             commandEncoders: [
                 {
                     passEncoders: [
-                        { computeObjects: [[computeObject0, computeObject1][t % 2]] },
+                        { __type: "IGPUComputePass", computeObjects: [[computeObject0, computeObject1][t % 2]] },
                         { descriptor: renderPass, renderObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
                     ]
                 }

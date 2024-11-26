@@ -7,7 +7,6 @@ import { IGPURenderPass } from "./IGPURenderPass";
  * 命令编码器。
  *
  * @see GPUCommandEncoder
- * @see GPUDevice.createCommandEncoder
  */
 export interface IGPUCommandEncoder
 {

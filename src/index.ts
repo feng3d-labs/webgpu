@@ -11,7 +11,7 @@ export * from "./data/IGPUCopyTextureToTexture";
 export * from "./data/IGPUReadPixels";
 export * from "./data/IGPURenderBundleObject";
 export * from "./data/IGPURenderObject";
-export * from "./data/IGPURenderOcclusionQueryObject";
+export * from "./data/IGPUOcclusionQueryObject";
 export * from "./data/IGPURenderPass";
 export * from "./data/IGPURenderPassColorAttachment";
 export * from "./data/IGPURenderPassDepthStencilAttachment";

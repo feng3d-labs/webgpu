@@ -8,6 +8,11 @@ import { IGPUTexture } from "./IGPUTexture";
 export interface IGPUCopyTextureToTexture
 {
     /**
+     * 数据类型。
+     */
+    readonly __type: "IGPUCopyTextureToTexture";
+
+    /**
      * Combined with `copySize`, defines the region of the source texture subresources.
      */
     source: IGPUImageCopyTexture,

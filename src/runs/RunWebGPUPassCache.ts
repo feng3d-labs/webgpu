@@ -2,7 +2,7 @@ import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputeObject, IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPURenderObject, IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
-import { IGPURenderOcclusionQueryObject } from "../data/IGPURenderOcclusionQueryObject";
+import { IGPUOcclusionQueryObject } from "../data/IGPUOcclusionQueryObject";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUViewport } from "../data/IGPUViewport";
@@ -21,7 +21,7 @@ export class RunWebGPUPassCache extends RunWebGPU
         super.runComputeObjects(device, passEncoder, computeObjects);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: (IGPURenderOcclusionQueryObject | IGPURenderObject | IGPURenderBundleObject)[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: (IGPUOcclusionQueryObject | IGPURenderObject | IGPURenderBundleObject)[])
     {
         passEncoder["_setBindGroup"] = passEncoder["_setBindGroup"] || [];
 

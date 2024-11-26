@@ -1,6 +1,6 @@
 import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderObject } from "./IGPURenderObject";
-import { IGPURenderOcclusionQueryObject } from "./IGPURenderOcclusionQueryObject";
+import { IGPUOcclusionQueryObject } from "./IGPUOcclusionQueryObject";
 import { IGPURenderPassDescriptor } from "./IGPURenderPassDescriptor";
 import { IGPUScissorRect } from "./IGPUScissorRect";
 import { IGPUViewport } from "./IGPUViewport";
@@ -14,6 +14,11 @@ import { IGPUViewport } from "./IGPUViewport";
  */
 export interface IGPURenderPass
 {
+    /**
+     * 数据类型。
+     */
+    readonly __type?: "IGPURenderPass";
+
     /**
      * 渲染通道描述。
      */
@@ -29,10 +34,10 @@ export interface IGPURenderPass
      * 
      * 当提交WebGPU后自动获取结果后填充该属性。
      */
-    occlusionQueryResults?: IGPURenderOcclusionQueryObject[];
+    occlusionQueryResults?: IGPUOcclusionQueryObject[];
 }
 
 /**
  * 渲染通道中的执行项。
  */
-export type IGPURenderPassObject = (IGPUViewport | IGPUScissorRect | IGPURenderObject | IGPURenderBundleObject | IGPURenderOcclusionQueryObject);
+export type IGPURenderPassObject = (IGPUViewport | IGPUScissorRect | IGPURenderObject | IGPURenderBundleObject | IGPUOcclusionQueryObject);

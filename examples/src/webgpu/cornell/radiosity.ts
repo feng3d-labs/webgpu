@@ -108,6 +108,7 @@ export default class Radiosity
     const lightmapSize = internal.getGPUTextureSize(this.lightmap);
 
     this.passEncoders = [{
+      __type: "IGPUComputePass",
       computeObjects: [
         // Dispatch the radiosity workgroups
         {

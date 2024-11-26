@@ -9,6 +9,11 @@ import { IGPUComputeObject } from "./IGPUComputeObject";
 export interface IGPUComputePass
 {
     /**
+     * 数据类型。
+     */
+    readonly __type: "IGPUComputePass";
+
+    /**
      * GPU计算通道描述。
      */
     descriptor?: IGPUComputePassDescriptor;

@@ -44,6 +44,7 @@ export default class Tonemapper
 
     //
     this.passEncoder = {
+      __type: "IGPUComputePass",
       computeObjects: [{
         pipeline: this.pipeline,
         bindingResources: {

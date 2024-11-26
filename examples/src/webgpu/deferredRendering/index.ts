@@ -344,6 +344,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ]
   });
   passEncoders.push({
+    __type: "IGPUComputePass",
     computeObjects: [
       {
         pipeline: lightUpdateComputePipeline,

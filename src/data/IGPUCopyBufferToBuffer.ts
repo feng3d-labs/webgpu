@@ -8,6 +8,11 @@ import { IGPUBuffer } from "./IGPUBuffer";
 export interface IGPUCopyBufferToBuffer
 {
     /**
+     * 数据类型。
+     */
+    readonly __type: "IGPUCopyBufferToBuffer";
+
+    /**
      * 源缓冲区。
      */
     source: IGPUBuffer,
