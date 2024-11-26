@@ -18,11 +18,99 @@ export class RunWebGPUCommandCache extends RunWebGPUStateCache
     }
 }
 
-class GPURenderPassEncoderCommandCache implements GPURenderPassEncoder
+class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMixin, GPUBindingCommandsMixin
 {
-    constructor(passEncoder: GPURenderPassEncoder)
+    constructor(passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin)
     {
         this._passEncoder = passEncoder;
+    }
+
+    setBindGroup(index: GPUIndex32, bindGroup: GPUBindGroup | null, dynamicOffsets?: Iterable<GPUBufferDynamicOffset>): undefined;
+    setBindGroup(index: GPUIndex32, bindGroup: GPUBindGroup | null, dynamicOffsetsData: Uint32Array, dynamicOffsetsDataStart: GPUSize64, dynamicOffsetsDataLength: GPUSize32): undefined;
+    setBindGroup(...args: any): undefined
+    {
+        if (this.arrayEq1("setBindGroup", args[0], args)) return;
+
+        return this._passEncoder.setBindGroup.apply(this._passEncoder, args);
+    }
+
+    pushDebugGroup(groupLabel: string): undefined
+    {
+        return this._passEncoder.pushDebugGroup(groupLabel);
+    }
+    popDebugGroup(): undefined
+    {
+        return this._passEncoder.popDebugGroup();
+    }
+    insertDebugMarker(markerLabel: string): undefined
+    {
+        return this._passEncoder.insertDebugMarker(markerLabel);
+    }
+
+    label: string;
+    protected _passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin;
+    protected _obj = { setBindGroup: [], setVertexBuffer: [] };
+
+    protected valueEq(name: string, value: any)
+    {
+        if (this._obj[name] === value)
+        {
+            return true;
+        }
+        this._obj[name] = value;
+        return false;
+    }
+
+    protected arrayEq0(name: string, args: any[])
+    {
+        const obj = this._obj;
+        const oldArgs: any[] = obj[name];
+        if (!oldArgs)
+        {
+            obj[name] = args;
+            return false;
+        }
+
+        for (let i = 0, n = oldArgs.length; i < n; i++)
+        {
+            if (oldArgs[i] !== args[i])
+            {
+                obj[name] = args;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    protected arrayEq1(name: string, index: number, args: any[])
+    {
+        const obj = this._obj[name];
+        const oldArgs: any[] = obj[index];
+        if (!oldArgs)
+        {
+            obj[index] = args;
+            return false;
+        }
+
+        for (let i = 1, n = oldArgs.length; i < n; i++)
+        {
+            if (oldArgs[i] !== args[i])
+            {
+                obj[index] = args;
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
+class GPURenderPassEncoderCommandCache extends GPUPassEncoderCommandCache implements GPURenderPassEncoder
+{
+    __brand: "GPURenderPassEncoder" = "GPURenderPassEncoder";
+    protected _passEncoder: GPURenderPassEncoder;
+    constructor(passEncoder: GPURenderPassEncoder)
+    {
+        super(passEncoder);
     }
 
     setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined
@@ -52,14 +140,6 @@ class GPURenderPassEncoderCommandCache implements GPURenderPassEncoder
         return this._passEncoder.setStencilReference(reference);
     }
 
-    setBindGroup(index: GPUIndex32, bindGroup: GPUBindGroup | null, dynamicOffsets?: Iterable<GPUBufferDynamicOffset>): undefined;
-    setBindGroup(index: GPUIndex32, bindGroup: GPUBindGroup | null, dynamicOffsetsData: Uint32Array, dynamicOffsetsDataStart: GPUSize64, dynamicOffsetsDataLength: GPUSize32): undefined;
-    setBindGroup(...args: any): undefined
-    {
-        if (this.arrayEq1("setBindGroup", args[0], args)) return;
-
-        return this._passEncoder.setBindGroup.apply(this._passEncoder, args);
-    }
     setPipeline(pipeline: GPURenderPipeline): undefined
     {
         if (this.valueEq("setPipeline", pipeline)) return;
@@ -97,18 +177,6 @@ class GPURenderPassEncoderCommandCache implements GPURenderPassEncoder
     {
         return this._passEncoder.end();
     }
-    pushDebugGroup(groupLabel: string): undefined
-    {
-        return this._passEncoder.pushDebugGroup(groupLabel);
-    }
-    popDebugGroup(): undefined
-    {
-        return this._passEncoder.popDebugGroup();
-    }
-    insertDebugMarker(markerLabel: string): undefined
-    {
-        return this._passEncoder.insertDebugMarker(markerLabel);
-    }
 
     draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32): undefined
     draw(...args: any): undefined
@@ -130,107 +198,37 @@ class GPURenderPassEncoderCommandCache implements GPURenderPassEncoder
     {
         return this._passEncoder.drawIndexedIndirect.apply(this._passEncoder, args);
     }
-
-    __brand: "GPURenderPassEncoder";
-    label: string;
-
-    private _passEncoder: GPURenderPassEncoder;
-    private _obj = { setBindGroup: [], setVertexBuffer: [] };
-
-    private valueEq(name: string, value: any)
-    {
-        if (this._obj[name] === value)
-        {
-            return true;
-        }
-        this._obj[name] = value;
-        return false;
-    }
-
-    private arrayEq0(name: string, args: any[])
-    {
-        const obj = this._obj;
-        const oldArgs: any[] = obj[name];
-        if (!oldArgs)
-        {
-            obj[name] = args;
-            return false;
-        }
-
-        for (let i = 0, n = oldArgs.length; i < n; i++)
-        {
-            if (oldArgs[i] !== args[i])
-            {
-                obj[name] = args;
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private arrayEq1(name: string, index: number, args: any[])
-    {
-        const obj = this._obj[name];
-        const oldArgs: any[] = obj[index];
-        if (!oldArgs)
-        {
-            obj[index] = args;
-            return false;
-        }
-
-        for (let i = 1, n = oldArgs.length; i < n; i++)
-        {
-            if (oldArgs[i] !== args[i])
-            {
-                obj[index] = args;
-                return false;
-            }
-        }
-        return true;
-    }
 }
 
-class GPUComputePassEncoderCommandCache implements GPUComputePassEncoder
+class GPUComputePassEncoderCommandCache extends GPUPassEncoderCommandCache implements GPUComputePassEncoder
 {
-    __brand: "GPUComputePassEncoder";
-    label: string;
-    private _passEncoder: GPUComputePassEncoder;
+    __brand: "GPUComputePassEncoder" = "GPUComputePassEncoder";
+    protected _passEncoder: GPUComputePassEncoder;
 
     constructor(passEncoder: GPUComputePassEncoder)
     {
-        this._passEncoder = passEncoder;
+        super(passEncoder);
     }
 
     setPipeline(pipeline: GPUComputePipeline): undefined
+    setPipeline(...args: any): undefined
     {
-        throw new Error("Method not implemented.");
+        if (this.valueEq("setPipeline", args[0])) return;
+
+        return this._passEncoder.setPipeline.apply(this._passEncoder, args);
     }
     dispatchWorkgroups(workgroupCountX: GPUSize32, workgroupCountY?: GPUSize32, workgroupCountZ?: GPUSize32): undefined
+    dispatchWorkgroups(...args: any): undefined
     {
-        throw new Error("Method not implemented.");
+        return this._passEncoder.dispatchWorkgroups.apply(this._passEncoder, args);
     }
     dispatchWorkgroupsIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
+    dispatchWorkgroupsIndirect(...args: any): undefined
     {
-        throw new Error("Method not implemented.");
+        return this._passEncoder.dispatchWorkgroupsIndirect.apply(this._passEncoder, args);
     }
     end(): undefined
     {
-        throw new Error("Method not implemented.");
-    }
-    pushDebugGroup(groupLabel: string): undefined
-    {
-        throw new Error("Method not implemented.");
-    }
-    popDebugGroup(): undefined
-    {
-        throw new Error("Method not implemented.");
-    }
-    insertDebugMarker(markerLabel: string): undefined
-    {
-        throw new Error("Method not implemented.");
-    }
-    setBindGroup(index: unknown, bindGroup: unknown, dynamicOffsetsData?: unknown, dynamicOffsetsDataStart?: unknown, dynamicOffsetsDataLength?: unknown): undefined
-    {
-        throw new Error("Method not implemented.");
+        return this._passEncoder.end();
     }
 }
