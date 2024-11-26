@@ -10,6 +10,7 @@ import { getGPUBufferBinding } from "./getGPUBufferBinding";
 import { getGPUExternalTexture } from "./getGPUExternalTexture";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
+import { getRealGPUBindGroup } from "../const";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescriptor)
 {
@@ -24,6 +25,8 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
      * 是否存在从 画布上下文 获取的纹理视图。
      */
     let hasContextTexture = false;
+
+    const updateFuncs: (() => void)[] = [];
 
     const layout = getGPUBindGroupLayout(device, bindGroup.layout);
 
@@ -50,6 +53,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
                 if ((iGPUTextureView.texture as IGPUTextureFromContext).context)
                 {
                     hasContextTexture = true;
+                    updateFuncs.push(() => { entry.resource = getGPUTextureView(device, iGPUTextureView); });
                 }
                 anyEmitter.once(resource, GPUTextureView_destroy, () =>
                 {
@@ -61,6 +65,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
                 const iGPUExternalTexture = v.resource as IGPUExternalTexture;
                 resource = getGPUExternalTexture(device, iGPUExternalTexture);
                 hasExternalTexture = true;
+                updateFuncs.push(() => { entry.resource = getGPUExternalTexture(device, iGPUExternalTexture); });
             }
             else 
             {
@@ -102,6 +107,18 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
     };
 
     createBindGroup();
+
+    // 设置更新外部纹理/画布纹理视图
+    gBindGroup[getRealGPUBindGroup] = () =>
+    {
+        if (hasExternalTexture || hasContextTexture)
+        {
+            updateFuncs.forEach((v) => v());
+            createBindGroup();
+        }
+
+        return gBindGroup;
+    };
 
     return gBindGroup;
 }

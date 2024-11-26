@@ -1,3 +1,4 @@
+import { getRealGPUBindGroup } from "../const";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassObject } from "../data/IGPURenderPass";
@@ -37,7 +38,19 @@ export class RunWebGPUCommandCache extends RunWebGPUStateCache
             let _passEncoder = (passEncoder as GPUComputePassEncoderCommandCache)._passEncoder;
             commands.forEach((v) =>
             {
-                _passEncoder[v[0]].apply(_passEncoder, v[1]);
+                if (v[0] === "setBindGroup")
+                {
+                    const temp = v[1][1];
+                    v[1][1] = v[1][1][getRealGPUBindGroup]();
+                    //
+                    _passEncoder[v[0]].apply(_passEncoder, v[1]);
+                    //
+                    v[1][1] = temp;
+                }
+                else
+                {
+                    _passEncoder[v[0]].apply(_passEncoder, v[1]);
+                }
             });
 
             return;
@@ -60,7 +73,19 @@ export class RunWebGPUCommandCache extends RunWebGPUStateCache
             let _passEncoder = (passEncoder as GPURenderPassEncoderCommandCache)._passEncoder;
             commands.forEach((v) =>
             {
-                _passEncoder[v[0]].apply(_passEncoder, v[1]);
+                if (v[0] === "setBindGroup")
+                {
+                    const temp = v[1][1];
+                    v[1][1] = v[1][1][getRealGPUBindGroup]();
+                    //
+                    _passEncoder[v[0]].apply(_passEncoder, v[1]);
+                    //
+                    v[1][1] = temp;
+                }
+                else
+                {
+                    _passEncoder[v[0]].apply(_passEncoder, v[1]);
+                }
             });
 
             return;
