@@ -214,9 +214,9 @@ export class RunWebGPU
 
     protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
     {
-        const map: ChainMap<[IGPURenderBundleObject, IGPURenderPassFormat], GPURenderBundle> = device[_RenderBundleMap] = device[_RenderBundleMap] || new ChainMap();
+        const renderBundleMap: ChainMap<[IGPURenderBundleObject, IGPURenderPassFormat], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
         //
-        let gpuRenderBundle: GPURenderBundle = map.get([renderBundleObject, renderPassFormat]);
+        let gpuRenderBundle: GPURenderBundle = renderBundleMap.get([renderBundleObject, renderPassFormat]);
         if (!gpuRenderBundle)
         {
             const descriptor: GPURenderBundleEncoderDescriptor = { ...renderBundleObject.descriptor, ...renderPassFormat };
@@ -227,7 +227,7 @@ export class RunWebGPU
             this.runRenderBundleObjects(device, renderBundleEncoder, renderPassFormat, renderBundleObject.renderObjects);
 
             gpuRenderBundle = renderBundleEncoder.finish();
-            map.set([renderBundleObject, renderPassFormat], gpuRenderBundle);
+            renderBundleMap.set([renderBundleObject, renderPassFormat], gpuRenderBundle);
         }
 
         passEncoder.executeBundles([gpuRenderBundle]);
@@ -396,6 +396,5 @@ export class RunWebGPU
         passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
     }
 }
-const _RenderBundleMap = "_RenderBundleMap";
 
 let autoVertexIndex = 0;
