@@ -10,20 +10,6 @@ import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
 export interface IGPURenderObject
 {
     /**
-     * GPU绘制时视口尺寸。
-     *
-     * @see GPURenderPassEncoder.setViewport
-     */
-    viewport?: IGPUViewport;
-
-    /**
-     * GPU绘制时视口尺寸。
-     *
-     * @see GPURenderPassEncoder.setScissorRect
-     */
-    scissorRect?: IGPUScissorRect;
-    
-    /**
      * GPU渲染管线描述。
      */
     pipeline: IGPURenderPipeline;
@@ -115,90 +101,6 @@ export interface IGPUDraw
      * First instance to draw.
      */
     firstInstance?: number;
-}
-
-/**
- * Sets the scissor rectangle used during the rasterization stage. After transformation into viewport coordinates any fragments which fall outside the scissor rectangle will be discarded.
- *
- * GPU绘制时视口尺寸。
- *
- * {@link GPURenderPassEncoder.setScissorRect}
- */
-export interface IGPUScissorRect
-{
-    /**
-     * 数据是否来着WebGL。
-     *
-     * WebGL以左下角为起始点，WebGPU以左上角为起点。
-     */
-    fromWebGL?: boolean;
-
-    /**
-     * Minimum X value of the scissor rectangle in pixels.
-     */
-    x: GPUIntegerCoordinate,
-
-    /**
-     * Minimum Y value of the scissor rectangle in pixels.
-     */
-    y: GPUIntegerCoordinate,
-
-    /**
-     * Width of the scissor rectangle in pixels.
-     */
-    width: GPUIntegerCoordinate,
-
-    /**
-     * Height of the scissor rectangle in pixels.
-     */
-    height: GPUIntegerCoordinate
-}
-
-/**
- * Sets the viewport used during the rasterization stage to linearly map from NDC|normalized device coordinates to viewport coordinates.
- *
- * GPU绘制时视口尺寸。
- *
- * {@link GPURenderPassEncoder.setViewport}
- */
-export interface IGPUViewport
-{
-    /**
-     * 数据是否来着WebGL。
-     *
-     * WebGL以左下角为起始点，WebGPU以左上角为起点。
-     */
-    fromWebGL?: boolean;
-
-    /**
-     * Minimum X value of the viewport in pixels.
-     */
-    x: number,
-
-    /**
-     * Minimum Y value of the viewport in pixels.
-     */
-    y: number,
-
-    /**
-     * Width of the viewport in pixels.
-     */
-    width: number,
-
-    /**
-     * Height of the viewport in pixels.
-     */
-    height: number,
-
-    /**
-     * Minimum depth value of the viewport.
-     */
-    minDepth: number,
-
-    /**
-     * Maximum depth value of the viewport.
-     */
-    maxDepth: number
 }
 
 /**

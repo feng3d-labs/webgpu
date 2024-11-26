@@ -2,6 +2,8 @@ import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderObject } from "./IGPURenderObject";
 import { IGPURenderOcclusionQueryObject } from "./IGPURenderOcclusionQueryObject";
 import { IGPURenderPassDescriptor } from "./IGPURenderPassDescriptor";
+import { IGPUScissorRect } from "./IGPUScissorRect";
+import { IGPUViewport } from "./IGPUViewport";
 
 /**
  * GPU渲染通道编码器。
@@ -20,7 +22,7 @@ export interface IGPURenderPass
     /**
      * 渲染对象列表
      */
-    renderObjects?: (IGPURenderObject | IGPURenderBundleObject | IGPURenderOcclusionQueryObject)[];
+    renderObjects?: IGPURenderPassObject[];
 
     /**
      * 渲染不被遮挡查询结果。具体数据保存在各子项的"result"属性中。
@@ -29,3 +31,8 @@ export interface IGPURenderPass
      */
     occlusionQueryResults?: IGPURenderOcclusionQueryObject[];
 }
+
+/**
+ * 渲染通道中的执行项。
+ */
+export type IGPURenderPassObject = (IGPUViewport | IGPUScissorRect | IGPURenderObject | IGPURenderBundleObject | IGPURenderOcclusionQueryObject);

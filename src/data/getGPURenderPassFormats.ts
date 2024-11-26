@@ -8,10 +8,10 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
  * @param descriptor 渲染通道描述。
  * @returns 
  */
-export function getGPURenderPassFormats(descriptor: IGPURenderPassDescriptor): IGPURenderPassFormat
+export function getGPURenderPassFormat(descriptor: IGPURenderPassDescriptor): IGPURenderPassFormat
 {
-    let gpuRenderPassFormats = descriptor[_RenderPassFormats];
-    if (gpuRenderPassFormats) return gpuRenderPassFormats;
+    let gpuRenderPassFormat: IGPURenderPassFormat = descriptor[_RenderPassFormats];
+    if (gpuRenderPassFormat) return gpuRenderPassFormat;
 
     const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => getGPUTextureFormat(v.view.texture));
 
@@ -21,15 +21,14 @@ export function getGPURenderPassFormats(descriptor: IGPURenderPassDescriptor): I
         depthStencilAttachmentTextureFormat = getGPUTextureFormat(descriptor.depthStencilAttachment.view?.texture) || "depth24plus";
     }
 
-    const multisample = descriptor.multisample;
-    gpuRenderPassFormats = descriptor[_RenderPassFormats] = {
+    gpuRenderPassFormat = descriptor[_RenderPassFormats] = {
         attachmentSize: descriptor.attachmentSize,
         colorFormats: colorAttachmentTextureFormats,
         depthStencilFormat: depthStencilAttachmentTextureFormat,
-        multisample
+        multisample: descriptor.multisample,
     };
 
-    return gpuRenderPassFormats;
+    return gpuRenderPassFormat;
 }
 
 const _RenderPassFormats = "_RenderPassFormats";

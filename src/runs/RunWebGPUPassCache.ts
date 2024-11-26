@@ -1,9 +1,11 @@
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
-import { IGPURenderObject, IGPURenderPipeline, IGPUScissorRect, IGPUSetBindGroup, IGPUViewport } from "../data/IGPURenderObject";
+import { IGPURenderObject, IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPURenderOcclusionQueryObject } from "../data/IGPURenderOcclusionQueryObject";
+import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
+import { IGPUViewport } from "../data/IGPUViewport";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { RunWebGPU } from "./RunWebGPU";
 

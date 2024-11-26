@@ -5,7 +5,7 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -301,7 +301,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    const renderObjects: IGPURenderObject[] = [];
+    const renderObjects: IGPURenderPassObject[] = [];
 
     const bindingResources0: IGPUBindingResources = {
         config: { bufferView: bufConfig },
@@ -318,10 +318,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const vpY = kViewportGridStride * Math.floor(i / kViewportGridSize) + 1;
 
         renderObjects.push(
+            { type: "IGPUViewport", x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
             {
                 pipeline: texturedSquarePipeline,
                 bindingResources: bindingResources0,
-                viewport: { x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
                 draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
             }
         );
@@ -332,34 +332,34 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
     const kLastViewport = (kViewportGridSize - 1) * kViewportGridStride + 1;
     renderObjects.push(
+        { type: "IGPUViewport", x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            viewport: { x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
             draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
         }
     );
     renderObjects.push(
+        { type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            viewport: { x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
             draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
         }
     );
     renderObjects.push(
+        { type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            viewport: { x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
             draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
         }
     );
     renderObjects.push(
+        { type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            viewport: { x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
             draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
         }
     );
