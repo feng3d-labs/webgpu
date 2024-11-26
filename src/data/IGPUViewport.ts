@@ -8,6 +8,9 @@
  */
 export interface IGPUViewport
 {
+    /**
+     * 数据类型。
+     */
     readonly __type: "IGPUViewport";
 
     /**

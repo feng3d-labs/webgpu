@@ -5,6 +5,9 @@ import { IGPURenderObject } from "./IGPURenderObject";
  */
 export interface IGPURenderOcclusionQueryObject
 {
+    /**
+     * 数据类型。
+     */
     readonly __type: "OcclusionQueryObject";
 
     /**

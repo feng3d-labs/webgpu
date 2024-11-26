@@ -9,6 +9,9 @@ import { IGPURenderObject } from "./IGPURenderObject";
  */
 export interface IGPURenderBundleObject
 {
+    /**
+     * 数据类型。
+     */
     readonly __type: "IGPURenderBundleObject";
 
     /**

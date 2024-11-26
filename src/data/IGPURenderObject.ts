@@ -9,6 +9,9 @@ import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
  */
 export interface IGPURenderObject
 {
+    /**
+     * 数据类型。
+     */
     readonly __type?: "IGPURenderObject";
     
     /**

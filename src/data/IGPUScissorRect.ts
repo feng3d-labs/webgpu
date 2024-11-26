@@ -8,6 +8,9 @@
  */
 export interface IGPUScissorRect
 {
+    /**
+     * 数据类型。
+     */
     readonly __type: "IGPUScissorRect";
 
     /**
