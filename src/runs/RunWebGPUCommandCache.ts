@@ -5,7 +5,7 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { RunWebGPUStateCache } from "./RunWebGPUStateCache";
 
 /**
- * 继承模式（RunWebGPUCommandCache）优于覆盖函数(RunWebGPUCommandCache1)的形式。
+ * 套壳模式（RunWebGPUCommandCache）优于覆盖函数(RunWebGPUCommandCache1)的形式。
  */
 export class RunWebGPUCommandCache extends RunWebGPUStateCache
 {
