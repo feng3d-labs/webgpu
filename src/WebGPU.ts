@@ -11,7 +11,7 @@ import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { RunWebGPU } from "./runs/RunWebGPU";
-import { RunWebGPUStateCache } from "./runs/RunWebGPUPassCache";
+import { RunWebGPUStateCache } from "./runs/RunWebGPUStateCache";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
 import { readPixels } from "./utils/readPixels";

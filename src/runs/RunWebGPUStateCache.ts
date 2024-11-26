@@ -71,10 +71,7 @@ export class RunWebGPUStateCache extends RunWebGPU
 
     protected runSetBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, index: number, setBindGroup: IGPUSetBindGroup, commands: any[])
     {
-        if (passEncoder["_setBindGroup"][index] === setBindGroup)
-        {
-            return;
-        }
+        if (passEncoder["_setBindGroup"][index] === setBindGroup) return;
         passEncoder["_setBindGroup"][index] = setBindGroup;
 
         super.runSetBindGroup(device, passEncoder, index, setBindGroup, commands);
