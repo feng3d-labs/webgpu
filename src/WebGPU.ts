@@ -11,6 +11,7 @@ import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { RunWebGPU } from "./runs/RunWebGPU";
+import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
 import { RunWebGPUStateCache } from "./runs/RunWebGPUStateCache";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
@@ -24,8 +25,31 @@ import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultipl
  */
 export class WebGPU
 {
-    runWebGPU = new RunWebGPUStateCache();
-    // runWebGPU = new RunWebGPU();
+    private _runWebGPU: RunWebGPU;
+
+    get type() { return this._type; }
+    set type(v)
+    {
+        this._type = v;
+        if (v === "StateCache")
+        {
+            this._runWebGPU = new RunWebGPUStateCache();
+        }
+        else if (v === "CommandCache")
+        {
+            this._runWebGPU = new RunWebGPUCommandCache();
+        }
+        else
+        {
+            this._runWebGPU = new RunWebGPU();
+        }
+    }
+    private _type: "None" | "StateCache" | "CommandCache";
+
+    constructor(type: "None" | "StateCache" | "CommandCache" = "CommandCache")
+    {
+        this.type = type;
+    }
 
     /**
      * 初始化 WebGPU 获取 GPUDevice 。
@@ -125,7 +149,7 @@ export class WebGPU
             this._currentComputePassEncoder = null;
         }
 
-        this.runWebGPU.runSubmit(this.device, submit);
+        this._runWebGPU.runSubmit(this.device, submit);
     }
 
     /**
