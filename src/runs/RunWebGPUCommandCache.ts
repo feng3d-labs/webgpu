@@ -28,6 +28,29 @@ export class RunWebGPUCommandCache extends RunWebGPUStateCache
         super.runRenderBundleObjects(device, bundleEncoder, renderPassFormats, renderObjects);
     }
 
+    protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
+    {
+        const map: Map<IGPUComputeObject, Array<any>> = device["_IGPUComputeObjectCommandMap"] = device["_IGPUComputeObjectCommandMap"] || new Map();
+        let commands = map.get(computeObject);
+        if (commands)
+        {
+            let _passEncoder = (passEncoder as GPUComputePassEncoderCommandCache)._passEncoder;
+            commands.forEach((v) =>
+            {
+                _passEncoder[v[0]].apply(_passEncoder, v[1]);
+            });
+
+            return;
+        }
+        passEncoder["_commands"] = commands = [];
+
+        map.set(computeObject, commands);
+
+        super.runComputeObject(device, passEncoder, computeObject);
+
+        passEncoder["_commands"] = undefined;
+    }
+
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
     {
         const map: ChainMap<[IGPURenderPassFormat, IGPURenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
@@ -172,7 +195,7 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
     draw(...args: any): undefined
     {
         this["_commands"].push(["draw", args]);
-        
+
         return this._passEncoder.draw.apply(this._passEncoder, args);
     }
 
@@ -180,7 +203,7 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
     drawIndexed(...args: any): undefined
     {
         this["_commands"].push(["drawIndexed", args]);
-        
+
         return this._passEncoder.drawIndexed.apply(this._passEncoder, args);
     }
     drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
@@ -262,23 +285,29 @@ class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements
 class GPUComputePassEncoderCommandCache extends GPUPassEncoderCommandCache implements GPUComputePassEncoder
 {
     __brand: "GPUComputePassEncoder" = "GPUComputePassEncoder";
-    protected _passEncoder: GPUComputePassEncoder;
+    _passEncoder: GPUComputePassEncoder;
 
     setPipeline(pipeline: GPUComputePipeline): undefined
     setPipeline(...args: any): undefined
     {
         if (this.valueEq("setPipeline", args[0])) return;
 
+        this["_commands"].push(["setPipeline", args]);
+
         return this._passEncoder.setPipeline.apply(this._passEncoder, args);
     }
     dispatchWorkgroups(workgroupCountX: GPUSize32, workgroupCountY?: GPUSize32, workgroupCountZ?: GPUSize32): undefined
     dispatchWorkgroups(...args: any): undefined
     {
+        this["_commands"].push(["dispatchWorkgroups", args]);
+
         return this._passEncoder.dispatchWorkgroups.apply(this._passEncoder, args);
     }
     dispatchWorkgroupsIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
     dispatchWorkgroupsIndirect(...args: any): undefined
     {
+        this["_commands"].push(["dispatchWorkgroupsIndirect", args]);
+
         return this._passEncoder.dispatchWorkgroupsIndirect.apply(this._passEncoder, args);
     }
     end(): undefined
