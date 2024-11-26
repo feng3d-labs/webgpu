@@ -46,7 +46,7 @@ export class WebGPU
     }
     private _type: "None" | "StateCache" | "CommandCache";
 
-    constructor(type: "None" | "StateCache" | "CommandCache" = "None")
+    constructor(type: "None" | "StateCache" | "CommandCache" = "CommandCache")
     {
         this.type = type;
     }

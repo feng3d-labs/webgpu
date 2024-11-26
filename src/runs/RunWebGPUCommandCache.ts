@@ -17,10 +17,33 @@ export class RunWebGPUCommandCache extends RunWebGPU
         super.runComputeObjects(device, passEncoder, computeObjects);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
     {
+        const map: ChainMap<[IGPURenderPassFormat, IGPURenderPassObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
+        let commands = map.get([renderPassFormat, renderObjects]);
+        if (commands)
+        {
+            console.time(`runCommands`)
+            runCommands(passEncoder, commands);
+            console.timeEnd(`runCommands`)
+
+            return;
+        }
+
         passEncoder = new GPURenderPassEncoderCommandCache(passEncoder);
-        super.runRenderPassObjects(device, passEncoder, renderPassFormats, renderObjects);
+
+        super.runRenderPassObjects(device, passEncoder, renderPassFormat, renderObjects);
+
+        // 收集命令列表
+        commands = [];
+        const renderObjectCommandMap: ChainMap<[IGPURenderPassFormat, IGPURenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
+        renderObjects.forEach((renderObject: IGPURenderObject) =>
+        {
+            let subCommands = renderObjectCommandMap.get([renderPassFormat, renderObject]);
+
+            subCommands.forEach((v) => commands.push(v));
+        });
+        map.set([renderPassFormat, renderObjects], commands);
     }
 
     protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
