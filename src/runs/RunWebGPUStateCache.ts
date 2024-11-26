@@ -34,18 +34,16 @@ export class RunWebGPUStateCache extends RunWebGPU
         super.runRenderBundleObjects(device, bundleEncoder, renderPassFormats, renderObjects);
     }
 
-    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport?: IGPUViewport)
+    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)
     {
-        if (!viewport) return;
         if (passEncoder["_viewport"] === viewport) return;
         passEncoder["_viewport"] = viewport;
 
         super.runViewport(passEncoder, attachmentSize, viewport);
     }
 
-    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect?: IGPUScissorRect)
+    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: IGPUScissorRect)
     {
-        if (!scissorRect) return;
         if (passEncoder["_scissorRect"] === scissorRect) return;
         passEncoder["_scissorRect"] = scissorRect;
 

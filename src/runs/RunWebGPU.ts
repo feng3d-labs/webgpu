@@ -305,7 +305,7 @@ export class RunWebGPU
             return;
         }
         commands = [];
-        map.set([renderPassFormat, renderObject], commands);
+        // map.set([renderPassFormat, renderObject], commands);
 
         const { pipeline, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
 
@@ -322,10 +322,8 @@ export class RunWebGPU
         this.runDrawIndexed(passEncoder, drawIndexed, commands);
     }
 
-    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport?: IGPUViewport)
+    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)
     {
-        if (!viewport) return;
-
         let { fromWebGL, x, y, width, height, minDepth, maxDepth } = viewport;
         if (fromWebGL)
         {
@@ -334,10 +332,8 @@ export class RunWebGPU
         passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
     }
 
-    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect?: IGPUScissorRect)
+    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: IGPUScissorRect)
     {
-        if (!scissorRect) return;
-
         let { fromWebGL, x, y, width, height } = scissorRect;
         if (fromWebGL)
         {
