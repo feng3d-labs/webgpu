@@ -8,7 +8,7 @@
  */
 export interface IGPUScissorRect
 {
-    readonly type: "IGPUScissorRect";
+    readonly __type: "IGPUScissorRect";
 
     /**
      * 数据是否来着WebGL。

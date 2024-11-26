@@ -9,6 +9,8 @@ import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
  */
 export interface IGPURenderObject
 {
+    readonly __type?: "IGPURenderObject";
+    
     /**
      * GPU渲染管线描述。
      */

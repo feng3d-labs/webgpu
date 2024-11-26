@@ -9,6 +9,8 @@ import { IGPURenderObject } from "./IGPURenderObject";
  */
 export interface IGPURenderBundleObject
 {
+    readonly __type: "IGPURenderBundleObject";
+
     /**
      * GPU渲染捆绑编码器描述。
      */

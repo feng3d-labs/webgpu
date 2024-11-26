@@ -318,7 +318,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const vpY = kViewportGridStride * Math.floor(i / kViewportGridSize) + 1;
 
         renderObjects.push(
-            { type: "IGPUViewport", x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
+            { __type: "IGPUViewport", x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
             {
                 pipeline: texturedSquarePipeline,
                 bindingResources: bindingResources0,
@@ -332,7 +332,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
     const kLastViewport = (kViewportGridSize - 1) * kViewportGridStride + 1;
     renderObjects.push(
-        { type: "IGPUViewport", x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
+        { __type: "IGPUViewport", x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
@@ -340,7 +340,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     );
     renderObjects.push(
-        { type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
+        { __type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
@@ -348,7 +348,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     );
     renderObjects.push(
-        { type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
+        { __type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
@@ -356,7 +356,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     );
     renderObjects.push(
-        { type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
+        { __type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,

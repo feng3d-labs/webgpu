@@ -5,7 +5,7 @@ import { IGPURenderObject } from "./IGPURenderObject";
  */
 export interface IGPURenderOcclusionQueryObject
 {
-    readonly type: "OcclusionQueryObject";
+    readonly __type: "OcclusionQueryObject";
 
     /**
      * GPU渲染对象列表。

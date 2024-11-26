@@ -105,25 +105,25 @@ export class RunWebGPU
         //
         renderObjects.forEach((element) =>
         {
-            if ((element as IGPURenderOcclusionQueryObject).type === "OcclusionQueryObject")
+            if (element.__type === "OcclusionQueryObject")
             {
-                this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element as IGPURenderOcclusionQueryObject);
+                this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
             }
-            else if ((element as IGPUViewport).type === "IGPUViewport")
+            else if (element.__type === "IGPUViewport")
             {
-                this.runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element as IGPUViewport);
+                this.runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element);
             }
-            else if ((element as IGPUScissorRect).type === "IGPUScissorRect")
+            else if (element.__type === "IGPUScissorRect")
             {
-                this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element as IGPUScissorRect);
+                this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element);
             }
-            else if ((element as IGPURenderBundleObject).renderObjects)
+            else if (element.__type === "IGPURenderBundleObject")
             {
-                this.runRenderBundle(device, passEncoder, renderPassFormat, element as IGPURenderBundleObject);
+                this.runRenderBundle(device, passEncoder, renderPassFormat, element);
             }
             else
             {
-                this.runRenderObject(device, passEncoder, renderPassFormat, element as IGPURenderObject);
+                this.runRenderObject(device, passEncoder, renderPassFormat, element);
             }
         });
     }

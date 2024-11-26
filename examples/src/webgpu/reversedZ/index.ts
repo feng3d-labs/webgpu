@@ -379,7 +379,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 }
             },
             renderObjects: [
-                { type: "IGPUViewport", x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
+                { __type: "IGPUViewport", x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                 {
                     pipeline: colorPassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
@@ -402,7 +402,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             renderObjects: [
                 {
-                    type: "IGPUViewport",
+                    __type: "IGPUViewport",
                     x: (canvas.width * m) / 2,
                     y: 0,
                     width: canvas.width / 2,
@@ -427,7 +427,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             renderObjects: [
                 {
-                    type: "IGPUViewport",
+                    __type: "IGPUViewport",
                     x: (canvas.width * m) / 2,
                     y: 0,
                     width: canvas.width / 2,
@@ -457,7 +457,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             renderObjects: [
                 {
-                    type: "IGPUViewport",
+                    __type: "IGPUViewport",
                     x: (canvas.width * m) / 2,
                     y: 0,
                     width: canvas.width / 2,
@@ -475,7 +475,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         depthBufferPassEncoders.push({
             descriptor: textureQuadPassDescriptors1[m],
             renderObjects: [{
-                type: "IGPUViewport",
+                __type: "IGPUViewport",
                 x: (canvas.width * m) / 2,
                 y: 0,
                 width: canvas.width / 2,

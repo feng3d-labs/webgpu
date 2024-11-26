@@ -8,7 +8,7 @@
  */
 export interface IGPUViewport
 {
-    readonly type: "IGPUViewport";
+    readonly __type: "IGPUViewport";
 
     /**
      * 数据是否来着WebGL。

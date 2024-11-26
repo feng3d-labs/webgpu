@@ -116,6 +116,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         const renderBundleObject: IGPURenderBundleObject = {
+            __type: "IGPURenderBundleObject",
             renderObjects
         };
 
