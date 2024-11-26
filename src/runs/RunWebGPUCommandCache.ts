@@ -1,4 +1,5 @@
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
+import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { RunWebGPUStateCache } from "./RunWebGPUStateCache";
@@ -15,6 +16,12 @@ export class RunWebGPUCommandCache extends RunWebGPUStateCache
     {
         passEncoder = new GPURenderPassEncoderCommandCache(passEncoder);
         super.runRenderPassObjects(device, passEncoder, renderPassFormats, renderObjects);
+    }
+
+    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
+    {
+        bundleEncoder = new GPURenderBundleEncoderCommandCache(bundleEncoder);
+        super.runRenderBundleObjects(device, bundleEncoder, renderPassFormats, renderObjects);
     }
 }
 
@@ -104,7 +111,72 @@ class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMi
     }
 }
 
-class GPURenderPassEncoderCommandCache extends GPUPassEncoderCommandCache implements GPURenderPassEncoder
+class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURenderCommandsMixin
+{
+    protected _passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin & GPURenderCommandsMixin;
+    constructor(passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin & GPURenderCommandsMixin)
+    {
+        super(passEncoder);
+    }
+
+    setPipeline(pipeline: GPURenderPipeline): undefined
+    {
+        if (this.valueEq("setPipeline", pipeline)) return;
+
+        return this._passEncoder.setPipeline(pipeline);
+    }
+    setIndexBuffer(buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64): undefined
+    setIndexBuffer(...args: any): undefined
+    {
+        if (this.arrayEq0("setIndexBuffer", args)) return;
+
+        return this._passEncoder.setIndexBuffer.apply(this._passEncoder, args);
+    }
+    setVertexBuffer(slot: GPUIndex32, buffer: GPUBuffer | null, offset?: GPUSize64, size?: GPUSize64): undefined
+    setVertexBuffer(...args: any): undefined
+    {
+        if (this.arrayEq1("setVertexBuffer", args[0], args)) return;
+
+        return this._passEncoder.setVertexBuffer.apply(this._passEncoder, args);
+    }
+    draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32): undefined
+    draw(...args: any): undefined
+    {
+        return this._passEncoder.draw.apply(this._passEncoder, args);
+    }
+
+    drawIndexed(indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32): undefined
+    drawIndexed(...args: any): undefined
+    {
+        return this._passEncoder.drawIndexed.apply(this._passEncoder, args);
+    }
+    drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
+    drawIndirect(...args: any): undefined
+    {
+        return this._passEncoder.drawIndirect.apply(this._passEncoder, args);
+    }
+    drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
+    drawIndexedIndirect(...args: any): undefined
+    {
+        return this._passEncoder.drawIndexedIndirect.apply(this._passEncoder, args);
+    }
+}
+
+class GPURenderBundleEncoderCommandCache extends GPURenderCommandsCache implements GPURenderBundleEncoder
+{
+    __brand: "GPURenderBundleEncoder" = "GPURenderBundleEncoder";
+    protected _passEncoder: GPURenderBundleEncoder;
+    constructor(passEncoder: GPURenderBundleEncoder)
+    {
+        super(passEncoder);
+    }
+    finish(descriptor?: GPURenderBundleDescriptor): GPURenderBundle
+    {
+        return this._passEncoder.finish(descriptor);
+    }
+}
+
+class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements GPURenderPassEncoder
 {
     __brand: "GPURenderPassEncoder" = "GPURenderPassEncoder";
     protected _passEncoder: GPURenderPassEncoder;
@@ -140,27 +212,6 @@ class GPURenderPassEncoderCommandCache extends GPUPassEncoderCommandCache implem
         return this._passEncoder.setStencilReference(reference);
     }
 
-    setPipeline(pipeline: GPURenderPipeline): undefined
-    {
-        if (this.valueEq("setPipeline", pipeline)) return;
-
-        return this._passEncoder.setPipeline(pipeline);
-    }
-    setIndexBuffer(buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64): undefined
-    setIndexBuffer(...args: any): undefined
-    {
-        if (this.arrayEq0("setIndexBuffer", args)) return;
-
-        return this._passEncoder.setIndexBuffer.apply(this._passEncoder, args);
-    }
-    setVertexBuffer(slot: GPUIndex32, buffer: GPUBuffer | null, offset?: GPUSize64, size?: GPUSize64): undefined
-    setVertexBuffer(...args: any): undefined
-    {
-        if (this.arrayEq1("setVertexBuffer", args[0], args)) return;
-
-        return this._passEncoder.setVertexBuffer.apply(this._passEncoder, args);
-    }
-
     beginOcclusionQuery(queryIndex: GPUSize32): undefined
     {
         return this._passEncoder.beginOcclusionQuery(queryIndex);
@@ -176,27 +227,6 @@ class GPURenderPassEncoderCommandCache extends GPUPassEncoderCommandCache implem
     end(): undefined
     {
         return this._passEncoder.end();
-    }
-
-    draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32): undefined
-    draw(...args: any): undefined
-    {
-        return this._passEncoder.draw.apply(this._passEncoder, args);
-    }
-    drawIndexed(indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32): undefined
-    drawIndexed(...args: any): undefined
-    {
-        return this._passEncoder.drawIndexed.apply(this._passEncoder, args);
-    }
-    drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
-    drawIndirect(...args: any): undefined
-    {
-        return this._passEncoder.drawIndirect.apply(this._passEncoder, args);
-    }
-    drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
-    drawIndexedIndirect(...args: any): undefined
-    {
-        return this._passEncoder.drawIndexedIndirect.apply(this._passEncoder, args);
     }
 }
 
