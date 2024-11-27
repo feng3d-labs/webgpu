@@ -106,18 +106,23 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
     const getReal = () =>
     {
-        if (hasExternalTexture || hasContextTexture)
-        {
-            updateFuncs.forEach((v) => v());
-            createBindGroup();
-            gBindGroup[getRealGPUBindGroup] = getReal;
-        }
+
+        updateFuncs.forEach((v) => v());
+        createBindGroup();
+        gBindGroup[getRealGPUBindGroup] = getReal;
 
         return gBindGroup;
     };
 
     // 设置更新外部纹理/画布纹理视图
-    gBindGroup[getRealGPUBindGroup] = getReal;
+    if (hasExternalTexture || hasContextTexture)
+    {
+        gBindGroup[getRealGPUBindGroup] = getReal;
+    }
+    else
+    {
+        gBindGroup[getRealGPUBindGroup] = () => gBindGroup;
+    }
 
     return gBindGroup;
 }
