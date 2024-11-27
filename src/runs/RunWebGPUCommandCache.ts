@@ -297,12 +297,9 @@ function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder 
     {
         if (v[0] === "setBindGroup")
         {
-            const temp = v[1][1];
             v[1][1] = v[1][1][getRealGPUBindGroup]();
             //
             _passEncoder[v[0]].apply(_passEncoder, v[1]);
-            //
-            v[1][1] = temp;
         }
         else
         {
