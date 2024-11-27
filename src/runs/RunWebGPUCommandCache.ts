@@ -17,11 +17,11 @@ export class RunWebGPUCommandCache extends RunWebGPU
         if (!commands)
         {
             // 收集命令
-            const passEncoderCache = new GPURenderPassEncoderCommandCache();
-            passEncoderCache["_commands"] = commands = [];
+            const renderPassRecord = new GPURenderPassRecord();
+            renderPassRecord["_commands"] = commands = [];
             map.set([renderPassFormat._key, renderObjects], commands);
 
-            super.runRenderPassObjects(device, passEncoderCache, renderPassFormat, renderObjects);
+            super.runRenderPassObjects(device, renderPassRecord, renderPassFormat, renderObjects);
 
             // 排除无效命令
             paichuWuxiaoCommands(commands);
@@ -38,11 +38,11 @@ export class RunWebGPUCommandCache extends RunWebGPU
         if (!commands)
         {
             // 收集命令
-            const bundleEncoderCache = new GPURenderBundleEncoderCommandCache();
-            bundleEncoderCache["_commands"] = commands = [];
+            const renderBundleRecord = new GPURenderBundleRecord();
+            renderBundleRecord["_commands"] = commands = [];
             map.set([renderPassFormat._key, renderObjects], commands);
 
-            super.runRenderBundleObjects(device, bundleEncoderCache, renderPassFormat, renderObjects);
+            super.runRenderBundleObjects(device, renderBundleRecord, renderPassFormat, renderObjects);
 
             // 排除无效命令
             paichuWuxiaoCommands(commands);
@@ -73,45 +73,56 @@ export class RunWebGPUCommandCache extends RunWebGPU
     }
 }
 
-class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMixin, GPUBindingCommandsMixin
+class GPURenderBundleRecord implements GPURenderBundleEncoder
 {
-    setBindGroup(...args: any): undefined { this["_commands"].push(["setBindGroup", args]); }
-    pushDebugGroup(...args: any): undefined { this["_commands"].push(["pushDebugGroup", args]); }
-    popDebugGroup(...args: any): undefined { this["_commands"].push(["popDebugGroup", args]); }
-    insertDebugMarker(...args: any): undefined { this["_commands"].push(["insertDebugMarker", args]); }
-
+    __brand: "GPURenderBundleEncoder";
     label: string;
-}
-
-class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURenderCommandsMixin
-{
+    //
     setPipeline(...args: any): undefined { this["_commands"].push(["setPipeline", args]); }
-    setIndexBuffer(...args: any): undefined { this["_commands"].push(["setIndexBuffer", args]); }
     setVertexBuffer(...args: any): undefined { this["_commands"].push(["setVertexBuffer", args]); }
+    setIndexBuffer(...args: any): undefined { this["_commands"].push(["setIndexBuffer", args]); }
+    setBindGroup(...args: any): undefined { this["_commands"].push(["setBindGroup", args]); }
     draw(...args: any): undefined { this["_commands"].push(["draw", args]); }
     drawIndexed(...args: any): undefined { this["_commands"].push(["drawIndexed", args]); }
     drawIndirect(...args: any): undefined { this["_commands"].push(["drawIndirect", args]); }
     drawIndexedIndirect(...args: any): undefined { this["_commands"].push(["drawIndexedIndirect", args]); }
-}
-
-class GPURenderBundleEncoderCommandCache extends GPURenderCommandsCache implements GPURenderBundleEncoder
-{
-    __brand: "GPURenderBundleEncoder";
+    //
     finish(...args: any): undefined { this["_commands"].push(["finish", args]); }
+    //
+    pushDebugGroup(...args: any): undefined { this["_commands"].push(["pushDebugGroup", args]); }
+    popDebugGroup(...args: any): undefined { this["_commands"].push(["popDebugGroup", args]); }
+    insertDebugMarker(...args: any): undefined { this["_commands"].push(["insertDebugMarker", args]); }
 }
 
-class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements GPURenderPassEncoder
+class GPURenderPassRecord implements GPURenderPassEncoder
 {
     __brand: "GPURenderPassEncoder" = "GPURenderPassEncoder";
-
+    label: string;
+    //
     setViewport(...args: any): undefined { this["_commands"].push(["setViewport", args]); }
     setScissorRect(...args: any): undefined { this["_commands"].push(["setScissorRect", args]); }
     setBlendConstant(...args: any): undefined { this["_commands"].push(["setBlendConstant", args]); }
     setStencilReference(...args: any): undefined { this["_commands"].push(["setStencilReference", args]); }
+    //
+    setPipeline(...args: any): undefined { this["_commands"].push(["setPipeline", args]); }
+    setVertexBuffer(...args: any): undefined { this["_commands"].push(["setVertexBuffer", args]); }
+    setIndexBuffer(...args: any): undefined { this["_commands"].push(["setIndexBuffer", args]); }
+    setBindGroup(...args: any): undefined { this["_commands"].push(["setBindGroup", args]); }
+    draw(...args: any): undefined { this["_commands"].push(["draw", args]); }
+    drawIndexed(...args: any): undefined { this["_commands"].push(["drawIndexed", args]); }
+    drawIndirect(...args: any): undefined { this["_commands"].push(["drawIndirect", args]); }
+    drawIndexedIndirect(...args: any): undefined { this["_commands"].push(["drawIndexedIndirect", args]); }
+    //
     beginOcclusionQuery(...args: any): undefined { this["_commands"].push(["beginOcclusionQuery", args]); }
     endOcclusionQuery(...args: any): undefined { this["_commands"].push(["endOcclusionQuery", args]); }
+    //
     executeBundles(...args: any): undefined { this["_commands"].push(["executeBundles", args]); }
+    //
     end(...args: any): undefined { this["_commands"].push(["end", args]); }
+    //
+    pushDebugGroup(...args: any): undefined { this["_commands"].push(["pushDebugGroup", args]); }
+    popDebugGroup(...args: any): undefined { this["_commands"].push(["popDebugGroup", args]); }
+    insertDebugMarker(...args: any): undefined { this["_commands"].push(["insertDebugMarker", args]); }
 }
 
 function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder | GPURenderBundleEncoder, commands: any[])
