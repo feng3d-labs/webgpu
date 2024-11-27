@@ -23,33 +23,35 @@ export class RunWebGPUCommandCache extends RunWebGPU
         let commands = map.get([renderPassFormat, renderObjects]);
         if (commands)
         {
-            console.time(`runCommands`)
             runCommands(passEncoder, commands);
-            console.timeEnd(`runCommands`)
 
             return;
         }
 
         passEncoder = new GPURenderPassEncoderCommandCache(passEncoder);
+        passEncoder["_commands"] = commands = [];
+
+        map.set([renderPassFormat, renderObjects], commands);
 
         super.runRenderPassObjects(device, passEncoder, renderPassFormat, renderObjects);
-
-        // 收集命令列表
-        commands = [];
-        const renderObjectCommandMap: ChainMap<[IGPURenderPassFormat, IGPURenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
-        renderObjects.forEach((renderObject: IGPURenderObject) =>
-        {
-            let subCommands = renderObjectCommandMap.get([renderPassFormat, renderObject]);
-
-            subCommands.forEach((v) => commands.push(v));
-        });
-        map.set([renderPassFormat, renderObjects], commands);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
     {
+        const map: ChainMap<[IGPURenderPassFormat, IGPURenderPassObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
+        let commands = map.get([renderPassFormat, renderObjects]);
+        if (commands)
+        {
+            runCommands(bundleEncoder, commands);
+
+            return;
+        }
+
         bundleEncoder = new GPURenderBundleEncoderCommandCache(bundleEncoder);
-        super.runRenderBundleObjects(device, bundleEncoder, renderPassFormats, renderObjects);
+        bundleEncoder["_commands"] = commands = [];
+        map.set([renderPassFormat, renderObjects], commands);
+
+        super.runRenderBundleObjects(device, bundleEncoder, renderPassFormat, renderObjects);
     }
 
     protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
@@ -59,16 +61,14 @@ export class RunWebGPUCommandCache extends RunWebGPU
         if (commands)
         {
             runCommands((passEncoder as GPUComputePassEncoderCommandCache)._passEncoder, commands);
-
             return;
         }
-        passEncoder["_commands"] = commands = [];
-
-        map.set(computeObject, commands);
+        const _commands = passEncoder["_commands"] as any[];
+        const start = _commands.length;
 
         super.runComputeObject(device, passEncoder, computeObject);
 
-        passEncoder["_commands"] = undefined;
+        map.set(computeObject, _commands.slice(start));
     }
 
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
@@ -81,13 +81,12 @@ export class RunWebGPUCommandCache extends RunWebGPU
 
             return;
         }
-        passEncoder["_commands"] = commands = [];
-
-        map.set([renderPassFormat, renderObject], commands);
+        const _commands = passEncoder["_commands"] as any[];
+        const start = _commands.length;
 
         super.runRenderObject(device, passEncoder, renderPassFormat, renderObject);
 
-        passEncoder["_commands"] = undefined;
+        map.set([renderPassFormat, renderObject], _commands.slice(start));
     }
 }
 
@@ -227,11 +226,15 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
     drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
     drawIndirect(...args: any): undefined
     {
+        this["_commands"].push(["drawIndirect", args]);
+
         return this._passEncoder.drawIndirect.apply(this._passEncoder, args);
     }
     drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
     drawIndexedIndirect(...args: any): undefined
     {
+        this["_commands"].push(["drawIndexedIndirect", args]);
+
         return this._passEncoder.drawIndexedIndirect.apply(this._passEncoder, args);
     }
 }
@@ -260,6 +263,8 @@ class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements
     {
         if (this.arrayEq0("setViewport", args)) return;
 
+        this["_commands"].push(["setViewport", args]);
+
         return this._passEncoder.setViewport.apply(this._passEncoder, args);
     }
     setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined
@@ -267,11 +272,14 @@ class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements
     {
         if (this.arrayEq0("setScissorRect", args)) return;
 
+        this["_commands"].push(["setScissorRect", args]);
+
         return this._passEncoder.setViewport.apply(this._passEncoder, args);
     }
     setBlendConstant(color: GPUColor): undefined
     {
         if (this.valueEq("setBlendConstant", color)) return;
+        this["_commands"].push(["setBlendConstant", [color]]);
 
         return this._passEncoder.setBlendConstant(color)
     }
@@ -279,23 +287,30 @@ class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements
     {
         if (this.valueEq("setStencilReference", reference)) return;
 
+        this["_commands"].push(["setStencilReference", [reference]]);
+
         return this._passEncoder.setStencilReference(reference);
     }
 
     beginOcclusionQuery(queryIndex: GPUSize32): undefined
     {
+        this["_commands"].push(["beginOcclusionQuery", [queryIndex]]);
+
         return this._passEncoder.beginOcclusionQuery(queryIndex);
     }
     endOcclusionQuery(): undefined
     {
+        this["_commands"].push(["endOcclusionQuery", []]);
         return this._passEncoder.endOcclusionQuery();
     }
     executeBundles(bundles: Iterable<GPURenderBundle>): undefined
     {
+        this["_commands"].push(["executeBundles", [bundles]]);
         return this._passEncoder.executeBundles(bundles);
     }
     end(): undefined
     {
+        this["_commands"].push(["end", []]);
         return this._passEncoder.end();
     }
 }
@@ -334,7 +349,7 @@ class GPUComputePassEncoderCommandCache extends GPUPassEncoderCommandCache imple
     }
 }
 
-function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder, commands: any[])
+function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder | GPURenderBundleEncoder, commands: any[])
 {
     commands.forEach((v) =>
     {
