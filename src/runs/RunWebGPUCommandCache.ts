@@ -16,12 +16,18 @@ export class RunWebGPUCommandCache extends RunWebGPU
         let commands = map.get([renderPassFormat._key, renderObjects]);
         if (!commands)
         {
+            // 收集命令
             const passEncoderCache = new GPURenderPassEncoderCommandCache(passEncoder);
             passEncoderCache["_commands"] = commands = [];
             map.set([renderPassFormat._key, renderObjects], commands);
 
             super.runRenderPassObjects(device, passEncoderCache, renderPassFormat, renderObjects);
+
+            // 排除无效命令
+            paichuWuxiaoCommands(commands);
         }
+
+        // 执行命令
         runCommands(passEncoder, commands);
     }
 
@@ -31,13 +37,18 @@ export class RunWebGPUCommandCache extends RunWebGPU
         let commands = map.get([renderPassFormat._key, renderObjects]);
         if (!commands)
         {
+            // 收集命令
             const bundleEncoderCache = new GPURenderBundleEncoderCommandCache(bundleEncoder);
             bundleEncoderCache["_commands"] = commands = [];
             map.set([renderPassFormat._key, renderObjects], commands);
 
             super.runRenderBundleObjects(device, bundleEncoderCache, renderPassFormat, renderObjects);
+
+            // 排除无效命令
+            paichuWuxiaoCommands(commands);
         }
 
+        // 执行命令
         runCommands(bundleEncoder, commands);
     }
 
@@ -74,8 +85,6 @@ class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMi
     setBindGroup(index: GPUIndex32, bindGroup: GPUBindGroup | null, dynamicOffsetsData: Uint32Array, dynamicOffsetsDataStart: GPUSize64, dynamicOffsetsDataLength: GPUSize32): undefined;
     setBindGroup(...args: any): undefined
     {
-        if (this.arrayEq1("setBindGroup", args[0], args)) return;
-
         this["_commands"].push(["setBindGroup", args]);
     }
 
@@ -94,49 +103,6 @@ class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMi
 
     label: string;
     protected _passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin;
-    protected _obj = { setBindGroup: [], setVertexBuffer: [] };
-
-    protected arrayEq0(name: string, args: any[])
-    {
-        const obj = this._obj;
-        const oldArgs: any[] = obj[name];
-        if (!oldArgs)
-        {
-            obj[name] = args;
-            return false;
-        }
-
-        for (let i = 0, n = oldArgs.length; i < n; i++)
-        {
-            if (oldArgs[i] !== args[i])
-            {
-                obj[name] = args;
-                return false;
-            }
-        }
-        return true;
-    }
-
-    protected arrayEq1(name: string, index: number, args: any[])
-    {
-        const obj = this._obj[name];
-        const oldArgs: any[] = obj[index];
-        if (!oldArgs)
-        {
-            obj[index] = args;
-            return false;
-        }
-
-        for (let i = 1, n = oldArgs.length; i < n; i++)
-        {
-            if (oldArgs[i] !== args[i])
-            {
-                obj[index] = args;
-                return false;
-            }
-        }
-        return true;
-    }
 }
 
 class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURenderCommandsMixin
@@ -145,22 +111,16 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
 
     setPipeline(pipeline: GPURenderPipeline): undefined
     {
-        if (this.arrayEq0("setPipeline", [pipeline])) return;
-
         this["_commands"].push(["setPipeline", [pipeline]]);
     }
     setIndexBuffer(buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64): undefined
     setIndexBuffer(...args: any): undefined
     {
-        if (this.arrayEq0("setIndexBuffer", args)) return;
-
         this["_commands"].push(["setIndexBuffer", args]);
     }
     setVertexBuffer(slot: GPUIndex32, buffer: GPUBuffer | null, offset?: GPUSize64, size?: GPUSize64): undefined
     setVertexBuffer(...args: any): undefined
     {
-        if (this.arrayEq1("setVertexBuffer", args[0], args)) return;
-
         this["_commands"].push(["setVertexBuffer", args]);
     }
     draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32): undefined
@@ -208,26 +168,19 @@ class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements
     setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined
     setViewport(...args: any): undefined
     {
-        if (this.arrayEq0("setViewport", args)) return;
-
         this["_commands"].push(["setViewport", args]);
     }
     setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined
     setScissorRect(...args: any): undefined
     {
-        if (this.arrayEq0("setScissorRect", args)) return;
-
         this["_commands"].push(["setScissorRect", args]);
     }
     setBlendConstant(color: GPUColor): undefined
     {
-        if (this.arrayEq0("setBlendConstant", [color])) return;
         this["_commands"].push(["setBlendConstant", [color]]);
     }
     setStencilReference(reference: GPUStencilValue): undefined
     {
-        if (this.arrayEq0("setStencilReference", [reference])) return;
-
         this["_commands"].push(["setStencilReference", [reference]]);
     }
 
@@ -264,4 +217,82 @@ function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder 
             _passEncoder[v[0]].apply(_passEncoder, v[1]);
         }
     });
+}
+
+function paichuWuxiaoCommands(commands: any[])
+{
+    const _obj = { setBindGroup: [], setVertexBuffer: [] };
+    //
+    let length = 0;
+    commands.concat().forEach((v) =>
+    {
+        if (v[0] === "setBindGroup" || v[0] === "setVertexBuffer")
+        {
+            if (!arrayEq1(_obj, v[0], v[1][0], v[1]))
+            {
+                commands[length++] = v;
+            }
+        }
+        else if (0
+            || v[0] == "setPipeline"
+            || v[0] == "setIndexBuffer"
+            || v[0] == "setViewport"
+            || v[0] == "setScissorRect"
+            || v[0] == "setBlendConstant"
+            || v[0] == "setStencilReference"
+        )
+        {
+            if (!arrayEq0(_obj, v[0], v[1]))
+            {
+                commands[length++] = v;
+            }
+        }
+        else
+        {
+            commands[length++] = v;
+        }
+    });
+    commands.length = length;
+}
+
+function arrayEq0(_obj: any, name: string, args: any[])
+{
+    const obj = _obj;
+    const oldArgs: any[] = obj[name];
+    if (!oldArgs)
+    {
+        obj[name] = args;
+        return false;
+    }
+
+    for (let i = 0, n = oldArgs.length; i < n; i++)
+    {
+        if (oldArgs[i] !== args[i])
+        {
+            obj[name] = args;
+            return false;
+        }
+    }
+    return true;
+}
+
+function arrayEq1(_obj: any, name: string, index: number, args: any[])
+{
+    const obj = _obj[name];
+    const oldArgs: any[] = obj[index];
+    if (!oldArgs)
+    {
+        obj[index] = args;
+        return false;
+    }
+
+    for (let i = 1, n = oldArgs.length; i < n; i++)
+    {
+        if (oldArgs[i] !== args[i])
+        {
+            obj[index] = args;
+            return false;
+        }
+    }
+    return true;
 }
