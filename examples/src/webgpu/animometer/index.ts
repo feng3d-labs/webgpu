@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IGPURenderBundleObject, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
+import { IGPURenderBundleObject, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -101,6 +101,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     }
 
+    const renderPass: IGPURenderPassDescriptor = {
+        colorAttachments: [
+            {
+                view: { texture: { context: { canvasId: canvas.id } } },
+                clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+            }
+        ],
+    };
+
     function configure()
     {
         const numTriangles = settings.numTriangles;
@@ -109,15 +118,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         let startTime: number;
         const uniformTime = new Float32Array([0]);
-
-        const renderPass: IGPURenderPassDescriptor = {
-            colorAttachments: [
-                {
-                    view: { texture: { context: { canvasId: canvas.id } } },
-                    clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
-                }
-            ],
-        };
 
         const renderBundleObject: IGPURenderBundleObject = {
             __type: "IGPURenderBundleObject",

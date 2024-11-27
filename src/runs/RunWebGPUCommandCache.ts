@@ -50,14 +50,17 @@ export class RunWebGPUCommandCache extends RunWebGPU
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
     {
         const map: ChainMap<[string, IGPURenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
+        const _commands = passEncoder["_commands"] as any[];
+
         let commands = map.get([renderPassFormat._key, renderObject]);
         if (commands)
         {
             runCommands((passEncoder as GPURenderPassEncoderCommandCache)._passEncoder, commands);
+            commands.forEach((v) => _commands.push(v));
 
             return;
         }
-        const _commands = passEncoder["_commands"] as any[];
+
         const start = _commands.length;
 
         super.runRenderObject(device, passEncoder, renderPassFormat, renderObject);
