@@ -1,13 +1,6 @@
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGPUTextureSize } from "./caches/getGPUTextureSize";
-import { IGPUComputeObject } from "./data/IGPUComputeObject";
-import { IGPUComputePass } from "./data/IGPUComputePass";
-import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
-import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPUReadPixels } from "./data/IGPUReadPixels";
-import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPass } from "./data/IGPURenderPass";
-import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { RunWebGPU } from "./runs/RunWebGPU";
@@ -54,58 +47,6 @@ export class WebGPU
 
     public device: GPUDevice;
 
-    private _currentSubmit: IGPUSubmit;
-    private _currentRenderPassEncoder: IGPURenderPass;
-    private _currentComputePassEncoder: IGPUComputePass;
-
-    renderPass(descriptor: IGPURenderPassDescriptor)
-    {
-        this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
-        //
-        if (this._currentRenderPassEncoder?.descriptor === descriptor) return;
-        //
-        this._currentRenderPassEncoder = { descriptor: descriptor, renderObjects: [] };
-        this._currentComputePassEncoder = null;
-        this._currentSubmit.commandEncoders[0].passEncoders.push(this._currentRenderPassEncoder);
-    }
-
-    renderObject(renderObject: IGPURenderObject)
-    {
-        this._currentRenderPassEncoder.renderObjects.push(renderObject);
-    }
-
-    computePass()
-    {
-        this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
-        //
-        this._currentRenderPassEncoder = null;
-        this._currentComputePassEncoder = { __type: "IGPUComputePass", computeObjects: [] };
-        this._currentSubmit.commandEncoders[0].passEncoders.push(this._currentComputePassEncoder);
-    }
-
-    computeObject(computeObject: IGPUComputeObject)
-    {
-        this._currentComputePassEncoder.computeObjects.push(computeObject);
-    }
-
-    copyTextureToTexture(copyTextureToTexture: IGPUCopyTextureToTexture)
-    {
-        this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
-
-        this._currentRenderPassEncoder = null;
-        this._currentComputePassEncoder = null;
-        this._currentSubmit.commandEncoders[0].passEncoders.push(copyTextureToTexture);
-    }
-
-    copyBufferToBuffer(copyBufferToBuffer: IGPUCopyBufferToBuffer)
-    {
-        this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
-
-        this._currentRenderPassEncoder = null;
-        this._currentComputePassEncoder = null;
-        this._currentSubmit.commandEncoders[0].passEncoders.push(copyBufferToBuffer);
-    }
-
     /**
      * 提交 GPU 。
      *
@@ -113,17 +54,8 @@ export class WebGPU
      *
      * @see GPUQueue.submit
      */
-    submit(submit?: IGPUSubmit)
+    submit(submit: IGPUSubmit)
     {
-        if (!submit)
-        {
-            if (!this._currentSubmit) return;
-            submit = this._currentSubmit;
-            this._currentSubmit = null;
-            this._currentRenderPassEncoder = null;
-            this._currentComputePassEncoder = null;
-        }
-
         this._runWebGPU.runSubmit(this.device, submit);
     }
 
