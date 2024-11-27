@@ -14,37 +14,31 @@ export class RunWebGPUCommandCache extends RunWebGPU
     {
         const map: ChainMap<[string, IGPURenderPassObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let commands = map.get([renderPassFormat._key, renderObjects]);
-        if (commands)
+        if (!commands)
         {
-            runCommands(passEncoder, commands);
+            const passEncoderCache = new GPURenderPassEncoderCommandCache(passEncoder);
+            passEncoderCache["_commands"] = commands = [];
+            map.set([renderPassFormat._key, renderObjects], commands);
 
-            return;
+            super.runRenderPassObjects(device, passEncoderCache, renderPassFormat, renderObjects);
         }
-
-        passEncoder = new GPURenderPassEncoderCommandCache(passEncoder);
-        passEncoder["_commands"] = commands = [];
-
-        map.set([renderPassFormat._key, renderObjects], commands);
-
-        super.runRenderPassObjects(device, passEncoder, renderPassFormat, renderObjects);
+        runCommands(passEncoder, commands);
     }
 
     protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
     {
         const map: ChainMap<[string, IGPURenderObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let commands = map.get([renderPassFormat._key, renderObjects]);
-        if (commands)
+        if (!commands)
         {
-            runCommands(bundleEncoder, commands);
+            const bundleEncoderCache = new GPURenderBundleEncoderCommandCache(bundleEncoder);
+            bundleEncoderCache["_commands"] = commands = [];
+            map.set([renderPassFormat._key, renderObjects], commands);
 
-            return;
+            super.runRenderBundleObjects(device, bundleEncoderCache, renderPassFormat, renderObjects);
         }
 
-        bundleEncoder = new GPURenderBundleEncoderCommandCache(bundleEncoder);
-        bundleEncoder["_commands"] = commands = [];
-        map.set([renderPassFormat._key, renderObjects], commands);
-
-        super.runRenderBundleObjects(device, bundleEncoder, renderPassFormat, renderObjects);
+        runCommands(bundleEncoder, commands);
     }
 
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
@@ -83,8 +77,6 @@ class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMi
         if (this.arrayEq1("setBindGroup", args[0], args)) return;
 
         this["_commands"].push(["setBindGroup", args]);
-
-        return this._passEncoder.setBindGroup.apply(this._passEncoder, args);
     }
 
     pushDebugGroup(groupLabel: string): undefined
@@ -103,16 +95,6 @@ class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMi
     label: string;
     protected _passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin;
     protected _obj = { setBindGroup: [], setVertexBuffer: [] };
-
-    protected valueEq(name: string, value: any)
-    {
-        if (this._obj[name] === value)
-        {
-            return true;
-        }
-        this._obj[name] = value;
-        return false;
-    }
 
     protected arrayEq0(name: string, args: any[])
     {
@@ -163,11 +145,9 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
 
     setPipeline(pipeline: GPURenderPipeline): undefined
     {
-        if (this.valueEq("setPipeline", pipeline)) return;
+        if (this.arrayEq0("setPipeline", [pipeline])) return;
 
         this["_commands"].push(["setPipeline", [pipeline]]);
-
-        return this._passEncoder.setPipeline(pipeline);
     }
     setIndexBuffer(buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64): undefined
     setIndexBuffer(...args: any): undefined
@@ -175,8 +155,6 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
         if (this.arrayEq0("setIndexBuffer", args)) return;
 
         this["_commands"].push(["setIndexBuffer", args]);
-
-        return this._passEncoder.setIndexBuffer.apply(this._passEncoder, args);
     }
     setVertexBuffer(slot: GPUIndex32, buffer: GPUBuffer | null, offset?: GPUSize64, size?: GPUSize64): undefined
     setVertexBuffer(...args: any): undefined
@@ -184,37 +162,27 @@ class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURe
         if (this.arrayEq1("setVertexBuffer", args[0], args)) return;
 
         this["_commands"].push(["setVertexBuffer", args]);
-
-        return this._passEncoder.setVertexBuffer.apply(this._passEncoder, args);
     }
     draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32): undefined
     draw(...args: any): undefined
     {
         this["_commands"].push(["draw", args]);
-
-        return this._passEncoder.draw.apply(this._passEncoder, args);
     }
 
     drawIndexed(indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32): undefined
     drawIndexed(...args: any): undefined
     {
         this["_commands"].push(["drawIndexed", args]);
-
-        return this._passEncoder.drawIndexed.apply(this._passEncoder, args);
     }
     drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
     drawIndirect(...args: any): undefined
     {
         this["_commands"].push(["drawIndirect", args]);
-
-        return this._passEncoder.drawIndirect.apply(this._passEncoder, args);
     }
     drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
     drawIndexedIndirect(...args: any): undefined
     {
         this["_commands"].push(["drawIndexedIndirect", args]);
-
-        return this._passEncoder.drawIndexedIndirect.apply(this._passEncoder, args);
     }
 }
 
@@ -243,8 +211,6 @@ class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements
         if (this.arrayEq0("setViewport", args)) return;
 
         this["_commands"].push(["setViewport", args]);
-
-        return this._passEncoder.setViewport.apply(this._passEncoder, args);
     }
     setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined
     setScissorRect(...args: any): undefined
@@ -252,45 +218,34 @@ class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements
         if (this.arrayEq0("setScissorRect", args)) return;
 
         this["_commands"].push(["setScissorRect", args]);
-
-        return this._passEncoder.setViewport.apply(this._passEncoder, args);
     }
     setBlendConstant(color: GPUColor): undefined
     {
-        if (this.valueEq("setBlendConstant", color)) return;
+        if (this.arrayEq0("setBlendConstant", [color])) return;
         this["_commands"].push(["setBlendConstant", [color]]);
-
-        return this._passEncoder.setBlendConstant(color)
     }
     setStencilReference(reference: GPUStencilValue): undefined
     {
-        if (this.valueEq("setStencilReference", reference)) return;
+        if (this.arrayEq0("setStencilReference", [reference])) return;
 
         this["_commands"].push(["setStencilReference", [reference]]);
-
-        return this._passEncoder.setStencilReference(reference);
     }
 
     beginOcclusionQuery(queryIndex: GPUSize32): undefined
     {
         this["_commands"].push(["beginOcclusionQuery", [queryIndex]]);
-
-        return this._passEncoder.beginOcclusionQuery(queryIndex);
     }
     endOcclusionQuery(): undefined
     {
         this["_commands"].push(["endOcclusionQuery", []]);
-        return this._passEncoder.endOcclusionQuery();
     }
     executeBundles(bundles: Iterable<GPURenderBundle>): undefined
     {
         this["_commands"].push(["executeBundles", [bundles]]);
-        return this._passEncoder.executeBundles(bundles);
     }
     end(): undefined
     {
         this["_commands"].push(["end", []]);
-        return this._passEncoder.end();
     }
 }
 

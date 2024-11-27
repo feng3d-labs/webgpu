@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     }
 
-    const renderPass: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -133,6 +133,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ]
         };
 
+        const renderBundlesPass = {
+            descriptor: renderPassDescriptor,
+            renderObjects: [renderBundleObject],
+        };
+
+        const renderPass = {
+            descriptor: renderPassDescriptor,
+            renderObjects,
+        };
+
         return function doDraw(timestamp: number)
         {
             if (startTime === undefined)
@@ -145,17 +155,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             if (settings.renderBundles)
             {
-                renderPasss[0] = {
-                    descriptor: renderPass,
-                    renderObjects: [renderBundleObject],
-                };
+                renderPasss[0] = renderBundlesPass;
             }
             else
             {
-                renderPasss[0] = {
-                    descriptor: renderPass,
-                    renderObjects,
-                };
+                renderPasss[0] = renderPass;
             }
 
             webgpu.submit(submit);
