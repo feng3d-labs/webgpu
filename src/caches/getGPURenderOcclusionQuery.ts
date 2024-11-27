@@ -5,7 +5,7 @@ import { GPUQueue_submit } from "../eventnames";
 
 export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[])
 {
-    if (!renderObjects) return undefined;
+    if (!renderObjects) return defautRenderOcclusionQuery;
     let renderOcclusionQuery: GPURenderOcclusionQuery = renderObjects["_GPURenderOcclusionQuery"];
     if (renderOcclusionQuery) return renderOcclusionQuery;
 
