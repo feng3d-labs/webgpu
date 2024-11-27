@@ -1,5 +1,4 @@
 import { getRealGPUBindGroup } from "../const";
-import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
@@ -11,12 +10,6 @@ import { RunWebGPU } from "./RunWebGPU";
  */
 export class RunWebGPUCommandCache extends RunWebGPU
 {
-    protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: IGPUComputeObject[])
-    {
-        passEncoder = new GPUComputePassEncoderCommandCache(passEncoder);
-        super.runComputeObjects(device, passEncoder, computeObjects);
-    }
-
     protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
     {
         const map: ChainMap<[IGPURenderPassFormat, IGPURenderPassObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
@@ -38,7 +31,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
 
     protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
     {
-        const map: ChainMap<[IGPURenderPassFormat, IGPURenderPassObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
+        const map: ChainMap<[IGPURenderPassFormat, IGPURenderObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let commands = map.get([renderPassFormat, renderObjects]);
         if (commands)
         {
@@ -52,23 +45,6 @@ export class RunWebGPUCommandCache extends RunWebGPU
         map.set([renderPassFormat, renderObjects], commands);
 
         super.runRenderBundleObjects(device, bundleEncoder, renderPassFormat, renderObjects);
-    }
-
-    protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
-    {
-        const map: Map<IGPUComputeObject, Array<any>> = device["_IGPUComputeObjectCommandMap"] = device["_IGPUComputeObjectCommandMap"] || new Map();
-        let commands = map.get(computeObject);
-        if (commands)
-        {
-            runCommands((passEncoder as GPUComputePassEncoderCommandCache)._passEncoder, commands);
-            return;
-        }
-        const _commands = passEncoder["_commands"] as any[];
-        const start = _commands.length;
-
-        super.runComputeObject(device, passEncoder, computeObject);
-
-        map.set(computeObject, _commands.slice(start));
     }
 
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
@@ -311,40 +287,6 @@ class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements
     end(): undefined
     {
         this["_commands"].push(["end", []]);
-        return this._passEncoder.end();
-    }
-}
-
-class GPUComputePassEncoderCommandCache extends GPUPassEncoderCommandCache implements GPUComputePassEncoder
-{
-    __brand: "GPUComputePassEncoder" = "GPUComputePassEncoder";
-    _passEncoder: GPUComputePassEncoder;
-
-    setPipeline(pipeline: GPUComputePipeline): undefined
-    setPipeline(...args: any): undefined
-    {
-        if (this.valueEq("setPipeline", args[0])) return;
-
-        this["_commands"].push(["setPipeline", args]);
-
-        return this._passEncoder.setPipeline.apply(this._passEncoder, args);
-    }
-    dispatchWorkgroups(workgroupCountX: GPUSize32, workgroupCountY?: GPUSize32, workgroupCountZ?: GPUSize32): undefined
-    dispatchWorkgroups(...args: any): undefined
-    {
-        this["_commands"].push(["dispatchWorkgroups", args]);
-
-        return this._passEncoder.dispatchWorkgroups.apply(this._passEncoder, args);
-    }
-    dispatchWorkgroupsIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
-    dispatchWorkgroupsIndirect(...args: any): undefined
-    {
-        this["_commands"].push(["dispatchWorkgroupsIndirect", args]);
-
-        return this._passEncoder.dispatchWorkgroupsIndirect.apply(this._passEncoder, args);
-    }
-    end(): undefined
-    {
         return this._passEncoder.end();
     }
 }
