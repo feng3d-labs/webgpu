@@ -20,7 +20,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  */
 export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
 {
-    let result = renderPipelineMap.get([renderPipeline, renderPassFormat, vertices]);
+    let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices]);
     if (!result)
     {
         // 获取完整的顶点阶段描述与顶点缓冲区列表。
@@ -52,14 +52,14 @@ export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
         };
 
         result = { pipeline, vertexBuffers };
-        renderPipelineMap.set([renderPipeline, renderPassFormat, vertices], result);
+        renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices], result);
     }
 
     return result;
 }
 
 const renderPipelineMap = new ChainMap<
-    [IGPURenderPipeline, IGPURenderPassFormat, IGPUVertexAttributes],
+    [IGPURenderPipeline, string, IGPUVertexAttributes],
     {
         /**
          * GPU渲染管线描述。

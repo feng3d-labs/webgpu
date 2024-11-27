@@ -218,9 +218,9 @@ export class RunWebGPU
 
     protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
     {
-        const renderBundleMap: ChainMap<[IGPURenderBundleObject, IGPURenderPassFormat], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
+        const renderBundleMap: ChainMap<[IGPURenderBundleObject, string], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
         //
-        let gpuRenderBundle: GPURenderBundle = renderBundleMap.get([renderBundleObject, renderPassFormat]);
+        let gpuRenderBundle: GPURenderBundle = renderBundleMap.get([renderBundleObject, renderPassFormat._key]);
         if (!gpuRenderBundle)
         {
             const descriptor: GPURenderBundleEncoderDescriptor = { ...renderBundleObject.descriptor, ...renderPassFormat };
@@ -231,7 +231,7 @@ export class RunWebGPU
             this.runRenderBundleObjects(device, renderBundleEncoder, renderPassFormat, renderBundleObject.renderObjects);
 
             gpuRenderBundle = renderBundleEncoder.finish();
-            renderBundleMap.set([renderBundleObject, renderPassFormat], gpuRenderBundle);
+            renderBundleMap.set([renderBundleObject, renderPassFormat._key], gpuRenderBundle);
         }
 
         passEncoder.executeBundles([gpuRenderBundle]);

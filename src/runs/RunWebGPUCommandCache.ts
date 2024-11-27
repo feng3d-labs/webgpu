@@ -12,8 +12,8 @@ export class RunWebGPUCommandCache extends RunWebGPU
 {
     protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
     {
-        const map: ChainMap<[IGPURenderPassFormat, IGPURenderPassObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
-        let commands = map.get([renderPassFormat, renderObjects]);
+        const map: ChainMap<[string, IGPURenderPassObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
+        let commands = map.get([renderPassFormat._key, renderObjects]);
         if (commands)
         {
             runCommands(passEncoder, commands);
@@ -24,15 +24,15 @@ export class RunWebGPUCommandCache extends RunWebGPU
         passEncoder = new GPURenderPassEncoderCommandCache(passEncoder);
         passEncoder["_commands"] = commands = [];
 
-        map.set([renderPassFormat, renderObjects], commands);
+        map.set([renderPassFormat._key, renderObjects], commands);
 
         super.runRenderPassObjects(device, passEncoder, renderPassFormat, renderObjects);
     }
 
     protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
     {
-        const map: ChainMap<[IGPURenderPassFormat, IGPURenderObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
-        let commands = map.get([renderPassFormat, renderObjects]);
+        const map: ChainMap<[string, IGPURenderObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
+        let commands = map.get([renderPassFormat._key, renderObjects]);
         if (commands)
         {
             runCommands(bundleEncoder, commands);
@@ -42,15 +42,15 @@ export class RunWebGPUCommandCache extends RunWebGPU
 
         bundleEncoder = new GPURenderBundleEncoderCommandCache(bundleEncoder);
         bundleEncoder["_commands"] = commands = [];
-        map.set([renderPassFormat, renderObjects], commands);
+        map.set([renderPassFormat._key, renderObjects], commands);
 
         super.runRenderBundleObjects(device, bundleEncoder, renderPassFormat, renderObjects);
     }
 
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
     {
-        const map: ChainMap<[IGPURenderPassFormat, IGPURenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
-        let commands = map.get([renderPassFormat, renderObject]);
+        const map: ChainMap<[string, IGPURenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
+        let commands = map.get([renderPassFormat._key, renderObject]);
         if (commands)
         {
             runCommands((passEncoder as GPURenderPassEncoderCommandCache)._passEncoder, commands);
@@ -62,7 +62,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
 
         super.runRenderObject(device, passEncoder, renderPassFormat, renderObject);
 
-        map.set([renderPassFormat, renderObject], _commands.slice(start));
+        map.set([renderPassFormat._key, renderObject], _commands.slice(start));
     }
 }
 

@@ -21,12 +21,14 @@ export function getGPURenderPassFormat(descriptor: IGPURenderPassDescriptor): IG
         depthStencilAttachmentTextureFormat = getGPUTextureFormat(descriptor.depthStencilAttachment.view?.texture) || "depth24plus";
     }
 
-    gpuRenderPassFormat = descriptor[_RenderPassFormat] = {
+    descriptor[_RenderPassFormat] = gpuRenderPassFormat = {
         attachmentSize: descriptor.attachmentSize,
         colorFormats: colorAttachmentTextureFormats,
         depthStencilFormat: depthStencilAttachmentTextureFormat,
         multisample: descriptor.multisample,
     };
+
+    gpuRenderPassFormat._key = gpuRenderPassFormat.colorFormats.toString() + "|" + gpuRenderPassFormat.depthStencilFormat + "|" + gpuRenderPassFormat.multisample;
 
     return gpuRenderPassFormat;
 }
