@@ -6,7 +6,7 @@ import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext, IGPUTextureSize }
  * @param texture 纹理。
  * @returns 纹理尺寸。
  */
-export function getGPUTextureSize(texture: IGPUTexture)
+export function getIGPUTextureSize(texture: IGPUTexture)
 {
     if ((texture as IGPUTextureFromContext).context)
     {

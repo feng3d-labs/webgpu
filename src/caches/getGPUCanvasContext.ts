@@ -2,7 +2,7 @@ import { IGPUCanvasContext } from "../data/IGPUTexture";
 
 export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContext)
 {
-    let gpuCanvasContext = canvasContextMap.get(context);
+    let gpuCanvasContext = canvasContextMap[context.canvasId];
     if (gpuCanvasContext) return gpuCanvasContext;
 
     const canvas = document.getElementById(context.canvasId) as HTMLCanvasElement;
@@ -32,9 +32,9 @@ export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContex
         format,
     });
 
-    canvasContextMap.set(context, gpuCanvasContext);
+    canvasContextMap[context.canvasId] = gpuCanvasContext;
 
     return gpuCanvasContext;
 }
 
-const canvasContextMap = new Map<IGPUCanvasContext, GPUCanvasContext>();
+const canvasContextMap: { [canvasId: string]: GPUCanvasContext } = {};

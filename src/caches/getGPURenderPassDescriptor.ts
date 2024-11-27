@@ -7,7 +7,7 @@ import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IG
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IGPUTexture_resize } from "../eventnames";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
-import { getGPUTextureSize } from "./getGPUTextureSize";
+import { getIGPUTextureSize } from "./getIGPUTextureSize";
 import { getGPUTextureView } from "./getGPUTextureView";
 
 /**
@@ -46,10 +46,8 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
     const watchProperty = { attachmentSize: { width: 0, height: 0 } }; // 被监听的属性
     watcher.watchobject(descriptor, watchProperty, () =>
     {
-        // 更新所有纹理描述中的尺寸
-        updateAttachmentSize(descriptor);
         // 由于深度纹理与多重采样纹理可能是引擎自动生成的，这部分纹理需要更新。
-        updateIGPURenderPassAttachmentSize(colorAttachments, depthStencilAttachment, descriptor.attachmentSize);
+        setIGPURenderPassAttachmentSize(colorAttachments, depthStencilAttachment, descriptor.attachmentSize);
     });
 
     colorAttachments?.forEach((v, i) =>
@@ -169,7 +167,7 @@ function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[]
  * @param renderPass 渲染通道描述。
  * @param attachmentSize 附件尺寸。
  */
-function updateIGPURenderPassAttachmentSize(colorAttachments: IGPURenderPassColorAttachment[], depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: { width: number; height: number; })
+function setIGPURenderPassAttachmentSize(colorAttachments: IGPURenderPassColorAttachment[], depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: { width: number; height: number; })
 {
     const attachmentTextures = getIGPURenderPassAttachmentTextures(colorAttachments, depthStencilAttachment);
     attachmentTextures.forEach((v) => setIGPUTextureSize(v, attachmentSize));
@@ -188,8 +186,8 @@ function setIGPUTextureSize(texture: IGPUTexture, attachmentSize: { width: numbe
     {
         texture = texture as IGPUTextureFromContext;
         const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
-        element.width = attachmentSize.width;
-        element.height = attachmentSize.height;
+        if (element.width !== attachmentSize.width) element.width = attachmentSize.width;
+        if (element.height !== attachmentSize.height) element.height = attachmentSize.height;
     }
     else
     {
@@ -257,7 +255,7 @@ function getMultisampleTextureView(texture: IGPUTexture, multisample: number)
     if (!multisampleTextureView)
     {
         // 新增用于解决多重采样的纹理
-        const size = getGPUTextureSize(texture);
+        const size = getIGPUTextureSize(texture);
         const format = getGPUTextureFormat(texture);
         const multisampleTexture: IGPUTexture = {
             label: "自动生成多重采样的纹理",
@@ -369,40 +367,9 @@ function updateAttachmentSize(renderPass: IGPURenderPassDescriptor)
     const attachmentTextures = getAttachmentTextures(renderPass.colorAttachments, renderPass.depthStencilAttachment);
     if (!renderPass.attachmentSize)
     {
-        const textureSize = getGPUTextureSize(attachmentTextures[0]);
+        const textureSize = getIGPUTextureSize(attachmentTextures[0]);
         renderPass.attachmentSize = { width: textureSize[0], height: textureSize[1] };
     }
-    attachmentTextures.forEach((v) => setITextureSize(v, renderPass.attachmentSize));
+    attachmentTextures.forEach((v) => setIGPUTextureSize(v, renderPass.attachmentSize));
 }
 
-/**
- * 设置纹理与附件相同尺寸。
- *
- * @param texture 纹理描述。
- * @param attachmentSize 附件尺寸。
- */
-function setITextureSize(texture: IGPUTexture, attachmentSize: { width: number, height: number })
-{
-    if ((texture as IGPUTextureFromContext).context)
-    {
-        texture = texture as IGPUTextureFromContext;
-
-        const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
-        console.assert(!!element, `在 document 上没有找到 canvasId 为 ${texture.context.canvasId} 的画布。`);
-        element.width = attachmentSize.width;
-        element.height = attachmentSize.height;
-    }
-    else
-    {
-        texture = texture as IGPUTextureBase;
-
-        if (texture.size[2])
-        {
-            texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
-        }
-        else
-        {
-            texture.size = [attachmentSize.width, attachmentSize.height];
-        }
-    }
-}
