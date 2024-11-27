@@ -33,62 +33,76 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
 
     const _updates: Function[] = renderPassDescriptor["_updates"] = [];
 
-    descriptor = getIGPURenderPassDescriptor(descriptor);
+    // 更新渲染通道附件尺寸，使得附件上纹理尺寸一致。
+    updateAttachmentSize(descriptor);
 
-    if (descriptor.colorAttachments)
+    // 获取颜色附件完整描述列表。
+    const colorAttachments = getIGPURenderPassColorAttachments(descriptor.colorAttachments, descriptor.multisample);
+
+    // 获取深度模板附件
+    const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(descriptor.depthStencilAttachment, descriptor.attachmentSize, descriptor.multisample);
+
+    // 附件尺寸变化时，渲染通道描述失效。
+    const watchProperty = { attachmentSize: { width: 0, height: 0 } }; // 被监听的属性
+    watcher.watchobject(descriptor, watchProperty, () =>
     {
-        descriptor.colorAttachments.forEach((v, i) =>
+        // 更新所有纹理描述中的尺寸
+        updateAttachmentSize(descriptor);
+        // 由于深度纹理与多重采样纹理可能是引擎自动生成的，这部分纹理需要更新。
+        updateIGPURenderPassAttachmentSize(colorAttachments, depthStencilAttachment, descriptor.attachmentSize);
+    });
+
+    colorAttachments?.forEach((v, i) =>
+    {
+        if (!v) return;
+
+        const { clearValue, loadOp, storeOp } = v;
+
+        const attachment: GPURenderPassColorAttachment = {
+            ...v,
+            view: undefined,
+            resolveTarget: undefined,
+            clearValue,
+            loadOp,
+            storeOp,
+        };
+
+        const updateView = () =>
         {
-            if (!v) return;
+            attachment.view = getGPUTextureView(device, v.view);
+        };
+        updateView();
 
-            const { clearValue, loadOp, storeOp } = v;
+        //
+        if ((v.view.texture as IGPUTextureFromContext).context)
+        {
+            _updates.push(updateView);
+        }
+        anyEmitter.on(v.view.texture, IGPUTexture_resize, updateView);
 
-            const attachment: GPURenderPassColorAttachment = {
-                ...v,
-                view: undefined,
-                resolveTarget: undefined,
-                clearValue,
-                loadOp,
-                storeOp,
+        //
+        if (v.resolveTarget)
+        {
+            const updateResolveTarget = () =>
+            {
+                attachment.resolveTarget = getGPUTextureView(device, v.resolveTarget);
             };
-
-            const updateView = () =>
-            {
-                attachment.view = getGPUTextureView(device, v.view);
-            };
-            updateView();
-
+            updateResolveTarget();
             //
-            if ((v.view.texture as IGPUTextureFromContext).context)
+            if ((v.resolveTarget?.texture as IGPUTextureFromContext)?.context)
             {
-                _updates.push(updateView);
+                _updates.push(updateResolveTarget);
             }
-            anyEmitter.on(v.view.texture, IGPUTexture_resize, updateView);
+            anyEmitter.on(v.resolveTarget.texture, IGPUTexture_resize, updateResolveTarget);
+        }
 
-            //
-            if (v.resolveTarget)
-            {
-                const updateResolveTarget = () =>
-                {
-                    attachment.resolveTarget = getGPUTextureView(device, v.resolveTarget);
-                };
-                updateResolveTarget();
-                //
-                if ((v.resolveTarget?.texture as IGPUTextureFromContext)?.context)
-                {
-                    _updates.push(updateResolveTarget);
-                }
-                anyEmitter.on(v.resolveTarget.texture, IGPUTexture_resize, updateResolveTarget);
-            }
+        //
+        renderPassDescriptor.colorAttachments[i] = attachment;
+    });
 
-            //
-            renderPassDescriptor.colorAttachments[i] = attachment;
-        });
-    }
-
-    if (descriptor.depthStencilAttachment)
+    if (depthStencilAttachment)
     {
-        const v = descriptor.depthStencilAttachment;
+        const v = depthStencilAttachment;
 
         renderPassDescriptor.depthStencilAttachment = {
             ...v,
@@ -106,51 +120,6 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
 
     return renderPassDescriptor;
 }
-
-/**
- * 获取完整的渲染通道描述。
- *
- * @param renderPass 渲染通道描述。
- * @returns 完整的渲染通道描述。
- */
-function getIGPURenderPassDescriptor(renderPass: IGPURenderPassDescriptor)
-{
-    let iGPURenderPass = renderPassMap.get(renderPass);
-    if (iGPURenderPass) return iGPURenderPass;
-
-    // 更新渲染通道附件尺寸，使得附件上纹理尺寸一致。
-    updateAttachmentSize(renderPass);
-
-    // 获取颜色附件完整描述列表。
-    const colorAttachments = getIGPURenderPassColorAttachments(renderPass.colorAttachments, renderPass.multisample);
-
-    // 获取深度模板附件
-    const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(renderPass.depthStencilAttachment, renderPass.attachmentSize, renderPass.multisample);
-
-    // 附件尺寸变化时，渲染通道描述失效。
-    const watchProperty = { attachmentSize: { width: 0, height: 0 } }; // 被监听的属性
-    watcher.watchobject(renderPass, watchProperty, () =>
-    {
-        // 更新所有纹理描述中的尺寸
-        updateAttachmentSize(renderPass);
-        // 更新所有纹理尺寸
-        const iGPURenderPass = renderPassMap.get(renderPass);
-        // 由于深度纹理与多重采样纹理可能是引擎自动生成的，这部分纹理需要更新。
-        updateIGPURenderPassAttachmentSize(iGPURenderPass, renderPass.attachmentSize);
-    });
-
-    //
-    iGPURenderPass = {
-        ...renderPass,
-        colorAttachments,
-        depthStencilAttachment,
-    };
-
-    renderPassMap.set(renderPass, iGPURenderPass);
-
-    return iGPURenderPass;
-}
-const renderPassMap = new Map<IGPURenderPassDescriptor, IGPURenderPassDescriptor>();
 
 /**
  * 获取渲染通道附件上的纹理描述列表。
@@ -200,9 +169,9 @@ function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[]
  * @param renderPass 渲染通道描述。
  * @param attachmentSize 附件尺寸。
  */
-function updateIGPURenderPassAttachmentSize(renderPass: IGPURenderPassDescriptor, attachmentSize: { width: number; height: number; })
+function updateIGPURenderPassAttachmentSize(colorAttachments: IGPURenderPassColorAttachment[], depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: { width: number; height: number; })
 {
-    const attachmentTextures = getIGPURenderPassAttachmentTextures(renderPass.colorAttachments, renderPass.depthStencilAttachment);
+    const attachmentTextures = getIGPURenderPassAttachmentTextures(colorAttachments, depthStencilAttachment);
     attachmentTextures.forEach((v) => setIGPUTextureSize(v, attachmentSize));
 }
 
