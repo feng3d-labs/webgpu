@@ -106,7 +106,6 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
     const getReal = () =>
     {
-
         updateFuncs.forEach((v) => v());
         createBindGroup();
         gBindGroup[getRealGPUBindGroup] = getReal;

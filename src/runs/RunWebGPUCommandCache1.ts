@@ -12,16 +12,16 @@ export class RunWebGPUCommandCache1 extends RunWebGPUStateCache
         super.runComputeObjects(device, passEncoder, computeObjects);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
     {
         cacheRenderPassEncoder(passEncoder);
-        super.runRenderPassObjects(device, passEncoder, renderPassFormats, renderObjects);
+        super.runRenderPassObjects(device, passEncoder, renderPassFormat, renderObjects);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
     {
         cacheRenderBundleEncoder(bundleEncoder);
-        super.runRenderBundleObjects(device, bundleEncoder, renderPassFormats, renderObjects);
+        super.runRenderBundleObjects(device, bundleEncoder, renderPassFormat, renderObjects);
     }
 }
 

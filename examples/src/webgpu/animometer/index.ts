@@ -18,6 +18,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.parentNode.appendChild(perfDisplayContainer);
 
     const params = new URLSearchParams(window.location.search);
+    const maxTriangles = 200000;
     const settings = {
         numTriangles: Number(params.get("numTriangles")) || 20000,
         renderBundles: Boolean(params.get("renderBundles")),
@@ -64,44 +65,47 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         draw: { vertexCount: 3, instanceCount: 1 },
     };
 
+    const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
+    const alignedUniformBytes = Math.ceil(uniformBytes / 256) * 256;
+    const alignedUniformFloats = alignedUniformBytes / Float32Array.BYTES_PER_ELEMENT;
+    const uniformBuffer = new Float32Array(
+        maxTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT
+    );
+    for (let i = 0; i < maxTriangles; ++i)
+    {
+        uniformBuffer[alignedUniformFloats * i + 0] = Math.random() * 0.2 + 0.2; // scale
+        uniformBuffer[alignedUniformFloats * i + 1] = 0.9 * 2 * (Math.random() - 0.5); // offsetX
+        uniformBuffer[alignedUniformFloats * i + 2] = 0.9 * 2 * (Math.random() - 0.5); // offsetY
+        uniformBuffer[alignedUniformFloats * i + 3] = Math.random() * 1.5 + 0.5; // scalar
+        uniformBuffer[alignedUniformFloats * i + 4] = Math.random() * 10; // scalarOffset
+    }
+
+    const timeOffset = maxTriangles * alignedUniformBytes;
+
+    const time = {
+        bufferView: new Float32Array(uniformBuffer.buffer, timeOffset, 1),
+        value: 0,
+    };
+
+    const renderObjects0: IGPURenderObject[] = [];
+    for (let i = 0; i < maxTriangles; ++i)
+    {
+        renderObjects0[i] = {
+            ...renderObject,
+            bindingResources: {
+                time: time,
+                uniforms: {
+                    bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
+                }
+            },
+        };
+    }
+
     function configure()
     {
         const numTriangles = settings.numTriangles;
-        const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
-        const alignedUniformBytes = Math.ceil(uniformBytes / 256) * 256;
-        const alignedUniformFloats = alignedUniformBytes / Float32Array.BYTES_PER_ELEMENT;
-        const uniformBuffer = new Float32Array(
-            numTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT
-        );
-        for (let i = 0; i < numTriangles; ++i)
-        {
-            uniformBuffer[alignedUniformFloats * i + 0] = Math.random() * 0.2 + 0.2; // scale
-            uniformBuffer[alignedUniformFloats * i + 1] = 0.9 * 2 * (Math.random() - 0.5); // offsetX
-            uniformBuffer[alignedUniformFloats * i + 2] = 0.9 * 2 * (Math.random() - 0.5); // offsetY
-            uniformBuffer[alignedUniformFloats * i + 3] = Math.random() * 1.5 + 0.5; // scalar
-            uniformBuffer[alignedUniformFloats * i + 4] = Math.random() * 10; // scalarOffset
-        }
 
-        const timeOffset = numTriangles * alignedUniformBytes;
-
-        const time = {
-            bufferView: new Float32Array(uniformBuffer.buffer, timeOffset, 1),
-            value: 0,
-        };
-
-        const renderObjects: IGPURenderObject[] = [];
-        for (let i = 0; i < numTriangles; ++i)
-        {
-            renderObjects[i] = {
-                ...renderObject,
-                bindingResources: {
-                    time: time,
-                    uniforms: {
-                        bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
-                    }
-                },
-            };
-        }
+        const renderObjects = renderObjects0.slice(0, numTriangles);
 
         let startTime: number;
         const uniformTime = new Float32Array([0]);
@@ -165,7 +169,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         doDraw = configure();
     };
     gui
-        .add(settings, "numTriangles", 0, 200000)
+        .add(settings, "numTriangles", 0, maxTriangles)
         .step(1)
         .onFinishChange(updateSettings);
     gui.add(settings, "renderBundles");

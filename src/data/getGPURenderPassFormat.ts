@@ -10,7 +10,7 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
  */
 export function getGPURenderPassFormat(descriptor: IGPURenderPassDescriptor): IGPURenderPassFormat
 {
-    let gpuRenderPassFormat: IGPURenderPassFormat = descriptor[_RenderPassFormats];
+    let gpuRenderPassFormat: IGPURenderPassFormat = descriptor[_RenderPassFormat];
     if (gpuRenderPassFormat) return gpuRenderPassFormat;
 
     const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => getGPUTextureFormat(v.view.texture));
@@ -21,7 +21,7 @@ export function getGPURenderPassFormat(descriptor: IGPURenderPassDescriptor): IG
         depthStencilAttachmentTextureFormat = getGPUTextureFormat(descriptor.depthStencilAttachment.view?.texture) || "depth24plus";
     }
 
-    gpuRenderPassFormat = descriptor[_RenderPassFormats] = {
+    gpuRenderPassFormat = descriptor[_RenderPassFormat] = {
         attachmentSize: descriptor.attachmentSize,
         colorFormats: colorAttachmentTextureFormats,
         depthStencilFormat: depthStencilAttachmentTextureFormat,
@@ -31,4 +31,4 @@ export function getGPURenderPassFormat(descriptor: IGPURenderPassDescriptor): IG
     return gpuRenderPassFormat;
 }
 
-const _RenderPassFormats = "_RenderPassFormats";
+const _RenderPassFormat = "_RenderPassFormat";

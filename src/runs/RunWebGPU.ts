@@ -9,7 +9,8 @@ import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
-import { getGPURenderPassFormat } from "../data/getGPURenderPassFormats";
+import { getRealGPUBindGroup } from "../const";
+import { getGPURenderPassFormat } from "../data/getGPURenderPassFormat";
 import { getIGPUBuffer, getIGPUIndexBuffer } from "../data/getIGPUIndexBuffer";
 import { getIGPUSetBindGroups } from "../data/getIGPUSetBindGroups";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
@@ -29,7 +30,6 @@ import { IGPUViewport } from "../data/IGPUViewport";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
-import { getRealGPUBindGroup } from "../const";
 
 export class RunWebGPU
 {
@@ -206,12 +206,12 @@ export class RunWebGPU
         );
     }
 
-    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderOcclusionQueryObject: IGPUOcclusionQueryObject)
+    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderOcclusionQueryObject: IGPUOcclusionQueryObject)
     {
         passEncoder.beginOcclusionQuery(renderOcclusionQueryObject._queryIndex);
         renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>
         {
-            this.runRenderObject(device, passEncoder, renderPassFormats, renderObject);
+            this.runRenderObject(device, passEncoder, renderPassFormat, renderObject);
         });
         passEncoder.endOcclusionQuery();
     }
@@ -237,12 +237,12 @@ export class RunWebGPU
         passEncoder.executeBundles([gpuRenderBundle]);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
     {
         //
         renderObjects.forEach((element) =>
         {
-            this.runRenderObject(device, passEncoder, renderPassFormats, element as IGPURenderObject);
+            this.runRenderObject(device, passEncoder, renderPassFormat, element as IGPURenderObject);
         });
     }
 

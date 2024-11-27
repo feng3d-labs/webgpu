@@ -20,18 +20,18 @@ export class RunWebGPUStateCache extends RunWebGPU
         super.runComputeObjects(device, passEncoder, computeObjects);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
     {
         passEncoder["_setBindGroup"] = passEncoder["_setBindGroup"] || [];
 
-        super.runRenderPassObjects(device, passEncoder, renderPassFormats, renderObjects);
+        super.runRenderPassObjects(device, passEncoder, renderPassFormat, renderObjects);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormats: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
     {
         bundleEncoder["_setBindGroup"] = bundleEncoder["_setBindGroup"] || [];
 
-        super.runRenderBundleObjects(device, bundleEncoder, renderPassFormats, renderObjects);
+        super.runRenderBundleObjects(device, bundleEncoder, renderPassFormat, renderObjects);
     }
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)
