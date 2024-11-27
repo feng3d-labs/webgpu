@@ -92,7 +92,7 @@ export class RunWebGPU
 
         // 处理不被遮挡查询。
         const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
-        occlusionQuery?.init(device, renderPassDescriptor)
+        occlusionQuery.init(device, renderPassDescriptor)
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
@@ -101,7 +101,7 @@ export class RunWebGPU
         passEncoder.end();
 
         //
-        occlusionQuery?.queryResult(device, commandEncoder, renderPass);
+        occlusionQuery.queryResult(device, commandEncoder, renderPass);
     }
 
     protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])

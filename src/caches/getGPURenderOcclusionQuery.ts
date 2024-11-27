@@ -10,7 +10,12 @@ export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[
     if (renderOcclusionQuery) return renderOcclusionQuery;
 
     const occlusionQueryObjects: IGPUOcclusionQueryObject[] = renderObjects.filter((cv) => cv.__type === "IGPUOcclusionQueryObject") as any;
-    if (occlusionQueryObjects.length == 0) return undefined;
+    if (occlusionQueryObjects.length == 0)
+    {
+        renderObjects["_GPURenderOcclusionQuery"] = defautRenderOcclusionQuery;
+
+        return defautRenderOcclusionQuery;
+    }
 
     occlusionQueryObjects.forEach((v, i) => { v._queryIndex = i; })
 
@@ -95,3 +100,5 @@ interface GPURenderOcclusionQuery
     init: (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) => void
     queryResult: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass) => void
 }
+
+const defautRenderOcclusionQuery = { init: () => { }, queryResult: () => { } };
