@@ -17,7 +17,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
         if (!commands)
         {
             // 收集命令
-            const passEncoderCache = new GPURenderPassEncoderCommandCache(passEncoder);
+            const passEncoderCache = new GPURenderPassEncoderCommandCache();
             passEncoderCache["_commands"] = commands = [];
             map.set([renderPassFormat._key, renderObjects], commands);
 
@@ -38,7 +38,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
         if (!commands)
         {
             // 收集命令
-            const bundleEncoderCache = new GPURenderBundleEncoderCommandCache(bundleEncoder);
+            const bundleEncoderCache = new GPURenderBundleEncoderCommandCache();
             bundleEncoderCache["_commands"] = commands = [];
             map.set([renderPassFormat._key, renderObjects], commands);
 
@@ -60,7 +60,6 @@ export class RunWebGPUCommandCache extends RunWebGPU
         let commands = map.get([renderPassFormat._key, renderObject]);
         if (commands)
         {
-            runCommands((passEncoder as GPURenderPassEncoderCommandCache)._passEncoder, commands);
             commands.forEach((v) => _commands.push(v));
 
             return;
@@ -76,130 +75,43 @@ export class RunWebGPUCommandCache extends RunWebGPU
 
 class GPUPassEncoderCommandCache implements GPUCommandsMixin, GPUDebugCommandsMixin, GPUBindingCommandsMixin
 {
-    constructor(passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin)
-    {
-        this._passEncoder = passEncoder;
-    }
-
-    setBindGroup(index: GPUIndex32, bindGroup: GPUBindGroup | null, dynamicOffsets?: Iterable<GPUBufferDynamicOffset>): undefined;
-    setBindGroup(index: GPUIndex32, bindGroup: GPUBindGroup | null, dynamicOffsetsData: Uint32Array, dynamicOffsetsDataStart: GPUSize64, dynamicOffsetsDataLength: GPUSize32): undefined;
-    setBindGroup(...args: any): undefined
-    {
-        this["_commands"].push(["setBindGroup", args]);
-    }
-
-    pushDebugGroup(groupLabel: string): undefined
-    {
-        return this._passEncoder.pushDebugGroup(groupLabel);
-    }
-    popDebugGroup(): undefined
-    {
-        return this._passEncoder.popDebugGroup();
-    }
-    insertDebugMarker(markerLabel: string): undefined
-    {
-        return this._passEncoder.insertDebugMarker(markerLabel);
-    }
+    setBindGroup(...args: any): undefined { this["_commands"].push(["setBindGroup", args]); }
+    pushDebugGroup(...args: any): undefined { this["_commands"].push(["pushDebugGroup", args]); }
+    popDebugGroup(...args: any): undefined { this["_commands"].push(["popDebugGroup", args]); }
+    insertDebugMarker(...args: any): undefined { this["_commands"].push(["insertDebugMarker", args]); }
 
     label: string;
-    protected _passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin;
 }
 
 class GPURenderCommandsCache extends GPUPassEncoderCommandCache implements GPURenderCommandsMixin
 {
-    protected _passEncoder: GPUCommandsMixin & GPUDebugCommandsMixin & GPUBindingCommandsMixin & GPURenderCommandsMixin;
-
-    setPipeline(pipeline: GPURenderPipeline): undefined
-    {
-        this["_commands"].push(["setPipeline", [pipeline]]);
-    }
-    setIndexBuffer(buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64): undefined
-    setIndexBuffer(...args: any): undefined
-    {
-        this["_commands"].push(["setIndexBuffer", args]);
-    }
-    setVertexBuffer(slot: GPUIndex32, buffer: GPUBuffer | null, offset?: GPUSize64, size?: GPUSize64): undefined
-    setVertexBuffer(...args: any): undefined
-    {
-        this["_commands"].push(["setVertexBuffer", args]);
-    }
-    draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32): undefined
-    draw(...args: any): undefined
-    {
-        this["_commands"].push(["draw", args]);
-    }
-
-    drawIndexed(indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32): undefined
-    drawIndexed(...args: any): undefined
-    {
-        this["_commands"].push(["drawIndexed", args]);
-    }
-    drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
-    drawIndirect(...args: any): undefined
-    {
-        this["_commands"].push(["drawIndirect", args]);
-    }
-    drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
-    drawIndexedIndirect(...args: any): undefined
-    {
-        this["_commands"].push(["drawIndexedIndirect", args]);
-    }
+    setPipeline(...args: any): undefined { this["_commands"].push(["setPipeline", args]); }
+    setIndexBuffer(...args: any): undefined { this["_commands"].push(["setIndexBuffer", args]); }
+    setVertexBuffer(...args: any): undefined { this["_commands"].push(["setVertexBuffer", args]); }
+    draw(...args: any): undefined { this["_commands"].push(["draw", args]); }
+    drawIndexed(...args: any): undefined { this["_commands"].push(["drawIndexed", args]); }
+    drawIndirect(...args: any): undefined { this["_commands"].push(["drawIndirect", args]); }
+    drawIndexedIndirect(...args: any): undefined { this["_commands"].push(["drawIndexedIndirect", args]); }
 }
 
 class GPURenderBundleEncoderCommandCache extends GPURenderCommandsCache implements GPURenderBundleEncoder
 {
-    __brand: "GPURenderBundleEncoder" = "GPURenderBundleEncoder";
-    _passEncoder: GPURenderBundleEncoder;
-    constructor(passEncoder: GPURenderBundleEncoder)
-    {
-        super(passEncoder);
-    }
-    finish(descriptor?: GPURenderBundleDescriptor): GPURenderBundle
-    {
-        return this._passEncoder.finish(descriptor);
-    }
+    __brand: "GPURenderBundleEncoder";
+    finish(...args: any): undefined { this["_commands"].push(["finish", args]); }
 }
 
 class GPURenderPassEncoderCommandCache extends GPURenderCommandsCache implements GPURenderPassEncoder
 {
     __brand: "GPURenderPassEncoder" = "GPURenderPassEncoder";
-    _passEncoder: GPURenderPassEncoder;
 
-    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined
-    setViewport(...args: any): undefined
-    {
-        this["_commands"].push(["setViewport", args]);
-    }
-    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined
-    setScissorRect(...args: any): undefined
-    {
-        this["_commands"].push(["setScissorRect", args]);
-    }
-    setBlendConstant(color: GPUColor): undefined
-    {
-        this["_commands"].push(["setBlendConstant", [color]]);
-    }
-    setStencilReference(reference: GPUStencilValue): undefined
-    {
-        this["_commands"].push(["setStencilReference", [reference]]);
-    }
-
-    beginOcclusionQuery(queryIndex: GPUSize32): undefined
-    {
-        this["_commands"].push(["beginOcclusionQuery", [queryIndex]]);
-    }
-    endOcclusionQuery(): undefined
-    {
-        this["_commands"].push(["endOcclusionQuery", []]);
-    }
-    executeBundles(bundles: Iterable<GPURenderBundle>): undefined
-    {
-        this["_commands"].push(["executeBundles", [bundles]]);
-    }
-    end(): undefined
-    {
-        this["_commands"].push(["end", []]);
-    }
+    setViewport(...args: any): undefined { this["_commands"].push(["setViewport", args]); }
+    setScissorRect(...args: any): undefined { this["_commands"].push(["setScissorRect", args]); }
+    setBlendConstant(...args: any): undefined { this["_commands"].push(["setBlendConstant", args]); }
+    setStencilReference(...args: any): undefined { this["_commands"].push(["setStencilReference", args]); }
+    beginOcclusionQuery(...args: any): undefined { this["_commands"].push(["beginOcclusionQuery", args]); }
+    endOcclusionQuery(...args: any): undefined { this["_commands"].push(["endOcclusionQuery", args]); }
+    executeBundles(...args: any): undefined { this["_commands"].push(["executeBundles", args]); }
+    end(...args: any): undefined { this["_commands"].push(["end", args]); }
 }
 
 function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder | GPURenderBundleEncoder, commands: any[])
