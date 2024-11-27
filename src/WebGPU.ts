@@ -12,7 +12,6 @@ import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
 import { RunWebGPU } from "./runs/RunWebGPU";
 import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
-import { RunWebGPUStateCache } from "./runs/RunWebGPUStateCache";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
 import { readPixels } from "./utils/readPixels";
@@ -25,31 +24,7 @@ import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultipl
  */
 export class WebGPU
 {
-    private _runWebGPU: RunWebGPU;
-
-    get type() { return this._type; }
-    set type(v)
-    {
-        this._type = v;
-        if (v === "StateCache")
-        {
-            this._runWebGPU = new RunWebGPUStateCache();
-        }
-        else if (v === "CommandCache")
-        {
-            this._runWebGPU = new RunWebGPUCommandCache();
-        }
-        else
-        {
-            this._runWebGPU = new RunWebGPU();
-        }
-    }
-    private _type: "None" | "StateCache" | "CommandCache";
-
-    constructor(type: "None" | "StateCache" | "CommandCache" = "CommandCache")
-    {
-        this.type = type;
-    }
+    private _runWebGPU: RunWebGPU = new RunWebGPUCommandCache();
 
     /**
      * 初始化 WebGPU 获取 GPUDevice 。
