@@ -146,7 +146,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
 
                 return;
             }
-            if (member.type.name === "f32" || subTypeName === "f32" || subsubTypeName === "f32")
+            if (member.type.name === "f32" || member.type.name === "mat4x4f" || subTypeName === "f32" || subsubTypeName === "f32")
             {
                 Cls = Float32Array;
                 ClsName = "Float32Array";
