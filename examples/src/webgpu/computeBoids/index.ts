@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { getIGPUBuffer, IGPUBuffer, IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

@@ -16,6 +16,7 @@
 		"occlusionQuery",
 		"samplerParameters",
 		"timestampQuery",
+		"blending",
 		""
 	],
 	"GPGPU Demos": [
