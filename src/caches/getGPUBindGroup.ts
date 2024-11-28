@@ -19,14 +19,10 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
     let gBindGroup = bindGroupMap.get(bindGroup);
     if (gBindGroup) return gBindGroup;
 
-    // 是否有外部纹理
-    let hasExternalTexture = false;
-    /**
-     * 是否存在从 画布上下文 获取的纹理视图。
-     */
-    let hasContextTexture = false;
-
-    const updateFuncs: (() => void)[] = [];
+    // 总是更新函数列表
+    const awaysUpdateFuncs: (() => void)[] = [];
+    // 执行一次函数列表
+    const onceUpdateFuncs: (() => void)[] = [];
 
     const layout = getGPUBindGroupLayout(device, bindGroup.layout);
 
@@ -44,6 +40,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
             {
                 entry.resource = getGPUBufferBinding(device, v.resource as IGPUBufferBinding);
             };
+            onceUpdateFuncs.push(updateResource);
         }
         else if ((v.resource as IGPUTextureView).texture)
         {
@@ -59,8 +56,11 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
             if (((v.resource as IGPUTextureView).texture as IGPUTextureFromContext).context)
             {
-                hasContextTexture = true;
-                updateFuncs.push(updateResource);
+                awaysUpdateFuncs.push(updateResource);
+            }
+            else
+            {
+                onceUpdateFuncs.push(updateResource);
             }
         }
         else if ((v.resource as IGPUExternalTexture).source)
@@ -70,8 +70,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
                 entry.resource = getGPUExternalTexture(device, v.resource as IGPUExternalTexture);
             };
 
-            hasExternalTexture = true;
-            updateFuncs.push(updateResource);
+            awaysUpdateFuncs.push(updateResource);
         }
         else 
         {
@@ -79,52 +78,40 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
             {
                 entry.resource = getGPUSampler(device, v.resource as IGPUSampler);
             };
+            onceUpdateFuncs.push(updateResource);
         }
-
-        updateResource();
 
         // 监听绑定资源发生改变
         watcher.watch(v, "resource", () =>
         {
             bindGroupMap.delete(bindGroup);
 
-            // 更新绑定组资源
-            updateResource();
-
-            createBindGroup();
+            //
+            onceUpdateFuncs.push(updateResource);
         });
 
         return entry;
     });
 
-    const getReal = () =>
+    const getBindGroup = () =>
     {
-        updateFuncs.forEach((v) => v());
-        createBindGroup();
-
-        return gBindGroup;
-    };
-
-    const createBindGroup = () =>
-    {
-        gBindGroup = device.createBindGroup({ layout, entries, });
-
-        bindGroupMap.set(bindGroup, gBindGroup);
-
-        // 设置更新外部纹理/画布纹理视图
-        if (hasExternalTexture || hasContextTexture)
+        if (awaysUpdateFuncs.length > 0 || onceUpdateFuncs.length > 0)
         {
-            gBindGroup[getRealGPUBindGroup] = getReal;
-        }
-        else
-        {
-            gBindGroup[getRealGPUBindGroup] = () => gBindGroup;
+            // 执行更新函数
+            awaysUpdateFuncs.forEach((v) => v());
+            onceUpdateFuncs.forEach((v) => v());
+            onceUpdateFuncs.length = 0;
+
+            // 创建
+            gBindGroup = device.createBindGroup({ layout, entries, });
+            bindGroupMap.set(bindGroup, gBindGroup);
+            gBindGroup[getRealGPUBindGroup] = getBindGroup;
         }
 
         return gBindGroup;
     };
 
-    createBindGroup();
+    getBindGroup();
 
     return gBindGroup;
 }
