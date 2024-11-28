@@ -1,5 +1,7 @@
 import { anyEmitter } from "@feng3d/event";
-import { IGPURenderPass, IGPUTimestampQuery } from "../data/IGPURenderPass";
+import { IGPUComputePass } from "../data/IGPUComputePass";
+import { IGPURenderPass } from "../data/IGPURenderPass";
+import { IGPUTimestampQuery } from "../data/IGPUTimestampQuery";
 import { GPUQueue_submit } from "../eventnames";
 
 export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: IGPUTimestampQuery): GPURenderTimestampQuery
@@ -32,13 +34,13 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: I
      * 在渲染通道描述上设置 occlusionQuerySet 。
      * 
      * @param device 
-     * @param renderPassDescriptor 
+     * @param passDescriptor 
      */
-    const init = (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) =>
+    const init = (device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor) =>
     {
         querySet = querySet || device.createQuerySet({ type: 'timestamp', count: 2 });
 
-        renderPassDescriptor.timestampWrites = {
+        passDescriptor.timestampWrites = {
             querySet: querySet,
             beginningOfPassWriteIndex: 0,
             endOfPassWriteIndex: 1,
@@ -118,8 +120,8 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: I
 
 interface GPURenderTimestampQuery
 {
-    init: (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) => void
-    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass) => void
+    init: (device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor) => void
+    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass | IGPUComputePass) => void
 }
 
 const defautGPURenderTimestampQuery = { init: () => { }, resolve: () => { } };

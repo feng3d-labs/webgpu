@@ -105,9 +105,10 @@ export class RunWebGPU
 
         passEncoder.end();
 
-        //
+        // 处理不被遮挡查询。
         occlusionQuery.resolve(device, commandEncoder, renderPass);
-        //
+
+        // 处理时间戳查询
         timestampQuery.resolve(device, commandEncoder, renderPass);
     }
 
@@ -157,11 +158,19 @@ export class RunWebGPU
      */
     protected runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: IGPUComputePass)
     {
-        const passEncoder = commandEncoder.beginComputePass(computePass.descriptor);
+        const descriptor: GPUComputePassDescriptor = {};
+        // 处理时间戳查询
+        const timestampQuery = getGPURenderTimestampQuery(device, computePass?.timestampQuery);
+        timestampQuery.init(device, descriptor)
+
+        const passEncoder = commandEncoder.beginComputePass(descriptor);
 
         this.runComputeObjects(device, passEncoder, computePass.computeObjects)
 
         passEncoder.end();
+
+        // 处理时间戳查询
+        timestampQuery.resolve(device, commandEncoder, computePass);
     }
 
     protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: IGPUComputeObject[])
