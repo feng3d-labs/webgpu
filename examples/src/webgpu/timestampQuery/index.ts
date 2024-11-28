@@ -1,13 +1,8 @@
+import { IGPUBuffer, IGPUCanvasContext, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+
 import { mat4, vec3 } from 'wgpu-matrix';
 
-import
-{
-  cubePositionOffset,
-  cubeUVOffset,
-  cubeVertexArray,
-  cubeVertexCount,
-  cubeVertexSize,
-} from '../../meshes/cube';
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from '../../meshes/cube';
 
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import fragmentWGSL from '../../shaders/black.frag.wgsl';
@@ -18,90 +13,40 @@ import TimestampQueryManager from './TimestampQueryManager';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
 
-  const adapter = await navigator.gpu?.requestAdapter();
-
-  // The use of timestamps require a dedicated adapter feature:
-  // The adapter may or may not support timestamp queries. If not, we simply
-  // don't measure timestamps and deactivate the timer display.
-  const supportsTimestampQueries = adapter?.features.has('timestamp-query');
-
-  const device = await adapter?.requestDevice({
-    // We request a device that has support for timestamp queries
-    requiredFeatures: supportsTimestampQueries ? ['timestamp-query'] : [],
-  });
-  quitIfWebGPUNotAvailable(adapter, device);
+  const webgpu = await new WebGPU().init();
 
   // GPU-side timer and the CPU-side counter where we accumulate statistics:
   // NB: Look for 'timestampQueryManager' in this file to locate parts of this
   // snippets that are related to timestamps. Most of the logic is in
   // TimestampQueryManager.ts.
-  const timestampQueryManager = new TimestampQueryManager(device);
+  // const timestampQueryManager = new TimestampQueryManager(device);
   const renderPassDurationCounter = new PerfCounter();
 
-  const context = canvas.getContext('webgpu') as GPUCanvasContext;
-
-  const devicePixelRatio = window.devicePixelRatio;
-  canvas.width = canvas.clientWidth * devicePixelRatio;
-  canvas.height = canvas.clientHeight * devicePixelRatio;
-  const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-
-  context.configure({
-    device,
-    format: presentationFormat,
-  });
+  const context: IGPUCanvasContext = { canvasId: canvas.id };
 
   const perfDisplay = document.querySelector('#info pre');
 
-  if (!supportsTimestampQueries)
-  {
-    perfDisplay.innerHTML = 'Timestamp queries are not supported';
-  }
+  // if (!supportsTimestampQueries)
+  // {
+  //   perfDisplay.innerHTML = 'Timestamp queries are not supported';
+  // }
 
   // Create a vertex buffer from the cube data.
-  const verticesBuffer = device.createBuffer({
-    size: cubeVertexArray.byteLength,
+  const verticesBuffer: IGPUBuffer = {
+    data: cubeVertexArray,
     usage: GPUBufferUsage.VERTEX,
-    mappedAtCreation: true,
-  });
-  new Float32Array(verticesBuffer.getMappedRange()).set(cubeVertexArray);
-  verticesBuffer.unmap();
+  };
 
-  const pipeline = device.createRenderPipeline({
-    layout: 'auto',
+  const pipeline: IGPURenderPipeline = {
     vertex: {
-      module: device.createShaderModule({
-        code: basicVertWGSL,
-      }),
-      buffers: [
-        {
-          arrayStride: cubeVertexSize,
-          attributes: [
-            {
-              // position
-              shaderLocation: 0,
-              offset: cubePositionOffset,
-              format: 'float32x4',
-            },
-            {
-              // uv
-              shaderLocation: 1,
-              offset: cubeUVOffset,
-              format: 'float32x2',
-            },
-          ],
-        },
-      ],
+      code: basicVertWGSL,
     },
     fragment: {
-      module: device.createShaderModule({
-        code: fragmentWGSL,
-      }),
-      targets: [
-        {
-          format: presentationFormat,
-        },
-      ],
+      code: fragmentWGSL,
     },
     primitive: {
       topology: 'triangle-list',
@@ -117,38 +62,21 @@ const init = async (canvas: HTMLCanvasElement) =>
     depthStencil: {
       depthWriteEnabled: true,
       depthCompare: 'less',
-      format: 'depth24plus',
     },
-  });
+  };
 
-  const depthTexture = device.createTexture({
+  const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: 'depth24plus',
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
-  });
+  };
 
-  const uniformBufferSize = 4 * 16; // 4x4 matrix
-  const uniformBuffer = device.createBuffer({
-    size: uniformBufferSize,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  });
+  const uniforms = { modelViewProjectionMatrix: null };
 
-  const uniformBindGroup = device.createBindGroup({
-    layout: pipeline.getBindGroupLayout(0),
-    entries: [
-      {
-        binding: 0,
-        resource: {
-          buffer: uniformBuffer,
-        },
-      },
-    ],
-  });
-
-  const renderPassDescriptor: GPURenderPassDescriptor = {
+  const renderPassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
-        view: undefined, // Assigned later
+        view: { texture: { context } }, // Assigned later
 
         clearValue: [0.95, 0.95, 0.95, 1.0],
         loadOp: 'clear',
@@ -156,7 +84,7 @@ const init = async (canvas: HTMLCanvasElement) =>
       },
     ],
     depthStencilAttachment: {
-      view: depthTexture.createView(),
+      view: { texture: depthTexture },
 
       depthClearValue: 1.0,
       depthLoadOp: 'clear',
@@ -164,7 +92,29 @@ const init = async (canvas: HTMLCanvasElement) =>
     },
   };
 
-  timestampQueryManager.addTimestampWrite(renderPassDescriptor);
+  const renderObject: IGPURenderObject = {
+    pipeline: pipeline,
+    vertices: {
+      position: { data: cubeVertexArray, offset: cubePositionOffset, vertexSize: cubeVertexSize },
+      uv: { data: cubeVertexArray, offset: cubeUVOffset, vertexSize: cubeVertexSize },
+    },
+    bindingResources: {
+      uniforms: uniforms,
+    },
+    draw: { vertexCount: cubeVertexCount },
+  };
+
+  const submit: IGPUSubmit = {
+    commandEncoders: [
+      {
+        passEncoders: [
+          { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
+        ]
+      }
+    ],
+  };
+
+  // timestampQueryManager.addTimestampWrite(renderPassDescriptor);
 
   const aspect = canvas.width / canvas.height;
   const projectionMatrix = mat4.perspective((2 * Math.PI) / 5, aspect, 1, 100.0);
@@ -190,44 +140,27 @@ const init = async (canvas: HTMLCanvasElement) =>
   function frame()
   {
     const transformationMatrix = getTransformationMatrix();
-    device.queue.writeBuffer(
-      uniformBuffer,
-      0,
-      transformationMatrix.buffer,
-      transformationMatrix.byteOffset,
-      transformationMatrix.byteLength
-    );
-    renderPassDescriptor.colorAttachments[0].view = context
-      .getCurrentTexture()
-      .createView();
-
-    const commandEncoder = device.createCommandEncoder();
-    const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-    passEncoder.setPipeline(pipeline);
-    passEncoder.setBindGroup(0, uniformBindGroup);
-    passEncoder.setVertexBuffer(0, verticesBuffer);
-    passEncoder.draw(cubeVertexCount);
-    passEncoder.end();
+    uniforms.modelViewProjectionMatrix = new Float32Array(transformationMatrix);
 
     // Resolve timestamp queries, so that their result is available in
     // a GPU-side buffer.
-    timestampQueryManager.resolve(commandEncoder);
+    // timestampQueryManager.resolve(commandEncoder);
 
-    device.queue.submit([commandEncoder.finish()]);
+    webgpu.submit(submit);
 
-    if (timestampQueryManager.timestampSupported)
-    {
-      // Show the last successfully downloaded elapsed time.
-      const elapsedNs = timestampQueryManager.passDurationMeasurementNs;
-      // Convert from nanoseconds to milliseconds:
-      const elapsedMs = Number(elapsedNs) * 1e-6;
-      renderPassDurationCounter.addSample(elapsedMs);
-      perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
-        .getAverage()
-        .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
-    }
+    // if (timestampQueryManager.timestampSupported)
+    // {
+    //   // Show the last successfully downloaded elapsed time.
+    //   const elapsedNs = timestampQueryManager.passDurationMeasurementNs;
+    //   // Convert from nanoseconds to milliseconds:
+    //   const elapsedMs = Number(elapsedNs) * 1e-6;
+    //   renderPassDurationCounter.addSample(elapsedMs);
+    //   perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
+    //     .getAverage()
+    //     .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
+    // }
 
-    timestampQueryManager.tryInitiateTimestampDownload();
+    // timestampQueryManager.tryInitiateTimestampDownload();
 
     requestAnimationFrame(frame);
   }

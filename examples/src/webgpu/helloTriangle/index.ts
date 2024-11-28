@@ -24,18 +24,18 @@ const init = async (canvas: HTMLCanvasElement) =>
         draw: { vertexCount: 3 },
     };
 
+    const data: IGPUSubmit = {
+        commandEncoders: [
+            {
+                passEncoders: [
+                    { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
+                ]
+            }
+        ],
+    };
+
     function frame()
     {
-        const data: IGPUSubmit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
-                    ]
-                }
-            ],
-        };
-
         webgpu.submit(data);
 
         requestAnimationFrame(frame);
