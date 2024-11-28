@@ -540,8 +540,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         pass.renderObjects = [
             ro,
+
             // draw source texture with blending
-            // pass.setBlendConstant([...constant.color, constant.alpha]),
+            { __type: "IGPUBlendConstant", color: [...constant.color, constant.alpha] as any },
 
             ro1,
         ];

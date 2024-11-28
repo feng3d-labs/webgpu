@@ -15,6 +15,7 @@ import { getGPURenderPassFormat } from "../data/getGPURenderPassFormat";
 import { getIGPUBuffer, getIGPUIndexBuffer } from "../data/getIGPUIndexBuffer";
 import { getIGPUSetBindGroups } from "../data/getIGPUSetBindGroups";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
+import { IGPUBlendConstant } from "../data/IGPUBlendConstant";
 import { IGPUCommandEncoder } from "../data/IGPUCommandEncoder";
 import { IGPUComputeObject, IGPUComputePipeline, IGPUWorkgroups } from "../data/IGPUComputeObject";
 import { IGPUComputePass } from "../data/IGPUComputePass";
@@ -142,9 +143,14 @@ export class RunWebGPU
             {
                 this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
             }
+            else if (element.__type === "IGPUBlendConstant")
+            {
+                this.runBlendConstant(passEncoder, element);
+            }
             else
             {
-                this.runRenderObject(device, passEncoder, renderPassFormat, element);
+                element
+                throw ``;
             }
         });
     }
@@ -323,6 +329,11 @@ export class RunWebGPU
         this.runDraw(passEncoder, draw);
 
         this.runDrawIndexed(passEncoder, drawIndexed);
+    }
+
+    protected runBlendConstant(passEncoder: GPURenderPassEncoder, element: IGPUBlendConstant)
+    {
+        passEncoder.setBlendConstant(element.color);
     }
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)

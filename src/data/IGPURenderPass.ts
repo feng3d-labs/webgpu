@@ -1,3 +1,4 @@
+import { IGPUBlendConstant } from "./IGPUBlendConstant";
 import { IGPUOcclusionQueryObject } from "./IGPUOcclusionQueryObject";
 import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderObject } from "./IGPURenderObject";
@@ -48,4 +49,4 @@ export interface IGPURenderPass
 /**
  * 渲染通道中的执行项。
  */
-export type IGPURenderPassObject = (IGPUViewport | IGPUScissorRect | IGPURenderObject | IGPURenderBundleObject | IGPUOcclusionQueryObject);
+export type IGPURenderPassObject = (IGPUViewport | IGPUScissorRect | IGPUBlendConstant | IGPURenderObject | IGPURenderBundleObject | IGPUOcclusionQueryObject);
