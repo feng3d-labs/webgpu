@@ -22,6 +22,7 @@
 	"GPGPU Demos": [
 		"computeBoids",
 		"gameOfLife",
+		"bitonicSort",
 		""
 	],
 	"Graphics Techniques": [
