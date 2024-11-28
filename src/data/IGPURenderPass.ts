@@ -4,6 +4,7 @@ import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderObject } from "./IGPURenderObject";
 import { IGPURenderPassDescriptor } from "./IGPURenderPassDescriptor";
 import { IGPUScissorRect } from "./IGPUScissorRect";
+import { IGPUStencilReference } from "./IGPUStencilReference";
 import { IGPUTimestampQuery } from "./IGPUTimestampQuery";
 import { IGPUViewport } from "./IGPUViewport";
 
@@ -49,4 +50,4 @@ export interface IGPURenderPass
 /**
  * 渲染通道中的执行项。
  */
-export type IGPURenderPassObject = (IGPUViewport | IGPUScissorRect | IGPUBlendConstant | IGPURenderObject | IGPURenderBundleObject | IGPUOcclusionQueryObject);
+export type IGPURenderPassObject = (IGPURenderObject | IGPUViewport | IGPUScissorRect | IGPURenderBundleObject | IGPUOcclusionQueryObject | IGPUBlendConstant | IGPUStencilReference);

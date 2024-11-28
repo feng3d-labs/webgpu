@@ -26,6 +26,7 @@ import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
 import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
+import { IGPUStencilReference } from "../data/IGPUStencilReference";
 import { IGPUSubmit } from "../data/IGPUSubmit";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUViewport } from "../data/IGPUViewport";
@@ -147,10 +148,13 @@ export class RunWebGPU
             {
                 this.runBlendConstant(passEncoder, element);
             }
+            else if (element.__type === "IGPUStencilReference")
+            {
+                this.runStencilReference(passEncoder, element);
+            }
             else
             {
-                element
-                throw ``;
+                throw `未处理 ${(element as IGPURenderPassObject).__type} 类型的渲染通道对象！`;
             }
         });
     }
@@ -334,6 +338,11 @@ export class RunWebGPU
     protected runBlendConstant(passEncoder: GPURenderPassEncoder, element: IGPUBlendConstant)
     {
         passEncoder.setBlendConstant(element.color);
+    }
+
+    protected runStencilReference(passEncoder: GPURenderPassEncoder, element: IGPUStencilReference)
+    {
+        passEncoder.setStencilReference(element.reference);
     }
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)
