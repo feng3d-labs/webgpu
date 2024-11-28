@@ -32,51 +32,56 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
     const entries = bindGroup.entries.map((v) =>
     {
-        const entry: GPUBindGroupEntry = {
-            binding: v.binding,
-            resource: null,
-        };
+        const entry: GPUBindGroupEntry = { binding: v.binding, resource: null };
+
+        // 更新资源函数。
+        let updateResource: () => void;
 
         //
-        const getGPUBindingResource = () =>
+        if ((v.resource as IGPUBufferBinding).bufferView)
         {
-            let resource: GPUBindingResource;
-            if ((v.resource as IGPUBufferBinding).bufferView)
+            updateResource = () =>
             {
-                const iGPUBufferBinding = v.resource as IGPUBufferBinding;
-                resource = getGPUBufferBinding(device, iGPUBufferBinding);
-            }
-            else if ((v.resource as IGPUTextureView).texture)
+                entry.resource = getGPUBufferBinding(device, v.resource as IGPUBufferBinding);
+            };
+        }
+        else if ((v.resource as IGPUTextureView).texture)
+        {
+            updateResource = () =>
             {
-                const iGPUTextureView = v.resource as IGPUTextureView;
-                resource = getGPUTextureView(device, iGPUTextureView);
-                if ((iGPUTextureView.texture as IGPUTextureFromContext).context)
-                {
-                    hasContextTexture = true;
-                    updateFuncs.push(() => { entry.resource = getGPUTextureView(device, iGPUTextureView); });
-                }
-                anyEmitter.once(resource, GPUTextureView_destroy, () =>
+                entry.resource = getGPUTextureView(device, v.resource as IGPUTextureView);
+
+                anyEmitter.once(entry.resource, GPUTextureView_destroy, () =>
                 {
                     bindGroupMap.delete(bindGroup);
                 });
-            }
-            else if ((v.resource as IGPUExternalTexture).source)
-            {
-                const iGPUExternalTexture = v.resource as IGPUExternalTexture;
-                resource = getGPUExternalTexture(device, iGPUExternalTexture);
-                hasExternalTexture = true;
-                updateFuncs.push(() => { entry.resource = getGPUExternalTexture(device, iGPUExternalTexture); });
-            }
-            else 
-            {
-                const iGPUSampler = v.resource as IGPUSampler;
-                resource = getGPUSampler(device, iGPUSampler);
-            }
+            };
 
-            return resource;
-        };
+            if (((v.resource as IGPUTextureView).texture as IGPUTextureFromContext).context)
+            {
+                hasContextTexture = true;
+                updateFuncs.push(updateResource);
+            }
+        }
+        else if ((v.resource as IGPUExternalTexture).source)
+        {
+            updateResource = () =>
+            {
+                entry.resource = getGPUExternalTexture(device, v.resource as IGPUExternalTexture);
+            };
 
-        entry.resource = getGPUBindingResource();
+            hasExternalTexture = true;
+            updateFuncs.push(updateResource);
+        }
+        else 
+        {
+            updateResource = () =>
+            {
+                entry.resource = getGPUSampler(device, v.resource as IGPUSampler);
+            };
+        }
+
+        updateResource();
 
         // 监听绑定资源发生改变
         watcher.watch(v, "resource", () =>
@@ -84,7 +89,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
             bindGroupMap.delete(bindGroup);
 
             // 更新绑定组资源
-            entry.resource = getGPUBindingResource();
+            updateResource();
 
             createBindGroup();
         });
