@@ -2,11 +2,20 @@ import { anyEmitter } from "@feng3d/event";
 import { IGPURenderPass, IGPUTimestampQuery } from "../data/IGPURenderPass";
 import { GPUQueue_submit } from "../eventnames";
 
-export function getGPURenderTimestampQuery(timestampQuery?: IGPUTimestampQuery)
+export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: IGPUTimestampQuery)
 {
     if (!timestampQuery) return defautGPURenderTimestampQuery
     let renderTimestampQuery: GPURenderTimestampQuery = timestampQuery["_GPURenderTimestampQuery"];
     if (renderTimestampQuery) return renderTimestampQuery;
+
+    // 判断是否支持 `timestamp-query`
+    timestampQuery.isSupports = device.features.has(`timestamp-query`);
+    if (!timestampQuery.isSupports)
+    {
+        console.warn(`WebGPU未开启或者不支持 timestamp-query 特性，请确认 WebGPU.init 初始化参数是否正确！`);
+
+        return defautGPURenderTimestampQuery;
+    }
 
     let querySet: GPUQuerySet;
 

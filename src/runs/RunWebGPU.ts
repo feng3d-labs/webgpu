@@ -92,7 +92,7 @@ export class RunWebGPU
         const renderPassFormat = getGPURenderPassFormat(descriptor);
 
         // 处理时间戳查询
-        const timestampQuery = getGPURenderTimestampQuery(renderPass.timestampQuery);
+        const timestampQuery = getGPURenderTimestampQuery(device, renderPass.timestampQuery);
         timestampQuery.init(device, renderPassDescriptor)
 
         // 处理不被遮挡查询。

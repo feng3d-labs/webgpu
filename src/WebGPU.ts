@@ -25,14 +25,13 @@ export class WebGPU
     async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
     {
         const adapter = await navigator.gpu?.requestAdapter(options);
-        // 添加时间戳查询支持
-        const supportsTimestampQueries = adapter?.features.has('timestamp-query');
+        // 获取支持的特性
+        const features: GPUFeatureName[] = [];
+        adapter?.features.forEach((v) => { features.push(v as any); });
+        // 默认开启当前本机支持的所有WebGPU特性。
         descriptor = descriptor || {};
-        const requiredFeatures: GPUFeatureName[] = descriptor.requiredFeatures = (descriptor.requiredFeatures || []) as any;
-        if (requiredFeatures.indexOf('timestamp-query') === -1)
-        {
-            requiredFeatures.push('timestamp-query');
-        }
+        descriptor.requiredFeatures = (descriptor.requiredFeatures || features) as any;
+        //
         const device = await adapter?.requestDevice(descriptor);
         quitIfWebGPUNotAvailable(adapter, device);
 

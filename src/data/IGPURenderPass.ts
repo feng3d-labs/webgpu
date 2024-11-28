@@ -1,6 +1,6 @@
+import { IGPUOcclusionQueryObject } from "./IGPUOcclusionQueryObject";
 import { IGPURenderBundleObject } from "./IGPURenderBundleObject";
 import { IGPURenderObject } from "./IGPURenderObject";
-import { IGPUOcclusionQueryObject } from "./IGPUOcclusionQueryObject";
 import { IGPURenderPassDescriptor } from "./IGPURenderPassDescriptor";
 import { IGPUScissorRect } from "./IGPUScissorRect";
 import { IGPUViewport } from "./IGPUViewport";
@@ -53,6 +53,11 @@ export interface IGPUTimestampQuery
      * （单位为纳秒）
      */
     elapsedNs?: number;
+
+    /**
+     * 当前WebGPU是否支持该特性。
+     */
+    isSupports?: boolean;
 }
 
 /**

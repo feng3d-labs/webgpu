@@ -12,10 +12,7 @@ import PerfCounter from './PerfCounter';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
-  // if (!supportsTimestampQueries)
-  // {
-  //   perfDisplay.innerHTML = 'Timestamp queries are not supported';
-  // }
+
 
   // GPU-side timer and the CPU-side counter where we accumulate statistics:
   // NB: Look for 'timestampQueryManager' in this file to locate parts of this
@@ -24,6 +21,15 @@ const init = async (canvas: HTMLCanvasElement) =>
   const timestampQuery: IGPUTimestampQuery = {};
   // const timestampQueryManager = new TimestampQueryManager(device);
   const renderPassDurationCounter = new PerfCounter();
+
+  watcher.watch(timestampQuery, "isSupports", () =>
+  {
+    if (!timestampQuery.isSupports)
+    {
+      perfDisplay.innerHTML = 'Timestamp queries are not supported';
+    }
+  });
+
   // 监听结果。
   watcher.watch(timestampQuery, "elapsedNs", () =>
   {
