@@ -1,3 +1,4 @@
+import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasContext } from "../data/IGPUTexture";
 
 export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContext)
@@ -9,30 +10,38 @@ export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContex
 
     gpuCanvasContext = canvas.getContext("webgpu");
 
-    //
-    context.configuration ||= {};
-    context.configuration.alphaMode ||= "premultiplied";
-    const format = context.configuration.format ||= navigator.gpu.getPreferredCanvasFormat();
+    canvasContextMap[context.canvasId] = gpuCanvasContext;
 
-    let usage = 0;
-
-    if (context.configuration.usage)
+    const updateConfigure = () =>
     {
-        usage = context.configuration.usage;
+
+        //
+        context.configuration ||= {};
+        context.configuration.alphaMode ||= "premultiplied";
+        const format = context.configuration.format ||= navigator.gpu.getPreferredCanvasFormat();
+
+        let usage = 0;
+
+        if (context.configuration.usage)
+        {
+            usage = context.configuration.usage;
+        }
+
+        // 附加上 GPUTextureUsage.RENDER_ATTACHMENT
+        usage = usage | GPUTextureUsage.RENDER_ATTACHMENT;
+
+        //
+        gpuCanvasContext.configure({
+            ...context.configuration,
+            device,
+            usage,
+            format,
+        });
     }
 
-    // 附加上 GPUTextureUsage.RENDER_ATTACHMENT
-    usage = usage | GPUTextureUsage.RENDER_ATTACHMENT;
+    updateConfigure();
 
-    //
-    gpuCanvasContext.configure({
-        ...context.configuration,
-        device,
-        usage,
-        format,
-    });
-
-    canvasContextMap[context.canvasId] = gpuCanvasContext;
+    watcher.watchobject(context, { configuration: { usage: undefined, format: undefined, colorSpace: undefined, toneMapping: { mode: undefined }, alphaMode: undefined, } }, updateConfigure);
 
     return gpuCanvasContext;
 }
