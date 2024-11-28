@@ -1,5 +1,6 @@
 import { anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
+import { getRealGPUBindGroup } from "../const";
 import { IGPUBindGroupDescriptor, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureFromContext } from "../data/IGPUTexture";
@@ -10,7 +11,6 @@ import { getGPUBufferBinding } from "./getGPUBufferBinding";
 import { getGPUExternalTexture } from "./getGPUExternalTexture";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
-import { getRealGPUBindGroup } from "../const";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescriptor)
 {
@@ -92,36 +92,34 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         return entry;
     });
 
-    const createBindGroup = () =>
-    {
-        gBindGroup = device.createBindGroup({
-            layout,
-            entries,
-        });
-
-        bindGroupMap.set(bindGroup, gBindGroup);
-    };
-
-    createBindGroup();
-
     const getReal = () =>
     {
         updateFuncs.forEach((v) => v());
         createBindGroup();
-        gBindGroup[getRealGPUBindGroup] = getReal;
 
         return gBindGroup;
     };
 
-    // 设置更新外部纹理/画布纹理视图
-    if (hasExternalTexture || hasContextTexture)
+    const createBindGroup = () =>
     {
-        gBindGroup[getRealGPUBindGroup] = getReal;
-    }
-    else
-    {
-        gBindGroup[getRealGPUBindGroup] = () => gBindGroup;
-    }
+        gBindGroup = device.createBindGroup({ layout, entries, });
+
+        bindGroupMap.set(bindGroup, gBindGroup);
+
+        // 设置更新外部纹理/画布纹理视图
+        if (hasExternalTexture || hasContextTexture)
+        {
+            gBindGroup[getRealGPUBindGroup] = getReal;
+        }
+        else
+        {
+            gBindGroup[getRealGPUBindGroup] = () => gBindGroup;
+        }
+
+        return gBindGroup;
+    };
+
+    createBindGroup();
 
     return gBindGroup;
 }
