@@ -21,6 +21,8 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
     // 总是更新函数列表。
     const awaysUpdateFuncs: (() => void)[] = [];
+    // 执行一次函数列表
+    const onceUpdateFuncs: (() => void)[] = [];
 
     const layout = getGPUBindGroupLayout(device, bindGroup.layout);
 
@@ -31,9 +33,10 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         // 更新资源函数。
         let updateResource: () => void;
 
+        // 资源变化后更新函数。
         const onResourceChanged = () =>
         {
-            updateResource();
+            onceUpdateFuncs.push(updateResource);
 
             if (gBindGroup[getRealGPUBindGroup] !== getReal)
             {
@@ -99,6 +102,8 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
     const createBindGroup = () =>
     {
+        onceUpdateFuncs.forEach(v => v());
+
         gBindGroup = device.createBindGroup({ layout, entries, });
 
         bindGroupMap.set(bindGroup, gBindGroup);
