@@ -1,4 +1,4 @@
-import { IGPUBuffer, IGPUCanvasContext, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUCanvasContext, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 import { mat4, vec3 } from 'wgpu-matrix';
 
@@ -6,40 +6,55 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import fragmentWGSL from '../../shaders/black.frag.wgsl';
-import { quitIfWebGPUNotAvailable } from '../util';
 
+import { watcher } from "@feng3d/watcher";
 import PerfCounter from './PerfCounter';
-import TimestampQueryManager from './TimestampQueryManager';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
-  const devicePixelRatio = window.devicePixelRatio || 1;
-  canvas.width = canvas.clientWidth * devicePixelRatio;
-  canvas.height = canvas.clientHeight * devicePixelRatio;
-
-  const webgpu = await new WebGPU().init();
-
-  // GPU-side timer and the CPU-side counter where we accumulate statistics:
-  // NB: Look for 'timestampQueryManager' in this file to locate parts of this
-  // snippets that are related to timestamps. Most of the logic is in
-  // TimestampQueryManager.ts.
-  // const timestampQueryManager = new TimestampQueryManager(device);
-  const renderPassDurationCounter = new PerfCounter();
-
-  const context: IGPUCanvasContext = { canvasId: canvas.id };
-
-  const perfDisplay = document.querySelector('#info pre');
-
   // if (!supportsTimestampQueries)
   // {
   //   perfDisplay.innerHTML = 'Timestamp queries are not supported';
   // }
 
+  // GPU-side timer and the CPU-side counter where we accumulate statistics:
+  // NB: Look for 'timestampQueryManager' in this file to locate parts of this
+  // snippets that are related to timestamps. Most of the logic is in
+  // TimestampQueryManager.ts.
+  const timestampQuery: IGPUTimestampQuery = {};
+  // const timestampQueryManager = new TimestampQueryManager(device);
+  const renderPassDurationCounter = new PerfCounter();
+  // 监听结果。
+  watcher.watch(timestampQuery, "elapsedNs", () =>
+  {
+    // Show the last successfully downloaded elapsed time.
+    const elapsedNs = timestampQuery.elapsedNs;
+    // Convert from nanoseconds to milliseconds:
+    const elapsedMs = Number(elapsedNs) * 1e-6;
+    renderPassDurationCounter.addSample(elapsedMs);
+    perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
+      .getAverage()
+      .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
+  });
+
+  //
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+
+  const webgpu = await new WebGPU().init();
+  //
+  const context: IGPUCanvasContext = { canvasId: canvas.id };
+
+  const perfDisplay = document.querySelector('#info pre');
+
   // Create a vertex buffer from the cube data.
-  const verticesBuffer: IGPUBuffer = {
-    data: cubeVertexArray,
-    usage: GPUBufferUsage.VERTEX,
+  const vertices: IGPUVertexAttributes = {
+    position: { data: cubeVertexArray, offset: cubePositionOffset, vertexSize: cubeVertexSize },
+    uv: { data: cubeVertexArray, offset: cubeUVOffset, vertexSize: cubeVertexSize },
   };
+
+  const uniforms = { modelViewProjectionMatrix: null };
 
   const pipeline: IGPURenderPipeline = {
     vertex: {
@@ -71,8 +86,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
-  const uniforms = { modelViewProjectionMatrix: null };
-
   const renderPassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
@@ -94,10 +107,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
   const renderObject: IGPURenderObject = {
     pipeline: pipeline,
-    vertices: {
-      position: { data: cubeVertexArray, offset: cubePositionOffset, vertexSize: cubeVertexSize },
-      uv: { data: cubeVertexArray, offset: cubeUVOffset, vertexSize: cubeVertexSize },
-    },
+    vertices,
     bindingResources: {
       uniforms: uniforms,
     },
@@ -108,13 +118,15 @@ const init = async (canvas: HTMLCanvasElement) =>
     commandEncoders: [
       {
         passEncoders: [
-          { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
+          {
+            descriptor: renderPassDescriptor, renderObjects: [renderObject],
+            // 开启时间戳查询
+            timestampQuery: timestampQuery,
+          },
         ]
       }
     ],
   };
-
-  // timestampQueryManager.addTimestampWrite(renderPassDescriptor);
 
   const aspect = canvas.width / canvas.height;
   const projectionMatrix = mat4.perspective((2 * Math.PI) / 5, aspect, 1, 100.0);
@@ -142,25 +154,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     const transformationMatrix = getTransformationMatrix();
     uniforms.modelViewProjectionMatrix = new Float32Array(transformationMatrix);
 
-    // Resolve timestamp queries, so that their result is available in
-    // a GPU-side buffer.
-    // timestampQueryManager.resolve(commandEncoder);
-
     webgpu.submit(submit);
-
-    // if (timestampQueryManager.timestampSupported)
-    // {
-    //   // Show the last successfully downloaded elapsed time.
-    //   const elapsedNs = timestampQueryManager.passDurationMeasurementNs;
-    //   // Convert from nanoseconds to milliseconds:
-    //   const elapsedMs = Number(elapsedNs) * 1e-6;
-    //   renderPassDurationCounter.addSample(elapsedMs);
-    //   perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
-    //     .getAverage()
-    //     .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
-    // }
-
-    // timestampQueryManager.tryInitiateTimestampDownload();
 
     requestAnimationFrame(frame);
   }

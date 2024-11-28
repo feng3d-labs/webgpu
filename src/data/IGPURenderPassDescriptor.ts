@@ -6,7 +6,7 @@ import { IGPURenderPassDepthStencilAttachment } from "./IGPURenderPassDepthStenc
  *
  * {@link GPURenderPassDescriptor}
  */
-export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, "colorAttachments" | "depthStencilAttachment" | "occlusionQuerySet">
+export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, "colorAttachments" | "depthStencilAttachment" | "occlusionQuerySet" | "timestampWrites">
 {
     /**
      * The set of {@link GPURenderPassColorAttachment} values in this sequence defines which

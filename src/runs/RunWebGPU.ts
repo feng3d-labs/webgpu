@@ -6,6 +6,7 @@ import { getGPUComputePipeline } from "../caches/getGPUComputePipeline";
 import { getGPURenderOcclusionQuery } from "../caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "../caches/getGPURenderPassDescriptor";
 import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
+import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
@@ -90,6 +91,10 @@ export class RunWebGPU
         const renderPassDescriptor = getGPURenderPassDescriptor(device, descriptor);
         const renderPassFormat = getGPURenderPassFormat(descriptor);
 
+        // 处理时间戳查询
+        const timestampQuery = getGPURenderTimestampQuery(renderPass.timestampQuery);
+        timestampQuery.init(device, renderPassDescriptor)
+
         // 处理不被遮挡查询。
         const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
         occlusionQuery.init(device, renderPassDescriptor)
@@ -102,6 +107,8 @@ export class RunWebGPU
 
         //
         occlusionQuery.queryResult(device, commandEncoder, renderPass);
+        //
+        timestampQuery.resolve(device, commandEncoder, renderPass);
     }
 
     protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
