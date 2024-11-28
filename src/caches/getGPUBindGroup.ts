@@ -5,7 +5,7 @@ import { IGPUBindGroupDescriptor, IGPUBufferBinding, IGPUExternalTexture } from 
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
-import { GPUTextureView_destroy } from "../eventnames";
+import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 import { getGPUBufferBinding } from "./getGPUBufferBinding";
 import { getGPUExternalTexture } from "./getGPUExternalTexture";
@@ -31,6 +31,16 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         // 更新资源函数。
         let updateResource: () => void;
 
+        const onResourceChanged = () =>
+        {
+            updateResource();
+
+            if (gBindGroup[getRealGPUBindGroup] !== getReal)
+            {
+                gBindGroup[getRealGPUBindGroup] = createBindGroup;
+            }
+        }
+
         //
         if ((v.resource as IGPUBufferBinding).bufferView)
         {
@@ -45,10 +55,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
             {
                 entry.resource = getGPUTextureView(device, v.resource as IGPUTextureView);
 
-                anyEmitter.once(entry.resource, GPUTextureView_destroy, () =>
-                {
-                    bindGroupMap.delete(bindGroup);
-                });
+                anyEmitter.once(entry.resource, GPUTextureView_destroy, onResourceChanged);
             };
 
             if (((v.resource as IGPUTextureView).texture as IGPUTextureFromContext).context)
@@ -70,22 +77,14 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
             updateResource = () =>
             {
                 entry.resource = getGPUSampler(device, v.resource as IGPUSampler);
+                anyEmitter.once(v.resource as IGPUSampler, IGPUSampler_changed, onResourceChanged);
             };
         }
 
         updateResource();
 
         // 监听绑定资源发生改变
-        watcher.watch(v, "resource", () =>
-        {
-            // 更新绑定组资源
-            updateResource();
-
-            if (gBindGroup[getRealGPUBindGroup] !== getReal)
-            {
-                gBindGroup[getRealGPUBindGroup] = createBindGroup;
-            }
-        });
+        watcher.watch(v, "resource", onResourceChanged);
 
         return entry;
     });

@@ -186,7 +186,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     : 1,
         };
 
-        bindingResources0.samp = sampler;
+        if (bindingResources0.samp)
+            Object.assign(bindingResources0.samp, sampler);
+        else
+            bindingResources0.samp = sampler;
     }
 
     //
