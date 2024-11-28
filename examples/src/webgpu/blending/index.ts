@@ -1,17 +1,11 @@
-import { mat4 } from 'wgpu-matrix';
 import { GUI } from 'dat.gui';
-import { quitIfWebGPUNotAvailable } from '../util';
+import { mat4 } from 'wgpu-matrix';
 import texturedQuadWGSL from './texturedQuad.wgsl';
 
-import { getIGPUBuffer, IGPUBuffer, IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
-
-    const adapter = await navigator.gpu?.requestAdapter();
-    const device = await adapter?.requestDevice();
-    quitIfWebGPUNotAvailable(adapter, device);
-
     // creates a CSS hsl string from 3 normalized numbers (0 to 1)
     const hsl = (hue: number, saturation: number, lightness: number) =>
         `hsl(${(hue * 360) | 0}, ${saturation * 100}%, ${(lightness * 100) | 0}%)`;
@@ -93,20 +87,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const srcCanvas = createSourceImage(size);
     const dstCanvas = createDestinationImage(size);
 
-    // Get a WebGPU context from the canvas and configure it
-    const context = canvas.getContext('webgpu');
-    const devicePixelRatio = window.devicePixelRatio;
+    const devicePixelRatio = window.devicePixelRatio || 1;
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
-    const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
 
-    const module = device.createShaderModule({
-        label: 'our hardcoded textured quad shaders',
-        code: texturedQuadWGSL,
-    });
+    const context: IGPUCanvasContext = { canvasId: canvas.id, configuration: {} };
+
+    // Get a WebGPU context from the canvas and configure it
+    const webgpu = await new WebGPU().init();
 
     function createTextureFromSource(
-        device: GPUDevice,
         source: HTMLCanvasElement,
         options: {
             flipY?: boolean;
@@ -115,19 +105,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     )
     {
         const { flipY, premultipliedAlpha } = options;
-        const texture = device.createTexture({
+        const texture: IGPUTexture = {
             format: 'rgba8unorm',
             size: [source.width, source.height],
             usage:
                 GPUTextureUsage.TEXTURE_BINDING |
                 GPUTextureUsage.COPY_DST |
                 GPUTextureUsage.RENDER_ATTACHMENT,
-        });
-        device.queue.copyExternalImageToTexture(
-            { source, flipY },
-            { texture, premultipliedAlpha },
-            { width: source.width, height: source.height }
-        );
+            source: [{ source: { source: source, flipY }, destination: { premultipliedAlpha }, copySize: { width: source.width, height: source.height } }]
+        };
         return texture;
     }
 
@@ -145,58 +131,48 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // create 2 textures with unpremultiplied alpha
     const srcTextureUnpremultipliedAlpha = createTextureFromSource(
-        device,
         srcCanvas
     );
     const dstTextureUnpremultipliedAlpha = createTextureFromSource(
-        device,
         dstCanvas
     );
 
     // create 2 textures with premultiplied alpha
     const srcTexturePremultipliedAlpha = createTextureFromSource(
-        device,
         srcCanvas,
         { premultipliedAlpha: true }
     );
     const dstTexturePremultipliedAlpha = createTextureFromSource(
-        device,
         dstCanvas,
         { premultipliedAlpha: true }
     );
 
-    const sampler = device.createSampler({
+    const sampler: IGPUSampler = {
         magFilter: 'linear',
         minFilter: 'linear',
         mipmapFilter: 'linear',
-    });
+    };
 
     type Uniforms = {
-        buffer: GPUBuffer;
         values: Float32Array;
         matrix: Float32Array;
     };
 
-    function makeUniformBufferAndValues(device: GPUDevice): Uniforms
+    function makeUniformBufferAndValues(): Uniforms
     {
         // offsets to the various uniform values in float32 indices
         const kMatrixOffset = 0;
 
         // create a buffer for the uniform values
         const uniformBufferSize = 16 * 4; // matrix is 16 32bit floats (4bytes each)
-        const buffer = device.createBuffer({
-            label: 'uniforms for quad',
-            size: uniformBufferSize,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
 
         // create a typedarray to hold the values for the uniforms in JavaScript
         const values = new Float32Array(uniformBufferSize / 4);
         const matrix = values.subarray(kMatrixOffset, 16);
-        return { buffer, values, matrix };
+        return { values, matrix };
     }
-    const srcUniform = makeUniformBufferAndValues(device);
-    const dstUniform = makeUniformBufferAndValues(device);
+    const srcUniform = makeUniformBufferAndValues();
+    const dstUniform = makeUniformBufferAndValues();
 
     const srcBindGroupUnpremultipliedAlpha = device.createBindGroup({
         layout: bindGroupLayout,
@@ -250,11 +226,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ];
 
     const clearValue = [0, 0, 0, 0];
-    const renderPassDescriptor: GPURenderPassDescriptor = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         label: 'our basic canvas renderPass',
         colorAttachments: [
             {
-                view: undefined, // <- to be filled out when we render
+                view: { texture: { context } }, // <- to be filled out when we render
                 clearValue,
                 loadOp: 'clear',
                 storeOp: 'store',
@@ -476,17 +452,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     clearFolder.add(clear, 'alpha', 0, 1).onChange(render);
     clearFolder.addColor(new GUIColorHelper(clear.color), 'value').onChange(render);
 
-    const dstPipeline = device.createRenderPipeline({
+    const dstPipeline: IGPURenderPipeline = {
         label: 'hardcoded textured quad pipeline',
         layout: pipelineLayout,
         vertex: {
-            module,
+            code: texturedQuadWGSL,
         },
         fragment: {
-            module,
-            targets: [{ format: presentationFormat }],
+            code: texturedQuadWGSL,
         },
-    });
+    };
 
     function makeBlendComponentValid(blend)
     {
@@ -504,17 +479,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         makeBlendComponentValid(alpha);
         gui.updateDisplay();
 
-        const srcPipeline = device.createRenderPipeline({
+        const srcPipeline: IGPURenderPipeline = {
             label: 'hardcoded textured quad pipeline',
             layout: pipelineLayout,
             vertex: {
-                module,
+                code: texturedQuadWGSL,
             },
             fragment: {
-                module,
+                code: texturedQuadWGSL,
                 targets: [
                     {
-                        format: presentationFormat,
                         blend: {
                             color,
                             alpha,
@@ -522,21 +496,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     },
                 ],
             },
-        });
+        };
 
         const { srcTexture, dstTexture, srcBindGroup, dstBindGroup } =
             textureSets[settings.textureSet === 'premultiplied alpha' ? 0 : 1];
 
-        context.configure({
-            device,
-            format: presentationFormat,
-            alphaMode: settings.alphaMode,
-        });
-
-        const canvasTexture = context.getCurrentTexture();
-        // Get the current texture from the canvas context and
-        // set it as the texture to render to.
-        renderPassDescriptor.colorAttachments[0].view = canvasTexture.createView();
+        context.configuration.alphaMode = settings.alphaMode;
 
         // Apply the clearValue, pre-multiplying or not it based on the settings.
         {
