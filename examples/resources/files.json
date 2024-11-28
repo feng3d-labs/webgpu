@@ -15,6 +15,7 @@
 		"renderBundles",
 		"occlusionQuery",
 		"samplerParameters",
+		"timestampQuery",
 		""
 	],
 	"GPGPU Demos": [
