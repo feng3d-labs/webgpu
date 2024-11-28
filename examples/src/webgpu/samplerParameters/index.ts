@@ -166,7 +166,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 );
                 folder2.open();
                 const kMaxAnisotropy = 16;
-                folder2.add(samplerDescriptor, "maxAnisotropy", 1, kMaxAnisotropy, 1);
+                folder2.add(samplerDescriptor, "maxAnisotropy", 1, kMaxAnisotropy, 1).onChange(updateSamplerResources);
             }
         }
     }
