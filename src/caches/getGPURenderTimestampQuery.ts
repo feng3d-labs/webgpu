@@ -2,7 +2,7 @@ import { anyEmitter } from "@feng3d/event";
 import { IGPURenderPass, IGPUTimestampQuery } from "../data/IGPURenderPass";
 import { GPUQueue_submit } from "../eventnames";
 
-export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: IGPUTimestampQuery)
+export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: IGPUTimestampQuery): GPURenderTimestampQuery
 {
     if (!timestampQuery) return defautGPURenderTimestampQuery
     let renderTimestampQuery: GPURenderTimestampQuery = timestampQuery["_GPURenderTimestampQuery"];

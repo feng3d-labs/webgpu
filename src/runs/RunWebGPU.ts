@@ -106,7 +106,7 @@ export class RunWebGPU
         passEncoder.end();
 
         //
-        occlusionQuery.queryResult(device, commandEncoder, renderPass);
+        occlusionQuery.resolve(device, commandEncoder, renderPass);
         //
         timestampQuery.resolve(device, commandEncoder, renderPass);
     }

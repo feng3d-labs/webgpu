@@ -3,7 +3,7 @@ import { IGPUOcclusionQueryObject } from "../data/IGPUOcclusionQueryObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { GPUQueue_submit } from "../eventnames";
 
-export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[])
+export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[]): GPURenderOcclusionQuery
 {
     if (!renderObjects) return defautRenderOcclusionQuery;
     let renderOcclusionQuery: GPURenderOcclusionQuery = renderObjects["_GPURenderOcclusionQuery"];
@@ -20,6 +20,8 @@ export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[
     occlusionQueryObjects.forEach((v, i) => { v._queryIndex = i; })
 
     let occlusionQuerySet: GPUQuerySet;
+    let resolveBuf: GPUBuffer;
+    let resultBuf: GPUBuffer;
 
     /**
      * 初始化。
@@ -41,9 +43,9 @@ export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[
      * @param commandEncoder 
      * @param renderPass 
      */
-    const queryResult = (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass) =>
+    const resolve = (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass) =>
     {
-        const resolveBuf: GPUBuffer = renderPass["resolveBuffer"] = renderPass["resolveBuffer"] || device.createBuffer({
+        resolveBuf = resolveBuf || device.createBuffer({
             label: 'resolveBuffer',
             // Query results are 64bit unsigned integers.
             size: occlusionQueryObjects.length * BigUint64Array.BYTES_PER_ELEMENT,
@@ -52,7 +54,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[
 
         commandEncoder.resolveQuerySet(occlusionQuerySet, 0, occlusionQueryObjects.length, resolveBuf, 0);
 
-        const resultBuf = renderPass["resultBuffer"] = renderPass["resultBuffer"] || device.createBuffer({
+        resultBuf = resultBuf || device.createBuffer({
             label: 'resultBuffer',
             size: resolveBuf.size,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
@@ -90,7 +92,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[
         anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
     };
 
-    renderObjects["_GPURenderOcclusionQuery"] = renderOcclusionQuery = { init, queryResult };
+    renderObjects["_GPURenderOcclusionQuery"] = renderOcclusionQuery = { init, resolve };
 
     return renderOcclusionQuery;
 }
@@ -98,7 +100,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[
 interface GPURenderOcclusionQuery
 {
     init: (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) => void
-    queryResult: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass) => void
+    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass) => void
 }
 
-const defautRenderOcclusionQuery = { init: () => { }, queryResult: () => { } };
+const defautRenderOcclusionQuery = { init: () => { }, resolve: () => { } };
