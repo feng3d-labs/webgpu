@@ -2,7 +2,7 @@ import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 import texturedQuadWGSL from './texturedQuad.wgsl';
 
-import { IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUBufferBinding, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureBase, IGPUTextureView, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -92,6 +92,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
     const context: IGPUCanvasContext = { canvasId: canvas.id, configuration: {} };
+    const canvasTexture: IGPUTextureView = { texture: { context } };
 
     // Get a WebGPU context from the canvas and configure it
     const webgpu = await new WebGPU().init();
@@ -116,18 +117,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
         return texture;
     }
-
-    const bindGroupLayout = device.createBindGroupLayout({
-        entries: [
-            { binding: 0, visibility: GPUShaderStage.FRAGMENT, sampler: {} },
-            { binding: 1, visibility: GPUShaderStage.FRAGMENT, texture: {} },
-            { binding: 2, visibility: GPUShaderStage.VERTEX, buffer: {} },
-        ],
-    });
-
-    const pipelineLayout = device.createPipelineLayout({
-        bindGroupLayouts: [bindGroupLayout],
-    });
 
     // create 2 textures with unpremultiplied alpha
     const srcTextureUnpremultipliedAlpha = createTextureFromSource(
@@ -154,61 +143,50 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     type Uniforms = {
-        values: Float32Array;
         matrix: Float32Array;
     };
 
-    function makeUniformBufferAndValues(): Uniforms
-    {
-        // offsets to the various uniform values in float32 indices
-        const kMatrixOffset = 0;
+    // function makeUniformBufferAndValues(): Uniforms
+    // {
+    //     // offsets to the various uniform values in float32 indices
+    //     const kMatrixOffset = 0;
 
-        // create a buffer for the uniform values
-        const uniformBufferSize = 16 * 4; // matrix is 16 32bit floats (4bytes each)
+    //     // create a buffer for the uniform values
+    //     const uniformBufferSize = 16 * 4; // matrix is 16 32bit floats (4bytes each)
 
-        // create a typedarray to hold the values for the uniforms in JavaScript
-        const values = new Float32Array(uniformBufferSize / 4);
-        const matrix = values.subarray(kMatrixOffset, 16);
-        return { values, matrix };
-    }
-    const srcUniform = makeUniformBufferAndValues();
-    const dstUniform = makeUniformBufferAndValues();
+    //     // create a typedarray to hold the values for the uniforms in JavaScript
+    //     const values = new Float32Array(uniformBufferSize / 4);
+    //     const matrix = values.subarray(kMatrixOffset, 16);
+    //     return { values, matrix };
+    // }
+    // const srcUniform = makeUniformBufferAndValues();
+    // const dstUniform = makeUniformBufferAndValues();
+    const srcUniform = { matrix: new Float32Array(16) };
+    const dstUniform = { matrix: new Float32Array(16) };
 
-    const srcBindGroupUnpremultipliedAlpha = device.createBindGroup({
-        layout: bindGroupLayout,
-        entries: [
-            { binding: 0, resource: sampler },
-            { binding: 1, resource: srcTextureUnpremultipliedAlpha.createView() },
-            { binding: 2, resource: { buffer: srcUniform.buffer } },
-        ],
-    });
+    const srcBindGroupUnpremultipliedAlpha: IGPUBindingResources = {
+        ourSampler: sampler,
+        ourTexture: { texture: srcTextureUnpremultipliedAlpha },
+        uni: srcUniform,
+    };
 
-    const dstBindGroupUnpremultipliedAlpha = device.createBindGroup({
-        layout: bindGroupLayout,
-        entries: [
-            { binding: 0, resource: sampler },
-            { binding: 1, resource: dstTextureUnpremultipliedAlpha.createView() },
-            { binding: 2, resource: { buffer: dstUniform.buffer } },
-        ],
-    });
+    const dstBindGroupUnpremultipliedAlpha: IGPUBindingResources = {
+        ourSampler: sampler,
+        ourTexture: { texture: dstTextureUnpremultipliedAlpha },
+        uni: dstUniform,
+    };
 
-    const srcBindGroupPremultipliedAlpha = device.createBindGroup({
-        layout: bindGroupLayout,
-        entries: [
-            { binding: 0, resource: sampler },
-            { binding: 1, resource: srcTexturePremultipliedAlpha.createView() },
-            { binding: 2, resource: { buffer: srcUniform.buffer } },
-        ],
-    });
+    const srcBindGroupPremultipliedAlpha: IGPUBindingResources = {
+        ourSampler: sampler,
+        ourTexture: { texture: srcTexturePremultipliedAlpha },
+        uni: srcUniform,
+    };
 
-    const dstBindGroupPremultipliedAlpha = device.createBindGroup({
-        layout: bindGroupLayout,
-        entries: [
-            { binding: 0, resource: sampler },
-            { binding: 1, resource: dstTexturePremultipliedAlpha.createView() },
-            { binding: 2, resource: { buffer: dstUniform.buffer } },
-        ],
-    });
+    const dstBindGroupPremultipliedAlpha: IGPUBindingResources = {
+        ourSampler: sampler,
+        ourTexture: { texture: dstTexturePremultipliedAlpha },
+        uni: dstUniform,
+    };
 
     const textureSets = [
         {
@@ -230,7 +208,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: 'our basic canvas renderPass',
         colorAttachments: [
             {
-                view: { texture: { context } }, // <- to be filled out when we render
+                view: canvasTexture, // <- to be filled out when we render
                 clearValue,
                 loadOp: 'clear',
                 storeOp: 'store',
@@ -454,7 +432,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const dstPipeline: IGPURenderPipeline = {
         label: 'hardcoded textured quad pipeline',
-        layout: pipelineLayout,
         vertex: {
             code: texturedQuadWGSL,
         },
@@ -481,7 +458,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const srcPipeline: IGPURenderPipeline = {
             label: 'hardcoded textured quad pipeline',
-            layout: pipelineLayout,
             vertex: {
                 code: texturedQuadWGSL,
             },
@@ -515,14 +491,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         function updateUniforms(
             uniforms: Uniforms,
-            canvasTexture: GPUTexture,
-            texture: GPUTexture
+            canvas: HTMLCanvasElement,
+            texture: IGPUTextureBase
         )
         {
             const projectionMatrix = mat4.ortho(
                 0,
-                canvasTexture.width / devicePixelRatio,
-                canvasTexture.height / devicePixelRatio,
+                canvas.width / devicePixelRatio,
+                canvas.height / devicePixelRatio,
                 0,
                 -1,
                 1
@@ -530,36 +506,47 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             mat4.scale(
                 projectionMatrix,
-                [texture.width, texture.height, 1],
+                [texture.size[0], texture.size[1], 1],
                 uniforms.matrix
             );
 
-            // copy the values from JavaScript to the GPU
-            device.queue.writeBuffer(uniforms.buffer, 0, uniforms.values);
+            uniforms.matrix = new Float32Array(uniforms.matrix);
         }
-        updateUniforms(srcUniform, canvasTexture, srcTexture);
-        updateUniforms(dstUniform, canvasTexture, dstTexture);
+        updateUniforms(srcUniform, canvas, srcTexture);
+        updateUniforms(dstUniform, canvas, dstTexture);
 
-        const encoder = device.createCommandEncoder({
-            label: 'render quad encoder',
-        });
-        const pass = encoder.beginRenderPass(renderPassDescriptor);
+        const pass: IGPURenderPass = {
+            descriptor: renderPassDescriptor,
+            renderObjects: []
+        };
 
-        // draw destination texture without blending
-        pass.setPipeline(dstPipeline);
-        pass.setBindGroup(0, dstBindGroup);
-        pass.draw(6);
+        const submit: IGPUSubmit = {
+            commandEncoders: [{
+                passEncoders: [pass]
+            }],
+        };
 
-        // draw source texture with blending
-        pass.setPipeline(srcPipeline);
-        pass.setBindGroup(0, srcBindGroup);
-        pass.setBlendConstant([...constant.color, constant.alpha]);
-        pass.draw(6);
+        const ro: IGPURenderObject = {
+            pipeline: dstPipeline,
+            bindingResources: dstBindGroup,
+            draw: { vertexCount: 6 },
+        };
 
-        pass.end();
+        const ro1: IGPURenderObject = {
+            pipeline: srcPipeline,
+            bindingResources: srcBindGroup,
+            draw: { vertexCount: 6 },
+        };
 
-        const commandBuffer = encoder.finish();
-        device.queue.submit([commandBuffer]);
+        pass.renderObjects = [
+            ro,
+            // draw source texture with blending
+            // pass.setBlendConstant([...constant.color, constant.alpha]),
+
+            ro1,
+        ];
+
+        webgpu.submit(submit);
     }
 
     applyPreset();
