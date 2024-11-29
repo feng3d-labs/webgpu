@@ -50,7 +50,7 @@
   },
   "dependencies": {
     "@feng3d/event": "^0.8.4",
-    "@feng3d/watcher": "^0.8.0",
+    "@feng3d/watcher": "^0.8.4",
     "@webgpu/types": "0.1.49",
     "stats.js": "^0.17.0",
     "wgsl_reflect": "^0.1.1"

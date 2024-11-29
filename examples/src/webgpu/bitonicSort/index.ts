@@ -114,7 +114,7 @@ async function init(
     stepTimeController.setValue(`${newStepTime.toFixed(5)}ms`);
     sortTimeController.setValue(`${newSortTime.toFixed(5)}ms`);
     // Calculate new average sort upon end of final execution step of a full bitonic sort.
-    console.log(highestBlockHeight , settings['Total Elements'] * 2);
+    console.log(highestBlockHeight, settings['Total Elements'] * 2);
     if (highestBlockHeight === settings['Total Elements'] * 2)
     {
       // Lock off access to this larger if block..not best architected solution but eh
@@ -128,7 +128,7 @@ async function init(
         `${averageSortTime.toFixed(5)}ms`
       );
     }
-  });
+  }, undefined, false);
 
   const totalElementOptions = [];
   const maxElements = maxInvocationsX * 32;
