@@ -5,6 +5,7 @@ import { NaiveBitonicCompute } from './bitonicCompute';
 import BitonicDisplayRenderer from './bitonicDisplay';
 
 import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUCommandEncoder, IGPUComputePass, IGPUComputePipeline, IGPURenderPassDescriptor, IGPUSubmit, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu-renderer";
+import { watcher } from '@feng3d/watcher';
 
 // Type of step that will be executed in our shader
 enum StepEnum
@@ -100,24 +101,34 @@ async function init(
 
   const maxInvocationsX = webgpu.device.limits.maxComputeWorkgroupSizeX;
 
-  let querySet: IGPUTimestampQuery;
-  let timestampQueryResolveBuffer: GPUBuffer;
-  let timestampQueryResultBuffer: GPUBuffer;
-
-  // if (timestampQueryAvailable)
-  // {
-  //   querySet = device.createQuerySet({ type: 'timestamp', count: 2 });
-  //   timestampQueryResolveBuffer = device.createBuffer({
-  //     // 2 timestamps * BigInt size for nanoseconds
-  //     size: 2 * BigInt64Array.BYTES_PER_ELEMENT,
-  //     usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-  //   });
-  //   timestampQueryResultBuffer = device.createBuffer({
-  //     // 2 timestamps * BigInt size for nanoseconds
-  //     size: 2 * BigInt64Array.BYTES_PER_ELEMENT,
-  //     usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-  //   });
-  // }
+  // Handle timestamp query stuff
+  let querySet: IGPUTimestampQuery = {};
+  watcher.watch(querySet, "elapsedNs", () =>
+  {
+    // Calculate new step, sort, and average sort times
+    const newStepTime = querySet.elapsedNs / 1000000;
+    const newSortTime = settings.sortTime + newStepTime;
+    // Apply calculated times to settings object as both number and 'ms' appended string
+    settings.stepTime = newStepTime;
+    settings.sortTime = newSortTime;
+    stepTimeController.setValue(`${newStepTime.toFixed(5)}ms`);
+    sortTimeController.setValue(`${newSortTime.toFixed(5)}ms`);
+    // Calculate new average sort upon end of final execution step of a full bitonic sort.
+    console.log(highestBlockHeight , settings['Total Elements'] * 2);
+    if (highestBlockHeight === settings['Total Elements'] * 2)
+    {
+      // Lock off access to this larger if block..not best architected solution but eh
+      highestBlockHeight *= 2;
+      settings.configToCompleteSwapsMap[settings.configKey].time +=
+        newSortTime;
+      const averageSortTime =
+        settings.configToCompleteSwapsMap[settings.configKey].time /
+        settings.configToCompleteSwapsMap[settings.configKey].sorts;
+      averageSortTimeController.setValue(
+        `${averageSortTime.toFixed(5)}ms`
+      );
+    }
+  });
 
   const totalElementOptions = [];
   const maxElements = maxInvocationsX * 32;
@@ -279,33 +290,6 @@ async function init(
     counter: atomicSwapsOutputBuffer,
     uniforms: computeUniformsBuffer,
   };
-
-  // const computeBGCluster = createBindGroupCluster(
-  //   [0, 1, 2, 3],
-  //   [
-  //     GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
-  //     GPUShaderStage.COMPUTE,
-  //     GPUShaderStage.COMPUTE | GPUShaderStage.FRAGMENT,
-  //     GPUShaderStage.COMPUTE,
-  //   ],
-  //   ['buffer', 'buffer', 'buffer', 'buffer'],
-  //   [
-  //     { type: 'read-only-storage' },
-  //     { type: 'storage' },
-  //     { type: 'uniform' },
-  //     { type: 'storage' },
-  //   ],
-  //   [
-  //     [
-  //       { buffer: elementsInputBuffer },
-  //       { buffer: elementsOutputBuffer },
-  //       { buffer: computeUniformsBuffer },
-  //       { buffer: atomicSwapsOutputBuffer },
-  //     ],
-  //   ],
-  //   'BitonicSort',
-  //   device
-  // );
 
   let computePipeline: IGPUComputePipeline = {
     compute: {
@@ -843,45 +827,6 @@ async function init(
       // Elements output becomes elements input, swap accumulate
       elements = elementsOutput;
       setSwappedCell();
-
-      // Handle timestamp query stuff
-      // if (timestampQueryAvailable)
-      // {
-      //   // Copy timestamp query result buffer data to CPU
-      //   await timestampQueryResultBuffer.mapAsync(
-      //     GPUMapMode.READ,
-      //     0,
-      //     2 * BigInt64Array.BYTES_PER_ELEMENT
-      //   );
-      //   const copyTimestampResult = new BigInt64Array(
-      //     timestampQueryResultBuffer.getMappedRange()
-      //   );
-      //   // Calculate new step, sort, and average sort times
-      //   const newStepTime =
-      //     Number(copyTimestampResult[1] - copyTimestampResult[0]) / 1000000;
-      //   const newSortTime = settings.sortTime + newStepTime;
-      //   // Apply calculated times to settings object as both number and 'ms' appended string
-      //   settings.stepTime = newStepTime;
-      //   settings.sortTime = newSortTime;
-      //   stepTimeController.setValue(`${newStepTime.toFixed(5)}ms`);
-      //   sortTimeController.setValue(`${newSortTime.toFixed(5)}ms`);
-      //   // Calculate new average sort upon end of final execution step of a full bitonic sort.
-      //   if (highestBlockHeight === settings['Total Elements'] * 2)
-      //   {
-      //     // Lock off access to this larger if block..not best architected solution but eh
-      //     highestBlockHeight *= 2;
-      //     settings.configToCompleteSwapsMap[settings.configKey].time +=
-      //       newSortTime;
-      //     const averageSortTime =
-      //       settings.configToCompleteSwapsMap[settings.configKey].time /
-      //       settings.configToCompleteSwapsMap[settings.configKey].sorts;
-      //     averageSortTimeController.setValue(
-      //       `${averageSortTime.toFixed(5)}ms`
-      //     );
-      //   }
-      //   timestampQueryResultBuffer.unmap();
-      //   // Get correct range of data from CPU copy of GPU Data
-      // }
     }
     settings.executeStep = false;
     requestAnimationFrame(frame);
