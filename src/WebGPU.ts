@@ -1,5 +1,7 @@
+import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUTextureSize } from "./caches/getIGPUTextureSize";
+import { IGPUBuffer } from "./data/IGPUBuffer";
 import { IGPUReadPixels } from "./data/IGPUReadPixels";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { IGPUTexture } from "./data/IGPUTexture";
@@ -122,6 +124,26 @@ export class WebGPU
         });
 
         gpuReadPixels.result = result;
+
+        return result;
+    }
+
+    /**
+     * 从GPU缓冲区读取数据到CPU。
+     * 
+     * @param buffer GPU缓冲区。
+     * @param offset 读取位置。
+     * @param size 读取字节数量。
+     * @returns CPU数据缓冲区。
+     */
+    async readBuffer(buffer: IGPUBuffer, offset?: GPUSize64, size?: GPUSize64)
+    {
+        const gpuBuffer = getGPUBuffer(this.device, buffer);
+        await gpuBuffer.mapAsync(GPUMapMode.READ);
+
+        const result = gpuBuffer.getMappedRange(offset, size).slice(0);
+
+        gpuBuffer.unmap();
 
         return result;
     }

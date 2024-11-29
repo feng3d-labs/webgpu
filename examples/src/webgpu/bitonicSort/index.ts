@@ -245,13 +245,11 @@ async function init(
   const elementsBufferSize =
     Float32Array.BYTES_PER_ELEMENT * totalElementOptions[0];
   // Initialize input, output, staging buffers
-  const elementsInputBuffer: IGPUBuffer = {
-    size: elementsBufferSize,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+  const elementsInputBuffer: IGPUBufferBinding = {
+    bufferView: new Uint8Array(elementsBufferSize)
   };
-  const elementsOutputBuffer: IGPUBuffer = {
-    size: elementsBufferSize,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+  const elementsOutputBuffer: IGPUBufferBinding = {
+    bufferView: new Uint8Array(elementsBufferSize)
   };
   const elementsStagingBuffer: IGPUBuffer = {
     size: elementsBufferSize,
@@ -260,9 +258,8 @@ async function init(
 
   // Initialize atomic swap buffer on GPU and CPU. Counts number of swaps actually performed by
   // compute shader (when value at index x is greater than value at index y)
-  const atomicSwapsOutputBuffer: IGPUBuffer = {
-    size: Uint32Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC,
+  const atomicSwapsOutputBuffer: IGPUBufferBinding = {
+    bufferView: new Uint32Array(1)
   };
   const atomicSwapsStagingBuffer: IGPUBuffer = {
     size: Uint32Array.BYTES_PER_ELEMENT,
@@ -276,7 +273,9 @@ async function init(
   };
 
   const computeBGCluster: IGPUBindingResources = {
+    input_data: elementsInputBuffer,
     data: elementsInputBuffer,
+    output_data: elementsOutputBuffer,
     counter: atomicSwapsOutputBuffer,
     uniforms: computeUniformsBuffer,
   };
@@ -721,9 +720,10 @@ async function init(
   {
     // Write elements buffer
 
-    let writeBuffers = elementsInputBuffer.writeBuffers || [];
+    let iGPUBuffer = getIGPUBuffer(elementsInputBuffer.bufferView);
+    let writeBuffers = iGPUBuffer.writeBuffers || [];
     writeBuffers.push({ data: elements });
-    elementsInputBuffer.writeBuffers = writeBuffers;
+    iGPUBuffer.writeBuffers = writeBuffers;
 
     const dims = new Float32Array([
       settings['Grid Width'],
@@ -734,7 +734,7 @@ async function init(
       settings['Next Swap Span'],
     ]);
 
-    const iGPUBuffer = getIGPUBuffer(computeUniformsBuffer.bufferView);
+    iGPUBuffer = getIGPUBuffer(computeUniformsBuffer.bufferView);
     writeBuffers = iGPUBuffer.writeBuffers || [];
     writeBuffers.push({ data: dims });
     writeBuffers.push({ bufferOffset: 8, data: stepDetails });
@@ -809,7 +809,7 @@ async function init(
       commandEncoder.passEncoders.push(
         {
           __type: "IGPUCopyBufferToBuffer",
-          source: elementsOutputBuffer,
+          source: getIGPUBuffer(elementsOutputBuffer.bufferView),
           sourceOffset: 0,
           destination: elementsStagingBuffer,
           destinationOffset: 0,
@@ -817,7 +817,7 @@ async function init(
         },
         {
           __type: "IGPUCopyBufferToBuffer",
-          source: atomicSwapsOutputBuffer,
+          source: getIGPUBuffer(atomicSwapsOutputBuffer.bufferView),
           sourceOffset: 0,
           destination: atomicSwapsStagingBuffer,
           destinationOffset: 0,
@@ -833,38 +833,13 @@ async function init(
     )
     {
       // Copy GPU element data to CPU
-      await elementsStagingBuffer.mapAsync(
-        GPUMapMode.READ,
-        0,
-        elementsBufferSize
-      );
-      const copyElementsBuffer = elementsStagingBuffer.getMappedRange(
-        0,
-        elementsBufferSize
-      );
+      const elementsData = await webgpu.readBuffer(elementsStagingBuffer, 0, Uint32Array.BYTES_PER_ELEMENT * settings['Total Elements']);
       // Copy atomic swaps data to CPU
-      await atomicSwapsStagingBuffer.mapAsync(
-        GPUMapMode.READ,
-        0,
-        Uint32Array.BYTES_PER_ELEMENT
-      );
-      const copySwapsBuffer = atomicSwapsStagingBuffer.getMappedRange(
-        0,
-        Uint32Array.BYTES_PER_ELEMENT
-      );
-      const elementsData = copyElementsBuffer.slice(
-        0,
-        Uint32Array.BYTES_PER_ELEMENT * settings['Total Elements']
-      );
-      const swapsData = copySwapsBuffer.slice(
-        0,
-        Uint32Array.BYTES_PER_ELEMENT
-      );
+      const swapsData = await webgpu.readBuffer(atomicSwapsStagingBuffer, 0, Uint32Array.BYTES_PER_ELEMENT);
+
       // Extract data
       const elementsOutput = new Uint32Array(elementsData);
       totalSwapsController.setValue(new Uint32Array(swapsData)[0]);
-      elementsStagingBuffer.unmap();
-      atomicSwapsStagingBuffer.unmap();
       // Elements output becomes elements input, swap accumulate
       elements = elementsOutput;
       setSwappedCell();

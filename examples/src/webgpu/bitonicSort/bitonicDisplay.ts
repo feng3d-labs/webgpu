@@ -2,7 +2,7 @@ import { Base2DRendererClass, } from './utils';
 
 import bitonicDisplay from './bitonicDisplay.frag.wgsl';
 
-import { IGPUBindingResources, IGPUBuffer, IGPUCommandEncoder, IGPURenderPassDescriptor } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUCommandEncoder, IGPURenderPassDescriptor } from "@feng3d/webgpu-renderer";
 
 interface BitonicDisplayRenderArgs
 {
@@ -25,12 +25,11 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
     this.renderPassDescriptor = renderPassDescriptor;
     this.computeBGDescript = computeBGDescript;
 
-    const uniformBuffer: IGPUBuffer = {
-      size: Uint32Array.BYTES_PER_ELEMENT,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    const fragment_uniforms: IGPUBufferBinding = {
+      highlight: undefined,
     };
 
-    computeBGDescript.fragment_uniforms = uniformBuffer;
+    computeBGDescript.fragment_uniforms = fragment_uniforms;
 
     this.pipeline = super.create2DRenderPipeline(
       label,
@@ -39,11 +38,7 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
 
     this.setArguments = (args: BitonicDisplayRenderArgs) =>
     {
-      const writeBuffers = (uniformBuffer.writeBuffers || []);
-      writeBuffers.push({
-        data: new Uint32Array([args.highlight]),
-      });
-      uniformBuffer.writeBuffers = writeBuffers
+      fragment_uniforms.highlight = args.highlight
     };
   }
 
