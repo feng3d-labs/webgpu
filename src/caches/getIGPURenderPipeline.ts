@@ -346,6 +346,13 @@ function getWGSLType(type: TypeInfo)
  * 别名
  */
 const wgslTypeMap = {
+    vec2u: "vec2<u32>",
+    vec3u: "vec3<u32>",
+    vec4u: "vec4<u32>",
+    vec2i: "vec2<i32>",
+    vec3i: "vec3<i32>",
+    vec4i: "vec4<i32>",
+    vec2f: "vec2<f32>",
     vec3f: "vec3<f32>",
     vec4f: "vec4<f32>",
 };

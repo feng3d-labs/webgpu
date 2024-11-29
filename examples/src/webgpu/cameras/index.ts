@@ -1,19 +1,11 @@
-import { mat4, vec3 } from 'wgpu-matrix';
 import { GUI } from 'dat.gui';
-import
-  {
-    cubeVertexArray,
-    cubeVertexSize,
-    cubeUVOffset,
-    cubePositionOffset,
-    cubeVertexCount,
-  } from '../../meshes/cube';
-import cubeWGSL from './cube.wgsl';
+import { mat4, vec3 } from 'wgpu-matrix';
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from '../../meshes/cube';
 import { ArcballCamera, WASDCamera } from './camera';
+import cubeWGSL from './cube.wgsl';
 import { createInputHandler } from './input';
-import { quitIfWebGPUNotAvailable } from '../util';
 
-import { IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -43,65 +35,24 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     oldCameraType = newCameraType;
   });
 
-  const adapter = await navigator.gpu?.requestAdapter();
-  const device = await adapter?.requestDevice();
-  quitIfWebGPUNotAvailable(adapter, device);
-  const context = canvas.getContext('webgpu') as GPUCanvasContext;
-
-  const devicePixelRatio = window.devicePixelRatio;
+  const devicePixelRatio = window.devicePixelRatio || 1;
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
-  const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
 
-  context.configure({
-    device,
-    format: presentationFormat,
-  });
+  const webgpu = await new WebGPU().init();
 
   // Create a vertex buffer from the cube data.
-  const verticesBuffer = device.createBuffer({
-    size: cubeVertexArray.byteLength,
-    usage: GPUBufferUsage.VERTEX,
-    mappedAtCreation: true,
-  });
-  new Float32Array(verticesBuffer.getMappedRange()).set(cubeVertexArray);
-  verticesBuffer.unmap();
+  const vertices: IGPUVertexAttributes = {
+    position: { data: cubeVertexArray, offset: cubePositionOffset, vertexSize: cubeVertexSize },
+    uv: { data: cubeVertexArray, offset: cubeUVOffset, vertexSize: cubeVertexSize },
+  };
 
-  const pipeline = device.createRenderPipeline({
-    layout: 'auto',
+  const pipeline: IGPURenderPipeline = {
     vertex: {
-      module: device.createShaderModule({
-        code: cubeWGSL,
-      }),
-      buffers: [
-        {
-          arrayStride: cubeVertexSize,
-          attributes: [
-            {
-              // position
-              shaderLocation: 0,
-              offset: cubePositionOffset,
-              format: 'float32x4',
-            },
-            {
-              // uv
-              shaderLocation: 1,
-              offset: cubeUVOffset,
-              format: 'float32x2',
-            },
-          ],
-        },
-      ],
+      code: cubeWGSL,
     },
     fragment: {
-      module: device.createShaderModule({
-        code: cubeWGSL,
-      }),
-      targets: [
-        {
-          format: presentationFormat,
-        },
-      ],
+      code: cubeWGSL,
     },
     primitive: {
       topology: 'triangle-list',
@@ -110,73 +61,57 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     depthStencil: {
       depthWriteEnabled: true,
       depthCompare: 'less',
-      format: 'depth24plus',
     },
-  });
+  };
 
-  const depthTexture = device.createTexture({
+  const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: 'depth24plus',
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
-  });
-
-  const uniformBufferSize = 4 * 16; // 4x4 matrix
-  const uniformBuffer = device.createBuffer({
-    size: uniformBufferSize,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  });
+  };
 
   // Fetch the image and upload it into a GPUTexture.
-  let cubeTexture: GPUTexture;
+  let cubeTexture: IGPUTexture;
   {
     const response = await fetch('../../../assets/img/Di-3d.png');
     const imageBitmap = await createImageBitmap(await response.blob());
 
-    cubeTexture = device.createTexture({
+    cubeTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
       format: 'rgba8unorm',
       usage:
         GPUTextureUsage.TEXTURE_BINDING |
         GPUTextureUsage.COPY_DST |
         GPUTextureUsage.RENDER_ATTACHMENT,
-    });
-    device.queue.copyExternalImageToTexture(
-      { source: imageBitmap },
-      { texture: cubeTexture },
-      [imageBitmap.width, imageBitmap.height]
-    );
+      source: [{ source: { source: imageBitmap }, destination: {}, copySize: [imageBitmap.width, imageBitmap.height] }]
+    };
   }
 
   // Create a sampler with linear filtering for smooth interpolation.
-  const sampler = device.createSampler({
+  const sampler: IGPUSampler = {
     magFilter: 'linear',
     minFilter: 'linear',
-  });
+  };
 
-  const uniformBindGroup = device.createBindGroup({
-    layout: pipeline.getBindGroupLayout(0),
-    entries: [
-      {
-        binding: 0,
-        resource: {
-          buffer: uniformBuffer,
-        },
-      },
-      {
-        binding: 1,
-        resource: sampler,
-      },
-      {
-        binding: 2,
-        resource: cubeTexture.createView(),
-      },
-    ],
-  });
+  const bindingResources = {
+    uniforms: {
+      modelViewProjectionMatrix: new Float32Array(16)
+    },
+    mySampler: sampler,
+    myTexture: { texture: cubeTexture },
+  }
 
-  const renderPassDescriptor: GPURenderPassDescriptor = {
+  const renderObject: IGPURenderObject = {
+    pipeline: pipeline,
+    vertices: vertices,
+    bindingResources: bindingResources,
+    draw: { vertexCount: cubeVertexCount },
+  };
+
+  const renderPassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
-        view: undefined, // Assigned later
+        view: { texture: { context: { canvasId: canvas.id } } },
 
         clearValue: [0.5, 0.5, 0.5, 1.0],
         loadOp: 'clear',
@@ -184,12 +119,22 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       },
     ],
     depthStencilAttachment: {
-      view: depthTexture.createView(),
+      view: { texture: depthTexture },
 
       depthClearValue: 1.0,
       depthLoadOp: 'clear',
       depthStoreOp: 'store',
     },
+  };
+
+  const data: IGPUSubmit = {
+    commandEncoders: [
+      {
+        passEncoders: [
+          { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
+        ]
+      }
+    ],
   };
 
   const aspect = canvas.width / canvas.height;
@@ -213,25 +158,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     lastFrameMS = now;
 
     const modelViewProjection = getModelViewProjectionMatrix(deltaTime);
-    device.queue.writeBuffer(
-      uniformBuffer,
-      0,
-      modelViewProjection.buffer,
-      modelViewProjection.byteOffset,
-      modelViewProjection.byteLength
-    );
-    renderPassDescriptor.colorAttachments[0].view = context
-      .getCurrentTexture()
-      .createView();
+    bindingResources.uniforms.modelViewProjectionMatrix = new Float32Array(modelViewProjection); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
-    const commandEncoder = device.createCommandEncoder();
-    const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-    passEncoder.setPipeline(pipeline);
-    passEncoder.setBindGroup(0, uniformBindGroup);
-    passEncoder.setVertexBuffer(0, verticesBuffer);
-    passEncoder.draw(cubeVertexCount);
-    passEncoder.end();
-    device.queue.submit([commandEncoder.finish()]);
+    webgpu.submit(data);
 
     requestAnimationFrame(frame);
   }
