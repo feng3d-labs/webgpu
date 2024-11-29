@@ -40,19 +40,6 @@ export const createBindGroupCluster = (
   label: string,
   device: GPUDevice
 ): BindGroupCluster => {
-  const layoutEntries: GPUBindGroupLayoutEntry[] = [];
-  for (let i = 0; i < bindings.length; i++) {
-    layoutEntries.push({
-      binding: bindings[i],
-      visibility: visibilities[i % visibilities.length],
-      [resourceTypes[i]]: resourceLayouts[i],
-    });
-  }
-
-  const bindGroupLayout = device.createBindGroupLayout({
-    label: `${label}.bindGroupLayout`,
-    entries: layoutEntries,
-  });
 
   const bindGroups: GPUBindGroup[] = [];
   //i represent the bindGroup index, j represents the binding index of the resource within the bindgroup

@@ -1,35 +1,39 @@
-import {
+import
+{
   BindGroupCluster,
   Base2DRendererClass,
   createBindGroupCluster,
 } from './utils';
 
 import bitonicDisplay from './bitonicDisplay.frag.wgsl';
+import { IGPUBuffer } from '../../../../src';
 
-interface BitonicDisplayRenderArgs {
+interface BitonicDisplayRenderArgs
+{
   highlight: number;
 }
 
-export default class BitonicDisplayRenderer extends Base2DRendererClass {
+export default class BitonicDisplayRenderer extends Base2DRendererClass
+{
   switchBindGroup: (name: string) => void;
   setArguments: (args: BitonicDisplayRenderArgs) => void;
   computeBGDescript: BindGroupCluster;
 
   constructor(
-    device: GPUDevice,
     presentationFormat: GPUTextureFormat,
     renderPassDescriptor: GPURenderPassDescriptor,
     computeBGDescript: BindGroupCluster,
     label: string
-  ) {
+  )
+  {
     super();
     this.renderPassDescriptor = renderPassDescriptor;
     this.computeBGDescript = computeBGDescript;
 
-    const uniformBuffer = device.createBuffer({
+    const uniformBuffer: IGPUBuffer = {
       size: Uint32Array.BYTES_PER_ELEMENT,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    };
 
     const bgCluster = createBindGroupCluster(
       [0],
@@ -51,16 +55,18 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass {
       presentationFormat
     );
 
-    this.setArguments = (args: BitonicDisplayRenderArgs) => {
-      device.queue.writeBuffer(
-        uniformBuffer,
-        0,
-        new Uint32Array([args.highlight])
-      );
+    this.setArguments = (args: BitonicDisplayRenderArgs) =>
+    {
+      const writeBuffers = (uniformBuffer.writeBuffers || []);
+      writeBuffers.push({
+        data: new Uint32Array([args.highlight]),
+      });
+      uniformBuffer.writeBuffers = writeBuffers
     };
   }
 
-  startRun(commandEncoder: GPUCommandEncoder, args: BitonicDisplayRenderArgs) {
+  startRun(commandEncoder: GPUCommandEncoder, args: BitonicDisplayRenderArgs)
+  {
     this.setArguments(args);
     super.executeRun(commandEncoder, this.renderPassDescriptor, this.pipeline, [
       this.computeBGDescript.bindGroups[0],
