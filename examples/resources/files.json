@@ -26,6 +26,7 @@
 		""
 	],
 	"Graphics Techniques": [
+		"cameras",
 		"shadowMapping",
 		"deferredRendering",
 		"particles",
