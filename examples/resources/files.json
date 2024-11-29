@@ -27,6 +27,7 @@
 	],
 	"Graphics Techniques": [
 		"cameras",
+		"normalMap",
 		"shadowMapping",
 		"deferredRendering",
 		"particles",
