@@ -1,19 +1,17 @@
-import { mat4, vec3 } from 'wgpu-matrix';
+import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 import { GUI } from 'dat.gui';
-import normalMapWGSL from './normalMap.wgsl';
-import { createMeshRenderable } from '../../meshes/mesh';
+import { mat4, vec3 } from 'wgpu-matrix';
 import { createBoxMeshWithTangents } from '../../meshes/box';
-import
-  {
-    createBindGroupDescriptor,
-    create3DRenderPipeline,
-    createTextureFromImage,
-  } from './utils';
-import { quitIfWebGPUNotAvailable } from '../util';
-import { IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import normalMapWGSL from './normalMap.wgsl';
+import { create3DRenderPipeline, createBindGroupDescriptor, createTextureFromImage, } from './utils';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
+
+  const webgpu = await new WebGPU().init();
 
   const MAT4X4_BYTES = 64;
   enum TextureAtlas
@@ -22,19 +20,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     Toybox,
     BrickWall,
   }
-
-  const adapter = await navigator.gpu?.requestAdapter();
-  const device = await adapter?.requestDevice();
-  quitIfWebGPUNotAvailable(adapter, device);
-  const context = canvas.getContext('webgpu') as GPUCanvasContext;
-  const devicePixelRatio = window.devicePixelRatio;
-  canvas.width = canvas.clientWidth * devicePixelRatio;
-  canvas.height = canvas.clientHeight * devicePixelRatio;
-  const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-  context.configure({
-    device,
-    format: presentationFormat,
-  });
 
   interface GUISettings
   {
@@ -77,93 +62,93 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   };
 
   // Create normal mapping resources and pipeline
-  const depthTexture = device.createTexture({
+  const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: 'depth24plus',
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
-  });
+  };
 
-  const spaceTransformsBuffer = device.createBuffer({
+  const spaceTransformsBuffer: IGPUBuffer = {
     // Buffer holding projection, view, and model matrices plus padding bytes
     size: MAT4X4_BYTES * 4,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  });
+  };
 
-  const mapInfoBuffer = device.createBuffer({
+  const mapInfoBuffer: IGPUBuffer = {
     // Buffer holding mapping type, light uniforms, and depth uniforms
     size: Float32Array.BYTES_PER_ELEMENT * 8,
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  });
+  };
   const mapInfoArray = new ArrayBuffer(mapInfoBuffer.size);
   const mapInfoView = new DataView(mapInfoArray, 0, mapInfoArray.byteLength);
 
   // Fetch the image and upload it into a GPUTexture.
-  let woodAlbedoTexture: GPUTexture;
+  let woodAlbedoTexture: IGPUTexture;
   {
     const response = await fetch('../../../assets/img/wood_albedo.png');
     const imageBitmap = await createImageBitmap(await response.blob());
-    woodAlbedoTexture = createTextureFromImage(device, imageBitmap);
+    woodAlbedoTexture = createTextureFromImage(imageBitmap);
   }
 
-  let spiralNormalTexture: GPUTexture;
+  let spiralNormalTexture: IGPUTexture;
   {
     const response = await fetch('../../../assets/img/spiral_normal.png');
     const imageBitmap = await createImageBitmap(await response.blob());
-    spiralNormalTexture = createTextureFromImage(device, imageBitmap);
+    spiralNormalTexture = createTextureFromImage(imageBitmap);
   }
 
-  let spiralHeightTexture: GPUTexture;
+  let spiralHeightTexture: IGPUTexture;
   {
     const response = await fetch('../../../assets/img/spiral_height.png');
     const imageBitmap = await createImageBitmap(await response.blob());
-    spiralHeightTexture = createTextureFromImage(device, imageBitmap);
+    spiralHeightTexture = createTextureFromImage(imageBitmap);
   }
 
-  let toyboxNormalTexture: GPUTexture;
+  let toyboxNormalTexture: IGPUTexture;
   {
     const response = await fetch('../../../assets/img/toybox_normal.png');
     const imageBitmap = await createImageBitmap(await response.blob());
-    toyboxNormalTexture = createTextureFromImage(device, imageBitmap);
+    toyboxNormalTexture = createTextureFromImage(imageBitmap);
   }
 
-  let toyboxHeightTexture: GPUTexture;
+  let toyboxHeightTexture: IGPUTexture;
   {
     const response = await fetch('../../../assets/img/toybox_height.png');
     const imageBitmap = await createImageBitmap(await response.blob());
-    toyboxHeightTexture = createTextureFromImage(device, imageBitmap);
+    toyboxHeightTexture = createTextureFromImage(imageBitmap);
   }
 
-  let brickwallAlbedoTexture: GPUTexture;
+  let brickwallAlbedoTexture: IGPUTexture;
   {
     const response = await fetch('../../../assets/img/brickwall_albedo.png');
     const imageBitmap = await createImageBitmap(await response.blob());
-    brickwallAlbedoTexture = createTextureFromImage(device, imageBitmap);
+    brickwallAlbedoTexture = createTextureFromImage(imageBitmap);
   }
 
-  let brickwallNormalTexture: GPUTexture;
+  let brickwallNormalTexture: IGPUTexture;
   {
     const response = await fetch('../../../assets/img/brickwall_normal.png');
     const imageBitmap = await createImageBitmap(await response.blob());
-    brickwallNormalTexture = createTextureFromImage(device, imageBitmap);
+    brickwallNormalTexture = createTextureFromImage(imageBitmap);
   }
 
-  let brickwallHeightTexture: GPUTexture;
+  let brickwallHeightTexture: IGPUTexture;
   {
     const response = await fetch('../../../assets/img/brickwall_height.png');
     const imageBitmap = await createImageBitmap(await response.blob());
-    brickwallHeightTexture = createTextureFromImage(device, imageBitmap);
+    brickwallHeightTexture = createTextureFromImage(imageBitmap);
   }
 
   // Create a sampler with linear filtering for smooth interpolation.
-  const sampler = device.createSampler({
+  const sampler: IGPUSampler = {
     magFilter: 'linear',
     minFilter: 'linear',
-  });
+  };
 
-  const renderPassDescriptor: GPURenderPassDescriptor = {
+  const renderPassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
-        view: undefined, // Assigned later
+        view: { texture: { context: { canvasId: canvas.id } } },
 
         clearValue: [0, 0, 0, 1],
         loadOp: 'clear',
@@ -171,7 +156,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       },
     ],
     depthStencilAttachment: {
-      view: depthTexture.createView(),
+      view: { texture: depthTexture },
 
       depthClearValue: 1.0,
       depthLoadOp: 'clear',
@@ -179,60 +164,46 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     },
   };
 
-  const box = createMeshRenderable(
-    device,
-    createBoxMeshWithTangents(1.0, 1.0, 1.0)
-  );
+  const box = createBoxMeshWithTangents(1.0, 1.0, 1.0);
 
   // Uniform bindGroups and bindGroupLayout
-  const frameBGDescriptor = createBindGroupDescriptor(
-    [0, 1],
-    [
-      GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-      GPUShaderStage.FRAGMENT | GPUShaderStage.VERTEX,
-    ],
-    ['buffer', 'buffer'],
-    [{ type: 'uniform' }, { type: 'uniform' }],
-    [[{ buffer: spaceTransformsBuffer }, { buffer: mapInfoBuffer }]],
-    'Frame',
-    device
-  );
+  const spaceTransform = {
+    worldViewProjMatrix: undefined,
+    worldViewMatrix: undefined,
+  };
+  const mapInfo = {
+    lightPosVS: undefined,
+    mode: undefined,
+    lightIntensity: undefined,
+    depthScale: undefined,
+    depthLayers: undefined,
+  };
 
-  // Texture bindGroups and bindGroupLayout
-  const surfaceBGDescriptor = createBindGroupDescriptor(
-    [0, 1, 2, 3],
-    [GPUShaderStage.FRAGMENT],
-    ['sampler', 'texture', 'texture', 'texture'],
-    [
-      { type: 'filtering' },
-      { sampleType: 'float' },
-      { sampleType: 'float' },
-      { sampleType: 'float' },
-    ],
-    // Multiple bindgroups that accord to the layout defined above
-    [
-      [
-        sampler,
-        woodAlbedoTexture.createView(),
-        spiralNormalTexture.createView(),
-        spiralHeightTexture.createView(),
-      ],
-      [
-        sampler,
-        woodAlbedoTexture.createView(),
-        toyboxNormalTexture.createView(),
-        toyboxHeightTexture.createView(),
-      ],
-      [
-        sampler,
-        brickwallAlbedoTexture.createView(),
-        brickwallNormalTexture.createView(),
-        brickwallHeightTexture.createView(),
-      ],
-    ],
-    'Surface',
-    device
-  );
+  const bindingResources: IGPUBindingResources = {
+    spaceTransform,
+    mapInfo,
+    // Texture bindGroups and bindGroupLayout
+    textureSampler: sampler,
+    albedoTexture: { texture: woodAlbedoTexture },
+    normalTexture: { texture: spiralNormalTexture },
+    depthTexture: { texture: spiralHeightTexture },
+  };
+
+  const bindingResourcesList = [
+    bindingResources,
+    {
+      ...bindingResources,
+      albedoTexture: { texture: woodAlbedoTexture },
+      normalTexture: { texture: toyboxNormalTexture },
+      depthTexture: { texture: toyboxHeightTexture },
+    },
+    {
+      ...bindingResources,
+      albedoTexture: { texture: brickwallAlbedoTexture },
+      normalTexture: { texture: brickwallNormalTexture },
+      depthTexture: { texture: brickwallHeightTexture },
+    },
+  ];
 
   const aspect = canvas.width / canvas.height;
   const projectionMatrix = mat4.perspective((2 * Math.PI) / 5, aspect, 0.1, 10.0);
@@ -275,15 +246,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
   };
 
-  const texturedCubePipeline = create3DRenderPipeline(
-    device,
+  const texturedCubePipeline: IGPURenderPipeline = create3DRenderPipeline(
     'NormalMappingRender',
-    [frameBGDescriptor.bindGroupLayout, surfaceBGDescriptor.bindGroupLayout],
     normalMapWGSL,
     // Position,   normal       uv           tangent      bitangent
-    ['float32x3', 'float32x3', 'float32x2', 'float32x3', 'float32x3'],
     normalMapWGSL,
-    presentationFormat,
     true
   );
 
@@ -334,10 +301,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const viewMatrix = getViewMatrix();
     const worldViewMatrix = mat4.mul(viewMatrix, getModelMatrix());
     const worldViewProjMatrix = mat4.mul(projectionMatrix, worldViewMatrix);
-    const matrices = new Float32Array([
-      ...worldViewProjMatrix,
-      ...worldViewMatrix,
-    ]);
+
+    spaceTransform.worldViewMatrix = worldViewMatrix;
+    spaceTransform.worldViewProjMatrix = worldViewProjMatrix;
+    spaceTransform.worldViewMatrix = new Float32Array([-1,0,0,0,0,0.8682431578636169,0.49613896012306213,0,0,0.49613896012306213,-0.8682431578636169,0,0,1.7881394143159923e-8,-1.6124515533447266,1]);
+    spaceTransform.worldViewProjMatrix = new Float32Array([0.09264609962701797,0.6813279390335083,0.8750241994857788,0.8662739992141724,0,1.195034146308899,-0.5011504292488098,-0.49613896012306213,1.373260259628296,-0.04596533998847008,-0.05903293192386627,-0.058442603796720505,0,2.4611626514570162e-8,1.527728796005249,1.6124515533447266]);
 
     // Update mapInfoBuffer
     const lightPosWS = vec3.create(
@@ -347,14 +315,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     );
     const lightPosVS = vec3.transformMat4(lightPosWS, viewMatrix);
     const mode = getMode();
-    device.queue.writeBuffer(
-      spaceTransformsBuffer,
-      0,
-      matrices.buffer,
-      matrices.byteOffset,
-      matrices.byteLength
-    );
-
     // struct MapInfo {
     //   lightPosVS: vec3f,
     //   mode: u32,
@@ -362,33 +322,48 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     //   depthScale: f32,
     //   depthLayers: f32,
     // }
-    mapInfoView.setFloat32(0, lightPosVS[0], true);
-    mapInfoView.setFloat32(4, lightPosVS[1], true);
-    mapInfoView.setFloat32(8, lightPosVS[2], true);
-    mapInfoView.setUint32(12, mode, true);
-    mapInfoView.setFloat32(16, settings.lightIntensity, true);
-    mapInfoView.setFloat32(20, settings.depthScale, true);
-    mapInfoView.setFloat32(24, settings.depthLayers, true);
-    device.queue.writeBuffer(mapInfoBuffer, 0, mapInfoArray);
+    mapInfo.lightPosVS = lightPosVS;
+    mapInfo.mode = mode;
+    mapInfo.lightIntensity = settings.lightIntensity;
+    mapInfo.depthScale = settings.depthScale;
+    mapInfo.depthLayers = settings.depthLayers;
 
-    renderPassDescriptor.colorAttachments[0].view = context
-      .getCurrentTexture()
-      .createView();
+    const submit: IGPUSubmit = {
+      commandEncoders: [{
+        passEncoders: [{
+          descriptor: renderPassDescriptor,
+          renderObjects: [{
+            pipeline: texturedCubePipeline,
+            vertices: {
+              position: { data: box.vertices, offset: 0, vertexSize: box.vertexStride },
+              normal: { data: box.vertices, offset: 12, vertexSize: box.vertexStride },
+              uv: { data: box.vertices, offset: 24, vertexSize: box.vertexStride },
+              vert_tan: { data: box.vertices, offset: 32, vertexSize: box.vertexStride },
+              vert_bitan: { data: box.vertices, offset: 44, vertexSize: box.vertexStride },
+            },
+            indices: box.indices,
+            bindingResources: bindingResourcesList[currentSurfaceBindGroup],
+            drawIndexed: { indexCount: box.indices.length },
+          }],
+        }]
+      }]
+    };
+    webgpu.submit(submit);
 
-    const commandEncoder = device.createCommandEncoder();
-    const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-    // Draw textured Cube
-    passEncoder.setPipeline(texturedCubePipeline);
-    passEncoder.setBindGroup(0, frameBGDescriptor.bindGroups[0]);
-    passEncoder.setBindGroup(
-      1,
-      surfaceBGDescriptor.bindGroups[currentSurfaceBindGroup]
-    );
-    passEncoder.setVertexBuffer(0, box.vertexBuffer);
-    passEncoder.setIndexBuffer(box.indexBuffer, 'uint16');
-    passEncoder.drawIndexed(box.indexCount);
-    passEncoder.end();
-    device.queue.submit([commandEncoder.finish()]);
+    // const commandEncoder = device.createCommandEncoder();
+    // const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+    // // Draw textured Cube
+    // passEncoder.setPipeline(texturedCubePipeline);
+    // passEncoder.setBindGroup(0, frameBGDescriptor.bindGroups[0]);
+    // passEncoder.setBindGroup(
+    //   1,
+    //   surfaceBGDescriptor.bindGroups[currentSurfaceBindGroup]
+    // );
+    // passEncoder.setVertexBuffer(0, box.vertexBuffer);
+    // passEncoder.setIndexBuffer(box.indexBuffer, 'uint16');
+    // passEncoder.drawIndexed(box.indexCount);
+    // passEncoder.end();
+    // device.queue.submit([commandEncoder.finish()]);
 
     requestAnimationFrame(frame);
   }

@@ -1,3 +1,5 @@
+import { IGPURenderPipeline, IGPUTexture } from "@feng3d/webgpu-renderer";
+
 type BindGroupBindingLayout =
   | GPUBufferBindingLayout
   | GPUTextureBindingLayout
@@ -31,10 +33,12 @@ export const createBindGroupDescriptor = (
   resources: GPUBindingResource[][],
   label: string,
   device: GPUDevice
-): BindGroupsObjectsAndLayout => {
+): BindGroupsObjectsAndLayout =>
+{
   // Create layout of each entry within a bindGroup
   const layoutEntries: GPUBindGroupLayoutEntry[] = [];
-  for (let i = 0; i < bindings.length; i++) {
+  for (let i = 0; i < bindings.length; i++)
+  {
     layoutEntries.push({
       binding: bindings[i],
       visibility: visibilities[i % visibilities.length],
@@ -50,9 +54,11 @@ export const createBindGroupDescriptor = (
 
   // Create bindGroups that conform to the layout
   const bindGroups: GPUBindGroup[] = [];
-  for (let i = 0; i < resources.length; i++) {
+  for (let i = 0; i < resources.length; i++)
+  {
     const groupEntries: GPUBindGroupEntry[] = [];
-    for (let j = 0; j < resources[0].length; j++) {
+    for (let j = 0; j < resources[0].length; j++)
+    {
       groupEntries.push({
         binding: j,
         resource: resources[i][j],
@@ -76,7 +82,8 @@ export type ShaderKeyInterface<T extends string[]> = {
   [K in T[number]]: number;
 };
 
-interface AttribAcc {
+interface AttribAcc
+{
   attributes: GPUVertexAttribute[];
   arrayStride: number;
 }
@@ -85,7 +92,8 @@ interface AttribAcc {
  * @param {GPUVertexFormat} vf - A valid GPUVertexFormat, representing a per-vertex value that can be passed to the vertex shader.
  * @returns {number} The number of bytes present in the value to be passed.
  */
-export const convertVertexFormatToBytes = (vf: GPUVertexFormat): number => {
+export const convertVertexFormatToBytes = (vf: GPUVertexFormat): number =>
+{
   const splitFormat = vf.split('x');
   const bytesPerElement = parseInt(splitFormat[0].replace(/[^0-9]/g, '')) / 8;
 
@@ -102,11 +110,13 @@ export const convertVertexFormatToBytes = (vf: GPUVertexFormat): number => {
  */
 export const createVBuffer = (
   vertexFormats: GPUVertexFormat[]
-): GPUVertexBufferLayout => {
+): GPUVertexBufferLayout =>
+{
   const initialValue: AttribAcc = { attributes: [], arrayStride: 0 };
 
   const vertexBuffer = vertexFormats.reduce(
-    (acc: AttribAcc, curr: GPUVertexFormat, idx: number) => {
+    (acc: AttribAcc, curr: GPUVertexFormat, idx: number) =>
+    {
       const newAttribute: GPUVertexAttribute = {
         shaderLocation: idx,
         offset: acc.arrayStride,
@@ -133,73 +143,49 @@ export const createVBuffer = (
 };
 
 export const create3DRenderPipeline = (
-  device: GPUDevice,
   label: string,
-  bgLayouts: GPUBindGroupLayout[],
   vertexShader: string,
-  vBufferFormats: GPUVertexFormat[],
   fragmentShader: string,
-  presentationFormat: GPUTextureFormat,
   depthTest = false,
   topology: GPUPrimitiveTopology = 'triangle-list',
   cullMode: GPUCullMode = 'back'
-) => {
-  const pipelineDescriptor: GPURenderPipelineDescriptor = {
+) =>
+{
+  const pipelineDescriptor: IGPURenderPipeline = {
     label: `${label}.pipeline`,
-    layout: device.createPipelineLayout({
-      label: `${label}.pipelineLayout`,
-      bindGroupLayouts: bgLayouts,
-    }),
     vertex: {
-      module: device.createShaderModule({
-        label: `${label}.vertexShader`,
-        code: vertexShader,
-      }),
-      buffers:
-        vBufferFormats.length !== 0 ? [createVBuffer(vBufferFormats)] : [],
+      code: vertexShader,
     },
     fragment: {
-      module: device.createShaderModule({
-        label: `${label}.fragmentShader`,
-        code: fragmentShader,
-      }),
-      targets: [
-        {
-          format: presentationFormat,
-        },
-      ],
+      code: fragmentShader,
     },
     primitive: {
       topology: topology,
       cullMode: cullMode,
     },
   };
-  if (depthTest) {
+  if (depthTest)
+  {
     pipelineDescriptor.depthStencil = {
       depthCompare: 'less',
       depthWriteEnabled: true,
-      format: 'depth24plus',
     };
   }
-  return device.createRenderPipeline(pipelineDescriptor);
+  return pipelineDescriptor;
 };
 
 export const createTextureFromImage = (
-  device: GPUDevice,
   bitmap: ImageBitmap
-) => {
-  const texture: GPUTexture = device.createTexture({
+) =>
+{
+  const texture: IGPUTexture = {
     size: [bitmap.width, bitmap.height, 1],
     format: 'rgba8unorm',
     usage:
       GPUTextureUsage.TEXTURE_BINDING |
       GPUTextureUsage.COPY_DST |
       GPUTextureUsage.RENDER_ATTACHMENT,
-  });
-  device.queue.copyExternalImageToTexture(
-    { source: bitmap },
-    { texture: texture },
-    [bitmap.width, bitmap.height]
-  );
+    source: [{ source: { source: bitmap }, destination: {}, copySize: [bitmap.width, bitmap.height] }]
+  };
   return texture;
 };
