@@ -1,9 +1,9 @@
-import { IGPUBindingResources, IGPUBuffer, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 import { GUI } from 'dat.gui';
 import { mat4, vec3 } from 'wgpu-matrix';
 import { createBoxMeshWithTangents } from '../../meshes/box';
 import normalMapWGSL from './normalMap.wgsl';
-import { create3DRenderPipeline, createBindGroupDescriptor, createTextureFromImage, } from './utils';
+import { create3DRenderPipeline, createTextureFromImage } from './utils';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -13,7 +13,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const webgpu = await new WebGPU().init();
 
-  const MAT4X4_BYTES = 64;
   enum TextureAtlas
   {
     Spiral,
@@ -67,20 +66,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     format: 'depth24plus',
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
-
-  const spaceTransformsBuffer: IGPUBuffer = {
-    // Buffer holding projection, view, and model matrices plus padding bytes
-    size: MAT4X4_BYTES * 4,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  };
-
-  const mapInfoBuffer: IGPUBuffer = {
-    // Buffer holding mapping type, light uniforms, and depth uniforms
-    size: Float32Array.BYTES_PER_ELEMENT * 8,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  };
-  const mapInfoArray = new ArrayBuffer(mapInfoBuffer.size);
-  const mapInfoView = new DataView(mapInfoArray, 0, mapInfoArray.byteLength);
 
   // Fetch the image and upload it into a GPUTexture.
   let woodAlbedoTexture: IGPUTexture;
@@ -304,8 +289,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     spaceTransform.worldViewMatrix = worldViewMatrix;
     spaceTransform.worldViewProjMatrix = worldViewProjMatrix;
-    spaceTransform.worldViewMatrix = new Float32Array([-1,0,0,0,0,0.8682431578636169,0.49613896012306213,0,0,0.49613896012306213,-0.8682431578636169,0,0,1.7881394143159923e-8,-1.6124515533447266,1]);
-    spaceTransform.worldViewProjMatrix = new Float32Array([0.09264609962701797,0.6813279390335083,0.8750241994857788,0.8662739992141724,0,1.195034146308899,-0.5011504292488098,-0.49613896012306213,1.373260259628296,-0.04596533998847008,-0.05903293192386627,-0.058442603796720505,0,2.4611626514570162e-8,1.527728796005249,1.6124515533447266]);
 
     // Update mapInfoBuffer
     const lightPosWS = vec3.create(
@@ -334,12 +317,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           descriptor: renderPassDescriptor,
           renderObjects: [{
             pipeline: texturedCubePipeline,
+            // *   position  : float32x3
+            // *   normal    : float32x3
+            // *   uv        : float32x2
+            // *   tangent   : float32x3
+            // *   bitangent : float32x3
             vertices: {
-              position: { data: box.vertices, offset: 0, vertexSize: box.vertexStride },
-              normal: { data: box.vertices, offset: 12, vertexSize: box.vertexStride },
-              uv: { data: box.vertices, offset: 24, vertexSize: box.vertexStride },
-              vert_tan: { data: box.vertices, offset: 32, vertexSize: box.vertexStride },
-              vert_bitan: { data: box.vertices, offset: 44, vertexSize: box.vertexStride },
+              position: { data: box.vertices, offset: 0, numComponents: 3, vertexSize: box.vertexStride },
+              normal: { data: box.vertices, offset: 12, numComponents: 3, vertexSize: box.vertexStride },
+              uv: { data: box.vertices, offset: 24, numComponents: 2, vertexSize: box.vertexStride },
+              vert_tan: { data: box.vertices, offset: 32, numComponents: 3, vertexSize: box.vertexStride },
+              vert_bitan: { data: box.vertices, offset: 44, numComponents: 3, vertexSize: box.vertexStride },
             },
             indices: box.indices,
             bindingResources: bindingResourcesList[currentSurfaceBindGroup],
@@ -349,21 +337,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       }]
     };
     webgpu.submit(submit);
-
-    // const commandEncoder = device.createCommandEncoder();
-    // const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-    // // Draw textured Cube
-    // passEncoder.setPipeline(texturedCubePipeline);
-    // passEncoder.setBindGroup(0, frameBGDescriptor.bindGroups[0]);
-    // passEncoder.setBindGroup(
-    //   1,
-    //   surfaceBGDescriptor.bindGroups[currentSurfaceBindGroup]
-    // );
-    // passEncoder.setVertexBuffer(0, box.vertexBuffer);
-    // passEncoder.setIndexBuffer(box.indexBuffer, 'uint16');
-    // passEncoder.drawIndexed(box.indexCount);
-    // passEncoder.end();
-    // device.queue.submit([commandEncoder.finish()]);
 
     requestAnimationFrame(frame);
   }
