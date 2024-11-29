@@ -276,7 +276,9 @@ async function init(
   };
 
   const computeBGCluster: IGPUBindingResources = {
-    counter: computeUniformsBuffer,
+    data: elementsInputBuffer,
+    counter: atomicSwapsOutputBuffer,
+    uniforms: computeUniformsBuffer,
   };
 
   // const computeBGCluster = createBindGroupCluster(
