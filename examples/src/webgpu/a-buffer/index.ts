@@ -1,14 +1,13 @@
-import { mat4, vec3 } from 'wgpu-matrix';
 import { GUI } from 'dat.gui';
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { quitIfWebGPUNotAvailable } from '../util';
 import { mesh } from '../../meshes/teapot';
 
+import compositeWGSL from './composite.wgsl';
 import opaqueWGSL from './opaque.wgsl';
 import translucentWGSL from './translucent.wgsl';
-import compositeWGSL from './composite.wgsl';
 
-import { IGPURenderBundleObject, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, IGPUTextureView, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -18,18 +17,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     return Math.ceil(n / k) * k;
   }
 
-  const adapter = await navigator.gpu?.requestAdapter();
-  const device = await adapter?.requestDevice();
-  quitIfWebGPUNotAvailable(adapter, device);
+  const devicePixelRatio = window.devicePixelRatio || 1;
+  canvas.width = canvas.clientWidth * devicePixelRatio;
+  canvas.height = canvas.clientHeight * devicePixelRatio;
 
-  const context = canvas.getContext('webgpu') as GPUCanvasContext;
-  const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-
-  context.configure({
-    device,
-    format: presentationFormat,
-    alphaMode: 'opaque',
-  });
+  const webgpu = await new WebGPU().init();
 
   const params = new URLSearchParams(window.location.search);
 
@@ -37,84 +29,33 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     memoryStrategy: params.get('memoryStrategy') || 'multipass',
   };
 
-  // Create the model vertex buffer
-  const vertexBuffer = device.createBuffer({
-    size: 3 * mesh.positions.length * Float32Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.VERTEX,
-    mappedAtCreation: true,
-    label: 'vertexBuffer',
-  });
-  {
-    const mapping = new Float32Array(vertexBuffer.getMappedRange());
-    for (let i = 0; i < mesh.positions.length; ++i)
-    {
-      mapping.set(mesh.positions[i], 3 * i);
-    }
-    vertexBuffer.unmap();
-  }
+  const ro: IGPURenderObject = {
+    pipeline: undefined,
+    // Create the model vertex buffer
+    vertices: {
+      position: { data: new Float32Array(mesh.positions.flat()), numComponents: 3, vertexSize: 12 }
+    },
+    // Create the model index buffer
+    indices: new Uint16Array(mesh.triangles.flat()),
+    bindingResources: {
+      // Uniforms contains:
+      // * modelViewProjectionMatrix: mat4x4f
+      // * maxStorableFragments: u32
+      // * targetWidth: u32
+      uniforms: {
+        modelViewProjectionMatrix: undefined,
+        maxStorableFragments: undefined,
+        targetWidth: undefined,
+      }
+    },
+  };
 
-  // Create the model index buffer
-  const indexCount = mesh.triangles.length * 3;
-  const indexBuffer = device.createBuffer({
-    size: indexCount * Uint16Array.BYTES_PER_ELEMENT,
-    usage: GPUBufferUsage.INDEX,
-    mappedAtCreation: true,
-    label: 'indexBuffer',
-  });
-  {
-    const mapping = new Uint16Array(indexBuffer.getMappedRange());
-    for (let i = 0; i < mesh.triangles.length; ++i)
-    {
-      mapping.set(mesh.triangles[i], 3 * i);
-    }
-    indexBuffer.unmap();
-  }
-
-  // Uniforms contains:
-  // * modelViewProjectionMatrix: mat4x4f
-  // * maxStorableFragments: u32
-  // * targetWidth: u32
-  const uniformsSize = roundUp(
-    16 * Float32Array.BYTES_PER_ELEMENT + 2 * Uint32Array.BYTES_PER_ELEMENT,
-    16
-  );
-
-  const uniformBuffer = device.createBuffer({
-    size: uniformsSize,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    label: 'uniformBuffer',
-  });
-
-  const opaqueModule = device.createShaderModule({
-    code: opaqueWGSL,
-    label: 'opaqueModule',
-  });
-
-  const opaquePipeline = device.createRenderPipeline({
-    layout: 'auto',
+  const opaquePipeline: IGPURenderPipeline = {
     vertex: {
-      module: opaqueModule,
-      buffers: [
-        {
-          arrayStride: 3 * Float32Array.BYTES_PER_ELEMENT,
-          attributes: [
-            {
-              // position
-              format: 'float32x3',
-              offset: 0,
-              shaderLocation: 0,
-            },
-          ],
-        },
-      ],
+      code: opaqueWGSL,
     },
     fragment: {
-      module: opaqueModule,
-      targets: [
-        {
-          format: presentationFormat,
-        },
-      ],
+      code: opaqueWGSL,
     },
     primitive: {
       topology: 'triangle-list',
@@ -122,15 +63,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     depthStencil: {
       depthWriteEnabled: true,
       depthCompare: 'less',
-      format: 'depth24plus',
     },
     label: 'opaquePipeline',
-  });
+  };
 
-  const opaquePassDescriptor: GPURenderPassDescriptor = {
+  const opaquePassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
-        view: undefined,
+        view: { texture: { context: { canvasId: canvas.id } } },
         clearValue: [0, 0, 0, 1.0],
         loadOp: 'clear',
         storeOp: 'store',
@@ -145,91 +85,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     label: 'opaquePassDescriptor',
   };
 
-  const opaqueBindGroup = device.createBindGroup({
-    layout: opaquePipeline.getBindGroupLayout(0),
-    entries: [
-      {
-        binding: 0,
-        resource: {
-          buffer: uniformBuffer,
-          size: 16 * Float32Array.BYTES_PER_ELEMENT,
-          label: 'modelViewProjection',
-        },
-      },
-    ],
-    label: 'opaquePipeline',
-  });
-
-  const translucentModule = device.createShaderModule({
-    code: translucentWGSL,
-    label: 'translucentModule',
-  });
-
-  const translucentBindGroupLayout = device.createBindGroupLayout({
-    label: 'translucentBindGroupLayout',
-    entries: [
-      {
-        binding: 0,
-        visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-        buffer: {
-          type: 'uniform',
-        },
-      },
-      {
-        binding: 1,
-        visibility: GPUShaderStage.FRAGMENT,
-        buffer: {
-          type: 'storage',
-        },
-      },
-      {
-        binding: 2,
-        visibility: GPUShaderStage.FRAGMENT,
-        buffer: {
-          type: 'storage',
-        },
-      },
-      {
-        binding: 3,
-        visibility: GPUShaderStage.FRAGMENT,
-        texture: { sampleType: 'depth' },
-      },
-      {
-        binding: 4,
-        visibility: GPUShaderStage.FRAGMENT,
-        buffer: {
-          type: 'uniform',
-          hasDynamicOffset: true,
-        },
-      },
-    ],
-  });
-
-  const translucentPipeline = device.createRenderPipeline({
-    layout: device.createPipelineLayout({
-      bindGroupLayouts: [translucentBindGroupLayout],
-      label: 'translucentPipelineLayout',
-    }),
+  const translucentPipeline: IGPURenderPipeline = {
     vertex: {
-      module: translucentModule,
-      buffers: [
-        {
-          arrayStride: 3 * Float32Array.BYTES_PER_ELEMENT,
-          attributes: [
-            {
-              format: 'float32x3',
-              offset: 0,
-              shaderLocation: 0,
-            },
-          ],
-        },
-      ],
+      code: translucentWGSL,
     },
     fragment: {
-      module: translucentModule,
+      code: translucentWGSL,
       targets: [
         {
-          format: presentationFormat,
           writeMask: 0x0,
         },
       ],
@@ -238,72 +101,27 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       topology: 'triangle-list',
     },
     label: 'translucentPipeline',
-  });
+  };
 
-  const translucentPassDescriptor: GPURenderPassDescriptor = {
+  const translucentPassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
         loadOp: 'load',
         storeOp: 'store',
-        view: undefined,
+        view: { texture: { context: { canvasId: canvas.id } } },
       },
     ],
     label: 'translucentPassDescriptor',
   };
 
-  const compositeModule = device.createShaderModule({
-    code: compositeWGSL,
-    label: 'compositeModule',
-  });
-
-  const compositeBindGroupLayout = device.createBindGroupLayout({
-    label: 'compositeBindGroupLayout',
-    entries: [
-      {
-        binding: 0,
-        visibility: GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT,
-        buffer: {
-          type: 'uniform',
-        },
-      },
-      {
-        binding: 1,
-        visibility: GPUShaderStage.FRAGMENT,
-        buffer: {
-          type: 'storage',
-        },
-      },
-      {
-        binding: 2,
-        visibility: GPUShaderStage.FRAGMENT,
-        buffer: {
-          type: 'storage',
-        },
-      },
-      {
-        binding: 3,
-        visibility: GPUShaderStage.FRAGMENT,
-        buffer: {
-          type: 'uniform',
-          hasDynamicOffset: true,
-        },
-      },
-    ],
-  });
-
-  const compositePipeline = device.createRenderPipeline({
-    layout: device.createPipelineLayout({
-      bindGroupLayouts: [compositeBindGroupLayout],
-      label: 'compositePipelineLayout',
-    }),
+  const compositePipeline: IGPURenderPipeline = {
     vertex: {
-      module: compositeModule,
+      code: compositeWGSL,
     },
     fragment: {
-      module: compositeModule,
+      code: compositeWGSL,
       targets: [
         {
-          format: presentationFormat,
           blend: {
             color: {
               srcFactor: 'one',
@@ -319,12 +137,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       topology: 'triangle-list',
     },
     label: 'compositePipeline',
-  });
+  };
 
-  const compositePassDescriptor: GPURenderPassDescriptor = {
+  const compositePassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
-        view: undefined,
+        view: { texture: { context: { canvasId: canvas.id } } },
         loadOp: 'load',
         storeOp: 'store',
       },
@@ -361,16 +179,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const depthTexture = device.createTexture({
+    const depthTexture: IGPUTexture = {
       size: [canvas.width, canvas.height],
       format: 'depth24plus',
       usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
       label: 'depthTexture',
-    });
+    };
 
-    const depthTextureView = depthTexture.createView({
+    const depthTextureView: IGPUTextureView = {
       label: 'depthTextureView',
-    });
+      texture: depthTexture,
+    };
 
     // Determines how much memory is allocated to store linked-list elements
     const averageLayersPerFragment = 4;
@@ -387,65 +206,63 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const bytesPerline =
       canvas.width * averageLayersPerFragment * linkedListElementSize;
     const maxLinesSupported = Math.floor(
-      device.limits.maxStorageBufferBindingSize / bytesPerline
+      webgpu.device.limits.maxStorageBufferBindingSize / bytesPerline
     );
     const numSlices = Math.ceil(canvas.height / maxLinesSupported);
     const sliceHeight = Math.ceil(canvas.height / numSlices);
     const linkedListBufferSize = sliceHeight * bytesPerline;
 
-    const linkedListBuffer = device.createBuffer({
+    const linkedListBuffer: IGPUBuffer = {
       size: linkedListBufferSize,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
       label: 'linkedListBuffer',
-    });
+    };
 
     // To slice up the frame we need to pass the starting fragment y position of the slice.
     // We do this using a uniform buffer with a dynamic offset.
-    const sliceInfoBuffer = device.createBuffer({
-      size: numSlices * device.limits.minUniformBufferOffsetAlignment,
+    const sliceInfoBuffer: IGPUBuffer = {
+      size: numSlices * webgpu.device.limits.minUniformBufferOffsetAlignment,
       usage: GPUBufferUsage.UNIFORM,
-      mappedAtCreation: true,
       label: 'sliceInfoBuffer',
-    });
+    };
     {
-      const mapping = new Int32Array(sliceInfoBuffer.getMappedRange());
+      const mapping = new Int32Array(sliceInfoBuffer.size / Int32Array.BYTES_PER_ELEMENT);
 
       // This assumes minUniformBufferOffsetAlignment is a multiple of 4
       const stride =
-        device.limits.minUniformBufferOffsetAlignment /
+        webgpu.device.limits.minUniformBufferOffsetAlignment /
         Int32Array.BYTES_PER_ELEMENT;
       for (let i = 0; i < numSlices; ++i)
       {
         mapping[i * stride] = i * sliceHeight;
       }
-      sliceInfoBuffer.unmap();
+
+      sliceInfoBuffer.data = mapping;
     }
 
     // `Heads` struct contains the start index of the linked-list of translucent fragments
     // for a given pixel.
     // * numFragments : u32
     // * data : array<u32>
-    const headsBuffer = device.createBuffer({
+    const headsBuffer: IGPUBuffer = {
       size: (1 + canvas.width * sliceHeight) * Uint32Array.BYTES_PER_ELEMENT,
       usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
       label: 'headsBuffer',
-    });
+    };
 
-    const headsInitBuffer = device.createBuffer({
+    const headsInitBuffer: IGPUBuffer = {
       size: (1 + canvas.width * sliceHeight) * Uint32Array.BYTES_PER_ELEMENT,
       usage: GPUBufferUsage.COPY_SRC,
-      mappedAtCreation: true,
       label: 'headsInitBuffer',
-    });
+    };
     {
-      const buffer = new Uint32Array(headsInitBuffer.getMappedRange());
+      const buffer = new Uint32Array(headsInitBuffer.size / Uint32Array.BYTES_PER_ELEMENT);
 
       for (let i = 0; i < buffer.length; ++i)
       {
         buffer[i] = 0xffffffff;
       }
-
-      headsInitBuffer.unmap();
+      headsInitBuffer.data = buffer;
     }
 
     const translucentBindGroup = device.createBindGroup({
@@ -567,10 +384,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       }
 
       const commandEncoder = device.createCommandEncoder();
-      const textureView = context.getCurrentTexture().createView();
 
       // Draw the opaque objects
-      opaquePassDescriptor.colorAttachments[0].view = textureView;
+
       const opaquePassEncoder =
         commandEncoder.beginRenderPass(opaquePassDescriptor);
       opaquePassEncoder.setPipeline(opaquePipeline);
@@ -599,7 +415,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           slice * sliceHeight;
 
         // Draw the translucent objects
-        translucentPassDescriptor.colorAttachments[0].view = textureView;
         const translucentPassEncoder = commandEncoder.beginRenderPass(
           translucentPassDescriptor
         );
@@ -622,7 +437,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         translucentPassEncoder.end();
 
         // Composite the opaque and translucent objects
-        compositePassDescriptor.colorAttachments[0].view = textureView;
         const compositePassEncoder = commandEncoder.beginRenderPass(
           compositePassDescriptor
         );
