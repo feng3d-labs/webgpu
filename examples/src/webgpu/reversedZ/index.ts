@@ -1,6 +1,6 @@
 import { GUI } from "dat.gui";
 
-import { mat4, vec3 } from "wgpu-matrix";
+import { Mat4, mat4, vec3 } from "wgpu-matrix";
 
 import fragmentWGSL from "./fragment.wgsl";
 import fragmentPrecisionErrorPassWGSL from "./fragmentPrecisionErrorPass.wgsl";
@@ -302,7 +302,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     ];
 
-    type Mat4 = mat4.default;
     const modelMatrices = new Array<Mat4>(numInstances);
     const mvpMatricesData = new Float32Array(matrixFloatCount * numInstances);
 

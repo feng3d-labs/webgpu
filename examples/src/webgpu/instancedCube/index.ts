@@ -1,4 +1,4 @@
-import { mat4, vec3 } from "wgpu-matrix";
+import { Mat4, mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 import instancedVertWGSL from "../../shaders/instanced.vert.wgsl";
@@ -27,7 +27,6 @@ const init = async (canvas: HTMLCanvasElement) =>
         100.0
     );
 
-    type Mat4 = mat4.default;
     const modelMatrices = new Array<Mat4>(numInstances);
     const mvpMatricesData = new Float32Array(matrixFloatCount * numInstances);
 
