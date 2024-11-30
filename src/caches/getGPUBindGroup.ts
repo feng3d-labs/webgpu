@@ -1,15 +1,15 @@
 import { anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
-import { IGPUBindGroupDescriptor } from "../internal/IGPUBindGroupDescriptor";
-import { IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindingResources";
+import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
+import { IGPUExternalTexture } from "../data/IGPUExternalTexture";
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
+import { IGPUBindGroupDescriptor } from "../internal/IGPUBindGroupDescriptor";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 import { getGPUBufferBinding } from "./getGPUBufferBinding";
-import { getGPUExternalTexture } from "./getGPUExternalTexture";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
 
@@ -71,7 +71,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         {
             updateResource = () =>
             {
-                entry.resource = getGPUExternalTexture(device, v.resource as IGPUExternalTexture);
+                entry.resource = device.importExternalTexture(v.resource as IGPUExternalTexture);
             };
 
             awaysUpdateFuncs.push(updateResource);

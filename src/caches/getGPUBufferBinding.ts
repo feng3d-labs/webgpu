@@ -1,4 +1,4 @@
-import { IGPUBufferBinding } from "../data/IGPUBindingResources";
+import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { getGPUBuffer } from "./getGPUBuffer";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 

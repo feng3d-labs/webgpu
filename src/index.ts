@@ -2,6 +2,7 @@ export * from "./WebGPU";
 
 export * from "./data/IGPUBindingResources";
 export * from "./data/IGPUBuffer";
+export * from "./data/IGPUBufferBinding";
 export * from "./data/IGPUCommandEncoder";
 export * from "./data/IGPUComputeObject";
 export * from "./data/IGPUComputePass";
