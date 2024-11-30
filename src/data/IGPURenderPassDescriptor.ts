@@ -14,7 +14,7 @@ export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 
      * Due to compatible usage list|usage compatibility, no color attachment
      * may alias another attachment or any resource used inside the render pass.
      */
-    colorAttachments: IGPURenderPassColorAttachment[];
+    readonly colorAttachments: IGPURenderPassColorAttachment[];
 
     /**
      * The {@link GPURenderPassDepthStencilAttachment} value that defines the depth/stencil
@@ -24,12 +24,12 @@ export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 
      *
      * 当使用深度附件时，必须设置，使用默认值可设置为 `{}` 。
      */
-    depthStencilAttachment?: IGPURenderPassDepthStencilAttachment;
+    readonly depthStencilAttachment?: IGPURenderPassDepthStencilAttachment;
 
     /**
      * 是否开启多重采样。WebGPU貌似只支持4重采样。如果在颜色附件中没有给出支持多重采样的纹理时则引擎将会自动为其添加。
      */
-    multisample?: 4;
+    readonly multisample?: 4;
 
     /**
      * 附件尺寸。
