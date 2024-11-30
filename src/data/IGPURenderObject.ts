@@ -140,13 +140,15 @@ export interface IGPURenderPipeline
     /**
      * 多重采样阶段描述。
      */
-    multisample?: IGPUMultisampleState;
+    readonly multisample?: IGPUMultisampleState;
 }
 
 /**
  * 深度模板阶段描述。
  *
  * `format` 将从深度附件 {@link IGPURenderPassDescriptor.depthStencilAttachment} 纹理上获取。
+ * 
+ * {@link GPUDepthStencilState}
  */
 export interface IGPUDepthStencilState extends Omit<GPUDepthStencilState, "format">
 {
@@ -156,7 +158,7 @@ export interface IGPUDepthStencilState extends Omit<GPUDepthStencilState, "forma
      *
      * 默认为 `true` 。
      */
-    depthWriteEnabled?: boolean;
+    readonly depthWriteEnabled?: boolean;
 
     /**
      * The comparison operation used to test fragment depths against
@@ -164,7 +166,38 @@ export interface IGPUDepthStencilState extends Omit<GPUDepthStencilState, "forma
      *
      * 默认 `'less'` 。
      */
-    depthCompare?: GPUCompareFunction;
+    readonly depthCompare?: GPUCompareFunction;
+
+    /**
+     * Defines how stencil comparisons and operations are performed for front-facing primitives.
+     */
+    readonly stencilFront?: GPUStencilFaceState;
+    /**
+     * Defines how stencil comparisons and operations are performed for back-facing primitives.
+     */
+    readonly stencilBack?: GPUStencilFaceState;
+    /**
+     * Bitmask controlling which {@link GPURenderPassDescriptor#depthStencilAttachment} stencil value
+     * bits are read when performing stencil comparison tests.
+     */
+    readonly stencilReadMask?: GPUStencilValue;
+    /**
+     * Bitmask controlling which {@link GPURenderPassDescriptor#depthStencilAttachment} stencil value
+     * bits are written to when performing stencil operations.
+     */
+    readonly stencilWriteMask?: GPUStencilValue;
+    /**
+     * Constant depth bias added to each triangle fragment. See [$biased fragment depth$] for details.
+     */
+    readonly depthBias?: GPUDepthBias;
+    /**
+     * Depth bias that scales with the triangle fragment’s slope. See [$biased fragment depth$] for details.
+     */
+    readonly depthBiasSlopeScale?: number;
+    /**
+     * The maximum depth bias of a triangle fragment. See [$biased fragment depth$] for details.
+     */
+    readonly depthBiasClamp?: number;
 }
 
 /**
@@ -252,28 +285,17 @@ export interface IGPUVertexState
     >>;
 }
 
-export interface NGPUVertexState extends IGPUVertexState
-{
-    /**
-     * A list of {@link GPUVertexBufferLayout}s defining the layout of the vertex attribute data in the
-     * vertex buffers used by this pipeline.
-     *
-     * 自动根据反射信息生成，不用设置。
-     */
-    buffers?: GPUVertexBufferLayout[];
-}
-
 /**
  * GPU片元程序阶段。
  *
  * {@link GPUFragmentState}
  */
-export interface IGPUFragmentState extends Omit<GPUFragmentState, "module" | "targets">
+export interface IGPUFragmentState
 {
     /**
      * 着色器源码，将由 {@link GPUDevice.createShaderModule} 生成 {@link GPUShaderModule} 。
      */
-    code: string;
+    readonly code: string;
 
     /**
      * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to
@@ -281,26 +303,78 @@ export interface IGPUFragmentState extends Omit<GPUFragmentState, "module" | "ta
      *
      * 入口函数可选。默认从着色器中进行反射获取。
      */
-    entryPoint?: string;
+    readonly entryPoint?: string;
 
     /**
      * A list of {@link GPUColorTargetState} defining the formats and behaviors of the color targets
      * this pipeline writes to.
      */
-    targets?: IGPUColorTargetState[];
+    readonly targets?: readonly IGPUColorTargetState[];
+
+    /**
+     * Specifies the values of pipeline-overridable constants in the shader module
+     * {@link GPUProgrammableStage#module}.
+     * Each such pipeline-overridable constant is uniquely identified by a single
+     * pipeline-overridable constant identifier string, representing the pipeline
+     * constant ID of the constant if its declaration specifies one, and otherwise the
+     * constant's identifier name.
+     * The key of each key-value pair must equal the
+     * pipeline-overridable constant identifier string|identifier string
+     * of one such constant, with the comparison performed
+     * according to the rules for WGSL identifier comparison.
+     * When the pipeline is executed, that constant will have the specified value.
+     * Values are specified as <dfn typedef for="">GPUPipelineConstantValue</dfn>, which is a {@link double}.
+     * They are converted [$to WGSL type$] of the pipeline-overridable constant (`bool`/`i32`/`u32`/`f32`/`f16`).
+     * If conversion fails, a validation error is generated.
+     */
+    readonly constants?: Readonly<Record<
+        string,
+        GPUPipelineConstantValue
+    >>;
 }
 
 /**
  * 属性 `format` 将由渲染通道中附件给出。
  */
-export interface IGPUColorTargetState extends Omit<GPUColorTargetState, "format">
+export interface IGPUColorTargetState
 {
     /**
-     * The {@link GPUTextureFormat} of this color target. The pipeline will only be compatible with
-     * {@link GPURenderPassEncoder}s which use a {@link GPUTextureView} of this format in the
-     * corresponding color attachment.
-     *
-     * 属性 `format` 将由渲染通道中附件给出。
+     * The blending behavior for this color target. If left undefined, disables blending for this
+     * color target.
      */
-    format?: GPUTextureFormat;
+    readonly blend?: IGPUBlendState;
+
+    /**
+     * Bitmask controlling which channels are are written to when drawing to this color target.
+     */
+    readonly writeMask?: GPUColorWriteFlags;
+}
+
+export interface IGPUBlendState
+{
+    /**
+     * Defines the blending behavior of the corresponding render target for color channels.
+     */
+    readonly color: IGPUBlendComponent;
+    /**
+     * Defines the blending behavior of the corresponding render target for the alpha channel.
+     */
+    readonly alpha: IGPUBlendComponent;
+}
+
+export interface IGPUBlendComponent
+{
+    /**
+     * Defines the {@link GPUBlendOperation} used to calculate the values written to the target
+     * attachment components.
+     */
+    readonly operation?: GPUBlendOperation;
+    /**
+     * Defines the {@link GPUBlendFactor} operation to be performed on values from the fragment shader.
+     */
+    readonly srcFactor?: GPUBlendFactor;
+    /**
+     * Defines the {@link GPUBlendFactor} operation to be performed on values from the target attachment.
+     */
+    readonly dstFactor?: GPUBlendFactor;
 }

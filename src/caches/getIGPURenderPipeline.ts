@@ -1,13 +1,13 @@
 import { watcher } from "@feng3d/watcher";
 
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
-import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState, NGPUVertexState } from "../data/IGPURenderObject";
+import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import { NGPUVertexState } from "../internal/NGPUVertexState";
 import { gpuVertexFormatMap, WGSLVertexType, wgslVertexTypeMap } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
-import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -305,12 +305,8 @@ function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments
             code,
             entryPoint,
             targets,
+            constants: fragmentState.constants
         };
-
-        if (fragmentState.constants)
-        {
-            gpuFragmentState.constants = fragmentState.constants;
-        }
 
         fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
     }
