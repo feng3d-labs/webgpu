@@ -1,13 +1,16 @@
 import { IGPURenderPipeline } from "../data/IGPURenderObject";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
+import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 
 export function getGPURenderPipeline(device: GPUDevice, descriptor: IGPURenderPipeline)
 {
     let pipeline = pipelineMap.get(descriptor);
     if (pipeline) return pipeline;
 
-    let layout = getGPUPipelineLayout(device, descriptor.layout);
+    // 从GPU管线中获取管线布局。
+    const gpuPipelineLayout = getIGPUPipelineLayout(descriptor);
+    let layout = getGPUPipelineLayout(device, gpuPipelineLayout);
 
     const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
         layout,

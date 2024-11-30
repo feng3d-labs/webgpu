@@ -1,7 +1,4 @@
-import { IGPUBindGroupDescriptor } from "../internal/IGPUBindGroupDescriptor";
-import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { IGPUBindingResources } from "./IGPUBindingResources";
-import { IGPUBuffer } from "./IGPUBuffer";
 import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
 
 /**
@@ -113,37 +110,32 @@ export interface IGPUDraw
  *
  * {@link GPURenderPipelineDescriptor}
  */
-export interface IGPURenderPipeline extends Omit<GPURenderPipelineDescriptor, "layout" | "vertex" | "primitive" | "depthStencil" | "multisample" | "fragment">
+export interface IGPURenderPipeline
 {
     /**
-     * The {@link GPUPipelineLayout} for this pipeline or {@link GPUAutoLayoutMode#"auto"}, to generate
-     * the pipeline layout automatically.
-     * Note: If {@link GPUAutoLayoutMode#"auto"} is used the pipeline cannot share {@link GPUBindGroup}s
-     * with any other pipelines.
-     *
-     * 默认 'auto' 。
+     * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
      */
-    layout?: IGPUPipelineLayoutDescriptor;
+    readonly label?: string;
 
     /**
      * Describes the primitive-related properties of the pipeline.
      */
-    primitive?: IGPUPrimitiveState;
+    readonly primitive?: IGPUPrimitiveState;
 
     /**
      * 描述顶点着色器源码入口点以及顶点属性缓冲区布局。
      */
-    vertex: IGPUVertexState;
+    readonly vertex: IGPUVertexState;
 
     /**
      * 片段着色器阶段描述。
      */
-    fragment?: IGPUFragmentState;
+    readonly fragment?: IGPUFragmentState;
 
     /**
      * 深度模板阶段描述。
      */
-    depthStencil?: IGPUDepthStencilState;
+    readonly depthStencil?: IGPUDepthStencilState;
 
     /**
      * 多重采样阶段描述。
@@ -180,9 +172,18 @@ export interface IGPUDepthStencilState extends Omit<GPUDepthStencilState, "forma
  *
  * 多重采样次数将由 {@link IGPURenderPassDescriptor.multisample} 覆盖。
  */
-export interface IGPUMultisampleState extends Omit<GPUMultisampleState, "count">
+export interface IGPUMultisampleState
 {
+    /**
+     * Mask determining which samples are written to.
+     */
+    readonly mask?: GPUSampleMask;
 
+    /**
+     * When `true` indicates that a fragment's alpha channel should be used to generate a sample
+     * coverage mask.
+     */
+    readonly alphaToCoverageEnabled?: boolean;
 }
 
 /**
@@ -195,14 +196,14 @@ export interface IGPUPrimitiveState extends GPUPrimitiveState
      *
      * WebGPU 默认 `"triangle-list"` ,默认每三个顶点绘制一个三角形。
      */
-    topology?: GPUPrimitiveTopology;
+    readonly topology?: GPUPrimitiveTopology;
 
     /**
      * Defines which polygon orientation will be culled, if any.
      *
      * WebGPU 默认 `"none"` ,不进行剔除。
      */
-    cullMode?: GPUCullMode;
+    readonly cullMode?: GPUCullMode;
 }
 
 /**
@@ -214,12 +215,12 @@ export interface IGPUPrimitiveState extends GPUPrimitiveState
  *
  * @see GPUVertexState
  */
-export interface IGPUVertexState extends Omit<GPUVertexState, "module" | "buffers">
+export interface IGPUVertexState
 {
     /**
      * 着色器源码，将由 {@link GPUDevice.createShaderModule} 生成 {@link GPUShaderModule} 。
      */
-    code: string;
+    readonly code: string;
 
     /**
      * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to
@@ -227,8 +228,32 @@ export interface IGPUVertexState extends Omit<GPUVertexState, "module" | "buffer
      *
      * 入口函数可选。默认从着色器中进行反射获取。
      */
-    entryPoint?: string;
+    readonly entryPoint?: string;
 
+    /**
+     * Specifies the values of pipeline-overridable constants in the shader module
+     * {@link GPUProgrammableStage#module}.
+     * Each such pipeline-overridable constant is uniquely identified by a single
+     * pipeline-overridable constant identifier string, representing the pipeline
+     * constant ID of the constant if its declaration specifies one, and otherwise the
+     * constant's identifier name.
+     * The key of each key-value pair must equal the
+     * pipeline-overridable constant identifier string|identifier string
+     * of one such constant, with the comparison performed
+     * according to the rules for WGSL identifier comparison.
+     * When the pipeline is executed, that constant will have the specified value.
+     * Values are specified as <dfn typedef for="">GPUPipelineConstantValue</dfn>, which is a {@link double}.
+     * They are converted [$to WGSL type$] of the pipeline-overridable constant (`bool`/`i32`/`u32`/`f32`/`f16`).
+     * If conversion fails, a validation error is generated.
+     */
+    readonly constants?: Readonly<Record<
+        string,
+        GPUPipelineConstantValue
+    >>;
+}
+
+export interface NGPUVertexState extends IGPUVertexState
+{
     /**
      * A list of {@link GPUVertexBufferLayout}s defining the layout of the vertex attribute data in the
      * vertex buffers used by this pipeline.

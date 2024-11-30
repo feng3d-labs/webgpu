@@ -1,7 +1,7 @@
 import { watcher } from "@feng3d/watcher";
 
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
-import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
+import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState, NGPUVertexState } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
@@ -32,9 +32,6 @@ export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
         // 获取深度模板阶段完整描述。
         const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
 
-        // 从GPU管线中获取管线布局。
-        const gpuPipelineLayout = getIGPUPipelineLayout(renderPipeline);
-
         // 从渲染通道上获取多重采样数量
         const multisample: GPUMultisampleState = {
             ...renderPipeline.multisample,
@@ -44,7 +41,6 @@ export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
         //
         const pipeline: IGPURenderPipeline = {
             ...renderPipeline,
-            layout: gpuPipelineLayout,
             vertex: gpuVertexState,
             fragment: gpuFragmentState,
             depthStencil: gpuDepthStencilState,
@@ -129,15 +125,12 @@ function getIGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAt
 
         const { vertexBufferLayouts, vertexBuffers } = getVertexBuffers(vertex, vertices);
 
-        const gpuVertexState: IGPUVertexState = {
+        const gpuVertexState: NGPUVertexState = {
             code,
             entryPoint,
             buffers: vertexBufferLayouts,
+            constants: vertexState.constants,
         };
-        if (vertexState.constants)
-        {
-            gpuVertexState.constants = vertexState.constants;
-        }
 
         result = { gpuVertexState, vertexBuffers };
         vertexStateMap.set([vertexState, vertices], result);
@@ -147,7 +140,7 @@ function getIGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAt
 }
 
 const vertexStateMap = new ChainMap<[IGPUVertexState, IGPUVertexAttributes], {
-    gpuVertexState: IGPUVertexState;
+    gpuVertexState: NGPUVertexState;
     vertexBuffers: IGPUVertexBuffer[];
 }>();
 
