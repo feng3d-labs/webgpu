@@ -1,5 +1,5 @@
-import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { IGPUBindGroupDescriptor } from "../internal/IGPUBindGroupDescriptor";
+import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPUBuffer } from "./IGPUBuffer";
 import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
@@ -13,36 +13,36 @@ export interface IGPURenderObject
      * 数据类型。
      */
     readonly __type?: "IGPURenderObject";
-    
+
     /**
      * GPU渲染管线描述。
      */
-    pipeline: IGPURenderPipeline;
+    readonly pipeline: IGPURenderPipeline;
 
     /**
      * 顶点属性数据映射。
      */
-    vertices?: IGPUVertexAttributes;
+    readonly vertices?: IGPUVertexAttributes;
 
     /**
      * 索引数据。
      */
-    indices?: Uint16Array | Uint32Array,
+    readonly indices?: Uint16Array | Uint32Array,
 
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
      */
-    bindingResources?: IGPUBindingResources;
+    readonly bindingResources?: IGPUBindingResources;
 
     /**
      * 绘制图元相关参数。
      */
-    draw?: IGPUDraw;
+    readonly draw?: IGPUDraw;
 
     /**
      * 根据索引数据绘制图元相关参数。
      */
-    drawIndexed?: IGPUDrawIndexed;
+    readonly drawIndexed?: IGPUDrawIndexed;
 }
 
 /**
@@ -55,27 +55,27 @@ export interface IGPUDrawIndexed
     /**
      * The number of indices to draw.
      */
-    indexCount: number;
+    readonly indexCount: number;
 
     /**
      * The number of instances to draw.
      */
-    instanceCount?: number;
+    readonly instanceCount?: number;
 
     /**
      * Offset into the index buffer, in indices, begin drawing from.
      */
-    firstIndex?: number;
+    readonly firstIndex?: number;
 
     /**
      * Added to each index value before indexing into the vertex buffers.
      */
-    baseVertex?: number;
+    readonly baseVertex?: number;
 
     /**
      * First instance to draw.
      */
-    firstInstance?: number;
+    readonly firstInstance?: number;
 }
 
 /**
@@ -90,78 +90,22 @@ export interface IGPUDraw
     /**
      * The number of vertices to draw.
      */
-    vertexCount: number;
+    readonly vertexCount: number;
 
     /**
      * The number of instances to draw.
      */
-    instanceCount?: number;
+    readonly instanceCount?: number;
 
     /**
      * Offset into the vertex buffers, in vertices, to begin drawing from.
      */
-    firstVertex?: number;
+    readonly firstVertex?: number;
 
     /**
      * First instance to draw.
      */
-    firstInstance?: number;
-}
-
-/**
- * GPU渲染时使用的绑定组。
- *
- * {@link GPUBindingCommandsMixin.setBindGroup}
- */
-export interface IGPUSetBindGroup
-{
-    /**
-     * GPU绑定组。
-     *
-     * Bind group to use for subsequent render or compute commands.
-     */
-    bindGroup: IGPUBindGroupDescriptor;
-
-    /**
-     * Array containing buffer offsets in bytes for each entry in `bindGroup` marked as {@link GPUBindGroupLayoutEntry#buffer}.{@link GPUBufferBindingLayout#hasDynamicOffset}.-->
-     */
-    dynamicOffsets?: number[];
-}
-
-/**
- * GPU渲染时使用的索引缓冲区。
- *
- * {@link GPURenderCommandsMixin.setIndexBuffer}
- */
-export interface IGPUIndexBuffer
-{
-    /**
-     * Buffer containing index data to use for subsequent drawing commands.
-     *
-     * 顶点索引缓冲区，包含提供给后续绘制命令使用的顶点索引数据。
-     */
-    buffer: IGPUBuffer;
-
-    /**
-     * Format of the index data contained in `buffer`.
-     *
-     * 缓冲区中提供的顶点索引数据格式。
-     */
-    indexFormat: GPUIndexFormat;
-
-    /**
-     * Offset in bytes into `buffer` where the index data begins. Defaults to `0`.
-     *
-     * 索引数据在缓冲区中的起始偏移值。默认为 `0` 。
-     */
-    offset?: number;
-
-    /**
-     * Size in bytes of the index data in `buffer`. Defaults to the size of the buffer minus the offset.
-     *
-     * 索引数据在缓冲区中所占字节尺寸。默认为缓冲区尺寸减去起始偏移值。
-     */
-    size?: number;
+    readonly firstInstance?: number;
 }
 
 /**

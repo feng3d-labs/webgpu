@@ -10,7 +10,7 @@ import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
-import { getIGPUBuffer, getIGPUIndexBuffer } from "../caches/getIGPUIndexBuffer";
+import { getIGPUBuffer } from "../caches/getIGPUBuffer";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { getRealGPUBindGroup } from "../const";
@@ -23,7 +23,7 @@ import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQueryObject } from "../data/IGPUOcclusionQueryObject";
 import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
-import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
+import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline } from "../data/IGPURenderObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUStencilReference } from "../data/IGPUStencilReference";
@@ -31,7 +31,9 @@ import { IGPUSubmit } from "../data/IGPUSubmit";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUViewport } from "../data/IGPUViewport";
 import { GPUQueue_submit } from "../eventnames";
+import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
 
 export class RunWebGPU
@@ -114,7 +116,7 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, renderPass);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IGPURenderPassObject[])
     {
         if (!renderObjects) return;
         //
@@ -263,7 +265,7 @@ export class RunWebGPU
         passEncoder.executeBundles([gpuRenderBundle]);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IGPURenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IGPURenderObject[])
     {
         //
         renderObjects.forEach((element) =>

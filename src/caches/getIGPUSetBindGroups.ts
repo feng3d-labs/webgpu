@@ -5,11 +5,12 @@ import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
-import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
+import { IGPURenderPipeline } from "../data/IGPURenderObject";
 import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
+import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
-import { getIGPUBuffer } from "./getIGPUIndexBuffer";
+import { getIGPUBuffer } from "./getIGPUBuffer";
 
 export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
 {

@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundleObject, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundleObject, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
 
 interface Renderable
 {
@@ -244,10 +244,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
   // Render bundles function as partial, limited render passes, so we can use the
   // same code both to render the scene normally and to build the render bundle.
-  function renderScene(
-    passEncoder: IGPURenderPass | IGPURenderBundleObject
-  )
+  function renderScene()
   {
+    const ros: IGPURenderObject[] = [];
     // Loop through every renderable object and draw them individually.
     // (Because many of these meshes are repeated, with only the transforms
     // differing, instancing would be highly effective here. This sample
@@ -268,13 +267,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         };
       }
 
-      passEncoder.renderObjects.push(renderable.renderObject);
+      ros.push(renderable.renderObject);
 
       if (++count > settings.asteroidCount)
       {
         break;
       }
     }
+
+    return ros;
   }
 
   // The render bundle can be encoded once and re-used as many times as needed.
@@ -292,14 +293,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     __type: "IGPURenderBundleObject",
     renderObjects: [],
   };
-  renderScene(renderBundle);
+  renderBundle.renderObjects = renderScene();
   function updateRenderBundle()
   {
     const renderBundleEncoder: IGPURenderBundleObject = {
       __type: "IGPURenderBundleObject",
       renderObjects: [],
     };
-    renderScene(renderBundleEncoder);
+    renderBundleEncoder.renderObjects = renderScene();
     renderBundle = renderBundleEncoder;
   }
   updateRenderBundle();
@@ -312,24 +313,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
     getIGPUBuffer(uniformBuffer).writeBuffers = [{ data: transformationMatrix }];
 
-    const renderPass: IGPURenderPass = {
-      descriptor: renderPassDescriptor,
-      renderObjects: [],
-    };
-
+    let renderObjects: IGPURenderPassObject[] = []
     if (settings.useRenderBundles)
     {
       // Executing a bundle is equivalent to calling all of the commands encoded
       // in the render bundle as part of the current render pass.
-      renderPass.renderObjects.push(renderBundle);
+      renderObjects.push(renderBundle);
     }
     else
     {
       // Alternatively, the same render commands can be encoded manually, which
       // can take longer since each command needs to be interpreted by the
       // JavaScript virtual machine and re-validated each time.
-      renderPass.renderObjects = renderBundle.renderObjects;
+      renderObjects = renderBundle.renderObjects as any;
     }
+
+    const renderPass: IGPURenderPass = {
+      descriptor: renderPassDescriptor,
+      renderObjects: renderObjects,
+    };
 
     const submit: IGPUSubmit = {
       commandEncoders: [

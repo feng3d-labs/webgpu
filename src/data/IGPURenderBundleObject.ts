@@ -17,12 +17,12 @@ export interface IGPURenderBundleObject
     /**
      * GPU渲染捆绑编码器描述。
      */
-    descriptor?: IGPURenderBundleEncoderDescriptor
+    readonly descriptor?: IGPURenderBundleEncoderDescriptor
 
     /**
      * GPU渲染对象列表。
      */
-    renderObjects: IGPURenderObject[];
+    renderObjects: readonly IGPURenderObject[];
 }
 
 /**
@@ -32,7 +32,21 @@ export interface IGPURenderBundleObject
  *
  * 'colorFormats' | 'depthStencilFormat' | 'sampleCount' 都将从GPU渲染通道中自动获取。
  */
-export interface IGPURenderBundleEncoderDescriptor extends Omit<GPURenderBundleEncoderDescriptor, "colorFormats" | "depthStencilFormat" | "sampleCount">
+export interface IGPURenderBundleEncoderDescriptor
 {
+    /**
+     * If `true`, indicates that the render bundle does not modify the depth component of the
+     * {@link GPURenderPassDepthStencilAttachment} of any render pass the render bundle is executed
+     * in.
+     * See read-only depth-stencil.
+     */
+    readonly depthReadOnly?: boolean;
 
+    /**
+     * If `true`, indicates that the render bundle does not modify the stencil component of the
+     * {@link GPURenderPassDepthStencilAttachment} of any render pass the render bundle is executed
+     * in.
+     * See read-only depth-stencil.
+     */
+    readonly stencilReadOnly?: boolean;
 }

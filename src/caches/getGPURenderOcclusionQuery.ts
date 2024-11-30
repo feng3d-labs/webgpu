@@ -3,7 +3,7 @@ import { IGPUOcclusionQueryObject } from "../data/IGPUOcclusionQueryObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { GPUQueue_submit } from "../eventnames";
 
-export function getGPURenderOcclusionQuery(renderObjects?: IGPURenderPassObject[]): GPURenderOcclusionQuery
+export function getGPURenderOcclusionQuery(renderObjects?: readonly IGPURenderPassObject[]): GPURenderOcclusionQuery
 {
     if (!renderObjects) return defautRenderOcclusionQuery;
     let renderOcclusionQuery: GPURenderOcclusionQuery = renderObjects["_GPURenderOcclusionQuery"];
