@@ -7,7 +7,7 @@ import compositeWGSL from './composite.wgsl';
 import opaqueWGSL from './opaque.wgsl';
 import translucentWGSL from './translucent.wgsl';
 
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUCommandEncoder, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -71,24 +71,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             depthCompare: 'less',
         },
         label: 'opaquePipeline',
-    };
-
-    const opaquePassDescriptor: IGPURenderPassDescriptor = {
-        colorAttachments: [
-            {
-                view: { texture: { context } },
-                clearValue: [0, 0, 0, 1.0],
-                loadOp: 'clear',
-                storeOp: 'store',
-            },
-        ],
-        depthStencilAttachment: {
-            view: undefined,
-            depthClearValue: 1.0,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
-        },
-        label: 'opaquePassDescriptor',
     };
 
     const translucentPipeline: IGPURenderPipeline = {
@@ -266,7 +248,23 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             sliceInfo: { sliceStartY: undefined },
         };
 
-        opaquePassDescriptor.depthStencilAttachment.view = depthTextureView;
+        const opaquePassDescriptor: IGPURenderPassDescriptor = {
+            colorAttachments: [
+                {
+                    view: { texture: { context } },
+                    clearValue: [0, 0, 0, 1.0],
+                    loadOp: 'clear',
+                    storeOp: 'store',
+                },
+            ],
+            depthStencilAttachment: {
+                view: depthTextureView,
+                depthClearValue: 1.0,
+                depthLoadOp: 'clear',
+                depthStoreOp: 'store',
+            },
+            label: 'opaquePassDescriptor',
+        };
 
         // Rotates the camera around the origin based on time.
         function getCameraViewProjMatrix()
