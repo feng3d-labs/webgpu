@@ -1,20 +1,16 @@
 import { GUI } from 'dat.gui';
 import { Mat4, mat4, quat, vec3 } from 'wgpu-matrix';
 import { createBindGroupCluster } from '../bitonicSort/utils';
-import { quitIfWebGPUNotAvailable } from '../util';
 import { convertGLBToJSONAndBinary, GLTFSkin } from './glbUtils';
 import gltfWGSL from './gltf.wgsl';
 import gridWGSL from './grid.wgsl';
 import { gridIndices } from './gridData';
-import
-{
-  createSkinnedGridBuffers,
-  createSkinnedGridRenderPipeline,
-} from './gridUtils';
+import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline, } from './gridUtils';
+
+import { IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
-
   const MAT4X4_BYTES = 64;
 
   interface BoneObject
@@ -101,21 +97,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   */
 
   //Normal setup
-  const adapter = await navigator.gpu?.requestAdapter();
-  const device = await adapter?.requestDevice();
-  quitIfWebGPUNotAvailable(adapter, device);
-
-  const context = canvas.getContext('webgpu') as GPUCanvasContext;
-
   const devicePixelRatio = window.devicePixelRatio || 1;
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
-  const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
 
-  context.configure({
-    device,
-    format: presentationFormat,
-  });
+  const webgpu = await new WebGPU().init();
 
   const settings = {
     cameraX: 0,
@@ -191,11 +177,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   animFolder.add(settings, 'angle', 0.05, 0.5).step(0.05);
   animFolder.add(settings, 'speed', 10, 100).step(10);
 
-  const depthTexture = device.createTexture({
+  const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: 'depth24plus',
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
-  });
+  };
 
   const cameraBuffer = device.createBuffer({
     size: MAT4X4_BYTES * 3,
