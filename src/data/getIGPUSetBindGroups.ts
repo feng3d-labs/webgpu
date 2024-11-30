@@ -114,7 +114,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
             || preVariableInfo.size !== variableInfo.size
         )
         {
-            console.warn(`updateBufferBinding 出现一份数据 ${uniformData} 对应多个 ${preVariableInfo} ${variableInfo}`);
+            console.warn(`updateBufferBinding 出现一份数据对应多个 variableInfo`, { uniformData, variableInfo, preVariableInfo });
         }
 
         // return;
