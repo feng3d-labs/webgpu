@@ -40,7 +40,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   // * modelViewProjectionMatrix: mat4x4f
   // * maxStorableFragments: u32
   // * targetWidth: u32
-  const uniforms = {
+  const uniformsSize = roundUp(
+    16 * Float32Array.BYTES_PER_ELEMENT + 2 * Uint32Array.BYTES_PER_ELEMENT,
+    16
+  );
+  const uniforms: IGPUBufferBinding = {
+    bufferView: new Uint8Array(uniformsSize),
     modelViewProjectionMatrix: undefined,
     maxStorableFragments: undefined,
     targetWidth: undefined,
