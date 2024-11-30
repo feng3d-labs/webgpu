@@ -38,5 +38,5 @@ export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 
      *
      * 该值被修改后将会改变所有附件的尺寸，并释放附件上过时的GPU纹理资源。
      */
-    attachmentSize?: { width: number, height: number };
+     attachmentSize?: { width: number, height: number };
 }

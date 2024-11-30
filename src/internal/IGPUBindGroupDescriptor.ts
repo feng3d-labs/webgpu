@@ -1,4 +1,4 @@
-import { IGPUBindingResource } from "./IGPUBindingResources";
+import { IGPUBindingResource } from "../data/IGPUBindingResources";
 
 /**
  * GPU 绑定组。

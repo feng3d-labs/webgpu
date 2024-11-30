@@ -1,5 +1,5 @@
 import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
-import { IGPUBindGroupDescriptor } from "./IGPUBindGroupDescriptor";
+import { IGPUBindGroupDescriptor } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPUBuffer } from "./IGPUBuffer";
 import { IGPUVertexAttributes } from "./IGPUVertexAttributes";

@@ -31,9 +31,9 @@ export interface IGPUBufferBinding
     [name: string]: ArrayBufferView | ArrayLike<number> | number;
 
     /**
-     * 如果未设置将通过反射信息自动生成。
+     * 如果未设置引擎将自动生成。
      */
-    bufferView?: ArrayBufferView;
+    readonly bufferView?: ArrayBufferView;
 }
 
 /**

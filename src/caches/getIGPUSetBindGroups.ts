@@ -1,10 +1,10 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
-import { IGPUBindGroupEntry } from "../data/IGPUBindGroupDescriptor";
 import { IGPUBindingResources, IGPUBufferBinding } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
+import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
@@ -69,7 +69,7 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
                 const hasDefautValue = !!uniformData.bufferView;
                 if (!uniformData.bufferView)
                 {
-                    uniformData.bufferView = new Uint8Array(size);
+                    (uniformData as any).bufferView = new Uint8Array(size);
                 }
 
                 // 更新缓冲区绑定的数据。
@@ -120,7 +120,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
     uniformData["_variableInfo"] = variableInfo as any;
 
     const buffer = getIGPUBuffer(uniformData.bufferView);
-    buffer.label = buffer.label || ("uniformData " + variableInfo.name);
+    buffer.label = buffer.label || ("BufferBinding " + variableInfo.name);
     const offset = uniformData.bufferView.byteOffset;
 
     variableInfo.members.forEach((member) =>
