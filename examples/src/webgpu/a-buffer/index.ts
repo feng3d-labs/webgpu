@@ -51,12 +51,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         targetWidth: undefined,
     }
 
-    const bindingResources = {
-        uniforms
-    };
-
-    const opaqueBindingResources = bindingResources;
-
     const opaquePipeline: IGPURenderPipeline = {
         vertex: {
             code: opaqueWGSL,
@@ -259,18 +253,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             headsInitBuffer.data = buffer;
         }
 
-        const translucentBindingResources = {
+        const bindingResources = {
             uniforms,
             heads: headsBuffer,
             linkedList: linkedListBuffer,
             opaqueDepthTexture: depthTextureView,
-            sliceInfo: { sliceStartY: undefined },
-        };
-
-        const compositeBindingResources = {
-            uniforms,
-            heads: headsBuffer,
-            linkedList: linkedListBuffer,
             sliceInfo: { sliceStartY: undefined },
         };
 
@@ -309,7 +296,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             descriptor: opaquePassDescriptor,
             renderObjects: [{
                 pipeline: opaquePipeline,
-                bindingResources: opaqueBindingResources,
+                bindingResources: bindingResources,
                 vertices,
                 indices,
                 drawIndexed: { indexCount: mesh.triangles.length * 3, instanceCount: 8 },
@@ -352,7 +339,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     {
                         pipeline: translucentPipeline,
                         bindingResources: {
-                            ...translucentBindingResources,
+                            ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice],
                         },
                         vertices,
@@ -379,12 +366,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     {
                         pipeline: compositePipeline,
                         bindingResources: {
-                            ...compositeBindingResources,
+                            ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice]
                         },
-                        // compositePassEncoder.setBindGroup(0, compositeBindGroup, [
-                        //   slice * device.limits.minUniformBufferOffsetAlignment,
-                        // ]);
                         draw: { vertexCount: 6 },
                     }
                 ]
