@@ -407,7 +407,7 @@ export class RunWebGPU
         vertexBuffers?.forEach((vertexBuffer, index) =>
         {
             const buffer = getIGPUBuffer(vertexBuffer.data);
-            buffer.label = buffer.label || ("顶点索引 " + autoVertexIndex++);
+            buffer.label = buffer.label || ("顶点属性 " + autoVertexIndex++);
             const gBuffer = getGPUBuffer(device, buffer);
             passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
         });
