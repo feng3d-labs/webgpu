@@ -1,7 +1,8 @@
 import { anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
-import { IGPUBindGroupDescriptor, IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindGroupDescriptor";
+import { IGPUBindGroupDescriptor } from "../data/IGPUBindGroupDescriptor";
+import { IGPUBufferBinding, IGPUExternalTexture } from "../data/IGPUBindingResources";
 import { IGPUSampler } from "../data/IGPUSampler";
 import { IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";

@@ -21,14 +21,15 @@ export function getGPURenderPassFormat(descriptor: IGPURenderPassDescriptor): IG
         depthStencilAttachmentTextureFormat = getGPUTextureFormat(descriptor.depthStencilAttachment.view?.texture) || "depth24plus";
     }
 
+    const _key = gpuRenderPassFormat.colorFormats.toString() + "|" + gpuRenderPassFormat.depthStencilFormat + "|" + gpuRenderPassFormat.multisample;
+
     descriptor[_RenderPassFormat] = gpuRenderPassFormat = {
         attachmentSize: descriptor.attachmentSize,
         colorFormats: colorAttachmentTextureFormats,
         depthStencilFormat: depthStencilAttachmentTextureFormat,
         multisample: descriptor.multisample,
+        _key: _key,
     };
-
-    gpuRenderPassFormat._key = gpuRenderPassFormat.colorFormats.toString() + "|" + gpuRenderPassFormat.depthStencilFormat + "|" + gpuRenderPassFormat.multisample;
 
     return gpuRenderPassFormat;
 }

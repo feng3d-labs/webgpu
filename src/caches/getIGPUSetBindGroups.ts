@@ -1,8 +1,8 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
-import { IGPUBindGroupEntry, IGPUBufferBinding } from "../data/IGPUBindGroupDescriptor";
-import { IGPUBindingResources } from "../data/IGPUBindingResources";
+import { IGPUBindGroupEntry } from "../data/IGPUBindGroupDescriptor";
+import { IGPUBindingResources, IGPUBufferBinding } from "../data/IGPUBindingResources";
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";

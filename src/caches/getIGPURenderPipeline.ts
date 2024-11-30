@@ -267,7 +267,7 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
  * @param colorAttachmentTextureFormats 颜色附件格式。
  * @returns 片段阶段完整描述。
  */
-function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments: GPUTextureFormat[])
+function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments: readonly GPUTextureFormat[])
 {
     if (!fragmentState) return undefined;
 
