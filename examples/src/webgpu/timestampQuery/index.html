@@ -29,6 +29,18 @@
       display: flex;
       place-content: center center;
     }
+
+    #info {
+      color: white;
+      background-color: black;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+    }
+
+    #info pre {
+      margin: 0.5em;
+    }
   </style>
 </head>
 
@@ -37,6 +49,9 @@
     <p id="description" style="width: 600px;">
       This example shows how to use timestamp queries to measure render pass duration.
     </p>
+    <div id="info">
+      <pre></pre>
+    </div>
     <canvas id="webgpu" style="width: 600px; height: 600px;"></canvas>
   </div>
 
