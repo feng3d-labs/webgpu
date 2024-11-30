@@ -4,7 +4,7 @@
  * @see GPUCanvasConfiguration
  * @see GPUCanvasContext.configure
  */
-export interface IGPUCanvasConfiguration extends Omit<GPUCanvasConfiguration, "device" | "usage" | "format">
+export interface IGPUCanvasConfiguration
 {
     /**
      * The usage that textures returned by {@link GPUCanvasContext#getCurrentTexture} will have.
@@ -30,4 +30,20 @@ export interface IGPUCanvasConfiguration extends Omit<GPUCanvasConfiguration, "d
      * 默认 'premultiplied' 。
      */
     alphaMode?: GPUCanvasAlphaMode;
+
+    /**
+     * The formats that views created from textures returned by
+     * {@link GPUCanvasContext#getCurrentTexture} may use.
+     */
+    viewFormats?: Iterable<GPUTextureFormat>;
+    /**
+     * The color space that values written into textures returned by
+     * {@link GPUCanvasContext#getCurrentTexture} should be displayed with.
+     */
+    colorSpace?: PredefinedColorSpace;
+    /**
+     * The tone mapping determines how the content of textures returned by
+     * {@link GPUCanvasContext#getCurrentTexture} are to be displayed.
+     */
+    toneMapping?: GPUCanvasToneMapping;
 }

@@ -1,6 +1,5 @@
 import { FunctionInfo } from "wgsl_reflect";
-import { IGPUComputePipeline, IGPUComputeStage, IGPUProgrammableStage } from "../data/IGPUComputeObject";
-import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
+import { IGPUComputePipeline, IGPUComputeStage } from "../data/IGPUComputeObject";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -17,12 +16,8 @@ export function getIGPUComputePipeline(computePipeline: IGPUComputePipeline): IG
 
     const gpuComputeStage = getIGPUComputeStage(computePipeline.compute);
 
-    // 从GPU管线中获取管线布局。
-    const gpuPipelineLayout = getIGPUPipelineLayout(computePipeline);
-
     gpuComputePipeline = {
         ...computePipeline,
-        layout: gpuPipelineLayout,
         compute: gpuComputeStage,
     };
 
@@ -47,7 +42,7 @@ function getIGPUComputeStage(computeStage: IGPUComputeStage)
     {
         compute = reflect.entry.compute[0];
         console.assert(!!compute, `WGSL着色器 ${computeStage.code} 中不存在计算入口点。`);
-        computeStage.entryPoint = compute.name;
+        (computeStage as any).entryPoint = compute.name;
     }
     else
     {

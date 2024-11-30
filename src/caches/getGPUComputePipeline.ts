@@ -1,6 +1,7 @@
 import { IGPUComputePipeline } from "../data/IGPUComputeObject";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
+import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 
 export function getGPUComputePipeline(device: GPUDevice, descriptor: IGPUComputePipeline)
 {
@@ -9,7 +10,10 @@ export function getGPUComputePipeline(device: GPUDevice, descriptor: IGPUCompute
     let pipeline = computePipelineMap.get(descriptor);
     if (pipeline) return pipeline;
 
-    const layout = getGPUPipelineLayout(device, descriptor.layout);
+    // 从GPU管线中获取管线布局。
+    const gpuPipelineLayout = getIGPUPipelineLayout(descriptor);
+
+    const layout = getGPUPipelineLayout(device, gpuPipelineLayout);
 
     pipeline = device.createComputePipeline({
         layout,
