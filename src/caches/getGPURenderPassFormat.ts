@@ -1,5 +1,5 @@
 import { getGPUTextureFormat } from "../caches/getGPUTextureFormat";
-import { IGPURenderPassDescriptor } from "./IGPURenderPassDescriptor";
+import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 
 /**

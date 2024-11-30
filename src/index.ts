@@ -23,7 +23,7 @@ export * from "./data/IGPUTextureView";
 export * from "./data/IGPUTimestampQuery";
 export * from "./data/IGPUVertexAttributes";
 
-export * from "./data/getIGPUIndexBuffer";
+export * from "./caches/getIGPUIndexBuffer";
 
 /**
  * 内部

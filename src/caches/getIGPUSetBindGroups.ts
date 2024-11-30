@@ -1,13 +1,13 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
+import { IGPUBindGroupEntry, IGPUBufferBinding } from "../data/IGPUBindGroupDescriptor";
+import { IGPUBindingResources } from "../data/IGPUBindingResources";
+import { IGPUComputePipeline } from "../data/IGPUComputeObject";
+import { IGPURenderPipeline, IGPUSetBindGroup } from "../data/IGPURenderObject";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUIndexBuffer";
-import { IGPUBindGroupEntry, IGPUBufferBinding } from "./IGPUBindGroupDescriptor";
-import { IGPUBindingResources } from "./IGPUBindingResources";
-import { IGPUComputePipeline } from "./IGPUComputeObject";
-import { IGPURenderPipeline, IGPUSetBindGroup } from "./IGPURenderObject";
 
 export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
 {

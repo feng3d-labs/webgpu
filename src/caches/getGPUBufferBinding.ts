@@ -1,6 +1,6 @@
 import { IGPUBufferBinding } from "../data/IGPUBindGroupDescriptor";
-import { getIGPUBuffer } from "../data/getIGPUIndexBuffer";
 import { getGPUBuffer } from "./getGPUBuffer";
+import { getIGPUBuffer } from "./getIGPUIndexBuffer";
 
 export function getGPUBufferBinding(device: GPUDevice, resource: IGPUBufferBinding): GPUBufferBinding
 {
