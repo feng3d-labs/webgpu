@@ -31,6 +31,7 @@
 		"shadowMapping",
 		"deferredRendering",
 		"particles",
+		"points",
 		"imageBlur",
 		"cornell",
 		""
