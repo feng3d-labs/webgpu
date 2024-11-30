@@ -151,10 +151,6 @@ function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[]
         {
             textures.push(depthStencilAttachment.view.texture);
         }
-        if (depthStencilAttachment.resolveTarget)
-        {
-            textures.push(depthStencilAttachment.resolveTarget.texture);
-        }
     }
 
     return textures;
@@ -233,10 +229,6 @@ function getIGPURenderPassAttachmentTextures(colorAttachments: IGPURenderPassCol
         {
             textures.push(depthStencilAttachment.view.texture);
         }
-        if (depthStencilAttachment.resolveTarget)
-        {
-            textures.push(depthStencilAttachment.resolveTarget.texture);
-        }
     }
 
     return textures;
@@ -299,13 +291,6 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURen
         };
     }
 
-    let resolveTarget = depthStencilAttachment.resolveTarget;
-    if (multisample && !resolveTarget)
-    {
-        resolveTarget = view;
-        view = getMultisampleTextureView(view.texture, multisample);
-    }
-
     const depthClearValue = depthStencilAttachment.depthClearValue;
     const depthLoadOp = depthStencilAttachment.depthLoadOp;
     const depthStoreOp = depthStencilAttachment.depthStoreOp;
@@ -314,7 +299,6 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURen
     gpuDepthStencilAttachment = {
         ...depthStencilAttachment,
         view,
-        resolveTarget,
         depthClearValue,
         depthLoadOp,
         depthStoreOp,

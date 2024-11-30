@@ -14,9 +14,4 @@ export interface IGPURenderPassDepthStencilAttachment extends Omit<GPURenderPass
      * 当值为空时，将自动从颜色附件中获取尺寸来创建深度纹理。
      */
     view?: IGPUTextureView;
-
-    /**
-     * 作为解决多重采样的纹理视图。
-     */
-    resolveTarget?: IGPUTextureView;
 }
