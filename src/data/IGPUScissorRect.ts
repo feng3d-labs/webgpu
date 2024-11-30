@@ -18,25 +18,25 @@ export interface IGPUScissorRect
      *
      * WebGL以左下角为起始点，WebGPU以左上角为起点。
      */
-    fromWebGL?: boolean;
+    readonly fromWebGL?: boolean;
 
     /**
      * Minimum X value of the scissor rectangle in pixels.
      */
-    x: GPUIntegerCoordinate,
+    readonly x: GPUIntegerCoordinate,
 
     /**
      * Minimum Y value of the scissor rectangle in pixels.
      */
-    y: GPUIntegerCoordinate,
+    readonly y: GPUIntegerCoordinate,
 
     /**
      * Width of the scissor rectangle in pixels.
      */
-    width: GPUIntegerCoordinate,
+    readonly width: GPUIntegerCoordinate,
 
     /**
      * Height of the scissor rectangle in pixels.
      */
-    height: GPUIntegerCoordinate
+    readonly height: GPUIntegerCoordinate
 }

@@ -25,7 +25,7 @@ export interface IGPURenderPass
     /**
      * 渲染通道描述。
      */
-    descriptor: IGPURenderPassDescriptor;
+    readonly descriptor: IGPURenderPassDescriptor;
 
     /**
      * 渲染对象列表

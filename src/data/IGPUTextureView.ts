@@ -12,5 +12,5 @@ export interface IGPUTextureView extends GPUTextureViewDescriptor
     /**
      * 产生视图的纹理。
      */
-    texture: IGPUTexture;
+    readonly texture: IGPUTexture;
 }

@@ -95,10 +95,10 @@ export interface IGPUCanvasContext
     /**
      * 画布id
      */
-    canvasId: string;
+    readonly canvasId: string;
 
     /**
-     * 画布配置。
+     * 画布配置。默认有引擎自动设置。
      */
     configuration?: IGPUCanvasConfiguration;
 }

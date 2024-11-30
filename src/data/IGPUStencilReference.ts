@@ -14,5 +14,5 @@ export interface IGPUStencilReference
     /**
      * The new stencil reference value.
      */
-    reference: GPUStencilValue;
+    readonly reference: GPUStencilValue;
 }

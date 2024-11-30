@@ -1,4 +1,3 @@
-import { IGPUBuffer } from "./IGPUBuffer";
 
 /**
  * 顶点属性数据映射。
@@ -21,17 +20,17 @@ export interface IGPUVertexAttribute
     /**
      * 顶点数据元素数量。
      */
-    numComponents?: 1 | 2 | 3 | 4;
+    readonly numComponents?: 1 | 2 | 3 | 4;
 
     /**
      * 所在顶点数据中的偏移字节数。
      */
-    offset?: number;
+    readonly offset?: number;
 
     /**
      * {@link GPUVertexBufferLayout.arrayStride}
      */
-    vertexSize?: number;
+    readonly vertexSize?: number;
 
     /**
      * Whether each element of this array represents per-vertex data or per-instance data
@@ -40,5 +39,5 @@ export interface IGPUVertexAttribute
      *
      * 默认 `"vertex"` 。
      */
-    stepMode?: GPUVertexStepMode;
+    readonly stepMode?: GPUVertexStepMode;
 }

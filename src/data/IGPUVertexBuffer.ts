@@ -1,4 +1,3 @@
-import { IGPUBuffer } from "./IGPUBuffer";
 
 /**
  * Sets the current vertex buffer for the given slot.
@@ -21,12 +20,12 @@ export interface IGPUVertexBuffer
      *
      * 使用的顶点数据在缓冲区中的起始偏移值，默认值为 `0` 。
      */
-    offset?: number;
+    readonly offset?: number;
 
     /**
      * Size in bytes of the vertex data in `buffer`. Defaults to the size of the buffer minus the offset.
      *
      * 使用的顶点数据在缓冲区中所占字节尺寸。默认为缓冲区尺寸减去起始偏移值。
      */
-    size?: number;
+    readonly size?: number;
 }
