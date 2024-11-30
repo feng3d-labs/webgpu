@@ -149,7 +149,9 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
             if (
                 member.type.name === "f32"
                 || member.type.name === "mat4x4f"
+                || member.type.name === "vec2f"
                 || member.type.name === "vec3f"
+                || member.type.name === "vec4f"
                 //
                 || subTypeName === "f32"
                 || subsubTypeName === "f32"
