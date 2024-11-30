@@ -7,7 +7,7 @@ import compositeWGSL from './composite.wgsl';
 import opaqueWGSL from './opaque.wgsl';
 import translucentWGSL from './translucent.wgsl';
 
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCommandEncoder, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUCommandEncoder, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -22,6 +22,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
     const webgpu = await new WebGPU().init();
+
+    const context: IGPUCanvasContext = {
+        canvasId: canvas.id,
+        configuration: { alphaMode: "opaque" }
+    };
 
     const params = new URLSearchParams(window.location.search);
 
@@ -71,7 +76,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const opaquePassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
-                view: { texture: { context: { canvasId: canvas.id } } },
+                view: { texture: { context } },
                 clearValue: [0, 0, 0, 1.0],
                 loadOp: 'clear',
                 storeOp: 'store',
@@ -109,7 +114,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 loadOp: 'load',
                 storeOp: 'store',
-                view: { texture: { context: { canvasId: canvas.id } } },
+                view: { texture: { context } },
             },
         ],
         label: 'translucentPassDescriptor',
@@ -143,7 +148,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const compositePassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
-                view: { texture: { context: { canvasId: canvas.id } } },
+                view: { texture: { context } },
                 loadOp: 'load',
                 storeOp: 'store',
             },
