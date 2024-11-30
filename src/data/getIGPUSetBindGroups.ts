@@ -120,7 +120,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
     uniformData["_variableInfo"] = variableInfo as any;
 
     const buffer = getIGPUBuffer(uniformData.bufferView);
-    buffer.label = buffer.label || ("uniformData " + autoVertexIndex++);
+    buffer.label = buffer.label || ("uniformData " + variableInfo.name);
     const offset = uniformData.bufferView.byteOffset;
 
     variableInfo.members.forEach((member) =>
@@ -197,5 +197,3 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
         watcher.watch(uniformData, member.name as any, update);
     });
 }
-
-let autoVertexIndex = 0;
