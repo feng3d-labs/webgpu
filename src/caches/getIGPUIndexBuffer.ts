@@ -10,7 +10,7 @@ export function getIGPUIndexBuffer(index: Uint16Array | Uint32Array)
         size: index.byteLength,
     };
 
-    indexBuffer.buffer.label = indexBuffer.buffer.label || ("顶点索引 " + autoIndex++);
+    (indexBuffer.buffer as any).label = indexBuffer.buffer.label || ("顶点索引 " + autoIndex++);
 
     return indexBuffer;
 }

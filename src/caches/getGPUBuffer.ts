@@ -31,21 +31,23 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
     let gBuffer: GPUBuffer = gBufferMap.get(buffer);
     if (gBuffer) return gBuffer;
 
+    let size = buffer.size;
     if (buffer.size === undefined)
     {
         const bufferData = buffer.data;
         console.assert(!!bufferData, `初始化缓冲区时，当尺寸未定义时，必须设置data属性来计算尺寸。`);
-        buffer.size = bufferData.byteLength;
-        // 调整为 4 的倍数，在 mapped 时必须为 4 的倍数。
-        buffer.size = Math.ceil(buffer.size / 4) * 4;
-    }
 
-    buffer.usage = buffer.usage ?? defaultGPUBufferUsage;
+
+        size = bufferData.byteLength;
+    }
+    // GPU缓冲区尺寸应该为4的倍数。
+    size = Math.ceil(buffer.size / 4) * 4;
+    (buffer as any).size = size;
+
+    (buffer as any).usage = buffer.usage ?? defaultGPUBufferUsage;
 
     const label = buffer.label;
     const usage = buffer.usage;
-
-    const size = Math.ceil(buffer.size / 4) * 4; // GPU缓冲区尺寸应该为4的倍数。
 
     // 初始化时存在数据，则使用map方式上传第一次数据。
     const mappedAtCreation = buffer.data !== undefined;

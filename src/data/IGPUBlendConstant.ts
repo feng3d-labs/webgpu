@@ -12,5 +12,5 @@ export interface IGPUBlendConstant
      */
     readonly __type?: "IGPUBlendConstant";
 
-    color: [r: number, g: number, b: number, a: number];
+    readonly color: [r: number, g: number, b: number, a: number];
 }

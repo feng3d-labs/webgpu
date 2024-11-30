@@ -122,7 +122,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
     uniformData["_variableInfo"] = variableInfo as any;
 
     const buffer = getIGPUBuffer(uniformData.bufferView);
-    buffer.label = buffer.label || ("BufferBinding " + variableInfo.name);
+    (buffer as any).label = buffer.label || ("BufferBinding " + variableInfo.name);
     const offset = uniformData.bufferView.byteOffset;
 
     variableInfo.members.forEach((member) =>
