@@ -24,27 +24,20 @@
       background-color: #050505;
       margin: 0px;
       overflow: hidden;
-    }
-    #info {
-      position: absolute;
-      left: 0;
-      top: 100;
-      padding: 1em;
-      margin: 0;
-      width: 12em;
-      height: 1.25em;
+      display: flex;
+      place-content: center center;
     }
   </style>
 </head>
 
 <body>
-  <div style="position: fixed;">
-    <p>
+  <div>
+    <p id="description" style="width: 600px;">
       This example demonstrates using Occlusion Queries.
     </p>
     <pre id="info"></pre>
+    <canvas id="webgpu" style="width: 600px; height: 600px;"></canvas>
   </div>
-  <canvas id="webgpu" style="width: 100%; height: 100%;"></canvas>
 
   <script type="module" src="./index.ts"></script>
 </body>
