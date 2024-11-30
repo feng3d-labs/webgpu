@@ -35,6 +35,7 @@
 		"imageBlur",
 		"cornell",
 		"a-buffer",
+		"skinnedMesh",
 		""
 	],
 	"Web Platform Integration": [
