@@ -108,9 +108,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
     if (uniformData["_variableInfo"] !== undefined)
     {
         const preVariableInfo = uniformData["_variableInfo"] as any as VariableInfo;
-        if (preVariableInfo.group !== variableInfo.group
-            || preVariableInfo.binding !== variableInfo.binding
-            || preVariableInfo.resourceType !== variableInfo.resourceType
+        if (preVariableInfo.resourceType !== variableInfo.resourceType
             || preVariableInfo.size !== variableInfo.size
         )
         {
