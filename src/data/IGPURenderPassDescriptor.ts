@@ -14,7 +14,7 @@ export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 
      * Due to compatible usage list|usage compatibility, no color attachment
      * may alias another attachment or any resource used inside the render pass.
      */
-    readonly colorAttachments: IGPURenderPassColorAttachment[];
+    readonly colorAttachments: readonly IGPURenderPassColorAttachment[];
 
     /**
      * The {@link GPURenderPassDepthStencilAttachment} value that defines the depth/stencil

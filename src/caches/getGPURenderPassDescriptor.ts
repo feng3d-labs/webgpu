@@ -6,9 +6,10 @@ import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IGPUTexture_resize } from "../eventnames";
+import { NGPURenderPassColorAttachment } from "../internal/internal";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
-import { getIGPUTextureSize } from "./getIGPUTextureSize";
 import { getGPUTextureView } from "./getGPUTextureView";
+import { getIGPUTextureSize } from "./getIGPUTextureSize";
 
 /**
  * 获取GPU渲染通道描述。
@@ -127,7 +128,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
  *
  * @returns 渲染通道附件上的纹理描述列表。
  */
-function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
+function getAttachmentTextures(colorAttachments: readonly IGPURenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
 {
     const textures: IGPUTexture[] = [];
 
@@ -138,10 +139,6 @@ function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[]
         if (element.view)
         {
             textures.push(element.view.texture);
-        }
-        if (element.resolveTarget)
-        {
-            textures.push(element.resolveTarget.texture);
         }
     }
 
@@ -163,7 +160,7 @@ function getAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[]
  * @param renderPass 渲染通道描述。
  * @param attachmentSize 附件尺寸。
  */
-function setIGPURenderPassAttachmentSize(colorAttachments: IGPURenderPassColorAttachment[], depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: { width: number; height: number; })
+function setIGPURenderPassAttachmentSize(colorAttachments: NGPURenderPassColorAttachment[], depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: { width: number; height: number; })
 {
     const attachmentTextures = getIGPURenderPassAttachmentTextures(colorAttachments, depthStencilAttachment);
     attachmentTextures.forEach((v) => setIGPUTextureSize(v, attachmentSize));
@@ -206,7 +203,7 @@ function setIGPUTextureSize(texture: IGPUTexture, attachmentSize: { width: numbe
  * @param depthStencilAttachment 深度模板附件。
  * @returns 渲染通道附件上的纹理描述列表。
  */
-function getIGPURenderPassAttachmentTextures(colorAttachments: IGPURenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
+function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
 {
     const textures: IGPUTexture[] = [];
 
@@ -314,16 +311,16 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURen
  * @param multisample 多重采样次数。
  * @returns 颜色附件完整描述列表。
  */
-function getIGPURenderPassColorAttachments(colorAttachments: IGPURenderPassColorAttachment[], multisample: number)
+function getIGPURenderPassColorAttachments(colorAttachments: readonly IGPURenderPassColorAttachment[], multisample: number)
 {
-    const gpuColorAttachments: IGPURenderPassColorAttachment[] = colorAttachments.map((v) =>
+    const gpuColorAttachments: NGPURenderPassColorAttachment[] = colorAttachments.map((v) =>
     {
         if (!v) return undefined;
 
         let view = v.view;
-        let resolveTarget = v.resolveTarget;
+        let resolveTarget: IGPUTextureView;
 
-        if (multisample && !resolveTarget)
+        if (multisample)
         {
             resolveTarget = view;
             view = getMultisampleTextureView(view.texture, multisample);
