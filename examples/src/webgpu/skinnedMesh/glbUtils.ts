@@ -368,7 +368,6 @@ export class GLTFPrimitive
                 const vertexFormat: GPUVertexFormat = this.attributeMap[attr].vertexType;
                 const attrString = attr.toLowerCase().replace(/_0$/, '');
 
-                const numComponents = gpuVertexFormatMap[vertexFormat].components
                 const Cls = gpuVertexFormatMap[vertexFormat].typedArrayConstructor
 
                 let data = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
@@ -464,7 +463,8 @@ export class GLTFPrimitive
         else
         {
             const vertexAttribute = this.vertices[Object.keys(this.vertices)[0]]
-            const vertexCount = vertexAttribute.data.length / vertexAttribute.numComponents;
+
+            const vertexCount = vertexAttribute.data.byteLength / gpuVertexFormatMap[vertexAttribute.format].byteSize;
 
             draw = { vertexCount };
         }

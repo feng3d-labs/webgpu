@@ -28,8 +28,8 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 
     const vertices: IGPUVertexAttributes = {
-        position: { data: vertexBuffer, numComponents: 3, offset: 0, vertexSize: Float32Array.BYTES_PER_ELEMENT * 6 },
-        normal: { data: vertexBuffer, numComponents: 3, offset: Float32Array.BYTES_PER_ELEMENT * 3, vertexSize: Float32Array.BYTES_PER_ELEMENT * 6 },
+        position: { data: vertexBuffer, format: "float32x3", offset: 0, vertexSize: Float32Array.BYTES_PER_ELEMENT * 6 },
+        normal: { data: vertexBuffer, format: "float32x3", offset: Float32Array.BYTES_PER_ELEMENT * 3, vertexSize: Float32Array.BYTES_PER_ELEMENT * 6 },
     };
 
     // Create the model index buffer.
