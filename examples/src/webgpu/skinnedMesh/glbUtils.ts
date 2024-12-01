@@ -740,7 +740,7 @@ export class GLTFSkin
         );
         this.joints = joints;
         this.jointMatricesUniformBuffer = new Float32Array(16 * joints.length);
-        this.inverseBindMatricesUniformBuffer = this.inverseBindMatrices;
+        this.inverseBindMatricesUniformBuffer = new Float32Array(this.inverseBindMatrices);
 
         this.skinBindGroup = {
             joint_matrices: { bufferView: this.jointMatricesUniformBuffer },
