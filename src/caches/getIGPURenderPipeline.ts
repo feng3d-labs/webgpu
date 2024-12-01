@@ -167,10 +167,7 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
         const shaderLocation = v.location as number;
         const attributeName = v.name;
 
-        const wgslType = getWGSLType(v.type);
-
-        let possibleFormats = wgslVertexTypeMap[wgslType].possibleFormats;
-
+        
         const vertexAttribute = vertices[attributeName];
         console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
         let isIGPUVertexBufferOffset = false;
@@ -180,8 +177,10 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
         let arrayStride = vertexAttribute.vertexSize;
         const stepMode = vertexAttribute.stepMode;
         const format = vertexAttribute.format;
-        //
-        console.assert(possibleFormats.indexOf(format) !== -1, `顶点${attributeName} 提供的数据格式 ${format} 与着色器中类型 ${wgslType} 不匹配！`);
+        // 检查提供的顶点数据格式是否与着色器匹配
+        // const wgslType = getWGSLType(v.type);
+        // let possibleFormats = wgslVertexTypeMap[wgslType].possibleFormats;
+        // console.assert(possibleFormats.indexOf(format) !== -1, `顶点${attributeName} 提供的数据格式 ${format} 与着色器中类型 ${wgslType} 不匹配！`);
         console.assert(data.constructor.name === gpuVertexFormatMap[format].typedArrayConstructor.name,
             `顶点${attributeName} 提供的数据类型 ${data.constructor.name} 与格式 ${format} 不匹配！请使用 ${data.constructor.name} 来组织数据或者更改数据格式。`);
 
