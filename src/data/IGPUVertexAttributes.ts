@@ -18,9 +18,9 @@ export interface IGPUVertexAttribute
     data: IGPUVertexAttributeDataType;
 
     /**
-     * 顶点数据元素数量。
+     * 顶点数据格式。
      */
-    readonly numComponents: 1 | 2 | 3 | 4;
+    readonly format: GPUVertexFormat;
 
     /**
      * 所在顶点数据中的偏移字节数。
@@ -43,10 +43,10 @@ export interface IGPUVertexAttribute
 }
 
 export type IGPUVertexAttributeDataType = | Float32Array
-| Uint32Array
-| Int32Array
-| Uint16Array
-| Int16Array
-| Uint8ClampedArray
-| Uint8Array
-| Int8Array
+    | Uint32Array
+    | Int32Array
+    | Uint16Array
+    | Int16Array
+    | Uint8ClampedArray
+    | Uint8Array
+    | Int8Array

@@ -169,7 +169,7 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
 
         const wgslType = getWGSLType(v.type);
 
-        let format = wgslVertexTypeMap[wgslType].format;
+        let possibleFormats = wgslVertexTypeMap[wgslType].possibleFormats;
 
         const vertexAttribute = vertices[attributeName];
         console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
@@ -179,19 +179,9 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
         let attributeOffset = vertexAttribute.offset;
         let arrayStride = vertexAttribute.vertexSize;
         const stepMode = vertexAttribute.stepMode;
-        // 根据顶点数据调整 布局中的数据格式。
-        const formats = format.split("x");
-        if (Number(formats[1]) !== vertexAttribute.numComponents)
-        {
-            if (vertexAttribute.numComponents === 1)
-            {
-                format = formats[0] as any;
-            }
-            else
-            {
-                format = `${formats[0]}x${vertexAttribute.numComponents}` as any;
-            }
-        }
+        const format = vertexAttribute.format;
+        //
+        console.assert(possibleFormats.indexOf(format) !== -1, `顶点${attributeName} 提供的数据格式 ${format} 与着色器中类型 ${wgslType} 不匹配！`);
 
         // 如果 偏移值大于 单个顶点尺寸，则该值被放入 IGPUVertexBuffer.offset。
         const vertexByteSize = gpuVertexFormatMap[format].byteSize;
