@@ -436,19 +436,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         let writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({
             bufferOffset: 0,
-            data: projectionMatrix,
+            data: projectionMatrix.buffer,
             dataOffset: projectionMatrix.byteOffset,
             size: projectionMatrix.byteLength
         });
         writeBuffers.push({
             bufferOffset: 64,
-            data: viewMatrix,
+            data: viewMatrix.buffer,
             dataOffset: viewMatrix.byteOffset,
             size: viewMatrix.byteLength
         });
         writeBuffers.push({
             bufferOffset: 128,
-            data: modelMatrix,
+            data: modelMatrix.buffer,
             dataOffset: modelMatrix.byteOffset,
             size: modelMatrix.byteLength
         });
