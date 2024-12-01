@@ -372,7 +372,7 @@ export class GLTFPrimitive
 
                 let data = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
 
-                this.vertices[attrString] = { data, format: vertexFormat, }
+                this.vertices[attrString] = { data: data, format: vertexFormat, }
             }
         );
         {
@@ -388,7 +388,7 @@ export class GLTFPrimitive
             {
                 Cls = Uint32Array;
             }
-            this.indices = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT) as any;
+            this.indices = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
         }
     }
 

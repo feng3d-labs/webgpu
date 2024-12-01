@@ -30,9 +30,11 @@ export interface IGPUVertexAttribute
     readonly offset?: number;
 
     /**
+     * The stride, in bytes, between elements of this array.
+     *
      * {@link GPUVertexBufferLayout.arrayStride}
      */
-    readonly vertexSize?: number;
+    readonly arrayStride?: number;
 
     /**
      * Whether each element of this array represents per-vertex data or per-instance data

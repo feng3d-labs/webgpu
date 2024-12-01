@@ -127,8 +127,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const renderObject: IGPURenderObject = {
         pipeline: pipeline,
         vertices: {
-            position: { data: vertexBuf, offset: 0, vertexSize: 6 * 4, format: "float32x3" },
-            normal: { data: vertexBuf, offset: 12, vertexSize: 6 * 4, format: "float32x3" },
+            position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
+            normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
         },
         indices: indices,
         bindingResources: {

@@ -3,10 +3,10 @@ import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
-import { IGPUVertexBuffer } from "../data/IGPUVertexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import { IGPUVertexBuffer } from "../internal/IGPUVertexBuffer";
 import { NGPUVertexState } from "../internal/NGPUVertexState";
-import { gpuVertexFormatMap, WGSLVertexType, wgslVertexTypeMap } from "../types/VertexFormat";
+import { gpuVertexFormatMap, WGSLVertexType } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
@@ -167,14 +167,13 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
         const shaderLocation = v.location as number;
         const attributeName = v.name;
 
-        
+
         const vertexAttribute = vertices[attributeName];
         console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
-        let isIGPUVertexBufferOffset = false;
         //
         const data = vertexAttribute.data;
-        let attributeOffset = vertexAttribute.offset;
-        let arrayStride = vertexAttribute.vertexSize;
+        let attributeOffset = vertexAttribute.offset || 0;
+        let arrayStride = vertexAttribute.arrayStride;
         const stepMode = vertexAttribute.stepMode;
         const format = vertexAttribute.format;
         // 检查提供的顶点数据格式是否与着色器匹配
@@ -186,30 +185,22 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
 
         // 如果 偏移值大于 单个顶点尺寸，则该值被放入 IGPUVertexBuffer.offset。
         const vertexByteSize = gpuVertexFormatMap[format].byteSize;
-        if (attributeOffset + vertexByteSize > arrayStride)
+        //
+        if (!arrayStride)
         {
-            isIGPUVertexBufferOffset = true;
+            arrayStride = vertexByteSize;
         }
+        console.assert(attributeOffset + vertexByteSize <= arrayStride, `offset(${attributeOffset}) + vertexByteSize(${vertexByteSize}) 必须不超出 arrayStride(${arrayStride})。`);
 
         watcher.watch(vertexAttribute, "data", () =>
         {
             const index = map.get(data);
-            const buffer = vertexAttribute.data;
+            const attributeData = vertexAttribute.data;
 
-            vertexBuffers[index].data = buffer;
+            vertexBuffers[index].data = attributeData;
+            vertexBuffers[index].offset = attributeData.byteOffset;
+            vertexBuffers[index].size = attributeData.byteLength;
         });
-
-        //
-        if (!attributeOffset)
-        {
-            attributeOffset = 0;
-        }
-
-        //
-        if (!arrayStride)
-        {
-            arrayStride = gpuVertexFormatMap[format].byteSize;
-        }
 
         let index = map.get(data);
         if (index === undefined)
@@ -217,19 +208,7 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
             index = vertexBufferLayouts.length;
             map.set(data, index);
 
-            vertexBuffers[index] = { data: data, offset: isIGPUVertexBufferOffset ? attributeOffset : 0 };
-
-            //
-            vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [] };
-        }
-        else if (isIGPUVertexBufferOffset)
-        {
-            const gpuBuffer = vertexBuffers[index].data;
-
-            // 使用相同 data 共用 gpuBuffer。
-            index = vertexBufferLayouts.length;
-
-            vertexBuffers[index] = { data: gpuBuffer, offset: isIGPUVertexBufferOffset ? attributeOffset : 0 };
+            vertexBuffers[index] = { data: data, offset: data.byteOffset, size: data.byteLength };
 
             //
             vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [] };
@@ -242,7 +221,7 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
             console.assert(gpuVertexBufferLayout.stepMode === stepMode);
         }
 
-        (vertexBufferLayouts[index].attributes as Array<GPUVertexAttribute>).push({ shaderLocation, offset: isIGPUVertexBufferOffset ? 0 : attributeOffset, format });
+        (vertexBufferLayouts[index].attributes as Array<GPUVertexAttribute>).push({ shaderLocation, offset: attributeOffset, format });
     });
 
     return { vertexBufferLayouts, vertexBuffers };

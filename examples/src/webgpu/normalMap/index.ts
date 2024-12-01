@@ -323,11 +323,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // *   tangent   : float32x3
             // *   bitangent : float32x3
             vertices: {
-              position: { data: box.vertices, offset: 0, format: "float32x3", vertexSize: box.vertexStride },
-              normal: { data: box.vertices, offset: 12, format: "float32x3", vertexSize: box.vertexStride },
-              uv: { data: box.vertices, offset: 24, format: "float32x2", vertexSize: box.vertexStride },
-              vert_tan: { data: box.vertices, offset: 32, format: "float32x3", vertexSize: box.vertexStride },
-              vert_bitan: { data: box.vertices, offset: 44, format: "float32x3", vertexSize: box.vertexStride },
+              position: { data: box.vertices, offset: 0, format: "float32x3", arrayStride: box.vertexStride },
+              normal: { data: box.vertices, offset: 12, format: "float32x3", arrayStride: box.vertexStride },
+              uv: { data: box.vertices, offset: 24, format: "float32x2", arrayStride: box.vertexStride },
+              vert_tan: { data: box.vertices, offset: 32, format: "float32x3", arrayStride: box.vertexStride },
+              vert_bitan: { data: box.vertices, offset: 44, format: "float32x3", arrayStride: box.vertexStride },
             },
             indices: box.indices,
             bindingResources: bindingResourcesList[currentSurfaceBindGroup],

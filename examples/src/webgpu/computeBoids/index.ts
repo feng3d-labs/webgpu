@@ -98,8 +98,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         },
         vertices: {
-            a_particlePos: { data: particleBuffers[0], format: "float32x2", offset: 0, vertexSize: 4 * 4, stepMode: "instance" },
-            a_particleVel: { data: particleBuffers[0], format: "float32x2", offset: 2 * 4, vertexSize: 4 * 4, stepMode: "instance" },
+            a_particlePos: { data: particleBuffers[0], format: "float32x2", offset: 0, arrayStride: 4 * 4, stepMode: "instance" },
+            a_particleVel: { data: particleBuffers[0], format: "float32x2", offset: 2 * 4, arrayStride: 4 * 4, stepMode: "instance" },
             a_pos: { data: vertexBufferData, format: "float32x2" },
         },
         draw: { vertexCount: 3, instanceCount: numParticles }
