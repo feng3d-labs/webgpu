@@ -100,25 +100,13 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
                 {
                     arrayBuffer = data;
                     dataOffsetByte = dataOffset ?? 0;
-                    sizeByte = size ?? data.byteLength;
+                    sizeByte = size ?? (data.byteLength - dataOffsetByte);
                 }
 
                 // 防止给出数据不够的情况
-                if (sizeByte > arrayBuffer.byteLength - dataOffsetByte)
-                {
-                    sizeByte = arrayBuffer.byteLength - dataOffsetByte;
-                }
+                console.assert(sizeByte <= arrayBuffer.byteLength - dataOffsetByte, `上传的尺寸超出数据范围！`);
 
-                // 处理写入数据长度不是4的倍数情况
-                if (sizeByte % 4 !== 0)
-                {
-                    const oldUint8Array = new Uint8Array(arrayBuffer, dataOffsetByte, sizeByte);
-                    // 创建4的倍数长度的数据
-                    sizeByte = Math.ceil(sizeByte / 4) * 4;
-                    dataOffsetByte = 0;
-                    arrayBuffer = new ArrayBuffer(sizeByte);
-                    new Uint8Array(arrayBuffer).set(oldUint8Array);
-                }
+                console.assert(sizeByte % 4 === 0, `写入数据长度不是4的倍数！`);
 
                 //
                 device.queue.writeBuffer(
