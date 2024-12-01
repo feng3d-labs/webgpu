@@ -1,7 +1,7 @@
 import { Mat4, Quatn, Vec3n, mat4 } from 'wgpu-matrix';
 import { Accessor, BufferView, GlTf, Scene } from './gltf';
 
-import { IGPUBuffer, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu-renderer";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -342,6 +342,8 @@ export class GLTFPrimitive
 {
     topology: GLTFRenderMode;
     renderPipeline: IGPURenderPipeline;
+    vertices: IGPUVertexAttributes;
+    indices: Uint16Array | Uint32Array
     private attributeMap: AttributeMapInterface;
     private attributes: string[] = [];
     constructor(
@@ -378,7 +380,7 @@ export class GLTFPrimitive
         // POSITION, NORMAL, TEXCOORD_0, JOINTS_0, WEIGHTS_0 for order
         // Vertex attribute state and shader stage
         let VertexInputShaderString = `struct VertexInput {\n`;
-        const vertexBuffers: GPUVertexBufferLayout[] = this.attributes.map(
+        this.attributes.forEach(
             (attr, idx) =>
             {
                 const vertexFormat: GPUVertexFormat =
@@ -387,16 +389,6 @@ export class GLTFPrimitive
                 VertexInputShaderString += `\t@location(${idx}) ${attrString}: ${convertGPUVertexFormatToWGSLFormat(
                     vertexFormat
                 )},\n`;
-                return {
-                    arrayStride: this.attributeMap[attr].byteStride,
-                    attributes: [
-                        {
-                            format: this.attributeMap[attr].vertexType,
-                            offset: this.attributeMap[attr].byteOffset,
-                            shaderLocation: idx,
-                        },
-                    ],
-                } as GPUVertexBufferLayout;
             }
         );
         VertexInputShaderString += '}';
@@ -437,13 +429,29 @@ export class GLTFPrimitive
         this.renderPipeline = rpDescript;
     }
 
-    render(renderPassEncoder: GPURenderPassEncoder, bindGroups: GPUBindGroup[])
+    render(renderPassEncoder: GPURenderPassEncoder, bindingResources: IGPUBindingResources)
     {
-        renderPassEncoder.setPipeline(this.renderPipeline);
-        bindGroups.forEach((bg, idx) =>
+        let drawIndexed: IGPUDrawIndexed;
+        let draw: IGPUDraw;
+        if (this.indices)
         {
-            renderPassEncoder.setBindGroup(idx, bg);
-        });
+            drawIndexed = { indexCount: this.indices.length };
+        }
+        else
+        {
+            this.vertices[Object.keys(this.vertices)[0]].data
+
+            draw = {};
+        }
+
+        const renderObject: IGPURenderObject = {
+            pipeline: this.renderPipeline,
+            bindingResources: bindingResources,
+            vertices: this.vertices,
+            indices: this.indices,
+            draw: draw,
+            drawIndexed: drawIndexed,
+        };
 
         //if skin do something with bone bind group
         this.attributes.map((attr, idx) =>

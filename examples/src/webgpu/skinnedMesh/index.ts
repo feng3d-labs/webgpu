@@ -243,7 +243,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     );
 
     // Create skinned grid resources
-    const skinnedGridVertexBuffers = createSkinnedGridBuffers(device);
+    const skinnedGridVertexBuffers = createSkinnedGridBuffers();
     // Buffer for our uniforms, joints, and inverse bind matrices
     const skinnedGridUniformBufferUsage: GPUBufferDescriptor = {
         // 5 4x4 matrices, one for each bone
@@ -271,15 +271,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         device
     );
     const skinnedGridPipeline = createSkinnedGridRenderPipeline(
-        device,
-        presentationFormat,
         gridWGSL,
         gridWGSL,
-        [
-            cameraBGCluster.bindGroupLayout,
-            generalUniformsBGCLuster.bindGroupLayout,
-            skinnedGridBoneBGCluster.bindGroupLayout,
-        ]
     );
 
     // Global Calc
