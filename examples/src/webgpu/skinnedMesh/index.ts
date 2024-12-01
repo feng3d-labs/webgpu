@@ -7,7 +7,7 @@ import gridWGSL from './grid.wgsl';
 import { gridIndices } from './gridData';
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline, } from './gridUtils';
 
-import { getIGPUBuffer, IGPURenderObject, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderObject, IGPURenderPassDescriptor, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -144,11 +144,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         .add(settings, 'renderMode', ['NORMAL', 'JOINTS', 'WEIGHTS'])
         .onChange(() =>
         {
-            device.queue.writeBuffer(
-                generalUniformsBuffer,
-                0,
-                new Uint32Array([RenderMode[settings.renderMode]])
-            );
+            const buffer = getIGPUBuffer(generalUniformsBuffer);
+            const writeBuffers = buffer.writeBuffers || [];
+
+            writeBuffers.push({
+                data: new Uint32Array([RenderMode[settings.renderMode]]),
+            });
+
+            buffer.writeBuffers = writeBuffers;
         });
     // Determine whether the mesh is static or whether skinning is activated
     gui.add(settings, 'skinMode', ['ON', 'OFF']).onChange(() =>
@@ -167,11 +170,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.cameraZ = -14.6;
             }
         }
-        device.queue.writeBuffer(
-            generalUniformsBuffer,
-            4,
-            new Uint32Array([SkinMode[settings.skinMode]])
-        );
+        const buffer = getIGPUBuffer(generalUniformsBuffer);
+        const writeBuffers = buffer.writeBuffers || [];
+        writeBuffers.push({
+            bufferOffset: 4,
+            data: new Uint32Array([SkinMode[settings.skinMode]]),
+        });
+        buffer.writeBuffers = writeBuffers;
     });
     const animFolder = gui.addFolder('Animation Settings');
     animFolder.add(settings, 'angle', 0.05, 0.5).step(0.05);
@@ -185,21 +190,22 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const cameraBuffer = new Float32Array(48);
 
-    const cameraBGCluster = {
+    const cameraBGCluster: IGPUBindingResources = {
         camera_uniforms: {
+            bufferView: cameraBuffer,
             proj_matrix: new Float32Array(16),
             view_matrix: new Float32Array(16),
             model_matrix: new Float32Array(16),
         }
     };
 
-    const generalUniformsBuffer = device.createBuffer({
-        size: Uint32Array.BYTES_PER_ELEMENT * 2,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    const generalUniformsBuffer = new Uint32Array(2);
 
-    const generalUniformsBGCLuster = {
-        general_uniforms: { render_mode: 1, skin_mode: 1 },
+    const generalUniformsBGCLuster: IGPUBindingResources = {
+        general_uniforms: {
+            bufferView: generalUniformsBuffer,
+            render_mode: 1, skin_mode: 1
+        },
     };
 
     // Fetch whale resources from the glb file
@@ -225,26 +231,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         size: MAT4X4_BYTES * 5,
         usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
     };
-    const skinnedGridJointUniformBuffer = device.createBuffer(
-        skinnedGridUniformBufferUsage
-    );
-    const skinnedGridInverseBindUniformBuffer = device.createBuffer(
-        skinnedGridUniformBufferUsage
-    );
-    const skinnedGridBoneBGCluster = createBindGroupCluster(
-        [0, 1],
-        [GPUShaderStage.VERTEX, GPUShaderStage.VERTEX],
-        ['buffer', 'buffer'],
-        [{ type: 'read-only-storage' }, { type: 'read-only-storage' }],
-        [
-            [
-                { buffer: skinnedGridJointUniformBuffer },
-                { buffer: skinnedGridInverseBindUniformBuffer },
-            ],
-        ],
-        'SkinnedGridJointUniforms',
-        device
-    );
+    const skinnedGridJointUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
+    const skinnedGridInverseBindUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
+    const skinnedGridBoneBGCluster: IGPUBindingResources = {
+        joint_matrices: { bufferView: skinnedGridJointUniformBuffer },
+        inverse_bind_matrices: { bufferView: skinnedGridInverseBindUniformBuffer },
+    };
+
     const skinnedGridPipeline = createSkinnedGridRenderPipeline(
         gridWGSL,
         gridWGSL,
@@ -312,10 +305,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     // Pass Descriptor for GLTFs
-    const gltfRenderPassDescriptor: GPURenderPassDescriptor = {
+    const gltfRenderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
-                view: undefined, // Assigned later
+                view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0.3, 0.3, 0.3, 1.0],
                 loadOp: 'clear',
@@ -323,7 +316,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         ],
         depthStencilAttachment: {
-            view: depthTexture.createView(),
+            view: { texture: depthTexture },
             depthLoadOp: 'clear',
             depthClearValue: 1.0,
             depthStoreOp: 'store',
@@ -331,10 +324,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Pass descriptor for grid with no depth testing
-    const skinnedGridRenderPassDescriptor: GPURenderPassDescriptor = {
+    const skinnedGridRenderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
-                view: undefined, // Assigned later
+                view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0.3, 0.3, 0.3, 1.0],
                 loadOp: 'clear',
@@ -385,15 +378,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // Create bones of the skinned grid and write the inverse bind positions to
     // the skinned grid's inverse bind matrix array
+    const buffer = getIGPUBuffer(skinnedGridInverseBindUniformBuffer);
+    const writeBuffers = buffer.writeBuffers || [];
     const gridBoneCollection = createBoneCollection(5);
     for (let i = 0; i < gridBoneCollection.bindPosesInv.length; i++)
     {
-        device.queue.writeBuffer(
-            skinnedGridInverseBindUniformBuffer,
-            i * 64,
-            gridBoneCollection.bindPosesInv[i]
-        );
+        writeBuffers.push({
+            bufferOffset: i * 64,
+            data: gridBoneCollection.bindPosesInv[i]
+        });
     }
+    buffer.writeBuffers = writeBuffers;
 
     // A map that maps a joint index to the original matrix transformation of a bone
     const origMatrices = new Map<number, Mat4>();
@@ -468,28 +463,21 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         buffer.writeBuffers = writeBuffers;
 
         // Write to skinned grid bone uniform buffer
+        const buffer0 = getIGPUBuffer(skinnedGridJointUniformBuffer);
+        const writeBuffers0 = buffer0.writeBuffers || [];
         for (let i = 0; i < gridBoneCollection.transforms.length; i++)
         {
-            device.queue.writeBuffer(
-                skinnedGridJointUniformBuffer,
-                i * 64,
-                gridBoneCollection.transforms[i]
-            );
+            writeBuffers0.push({
+                bufferOffset: i * 64,
+                data: gridBoneCollection.transforms[i]
+            });
         }
-
-        // Difference between these two render passes is just the presence of depthTexture
-        gltfRenderPassDescriptor.colorAttachments[0].view = context
-            .getCurrentTexture()
-            .createView();
-
-        skinnedGridRenderPassDescriptor.colorAttachments[0].view = context
-            .getCurrentTexture()
-            .createView();
+        buffer0.writeBuffers = writeBuffers0;
 
         // Update node matrixes
         for (const scene of whaleScene.scenes)
         {
-            scene.root.updateWorldMatrix(device);
+            scene.root.updateWorldMatrix();
         }
 
         // Updates skins (we index into skins in the renderer, which is not the best approach but hey)
