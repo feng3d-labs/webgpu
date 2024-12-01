@@ -429,7 +429,7 @@ export class GLTFPrimitive
         this.renderPipeline = rpDescript;
     }
 
-    render(renderPassEncoder: GPURenderPassEncoder, bindingResources: IGPUBindingResources)
+    render(renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources)
     {
         let drawIndexed: IGPUDrawIndexed;
         let draw: IGPUDraw;
@@ -439,44 +439,22 @@ export class GLTFPrimitive
         }
         else
         {
-            this.vertices[Object.keys(this.vertices)[0]].data
+            const vertexAttribute = this.vertices[Object.keys(this.vertices)[0]]
+            const vertexCount = vertexAttribute.data.length / vertexAttribute.numComponents;
 
-            draw = {};
+            draw = { vertexCount };
         }
 
         const renderObject: IGPURenderObject = {
             pipeline: this.renderPipeline,
             bindingResources: bindingResources,
+            //if skin do something with bone bind group
             vertices: this.vertices,
             indices: this.indices,
             draw: draw,
             drawIndexed: drawIndexed,
         };
-
-        //if skin do something with bone bind group
-        this.attributes.map((attr, idx) =>
-        {
-            renderPassEncoder.setVertexBuffer(
-                idx,
-                this.attributeMap[attr].view.gpuBuffer,
-                this.attributeMap[attr].byteOffset,
-                this.attributeMap[attr].byteLength
-            );
-        });
-
-        if (this.attributeMap['INDICES'])
-        {
-            renderPassEncoder.setIndexBuffer(
-                this.attributeMap['INDICES'].view.gpuBuffer,
-                this.attributeMap['INDICES'].vertexType,
-                this.attributeMap['INDICES'].byteOffset,
-                this.attributeMap['INDICES'].byteLength
-            );
-            renderPassEncoder.drawIndexed(this.attributeMap['INDICES'].count);
-        } else
-        {
-            renderPassEncoder.draw(this.attributeMap['POSITION'].count);
-        }
+        renderObjects.push(renderObject);
     }
 }
 
@@ -507,13 +485,13 @@ export class GLTFMesh
         }
     }
 
-    render(renderPassEncoder: GPURenderPassEncoder, bindGroups: GPUBindGroup[])
+    render(renderObjects: IGPURenderObject[], bindGroups: GPUBindGroup[])
     {
         // We take a pretty simple approach to start. Just loop through all the primitives and
         // call their individual draw methods
         for (let i = 0; i < this.primitives.length; ++i)
         {
-            this.primitives[i].render(renderPassEncoder, bindGroups);
+            this.primitives[i].render(renderObjects, bindGroups);
         }
     }
 }
@@ -594,12 +572,9 @@ export class GLTFNode
     drawables: GLTFMesh[];
     test = 0;
     skin?: GLTFSkin;
-    private nodeTransformGPUBuffer: GPUBuffer;
-    private nodeTransformBindGroup: GPUBindGroup;
+    private nodeTransformGPUBuffer: Float32Array;
 
     constructor(
-        device: GPUDevice,
-        bgLayout: GPUBindGroupLayout,
         source: BaseTransformation,
         name?: string,
         skin?: GLTFSkin
@@ -614,21 +589,7 @@ export class GLTFNode
         this.localMatrix = mat4.identity();
         this.worldMatrix = mat4.identity();
         this.drawables = [];
-        this.nodeTransformGPUBuffer = device.createBuffer({
-            size: Float32Array.BYTES_PER_ELEMENT * 16,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
-        this.nodeTransformBindGroup = device.createBindGroup({
-            layout: bgLayout,
-            entries: [
-                {
-                    binding: 0,
-                    resource: {
-                        buffer: this.nodeTransformGPUBuffer,
-                    },
-                },
-            ],
-        });
+        this.nodeTransformGPUBuffer = new Float32Array(16);
         this.skin = skin;
     }
 
@@ -679,7 +640,6 @@ export class GLTFNode
     }
 
     renderDrawables(
-        passEncoder: GPURenderPassEncoder,
         bindGroups: GPUBindGroup[]
     )
     {
@@ -689,14 +649,14 @@ export class GLTFNode
             {
                 if (this.skin)
                 {
-                    drawable.render(passEncoder, [
+                    drawable.render([
                         ...bindGroups,
                         this.nodeTransformBindGroup,
                         this.skin.skinBindGroup,
                     ]);
                 } else
                 {
-                    drawable.render(passEncoder, [
+                    drawable.render([
                         ...bindGroups,
                         this.nodeTransformBindGroup,
                     ]);
@@ -729,16 +689,12 @@ export class GLTFScene
     name?: string;
 
     constructor(
-        device: GPUDevice,
-        nodeTransformBGL: GPUBindGroupLayout,
         baseScene: Scene
     )
     {
         this.nodes = baseScene.nodes;
         this.name = baseScene.name;
         this.root = new GLTFNode(
-            device,
-            nodeTransformBGL,
             new BaseTransformation(),
             baseScene.name
         );
@@ -1087,7 +1043,7 @@ export const convertGLBToJSONAndBinary = async (
 
     for (const jsonScene of jsonChunk.scenes)
     {
-        const scene = new GLTFScene(device, nodeUniformsBindGroupLayout, jsonScene);
+        const scene = new GLTFScene(nodeUniformsBindGroupLayout, jsonScene);
         const sceneChildren = scene.nodes;
         sceneChildren.forEach((childIdx) =>
         {
