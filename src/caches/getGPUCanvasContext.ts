@@ -17,7 +17,6 @@ export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContex
 
         //
         context.configuration = context.configuration || {};
-        context.configuration.alphaMode ||= "premultiplied";
         const format = (context.configuration as any).format = context.configuration.format || navigator.gpu.getPreferredCanvasFormat();
 
         let usage = 0;
