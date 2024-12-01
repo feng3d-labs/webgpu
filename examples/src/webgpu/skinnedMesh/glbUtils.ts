@@ -606,7 +606,7 @@ export class GLTFNode
         this.parent = parent;
     }
 
-    updateWorldMatrix(device: GPUDevice, parentWorldMatrix?: Mat4)
+    updateWorldMatrix(parentWorldMatrix?: Mat4)
     {
         // Get local transform of this particular node, and if the node has a parent,
         // multiply it against the parent's transform matrix to get transformMatrix relative to world.
@@ -624,7 +624,7 @@ export class GLTFNode
 
         for (const child of this.children)
         {
-            child.updateWorldMatrix(device, worldMatrix);
+            child.updateWorldMatrix(worldMatrix);
         }
     }
 

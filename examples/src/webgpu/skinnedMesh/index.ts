@@ -7,7 +7,7 @@ import gridWGSL from './grid.wgsl';
 import { gridIndices } from './gridData';
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline, } from './gridUtils';
 
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderObject, IGPURenderPassDescriptor, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUPassEncoder, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -483,45 +483,51 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Updates skins (we index into skins in the renderer, which is not the best approach but hey)
         animWhaleSkin(whaleScene.skins[0], Math.sin(t) * settings.angle);
         // Node 6 should be the only node with a drawable mesh so hopefully this works fine
-        whaleScene.skins[0].update(device, 6, whaleScene.nodes);
+        whaleScene.skins[0].update(6, whaleScene.nodes);
 
-        const commandEncoder = device.createCommandEncoder();
+        const passEncoders: IGPUPassEncoder[] = [];
+
         if (settings.object === 'Whale')
         {
-            const passEncoder = commandEncoder.beginRenderPass(
-                gltfRenderPassDescriptor
-            );
             const renderObjects: IGPURenderObject[] = [];
+            const bindingResources: IGPUBindingResources = {
+                ...cameraBGCluster,
+                ...generalUniformsBGCLuster,
+            };
             for (const scene of whaleScene.scenes)
             {
-                scene.root.renderDrawables(renderObjects, [
-                    cameraBGCluster.bindGroups[0],
-                    generalUniformsBGCLuster.bindGroups[0],
-                ]);
+                scene.root.renderDrawables(renderObjects, bindingResources);
             }
-            passEncoder.end();
+            const passEncoder: IGPURenderPass = {
+                descriptor: gltfRenderPassDescriptor,
+                renderObjects
+            };
+            passEncoders.push(passEncoder);
         } else
         {
             // Our skinned grid isn't checking for depth, so we pass it
             // a separate render descriptor that does not take in a depth texture
-            const passEncoder = commandEncoder.beginRenderPass(
-                skinnedGridRenderPassDescriptor
-            );
-            passEncoder.setPipeline(skinnedGridPipeline);
-            passEncoder.setBindGroup(0, cameraBGCluster.bindGroups[0]);
-            passEncoder.setBindGroup(1, generalUniformsBGCLuster.bindGroups[0]);
-            passEncoder.setBindGroup(2, skinnedGridBoneBGCluster.bindGroups[0]);
             // Pass in vertex and index buffers generated from our static skinned grid
             // data at ./gridData.ts
-            passEncoder.setVertexBuffer(0, skinnedGridVertexBuffers.positions);
-            passEncoder.setVertexBuffer(1, skinnedGridVertexBuffers.joints);
-            passEncoder.setVertexBuffer(2, skinnedGridVertexBuffers.weights);
-            passEncoder.setIndexBuffer(skinnedGridVertexBuffers.indices, 'uint16');
-            passEncoder.drawIndexed(gridIndices.length, 1);
-            passEncoder.end();
+            const renderObject: IGPURenderObject = {
+                pipeline: skinnedGridPipeline,
+                bindingResources: {
+                    ...cameraBGCluster,
+                    ...generalUniformsBGCLuster,
+                    ...skinnedGridBoneBGCluster,
+                },
+                vertices: skinnedGridVertexBuffers.vertices,
+                indices: skinnedGridVertexBuffers.indices,
+                drawIndexed: { indexCount: gridIndices.length },
+            };
+            //
+            passEncoders.push({
+                descriptor: skinnedGridRenderPassDescriptor,
+                renderObjects: [renderObject],
+            })
         }
 
-        device.queue.submit([commandEncoder.finish()]);
+        webgpu.submit({ commandEncoders: [{ passEncoders: passEncoders }] });
 
         requestAnimationFrame(frame);
     }
