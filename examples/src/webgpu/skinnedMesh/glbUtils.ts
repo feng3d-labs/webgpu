@@ -1,7 +1,7 @@
-import { Mat4, Quatn, Vec3n, mat4 } from 'wgpu-matrix';
+import { Mat4, mat4, Quatn, Vec3n } from 'wgpu-matrix';
 import { Accessor, BufferView, GlTf, Scene } from './gltf';
 
-import { IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu-renderer";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -485,13 +485,13 @@ export class GLTFMesh
         }
     }
 
-    render(renderObjects: IGPURenderObject[], bindGroups: GPUBindGroup[])
+    render(renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources)
     {
         // We take a pretty simple approach to start. Just loop through all the primitives and
         // call their individual draw methods
         for (let i = 0; i < this.primitives.length; ++i)
         {
-            this.primitives[i].render(renderObjects, bindGroups);
+            this.primitives[i].render(renderObjects, bindingResources);
         }
     }
 }
@@ -572,7 +572,9 @@ export class GLTFNode
     drawables: GLTFMesh[];
     test = 0;
     skin?: GLTFSkin;
-    private nodeTransformGPUBuffer: Float32Array;
+    private nodeTransformBindGroup = {
+        node_uniforms: { world_matrix: new Float32Array(16) }
+    };
 
     constructor(
         source: BaseTransformation,
@@ -589,7 +591,7 @@ export class GLTFNode
         this.localMatrix = mat4.identity();
         this.worldMatrix = mat4.identity();
         this.drawables = [];
-        this.nodeTransformGPUBuffer = new Float32Array(16);
+
         this.skin = skin;
     }
 
@@ -617,13 +619,9 @@ export class GLTFNode
             mat4.copy(this.localMatrix, this.worldMatrix);
         }
         const worldMatrix = this.worldMatrix;
-        device.queue.writeBuffer(
-            this.nodeTransformGPUBuffer,
-            0,
-            worldMatrix.buffer,
-            worldMatrix.byteOffset,
-            worldMatrix.byteLength
-        );
+
+        this.nodeTransformBindGroup.node_uniforms.world_matrix = worldMatrix;
+
         for (const child of this.children)
         {
             child.updateWorldMatrix(device, worldMatrix);
@@ -640,7 +638,7 @@ export class GLTFNode
     }
 
     renderDrawables(
-        bindGroups: GPUBindGroup[]
+        renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources
     )
     {
         if (this.drawables !== undefined)
@@ -649,24 +647,25 @@ export class GLTFNode
             {
                 if (this.skin)
                 {
-                    drawable.render([
-                        ...bindGroups,
-                        this.nodeTransformBindGroup,
-                        this.skin.skinBindGroup,
-                    ]);
+                    drawable.render(renderObjects, {
+                        ...bindingResources,
+                        ...this.nodeTransformBindGroup,
+                        ...this.skin.skinBindGroup,
+                    });
                 } else
                 {
-                    drawable.render([
-                        ...bindGroups,
-                        this.nodeTransformBindGroup,
-                    ]);
+                    drawable.render(renderObjects, {
+                        ...bindingResources,
+                        ...this.nodeTransformBindGroup,
+                    }
+                    );
                 }
             }
         }
         // Render any of its children
         for (const child of this.children)
         {
-            child.renderDrawables(passEncoder, bindGroups);
+            child.renderDrawables(renderObjects, bindingResources);
         }
     }
 
@@ -707,47 +706,20 @@ export class GLTFSkin
     // [5, 2, 3] means our joint info is at nodes 5, 2, and 3
     joints: number[];
     // Bind Group for this skin's uniform buffer
-    skinBindGroup: GPUBindGroup;
+    skinBindGroup: IGPUBindingResources;
     // Static bindGroupLayout shared across all skins
     // In a larger shader with more properties, certain bind groups
     // would likely have to be combined due to device limitations in the number of bind groups
     // allowed within a shader
     // Inverse bind matrices parsed from the accessor
     private inverseBindMatrices: Float32Array;
-    private jointMatricesUniformBuffer: GPUBuffer;
-    private inverseBindMatricesUniformBuffer: GPUBuffer;
-    static skinBindGroupLayout: GPUBindGroupLayout;
-
-    static createSharedBindGroupLayout(device: GPUDevice)
-    {
-        this.skinBindGroupLayout = device.createBindGroupLayout({
-            label: 'StaticGLTFSkin.bindGroupLayout',
-            entries: [
-                // Holds the initial joint matrices buffer
-                {
-                    binding: 0,
-                    buffer: {
-                        type: 'read-only-storage',
-                    },
-                    visibility: GPUShaderStage.VERTEX,
-                },
-                // Holds the inverse bind matrices buffer
-                {
-                    binding: 1,
-                    buffer: {
-                        type: 'read-only-storage',
-                    },
-                    visibility: GPUShaderStage.VERTEX,
-                },
-            ],
-        });
-    }
+    private jointMatricesUniformBuffer: Float32Array;
+    private inverseBindMatricesUniformBuffer: Float32Array;
 
     // For the sake of simplicity and easier debugging, we're going to convert our skin gpu accessor to a
     // float32array, which should be performant enough for this example since there is only one skin (again, this)
     // is not a comprehensive gltf parser
     constructor(
-        device: GPUDevice,
         inverseBindMatricesAccessor: GLTFAccessor,
         joints: number[]
     )
@@ -769,57 +741,39 @@ export class GLTFSkin
             inverseBindMatricesAccessor.view.view.byteLength / 4
         );
         this.joints = joints;
-        const skinGPUBufferUsage: GPUBufferDescriptor = {
-            size: Float32Array.BYTES_PER_ELEMENT * 16 * joints.length,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
+        this.jointMatricesUniformBuffer = new Float32Array(16 * joints.length);
+        this.inverseBindMatricesUniformBuffer = this.inverseBindMatrices;
+
+        this.skinBindGroup = {
+            joint_matrices: { bufferView: this.jointMatricesUniformBuffer },
+            inverse_bind_matrices: { bufferView: this.inverseBindMatricesUniformBuffer },
         };
-        this.jointMatricesUniformBuffer = device.createBuffer(skinGPUBufferUsage);
-        this.inverseBindMatricesUniformBuffer =
-            device.createBuffer(skinGPUBufferUsage);
-        device.queue.writeBuffer(
-            this.inverseBindMatricesUniformBuffer,
-            0,
-            this.inverseBindMatrices
-        );
-        this.skinBindGroup = device.createBindGroup({
-            layout: GLTFSkin.skinBindGroupLayout,
-            label: 'StaticGLTFSkin.bindGroup',
-            entries: [
-                {
-                    binding: 0,
-                    resource: {
-                        buffer: this.jointMatricesUniformBuffer,
-                    },
-                },
-                {
-                    binding: 1,
-                    resource: {
-                        buffer: this.inverseBindMatricesUniformBuffer,
-                    },
-                },
-            ],
-        });
     }
 
-    update(device: GPUDevice, currentNodeIndex: number, nodes: GLTFNode[])
+    update(currentNodeIndex: number, nodes: GLTFNode[])
     {
         const globalWorldInverse = mat4.inverse(
             nodes[currentNodeIndex].worldMatrix
         );
+        const gpuBuffer = getIGPUBuffer(this.jointMatricesUniformBuffer)
+        const writeBuffers = gpuBuffer.writeBuffers || [];
+
         for (let j = 0; j < this.joints.length; j++)
         {
             const joint = this.joints[j];
             const dstMatrix = mat4.identity();
             mat4.multiply(globalWorldInverse, nodes[joint].worldMatrix, dstMatrix);
             const toWrite = dstMatrix;
-            device.queue.writeBuffer(
-                this.jointMatricesUniformBuffer,
-                j * 64,
-                toWrite.buffer,
-                toWrite.byteOffset,
-                toWrite.byteLength
-            );
+            //
+            writeBuffers.push({
+                bufferOffset: j * 64,
+                data: toWrite.buffer,
+                dataOffset: toWrite.byteOffset,
+                size: toWrite.byteLength,
+            })
         }
+
+        gpuBuffer.writeBuffers = writeBuffers;
     }
 }
 
@@ -980,29 +934,16 @@ export const convertGLBToJSONAndBinary = async (
         }
     }
 
-    GLTFSkin.createSharedBindGroupLayout(device);
     for (const skin of jsonChunk.skins)
     {
         const inverseBindMatrixAccessor = accessors[skin.inverseBindMatrices];
         const joints = skin.joints;
-        skins.push(new GLTFSkin(device, inverseBindMatrixAccessor, joints));
+        skins.push(new GLTFSkin(inverseBindMatrixAccessor, joints));
     }
 
     const nodes: GLTFNode[] = [];
 
     // Access each node. If node references a mesh, add mesh to that node
-    const nodeUniformsBindGroupLayout = device.createBindGroupLayout({
-        label: 'NodeUniforms.bindGroupLayout',
-        entries: [
-            {
-                binding: 0,
-                buffer: {
-                    type: 'uniform',
-                },
-                visibility: GPUShaderStage.VERTEX,
-            },
-        ],
-    });
     for (const currNode of jsonChunk.nodes)
     {
         const baseTransformation = new BaseTransformation(
@@ -1011,8 +952,6 @@ export const convertGLBToJSONAndBinary = async (
             currNode.scale
         );
         const nodeToCreate = new GLTFNode(
-            device,
-            nodeUniformsBindGroupLayout,
             baseTransformation,
             currNode.name,
             skins[currNode.skin]
@@ -1043,7 +982,7 @@ export const convertGLBToJSONAndBinary = async (
 
     for (const jsonScene of jsonChunk.scenes)
     {
-        const scene = new GLTFScene(nodeUniformsBindGroupLayout, jsonScene);
+        const scene = new GLTFScene(jsonScene);
         const sceneChildren = scene.nodes;
         sceneChildren.forEach((childIdx) =>
         {
