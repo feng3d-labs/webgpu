@@ -1,6 +1,6 @@
 import { GUI } from 'dat.gui';
 import { Mat4, mat4, quat, vec3 } from 'wgpu-matrix';
-import { createBindGroupCluster } from '../bitonicSort/utils';
+
 import { convertGLBToJSONAndBinary, GLTFSkin } from './glbUtils';
 import gltfWGSL from './gltf.wgsl';
 import gridWGSL from './grid.wgsl';
@@ -230,7 +230,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Fetch whale resources from the glb file
     const whaleScene = await fetch('../../../assets/gltf/whale.glb')
         .then((res) => res.arrayBuffer())
-        .then((buffer) => convertGLBToJSONAndBinary(buffer, device));
+        .then((buffer) => convertGLBToJSONAndBinary(buffer));
 
     // Builds a render pipeline for our whale mesh
     // Since we are building a lightweight gltf parser around a gltf scene with a known
@@ -238,17 +238,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // within our scene. A more robust gltf parser would loop through all the meshes,
     // cache replicated pipelines, and perform other optimizations.
     whaleScene.meshes[0].buildRenderPipeline(
-        device,
         gltfWGSL,
         gltfWGSL,
-        presentationFormat,
-        depthTexture.format,
-        [
-            cameraBGCluster.bindGroupLayout,
-            generalUniformsBGCLuster.bindGroupLayout,
-            nodeUniformsBindGroupLayout,
-            GLTFSkin.skinBindGroupLayout,
-        ]
     );
 
     // Create skinned grid resources
