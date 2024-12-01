@@ -296,7 +296,7 @@ export interface IGPUPrimitiveState
  *
  * 描述顶点着色器源码入口点以及顶点属性缓冲区布局。
  *
- * 顶点属性缓冲区布局将由给出顶点数据自动生成。
+ * `buffers` 顶点属性缓冲区布局将由给出顶点数据自动生成。
  *
  * @see GPUVertexState
  */

@@ -193,9 +193,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const cameraBGCluster: IGPUBindingResources = {
         camera_uniforms: {
             bufferView: cameraBuffer,
-            proj_matrix: new Float32Array(16),
-            view_matrix: new Float32Array(16),
-            model_matrix: new Float32Array(16),
         }
     };
 
@@ -226,11 +223,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Create skinned grid resources
     const skinnedGridVertexBuffers = createSkinnedGridBuffers();
     // Buffer for our uniforms, joints, and inverse bind matrices
-    const skinnedGridUniformBufferUsage: GPUBufferDescriptor = {
-        // 5 4x4 matrices, one for each bone
-        size: MAT4X4_BYTES * 5,
-        usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-    };
     const skinnedGridJointUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
     const skinnedGridInverseBindUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
     const skinnedGridBoneBGCluster: IGPUBindingResources = {
