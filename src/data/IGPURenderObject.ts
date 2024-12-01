@@ -150,7 +150,7 @@ export interface IGPURenderPipeline
  * 
  * {@link GPUDepthStencilState}
  */
-export interface IGPUDepthStencilState extends Omit<GPUDepthStencilState, "format">
+export interface IGPUDepthStencilState
 {
     /**
      * Indicates if this {@link GPURenderPipeline} can modify
@@ -171,11 +171,11 @@ export interface IGPUDepthStencilState extends Omit<GPUDepthStencilState, "forma
     /**
      * Defines how stencil comparisons and operations are performed for front-facing primitives.
      */
-    readonly stencilFront?: GPUStencilFaceState;
+    readonly stencilFront?: IGPUStencilFaceState;
     /**
      * Defines how stencil comparisons and operations are performed for back-facing primitives.
      */
-    readonly stencilBack?: GPUStencilFaceState;
+    readonly stencilBack?: IGPUStencilFaceState;
     /**
      * Bitmask controlling which {@link GPURenderPassDescriptor#depthStencilAttachment} stencil value
      * bits are read when performing stencil comparison tests.
@@ -201,6 +201,33 @@ export interface IGPUDepthStencilState extends Omit<GPUDepthStencilState, "forma
 }
 
 /**
+ * {@link GPUStencilFaceState}
+ */
+export interface IGPUStencilFaceState
+{
+    /**
+     * The {@link GPUCompareFunction} used when testing the {@link RenderState#[[stencilReference]]} value
+     * against the fragment's {@link GPURenderPassDescriptor#depthStencilAttachment} stencil values.
+     */
+    readonly compare?: GPUCompareFunction;
+    /**
+     * The {@link GPUStencilOperation} performed if the fragment stencil comparison test described by
+     * {@link GPUStencilFaceState#compare} fails.
+     */
+    readonly failOp?: GPUStencilOperation;
+    /**
+     * The {@link GPUStencilOperation} performed if the fragment depth comparison described by
+     * {@link GPUDepthStencilState#depthCompare} fails.
+     */
+    readonly depthFailOp?: GPUStencilOperation;
+    /**
+     * The {@link GPUStencilOperation} performed if the fragment stencil comparison test described by
+     * {@link GPUStencilFaceState#compare} passes.
+     */
+    readonly passOp?: GPUStencilOperation;
+}
+
+/**
  * 多重采样阶段描述。
  *
  * 多重采样次数将由 {@link IGPURenderPassDescriptor.multisample} 覆盖。
@@ -222,7 +249,7 @@ export interface IGPUMultisampleState
 /**
  * {@link GPUPrimitiveState}
  */
-export interface IGPUPrimitiveState extends GPUPrimitiveState
+export interface IGPUPrimitiveState
 {
     /**
      * The type of primitive to be constructed from the vertex inputs.
@@ -237,6 +264,31 @@ export interface IGPUPrimitiveState extends GPUPrimitiveState
      * WebGPU 默认 `"none"` ,不进行剔除。
      */
     readonly cullMode?: GPUCullMode;
+
+    /**
+     * For pipelines with strip topologies
+     * ({@link GPUPrimitiveTopology#"line-strip"} or {@link GPUPrimitiveTopology#"triangle-strip"}),
+     * this determines the index buffer format and primitive restart value
+     * ({@link GPUIndexFormat#"uint16"}/`0xFFFF` or {@link GPUIndexFormat#"uint32"}/`0xFFFFFFFF`).
+     * It is not allowed on pipelines with non-strip topologies.
+     * Note: Some implementations require knowledge of the primitive restart value to compile
+     * pipeline state objects.
+     * To use a strip-topology pipeline with an indexed draw call
+     * ({@link GPURenderCommandsMixin#drawIndexed()} or {@link GPURenderCommandsMixin#drawIndexedIndirect}),
+     * this must be set, and it must match the index buffer format used with the draw call
+     * (set in {@link GPURenderCommandsMixin#setIndexBuffer}).
+     * See [[#primitive-assembly]] for additional details.
+     */
+    readonly stripIndexFormat?: GPUIndexFormat;
+    /**
+     * Defines which polygons are considered front-facing.
+     */
+    readonly frontFace?: GPUFrontFace;
+    /**
+     * If true, indicates that depth clipping is disabled.
+     * Requires the {@link GPUFeatureName#"depth-clip-control"} feature to be enabled.
+     */
+    readonly unclippedDepth?: boolean;
 }
 
 /**
