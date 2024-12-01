@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const squareVertices = new Uint32Array([0, 0, 0, 1, 1, 0, 1, 1]);
     const verticesSquareBuffer: IGPUVertexAttributes = {
-        pos: { data: squareVertices, numComponents: 2 }
+        pos: { data: squareVertices, format: "uint32x2" }
     };
 
     function addGUI()
@@ -65,12 +65,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         buffer0 = cells;
 
         verticesBuffer0 = {
-            cell: { data: buffer0, numComponents: 1, stepMode: "instance" }
+            cell: { data: buffer0, format: "uint32", stepMode: "instance" }
         };
 
         buffer1 = new Uint32Array(cells.byteLength);
         verticesBuffer1 = {
-            cell: { data: buffer1, numComponents: 1, stepMode: "instance" }
+            cell: { data: buffer1, format: "uint32", stepMode: "instance" }
         };
 
         const bindGroup0: IGPUBindingResources = {

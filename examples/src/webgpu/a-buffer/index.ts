@@ -36,7 +36,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // Create the model vertex buffer
     const vertices: IGPUVertexAttributes = {
-        position: { data: new Float32Array(mesh.positions.flat()), numComponents: 3, vertexSize: 12 }
+        position: { data: new Float32Array(mesh.positions.flat()), format: "float32x3", vertexSize: 12 }
     };
     // Create the model index buffer
     const indices = new Uint16Array(mesh.triangles.flat());

@@ -43,8 +43,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   // Create a vertex buffer from the cube data.
   const vertices: IGPUVertexAttributes = {
-    position: { data: cubeVertexArray, numComponents: 4, offset: cubePositionOffset, vertexSize: cubeVertexSize },
-    uv: { data: cubeVertexArray, numComponents: 2, offset: cubeUVOffset, vertexSize: cubeVertexSize },
+    position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, vertexSize: cubeVertexSize },
+    uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, vertexSize: cubeVertexSize },
   };
 
   const pipeline: IGPURenderPipeline = {

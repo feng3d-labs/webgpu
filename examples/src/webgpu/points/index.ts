@@ -102,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const kNumPoints = vertexData.length / 3;
 
   const vertices: IGPUVertexAttributes = {
-    position: { data: vertexData, numComponents: 3, vertexSize: 12, stepMode: "instance" },
+    position: { data: vertexData, format: "float32x3", vertexSize: 12, stepMode: "instance" },
   };
 
   // Use canvas 2d to make texture data
