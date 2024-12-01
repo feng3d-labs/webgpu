@@ -182,6 +182,8 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
         const format = vertexAttribute.format;
         //
         console.assert(possibleFormats.indexOf(format) !== -1, `顶点${attributeName} 提供的数据格式 ${format} 与着色器中类型 ${wgslType} 不匹配！`);
+        console.assert(data.constructor.name === gpuVertexFormatMap[format].typedArrayConstructor.name,
+            `顶点${attributeName} 提供的数据类型 ${data.constructor.name} 与格式 ${format} 不匹配！请使用 ${data.constructor.name} 来组织数据或者更改数据格式。`);
 
         // 如果 偏移值大于 单个顶点尺寸，则该值被放入 IGPUVertexBuffer.offset。
         const vertexByteSize = gpuVertexFormatMap[format].byteSize;
