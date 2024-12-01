@@ -132,7 +132,6 @@ export default class Scene
   readonly vertices: Float32Array;
   readonly vertexAttributes: IGPUVertexAttributes;
   readonly indices: Uint16Array;
-  readonly vertexBufferLayout: GPUVertexBufferLayout[];
   readonly quadBuffer: ArrayBufferView;
   readonly quads = [
     ...box({
@@ -282,45 +281,18 @@ export default class Scene
     const vertices = vertexData;
 
     const vertexAttributes: IGPUVertexAttributes = {
-      position: { data: vertices, offset: 0 * 4, vertexSize: vertexStride },
-      uv: { data: vertices, offset: 4 * 4, vertexSize: vertexStride },
-      emissive: { data: vertices, offset: 7 * 4, vertexSize: vertexStride },
+      position: { data: vertices, numComponents: 4, offset: 0 * 4, vertexSize: vertexStride },
+      uv: { data: vertices, numComponents: 3, offset: 4 * 4, vertexSize: vertexStride },
+      emissive: { data: vertices, numComponents: 3, offset: 7 * 4, vertexSize: vertexStride },
     };
 
     const indices = indexData;
-
-    const vertexBufferLayout: GPUVertexBufferLayout[] = [
-      {
-        arrayStride: vertexStride,
-        attributes: [
-          {
-            // position
-            shaderLocation: 0,
-            offset: 0 * 4,
-            format: "float32x4",
-          } as GPUVertexAttribute,
-          {
-            // uv
-            shaderLocation: 1,
-            offset: 4 * 4,
-            format: "float32x3",
-          } as GPUVertexAttribute,
-          {
-            // color
-            shaderLocation: 2,
-            offset: 7 * 4,
-            format: "float32x3",
-          } as GPUVertexAttribute,
-        ],
-      },
-    ];
 
     this.vertexCount = vertexCount;
     this.indexCount = indexCount;
     this.vertices = vertices;
     this.vertexAttributes = vertexAttributes;
     this.indices = indices;
-    this.vertexBufferLayout = vertexBufferLayout;
     this.quadBuffer = quadBuffer;
   }
 }

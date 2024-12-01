@@ -180,19 +180,16 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
         let arrayStride = vertexAttribute.vertexSize;
         const stepMode = vertexAttribute.stepMode;
         // 根据顶点数据调整 布局中的数据格式。
-        if (vertexAttribute.numComponents !== undefined)
+        const formats = format.split("x");
+        if (Number(formats[1]) !== vertexAttribute.numComponents)
         {
-            const formats = format.split("x");
-            if (Number(formats[1]) !== vertexAttribute.numComponents)
+            if (vertexAttribute.numComponents === 1)
             {
-                if (vertexAttribute.numComponents === 1)
-                {
-                    format = formats[0] as any;
-                }
-                else
-                {
-                    format = `${formats[0]}x${vertexAttribute.numComponents}` as any;
-                }
+                format = formats[0] as any;
+            }
+            else
+            {
+                format = `${formats[0]}x${vertexAttribute.numComponents}` as any;
             }
         }
 

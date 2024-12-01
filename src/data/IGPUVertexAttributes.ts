@@ -15,12 +15,19 @@ export interface IGPUVertexAttribute
     /**
      * 顶点数据。
      */
-    data: ArrayBufferView;
+    data: | Float32Array
+    | Uint32Array
+    | Int32Array
+    | Uint16Array
+    | Int16Array
+    | Uint8ClampedArray
+    | Uint8Array
+    | Int8Array;
 
     /**
      * 顶点数据元素数量。
      */
-    readonly numComponents?: 1 | 2 | 3 | 4;
+    readonly numComponents: 1 | 2 | 3 | 4;
 
     /**
      * 所在顶点数据中的偏移字节数。

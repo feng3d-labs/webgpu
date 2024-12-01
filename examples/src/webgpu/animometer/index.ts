@@ -58,8 +58,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const renderObject: IGPURenderObject = {
         pipeline,
         vertices: {
-            position: { data: vertexBuffer, offset: 0, vertexSize: 2 * vec4Size },
-            color: { data: vertexBuffer, offset: vec4Size, vertexSize: 2 * vec4Size },
+            position: { data: vertexBuffer, numComponents: 4, offset: 0, vertexSize: 2 * vec4Size },
+            color: { data: vertexBuffer, numComponents: 4, offset: vec4Size, vertexSize: 2 * vec4Size },
         },
         bindingResources: {},
         draw: { vertexCount: 3, instanceCount: 1 },

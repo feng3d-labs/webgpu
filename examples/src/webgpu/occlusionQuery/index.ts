@@ -128,7 +128,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: pipeline,
         vertices: {
             position: { data: vertexBuf, offset: 0, vertexSize: 6 * 4, numComponents: 3 },
-            normal: { data: vertexBuf, offset: 12, vertexSize: 6 * 4 },
+            normal: { data: vertexBuf, offset: 12, vertexSize: 6 * 4, numComponents: 3 },
         },
         indices: indices,
         bindingResources: {
