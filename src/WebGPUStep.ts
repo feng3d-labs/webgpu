@@ -3,7 +3,7 @@ import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPass } from "./data/IGPURenderPass";
+import { IGPURenderPass, IGPURenderPassObject } from "./data/IGPURenderPass";
 import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { WebGPU } from "./WebGPU";
@@ -39,7 +39,7 @@ export class WebGPUStep
 
     renderObject(renderObject: IGPURenderObject)
     {
-        this._currentRenderPassEncoder.renderObjects.push(renderObject);
+        (this._currentRenderPassEncoder.renderObjects as IGPURenderPassObject[]).push(renderObject);
     }
 
     computePass()
