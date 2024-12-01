@@ -15,14 +15,7 @@ export interface IGPUVertexAttribute
     /**
      * 顶点数据。
      */
-    data: | Float32Array
-    | Uint32Array
-    | Int32Array
-    | Uint16Array
-    | Int16Array
-    | Uint8ClampedArray
-    | Uint8Array
-    | Int8Array;
+    data: IGPUVertexAttributeDataType;
 
     /**
      * 顶点数据元素数量。
@@ -48,3 +41,12 @@ export interface IGPUVertexAttribute
      */
     readonly stepMode?: GPUVertexStepMode;
 }
+
+export type IGPUVertexAttributeDataType = | Float32Array
+| Uint32Array
+| Int32Array
+| Uint16Array
+| Int16Array
+| Uint8ClampedArray
+| Uint8Array
+| Int8Array
