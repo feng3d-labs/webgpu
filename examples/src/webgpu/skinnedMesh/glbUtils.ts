@@ -1,7 +1,7 @@
 import { Mat4, mat4, Quatn, Vec3n } from 'wgpu-matrix';
 import { Accessor, BufferView, GlTf, Scene } from './gltf';
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPUPrimitiveState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu-renderer";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -344,8 +344,6 @@ export class GLTFPrimitive
     renderPipeline: IGPURenderPipeline;
     vertices: IGPUVertexAttributes;
     indices: Uint16Array | Uint32Array
-    private attributeMap: AttributeMapInterface;
-    private attributes: string[] = [];
     constructor(
         topology: GLTFRenderMode,
         attributeMap: AttributeMapInterface,
@@ -354,19 +352,24 @@ export class GLTFPrimitive
     {
         this.topology = topology;
         this.renderPipeline = null;
-        // Maps attribute names to accessors
-        this.attributeMap = attributeMap;
-        this.attributes = attributes;
 
-        for (const key in this.attributeMap)
+        // POSITION, NORMAL, TEXCOORD_0, JOINTS_0, WEIGHTS_0
+        this.vertices = {
+            position: { data: attributeMap['POSITION'].view.view, numComponents: 3 },
+            normal: { data: attributeMap['NORMAL'].view.view, numComponents: 3 },
+            texcoord: { data: attributeMap['TEXCOORD_0'].view.view, numComponents: 2 },
+            joints: { data: attributeMap['JOINTS_0'].view.view, numComponents: 4 },
+            weights: { data: attributeMap['WEIGHTS_0'].view.view, numComponents: 4 },
+        };
+
+        const INDICES = attributeMap['INDICES'];
+        if (INDICES.view.byteLength / INDICES.count === 2)
         {
-            this.attributeMap[key].view.needsUpload = true;
-            if (key === 'INDICES')
-            {
-                this.attributeMap['INDICES'].view.addUsage(GPUBufferUsage.INDEX);
-                continue;
-            }
-            this.attributeMap[key].view.addUsage(GPUBufferUsage.VERTEX);
+            this.indices = new Uint16Array(INDICES.view.view.buffer);
+        }
+        else
+        {
+            throw ``;
         }
     }
 
@@ -376,22 +379,15 @@ export class GLTFPrimitive
         label: string
     )
     {
-        // For now, just check if the attributeMap contains a given attribute using map.has(), and add it if it does
         // POSITION, NORMAL, TEXCOORD_0, JOINTS_0, WEIGHTS_0 for order
         // Vertex attribute state and shader stage
-        let VertexInputShaderString = `struct VertexInput {\n`;
-        this.attributes.forEach(
-            (attr, idx) =>
-            {
-                const vertexFormat: GPUVertexFormat =
-                    this.attributeMap[attr].vertexType;
-                const attrString = attr.toLowerCase().replace(/_0$/, '');
-                VertexInputShaderString += `\t@location(${idx}) ${attrString}: ${convertGPUVertexFormatToWGSLFormat(
-                    vertexFormat
-                )},\n`;
-            }
-        );
-        VertexInputShaderString += '}';
+        const VertexInputShaderString = `struct VertexInput {
+	@location(0) position: vec3f,
+	@location(1) normal: vec3f,
+	@location(2) texcoord: vec2f,
+	@location(3) joints: vec4u,
+	@location(4) weights: vec4f,
+}`;
 
         const vertexState: IGPUVertexState = {
             // Shader stage info
@@ -407,11 +403,13 @@ export class GLTFPrimitive
 
         // Our loader only supports triangle lists and strips, so by default we set
         // the primitive topology to triangle list, and check if it's instead a triangle strip
-        const primitive: GPUPrimitiveState = { topology: 'triangle-list' };
+        let primitive: IGPUPrimitiveState = { topology: 'triangle-list' };
         if (this.topology == GLTFRenderMode.TRIANGLE_STRIP)
         {
-            primitive.topology = 'triangle-strip';
-            primitive.stripIndexFormat = this.attributeMap['INDICES'].vertexType;
+            primitive = {
+                topology: 'triangle-strip',
+                stripIndexFormat: "uint16",
+            }
         }
 
         const rpDescript: IGPURenderPipeline = {
