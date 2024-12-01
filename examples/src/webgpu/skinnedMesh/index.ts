@@ -7,7 +7,7 @@ import gridWGSL from './grid.wgsl';
 import { gridIndices } from './gridData';
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline, } from './gridUtils';
 
-import { IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPURenderObject, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -183,49 +183,24 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
-    const cameraBuffer = device.createBuffer({
-        size: MAT4X4_BYTES * 3,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    const cameraBuffer = new Float32Array(48);
 
-    const cameraBGCluster = createBindGroupCluster(
-        [0],
-        [GPUShaderStage.VERTEX],
-        ['buffer'],
-        [{ type: 'uniform' }],
-        [[{ buffer: cameraBuffer }]],
-        'Camera',
-        device
-    );
+    const cameraBGCluster = {
+        camera_uniforms: {
+            proj_matrix: new Float32Array(16),
+            view_matrix: new Float32Array(16),
+            model_matrix: new Float32Array(16),
+        }
+    };
 
     const generalUniformsBuffer = device.createBuffer({
         size: Uint32Array.BYTES_PER_ELEMENT * 2,
         usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
-    const generalUniformsBGCLuster = createBindGroupCluster(
-        [0],
-        [GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT],
-        ['buffer'],
-        [{ type: 'uniform' }],
-        [[{ buffer: generalUniformsBuffer }]],
-        'General',
-        device
-    );
-
-    // Same bindGroupLayout as in main file.
-    const nodeUniformsBindGroupLayout = device.createBindGroupLayout({
-        label: 'NodeUniforms.bindGroupLayout',
-        entries: [
-            {
-                binding: 0,
-                buffer: {
-                    type: 'uniform',
-                },
-                visibility: GPUShaderStage.VERTEX,
-            },
-        ],
-    });
+    const generalUniformsBGCLuster = {
+        general_uniforms: { render_mode: 1, skin_mode: 1 },
+    };
 
     // Fetch whale resources from the glb file
     const whaleScene = await fetch('../../../assets/gltf/whale.glb')
@@ -470,29 +445,27 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         animSkinnedGrid(gridBoneCollection.transforms, angle);
 
         // Write to mvp to camera buffer
-        device.queue.writeBuffer(
-            cameraBuffer,
-            0,
-            projectionMatrix.buffer,
-            projectionMatrix.byteOffset,
-            projectionMatrix.byteLength
-        );
-
-        device.queue.writeBuffer(
-            cameraBuffer,
-            64,
-            viewMatrix.buffer,
-            viewMatrix.byteOffset,
-            viewMatrix.byteLength
-        );
-
-        device.queue.writeBuffer(
-            cameraBuffer,
-            128,
-            modelMatrix.buffer,
-            modelMatrix.byteOffset,
-            modelMatrix.byteLength
-        );
+        let buffer = getIGPUBuffer(cameraBuffer);
+        let writeBuffers = buffer.writeBuffers || [];
+        writeBuffers.push({
+            bufferOffset: 0,
+            data: projectionMatrix,
+            dataOffset: projectionMatrix.byteOffset,
+            size: projectionMatrix.byteLength
+        });
+        writeBuffers.push({
+            bufferOffset: 64,
+            data: viewMatrix,
+            dataOffset: viewMatrix.byteOffset,
+            size: viewMatrix.byteLength
+        });
+        writeBuffers.push({
+            bufferOffset: 128,
+            data: modelMatrix,
+            dataOffset: modelMatrix.byteOffset,
+            size: modelMatrix.byteLength
+        });
+        buffer.writeBuffers = writeBuffers;
 
         // Write to skinned grid bone uniform buffer
         for (let i = 0; i < gridBoneCollection.transforms.length; i++)
@@ -530,9 +503,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             const passEncoder = commandEncoder.beginRenderPass(
                 gltfRenderPassDescriptor
             );
+            const renderObjects: IGPURenderObject[] = [];
             for (const scene of whaleScene.scenes)
             {
-                scene.root.renderDrawables(passEncoder, [
+                scene.root.renderDrawables(renderObjects, [
                     cameraBGCluster.bindGroups[0],
                     generalUniformsBGCLuster.bindGroups[0],
                 ]);
