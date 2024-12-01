@@ -185,7 +185,14 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
             const formats = format.split("x");
             if (Number(formats[1]) !== vertexAttribute.numComponents)
             {
-                format = `${formats[0]}x${vertexAttribute.numComponents}` as any;
+                if (vertexAttribute.numComponents === 1)
+                {
+                    format = formats[0] as any;
+                }
+                else
+                {
+                    format = `${formats[0]}x${vertexAttribute.numComponents}` as any;
+                }
             }
         }
 
