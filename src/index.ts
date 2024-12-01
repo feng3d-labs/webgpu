@@ -24,6 +24,7 @@ export * from "./data/IGPUTimestampQuery";
 export * from "./data/IGPUVertexAttributes";
 
 export * from "./caches/getIGPUBuffer";
+export * from "./types/VertexFormat";
 
 /**
  * 内部

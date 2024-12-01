@@ -1,7 +1,7 @@
 import { Mat4, mat4, Quatn, Vec3n } from 'wgpu-matrix';
 import { Accessor, BufferView, GlTf, Scene } from './gltf';
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPUPrimitiveState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPUPrimitiveState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu-renderer";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -342,6 +342,8 @@ export class GLTFPrimitive
 {
     topology: GLTFRenderMode;
     renderPipeline: IGPURenderPipeline;
+    private attributeMap: AttributeMapInterface;
+    private attributes: string[] = [];
     vertices: IGPUVertexAttributes;
     indices: Uint16Array | Uint32Array
     constructor(
@@ -352,24 +354,42 @@ export class GLTFPrimitive
     {
         this.topology = topology;
         this.renderPipeline = null;
+        this.attributeMap = attributeMap;
+        this.attributes = attributes;
 
         // POSITION, NORMAL, TEXCOORD_0, JOINTS_0, WEIGHTS_0
-        this.vertices = {
-            position: { data: attributeMap['POSITION'].view.view, numComponents: 3 },
-            normal: { data: attributeMap['NORMAL'].view.view, numComponents: 3 },
-            texcoord: { data: attributeMap['TEXCOORD_0'].view.view, numComponents: 2 },
-            joints: { data: attributeMap['JOINTS_0'].view.view, numComponents: 4 },
-            weights: { data: attributeMap['WEIGHTS_0'].view.view, numComponents: 4 },
-        };
 
-        const INDICES = attributeMap['INDICES'];
-        if (INDICES.view.byteLength / INDICES.count === 2)
+        this.vertices = {};
+
+        this.attributes.forEach(
+            (attr, idx) =>
+            {
+                const view = this.attributeMap[attr].view.view;
+                const vertexFormat: GPUVertexFormat = this.attributeMap[attr].vertexType;
+                const attrString = attr.toLowerCase().replace(/_0$/, '');
+
+                const numComponents = gpuVertexFormatMap[vertexFormat].components
+                const Cls = gpuVertexFormatMap[vertexFormat].typedArrayConstructor
+
+                let data = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
+
+                this.vertices[attrString] = { data, format: vertexFormat, }
+            }
+        );
         {
-            this.indices = new Uint16Array(INDICES.view.view.buffer);
-        }
-        else
-        {
-            throw ``;
+            const INDICES = attributeMap['INDICES'];
+            const view = INDICES.view.view;
+            const vertexFormat: GPUIndexFormat = INDICES.vertexType;
+            let Cls: Uint16ArrayConstructor | Uint32ArrayConstructor;
+            if (vertexFormat === "uint16")
+            {
+                Cls = Uint16Array;
+            }
+            else
+            {
+                Cls = Uint32Array;
+            }
+            this.indices = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT) as any;
         }
     }
 
@@ -381,13 +401,19 @@ export class GLTFPrimitive
     {
         // POSITION, NORMAL, TEXCOORD_0, JOINTS_0, WEIGHTS_0 for order
         // Vertex attribute state and shader stage
-        const VertexInputShaderString = `struct VertexInput {
-	@location(0) position: vec3f,
-	@location(1) normal: vec3f,
-	@location(2) texcoord: vec2f,
-	@location(3) joints: vec4u,
-	@location(4) weights: vec4f,
-}`;
+        let VertexInputShaderString = `struct VertexInput {\n`;
+        this.attributes.forEach(
+            (attr, idx) =>
+            {
+                const vertexFormat: GPUVertexFormat =
+                    this.attributeMap[attr].vertexType;
+                const attrString = attr.toLowerCase().replace(/_0$/, '');
+                VertexInputShaderString += `\t@location(${idx}) ${attrString}: ${convertGPUVertexFormatToWGSLFormat(
+                    vertexFormat
+                )},\n`;
+            }
+        );
+        VertexInputShaderString += '}';
 
         const vertexState: IGPUVertexState = {
             // Shader stage info
