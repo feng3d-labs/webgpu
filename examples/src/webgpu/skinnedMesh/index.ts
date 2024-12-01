@@ -201,7 +201,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const generalUniformsBGCLuster: IGPUBindingResources = {
         general_uniforms: {
             bufferView: generalUniformsBuffer,
-            render_mode: 1, skin_mode: 1
         },
     };
 
