@@ -8,7 +8,7 @@ export * from "./data/IGPUComputeObject";
 export * from "./data/IGPUComputePass";
 export * from "./data/IGPUCopyBufferToBuffer";
 export * from "./data/IGPUCopyTextureToTexture";
-export * from "./data/IGPUOcclusionQueryObject";
+export * from "./data/IGPUOcclusionQuery";
 export * from "./data/IGPUReadPixels";
 export * from "./data/IGPURenderBundle";
 export * from "./data/IGPURenderObject";

@@ -3,12 +3,12 @@ import { IGPURenderObject } from "./IGPURenderObject";
 /**
  * 被查询的渲染对象列表
  */
-export interface IGPUOcclusionQueryObject
+export interface IGPUOcclusionQuery
 {
     /**
      * 数据类型。
      */
-    readonly __type: "IGPUOcclusionQueryObject";
+    readonly __type: "IGPUOcclusionQuery";
 
     /**
      * GPU渲染对象列表。

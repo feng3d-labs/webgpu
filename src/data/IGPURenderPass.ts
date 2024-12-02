@@ -1,5 +1,5 @@
 import { IGPUBlendConstant } from "./IGPUBlendConstant";
-import { IGPUOcclusionQueryObject } from "./IGPUOcclusionQueryObject";
+import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
 import { IGPURenderObject } from "./IGPURenderObject";
 import { IGPURenderPassDescriptor } from "./IGPURenderPassDescriptor";
@@ -37,7 +37,7 @@ export interface IGPURenderPass
      * 
      * 当提交WebGPU后自动获取结果后填充该属性。
      */
-    occlusionQueryResults?: IGPUOcclusionQueryObject[];
+    occlusionQueryResults?: IGPUOcclusionQuery[];
 
     /**
      * 查询通道运行消耗时长（单位为纳秒）。
@@ -50,4 +50,4 @@ export interface IGPURenderPass
 /**
  * 渲染通道中的执行项。
  */
-export type IGPURenderPassObject = (IGPURenderObject | IGPUViewport | IGPUScissorRect | IGPURenderBundle | IGPUOcclusionQueryObject | IGPUBlendConstant | IGPUStencilReference);
+export type IGPURenderPassObject = (IGPURenderObject | IGPUViewport | IGPUScissorRect | IGPURenderBundle | IGPUOcclusionQuery | IGPUBlendConstant | IGPUStencilReference);

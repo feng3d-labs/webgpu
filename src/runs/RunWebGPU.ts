@@ -21,7 +21,7 @@ import { IGPUComputeObject, IGPUComputePipeline, IGPUWorkgroups } from "../data/
 import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
-import { IGPUOcclusionQueryObject } from "../data/IGPUOcclusionQueryObject";
+import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline } from "../data/IGPURenderObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
@@ -138,11 +138,11 @@ export class RunWebGPU
             {
                 this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element);
             }
-            else if (element.__type === "IGPURenderBundleObject")
+            else if (element.__type === "IGPURenderBundle")
             {
                 this.runRenderBundle(device, passEncoder, renderPassFormat, element);
             }
-            else if (element.__type === "IGPUOcclusionQueryObject")
+            else if (element.__type === "IGPUOcclusionQuery")
             {
                 this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
             }
@@ -234,7 +234,7 @@ export class RunWebGPU
         );
     }
 
-    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderOcclusionQueryObject: IGPUOcclusionQueryObject)
+    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderOcclusionQueryObject: IGPUOcclusionQuery)
     {
         passEncoder.beginOcclusionQuery(renderOcclusionQueryObject._queryIndex);
         renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>
