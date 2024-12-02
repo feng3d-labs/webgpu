@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IBuffer, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISubmit, WebGPU } from "webgpu-renderer";
+import { IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -18,6 +18,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.parentNode.appendChild(perfDisplayContainer);
 
     const params = new URLSearchParams(window.location.search);
+    const maxTriangles = 200000;
     const settings = {
         numTriangles: Number(params.get("numTriangles")) || 20000,
         renderBundles: Boolean(params.get("renderBundles")),
@@ -27,11 +28,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     const vec4Size = 4 * Float32Array.BYTES_PER_ELEMENT;
 
-    const pipelineDesc: IRenderPipeline = {
+    const pipelineDesc: IGPURenderPipeline = {
         vertex: {
             code: animometerWGSL,
         },
@@ -43,107 +44,103 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: IGPURenderPipeline = {
         ...pipelineDesc,
     };
 
-    const vertexBuffer: IBuffer = {
-        size: 2 * 3 * vec4Size,
-        usage: GPUBufferUsage.VERTEX,
-        data: new Float32Array([
-            // position data  /**/ color data
-            0, 0.1, 0, 1, /**/ 1, 0, 0, 1,
-            -0.1, -0.1, 0, 1, /**/ 0, 1, 0, 1,
-            0.1, -0.1, 0, 1, /**/ 0, 0, 1, 1,
-        ])
+    const vertexBuffer = new Float32Array([
+        // position data  /**/ color data
+        0, 0.1, 0, 1, /**/ 1, 0, 0, 1,
+        -0.1, -0.1, 0, 1, /**/ 0, 1, 0, 1,
+        0.1, -0.1, 0, 1, /**/ 0, 0, 1, 1,
+    ]);
+
+    const renderObject: IGPURenderObject = {
+        pipeline,
+        vertices: {
+            position: { data: vertexBuffer, format: "float32x4", offset: 0, arrayStride: 2 * vec4Size },
+            color: { data: vertexBuffer, format: "float32x4", offset: vec4Size, arrayStride: 2 * vec4Size },
+        },
+        bindingResources: {},
+        draw: { vertexCount: 3, instanceCount: 1 },
+    };
+
+    const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
+    const alignedUniformBytes = Math.ceil(uniformBytes / 256) * 256;
+    const alignedUniformFloats = alignedUniformBytes / Float32Array.BYTES_PER_ELEMENT;
+    const uniformBuffer = new Float32Array(
+        maxTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT
+    );
+    for (let i = 0; i < maxTriangles; ++i)
+    {
+        uniformBuffer[alignedUniformFloats * i + 0] = Math.random() * 0.2 + 0.2; // scale
+        uniformBuffer[alignedUniformFloats * i + 1] = 0.9 * 2 * (Math.random() - 0.5); // offsetX
+        uniformBuffer[alignedUniformFloats * i + 2] = 0.9 * 2 * (Math.random() - 0.5); // offsetY
+        uniformBuffer[alignedUniformFloats * i + 3] = Math.random() * 1.5 + 0.5; // scalar
+        uniformBuffer[alignedUniformFloats * i + 4] = Math.random() * 10; // scalarOffset
+    }
+
+    const timeOffset = maxTriangles * alignedUniformBytes;
+
+    const time = {
+        bufferView: new Float32Array(uniformBuffer.buffer, timeOffset, 1),
+        value: 0,
+    };
+
+    const renderObjects0: IGPURenderObject[] = [];
+    for (let i = 0; i < maxTriangles; ++i)
+    {
+        renderObjects0[i] = {
+            ...renderObject,
+            bindingResources: {
+                time,
+                uniforms: {
+                    bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
+                }
+            },
+        };
+    }
+
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
+        colorAttachments: [
+            {
+                view: { texture: { context: { canvasId: canvas.id } } },
+                clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+            }
+        ],
     };
 
     function configure()
     {
         const numTriangles = settings.numTriangles;
-        const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
-        const alignedUniformBytes = Math.ceil(uniformBytes / 256) * 256;
-        const alignedUniformFloats = alignedUniformBytes / Float32Array.BYTES_PER_ELEMENT;
-        const uniformBuffer: IBuffer = {
-            size: numTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT,
-            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
-        };
-        const uniformBufferData = new Float32Array(
-            numTriangles * alignedUniformFloats
-        );
-        for (let i = 0; i < numTriangles; ++i)
-        {
-            uniformBufferData[alignedUniformFloats * i + 0] = Math.random() * 0.2 + 0.2; // scale
-            uniformBufferData[alignedUniformFloats * i + 1] = 0.9 * 2 * (Math.random() - 0.5); // offsetX
-            uniformBufferData[alignedUniformFloats * i + 2] = 0.9 * 2 * (Math.random() - 0.5); // offsetY
-            uniformBufferData[alignedUniformFloats * i + 3] = Math.random() * 1.5 + 0.5; // scalar
-            uniformBufferData[alignedUniformFloats * i + 4] = Math.random() * 10; // scalarOffset
-        }
 
-        const timeOffset = numTriangles * alignedUniformBytes;
-
-        // writeBuffer too large may OOM. TODO: The browser should internally chunk uploads.
-        const maxMappingLength = (14 * 1024 * 1024) / Float32Array.BYTES_PER_ELEMENT;
-        const writeBuffers = uniformBuffer.writeBuffers || [];
-        for (let offset = 0; offset < uniformBufferData.length; offset += maxMappingLength)
-        {
-            const uploadCount = Math.min(uniformBufferData.length - offset, maxMappingLength);
-
-            writeBuffers.push({
-                bufferOffset: offset * Float32Array.BYTES_PER_ELEMENT,
-                data: uniformBufferData.buffer,
-                dataOffset: uniformBufferData.byteOffset + offset * Float32Array.BYTES_PER_ELEMENT,
-                size: uploadCount * Float32Array.BYTES_PER_ELEMENT,
-            });
-        }
-        uniformBuffer.writeBuffers = writeBuffers;
-
-        const renderObjects: IRenderObject[] = [];
-        for (let i = 0; i < numTriangles; ++i)
-        {
-            renderObjects[i] = {
-                pipeline,
-                vertices: {
-                    position: { buffer: vertexBuffer, offset: 0, vertexSize: 2 * vec4Size },
-                    color: { buffer: vertexBuffer, offset: vec4Size, vertexSize: 2 * vec4Size },
-                },
-                bindingResources: {
-                    time: {
-                        buffer: uniformBuffer,
-                        offset: timeOffset,
-                    },
-                    uniforms: {
-                        buffer: uniformBuffer,
-                        offset: i * alignedUniformBytes,
-                    }
-                },
-                draw: { vertexCount: 3, instanceCount: 1 },
-            };
-        }
+        const renderObjects = renderObjects0.slice(0, numTriangles);
 
         let startTime: number;
         const uniformTime = new Float32Array([0]);
 
-        const renderPass: IRenderPass = {
-            colorAttachments: [
-                {
-                    view: { texture: { context: { canvasId: canvas.id } } },
-                    clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
-                }
-            ],
-        };
-
-        const renderBundle: IRenderBundleObject = {
+        const renderBundleObject: IGPURenderBundle = {
+            __type: "IGPURenderBundle",
             renderObjects
         };
 
-        const renderPasss: (IRenderPassEncoder)[] = [];
-        const submit: ISubmit = {
+        const renderPasss: (IGPURenderPass)[] = [];
+        const submit: IGPUSubmit = {
             commandEncoders: [
                 {
                     passEncoders: renderPasss,
                 }
             ]
+        };
+
+        const renderBundlesPass = {
+            descriptor: renderPassDescriptor,
+            renderObjects: [renderBundleObject],
+        };
+
+        const renderPass = {
+            descriptor: renderPassDescriptor,
+            renderObjects,
         };
 
         return function doDraw(timestamp: number)
@@ -154,25 +151,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
             uniformTime[0] = (timestamp - startTime) / 1000;
 
-            const writeBuffers = uniformBuffer.writeBuffers || [];
-            writeBuffers.push({
-                bufferOffset: timeOffset, data: uniformTime
-            });
-            uniformBuffer.writeBuffers = writeBuffers;
+            time.value = uniformTime[0];
 
             if (settings.renderBundles)
             {
-                renderPasss[0] = {
-                    renderPass,
-                    renderObjects: [renderBundle],
-                };
+                renderPasss[0] = renderBundlesPass;
             }
             else
             {
-                renderPasss[0] = {
-                    renderPass,
-                    renderObjects,
-                };
+                renderPasss[0] = renderPass;
             }
 
             webgpu.submit(submit);
@@ -186,7 +173,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         doDraw = configure();
     };
     gui
-        .add(settings, "numTriangles", 0, 200000)
+        .add(settings, "numTriangles", 0, maxTriangles)
         .step(1)
         .onFinishChange(updateSettings);
     gui.add(settings, "renderBundles");

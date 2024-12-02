@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, ITextureFromContext, internal } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, IGPUTextureFromContext, internal } from "@feng3d/webgpu-renderer";
 
 import Common from "./common";
 import tonemapperWGSL from "./tonemapper.wgsl";
@@ -9,8 +9,8 @@ import tonemapperWGSL from "./tonemapper.wgsl";
  */
 export default class Tonemapper
 {
-  private readonly bindGroup: IBindingResources;
-  private readonly pipeline: IComputePipeline;
+  private readonly bindGroup: IGPUBindingResources;
+  private readonly pipeline: IGPUComputePipeline;
   private readonly width: number;
   private readonly height: number;
   private readonly kWorkgroupSizeX = 16;
@@ -18,11 +18,11 @@ export default class Tonemapper
 
   constructor(
     common: Common,
-    input: ITexture,
-    output: ITextureFromContext,
+    input: IGPUTexture,
+    output: IGPUTextureFromContext,
   )
   {
-    const inputSize = internal.getIGPUTextureSize(input);
+    const inputSize = internal.getGPUTextureSize(input);
 
     this.width = inputSize[0];
     this.height = inputSize[1];
@@ -44,6 +44,7 @@ export default class Tonemapper
 
     //
     this.passEncoder = {
+      __type: "IGPUComputePass",
       computeObjects: [{
         pipeline: this.pipeline,
         bindingResources: {
@@ -56,9 +57,9 @@ export default class Tonemapper
       }],
     };
   }
-  private passEncoder: IPassEncoder;
+  private passEncoder: IGPUPassEncoder;
 
-  encode(commandEncoder: ICommandEncoder)
+  encode(commandEncoder: IGPUCommandEncoder)
   {
     commandEncoder.passEncoders.push(this.passEncoder);
   }

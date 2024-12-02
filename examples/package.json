@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "@types/dat.gui": "^0.7.6",
-    "@webgpu/types": "0.1.38",
+    "@webgpu/types": "0.1.49",
     "fast-glob": "^3.2.12",
     "fs-extra": "^10.1.0",
     "rimraf": "3.0.2",
@@ -22,10 +22,11 @@
     "vite": "^3.0.7"
   },
   "dependencies": {
+    "@feng3d/webgpu-renderer": "0.0.1",
     "dat.gui": "^0.7.6",
     "gl-matrix": "^3.4.3",
     "stanford-dragon": "^1.1.1",
-    "webgpu-renderer": "0.0.1",
-    "wgpu-matrix": "^1.1.0"
+    "teapot": "^1.0.0",
+    "wgpu-matrix": "^3.3.0"
   }
 }

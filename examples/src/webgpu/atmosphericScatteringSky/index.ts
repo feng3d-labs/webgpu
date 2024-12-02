@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import atmosphericScatteringSkyWGSL from "./atmosphericScatteringSky.wgsl";
 
-import { ICanvasContext, IComputeObject, ITexture, WebGPU } from "webgpu-renderer";
+import { IGPUCanvasContext, IGPUComputeObject, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -10,7 +10,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const context: ICanvasContext = {
+    const context: IGPUCanvasContext = {
         canvasId: canvas.id,
         configuration: {
             format: "rgba16float",
@@ -18,9 +18,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
-    const framebuffer: ITexture = {
+    const framebuffer: IGPUTexture = {
         label: "framebuffer",
         size: [canvas.width, canvas.height],
         format: "rgba16float",
@@ -44,14 +44,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         skyColor: [1, 1, 1, 1],
     };
 
-    const computeObject0: IComputeObject = {
+    const computeObject0: IGPUComputeObject = {
         pipeline: {
             compute: { code: atmosphericScatteringSkyWGSL }
         },
         bindingResources: {
-            uniformBuffer: {
-                map: uniformBuffer,
-            },
+            uniformBuffer,
             outTexture: { texture: framebuffer }
         },
         workgroups: { workgroupCountX: Math.ceil(uniformBuffer.width / 64), workgroupCountY: Math.ceil(uniformBuffer.height / 64) },
@@ -60,10 +58,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let t = 0;
     function frame()
     {
-        webgpu.computePass();
-        webgpu.computeObject(computeObject0);
-
-        webgpu.submit();
+        webgpu.submit({
+            commandEncoders: [{ passEncoders: [{ __type: "IGPUComputePass", computeObjects: [computeObject0] }] }]
+        });
 
         ++t;
 

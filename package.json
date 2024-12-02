@@ -1,5 +1,5 @@
 {
-  "name": "webgpu-renderer",
+  "name": "@feng3d/webgpu",
   "version": "0.0.1",
   "description": "webgpu渲染库",
   "main": "src/index.ts",
@@ -15,7 +15,7 @@
     "test:ui": "vitest --ui",
     "types": "tsc",
     "watch": "tsc -w",
-    "lint": "eslint --ext .js --ext .ts src test examples/src --ignore-path .gitignore --max-warnings 0",
+    "lint": "eslint --ext .js --ext .ts src test --ignore-path .gitignore --max-warnings 0",
     "lintfix": "npm run lint -- --fix",
     "docs": "typedoc && cd examples && vite build --outDir ../public",
     "release": "npm run clean && npm run lint && npm run docs && npm run build && npm run types && npm publish",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/feng3d/webgpu-renderer.git"
+    "url": "https://gitee.com/feng3d/webgpu.git"
   },
   "files": [
     "dist/",
@@ -50,8 +50,9 @@
   },
   "dependencies": {
     "@feng3d/event": "^0.8.4",
-    "@feng3d/watcher": "^0.8.0",
-    "@webgpu/types": "0.1.38",
-    "wgsl_reflect": "^0.1.1"
+    "@feng3d/watcher": "^0.8.6",
+    "@webgpu/types": "0.1.49",
+    "stats.js": "^0.17.0",
+    "wgsl_reflect": "^1.0.16"
   }
 }

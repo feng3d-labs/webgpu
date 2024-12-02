@@ -1,108 +1,81 @@
-import { getIGPUSubmit } from "./caches/getIGPUSubmit";
-import { IComputeObject } from "./data/IComputeObject";
-import { IComputePassEncoder } from "./data/IComputePassEncoder";
-import { ICopyBufferToBuffer } from "./data/ICopyBufferToBuffer";
-import { ICopyTextureToTexture } from "./data/ICopyTextureToTexture";
-import { IRenderObject } from "./data/IRenderObject";
-import { IRenderPass } from "./data/IRenderPass";
-import { IRenderPassEncoder } from "./data/IRenderPassEncoder";
-import { ISubmit } from "./data/ISubmit";
-import { ITexture, ITextureBase } from "./data/ITexture";
-import { getIGPUTexture } from "./internal";
-import { WebGPU as WebGPUBase } from "./webgpu-data-driven/WebGPU";
-import { IGPUSubmit } from "./webgpu-data-driven/data/IGPUSubmit";
+import { getGPUBuffer } from "./caches/getGPUBuffer";
+import { getGPUTexture } from "./caches/getGPUTexture";
+import { getIGPUTextureSize } from "./caches/getIGPUTextureSize";
+import { IGPUBuffer } from "./data/IGPUBuffer";
+import { IGPUReadPixels } from "./data/IGPUReadPixels";
+import { IGPUSubmit } from "./data/IGPUSubmit";
+import { IGPUTexture } from "./data/IGPUTexture";
+import { RunWebGPU } from "./runs/RunWebGPU";
+import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
+import { copyDepthTexture } from "./utils/copyDepthTexture";
+import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
+import { readPixels } from "./utils/readPixels";
+import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
 
+/**
+ * WebGPU 对象。
+ *
+ * 提供 `WebGPU` 操作入口 {@link WebGPU.submit}。
+ */
 export class WebGPU
 {
-    static async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
+    private _runWebGPU: RunWebGPU = new RunWebGPUCommandCache();
+
+    /**
+     * 初始化 WebGPU 获取 GPUDevice 。
+     */
+    async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
     {
-        const webGPUBase = await WebGPUBase.init(options, descriptor);
-
-        const webGPU = new WebGPU(webGPUBase);
-
-        return webGPU;
-    }
-
-    private _webgpu: WebGPUBase;
-    private _currentSubmit: ISubmit;
-    private _currentRenderPassEncoder: IRenderPassEncoder;
-    private _currentComputePassEncoder: IComputePassEncoder;
-
-    constructor(webGPUBase: WebGPUBase)
-    {
-        this._webgpu = webGPUBase;
-    }
-
-    renderPass(renderPass: IRenderPass)
-    {
-        this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
+        const adapter = await navigator.gpu?.requestAdapter(options);
+        // 获取支持的特性
+        const features: GPUFeatureName[] = [];
+        adapter?.features.forEach((v) => { features.push(v as any); });
+        // 默认开启当前本机支持的所有WebGPU特性。
+        descriptor = descriptor || {};
+        descriptor.requiredFeatures = (descriptor.requiredFeatures || features) as any;
         //
-        if (this._currentRenderPassEncoder?.renderPass === renderPass) return;
-        //
-        this._currentRenderPassEncoder = { renderPass, renderObjects: [] };
-        this._currentComputePassEncoder = null;
-        this._currentSubmit.commandEncoders[0].passEncoders.push(this._currentRenderPassEncoder);
+        const device = await adapter?.requestDevice(descriptor);
+        quitIfWebGPUNotAvailable(adapter, device);
+
+        device?.lost.then(async (info) =>
+        {
+            console.error(`WebGPU device was lost: ${info.message}`);
+
+            // 'reason' will be 'destroyed' if we intentionally destroy the device.
+            if (info.reason !== "destroyed")
+            {
+                // try again
+                await this.init(options, descriptor);
+            }
+        });
+
+        this.device = device;
+
+        return this;
     }
 
-    renderObject(renderObject: IRenderObject)
-    {
-        this._currentRenderPassEncoder.renderObjects.push(renderObject);
-    }
-
-    computePass()
-    {
-        this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
-        //
-        this._currentRenderPassEncoder = null;
-        this._currentComputePassEncoder = { computeObjects: [] };
-        this._currentSubmit.commandEncoders[0].passEncoders.push(this._currentComputePassEncoder);
-    }
-
-    computeObject(computeObject: IComputeObject)
-    {
-        this._currentComputePassEncoder.computeObjects.push(computeObject);
-    }
-
-    copyTextureToTexture(copyTextureToTexture: ICopyTextureToTexture)
-    {
-        this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
-
-        this._currentRenderPassEncoder = null;
-        this._currentComputePassEncoder = null;
-        this._currentSubmit.commandEncoders[0].passEncoders.push(copyTextureToTexture);
-    }
-
-    copyBufferToBuffer(copyBufferToBuffer: ICopyBufferToBuffer)
-    {
-        this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
-
-        this._currentRenderPassEncoder = null;
-        this._currentComputePassEncoder = null;
-        this._currentSubmit.commandEncoders[0].passEncoders.push(copyBufferToBuffer);
-    }
+    public device: GPUDevice;
 
     /**
      * 提交 GPU 。
      *
-     * @param data 一次 GPU 提交内容。
+     * @param submit 一次 GPU 提交内容。
+     *
+     * @see GPUQueue.submit
      */
-    submit(data?: ISubmit)
+    submit(submit: IGPUSubmit)
     {
-        let gpuSubmit: IGPUSubmit;
-        if (data)
-        {
-            gpuSubmit = getIGPUSubmit(data);
-        }
-        else
-        {
-            if (!this._currentSubmit) return;
-            gpuSubmit = getIGPUSubmit(this._currentSubmit);
-            this._currentSubmit = null;
-            this._currentRenderPassEncoder = null;
-            this._currentComputePassEncoder = null;
-        }
+        this._runWebGPU.runSubmit(this.device, submit);
+    }
 
-        this._webgpu.submit(gpuSubmit);
+    /**
+     * 销毁纹理。
+     *
+     * @param texture 需要被销毁的纹理。
+     */
+    destoryTexture(texture: IGPUTexture)
+    {
+        getGPUTexture(this.device, texture, false)?.destroy();
     }
 
     /**
@@ -112,33 +85,11 @@ export class WebGPU
      * @param invertY 是否Y轴翻转
      * @param premultiplyAlpha 是否预乘Alpha。
      */
-    textureInvertYPremultiplyAlpha(texture: ITextureBase, options: { invertY?: boolean, premultiplyAlpha?: boolean })
+    textureInvertYPremultiplyAlpha(texture: IGPUTexture, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
-        const gTexture = getIGPUTexture(texture);
+        const gpuTexture = getGPUTexture(this.device, texture);
 
-        this._webgpu.textureInvertYPremultiplyAlpha(gTexture, options);
-    }
-
-    /**
-     * 从 GPU纹理 上读取数据。
-     *
-     * @param texture GPU纹理
-     * @param x 纹理读取X坐标。
-     * @param y 纹理读取Y坐标。
-     * @param width 纹理读取宽度。
-     * @param height 纹理读取高度。
-     *
-     * @returns 读取到的数据。
-     */
-    async readPixels(params: { texture: ITexture, origin: GPUOrigin3D, copySize: { width: number, height: number } })
-    {
-        const gTexture = getIGPUTexture(params.texture);
-        const result = await this._webgpu.readPixels({
-            ...params,
-            texture: gTexture,
-        });
-
-        return result;
+        textureInvertYPremultiplyAlpha(this.device, gpuTexture, options);
     }
 
     /**
@@ -148,22 +99,57 @@ export class WebGPU
      * @param sourceTexture 源纹理。
      * @param targetTexture 目标纹理。
      */
-    copyDepthTexture(sourceTexture: ITexture, targetTexture: ITexture)
+    copyDepthTexture(sourceTexture: IGPUTexture, targetTexture: IGPUTexture)
     {
-        const gSourceTexture = getIGPUTexture(sourceTexture);
-        const gTargetTexture = getIGPUTexture(targetTexture);
+        const gpuSourceTexture = getGPUTexture(this.device, sourceTexture);
+        const gpuTargetTexture = getGPUTexture(this.device, targetTexture);
 
-        this._webgpu.copyDepthTexture(gSourceTexture, gTargetTexture);
+        copyDepthTexture(this.device, gpuSourceTexture, gpuTargetTexture);
     }
 
     /**
-     * 销毁纹理。
+     * 从 GPU纹理 上读取数据。
      *
-     * @param texture 需要被销毁的纹理。
+     * @param gpuReadPixels
+     *
+     * @returns 读取到的数据。
      */
-    destoryTexture(texture: ITexture)
+    async readPixels(gpuReadPixels: IGPUReadPixels)
     {
-        const gTexture = getIGPUTexture(texture);
-        this._webgpu.destoryTexture(gTexture);
+        const gpuTexture = getGPUTexture(this.device, gpuReadPixels.texture, false);
+
+        const result = await readPixels(this.device, {
+            ...gpuReadPixels,
+            texture: gpuTexture,
+        });
+
+        gpuReadPixels.result = result;
+
+        return result;
+    }
+
+    /**
+     * 从GPU缓冲区读取数据到CPU。
+     *
+     * @param buffer GPU缓冲区。
+     * @param offset 读取位置。
+     * @param size 读取字节数量。
+     * @returns CPU数据缓冲区。
+     */
+    async readBuffer(buffer: IGPUBuffer, offset?: GPUSize64, size?: GPUSize64)
+    {
+        const gpuBuffer = getGPUBuffer(this.device, buffer);
+        await gpuBuffer.mapAsync(GPUMapMode.READ);
+
+        const result = gpuBuffer.getMappedRange(offset, size).slice(0);
+
+        gpuBuffer.unmap();
+
+        return result;
+    }
+
+    getGPUTextureSize(input: IGPUTexture)
+    {
+        return getIGPUTextureSize(input);
     }
 }

@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IComputePipeline, IPassEncoder, ITexture, internal } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal, WebGPU } from "@feng3d/webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -10,9 +10,9 @@ import raytracerWGSL from "./raytracer.wgsl";
 export default class Raytracer
 {
   private readonly common: Common;
-  private readonly framebuffer: ITexture;
-  private readonly pipeline: IComputePipeline;
-  private readonly bindGroup: IBindingResources;
+  private readonly framebuffer: IGPUTexture;
+  private readonly pipeline: IGPUComputePipeline;
+  private readonly bindGroup: IGPUBindingResources;
 
   private readonly kWorkgroupSizeX = 16;
   private readonly kWorkgroupSizeY = 16;
@@ -20,7 +20,7 @@ export default class Raytracer
   constructor(
     common: Common,
     radiosity: Radiosity,
-    framebuffer: ITexture
+    framebuffer: IGPUTexture,
   )
   {
     this.common = common;
@@ -49,9 +49,10 @@ export default class Raytracer
       },
     };
 
-    const framebufferSize = internal.getIGPUTextureSize(this.framebuffer);
+    const framebufferSize = internal.getGPUTextureSize(this.framebuffer);
     //
     this.passEncoder = {
+      __type: "IGPUComputePass",
       computeObjects: [{
         pipeline: this.pipeline,
         bindingResources: {
@@ -65,9 +66,9 @@ export default class Raytracer
       }],
     };
   }
-  private passEncoder: IPassEncoder;
+  private passEncoder: IGPUPassEncoder;
 
-  encode(commandEncoder: ICommandEncoder)
+  encode(commandEncoder: IGPUCommandEncoder)
   {
     commandEncoder.passEncoders.push(this.passEncoder);
   }

@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IBindingResources, IBuffer, IComputePassEncoder, IComputePipeline, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, WebGPU } from "webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -15,15 +15,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
-    const blurPipeline: IComputePipeline = {
+    const blurPipeline: IGPUComputePipeline = {
         compute: {
             code: blurWGSL,
         },
     };
 
-    const fullscreenQuadPipeline1: IRenderPipeline = {
+    const fullscreenQuadPipeline1: IGPURenderPipeline = {
         vertex: {
             code: fullscreenTexturedQuadWGSL,
         },
@@ -32,7 +32,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const sampler: ISampler = {
+    const sampler: IGPUSampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -46,79 +46,58 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const imageBitmap = await createImageBitmap(img);
 
     const [srcWidth, srcHeight] = [imageBitmap.width, imageBitmap.height];
-    const cubeTexture1: ITexture = {
+    const cubeTexture1: IGPUTexture = {
         size: [srcWidth, srcHeight, 1],
         format: "rgba8unorm",
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
         source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
 
-    const textures: ITexture[] = [0, 1].map(() =>
+    const textures: IGPUTexture[] = [0, 1].map(() =>
     ({
         size: [srcWidth, srcHeight],
         format: "rgba8unorm",
         usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
-    } as ITexture));
+    } as IGPUTexture));
 
-    const buffer0 = (() =>
-    {
-        const buffer: IBuffer = {
-            size: 4,
-            usage: GPUBufferUsage.UNIFORM,
-            data: new Uint32Array([0]),
-        };
+    const buffer0 = new Uint32Array([0]);
 
-        return buffer;
-    })();
+    const buffer1 = new Uint32Array([1]);
 
-    const buffer1 = (() =>
-    {
-        const buffer: IBuffer = {
-            size: 4,
-            usage: GPUBufferUsage.UNIFORM,
-            data: new Uint32Array([1]),
-        };
+    const blurParamsBuffer = new Uint8Array(8);
 
-        return buffer;
-    })();
-
-    const blurParamsBuffer: IBuffer = {
-        size: 8,
-        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
-    };
-
-    const computeConstants: IBindingResources = {
+    const computeConstants: IGPUBindingResources = {
         samp: sampler,
         params: {
-            buffer: blurParamsBuffer,
+            bufferView: blurParamsBuffer,
         },
     };
 
-    const computeBindGroup0: IBindingResources = {
+    const computeBindGroup0: IGPUBindingResources = {
         inputTex: { texture: cubeTexture1 },
         outputTex: { texture: textures[0] },
         flip: {
-            buffer: buffer0,
+            bufferView: buffer0,
         }
     };
 
-    const computeBindGroup1: IBindingResources = {
+    const computeBindGroup1: IGPUBindingResources = {
         inputTex: { texture: textures[0] },
         outputTex: { texture: textures[1] },
         flip: {
-            buffer: buffer1,
+            bufferView: buffer1,
         },
     };
 
-    const computeBindGroup2: IBindingResources = {
+    const computeBindGroup2: IGPUBindingResources = {
         inputTex: { texture: textures[1] },
         outputTex: { texture: textures[0] },
         flip: {
-            buffer: buffer0,
+            bufferView: buffer0,
         },
     };
 
-    const showResultBindGroup1: IBindingResources = {
+    const showResultBindGroup1: IGPUBindingResources = {
         mySampler: sampler,
         myTexture: { texture: textures[1] },
     };
@@ -134,13 +113,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const updateSettings = () =>
     {
         blockDim = tileDim - (settings.filterSize - 1);
-        if (blurParamsBuffer.writeBuffers)
+        if (getIGPUBuffer(blurParamsBuffer).writeBuffers)
         {
-            blurParamsBuffer.writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
+            getIGPUBuffer(blurParamsBuffer).writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
         }
         else
         {
-            blurParamsBuffer.writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
+            getIGPUBuffer(blurParamsBuffer).writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
         }
         needUpdateEncoder = true;
     };
@@ -152,7 +131,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     updateSettings();
 
-    const renderPassDescriptor: IRenderPass = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -161,8 +140,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    const gpuRenderPassEncoder: IRenderPassEncoder = {
-        renderPass: renderPassDescriptor,
+    const gpuRenderPassEncoder: IGPURenderPass = {
+        descriptor: renderPassDescriptor,
         renderObjects: [{
             pipeline: fullscreenQuadPipeline1,
             bindingResources: showResultBindGroup1,
@@ -170,8 +149,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }],
     };
 
-    const gpuComputePassEncoder: IComputePassEncoder = { computeObjects: [] };
-    const submit: ISubmit = {
+    const gpuComputePassEncoder: IGPUComputePass = { __type: "IGPUComputePass", computeObjects: [] };
+    const submit: IGPUSubmit = {
         commandEncoders: [
             {
                 passEncoders: [
@@ -182,15 +161,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     };
 
-    const bindingResources0: IBindingResources = {
+    const bindingResources0: IGPUBindingResources = {
         ...computeConstants,
         ...computeBindGroup0,
     };
-    const bindingResources1: IBindingResources = {
+    const bindingResources1: IGPUBindingResources = {
         ...computeConstants,
         ...computeBindGroup1,
     };
-    const bindingResources2: IBindingResources = {
+    const bindingResources2: IGPUBindingResources = {
         ...computeConstants,
         ...computeBindGroup2,
     };

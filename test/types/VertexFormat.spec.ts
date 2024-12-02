@@ -53,6 +53,7 @@ describe("VertexFormat", () =>
         "sint32x2",
         "sint32x3",
         "sint32x4",
+        "unorm10-10-10-2",
     ];
 
     it("constructor", () =>
@@ -67,7 +68,7 @@ describe("VertexFormat", () =>
         wgslVertexTypes.forEach((wgslVertexType) =>
         {
             const wgslVertexTypeValue = wgslVertexTypeMap[wgslVertexType];
-            ok(wgslVertexTypeValue.possibleFormats.includes(wgslVertexTypeValue.format));
+            equal(wgslVertexTypeValue.possibleFormats.includes(wgslVertexTypeValue.format), true);
 
             wgslVertexTypeValue.possibleFormats.forEach((gpuVertexFormat) =>
             {

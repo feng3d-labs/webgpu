@@ -1,249 +1,202 @@
 import { watcher } from "@feng3d/watcher";
-import { TemplateInfo, VariableInfo } from "wgsl_reflect";
-import { IBindingResources, IBufferBinding } from "../data/IBindingResources";
-import { ITextureBase } from "../data/ITexture";
-import { ITextureView } from "../data/ITextureView";
-import { ChainMap } from "../utils/ChainMap";
-import { IGPUBindGroupEntry, IGPUBindingResource, IGPUExternalTexture } from "../webgpu-data-driven/data/IGPUBindGroup";
-import { IGPUComputePipeline } from "../webgpu-data-driven/data/IGPUComputeObject";
-import { IGPUPipelineLayout } from "../webgpu-data-driven/data/IGPUPipelineLayout";
-import { IGPURenderPipeline, IGPUSetBindGroup } from "../webgpu-data-driven/data/IGPURenderObject";
-import { IGPUSampler } from "../webgpu-data-driven/data/IGPUSampler";
-import { getIGPUBuffer } from "./getIGPUBuffer";
-import { WGSLBindingResourceInfoMap } from "./getWGSLReflectInfo";
 
-export function getIGPUSetBindGroups(pipeline: IGPURenderPipeline | IGPUComputePipeline, bindingResources: IBindingResources, bindingResourceInfoMap: WGSLBindingResourceInfoMap)
+import { TemplateInfo, VariableInfo } from "wgsl_reflect";
+import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
+import { IGPUBindingResources } from "../data/IGPUBindingResources";
+import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
+import { IGPUComputePipeline } from "../data/IGPUComputeObject";
+import { IGPURenderPipeline } from "../data/IGPURenderObject";
+import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
+import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
+import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
+import { ChainMap } from "../utils/ChainMap";
+import { getIGPUBuffer } from "./getIGPUBuffer";
+
+export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
 {
     //
     let gpuSetBindGroups = bindGroupsMap.get([pipeline, bindingResources]);
-    if (!gpuSetBindGroups)
+    if (gpuSetBindGroups) return gpuSetBindGroups;
+
+    gpuSetBindGroups = [];
+    bindGroupsMap.set([pipeline, bindingResources], gpuSetBindGroups);
+
+    //
+    const layout = getIGPUPipelineLayout(pipeline);
+    layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
     {
-        gpuSetBindGroups = [];
-
-        const pipelineLayout = pipeline.layout as IGPUPipelineLayout;
-
-        for (const resourceName in bindingResourceInfoMap)
-        {
-            const bindingResourceInfo = bindingResourceInfoMap[resourceName];
-
-            const { group, binding, type } = bindingResourceInfo;
-
-            gpuSetBindGroups[group] = gpuSetBindGroups[group] || {
-                bindGroup: {
-                    layout: { ...pipelineLayout.bindGroupLayouts[group] },
-                    entries: [],
-                }
-            };
-
-            const entry: IGPUBindGroupEntry = { binding, resource: null };
-            gpuSetBindGroups[group].bindGroup.entries.push(entry);
-
-            // eslint-disable-next-line no-loop-func
-            const getResource = () =>
-            {
-                const bindingResource = bindingResources[resourceName];
-                console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
-
-                let resource: IGPUBindingResource;
-                //
-                if (type === "buffer")
-                {
-                    const variableInfo = bindingResourceInfo.buffer.variableInfo;
-                    const layoutType = bindingResourceInfo.buffer.layout.type;
-
-                    //
-                    const size = variableInfo.size;
-
-                    const uniformData = bindingResource as IBufferBinding;
-
-                    if (!uniformData.buffer)
-                    {
-                        uniformData.buffer = {
-                            size,
-                            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST | GPUBufferUsage.STORAGE,
-                        };
-                    }
-
-                    const buffer = getIGPUBuffer(uniformData.buffer);
-                    const offset = uniformData.offset ?? 0; // 默认值为0
-
-                    if (layoutType === "uniform")
-                    {
-                        resource = {
-                            buffer,
-                            offset,
-                            size,
-                        };
-                    }
-                    else
-                    {
-                        // 无法确定 storage 中数据的尺寸，不设置 size 属性。
-                        resource = {
-                            buffer,
-                            offset,
-                        };
-                    }
-
-                    // 更新缓冲区绑定的数据。
-                    updateBufferBinding(variableInfo, uniformData);
-                }
-                else if (type === "sampler")
-                {
-                    const uniformData = bindingResource as IGPUSampler;
-
-                    resource = uniformData;
-                }
-                else if (type === "texture")
-                {
-                    const uniformData = bindingResource as ITextureView;
-
-                    // 设置纹理资源布局上的采样类型。
-                    if ((uniformData.texture as ITextureBase).sampleType === "unfilterable-float")
-                    {
-                        bindingResourceInfo.texture.layout.sampleType = "unfilterable-float";
-                    }
-
-                    resource = uniformData;
-                }
-                else if (type === "externalTexture")
-                {
-                    const uniformData = bindingResource as IGPUExternalTexture;
-
-                    resource = uniformData;
-                }
-                else if (type === "storageTexture")
-                {
-                    const uniformData = bindingResource as ITextureView;
-
-                    resource = uniformData;
-                }
-                else
-                {
-                    throw `未解析 ${type}`;
-                }
-
-                return resource;
-            };
-
-            entry.resource = getResource();
-
-            //
-            watcher.watch(bindingResources, resourceName, () =>
-            {
-                entry.resource = getResource();
-            });
-        }
-
-        bindGroupsMap.set([pipeline, bindingResources], gpuSetBindGroups);
-    }
+        gpuSetBindGroups[group] = getIGPUSetBindGroup(bindGroupLayout, bindingResources);
+    });
 
     return gpuSetBindGroups;
 }
 
-const bindGroupsMap = new ChainMap<[IGPURenderPipeline | IGPUComputePipeline, IBindingResources], IGPUSetBindGroup[]>();
+const bindGroupsMap = new ChainMap<[IGPUComputePipeline | IGPURenderPipeline, IGPUBindingResources], IGPUSetBindGroup[]>();
 
-function updateBufferBinding(variableInfo: VariableInfo, uniformData: IBufferBinding)
+function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bindingResources: IGPUBindingResources): IGPUSetBindGroup
+{
+    const map: ChainMap<Array<any>, IGPUSetBindGroup> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
+    const subBindingResources = bindGroupLayout.entryNames.map((v) => bindingResources[v]);
+    let setBindGroup: IGPUSetBindGroup = map.get(subBindingResources);
+    if (setBindGroup) return setBindGroup;
+
+    const entries: IGPUBindGroupEntry[] = [];
+    setBindGroup = { bindGroup: { layout: bindGroupLayout, entries } };
+    map.set(subBindingResources, setBindGroup);
+
+    //
+    bindGroupLayout.entries.forEach((entry1) =>
+    {
+        const { variableInfo, binding } = entry1;
+        //
+        const entry: IGPUBindGroupEntry = { binding, resource: null };
+
+        entries.push(entry);
+
+        const resourceName = variableInfo.name;
+
+        const getResource = () =>
+        {
+            const bindingResource = bindingResources[resourceName];
+            console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
+
+            //
+            if (entry1.buffer)
+            {
+                //
+                const size = variableInfo.size;
+
+                const uniformData = bindingResource as IGPUBufferBinding;
+
+                // 是否存在默认值。
+                const hasDefautValue = !!uniformData.bufferView;
+                if (!uniformData.bufferView)
+                {
+                    (uniformData as any).bufferView = new Uint8Array(size);
+                }
+
+                // 更新缓冲区绑定的数据。
+                updateBufferBinding(variableInfo, uniformData, hasDefautValue);
+            }
+
+            return bindingResource;
+        };
+
+        entry.resource = getResource();
+
+        //
+        watcher.watch(bindingResources, resourceName, () =>
+        {
+            entry.resource = getResource();
+        });
+    });
+
+    return setBindGroup;
+}
+
+/**
+ *
+ * @param variableInfo
+ * @param uniformData
+ * @param hasDefautValue 是否存在默认值。
+ * @returns
+ */
+function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding, hasDefautValue: boolean)
 {
     if (!variableInfo.members)
     {
         return;
     }
 
-    if (!uniformData.map)
-    {
-        return;
-    }
-
-    if (uniformData["_variableInfo"] === variableInfo)
-    {
-        // 已经做好数据映射。
-        return;
-    }
-
     if (uniformData["_variableInfo"] !== undefined)
     {
-        console.error(`updateBufferBinding 出现一份数据对应多个 variableInfo`);
+        const preVariableInfo = uniformData["_variableInfo"] as any as VariableInfo;
+        if (preVariableInfo.resourceType !== variableInfo.resourceType
+            || preVariableInfo.size !== variableInfo.size
+        )
+        {
+            console.warn(`updateBufferBinding 出现一份数据对应多个 variableInfo`, { uniformData, variableInfo, preVariableInfo });
+        }
 
-        return;
+        // return;
     }
-    uniformData["_variableInfo"] = variableInfo;
+    uniformData["_variableInfo"] = variableInfo as any;
 
-    const buffer = getIGPUBuffer(uniformData.buffer);
-    const offset = uniformData.offset ?? 0; // 默认值为0
+    const buffer = getIGPUBuffer(uniformData.bufferView);
+    (buffer as any).label = buffer.label || (`BufferBinding ${variableInfo.name}`);
+    const offset = uniformData.bufferView.byteOffset;
 
     variableInfo.members.forEach((member) =>
     {
-        let update: () => void;
         const subTypeName = (member.type as TemplateInfo).format?.name;
         const subsubTypeName = (member.type as any).format?.format?.name;
 
-        if (member.type.name === "f32" || subTypeName === "f32" || subsubTypeName === "f32")
+        let Cls: Float32ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor;
+        type Type = Float32Array | Int32Array | Uint32Array;
+        let ClsName: "Float32Array" | "Int32Array" | "Uint32Array";
+        const update = () =>
         {
-            update = () =>
+            let data: Type;
+            const memberData = uniformData[member.name];
+            if (memberData === undefined)
             {
-                let data: Float32Array;
-                const memberData = uniformData.map[member.name];
-                if (memberData === undefined)
+                if (!hasDefautValue)
                 {
                     console.warn(`没有找到 binding ${member.name} 值！`);
+                }
 
-                    return;
-                }
-                if (typeof memberData === "number")
-                {
-                    data = new Float32Array([memberData]);
-                }
-                else if (memberData.constructor !== Float32Array)
-                {
-                    data = new Float32Array(memberData);
-                }
-                else
-                {
-                    data = memberData;
-                }
-                const writeBuffers = buffer.writeBuffers ?? [];
-                writeBuffers.push({ data: data.buffer, bufferOffset: offset + member.offset, size: member.size });
-                buffer.writeBuffers = writeBuffers;
-            };
-        }
-        else if (member.type.name === "i32" || subTypeName === "i32" || subsubTypeName === "i32")
-        {
-            update = () =>
+                return;
+            }
+            if (
+                member.type.name === "f32"
+                || member.type.name === "mat4x4f"
+                || member.type.name === "vec2f"
+                || member.type.name === "vec3f"
+                || member.type.name === "vec4f"
+                //
+                || subTypeName === "f32"
+                || subsubTypeName === "f32"
+            )
             {
-                let data: Int32Array;
-                const memberData = uniformData.map[member.name];
-                if (memberData === undefined)
-                {
-                    console.warn(`没有找到 binding ${member.name} 值！`);
+                Cls = Float32Array;
+                ClsName = "Float32Array";
+            }
+            else if (member.type.name === "i32" || subTypeName === "i32" || subsubTypeName === "i32")
+            {
+                Cls = Int32Array;
+                ClsName = "Int32Array";
+            }
+            else if (member.type.name === "u32" || subTypeName === "u32" || subsubTypeName === "u32")
+            {
+                Cls = Uint32Array;
+                ClsName = "Uint32Array";
+            }
+            else
+            {
+                console.error(`未处理缓冲区绑定类型为 ${member.type.name} 的 ${member.name} 成员！`);
+            }
+            if (typeof memberData === "number")
+            {
+                data = new Cls([memberData]);
+            }
+            else if ((memberData as ArrayBufferView).buffer)
+            {
+                data = new Cls((memberData as ArrayBufferView).buffer);
+            }
+            else if (memberData.constructor.name !== ClsName)
+            {
+                data = new Cls(memberData as ArrayLike<number>);
+            }
+            else
+            {
+                data = memberData as any;
+            }
+            const writeBuffers = buffer.writeBuffers ?? [];
+            writeBuffers.push({ data: data.buffer, bufferOffset: offset + member.offset, size: member.size });
+            buffer.writeBuffers = writeBuffers;
+        };
 
-                    return;
-                }
-                if (typeof memberData === "number")
-                {
-                    data = new Int32Array([memberData]);
-                }
-                else if (memberData.constructor !== Int32Array)
-                {
-                    data = new Int32Array(memberData);
-                }
-                else
-                {
-                    data = memberData;
-                }
-                const writeBuffers = buffer.writeBuffers ?? [];
-                writeBuffers.push({ data: data.buffer, bufferOffset: offset + member.offset, size: member.size });
-                buffer.writeBuffers = writeBuffers;
-            };
-        }
-        else
-        {
-            console.error(`未处理缓冲区绑定类型为 ${member.type.name} 的成员！`);
-        }
-        if (update && uniformData.map)
-        {
-            update();
-
-            watcher.watch(uniformData.map, member.name, update);
-        }
+        update();
+        watcher.watch(uniformData, member.name as any, update);
     });
 }
