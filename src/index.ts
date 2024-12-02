@@ -31,4 +31,5 @@ export * from "./types/VertexFormat";
  */
 export * as internal from "./internal";
 export * from "./utils/ChainMap";
+export * from "./utils/getOffscreenCanvasId";
 
