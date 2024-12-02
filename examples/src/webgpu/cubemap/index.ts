@@ -4,7 +4,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleCubemapWGSL from "./sampleCubemap.frag.wgsl";
 
-import { IGPUBufferBinding, IGPUCopyExternalImageToTexture, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBufferBinding, IGPUTextureImageSource, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -55,7 +55,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const imageBitmaps = await Promise.all(promises);
         const textureSource = imageBitmaps.map((v, i) =>
         {
-            const item: IGPUCopyExternalImageToTexture = {
+            const item: IGPUTextureImageSource = {
                 source: { source: v }, destination: { origin: { x: 0, y: 0, z: i } }, copySize: { width: v.width, height: v.height }
             };
 

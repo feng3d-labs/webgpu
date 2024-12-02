@@ -29,7 +29,7 @@ export interface IGPUTextureBase
      *
      * @see GPUQueue.copyExternalImageToTexture
      */
-    source?: IGPUCopyExternalImageToTexture[];
+    source?: IGPUTextureImageSource[];
 
     /**
      * 是否生成 mipmap。
@@ -94,16 +94,16 @@ export interface IGPUTextureBase
  *
  * @see GPUQueue.writeTexture
  */
-export type IGPUWriteTexture = [destination: IGPUImageCopyTexture, data: BufferSource | SharedArrayBuffer, dataLayout: GPUImageDataLayout, size: GPUExtent3DStrict];
+export type IGPUWriteTexture = [destination: IGPUWriteTextureDestination, data: BufferSource | SharedArrayBuffer, dataLayout: GPUImageDataLayout, size: GPUExtent3DStrict];
 
-export interface IGPUCopyExternalImageToTexture
+export interface IGPUTextureImageSource
 {
     source: GPUImageCopyExternalImage,
-    destination: IGPUImageCopyTextureTagged,
+    destination: IGPUTextureSourceDestination,
     copySize: GPUExtent3DStrict
 }
 
-export interface IGPUImageCopyTextureTagged extends IGPUImageCopyTexture
+export interface IGPUTextureSourceDestination extends IGPUWriteTextureDestination
 {
     /**
      * Describes the color space and encoding used to encode data into the destination texture.
@@ -131,7 +131,7 @@ export interface IGPUImageCopyTextureTagged extends IGPUImageCopyTexture
 /**
  * @see GPUImageCopyTexture
  */
-export interface IGPUImageCopyTexture
+export interface IGPUWriteTextureDestination
 {
     /**
      * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
