@@ -5,7 +5,7 @@ import solidColorLitWGSL from './solidColorLit.wgsl';
 import { randColor, randElement } from './utils';
 import wireframeWGSL from './wireframe.wgsl';
 
-import { IGPURenderPipeline, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -26,57 +26,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         models: true,
     };
 
-    type TypedArrayView = Float32Array | Uint32Array;
-
-    function createBufferWithData(
-        device: GPUDevice,
-        data: TypedArrayView,
-        usage: GPUBufferUsageFlags
-    )
-    {
-        const buffer = device.createBuffer({
-            size: data.byteLength,
-            usage,
-        });
-        device.queue.writeBuffer(buffer, 0, data);
-        return buffer;
-    }
-
     type Model = {
-        vertexBuffer: GPUBuffer;
-        indexBuffer: GPUBuffer;
-        indexFormat: GPUIndexFormat;
-        vertexCount: number;
+        vertices: Float32Array;
+        indices: Uint32Array;
+        vertexAttributes: IGPUVertexAttributes
     };
 
-    function createVertexAndIndexBuffer(
-        device: GPUDevice,
-        { vertices, indices }: { vertices: Float32Array; indices: Uint32Array }
-    ): Model
+    const models = Object.values(modelData).map((v) =>
     {
-        const vertexBuffer = createBufferWithData(
-            device,
-            vertices,
-            GPUBufferUsage.VERTEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-        );
-        const indexBuffer = createBufferWithData(
-            device,
-            indices,
-            GPUBufferUsage.INDEX | GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST
-        );
-        return {
-            vertexBuffer,
-            indexBuffer,
-            indexFormat: 'uint32',
-            vertexCount: indices.length,
-        };
-    }
+        const model: Model = {
+            vertices: v.vertices,
+            indices: v.indices,
+            vertexAttributes: {
+                position: { data: v.vertices, format: "float32x3", offset: 0, arrayStride: 6 * 4 },
+                normal: { data: v.vertices, format: "float32x3", offset: 3 * 4, arrayStride: 6 * 4 },
+            },
+        }
 
-    const depthFormat = 'depth24plus';
-
-    const models = Object.values(modelData).map((data) =>
-        createVertexAndIndexBuffer(device, data)
-    );
+        return model;
+    });
 
     let litPipeline: IGPURenderPipeline;
     function rebuildLitPipeline()
@@ -85,25 +53,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             label: 'lit pipeline',
             vertex: {
                 code: solidColorLitWGSL,
-                // buffers: [
-                //     {
-                //         arrayStride: 6 * 4, // position, normal
-                //         attributes: [
-                //             {
-                //                 // position
-                //                 shaderLocation: 0,
-                //                 offset: 0,
-                //                 format: 'float32x3',
-                //             },
-                //             {
-                //                 // normal
-                //                 shaderLocation: 1,
-                //                 offset: 3 * 4,
-                //                 format: 'float32x3',
-                //             },
-                //         ],
-                //     },
-                // ],
             },
             fragment: {
                 code: solidColorLitWGSL,
@@ -144,52 +93,53 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const barycentricCoordinatesBasedWireframePipeline =
-        device.createRenderPipeline({
-            label: 'barycentric coordinates based wireframe pipeline',
-            layout: 'auto',
-            vertex: {
-                code: wireframeWGSL,
-                entryPoint: 'vsIndexedU32BarycentricCoordinateBasedLines',
-            },
-            fragment: {
-                code: wireframeWGSL,
-                entryPoint: 'fsBarycentricCoordinateBasedLines',
-                targets: [
-                    {
-                        format: presentationFormat,
-                        blend: {
-                            color: {
-                                srcFactor: 'one',
-                                dstFactor: 'one-minus-src-alpha',
-                            },
-                            alpha: {
-                                srcFactor: 'one',
-                                dstFactor: 'one-minus-src-alpha',
-                            },
+    const barycentricCoordinatesBasedWireframePipeline: IGPURenderPipeline = {
+        label: 'barycentric coordinates based wireframe pipeline',
+        vertex: {
+            code: wireframeWGSL,
+            entryPoint: 'vsIndexedU32BarycentricCoordinateBasedLines',
+        },
+        fragment: {
+            code: wireframeWGSL,
+            entryPoint: 'fsBarycentricCoordinateBasedLines',
+            targets: [
+                {
+                    blend: {
+                        color: {
+                            srcFactor: 'one',
+                            dstFactor: 'one-minus-src-alpha',
+                        },
+                        alpha: {
+                            srcFactor: 'one',
+                            dstFactor: 'one-minus-src-alpha',
                         },
                     },
-                ],
-            },
-            primitive: {
-                topology: 'triangle-list',
-            },
-            depthStencil: {
-                depthWriteEnabled: true,
-                depthCompare: 'less-equal',
-                format: depthFormat,
-            },
-        });
+                },
+            ],
+        },
+        primitive: {
+            topology: 'triangle-list',
+        },
+        depthStencil: {
+            depthWriteEnabled: true,
+            depthCompare: 'less-equal',
+        },
+    };
 
     type ObjectInfo = {
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
         uniformValues: Float32Array;
-        uniformBuffer: GPUBuffer;
+        uniformBuffer: IGPUBufferBinding;
         lineUniformValues: Float32Array;
-        lineUniformBuffer: GPUBuffer;
-        litBindGroup: GPUBindGroup;
-        wireframeBindGroups: GPUBindGroup[];
+        lineUniformBuffer: {
+            readonly bufferView: Float32Array;
+            stride: number;
+            thickness: number;
+            alphaThreshold: number;
+        };
+        litBindGroup: IGPUBindingResources;
+        wireframeBindGroups: IGPUBindingResources[];
         model: Model;
     };
 
@@ -201,10 +151,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Make a uniform buffer and type array views
         // for our uniforms.
         const uniformValues = new Float32Array(16 + 16 + 4);
-        const uniformBuffer = device.createBuffer({
-            size: uniformValues.byteLength,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
+        const uniformBuffer: IGPUBindingResource = {
+            bufferView: uniformValues,
+        };
         const kWorldViewProjectionMatrixOffset = 0;
         const kWorldMatrixOffset = 16;
         const kColorOffset = 32;
@@ -222,10 +171,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const model = randElement(models);
 
         // Make a bind group for this uniform
-        const litBindGroup = device.createBindGroup({
-            layout: litBindGroupLayout,
-            entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
-        });
+        const litBindGroup: IGPUBindingResources = {
+            uni: uniformBuffer,
+        };
 
         // Note: We're making one lineUniformBuffer per object.
         // This is only because stride might be different per object.
@@ -234,34 +182,30 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // these settings.
         const lineUniformValues = new Float32Array(3 + 1);
         const lineUniformValuesAsU32 = new Uint32Array(lineUniformValues.buffer);
-        const lineUniformBuffer = device.createBuffer({
-            size: lineUniformValues.byteLength,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        });
+        const lineUniformBuffer = {
+            bufferView: lineUniformValues,
+            stride: undefined as number,
+            thickness: undefined as number,
+            alphaThreshold: undefined as number,
+        };
         lineUniformValuesAsU32[0] = 6; // the array stride for positions for this model.
 
         // We're creating 2 bindGroups, one for each pipeline.
         // We could create just one since they are identical. To do
         // so we'd have to manually create a bindGroupLayout.
-        const wireframeBindGroup = device.createBindGroup({
-            layout: wireframePipeline.getBindGroupLayout(0),
-            entries: [
-                { binding: 0, resource: { buffer: uniformBuffer } },
-                { binding: 1, resource: { buffer: model.vertexBuffer } },
-                { binding: 2, resource: { buffer: model.indexBuffer } },
-                { binding: 3, resource: { buffer: lineUniformBuffer } },
-            ],
-        });
+        const wireframeBindGroup: IGPUBindingResources = {
+            uni: uniformBuffer,
+            positions: { bufferView: model.vertices },
+            indices: { bufferView: model.indices },
+            line: lineUniformBuffer,
+        };
 
-        const barycentricCoordinatesBasedWireframeBindGroup = device.createBindGroup({
-            layout: barycentricCoordinatesBasedWireframePipeline.getBindGroupLayout(0),
-            entries: [
-                { binding: 0, resource: { buffer: uniformBuffer } },
-                { binding: 1, resource: { buffer: model.vertexBuffer } },
-                { binding: 2, resource: { buffer: model.indexBuffer } },
-                { binding: 3, resource: { buffer: lineUniformBuffer } },
-            ],
-        });
+        const barycentricCoordinatesBasedWireframeBindGroup: IGPUBindingResources = {
+            uni: uniformBuffer,
+            positions: { bufferView: model.vertices },
+            indices: { bufferView: model.indices },
+            line: lineUniformBuffer,
+        };
 
         objectInfos.push({
             worldViewProjectionMatrixValue,
@@ -279,11 +223,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    const renderPassDescriptor: GPURenderPassDescriptor = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         label: 'our basic canvas renderPass',
         colorAttachments: [
             {
-                view: undefined, // <- to be filled out when we render
+                view: { texture: { context: { canvasId: canvas.id } } }, // <- to be filled out when we render
                 clearValue: [0.3, 0.3, 0.3, 1],
                 loadOp: 'clear',
                 storeOp: 'store',
@@ -329,14 +273,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         objectInfos.forEach(({ lineUniformBuffer, lineUniformValues }) =>
         {
-            lineUniformValues[1] = settings.thickness;
-            lineUniformValues[2] = settings.alphaThreshold;
-            device.queue.writeBuffer(lineUniformBuffer, 0, lineUniformValues);
+            lineUniformBuffer.thickness = settings.thickness;
+            lineUniformBuffer.alphaThreshold = settings.alphaThreshold;
         });
     }
     updateThickness();
-
-    let depthTexture: GPUTexture | undefined;
 
     let time = 0.0;
     function render(ts: number)
@@ -345,31 +286,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             time = ts * 0.001; // convert to seconds;
         }
-
-        // Get the current texture from the canvas context and
-        // set it as the texture to render to.
-        const canvasTexture = context.getCurrentTexture();
-        renderPassDescriptor.colorAttachments[0].view = canvasTexture.createView();
-
-        // If we don't have a depth texture OR if its size is different
-        // from the canvasTexture when make a new depth texture
-        if (
-            !depthTexture ||
-            depthTexture.width !== canvasTexture.width ||
-            depthTexture.height !== canvasTexture.height
-        )
-        {
-            if (depthTexture)
-            {
-                depthTexture.destroy();
-            }
-            depthTexture = device.createTexture({
-                size: [canvasTexture.width, canvasTexture.height],
-                format: 'depth24plus',
-                usage: GPUTextureUsage.RENDER_ATTACHMENT,
-            });
-        }
-        renderPassDescriptor.depthStencilAttachment.view = depthTexture.createView();
 
         const fov = (60 * Math.PI) / 180;
         const aspect = canvas.clientWidth / canvas.clientHeight;
@@ -383,12 +299,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const viewProjection = mat4.multiply(projection, view);
 
-        // make a command encoder to start encoding commands
-        const encoder = device.createCommandEncoder();
-
-        // make a render pass encoder to encode render specific commands
-        const pass = encoder.beginRenderPass(renderPassDescriptor);
-        pass.setPipeline(litPipeline);
+        const renderObjects: IGPURenderObject[] = [];
 
         objectInfos.forEach(
             (
@@ -398,7 +309,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     worldViewProjectionMatrixValue,
                     worldMatrixValue,
                     litBindGroup,
-                    model: { vertexBuffer, indexBuffer, indexFormat, vertexCount },
+                    model: { vertexAttributes, indices },
                 },
                 i
             ) =>
@@ -422,14 +333,22 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat3.fromMat4(world, worldMatrixValue);
 
                 // Upload our uniform values.
-                device.queue.writeBuffer(uniformBuffer, 0, uniformValues);
+                const buffer = getIGPUBuffer(uniformBuffer.bufferView);
+                const writeBuffers = buffer.writeBuffers || [];
+                writeBuffers.push({
+                    data: uniformValues,
+                });
+                buffer.writeBuffers = writeBuffers;
 
                 if (settings.models)
                 {
-                    pass.setVertexBuffer(0, vertexBuffer);
-                    pass.setIndexBuffer(indexBuffer, indexFormat);
-                    pass.setBindGroup(0, litBindGroup);
-                    pass.drawIndexed(vertexCount);
+                    renderObjects.push({
+                        pipeline: litPipeline,
+                        vertices: vertexAttributes,
+                        indices: indices,
+                        bindingResources: litBindGroup,
+                        drawIndexed: { indexCount: indices.length },
+                    });
                 }
             }
         );
@@ -443,18 +362,26 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.barycentricCoordinatesBased
                     ? [1, 1, barycentricCoordinatesBasedWireframePipeline]
                     : [0, 2, wireframePipeline];
-            pass.setPipeline(pipeline);
-            objectInfos.forEach(({ wireframeBindGroups, model: { vertexCount } }) =>
+            objectInfos.forEach(({ wireframeBindGroups, model: { indices } }) =>
             {
-                pass.setBindGroup(0, wireframeBindGroups[bindGroupNdx]);
-                pass.draw(vertexCount * countMult);
+                renderObjects.push({
+                    pipeline: pipeline,
+                    bindingResources: wireframeBindGroups[bindGroupNdx],
+                    draw: { vertexCount: indices.length * countMult },
+                });
+
             });
         }
 
-        pass.end();
-
-        const commandBuffer = encoder.finish();
-        device.queue.submit([commandBuffer]);
+        const submit: IGPUSubmit = {
+            commandEncoders: [{
+                passEncoders: [{
+                    descriptor: renderPassDescriptor,
+                    renderObjects: renderObjects,
+                }]
+            }]
+        };
+        webgpu.submit(submit);
 
         requestAnimationFrame(render);
     }
