@@ -2,7 +2,7 @@ import { mat4, Mat4 } from 'wgpu-matrix';
 
 import msdfTextWGSL from './msdfText.wgsl';
 
-import { IGPUBuffer, IGPURenderPipeline, IGPUSampler, IGPUTexture } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPURenderBundleObject, IGPURenderPipeline, IGPUSampler, IGPUTexture } from "@feng3d/webgpu-renderer";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -31,8 +31,8 @@ export class MsdfFont
   charCount: number;
   defaultChar: MsdfChar;
   constructor(
-    public pipeline: GPURenderPipeline,
-    public bindGroup: GPUBindGroup,
+    public pipeline: IGPURenderPipeline,
+    public bindGroup: IGPUBindingResources,
     public lineHeight: number,
     public chars: { [x: number]: MsdfChar },
     public kernings: KerningMap
@@ -84,8 +84,7 @@ export class MsdfText
   private bufferArrayDirty = true;
 
   constructor(
-    public device: GPUDevice,
-    private renderBundle: GPURenderBundle,
+    private renderBundle: IGPURenderBundleObject,
     public measurements: MsdfTextMeasurements,
     public font: MsdfFont,
     public textBuffer: GPUBuffer
@@ -146,9 +145,8 @@ export class MsdfTextRenderer
 {
   pipelinePromise: IGPURenderPipeline;
   sampler: IGPUSampler;
-  cameraUniformBuffer: IGPUBuffer;
 
-  cameraArray: Float32Array = new Float32Array(16 * 2);
+  cameraUniformBuffer: Float32Array = new Float32Array(16 * 2);
 
   constructor(
   )
@@ -160,12 +158,6 @@ export class MsdfTextRenderer
       magFilter: 'linear',
       mipmapFilter: 'linear',
       maxAnisotropy: 16,
-    };
-
-    this.cameraUniformBuffer = {
-      label: 'MSDF camera uniform buffer',
-      size: this.cameraArray.byteLength,
-      usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.UNIFORM,
     };
 
     this.pipelinePromise = {
@@ -233,7 +225,7 @@ export class MsdfTextRenderer
     const i = fontJsonUrl.lastIndexOf('/');
     const baseUrl = i !== -1 ? fontJsonUrl.substring(0, i + 1) : undefined;
 
-    const pagePromises = [];
+    const pagePromises: Promise<IGPUTexture>[] = [];
     for (const pageUrl of json.pages)
     {
       pagePromises.push(this.loadTexture(baseUrl + pageUrl));
@@ -241,12 +233,6 @@ export class MsdfTextRenderer
 
     const charCount = json.chars.length;
     const charsArray = new Float32Array(charCount * 8);
-    const charsBuffer: IGPUBuffer = {
-      label: 'MSDF character layout buffer',
-      size: charCount * Float32Array.BYTES_PER_ELEMENT * 8,
-      usage: GPUBufferUsage.STORAGE,
-      data: charsArray,
-    };
 
     const u = 1 / json.common.scaleW;
     const v = 1 / json.common.scaleH;
@@ -271,25 +257,11 @@ export class MsdfTextRenderer
 
     const pageTextures = await Promise.all(pagePromises);
 
-    const bindGroup = this.device.createBindGroup({
-      label: 'msdf font bind group',
-      layout: this.fontBindGroupLayout,
-      entries: [
-        {
-          binding: 0,
-          // TODO: Allow multi-page fonts
-          resource: pageTextures[0].createView(),
-        },
-        {
-          binding: 1,
-          resource: this.sampler,
-        },
-        {
-          binding: 2,
-          resource: { buffer: charsBuffer },
-        },
-      ],
-    });
+    const bindGroup: IGPUBindingResources = {
+      fontTexture: { texture: pageTextures[0] },
+      fontSampler: this.sampler,
+      chars: { bufferView: charsArray }
+    };
 
     const kernings = new Map();
 
@@ -308,7 +280,7 @@ export class MsdfTextRenderer
     }
 
     return new MsdfFont(
-      await this.pipelinePromise,
+      this.pipelinePromise,
       bindGroup,
       json.common.lineHeight,
       chars,
@@ -322,14 +294,8 @@ export class MsdfTextRenderer
     options: MsdfTextFormattingOptions = {}
   ): MsdfText
   {
-    const textBuffer = this.device.createBuffer({
-      label: 'msdf text buffer',
-      size: (text.length + 6) * Float32Array.BYTES_PER_ELEMENT * 4,
-      usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-      mappedAtCreation: true,
-    });
+    const textBuffer = new Float32Array((text.length + 6) * 4);
 
-    const textArray = new Float32Array(textBuffer.getMappedRange());
     let offset = 24; // Accounts for the values managed by MsdfText internally.
 
     let measurements: MsdfTextMeasurements;
@@ -346,9 +312,9 @@ export class MsdfTextRenderer
             measurements.width * -0.5 -
             (measurements.width - measurements.lineWidths[line]) * -0.5;
 
-          textArray[offset] = textX + lineOffset;
-          textArray[offset + 1] = textY + measurements.height * 0.5;
-          textArray[offset + 2] = char.charIndex;
+          textBuffer[offset] = textX + lineOffset;
+          textBuffer[offset + 1] = textY + measurements.height * 0.5;
+          textBuffer[offset + 2] = char.charIndex;
           offset += 4;
         }
       );
@@ -359,42 +325,34 @@ export class MsdfTextRenderer
         text,
         (textX: number, textY: number, line: number, char: MsdfChar) =>
         {
-          textArray[offset] = textX;
-          textArray[offset + 1] = textY;
-          textArray[offset + 2] = char.charIndex;
+          textBuffer[offset] = textX;
+          textBuffer[offset + 1] = textY;
+          textBuffer[offset + 2] = char.charIndex;
           offset += 4;
         }
       );
     }
 
-    textBuffer.unmap();
+    const bindGroup: IGPUBindingResources = {
+      camera: { bufferView: this.cameraUniformBuffer },
+      text: { bufferView: textBuffer },
+    };
 
-    const bindGroup = this.device.createBindGroup({
-      label: 'msdf text bind group',
-      layout: this.textBindGroupLayout,
-      entries: [
+    const renderBundle: IGPURenderBundleObject = {
+      __type: "IGPURenderBundleObject",
+      renderObjects: [
         {
-          binding: 0,
-          resource: { buffer: this.cameraUniformBuffer },
-        },
-        {
-          binding: 1,
-          resource: { buffer: textBuffer },
-        },
+          pipeline: font.pipeline,
+          bindingResources: {
+            ...font.bindGroup,
+            ...bindGroup,
+          },
+          draw: { vertexCount: 4, instanceCount: measurements.printedCharCount },
+        }
       ],
-    });
-
-    const encoder = this.device.createRenderBundleEncoder(
-      this.renderBundleDescriptor
-    );
-    encoder.setPipeline(font.pipeline);
-    encoder.setBindGroup(0, font.bindGroup);
-    encoder.setBindGroup(1, bindGroup);
-    encoder.draw(4, measurements.printedCharCount);
-    const renderBundle = encoder.finish();
+    }
 
     const msdfText = new MsdfText(
-      this.device,
       renderBundle,
       measurements,
       font,
@@ -475,12 +433,12 @@ export class MsdfTextRenderer
 
   updateCamera(projection: Mat4, view: Mat4)
   {
-    this.cameraArray.set(projection, 0);
-    this.cameraArray.set(view, 16);
+    this.cameraUniformBuffer.set(projection, 0);
+    this.cameraUniformBuffer.set(view, 16);
     this.device.queue.writeBuffer(
       this.cameraUniformBuffer,
       0,
-      this.cameraArray
+      this.cameraUniformBuffer
     );
   }
 
