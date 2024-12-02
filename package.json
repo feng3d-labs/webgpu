@@ -1,5 +1,5 @@
 {
-  "name": "@feng3d/webgpu-renderer",
+  "name": "@feng3d/webgpu",
   "version": "0.0.1",
   "description": "webgpu渲染库",
   "main": "src/index.ts",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/feng3d/webgpu-renderer.git"
+    "url": "https://gitee.com/feng3d/webgpu.git"
   },
   "files": [
     "dist/",
