@@ -32,7 +32,8 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
 
     const iGPUTextureBase = texture as IGPUTextureBase;
 
-    let { label, usage, mipLevelCount } = iGPUTextureBase;
+    const { usage } = iGPUTextureBase;
+    let { label, mipLevelCount } = iGPUTextureBase;
 
     // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
     if (iGPUTextureBase.generateMipmap && mipLevelCount === undefined)

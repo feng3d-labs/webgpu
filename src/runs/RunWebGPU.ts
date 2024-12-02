@@ -9,8 +9,8 @@ import { getGPURenderPassFormat } from "../caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
-import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { getIGPUBuffer } from "../caches/getIGPUBuffer";
+import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { getRealGPUBindGroup } from "../const";
@@ -349,7 +349,8 @@ export class RunWebGPU
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)
     {
-        let { fromWebGL, x, y, width, height, minDepth, maxDepth } = viewport;
+        const { fromWebGL, x, width, height, minDepth, maxDepth } = viewport;
+        let { y } = viewport;
         if (fromWebGL)
         {
             y = attachmentSize.height - y - height;
@@ -359,7 +360,8 @@ export class RunWebGPU
 
     protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: IGPUScissorRect)
     {
-        let { fromWebGL, x, y, width, height } = scissorRect;
+        const { fromWebGL, x, width, height } = scissorRect;
+        let { y } = scissorRect;
         if (fromWebGL)
         {
             y = attachmentSize.height - y - height;

@@ -95,7 +95,7 @@ export function createInputHandler(
   });
   canvas.addEventListener("pointermove", (e) =>
 {
-    mouseDown = e.pointerType == "mouse" ? (e.buttons & 1) !== 0 : true;
+    mouseDown = e.pointerType === "mouse" ? (e.buttons & 1) !== 0 : true;
     if (mouseDown)
 {
       analog.x += e.movementX;

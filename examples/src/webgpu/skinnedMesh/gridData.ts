@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 export const gridVertices = new Float32Array([
   // B0
   0, 1, // 0

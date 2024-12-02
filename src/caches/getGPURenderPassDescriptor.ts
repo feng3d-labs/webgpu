@@ -27,7 +27,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
         // 执行更新函数。
         (renderPassDescriptor["_updates"] as Function[]).forEach((v) => v());
 
-return renderPassDescriptor;
+        return renderPassDescriptor;
     }
 
     renderPassDescriptor = { colorAttachments: [] };
@@ -271,7 +271,6 @@ const multisampleTextureMap = new WeakMap<IGPUTexture, IGPUTextureView>();
  */
 function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: { width: number, height: number }, multisample: number)
 {
-    let gpuDepthStencilAttachment: IGPURenderPassDepthStencilAttachment;
     if (!depthStencilAttachment) return undefined;
 
     let view = depthStencilAttachment.view;
@@ -292,7 +291,7 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURen
     const depthStoreOp = depthStencilAttachment.depthStoreOp;
 
     //
-    gpuDepthStencilAttachment = {
+    const gpuDepthStencilAttachment: IGPURenderPassDepthStencilAttachment = {
         ...depthStencilAttachment,
         view,
         depthClearValue,

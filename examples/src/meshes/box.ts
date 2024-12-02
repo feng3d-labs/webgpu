@@ -62,35 +62,35 @@ export function createBoxMeshWithTangents(
   let vertexOffset = 0;
   let indexOffset = 0;
   for (let faceIndex = 0; faceIndex < faces.length; faceIndex++)
-{
+  {
     const face = faces[faceIndex];
     const tangent = halfVecs[face.tangent];
     const bitangent = halfVecs[face.bitangent];
     const normal = halfVecs[face.normal];
 
     for (let u = 0; u < 2; u++)
-{
+    {
       for (let v = 0; v < 2; v++)
-{
+      {
         for (let i = 0; i < 3; i++)
-{
+        {
           vertices[vertexOffset++]
             = normal[i]
-            + (u == 0 ? -1 : 1) * tangent[i]
-            + (v == 0 ? -1 : 1) * bitangent[i];
+            + (u === 0 ? -1 : 1) * tangent[i]
+            + (v === 0 ? -1 : 1) * bitangent[i];
         }
         for (let i = 0; i < 3; i++)
-{
+        {
           vertices[vertexOffset++] = normal[i];
         }
         vertices[vertexOffset++] = u;
         vertices[vertexOffset++] = v;
         for (let i = 0; i < 3; i++)
-{
+        {
           vertices[vertexOffset++] = tangent[i];
         }
         for (let i = 0; i < 3; i++)
-{
+        {
           vertices[vertexOffset++] = bitangent[i];
         }
       }
