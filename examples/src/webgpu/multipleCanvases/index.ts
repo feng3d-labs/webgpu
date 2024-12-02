@@ -163,7 +163,6 @@ const init = async () =>
 
     type CanvasInfo = {
         context: IGPUCanvasContext;
-        depthTexture?: IGPUTexture;
         clearValue: number[];
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
@@ -171,6 +170,7 @@ const init = async () =>
         bindGroup: IGPUBindingResources;
         rotation: number;
         model: Model;
+        renderPassDescriptor?: IGPURenderPassDescriptor
     };
 
     const outerElem = document.querySelector('#outer');
@@ -267,7 +267,7 @@ const init = async () =>
 
             // Get the current texture from the canvas context and
             // set it as the texture to render to.
-            const renderPassDescriptor: IGPURenderPassDescriptor = canvasInfo["renderPassDescriptor"] = canvasInfo["renderPassDescriptor"] || {
+            const renderPassDescriptor: IGPURenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
                 label: 'our basic canvas renderPass',
                 colorAttachments: [
                     {
