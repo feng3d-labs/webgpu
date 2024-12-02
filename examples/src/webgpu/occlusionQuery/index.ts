@@ -1,18 +1,18 @@
-import { GUI } from 'dat.gui';
-import { mat4 } from 'wgpu-matrix';
-import solidColorLitWGSL from './solidColorLit.wgsl';
+import { GUI } from "dat.gui";
+import { mat4 } from "wgpu-matrix";
+import solidColorLitWGSL from "./solidColorLit.wgsl";
 
-import { watcher } from '@feng3d/watcher';
+import { watcher } from "@feng3d/watcher";
 import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
-const info = document.querySelector('#info');
+const info = document.querySelector("#info");
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
     const settings = {
         animate: true,
     };
-    gui.add(settings, 'animate');
+    gui.add(settings, "animate");
 
     const devicePixelRatio = window.devicePixelRatio;
     canvas.width = canvas.clientWidth * devicePixelRatio;
@@ -28,23 +28,23 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: solidColorLitWGSL,
         },
         primitive: {
-            topology: 'triangle-list',
-            cullMode: 'back',
+            topology: "triangle-list",
+            cullMode: "back",
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: 'less',
+            depthCompare: "less",
         },
     };
 
     // prettier-ignore
     const cubePositions = [
-        { position: [-1, 0, 0], id: '🟥', color: [1, 0, 0, 1] },
-        { position: [1, 0, 0], id: '🟨', color: [1, 1, 0, 1] },
-        { position: [0, -1, 0], id: '🟩', color: [0, 0.5, 0, 1] },
-        { position: [0, 1, 0], id: '🟧', color: [1, 0.6, 0, 1] },
-        { position: [0, 0, -1], id: '🟦', color: [0, 0, 1, 1] },
-        { position: [0, 0, 1], id: '🟪', color: [0.5, 0, 0.5, 1] },
+        { position: [-1, 0, 0], id: "🟥", color: [1, 0, 0, 1] },
+        { position: [1, 0, 0], id: "🟨", color: [1, 1, 0, 1] },
+        { position: [0, -1, 0], id: "🟩", color: [0, 0.5, 0, 1] },
+        { position: [0, 1, 0], id: "🟧", color: [1, 0.6, 0, 1] },
+        { position: [0, 0, -1], id: "🟦", color: [0, 0, 1, 1] },
+        { position: [0, 0, 1], id: "🟪", color: [0.5, 0, 0.5, 1] },
     ];
 
     const objectInfos = cubePositions.map(({ position, id, color }) =>
@@ -113,24 +113,24 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.5, 0.5, 0.5, 1.0],
-                loadOp: 'clear',
-                storeOp: 'store',
+                loadOp: "clear",
+                storeOp: "store",
             },
         ],
         depthStencilAttachment: {
             depthClearValue: 1.0,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 
     const renderObject: IGPURenderObject = {
-        pipeline: pipeline,
+        pipeline,
         vertices: {
             position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
             normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
         },
-        indices: indices,
+        indices,
         bindingResources: {
             uni: {
                 bufferView: undefined,
@@ -154,15 +154,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     });
 
     const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.map((ro) =>
-    {
-        return { __type: "IGPUOcclusionQuery", renderObjects: [ro] };
-    })
+    ({ __type: "IGPUOcclusionQuery", renderObjects: [ro] }));
 
     const renderPass: IGPURenderPass = {
         descriptor: renderPassDescriptor,
         // renderObjects: renderObjects,
         renderObjects: occlusionQueryObjects,
-    }
+    };
 
     const submit: IGPUSubmit = {
         commandEncoders: [
@@ -235,14 +233,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             const visible = objectInfos
                 .filter((_, i) => renderPass.occlusionQueryResults[i].result)
                 .map(({ id }) => id)
-                .join('');
+                .join("");
             info.textContent = `visible: ${visible}`;
         });
 
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
-
 };
 
 const panel = new GUI({ width: 310 });

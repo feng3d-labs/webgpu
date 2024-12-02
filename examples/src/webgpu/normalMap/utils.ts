@@ -5,15 +5,15 @@ export const create3DRenderPipeline = (
     vertexShader: string,
     fragmentShader: string,
     depthTest = false,
-    topology: GPUPrimitiveTopology = 'triangle-list',
-    cullMode: GPUCullMode = 'back'
+    topology: GPUPrimitiveTopology = "triangle-list",
+    cullMode: GPUCullMode = "back"
 ) =>
 {
     let depthStencil: IGPUDepthStencilState;
     if (depthTest)
     {
         depthStencil = {
-            depthCompare: 'less',
+            depthCompare: "less",
             depthWriteEnabled: true,
         };
     }
@@ -27,8 +27,8 @@ export const create3DRenderPipeline = (
             code: fragmentShader,
         },
         primitive: {
-            topology: topology,
-            cullMode: cullMode,
+            topology,
+            cullMode,
         },
         depthStencil,
     };
@@ -42,12 +42,13 @@ export const createTextureFromImage = (
 {
     const texture: IGPUTexture = {
         size: [bitmap.width, bitmap.height, 1],
-        format: 'rgba8unorm',
+        format: "rgba8unorm",
         usage:
-            GPUTextureUsage.TEXTURE_BINDING |
-            GPUTextureUsage.COPY_DST |
-            GPUTextureUsage.RENDER_ATTACHMENT,
+            GPUTextureUsage.TEXTURE_BINDING
+            | GPUTextureUsage.COPY_DST
+            | GPUTextureUsage.RENDER_ATTACHMENT,
         source: [{ source: { source: bitmap }, destination: {}, copySize: [bitmap.width, bitmap.height] }]
     };
-    return texture;
+
+return texture;
 };

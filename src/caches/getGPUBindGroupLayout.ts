@@ -1,4 +1,3 @@
-
 export function getGPUBindGroupLayout(device: GPUDevice, layout: GPUBindGroupLayoutDescriptor)
 {
     let gpuBindGroupLayout = bindGroupLayoutMap.get(layout);

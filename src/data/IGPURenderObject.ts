@@ -147,7 +147,7 @@ export interface IGPURenderPipeline
  * 深度模板阶段描述。
  *
  * `format` 将从深度附件 {@link IGPURenderPassDescriptor.depthStencilAttachment} 纹理上获取。
- * 
+ *
  * {@link GPUDepthStencilState}
  */
 export interface IGPUDepthStencilState

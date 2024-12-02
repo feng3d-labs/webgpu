@@ -1,5 +1,5 @@
-import { Mat4, mat4, Quatn, Vec3n } from 'wgpu-matrix';
-import { Accessor, BufferView, GlTf, Scene } from './gltf';
+import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
+import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
 import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPUPrimitiveState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu-renderer";
 
@@ -44,27 +44,25 @@ enum GLTFDataStructureType
 }
 
 export const alignTo = (val: number, align: number): number =>
-{
-    return Math.floor((val + align - 1) / align) * align;
-};
+Math.floor((val + align - 1) / align) * align;
 
 const parseGltfDataStructureType = (type: string) =>
 {
     switch (type)
     {
-        case 'SCALAR':
+        case "SCALAR":
             return GLTFDataStructureType.SCALAR;
-        case 'VEC2':
+        case "VEC2":
             return GLTFDataStructureType.VEC2;
-        case 'VEC3':
+        case "VEC3":
             return GLTFDataStructureType.VEC3;
-        case 'VEC4':
+        case "VEC4":
             return GLTFDataStructureType.VEC4;
-        case 'MAT2':
+        case "MAT2":
             return GLTFDataStructureType.MAT2;
-        case 'MAT3':
+        case "MAT3":
             return GLTFDataStructureType.MAT3;
-        case 'MAT4':
+        case "MAT4":
             return GLTFDataStructureType.MAT4;
         default:
             throw Error(`Unhandled glTF Type ${type}`);
@@ -104,25 +102,25 @@ const gltfVertexType = (
     switch (componentType)
     {
         case GLTFDataComponentType.BYTE:
-            typeStr = 'sint8';
+            typeStr = "sint8";
             break;
         case GLTFDataComponentType.UNSIGNED_BYTE:
-            typeStr = 'uint8';
+            typeStr = "uint8";
             break;
         case GLTFDataComponentType.SHORT:
-            typeStr = 'sint16';
+            typeStr = "sint16";
             break;
         case GLTFDataComponentType.UNSIGNED_SHORT:
-            typeStr = 'uint16';
+            typeStr = "uint16";
             break;
         case GLTFDataComponentType.INT:
-            typeStr = 'int32';
+            typeStr = "int32";
             break;
         case GLTFDataComponentType.UNSIGNED_INT:
-            typeStr = 'uint32';
+            typeStr = "uint32";
             break;
         case GLTFDataComponentType.FLOAT:
-            typeStr = 'float32';
+            typeStr = "float32";
             break;
         default:
             throw Error(`Unrecognized or unsupported glTF type ${componentType}`);
@@ -133,11 +131,11 @@ const gltfVertexType = (
         case 1:
             return typeStr;
         case 2:
-            return typeStr + 'x2';
+            return `${typeStr}x2`;
         case 3:
-            return typeStr + 'x3';
+            return `${typeStr}x3`;
         case 4:
-            return typeStr + 'x4';
+            return `${typeStr}x4`;
         // Vertex attributes should never be a matrix type, so we should not hit this
         // unless we're passed an improperly created gltf file
         default:
@@ -178,9 +176,10 @@ const gltfElementSize = (
             componentSize = 8;
             break;
         default:
-            throw Error('Unrecognized GLTF Component Type?');
+            throw Error("Unrecognized GLTF Component Type?");
     }
-    return gltfDataStructureTypeNumComponents(type) * componentSize;
+
+return gltfDataStructureTypeNumComponents(type) * componentSize;
 };
 
 // Convert differently depending on if the shader is a vertex or compute shader
@@ -188,44 +187,44 @@ const convertGPUVertexFormatToWGSLFormat = (vertexFormat: GPUVertexFormat) =>
 {
     switch (vertexFormat)
     {
-        case 'float32': {
-            return 'f32';
+        case "float32": {
+            return "f32";
         }
-        case 'float32x2': {
-            return 'vec2f';
+        case "float32x2": {
+            return "vec2f";
         }
-        case 'float32x3': {
-            return 'vec3f';
+        case "float32x3": {
+            return "vec3f";
         }
-        case 'float32x4': {
-            return 'vec4f';
+        case "float32x4": {
+            return "vec4f";
         }
-        case 'uint32': {
-            return 'u32';
+        case "uint32": {
+            return "u32";
         }
-        case 'uint32x2': {
-            return 'vec2u';
+        case "uint32x2": {
+            return "vec2u";
         }
-        case 'uint32x3': {
-            return 'vec3u';
+        case "uint32x3": {
+            return "vec3u";
         }
-        case 'uint32x4': {
-            return 'vec4u';
+        case "uint32x4": {
+            return "vec4u";
         }
-        case 'uint8x2': {
-            return 'vec2u';
+        case "uint8x2": {
+            return "vec2u";
         }
-        case 'uint8x4': {
-            return 'vec4u';
+        case "uint8x4": {
+            return "vec4u";
         }
-        case 'uint16x4': {
-            return 'vec4u';
+        case "uint16x4": {
+            return "vec4u";
         }
-        case 'uint16x2': {
-            return 'vec2u';
+        case "uint16x2": {
+            return "vec2u";
         }
         default: {
-            return 'f32';
+            return "f32";
         }
     }
 };
@@ -249,18 +248,18 @@ export class GLTFBufferView
     usage: number;
     constructor(buffer: GLTFBuffer, view: BufferView)
     {
-        this.byteLength = view['byteLength'];
+        this.byteLength = view["byteLength"];
         this.byteStride = 0;
-        if (view['byteStride'] !== undefined)
+        if (view["byteStride"] !== undefined)
         {
-            this.byteStride = view['byteStride'];
+            this.byteStride = view["byteStride"];
         }
         // Create the buffer view. Note that subarray creates a new typed
         // view over the same array buffer, we do not make a copy here.
         let viewOffset = 0;
-        if (view['byteOffset'] !== undefined)
+        if (view["byteOffset"] !== undefined)
         {
-            viewOffset = view['byteOffset'];
+            viewOffset = view["byteOffset"];
         }
         // NOTE: This creates a uint8array view into the buffer!
         // When we call .buffer on this view, it will give us back the original array buffer
@@ -304,21 +303,22 @@ export class GLTFAccessor
     byteOffset: number;
     constructor(view: GLTFBufferView, accessor: Accessor)
     {
-        this.count = accessor['count'];
-        this.componentType = accessor['componentType'];
-        this.structureType = parseGltfDataStructureType(accessor['type']);
+        this.count = accessor["count"];
+        this.componentType = accessor["componentType"];
+        this.structureType = parseGltfDataStructureType(accessor["type"]);
         this.view = view;
         this.byteOffset = 0;
-        if (accessor['byteOffset'] !== undefined)
+        if (accessor["byteOffset"] !== undefined)
         {
-            this.byteOffset = accessor['byteOffset'];
+            this.byteOffset = accessor["byteOffset"];
         }
     }
 
     get byteStride()
     {
         const elementSize = gltfElementSize(this.componentType, this.structureType);
-        return Math.max(elementSize, this.view.byteStride);
+
+return Math.max(elementSize, this.view.byteStride);
     }
 
     get byteLength()
@@ -345,7 +345,7 @@ export class GLTFPrimitive
     private attributeMap: AttributeMapInterface;
     private attributes: string[] = [];
     vertices: IGPUVertexAttributes;
-    indices: Uint16Array | Uint32Array
+    indices: Uint16Array | Uint32Array;
     constructor(
         topology: GLTFRenderMode,
         attributeMap: AttributeMapInterface,
@@ -366,17 +366,17 @@ export class GLTFPrimitive
             {
                 const view = this.attributeMap[attr].view.view;
                 const vertexFormat: GPUVertexFormat = this.attributeMap[attr].vertexType;
-                const attrString = attr.toLowerCase().replace(/_0$/, '');
+                const attrString = attr.toLowerCase().replace(/_0$/, "");
 
-                const Cls = gpuVertexFormatMap[vertexFormat].typedArrayConstructor
+                const Cls = gpuVertexFormatMap[vertexFormat].typedArrayConstructor;
 
-                let data = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
+                const data = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
 
-                this.vertices[attrString] = { data: data, format: vertexFormat, }
+                this.vertices[attrString] = { data, format: vertexFormat };
             }
         );
         {
-            const INDICES = attributeMap['INDICES'];
+            const INDICES = attributeMap["INDICES"];
             const view = INDICES.view.view;
             const vertexFormat: GPUIndexFormat = INDICES.vertexType;
             let Cls: Uint16ArrayConstructor | Uint32ArrayConstructor;
@@ -404,15 +404,15 @@ export class GLTFPrimitive
         this.attributes.forEach(
             (attr, idx) =>
             {
-                const vertexFormat: GPUVertexFormat =
-                    this.attributeMap[attr].vertexType;
-                const attrString = attr.toLowerCase().replace(/_0$/, '');
+                const vertexFormat: GPUVertexFormat
+                    = this.attributeMap[attr].vertexType;
+                const attrString = attr.toLowerCase().replace(/_0$/, "");
                 VertexInputShaderString += `\t@location(${idx}) ${attrString}: ${convertGPUVertexFormatToWGSLFormat(
                     vertexFormat
                 )},\n`;
             }
         );
-        VertexInputShaderString += '}';
+        VertexInputShaderString += "}";
 
         const vertexState: IGPUVertexState = {
             // Shader stage info
@@ -428,24 +428,24 @@ export class GLTFPrimitive
 
         // Our loader only supports triangle lists and strips, so by default we set
         // the primitive topology to triangle list, and check if it's instead a triangle strip
-        let primitive: IGPUPrimitiveState = { topology: 'triangle-list' };
+        let primitive: IGPUPrimitiveState = { topology: "triangle-list" };
         if (this.topology == GLTFRenderMode.TRIANGLE_STRIP)
         {
             primitive = {
-                topology: 'triangle-strip',
+                topology: "triangle-strip",
                 stripIndexFormat: "uint16",
-            }
+            };
         }
 
         const rpDescript: IGPURenderPipeline = {
             label: `${label}.pipeline`,
             vertex: vertexState,
             fragment: fragmentState,
-            primitive: primitive,
+            primitive,
             depthStencil: {
                 // format: depthFormat,
                 depthWriteEnabled: true,
-                depthCompare: 'less',
+                depthCompare: "less",
             },
         };
 
@@ -462,7 +462,7 @@ export class GLTFPrimitive
         }
         else
         {
-            const vertexAttribute = this.vertices[Object.keys(this.vertices)[0]]
+            const vertexAttribute = this.vertices[Object.keys(this.vertices)[0]];
 
             const vertexCount = vertexAttribute.data.byteLength / gpuVertexFormatMap[vertexAttribute.format].byteSize;
 
@@ -471,12 +471,12 @@ export class GLTFPrimitive
 
         const renderObject: IGPURenderObject = {
             pipeline: this.renderPipeline,
-            bindingResources: bindingResources,
+            bindingResources,
             //if skin do something with bone bind group
             vertices: this.vertices,
             indices: this.indices,
-            draw: draw,
-            drawIndexed: drawIndexed,
+            draw,
+            drawIndexed,
         };
         renderObjects.push(renderObject);
     }
@@ -524,11 +524,11 @@ export const validateGLBHeader = (header: DataView) =>
 {
     if (header.getUint32(0, true) != 0x46546c67)
     {
-        throw Error('Provided file is not a glB file');
+        throw Error("Provided file is not a glB file");
     }
     if (header.getUint32(4, true) != 2)
     {
-        throw Error('Provided file is glTF 2.0 file');
+        throw Error("Provided file is glTF 2.0 file");
     }
 };
 
@@ -537,7 +537,7 @@ export const validateBinaryHeader = (header: Uint32Array) =>
     if (header[1] != 0x004e4942)
     {
         throw Error(
-            'Invalid glB: The second chunk of the glB file is not a binary chunk!'
+            "Invalid glB: The second chunk of the glB file is not a binary chunk!"
         );
     }
 };
@@ -579,7 +579,8 @@ export class BaseTransformation
         mat4.multiply(rotationMatrix, dst, dst);
         // Translate the transformationMatrix
         mat4.translate(dst, this.position, dst);
-        return dst;
+
+return dst;
     }
 }
 
@@ -638,7 +639,8 @@ export class GLTFNode
         if (parentWorldMatrix)
         {
             mat4.multiply(parentWorldMatrix, this.localMatrix, this.worldMatrix);
-        } else
+        }
+ else
         {
             mat4.copy(this.localMatrix, this.worldMatrix);
         }
@@ -676,7 +678,8 @@ export class GLTFNode
                         ...this.nodeTransformBindGroup,
                         ...this.skin.skinBindGroup,
                     });
-                } else
+                }
+ else
                 {
                     drawable.render(renderObjects, {
                         ...bindingResources,
@@ -749,9 +752,9 @@ export class GLTFSkin
     )
     {
         if (
-            inverseBindMatricesAccessor.componentType !==
-            GLTFDataComponentType.FLOAT ||
-            inverseBindMatricesAccessor.byteStride !== 64
+            inverseBindMatricesAccessor.componentType
+            !== GLTFDataComponentType.FLOAT
+            || inverseBindMatricesAccessor.byteStride !== 64
         )
         {
             throw Error(
@@ -779,7 +782,7 @@ export class GLTFSkin
         const globalWorldInverse = mat4.inverse(
             nodes[currentNodeIndex].worldMatrix
         );
-        const gpuBuffer = getIGPUBuffer(this.jointMatricesUniformBuffer)
+        const gpuBuffer = getIGPUBuffer(this.jointMatricesUniformBuffer);
         const writeBuffers = gpuBuffer.writeBuffers || [];
 
         for (let j = 0; j < this.joints.length; j++)
@@ -794,7 +797,7 @@ export class GLTFSkin
                 data: toWrite.buffer,
                 dataOffset: toWrite.byteOffset,
                 size: toWrite.byteLength,
-            })
+            });
         }
 
         gpuBuffer.writeBuffers = writeBuffers;
@@ -816,7 +819,7 @@ export const convertGLBToJSONAndBinary = async (
 
     // Parse the JSON chunk of the glB file to a JSON object
     const jsonChunk: GlTf = JSON.parse(
-        new TextDecoder('utf-8').decode(new Uint8Array(buffer, 20, jsonChunkLength))
+        new TextDecoder("utf-8").decode(new Uint8Array(buffer, 20, jsonChunkLength))
     );
 
     // Binary data located after jsonChunk
@@ -856,20 +859,20 @@ export const convertGLBToJSONAndBinary = async (
     {
         for (const primitive of mesh.primitives)
         {
-            if ('indices' in primitive)
+            if ("indices" in primitive)
             {
                 const accessor = jsonChunk.accessors[primitive.indices];
-                jsonChunk.accessors[primitive.indices].bufferViewUsage |=
-                    GPUBufferUsage.INDEX;
-                jsonChunk.bufferViews[accessor.bufferView].usage |=
-                    GPUBufferUsage.INDEX;
+                jsonChunk.accessors[primitive.indices].bufferViewUsage
+                    |= GPUBufferUsage.INDEX;
+                jsonChunk.bufferViews[accessor.bufferView].usage
+                    |= GPUBufferUsage.INDEX;
             }
             for (const attribute of Object.values(primitive.attributes))
             {
                 const accessor = jsonChunk.accessors[attribute];
                 jsonChunk.accessors[attribute].bufferViewUsage |= GPUBufferUsage.VERTEX;
-                jsonChunk.bufferViews[accessor.bufferView].usage |=
-                    GPUBufferUsage.VERTEX;
+                jsonChunk.bufferViews[accessor.bufferView].usage
+                    |= GPUBufferUsage.VERTEX;
             }
         }
     }
@@ -885,7 +888,7 @@ export const convertGLBToJSONAndBinary = async (
     for (let i = 0; i < jsonChunk.accessors.length; ++i)
     {
         const accessorInfo = jsonChunk.accessors[i];
-        const viewID = accessorInfo['bufferView'];
+        const viewID = accessorInfo["bufferView"];
         accessors.push(new GLTFAccessor(bufferViews[viewID], accessorInfo));
     }
     // Load the first mesh
@@ -897,37 +900,37 @@ export const convertGLBToJSONAndBinary = async (
         for (let j = 0; j < mesh.primitives.length; ++j)
         {
             const prim = mesh.primitives[j];
-            let topology = prim['mode'];
+            let topology = prim["mode"];
             // Default is triangles if mode specified
             if (topology === undefined)
             {
                 topology = GLTFRenderMode.TRIANGLES;
             }
             if (
-                topology != GLTFRenderMode.TRIANGLES &&
-                topology != GLTFRenderMode.TRIANGLE_STRIP
+                topology != GLTFRenderMode.TRIANGLES
+                && topology != GLTFRenderMode.TRIANGLE_STRIP
             )
             {
-                throw Error(`Unsupported primitive mode ${prim['mode']}`);
+                throw Error(`Unsupported primitive mode ${prim["mode"]}`);
             }
 
             const primitiveAttributeMap = {};
             const attributes = [];
-            if (jsonChunk['accessors'][prim['indices']] !== undefined)
+            if (jsonChunk["accessors"][prim["indices"]] !== undefined)
             {
-                const indices = accessors[prim['indices']];
-                primitiveAttributeMap['INDICES'] = indices;
+                const indices = accessors[prim["indices"]];
+                primitiveAttributeMap["INDICES"] = indices;
             }
 
             // Loop through all the attributes and store within our attributeMap
-            for (const attr in prim['attributes'])
+            for (const attr in prim["attributes"])
             {
-                const accessor = accessors[prim['attributes'][attr]];
+                const accessor = accessors[prim["attributes"][attr]];
                 primitiveAttributeMap[attr] = accessor;
                 if (accessor.structureType > 3)
                 {
                     throw Error(
-                        'Vertex attribute accessor accessed an unsupported data type for vertex attribute'
+                        "Vertex attribute accessor accessed an unsupported data type for vertex attribute"
                     );
                 }
                 attributes.push(attr);
@@ -1015,7 +1018,8 @@ export const convertGLBToJSONAndBinary = async (
         });
         scenes.push(scene);
     }
-    return {
+
+return {
         meshes,
         nodes,
         scenes,

@@ -313,7 +313,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
     getIGPUBuffer(uniformBuffer).writeBuffers = [{ data: transformationMatrix }];
 
-    let renderObjects: IGPURenderPassObject[] = []
+    let renderObjects: IGPURenderPassObject[] = [];
     if (settings.useRenderBundles)
     {
       // Executing a bundle is equivalent to calling all of the commands encoded
@@ -330,7 +330,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
     const renderPass: IGPURenderPass = {
       descriptor: renderPassDescriptor,
-      renderObjects: renderObjects,
+      renderObjects,
     };
 
     const submit: IGPUSubmit = {

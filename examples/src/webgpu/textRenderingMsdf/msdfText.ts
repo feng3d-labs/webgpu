@@ -1,6 +1,6 @@
-import { mat4, Mat4 } from 'wgpu-matrix';
+import { mat4, Mat4 } from "wgpu-matrix";
 
-import msdfTextWGSL from './msdfText.wgsl';
+import msdfTextWGSL from "./msdfText.wgsl";
 
 import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUTexture } from "@feng3d/webgpu-renderer";
 
@@ -50,12 +50,13 @@ export class MsdfFont
     {
       char = this.defaultChar;
     }
-    return char;
+
+return char;
   }
 
   // Gets the distance in pixels a line should advance for a given character code. If the upcoming
   // character code is given any kerning between the two characters will be taken into account.
-  getXAdvance(charCode: number, nextCharCode: number = -1): number
+  getXAdvance(charCode: number, nextCharCode = -1): number
   {
     const char = this.getChar(charCode);
     if (nextCharCode >= 0)
@@ -66,7 +67,8 @@ export class MsdfFont
         return char.xadvance + (kerning.get(nextCharCode) ?? 0);
       }
     }
-    return char.xadvance;
+
+return char.xadvance;
   }
 }
 
@@ -111,7 +113,8 @@ export class MsdfText
       });
       buffer.writeBuffers = writeBuffers;
     }
-    return this.renderBundle;
+
+return this.renderBundle;
   }
 
   setTransform(matrix: Mat4)
@@ -120,7 +123,7 @@ export class MsdfText
     this.bufferArrayDirty = true;
   }
 
-  setColor(r: number, g: number, b: number, a: number = 1.0)
+  setColor(r: number, g: number, b: number, a = 1.0)
   {
     this.bufferArray[16] = r;
     this.bufferArray[17] = g;
@@ -153,12 +156,11 @@ export class MsdfTextRenderer
   constructor(
   )
   {
-
     this.sampler = {
-      label: 'MSDF text sampler',
-      minFilter: 'linear',
-      magFilter: 'linear',
-      mipmapFilter: 'linear',
+      label: "MSDF text sampler",
+      minFilter: "linear",
+      magFilter: "linear",
+      mipmapFilter: "linear",
       maxAnisotropy: 16,
     };
 
@@ -166,33 +168,33 @@ export class MsdfTextRenderer
       label: `msdf text pipeline`,
       vertex: {
         code: msdfTextWGSL,
-        entryPoint: 'vertexMain',
+        entryPoint: "vertexMain",
       },
       fragment: {
         code: msdfTextWGSL,
-        entryPoint: 'fragmentMain',
+        entryPoint: "fragmentMain",
         targets: [
           {
             blend: {
               color: {
-                srcFactor: 'src-alpha',
-                dstFactor: 'one-minus-src-alpha',
+                srcFactor: "src-alpha",
+                dstFactor: "one-minus-src-alpha",
               },
               alpha: {
-                srcFactor: 'one',
-                dstFactor: 'one',
+                srcFactor: "one",
+                dstFactor: "one",
               },
             },
           },
         ],
       },
       primitive: {
-        topology: 'triangle-strip',
-        stripIndexFormat: 'uint32',
+        topology: "triangle-strip",
+        stripIndexFormat: "uint32",
       },
       depthStencil: {
         depthWriteEnabled: false,
-        depthCompare: 'less',
+        depthCompare: "less",
       },
     };
   }
@@ -205,18 +207,19 @@ export class MsdfTextRenderer
     const texture: IGPUTexture = {
       label: `MSDF font texture ${url}`,
       size: [imageBitmap.width, imageBitmap.height, 1],
-      format: 'rgba8unorm',
+      format: "rgba8unorm",
       usage:
-        GPUTextureUsage.TEXTURE_BINDING |
-        GPUTextureUsage.COPY_DST |
-        GPUTextureUsage.RENDER_ATTACHMENT,
+        GPUTextureUsage.TEXTURE_BINDING
+        | GPUTextureUsage.COPY_DST
+        | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{
         source: { source: imageBitmap },
         destination: {},
         copySize: [imageBitmap.width, imageBitmap.height]
       }]
     };
-    return texture;
+
+return texture;
   }
 
   async createFont(fontJsonUrl: string): Promise<MsdfFont>
@@ -224,7 +227,7 @@ export class MsdfTextRenderer
     const response = await fetch(fontJsonUrl);
     const json = await response.json();
 
-    const i = fontJsonUrl.lastIndexOf('/');
+    const i = fontJsonUrl.lastIndexOf("/");
     const baseUrl = i !== -1 ? fontJsonUrl.substring(0, i + 1) : undefined;
 
     const pagePromises: Promise<IGPUTexture>[] = [];
@@ -310,9 +313,9 @@ export class MsdfTextRenderer
         text,
         (textX: number, textY: number, line: number, char: MsdfChar) =>
         {
-          const lineOffset =
-            measurements.width * -0.5 -
-            (measurements.width - measurements.lineWidths[line]) * -0.5;
+          const lineOffset
+            = measurements.width * -0.5
+            - (measurements.width - measurements.lineWidths[line]) * -0.5;
 
           textBuffer[offset] = textX + lineOffset;
           textBuffer[offset + 1] = textY + measurements.height * 0.5;
@@ -320,7 +323,8 @@ export class MsdfTextRenderer
           offset += 4;
         }
       );
-    } else
+    }
+ else
     {
       measurements = this.measureText(
         font,
@@ -352,7 +356,7 @@ export class MsdfTextRenderer
           draw: { vertexCount: 4, instanceCount: measurements.printedCharCount },
         }
       ],
-    }
+    };
 
     const msdfText = new MsdfText(
       renderBundle,

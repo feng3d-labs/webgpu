@@ -1,17 +1,16 @@
-import { GUI } from 'dat.gui';
-import { mat4, vec3 } from 'wgpu-matrix';
+import { GUI } from "dat.gui";
+import { mat4, vec3 } from "wgpu-matrix";
 
-import { mesh } from '../../meshes/teapot';
+import { mesh } from "../../meshes/teapot";
 
-import compositeWGSL from './composite.wgsl';
-import opaqueWGSL from './opaque.wgsl';
-import translucentWGSL from './translucent.wgsl';
+import compositeWGSL from "./composite.wgsl";
+import opaqueWGSL from "./opaque.wgsl";
+import translucentWGSL from "./translucent.wgsl";
 
 import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
-
     function roundUp(n: number, k: number): number
     {
         return Math.ceil(n / k) * k;
@@ -31,7 +30,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const params = new URLSearchParams(window.location.search);
 
     const settings = {
-        memoryStrategy: params.get('memoryStrategy') || 'multipass',
+        memoryStrategy: params.get("memoryStrategy") || "multipass",
     };
 
     // Create the model vertex buffer
@@ -54,7 +53,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         modelViewProjectionMatrix: undefined,
         maxStorableFragments: undefined,
         targetWidth: undefined,
-    }
+    };
 
     const opaquePipeline: IGPURenderPipeline = {
         vertex: {
@@ -64,13 +63,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: opaqueWGSL,
         },
         primitive: {
-            topology: 'triangle-list',
+            topology: "triangle-list",
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: 'less',
+            depthCompare: "less",
         },
-        label: 'opaquePipeline',
+        label: "opaquePipeline",
     };
 
     const translucentPipeline: IGPURenderPipeline = {
@@ -86,20 +85,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ],
         },
         primitive: {
-            topology: 'triangle-list',
+            topology: "triangle-list",
         },
-        label: 'translucentPipeline',
+        label: "translucentPipeline",
     };
 
     const translucentPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
-                loadOp: 'load',
-                storeOp: 'store',
+                loadOp: "load",
+                storeOp: "store",
                 view: { texture: { context } },
             },
         ],
-        label: 'translucentPassDescriptor',
+        label: "translucentPassDescriptor",
     };
 
     const compositePipeline: IGPURenderPipeline = {
@@ -112,9 +111,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     blend: {
                         color: {
-                            srcFactor: 'one',
-                            operation: 'add',
-                            dstFactor: 'one-minus-src-alpha',
+                            srcFactor: "one",
+                            operation: "add",
+                            dstFactor: "one-minus-src-alpha",
                         },
                         alpha: {},
                     },
@@ -122,20 +121,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ],
         },
         primitive: {
-            topology: 'triangle-list',
+            topology: "triangle-list",
         },
-        label: 'compositePipeline',
+        label: "compositePipeline",
     };
 
     const compositePassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
-                loadOp: 'load',
-                storeOp: 'store',
+                loadOp: "load",
+                storeOp: "store",
             },
         ],
-        label: 'compositePassDescriptor',
+        label: "compositePassDescriptor",
     };
 
     const configure = () =>
@@ -159,7 +158,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         //    usage because we only need enough memory to process the dimensions
         //    of the slice. The tradeoff is the performance reduction due to multiple
         //    passes.
-        if (settings.memoryStrategy === 'clamp-pixel-ratio')
+        if (settings.memoryStrategy === "clamp-pixel-ratio")
         {
             devicePixelRatio = Math.min(window.devicePixelRatio, 3);
         }
@@ -169,13 +168,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const depthTexture: IGPUTexture = {
             size: [canvas.width, canvas.height],
-            format: 'depth24plus',
+            format: "depth24plus",
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
-            label: 'depthTexture',
+            label: "depthTexture",
         };
 
         const depthTextureView: IGPUTextureView = {
-            label: 'depthTextureView',
+            label: "depthTextureView",
             texture: depthTexture,
         };
 
@@ -186,13 +185,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // * color : vec4f
         // * depth : f32
         // * index of next element in the list : u32
-        const linkedListElementSize =
-            5 * Float32Array.BYTES_PER_ELEMENT + 1 * Uint32Array.BYTES_PER_ELEMENT;
+        const linkedListElementSize
+            = 5 * Float32Array.BYTES_PER_ELEMENT + Number(Uint32Array.BYTES_PER_ELEMENT);
 
         // We want to keep the linked-list buffer size under the maxStorageBufferBindingSize.
         // Split the frame into enough slices to meet that constraint.
-        const bytesPerline =
-            canvas.width * averageLayersPerFragment * linkedListElementSize;
+        const bytesPerline
+            = canvas.width * averageLayersPerFragment * linkedListElementSize;
         const maxLinesSupported = Math.floor(
             webgpu.device.limits.maxStorageBufferBindingSize / bytesPerline
         );
@@ -211,7 +210,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             for (let i = 0; i < numSlices; ++i)
             {
-                sliceInfoBuffer[i] = { sliceStartY: i * sliceHeight }
+                sliceInfoBuffer[i] = { sliceStartY: i * sliceHeight };
             }
         }
 
@@ -228,7 +227,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const headsInitBuffer: IGPUBuffer = {
             size: (1 + canvas.width * sliceHeight) * Uint32Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.COPY_SRC,
-            label: 'headsInitBuffer',
+            label: "headsInitBuffer",
         };
         {
             const buffer = new Uint32Array(headsInitBuffer.size / Uint32Array.BYTES_PER_ELEMENT);
@@ -253,17 +252,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     view: { texture: { context } },
                     clearValue: [0, 0, 0, 1.0],
-                    loadOp: 'clear',
-                    storeOp: 'store',
+                    loadOp: "clear",
+                    storeOp: "store",
                 },
             ],
             depthStencilAttachment: {
                 view: depthTextureView,
                 depthClearValue: 1.0,
-                depthLoadOp: 'clear',
-                depthStoreOp: 'store',
+                depthLoadOp: "clear",
+                depthStoreOp: "store",
             },
-            label: 'opaquePassDescriptor',
+            label: "opaquePassDescriptor",
         };
 
         // Rotates the camera around the origin based on time.
@@ -289,7 +288,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             const viewMatrix = mat4.lookAt(eyePosition, origin, upVector);
 
             const viewProjMatrix = mat4.multiply(projectionMatrix, viewMatrix);
-            return viewProjMatrix;
+
+return viewProjMatrix;
         }
 
         const passEncoders: IGPUPassEncoder[] = [];
@@ -299,12 +299,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             descriptor: opaquePassDescriptor,
             renderObjects: [{
                 pipeline: opaquePipeline,
-                bindingResources: bindingResources,
+                bindingResources,
                 vertices,
                 indices,
                 drawIndexed: { indexCount: mesh.triangles.length * 3, instanceCount: 8 },
             }]
-        }
+        };
         passEncoders.push(opaquePassEncoder);
 
         for (let slice = 0; slice < numSlices; ++slice)
@@ -322,9 +322,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             const scissorX = 0;
             const scissorY = slice * sliceHeight;
             const scissorWidth = canvas.width;
-            const scissorHeight =
-                Math.min((slice + 1) * sliceHeight, canvas.height) -
-                slice * sliceHeight;
+            const scissorHeight
+                = Math.min((slice + 1) * sliceHeight, canvas.height)
+                - slice * sliceHeight;
 
             // Draw the translucent objects
 
@@ -354,8 +354,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             passEncoders.push(translucentPassEncoder);
 
             // Composite the opaque and translucent objects
-            const compositePassEncoder: IGPURenderPass =
-            {
+            const compositePassEncoder: IGPURenderPass
+            = {
                 descriptor: compositePassDescriptor,
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
@@ -381,7 +381,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const submit: IGPUSubmit = {
             commandEncoders: [{
-                passEncoders: passEncoders,
+                passEncoders,
             }],
         };
 
@@ -408,7 +408,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     gui
-        .add(settings, 'memoryStrategy', ['multipass', 'clamp-pixel-ratio'])
+        .add(settings, "memoryStrategy", ["multipass", "clamp-pixel-ratio"])
         .onFinishChange(updateSettings);
 
     function frame()
@@ -419,7 +419,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     requestAnimationFrame(frame);
-
 };
 
 const panel = new GUI({ width: 310 });

@@ -1,4 +1,4 @@
-import { Mesh } from './mesh';
+import { Mesh } from "./mesh";
 
 /**
  * Constructs a box mesh with the given dimensions.
@@ -17,7 +17,8 @@ export function createBoxMeshWithTangents(
   width: number,
   height: number,
   depth: number
-): Mesh {
+): Mesh
+{
   //    __________
   //   /         /|      y
   //  /   +y    / |      ^
@@ -50,39 +51,46 @@ export function createBoxMeshWithTangents(
   );
   const indices = new Uint16Array(faces.length * indicesPerSize);
   const halfVecs = [
-    [+width / 2, 0, 0], // +x
+    [Number(width) / 2, 0, 0], // +x
     [-width / 2, 0, 0], // -x
-    [0, +height / 2, 0], // +y
+    [0, Number(height) / 2, 0], // +y
     [0, -height / 2, 0], // -y
-    [0, 0, +depth / 2], // +z
+    [0, 0, Number(depth) / 2], // +z
     [0, 0, -depth / 2], // -z
   ];
 
   let vertexOffset = 0;
   let indexOffset = 0;
-  for (let faceIndex = 0; faceIndex < faces.length; faceIndex++) {
+  for (let faceIndex = 0; faceIndex < faces.length; faceIndex++)
+{
     const face = faces[faceIndex];
     const tangent = halfVecs[face.tangent];
     const bitangent = halfVecs[face.bitangent];
     const normal = halfVecs[face.normal];
 
-    for (let u = 0; u < 2; u++) {
-      for (let v = 0; v < 2; v++) {
-        for (let i = 0; i < 3; i++) {
-          vertices[vertexOffset++] =
-            normal[i] +
-            (u == 0 ? -1 : 1) * tangent[i] +
-            (v == 0 ? -1 : 1) * bitangent[i];
+    for (let u = 0; u < 2; u++)
+{
+      for (let v = 0; v < 2; v++)
+{
+        for (let i = 0; i < 3; i++)
+{
+          vertices[vertexOffset++]
+            = normal[i]
+            + (u == 0 ? -1 : 1) * tangent[i]
+            + (v == 0 ? -1 : 1) * bitangent[i];
         }
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 3; i++)
+{
           vertices[vertexOffset++] = normal[i];
         }
         vertices[vertexOffset++] = u;
         vertices[vertexOffset++] = v;
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 3; i++)
+{
           vertices[vertexOffset++] = tangent[i];
         }
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < 3; i++)
+{
           vertices[vertexOffset++] = bitangent[i];
         }
       }

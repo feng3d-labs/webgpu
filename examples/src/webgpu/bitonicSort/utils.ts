@@ -1,6 +1,6 @@
-import type { GUI } from 'dat.gui';
-import fullscreenTexturedQuad from '../../shaders/fullscreenTexturedQuad.wgsl';
-import { quitIfAdapterNotAvailable, quitIfWebGPUNotAvailable } from '../util';
+import type { GUI } from "dat.gui";
+import fullscreenTexturedQuad from "../../shaders/fullscreenTexturedQuad.wgsl";
+import { quitIfAdapterNotAvailable, quitIfWebGPUNotAvailable } from "../util";
 
 type BindGroupBindingLayout =
   | GPUBufferBindingLayout
@@ -18,11 +18,11 @@ export type BindGroupCluster = {
 };
 
 type ResourceTypeName =
-  | 'buffer'
-  | 'texture'
-  | 'sampler'
-  | 'externalTexture'
-  | 'storageTexture';
+  | "buffer"
+  | "texture"
+  | "sampler"
+  | "externalTexture"
+  | "storageTexture";
 
 /**
  * @param {number[]} bindings - The binding value of each resource in the bind group.
@@ -38,9 +38,11 @@ export const createBindGroupCluster = (
   resources: GPUBindingResource[][],
   label: string,
   device: GPUDevice
-): BindGroupCluster => {
+): BindGroupCluster =>
+{
   const layoutEntries: GPUBindGroupLayoutEntry[] = [];
-  for (let i = 0; i < bindings.length; i++) {
+  for (let i = 0; i < bindings.length; i++)
+{
     layoutEntries.push({
       binding: bindings[i],
       visibility: visibilities[i % visibilities.length],
@@ -58,9 +60,11 @@ export const createBindGroupCluster = (
   //i=0, j=0  bindGroup: 0, binding: 0
   //i=1, j=1, bindGroup: 0, binding: 1
   //NOTE: not the same as @group(0) @binding(1) group index within the fragment shader is set within a pipeline
-  for (let i = 0; i < resources.length; i++) {
+  for (let i = 0; i < resources.length; i++)
+{
     const groupEntries: GPUBindGroupEntry[] = [];
-    for (let j = 0; j < resources[0].length; j++) {
+    for (let j = 0; j < resources[0].length; j++)
+{
       groupEntries.push({
         binding: j,
         resource: resources[i][j],
@@ -110,23 +114,28 @@ export type SampleInit = (params: SampleInitParams) => void;
 
 export const SampleInitFactoryWebGPU = async (
   callback: SampleInitCallback3D
-): Promise<SampleInit> => {
-  const init = async ({ canvas, gui, stats }) => {
+): Promise<SampleInit> =>
+{
+  const init = async ({ canvas, gui, stats }) =>
+{
     const adapter = await navigator.gpu?.requestAdapter();
     quitIfAdapterNotAvailable(adapter);
 
-    const timestampQueryAvailable = adapter.features.has('timestamp-query');
+    const timestampQueryAvailable = adapter.features.has("timestamp-query");
     let device: GPUDevice;
-    if (timestampQueryAvailable) {
+    if (timestampQueryAvailable)
+{
       device = await adapter.requestDevice({
-        requiredFeatures: ['timestamp-query'],
+        requiredFeatures: ["timestamp-query"],
       });
-    } else {
+    }
+ else
+{
       device = await adapter.requestDevice();
     }
     quitIfWebGPUNotAvailable(adapter, device);
 
-    const context = canvas.getContext('webgpu') as GPUCanvasContext;
+    const context = canvas.getContext("webgpu") as GPUCanvasContext;
     const devicePixelRatio = window.devicePixelRatio;
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
@@ -146,10 +155,12 @@ export const SampleInitFactoryWebGPU = async (
       timestampQueryAvailable,
     });
   };
-  return init;
+
+return init;
 };
 
-export abstract class Base2DRendererClass {
+export abstract class Base2DRendererClass
+{
   abstract switchBindGroup(name: string): void;
   abstract startRun(
     commandEncoder: GPUCommandEncoder,
@@ -166,10 +177,12 @@ export abstract class Base2DRendererClass {
     renderPassDescriptor: GPURenderPassDescriptor,
     pipeline: GPURenderPipeline,
     bindGroups: GPUBindGroup[]
-  ) {
+  )
+{
     const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
     passEncoder.setPipeline(pipeline);
-    for (let i = 0; i < bindGroups.length; i++) {
+    for (let i = 0; i < bindGroups.length; i++)
+{
       passEncoder.setBindGroup(i, bindGroups[i]);
     }
     passEncoder.draw(6, 1, 0, 0);
@@ -181,8 +194,10 @@ export abstract class Base2DRendererClass {
     uniformBuffer: GPUBuffer,
     instance: T,
     keys: K
-  ) {
-    for (let i = 0; i < keys.length; i++) {
+  )
+{
+    for (let i = 0; i < keys.length; i++)
+{
       device.queue.writeBuffer(
         uniformBuffer,
         i * 4,
@@ -197,7 +212,8 @@ export abstract class Base2DRendererClass {
     bgLayouts: GPUBindGroupLayout[],
     code: string,
     presentationFormat: GPUTextureFormat
-  ) {
+  )
+{
     return device.createRenderPipeline({
       label: `${label}.pipeline`,
       layout: device.createPipelineLayout({
@@ -210,7 +226,7 @@ export abstract class Base2DRendererClass {
       },
       fragment: {
         module: device.createShaderModule({
-          code: code,
+          code,
         }),
         targets: [
           {
@@ -219,8 +235,8 @@ export abstract class Base2DRendererClass {
         ],
       },
       primitive: {
-        topology: 'triangle-list',
-        cullMode: 'none',
+        topology: "triangle-list",
+        cullMode: "none",
       },
     });
   }

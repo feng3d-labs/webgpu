@@ -1,15 +1,14 @@
-import { GUI } from 'dat.gui';
-import { mat4, vec3 } from 'wgpu-matrix';
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from '../../meshes/cube';
-import { ArcballCamera, WASDCamera } from './camera';
-import cubeWGSL from './cube.wgsl';
-import { createInputHandler } from './input';
+import { GUI } from "dat.gui";
+import { mat4, vec3 } from "wgpu-matrix";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import { ArcballCamera, WASDCamera } from "./camera";
+import cubeWGSL from "./cube.wgsl";
+import { createInputHandler } from "./input";
 
 import { IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
-
   // The input handler
   const inputHandler = createInputHandler(window, canvas);
 
@@ -21,13 +20,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   };
 
   // GUI parameters
-  const params: { type: 'arcball' | 'WASD' } = {
-    type: 'arcball',
+  const params: { type: "arcball" | "WASD" } = {
+    type: "arcball",
   };
 
   // Callback handler for camera mode
   let oldCameraType = params.type;
-  gui.add(params, 'type', ['arcball', 'WASD']).onChange(() =>
+  gui.add(params, "type", ["arcball", "WASD"]).onChange(() =>
   {
     // Copy the camera matrix from old to new
     const newCameraType = params.type;
@@ -55,42 +54,42 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       code: cubeWGSL,
     },
     primitive: {
-      topology: 'triangle-list',
-      cullMode: 'back',
+      topology: "triangle-list",
+      cullMode: "back",
     },
     depthStencil: {
       depthWriteEnabled: true,
-      depthCompare: 'less',
+      depthCompare: "less",
     },
   };
 
   const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
-    format: 'depth24plus',
+    format: "depth24plus",
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
   // Fetch the image and upload it into a GPUTexture.
   let cubeTexture: IGPUTexture;
   {
-    const response = await fetch('../../../assets/img/Di-3d.png');
+    const response = await fetch("../../../assets/img/Di-3d.png");
     const imageBitmap = await createImageBitmap(await response.blob());
 
     cubeTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
-      format: 'rgba8unorm',
+      format: "rgba8unorm",
       usage:
-        GPUTextureUsage.TEXTURE_BINDING |
-        GPUTextureUsage.COPY_DST |
-        GPUTextureUsage.RENDER_ATTACHMENT,
+        GPUTextureUsage.TEXTURE_BINDING
+        | GPUTextureUsage.COPY_DST
+        | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{ source: { source: imageBitmap }, destination: {}, copySize: [imageBitmap.width, imageBitmap.height] }]
     };
   }
 
   // Create a sampler with linear filtering for smooth interpolation.
   const sampler: IGPUSampler = {
-    magFilter: 'linear',
-    minFilter: 'linear',
+    magFilter: "linear",
+    minFilter: "linear",
   };
 
   const bindingResources = {
@@ -99,12 +98,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     },
     mySampler: sampler,
     myTexture: { texture: cubeTexture },
-  }
+  };
 
   const renderObject: IGPURenderObject = {
-    pipeline: pipeline,
-    vertices: vertices,
-    bindingResources: bindingResources,
+    pipeline,
+    vertices,
+    bindingResources,
     draw: { vertexCount: cubeVertexCount },
   };
 
@@ -114,16 +113,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         view: { texture: { context: { canvasId: canvas.id } } },
 
         clearValue: [0.5, 0.5, 0.5, 1.0],
-        loadOp: 'clear',
-        storeOp: 'store',
+        loadOp: "clear",
+        storeOp: "store",
       },
     ],
     depthStencilAttachment: {
       view: { texture: depthTexture },
 
       depthClearValue: 1.0,
-      depthLoadOp: 'clear',
-      depthStoreOp: 'store',
+      depthLoadOp: "clear",
+      depthStoreOp: "store",
     },
   };
 
@@ -146,7 +145,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const camera = cameras[params.type];
     const viewMatrix = camera.update(deltaTime, inputHandler());
     mat4.multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
-    return modelViewProjectionMatrix;
+
+return modelViewProjectionMatrix;
   }
 
   let lastFrameMS = Date.now();

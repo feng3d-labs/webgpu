@@ -3,10 +3,10 @@
 // but, we want to reuse the model data in this repo
 // so we'll normalize it here
 
-import { vec3 } from 'wgpu-matrix';
-import { mesh as teapot } from '../../meshes/teapot';
-import { mesh as dragon } from '../../meshes/stanfordDragon';
-import { createSphereMesh } from '../../meshes/sphere';
+import { vec3 } from "wgpu-matrix";
+import { mesh as teapot } from "../../meshes/teapot";
+import { mesh as dragon } from "../../meshes/stanfordDragon";
+import { createSphereMesh } from "../../meshes/sphere";
 
 type Mesh = {
   positions: [number, number, number][];
@@ -18,18 +18,21 @@ export function convertMeshToTypedArrays(
   mesh: Mesh,
   scale: number,
   offset = [0, 0, 0]
-) {
+)
+{
   const { positions, normals, triangles } = mesh;
   const scaledPositions = positions.map((p) =>
     p.map((v, i) => v * scale + offset[i % 3])
   );
   const vertices = new Float32Array(scaledPositions.length * 6);
-  for (let i = 0; i < scaledPositions.length; ++i) {
+  for (let i = 0; i < scaledPositions.length; ++i)
+{
     vertices.set(scaledPositions[i], 6 * i);
     vertices.set(normals[i], 6 * i + 3);
   }
   const indices = new Uint32Array(triangles.length * 3);
-  for (let i = 0; i < triangles.length; ++i) {
+  for (let i = 0; i < triangles.length; ++i)
+{
     indices.set(triangles[i], 3 * i);
   }
 
@@ -44,7 +47,8 @@ function createSphereTypedArrays(
   widthSegments = 32,
   heightSegments = 16,
   randomness = 0
-) {
+)
+{
   const { vertices: verticesWithUVs, indices } = createSphereMesh(
     radius,
     widthSegments,
@@ -53,12 +57,14 @@ function createSphereTypedArrays(
   );
   const numVertices = verticesWithUVs.length / 8;
   const vertices = new Float32Array(numVertices * 6);
-  for (let i = 0; i < numVertices; ++i) {
+  for (let i = 0; i < numVertices; ++i)
+{
     const srcNdx = i * 8;
     const dstNdx = i * 6;
     vertices.set(verticesWithUVs.subarray(srcNdx, srcNdx + 6), dstNdx);
   }
-  return {
+
+return {
     vertices,
     indices: new Uint32Array(indices),
   };
@@ -70,12 +76,15 @@ function flattenNormals({
 }: {
   vertices: Float32Array;
   indices: Uint32Array;
-}) {
+})
+{
   const newVertices = new Float32Array(indices.length * 6);
   const newIndices = new Uint32Array(indices.length);
-  for (let i = 0; i < indices.length; i += 3) {
+  for (let i = 0; i < indices.length; i += 3)
+{
     const positions = [];
-    for (let j = 0; j < 3; ++j) {
+    for (let j = 0; j < 3; ++j)
+{
       const ndx = indices[i + j];
       const srcNdx = ndx * 6;
       const dstNdx = (i + j) * 6;
@@ -93,7 +102,8 @@ function flattenNormals({
       )
     );
 
-    for (let j = 0; j < 3; ++j) {
+    for (let j = 0; j < 3; ++j)
+{
       const dstNdx = (i + j) * 6;
       newVertices.set(normal, dstNdx + 3);
     }

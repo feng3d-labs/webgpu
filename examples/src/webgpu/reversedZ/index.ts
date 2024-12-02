@@ -293,11 +293,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const uniformBindGroups: IGPUBindingResources[] = [
         {
-            uniforms: uniforms,
+            uniforms,
             camera: camera0,
         },
         {
-            uniforms: uniforms,
+            uniforms,
             camera: camera1,
         },
     ];

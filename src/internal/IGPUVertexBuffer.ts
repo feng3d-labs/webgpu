@@ -1,4 +1,3 @@
-
 /**
  * Sets the current vertex buffer for the given slot.
  *

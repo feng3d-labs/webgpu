@@ -1,4 +1,3 @@
-
 /**
  * Sets the scissor rectangle used during the rasterization stage. After transformation into viewport coordinates any fragments which fall outside the scissor rectangle will be discarded.
  *

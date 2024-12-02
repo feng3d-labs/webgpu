@@ -41,7 +41,7 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
     if (setBindGroup) return setBindGroup;
 
     const entries: IGPUBindGroupEntry[] = [];
-    setBindGroup = { bindGroup: { layout: bindGroupLayout, entries: entries, } };
+    setBindGroup = { bindGroup: { layout: bindGroupLayout, entries } };
     map.set(subBindingResources, setBindGroup);
 
     //
@@ -49,7 +49,7 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
     {
         const { variableInfo, binding } = entry1;
         //
-        const entry: IGPUBindGroupEntry = { binding: binding, resource: null };
+        const entry: IGPUBindGroupEntry = { binding, resource: null };
 
         entries.push(entry);
 
@@ -95,11 +95,11 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
 }
 
 /**
- * 
- * @param variableInfo 
- * @param uniformData 
+ *
+ * @param variableInfo
+ * @param uniformData
  * @param hasDefautValue 是否存在默认值。
- * @returns 
+ * @returns
  */
 function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding, hasDefautValue: boolean)
 {
@@ -123,7 +123,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
     uniformData["_variableInfo"] = variableInfo as any;
 
     const buffer = getIGPUBuffer(uniformData.bufferView);
-    (buffer as any).label = buffer.label || ("BufferBinding " + variableInfo.name);
+    (buffer as any).label = buffer.label || (`BufferBinding ${variableInfo.name}`);
     const offset = uniformData.bufferView.byteOffset;
 
     variableInfo.members.forEach((member) =>

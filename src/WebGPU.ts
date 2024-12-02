@@ -130,7 +130,7 @@ export class WebGPU
 
     /**
      * 从GPU缓冲区读取数据到CPU。
-     * 
+     *
      * @param buffer GPU缓冲区。
      * @param offset 读取位置。
      * @param size 读取字节数量。

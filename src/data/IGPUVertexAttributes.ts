@@ -1,4 +1,3 @@
-
 /**
  * 顶点属性数据映射。
  */
@@ -19,7 +18,7 @@ export interface IGPUVertexAttribute
 
     /**
      * 顶点数据格式。
-     * 
+     *
      * 由于提供的数据并不一定与着色器中格式一直，因此必须提供与着色器中兼容的数据格式。
      */
     readonly format: GPUVertexFormat;
@@ -53,4 +52,4 @@ export type IGPUVertexAttributeDataType = | Float32Array
     | Int16Array
     | Uint8ClampedArray
     | Uint8Array
-    | Int8Array
+    | Int8Array;

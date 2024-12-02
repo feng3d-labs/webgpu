@@ -6,7 +6,7 @@ import { GPUQueue_submit } from "../eventnames";
 
 export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: IGPUTimestampQuery): GPURenderTimestampQuery
 {
-    if (!timestampQuery) return defautGPURenderTimestampQuery
+    if (!timestampQuery) return defautGPURenderTimestampQuery;
     let renderTimestampQuery: GPURenderTimestampQuery = timestampQuery["_GPURenderTimestampQuery"];
     if (renderTimestampQuery) return renderTimestampQuery;
 
@@ -30,21 +30,21 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: I
 
     /**
      * 初始化。
-     * 
+     *
      * 在渲染通道描述上设置 occlusionQuerySet 。
-     * 
-     * @param device 
-     * @param passDescriptor 
+     *
+     * @param device
+     * @param passDescriptor
      */
     const init = (device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor) =>
     {
-        querySet = querySet || device.createQuerySet({ type: 'timestamp', count: 2 });
+        querySet = querySet || device.createQuerySet({ type: "timestamp", count: 2 });
 
         passDescriptor.timestampWrites = {
-            querySet: querySet,
+            querySet,
             beginningOfPassWriteIndex: 0,
             endOfPassWriteIndex: 1,
-        }
+        };
     };
 
     const resolve = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
@@ -70,7 +70,7 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: I
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
         });
 
-        if (resultBuf.mapState === 'unmapped')
+        if (resultBuf.mapState === "unmapped")
         {
             // Copy values to the mappable buffer
             commandEncoder.copyBufferToBuffer(
@@ -84,7 +84,7 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: I
 
         const getQueryResult = () =>
         {
-            if (resultBuf.mapState === 'unmapped')
+            if (resultBuf.mapState === "unmapped")
             {
                 resultBuf.mapAsync(GPUMapMode.READ).then(() =>
                 {

@@ -1,9 +1,9 @@
 import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
-import { GUI } from 'dat.gui';
-import { mat4, vec3 } from 'wgpu-matrix';
-import { createBoxMeshWithTangents } from '../../meshes/box';
-import normalMapWGSL from './normalMap.wgsl';
-import { create3DRenderPipeline, createTextureFromImage } from './utils';
+import { GUI } from "dat.gui";
+import { mat4, vec3 } from "wgpu-matrix";
+import { createBoxMeshWithTangents } from "../../meshes/box";
+import normalMapWGSL from "./normalMap.wgsl";
+import { create3DRenderPipeline, createTextureFromImage } from "./utils";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -22,13 +22,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   interface GUISettings
   {
-    'Bump Mode':
-    | 'Albedo Texture'
-    | 'Normal Texture'
-    | 'Depth Texture'
-    | 'Normal Map'
-    | 'Parallax Scale'
-    | 'Steep Parallax';
+    "Bump Mode":
+    | "Albedo Texture"
+    | "Normal Texture"
+    | "Depth Texture"
+    | "Normal Map"
+    | "Parallax Scale"
+    | "Steep Parallax";
     cameraPosX: number;
     cameraPosY: number;
     cameraPosZ: number;
@@ -39,11 +39,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     depthScale: number;
     depthLayers: number;
     Texture: string;
-    'Reset Light': () => void;
+    "Reset Light": () => void;
   }
 
   const settings: GUISettings = {
-    'Bump Mode': 'Normal Map',
+    "Bump Mode": "Normal Map",
     cameraPosX: 0.0,
     cameraPosY: 0.8,
     cameraPosZ: -1.4,
@@ -53,8 +53,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     lightIntensity: 5.0,
     depthScale: 0.05,
     depthLayers: 16,
-    Texture: 'Spiral',
-    'Reset Light': () =>
+    Texture: "Spiral",
+    "Reset Light": () =>
     {
       return;
     },
@@ -63,71 +63,71 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   // Create normal mapping resources and pipeline
   const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
-    format: 'depth24plus',
+    format: "depth24plus",
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
   // Fetch the image and upload it into a GPUTexture.
   let woodAlbedoTexture: IGPUTexture;
   {
-    const response = await fetch('../../../assets/img/wood_albedo.png');
+    const response = await fetch("../../../assets/img/wood_albedo.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     woodAlbedoTexture = createTextureFromImage(imageBitmap);
   }
 
   let spiralNormalTexture: IGPUTexture;
   {
-    const response = await fetch('../../../assets/img/spiral_normal.png');
+    const response = await fetch("../../../assets/img/spiral_normal.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     spiralNormalTexture = createTextureFromImage(imageBitmap);
   }
 
   let spiralHeightTexture: IGPUTexture;
   {
-    const response = await fetch('../../../assets/img/spiral_height.png');
+    const response = await fetch("../../../assets/img/spiral_height.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     spiralHeightTexture = createTextureFromImage(imageBitmap);
   }
 
   let toyboxNormalTexture: IGPUTexture;
   {
-    const response = await fetch('../../../assets/img/toybox_normal.png');
+    const response = await fetch("../../../assets/img/toybox_normal.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     toyboxNormalTexture = createTextureFromImage(imageBitmap);
   }
 
   let toyboxHeightTexture: IGPUTexture;
   {
-    const response = await fetch('../../../assets/img/toybox_height.png');
+    const response = await fetch("../../../assets/img/toybox_height.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     toyboxHeightTexture = createTextureFromImage(imageBitmap);
   }
 
   let brickwallAlbedoTexture: IGPUTexture;
   {
-    const response = await fetch('../../../assets/img/brickwall_albedo.png');
+    const response = await fetch("../../../assets/img/brickwall_albedo.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     brickwallAlbedoTexture = createTextureFromImage(imageBitmap);
   }
 
   let brickwallNormalTexture: IGPUTexture;
   {
-    const response = await fetch('../../../assets/img/brickwall_normal.png');
+    const response = await fetch("../../../assets/img/brickwall_normal.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     brickwallNormalTexture = createTextureFromImage(imageBitmap);
   }
 
   let brickwallHeightTexture: IGPUTexture;
   {
-    const response = await fetch('../../../assets/img/brickwall_height.png');
+    const response = await fetch("../../../assets/img/brickwall_height.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     brickwallHeightTexture = createTextureFromImage(imageBitmap);
   }
 
   // Create a sampler with linear filtering for smooth interpolation.
   const sampler: IGPUSampler = {
-    magFilter: 'linear',
-    minFilter: 'linear',
+    magFilter: "linear",
+    minFilter: "linear",
   };
 
   const renderPassDescriptor: IGPURenderPassDescriptor = {
@@ -136,16 +136,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         view: { texture: { context: { canvasId: canvas.id } } },
 
         clearValue: [0, 0, 0, 1],
-        loadOp: 'clear',
-        storeOp: 'store',
+        loadOp: "clear",
+        storeOp: "store",
       },
     ],
     depthStencilAttachment: {
       view: { texture: depthTexture },
 
       depthClearValue: 1.0,
-      depthLoadOp: 'clear',
-      depthStoreOp: 'store',
+      depthLoadOp: "clear",
+      depthStoreOp: "store",
     },
   };
 
@@ -208,31 +208,32 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     mat4.identity(modelMatrix);
     const now = Date.now() / 1000;
     mat4.rotateY(modelMatrix, now * -0.5, modelMatrix);
-    return modelMatrix;
+
+return modelMatrix;
   }
 
   // Change the model mapping type
   const getMode = (): number =>
   {
-    switch (settings['Bump Mode'])
+    switch (settings["Bump Mode"])
     {
-      case 'Albedo Texture':
+      case "Albedo Texture":
         return 0;
-      case 'Normal Texture':
+      case "Normal Texture":
         return 1;
-      case 'Depth Texture':
+      case "Depth Texture":
         return 2;
-      case 'Normal Map':
+      case "Normal Map":
         return 3;
-      case 'Parallax Scale':
+      case "Parallax Scale":
         return 4;
-      case 'Steep Parallax':
+      case "Steep Parallax":
         return 5;
     }
   };
 
   const texturedCubePipeline: IGPURenderPipeline = create3DRenderPipeline(
-    'NormalMappingRender',
+    "NormalMappingRender",
     normalMapWGSL,
     // Position,   normal       uv           tangent      bitangent
     normalMapWGSL,
@@ -245,20 +246,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     currentSurfaceBindGroup = TextureAtlas[settings.Texture];
   };
 
-  gui.add(settings, 'Bump Mode', [
-    'Albedo Texture',
-    'Normal Texture',
-    'Depth Texture',
-    'Normal Map',
-    'Parallax Scale',
-    'Steep Parallax',
+  gui.add(settings, "Bump Mode", [
+    "Albedo Texture",
+    "Normal Texture",
+    "Depth Texture",
+    "Normal Map",
+    "Parallax Scale",
+    "Steep Parallax",
   ]);
   gui
-    .add(settings, 'Texture', ['Spiral', 'Toybox', 'BrickWall'])
+    .add(settings, "Texture", ["Spiral", "Toybox", "BrickWall"])
     .onChange(onChangeTexture);
-  const lightFolder = gui.addFolder('Light');
-  const depthFolder = gui.addFolder('Depth');
-  lightFolder.add(settings, 'Reset Light').onChange(() =>
+  const lightFolder = gui.addFolder("Light");
+  const depthFolder = gui.addFolder("Depth");
+  lightFolder.add(settings, "Reset Light").onChange(() =>
   {
     lightPosXController.setValue(1.7);
     lightPosYController.setValue(0.7);
@@ -266,19 +267,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     lightIntensityController.setValue(5.0);
   });
   const lightPosXController = lightFolder
-    .add(settings, 'lightPosX', -5, 5)
+    .add(settings, "lightPosX", -5, 5)
     .step(0.1);
   const lightPosYController = lightFolder
-    .add(settings, 'lightPosY', -5, 5)
+    .add(settings, "lightPosY", -5, 5)
     .step(0.1);
   const lightPosZController = lightFolder
-    .add(settings, 'lightPosZ', -5, 5)
+    .add(settings, "lightPosZ", -5, 5)
     .step(0.1);
   const lightIntensityController = lightFolder
-    .add(settings, 'lightIntensity', 0.0, 10)
+    .add(settings, "lightIntensity", 0.0, 10)
     .step(0.1);
-  depthFolder.add(settings, 'depthScale', 0.0, 0.1).step(0.01);
-  depthFolder.add(settings, 'depthLayers', 1, 32).step(1);
+  depthFolder.add(settings, "depthScale", 0.0, 0.1).step(0.01);
+  depthFolder.add(settings, "depthLayers", 1, 32).step(1);
 
   function frame()
   {

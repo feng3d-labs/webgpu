@@ -1,6 +1,6 @@
-import { Base2DRendererClass, } from './utils1';
+import { Base2DRendererClass } from "./utils1";
 
-import bitonicDisplay from './bitonicDisplay.frag.wgsl';
+import bitonicDisplay from "./bitonicDisplay.frag.wgsl";
 
 import { IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUCommandEncoder, IGPURenderPassDescriptor } from "@feng3d/webgpu-renderer";
 
@@ -38,7 +38,7 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
 
     this.setArguments = (args: BitonicDisplayRenderArgs) =>
     {
-      fragment_uniforms.highlight = args.highlight
+      fragment_uniforms.highlight = args.highlight;
     };
   }
 

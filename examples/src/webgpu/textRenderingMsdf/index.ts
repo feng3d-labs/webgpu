@@ -1,10 +1,10 @@
-import { mat4, vec3 } from 'wgpu-matrix';
+import { mat4, vec3 } from "wgpu-matrix";
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from '../../meshes/cube';
-import { MsdfTextRenderer } from './msdfText';
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import { MsdfTextRenderer } from "./msdfText";
 
-import basicVertWGSL from '../../shaders/basic.vert.wgsl';
-import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
+import basicVertWGSL from "../../shaders/basic.vert.wgsl";
+import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
 import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
@@ -16,12 +16,12 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
 
-    const depthFormat = 'depth24plus';
+    const depthFormat = "depth24plus";
 
     const textRenderer = new MsdfTextRenderer();
     const font = await textRenderer.createFont(
         new URL(
-            '../../../assets/font/ya-hei-ascii-msdf.json',
+            "../../../assets/font/ya-hei-ascii-msdf.json",
             import.meta.url
         ).toString()
     );
@@ -46,7 +46,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         {
             mat4.rotateZ(textTransform, rotation[2], textTransform);
         }
-        return textTransform;
+
+return textTransform;
     }
 
     const textTransforms = [
@@ -97,32 +98,32 @@ setBlendConstant().`,
     );
 
     const text = [
-        textRenderer.formatText(font, 'Front', {
+        textRenderer.formatText(font, "Front", {
             centered: true,
             pixelScale: 1 / 128,
             color: [1, 0, 0, 1],
         }),
-        textRenderer.formatText(font, 'Back', {
+        textRenderer.formatText(font, "Back", {
             centered: true,
             pixelScale: 1 / 128,
             color: [0, 1, 1, 1],
         }),
-        textRenderer.formatText(font, 'Right', {
+        textRenderer.formatText(font, "Right", {
             centered: true,
             pixelScale: 1 / 128,
             color: [0, 1, 0, 1],
         }),
-        textRenderer.formatText(font, 'Left', {
+        textRenderer.formatText(font, "Left", {
             centered: true,
             pixelScale: 1 / 128,
             color: [1, 0, 1, 1],
         }),
-        textRenderer.formatText(font, 'Top', {
+        textRenderer.formatText(font, "Top", {
             centered: true,
             pixelScale: 1 / 128,
             color: [0, 0, 1, 1],
         }),
-        textRenderer.formatText(font, 'Bottom', {
+        textRenderer.formatText(font, "Bottom", {
             centered: true,
             pixelScale: 1 / 128,
             color: [1, 1, 0, 1],
@@ -149,14 +150,14 @@ setBlendConstant().`,
             // Backface culling since the cube is solid piece of geometry.
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
-            cullMode: 'back',
+            cullMode: "back",
         },
 
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: 'less',
+            depthCompare: "less",
         },
     };
 
@@ -178,16 +179,16 @@ setBlendConstant().`,
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0, 0, 0, 1],
-                loadOp: 'clear',
-                storeOp: 'store',
+                loadOp: "clear",
+                storeOp: "store",
             },
         ],
         depthStencilAttachment: {
             view: { texture: depthTexture },
 
             depthClearValue: 1.0,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 
@@ -258,7 +259,7 @@ setBlendConstant().`,
         const renderObjects: IGPURenderPassObject[] = [];
 
         renderObjects.push({
-            pipeline: pipeline,
+            pipeline,
             bindingResources: uniformBindGroup,
             vertices: verticesBuffer,
             draw: { vertexCount: cubeVertexCount, instanceCount: 1 },
@@ -270,7 +271,7 @@ setBlendConstant().`,
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
-                    renderObjects: renderObjects,
+                    renderObjects,
                 }]
             }]
         };

@@ -18,7 +18,8 @@ export class ChainMap3<K1, K2, K3, V>
     get(keys: [K1, K2, K3]): V
     {
         const map = this._map;
-        return map.get(keys[0])?.get(keys[1])?.get(keys[2]);
+
+return map.get(keys[0])?.get(keys[1])?.get(keys[2]);
     }
 
     /**
@@ -49,7 +50,8 @@ export class ChainMap3<K1, K2, K3, V>
     delete(keys: [K1, K2, K3]): boolean
     {
         const map = this._map;
-        return !!(map.get(keys[0])?.get(keys[1])?.delete(keys[2]));
+
+return !!(map.get(keys[0])?.get(keys[1])?.delete(keys[2]));
     }
 }
 

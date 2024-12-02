@@ -25,7 +25,7 @@ describe("ChainMap", () =>
     it("性能测试", () =>
     {
         const Num = 100000;
-        const data = new Array(Num).fill(0).map((v, i) => ({ key0: Math.random(), key1: Math.random() < 0.5, key2: "abc"[Math.floor(Math.random() * 3)], result: i }))
+        const data = new Array(Num).fill(0).map((v, i) => ({ key0: Math.random(), key1: Math.random() < 0.5, key2: "abc"[Math.floor(Math.random() * 3)], result: i }));
 
         {
             const chainMap = new ChainMap<[number, boolean, string], number>();

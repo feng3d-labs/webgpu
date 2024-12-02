@@ -102,6 +102,4 @@ function mergeBindGroupLayouts(entryMap: IGPUBindGroupLayoutEntryMap, entryMap1:
     return entryMap;
 }
 
-
-
 const gpuPipelineLayoutMap: { [key: string]: IGPUPipelineLayoutDescriptor } = {};

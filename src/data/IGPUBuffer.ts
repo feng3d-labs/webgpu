@@ -13,7 +13,7 @@ export interface IGPUBuffer
 
     /**
      * The size of the buffer in bytes.
-     * 
+     *
      * 如果没有设置，引擎将设置为 data 的字节长度。
      */
     readonly size?: GPUSize64;
@@ -27,7 +27,7 @@ export interface IGPUBuffer
 
     /**
      * The allowed usages for the buffer.
-     * 
+     *
      * 默认  GPUBufferUsage.COPY_SRC
             | GPUBufferUsage.COPY_DST
             | GPUBufferUsage.INDEX

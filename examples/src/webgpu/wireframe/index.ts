@@ -1,9 +1,9 @@
-import { GUI } from 'dat.gui';
-import { mat3, mat4 } from 'wgpu-matrix';
-import { modelData } from './models';
-import solidColorLitWGSL from './solidColorLit.wgsl';
-import { randColor, randElement } from './utils';
-import wireframeWGSL from './wireframe.wgsl';
+import { GUI } from "dat.gui";
+import { mat3, mat4 } from "wgpu-matrix";
+import { modelData } from "./models";
+import solidColorLitWGSL from "./solidColorLit.wgsl";
+import { randColor, randElement } from "./utils";
+import wireframeWGSL from "./wireframe.wgsl";
 
 import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
@@ -41,7 +41,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 position: { data: v.vertices, format: "float32x3", offset: 0, arrayStride: 6 * 4 },
                 normal: { data: v.vertices, format: "float32x3", offset: 3 * 4, arrayStride: 6 * 4 },
             },
-        }
+        };
 
         return model;
     });
@@ -50,7 +50,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function rebuildLitPipeline()
     {
         litPipeline = {
-            label: 'lit pipeline',
+            label: "lit pipeline",
             vertex: {
                 code: solidColorLitWGSL,
             },
@@ -58,11 +58,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 code: solidColorLitWGSL,
             },
             primitive: {
-                cullMode: 'back',
+                cullMode: "back",
             },
             depthStencil: {
                 depthWriteEnabled: true,
-                depthCompare: 'less',
+                depthCompare: "less",
                 // Applying a depth bias can prevent aliasing from z-fighting with the
                 // wireframe lines. The depth bias has to be applied to the lit meshes
                 // rather that the wireframe because depthBias isn't considered when
@@ -75,54 +75,54 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     rebuildLitPipeline();
 
     const wireframePipeline: IGPURenderPipeline = {
-        label: 'wireframe pipeline',
+        label: "wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
-            entryPoint: 'vsIndexedU32',
+            entryPoint: "vsIndexedU32",
         },
         fragment: {
             code: wireframeWGSL,
-            entryPoint: 'fs',
+            entryPoint: "fs",
         },
         primitive: {
-            topology: 'line-list',
+            topology: "line-list",
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: 'less-equal',
+            depthCompare: "less-equal",
         },
     };
 
     const barycentricCoordinatesBasedWireframePipeline: IGPURenderPipeline = {
-        label: 'barycentric coordinates based wireframe pipeline',
+        label: "barycentric coordinates based wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
-            entryPoint: 'vsIndexedU32BarycentricCoordinateBasedLines',
+            entryPoint: "vsIndexedU32BarycentricCoordinateBasedLines",
         },
         fragment: {
             code: wireframeWGSL,
-            entryPoint: 'fsBarycentricCoordinateBasedLines',
+            entryPoint: "fsBarycentricCoordinateBasedLines",
             targets: [
                 {
                     blend: {
                         color: {
-                            srcFactor: 'one',
-                            dstFactor: 'one-minus-src-alpha',
+                            srcFactor: "one",
+                            dstFactor: "one-minus-src-alpha",
                         },
                         alpha: {
-                            srcFactor: 'one',
-                            dstFactor: 'one-minus-src-alpha',
+                            srcFactor: "one",
+                            dstFactor: "one-minus-src-alpha",
                         },
                     },
                 },
             ],
         },
         primitive: {
-            topology: 'triangle-list',
+            topology: "triangle-list",
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: 'less-equal',
+            depthCompare: "less-equal",
         },
     };
 
@@ -224,27 +224,27 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     const renderPassDescriptor: IGPURenderPassDescriptor = {
-        label: 'our basic canvas renderPass',
+        label: "our basic canvas renderPass",
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // <- to be filled out when we render
                 clearValue: [0.3, 0.3, 0.3, 1],
-                loadOp: 'clear',
-                storeOp: 'store',
+                loadOp: "clear",
+                storeOp: "store",
             },
         ],
         depthStencilAttachment: {
             view: undefined, // <- to be filled out when we render
             depthClearValue: 1.0,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 
-    gui.add(settings, 'barycentricCoordinatesBased').onChange(addRemoveGUI);
-    gui.add(settings, 'lines');
-    gui.add(settings, 'models');
-    gui.add(settings, 'animate');
+    gui.add(settings, "barycentricCoordinatesBased").onChange(addRemoveGUI);
+    gui.add(settings, "lines");
+    gui.add(settings, "models");
+    gui.add(settings, "animate");
 
     const guis = [];
     function addRemoveGUI()
@@ -254,15 +254,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         if (settings.barycentricCoordinatesBased)
         {
             guis.push(
-                gui.add(settings, 'thickness', 0.0, 10).onChange(updateThickness),
-                gui.add(settings, 'alphaThreshold', 0, 1).onChange(updateThickness)
+                gui.add(settings, "thickness", 0.0, 10).onChange(updateThickness),
+                gui.add(settings, "alphaThreshold", 0, 1).onChange(updateThickness)
             );
-        } else
+        }
+ else
         {
             guis.push(
-                gui.add(settings, 'depthBias', -3, 3, 1).onChange(rebuildLitPipeline),
+                gui.add(settings, "depthBias", -3, 3, 1).onChange(rebuildLitPipeline),
                 gui
-                    .add(settings, 'depthBiasSlopeScale', -1, 1, 0.05)
+                    .add(settings, "depthBiasSlopeScale", -1, 1, 0.05)
                     .onChange(rebuildLitPipeline)
             );
         }
@@ -345,7 +346,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     renderObjects.push({
                         pipeline: litPipeline,
                         vertices: vertexAttributes,
-                        indices: indices,
+                        indices,
                         bindingResources: litBindGroup,
                         drawIndexed: { indexCount: indices.length },
                     });
@@ -358,18 +359,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // Note: If we're using the line-list based pipeline then we need to
             // multiply the vertex count by 2 since we need to emit 6 vertices
             // for each triangle (3 edges).
-            const [bindGroupNdx, countMult, pipeline] =
-                settings.barycentricCoordinatesBased
+            const [bindGroupNdx, countMult, pipeline]
+                = settings.barycentricCoordinatesBased
                     ? [1, 1, barycentricCoordinatesBasedWireframePipeline]
                     : [0, 2, wireframePipeline];
             objectInfos.forEach(({ wireframeBindGroups, model: { indices } }) =>
             {
                 renderObjects.push({
-                    pipeline: pipeline,
+                    pipeline,
                     bindingResources: wireframeBindGroups[bindGroupNdx],
                     draw: { vertexCount: indices.length * countMult },
                 });
-
             });
         }
 
@@ -377,7 +377,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
-                    renderObjects: renderObjects,
+                    renderObjects,
                 }]
             }]
         };
@@ -386,7 +386,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
-
 };
 
 const panel = new GUI({ width: 310 });

@@ -68,7 +68,6 @@ const renderPipelineMap = new ChainMap<
     }
 >();
 
-
 /**
  * 获取深度模板阶段完整描述。
  *
@@ -168,12 +167,11 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
         const shaderLocation = v.location as number;
         const attributeName = v.name;
 
-
         const vertexAttribute = vertices[attributeName];
         console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
         //
         const data = vertexAttribute.data;
-        let attributeOffset = vertexAttribute.offset || 0;
+        const attributeOffset = vertexAttribute.offset || 0;
         let arrayStride = vertexAttribute.arrayStride;
         const stepMode = vertexAttribute.stepMode;
         const format = vertexAttribute.format;
@@ -209,7 +207,7 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
             index = vertexBufferLayouts.length;
             map.set(data, index);
 
-            vertexBuffers[index] = { data: data, offset: data.byteOffset, size: data.byteLength };
+            vertexBuffers[index] = { data, offset: data.byteOffset, size: data.byteLength };
 
             //
             vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [] };
@@ -300,7 +298,7 @@ function getWGSLType(type: TypeInfo)
     }
     if (wgslTypeMap[wgslType])
     {
-        wgslType = wgslTypeMap[wgslType]
+        wgslType = wgslTypeMap[wgslType];
     }
 
     return wgslType as WGSLVertexType;

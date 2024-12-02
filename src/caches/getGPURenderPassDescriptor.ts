@@ -26,10 +26,11 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
     {
         // 执行更新函数。
         (renderPassDescriptor["_updates"] as Function[]).forEach((v) => v());
-        return renderPassDescriptor;
+
+return renderPassDescriptor;
     }
 
-    renderPassDescriptor = { colorAttachments: [], };
+    renderPassDescriptor = { colorAttachments: [] };
     renderPassDescriptorMap.set(descriptor, renderPassDescriptor);
 
     const _updates: Function[] = renderPassDescriptor["_updates"] = [];
@@ -153,7 +154,6 @@ function getAttachmentTextures(colorAttachments: readonly IGPURenderPassColorAtt
     return textures;
 }
 
-
 /**
  * 更新渲染通道附件尺寸，使得附件上纹理尺寸一致。
  *
@@ -165,7 +165,6 @@ function setIGPURenderPassAttachmentSize(colorAttachments: NGPURenderPassColorAt
     const attachmentTextures = getIGPURenderPassAttachmentTextures(colorAttachments, depthStencilAttachment);
     attachmentTextures.forEach((v) => setIGPUTextureSize(v, attachmentSize));
 }
-
 
 /**
  * 设置纹理与附件相同尺寸。

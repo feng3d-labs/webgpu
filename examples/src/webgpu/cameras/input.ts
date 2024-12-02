@@ -25,7 +25,8 @@ export type InputHandler = () => Input;
 export function createInputHandler(
   window: Window,
   canvas: HTMLCanvasElement
-): InputHandler {
+): InputHandler
+{
   const digital = {
     forward: false,
     backward: false,
@@ -41,36 +42,38 @@ export function createInputHandler(
   };
   let mouseDown = false;
 
-  const setDigital = (e: KeyboardEvent, value: boolean) => {
-    switch (e.code) {
-      case 'KeyW':
+  const setDigital = (e: KeyboardEvent, value: boolean) =>
+{
+    switch (e.code)
+{
+      case "KeyW":
         digital.forward = value;
         e.preventDefault();
         e.stopPropagation();
         break;
-      case 'KeyS':
+      case "KeyS":
         digital.backward = value;
         e.preventDefault();
         e.stopPropagation();
         break;
-      case 'KeyA':
+      case "KeyA":
         digital.left = value;
         e.preventDefault();
         e.stopPropagation();
         break;
-      case 'KeyD':
+      case "KeyD":
         digital.right = value;
         e.preventDefault();
         e.stopPropagation();
         break;
-      case 'Space':
+      case "Space":
         digital.up = value;
         e.preventDefault();
         e.stopPropagation();
         break;
-      case 'ShiftLeft':
-      case 'ControlLeft':
-      case 'KeyC':
+      case "ShiftLeft":
+      case "ControlLeft":
+      case "KeyC":
         digital.down = value;
         e.preventDefault();
         e.stopPropagation();
@@ -78,28 +81,34 @@ export function createInputHandler(
     }
   };
 
-  window.addEventListener('keydown', (e) => setDigital(e, true));
-  window.addEventListener('keyup', (e) => setDigital(e, false));
+  window.addEventListener("keydown", (e) => setDigital(e, true));
+  window.addEventListener("keyup", (e) => setDigital(e, false));
 
-  canvas.style.touchAction = 'pinch-zoom';
-  canvas.addEventListener('pointerdown', () => {
+  canvas.style.touchAction = "pinch-zoom";
+  canvas.addEventListener("pointerdown", () =>
+{
     mouseDown = true;
   });
-  canvas.addEventListener('pointerup', () => {
+  canvas.addEventListener("pointerup", () =>
+{
     mouseDown = false;
   });
-  canvas.addEventListener('pointermove', (e) => {
-    mouseDown = e.pointerType == 'mouse' ? (e.buttons & 1) !== 0 : true;
-    if (mouseDown) {
+  canvas.addEventListener("pointermove", (e) =>
+{
+    mouseDown = e.pointerType == "mouse" ? (e.buttons & 1) !== 0 : true;
+    if (mouseDown)
+{
       analog.x += e.movementX;
       analog.y += e.movementY;
     }
   });
   canvas.addEventListener(
-    'wheel',
-    (e) => {
+    "wheel",
+    (e) =>
+{
       mouseDown = (e.buttons & 1) !== 0;
-      if (mouseDown) {
+      if (mouseDown)
+{
         // The scroll value varies substantially between user agents / browsers.
         // Just use the sign.
         analog.zoom += Math.sign(e.deltaY);
@@ -110,7 +119,8 @@ export function createInputHandler(
     { passive: false }
   );
 
-  return () => {
+  return () =>
+{
     const out = {
       digital,
       analog: {
@@ -124,6 +134,7 @@ export function createInputHandler(
     analog.x = 0;
     analog.y = 0;
     analog.zoom = 0;
-    return out;
+
+return out;
   };
 }

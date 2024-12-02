@@ -1,11 +1,11 @@
-import type { GUI } from 'dat.gui';
-import Stats from 'stats.js';
-import { quitIfAdapterNotAvailable, quitIfWebGPUNotAvailable } from '../util';
+import type { GUI } from "dat.gui";
+import Stats from "stats.js";
+import { quitIfAdapterNotAvailable, quitIfWebGPUNotAvailable } from "../util";
 
 import { IGPUBindingResources, IGPUCommandEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline } from "@feng3d/webgpu-renderer";
 
-const fullscreenTexturedQuad =
-`
+const fullscreenTexturedQuad
+= `
 struct VertexOutput {
   @builtin(position) Position: vec4<f32>,
   @location(0) fragUV: vec2<f32>,
@@ -37,7 +37,7 @@ fn vert_main(@builtin(vertex_index) VertexIndex: u32) -> VertexOutput {
     return output;
 }
 
-`
+`;
 
 export type ShaderKeyInterface<T extends string[]> = {
   [K in T[number]]: number;
@@ -78,20 +78,21 @@ export const SampleInitFactoryWebGPU = async (
     const adapter = await navigator.gpu?.requestAdapter();
     quitIfAdapterNotAvailable(adapter);
 
-    const timestampQueryAvailable = adapter.features.has('timestamp-query');
+    const timestampQueryAvailable = adapter.features.has("timestamp-query");
     let device: GPUDevice;
     if (timestampQueryAvailable)
     {
       device = await adapter.requestDevice({
-        requiredFeatures: ['timestamp-query'],
+        requiredFeatures: ["timestamp-query"],
       });
-    } else
+    }
+ else
     {
       device = await adapter.requestDevice();
     }
     quitIfWebGPUNotAvailable(adapter, device);
 
-    const context = canvas.getContext('webgpu') as GPUCanvasContext;
+    const context = canvas.getContext("webgpu") as GPUCanvasContext;
     const devicePixelRatio = window.devicePixelRatio;
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
@@ -111,7 +112,8 @@ export const SampleInitFactoryWebGPU = async (
       timestampQueryAvailable,
     });
   };
-  return init;
+
+return init;
 };
 
 export abstract class Base2DRendererClass
@@ -136,8 +138,8 @@ export abstract class Base2DRendererClass
     const passEncoder: IGPURenderPass = {
       descriptor: renderPassDescriptor,
       renderObjects: [{
-        pipeline: pipeline,
-        bindingResources: bindingResources,
+        pipeline,
+        bindingResources,
         draw: { vertexCount: 6, instanceCount: 1 }
       }],
     };
@@ -172,11 +174,11 @@ export abstract class Base2DRendererClass
         code: fullscreenTexturedQuad,
       },
       fragment: {
-        code: code,
+        code,
       },
       primitive: {
-        topology: 'triangle-list',
-        cullMode: 'none',
+        topology: "triangle-list",
+        cullMode: "none",
       },
     };
 

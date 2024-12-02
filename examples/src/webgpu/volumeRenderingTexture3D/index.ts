@@ -1,6 +1,6 @@
-import { GUI } from 'dat.gui';
-import { mat4 } from 'wgpu-matrix';
-import volumeWGSL from './volume.wgsl';
+import { GUI } from "dat.gui";
+import { mat4 } from "wgpu-matrix";
+import volumeWGSL from "./volume.wgsl";
 
 const gui = new GUI();
 
@@ -21,9 +21,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         far: 7.0,
     };
 
-    gui.add(params, 'rotateCamera', true);
-    gui.add(params, 'near', 2.0, 7.0);
-    gui.add(params, 'far', 2.0, 7.0);
+    gui.add(params, "rotateCamera", true);
+    gui.add(params, "near", 2.0, 7.0);
+    gui.add(params, "far", 2.0, 7.0);
 
     const sampleCount = 4;
 
@@ -35,8 +35,8 @@ const init = async (canvas: HTMLCanvasElement) =>
             code: volumeWGSL,
         },
         primitive: {
-            topology: 'triangle-list',
-            cullMode: 'back',
+            topology: "triangle-list",
+            cullMode: "back",
         },
     };
 
@@ -50,21 +50,21 @@ const init = async (canvas: HTMLCanvasElement) =>
         const width = 180;
         const height = 216;
         const depth = 180;
-        const format: GPUTextureFormat = 'r8unorm';
+        const format: GPUTextureFormat = "r8unorm";
         const blockLength = 1;
         const bytesPerBlock = 1;
         const blocksWide = Math.ceil(width / blockLength);
         const blocksHigh = Math.ceil(height / blockLength);
         const bytesPerRow = blocksWide * bytesPerBlock;
-        const dataPath =
-            '../../../assets/img/volume/t1_icbm_normal_1mm_pn0_rf0_180x216x180_uint8_1x1.bin-gz';
+        const dataPath
+            = "../../../assets/img/volume/t1_icbm_normal_1mm_pn0_rf0_180x216x180_uint8_1x1.bin-gz";
 
         // Fetch the compressed data
         const response = await fetch(dataPath);
         const compressedArrayBuffer = await response.arrayBuffer();
 
         // Decompress the data using DecompressionStream for gzip format
-        const decompressionStream = new DecompressionStream('gzip');
+        const decompressionStream = new DecompressionStream("gzip");
         const decompressedStream = new Response(
             compressedArrayBuffer
         ).body.pipeThrough(decompressionStream);
@@ -74,13 +74,13 @@ const init = async (canvas: HTMLCanvasElement) =>
         const byteArray = new Uint8Array(decompressedArrayBuffer);
 
         volumeTexture = {
-            dimension: '3d',
+            dimension: "3d",
             size: [width, height, depth],
-            format: format,
+            format,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
             writeTextures: [{
                 data: byteArray,
-                dataLayout: { bytesPerRow: bytesPerRow, rowsPerImage: blocksHigh },
+                dataLayout: { bytesPerRow, rowsPerImage: blocksHigh },
                 size: [width, height, depth]
             }],
         };
@@ -88,9 +88,9 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Create a sampler with linear filtering for smooth interpolation.
     const sampler: IGPUSampler = {
-        magFilter: 'linear',
-        minFilter: 'linear',
-        mipmapFilter: 'linear',
+        magFilter: "linear",
+        minFilter: "linear",
+        mipmapFilter: "linear",
         maxAnisotropy: 16,
     };
 
@@ -106,8 +106,8 @@ const init = async (canvas: HTMLCanvasElement) =>
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0.5, 0.5, 0.5, 1.0],
-                loadOp: 'clear',
-                storeOp: 'discard',
+                loadOp: "clear",
+                storeOp: "discard",
             },
         ],
         multisample: sampleCount,
@@ -150,8 +150,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         const deltaTime = (now - lastFrameMS) / 1000;
         lastFrameMS = now;
 
-        const inverseModelViewProjection =
-            getInverseModelViewProjectionMatrix(deltaTime);
+        const inverseModelViewProjection
+            = getInverseModelViewProjectionMatrix(deltaTime);
 
         uniformBuffer.inverseModelViewProjectionMatrix = inverseModelViewProjection;
 

@@ -1,6 +1,6 @@
 import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
-import { mat3, mat4 } from 'wgpu-matrix';
-import { modelData } from './models';
+import { mat3, mat4 } from "wgpu-matrix";
+import { modelData } from "./models";
 
 type TypedArrayView = Float32Array | Uint32Array;
 
@@ -12,10 +12,11 @@ function createBufferWithData(
 {
     const buffer = device.createBuffer({
         size: data.byteLength,
-        usage: usage,
+        usage,
     });
     device.queue.writeBuffer(buffer, 0, data);
-    return buffer;
+
+return buffer;
 }
 
 type Model = {
@@ -54,12 +55,14 @@ const init = async () =>
         {
             max = 1;
             min = 0;
-        } else if (max === undefined)
+        }
+ else if (max === undefined)
         {
             max = min;
             min = 0;
         }
-        return Math.random() * (max - min) + min;
+
+return Math.random() * (max - min) + min;
     }
 
     function randInt(min: number, max?: number)
@@ -73,7 +76,7 @@ const init = async () =>
     }
 
     const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-    const depthFormat = 'depth24plus';
+    const depthFormat = "depth24plus";
 
     const module = {
         code: `
@@ -111,7 +114,7 @@ const init = async () =>
     };
 
     const pipeline: IGPURenderPipeline = {
-        label: 'our hardcoded red triangle pipeline',
+        label: "our hardcoded red triangle pipeline",
         vertex: {
             ...module,
         },
@@ -119,11 +122,11 @@ const init = async () =>
             ...module,
         },
         primitive: {
-            cullMode: 'back',
+            cullMode: "back",
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: 'less',
+            depthCompare: "less",
         },
     };
 
@@ -154,7 +157,8 @@ const init = async () =>
             if (isIntersecting)
             {
                 visibleCanvasSet.add(canvas);
-            } else
+            }
+ else
             {
                 visibleCanvasSet.delete(canvas);
             }
@@ -173,7 +177,7 @@ const init = async () =>
         renderPassDescriptor?: IGPURenderPassDescriptor
     };
 
-    const outerElem = document.querySelector('#outer');
+    const outerElem = document.querySelector("#outer");
     const canvasToInfoMap = new Map<HTMLCanvasElement, CanvasInfo>();
     const numProducts = 200;
     for (let i = 0; i < numProducts; ++i)
@@ -183,14 +187,14 @@ const init = async () =>
         //   <canvas></canvas>
         //   <div>Product#: ?</div>
         // </div>
-        const canvas = document.createElement('canvas');
+        const canvas = document.createElement("canvas");
         resizeObserver.observe(canvas);
         intersectionObserver.observe(canvas);
 
-        const container = document.createElement('div');
+        const container = document.createElement("div");
         container.className = `product size${randInt(4)}`;
 
-        const description = document.createElement('div');
+        const description = document.createElement("div");
         description.textContent = `product#: ${i + 1}`;
 
         container.appendChild(canvas);
@@ -198,7 +202,7 @@ const init = async () =>
         outerElem.appendChild(container);
 
         // Get a WebGPU context and configure it.
-        canvas.id = canvas.id || `gpuCanvas___` + (globalThis["gpuCanvasAutoID"] = ~~globalThis["gpuCanvasAutoID"] + 1)
+        canvas.id = canvas.id || `gpuCanvas___${globalThis["gpuCanvasAutoID"] = ~~globalThis["gpuCanvasAutoID"] + 1}`;
         const context: IGPUCanvasContext = { canvasId: canvas.id };
 
         // Make a uniform buffer and type array views
@@ -268,20 +272,20 @@ const init = async () =>
             // Get the current texture from the canvas context and
             // set it as the texture to render to.
             const renderPassDescriptor: IGPURenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
-                label: 'our basic canvas renderPass',
+                label: "our basic canvas renderPass",
                 colorAttachments: [
                     {
                         view: { texture: { context } }, // <- to be filled out when we render
-                        clearValue: clearValue,
-                        loadOp: 'clear',
-                        storeOp: 'store',
+                        clearValue,
+                        loadOp: "clear",
+                        storeOp: "store",
                     },
                 ],
                 depthStencilAttachment: {
                     view: undefined, // <- to be filled out when we render
                     depthClearValue: 1.0,
-                    depthLoadOp: 'clear',
-                    depthStoreOp: 'store',
+                    depthLoadOp: "clear",
+                    depthStoreOp: "store",
                 },
             };
 
@@ -306,7 +310,7 @@ const init = async () =>
             const writeBuffers = buffer.writeBuffers || [];
             writeBuffers.push({
                 data: uniformValues,
-            })
+            });
             buffer.writeBuffers = writeBuffers;
 
             // make a render pass encoder to encode render specific commands
@@ -326,13 +330,12 @@ const init = async () =>
             commandEncoders: [{
                 passEncoders,
             }]
-        }
+        };
         webgpu.submit(submit);
 
         requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
-
 };
 
 init();

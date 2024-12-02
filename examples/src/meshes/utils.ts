@@ -1,4 +1,4 @@
-import { vec3, Vec3 } from 'wgpu-matrix';
+import { vec3, Vec3 } from "wgpu-matrix";
 
 export function computeSurfaceNormals(
   positions: [number, number, number][],
@@ -6,10 +6,10 @@ export function computeSurfaceNormals(
 ): [number, number, number][]
 {
   const normals: [number, number, number][] = positions.map(() =>
-  {
+
     // Initialize to zero.
-    return [0, 0, 0];
-  });
+     [0, 0, 0]
+  );
   triangles.forEach(([i0, i1, i2]) =>
   {
     const p0 = positions[i0];
@@ -49,7 +49,8 @@ function makeTriangleIndicesFn(triangles: [number, number, number][])
       vNdx = 0;
       ++triNdx;
     }
-    return ndx;
+
+return ndx;
   };
   fn.reset = function ()
   {
@@ -57,7 +58,8 @@ function makeTriangleIndicesFn(triangles: [number, number, number][])
     vNdx = 0;
   };
   fn.numElements = triangles.length * 3;
-  return fn;
+
+return fn;
 }
 
 // adapted from: https://webglfundamentals.org/webgl/lessons/webgl-3d-geometry-lathe.htmls
@@ -106,7 +108,8 @@ export function generateNormals(
     }
     const newNdx = tempVertNdx++;
     tempVerts[vertId] = newNdx;
-    return newNdx;
+
+return newNdx;
   }
 
   // We need to figure out the shared vertices.
@@ -177,7 +180,8 @@ export function generateNormals(
     tempVerts[vertId] = newNdx;
     newPositions.push(position);
     newNormals.push(normal);
-    return newNdx;
+
+return newNdx;
   }
 
   const newTriangles: [number, number, number][] = [];
@@ -219,7 +223,7 @@ export function generateNormals(
   };
 }
 
-type ProjectedPlane = 'xy' | 'xz' | 'yz';
+type ProjectedPlane = "xy" | "xz" | "yz";
 
 const projectedPlane2Ids: { [key in ProjectedPlane]: [number, number] } = {
   xy: [0, 1],
@@ -229,15 +233,15 @@ const projectedPlane2Ids: { [key in ProjectedPlane]: [number, number] } = {
 
 export function computeProjectedPlaneUVs(
   positions: [number, number, number][],
-  projectedPlane: ProjectedPlane = 'xy'
+  projectedPlane: ProjectedPlane = "xy"
 ): [number, number][]
 {
   const idxs = projectedPlane2Ids[projectedPlane];
   const uvs: [number, number][] = positions.map(() =>
-  {
+
     // Initialize to zero.
-    return [0, 0];
-  });
+     [0, 0]
+  );
   const extentMin = [Infinity, Infinity];
   const extentMax = [-Infinity, -Infinity];
   positions.forEach((pos, i) =>
@@ -256,5 +260,6 @@ export function computeProjectedPlaneUVs(
     uv[0] = (uv[0] - extentMin[0]) / (extentMax[0] - extentMin[0]);
     uv[1] = (uv[1] - extentMin[1]) / (extentMax[1] - extentMin[1]);
   });
-  return uvs;
+
+return uvs;
 }

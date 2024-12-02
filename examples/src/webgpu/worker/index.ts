@@ -2,10 +2,10 @@ const init = async (canvas: HTMLCanvasElement) =>
 {
   // The web worker is created by passing a path to the worker's source file, which will then be
   // executed on a separate thread.
-  const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
+  const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
 
   // The primary way to communicate with the worker is to send and receive messages.
-  worker.addEventListener('message', (ev) =>
+  worker.addEventListener("message", (ev) =>
   {
     // The format of the message can be whatever you'd like, but it's helpful to decide on a
     // consistent convention so that you can tell the message types apart as your apps grow in
@@ -32,7 +32,7 @@ const init = async (canvas: HTMLCanvasElement) =>
   // array passed as the second argument here indicates that the OffscreenCanvas is to be
   // transferred to the worker, meaning this main thread will lose access to it and it will be
   // fully owned by the worker.
-  worker.postMessage({ type: 'init', offscreenCanvas }, [offscreenCanvas]);
+  worker.postMessage({ type: "init", offscreenCanvas }, [offscreenCanvas]);
 };
 
 const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;

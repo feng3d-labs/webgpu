@@ -10,7 +10,7 @@ export function getGPURenderPipeline(device: GPUDevice, descriptor: IGPURenderPi
 
     // 从GPU管线中获取管线布局。
     const gpuPipelineLayout = getIGPUPipelineLayout(descriptor);
-    let layout = getGPUPipelineLayout(device, gpuPipelineLayout);
+    const layout = getGPUPipelineLayout(device, gpuPipelineLayout);
 
     const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
         layout,

@@ -29,6 +29,6 @@ export * from "./types/VertexFormat";
 /**
  * 内部
  */
-export * as internal from './internal';
+export * as internal from "./internal";
 export * from "./utils/ChainMap";
 

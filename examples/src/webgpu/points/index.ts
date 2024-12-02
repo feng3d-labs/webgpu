@@ -1,11 +1,11 @@
 import { IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
-import { GUI } from 'dat.gui';
-import { mat4 } from 'wgpu-matrix';
+import { GUI } from "dat.gui";
+import { mat4 } from "wgpu-matrix";
 
-import distanceSizedPointsVertWGSL from './distance-sized-points.vert.wgsl';
-import fixedSizePointsVertWGSL from './fixed-size-points.vert.wgsl';
-import orangeFragWGSL from './orange.frag.wgsl';
-import texturedFragWGSL from './textured.frag.wgsl';
+import distanceSizedPointsVertWGSL from "./distance-sized-points.vert.wgsl";
+import fixedSizePointsVertWGSL from "./fixed-size-points.vert.wgsl";
+import orangeFragWGSL from "./orange.frag.wgsl";
+import texturedFragWGSL from "./textured.frag.wgsl";
 
 // See: https://www.google.com/search?q=fibonacci+sphere
 function createFibonacciSphereVertices({
@@ -28,7 +28,8 @@ function createFibonacciSphereVertices({
     const z = Math.sin(phi) * r;
     vertices.push(x * radius, y * radius, z * radius);
   }
-  return new Float32Array(vertices);
+
+return new Float32Array(vertices);
 }
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -51,7 +52,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     fixedSizePointsVertWGSL,
   ];
 
-  const depthFormat = 'depth24plus';
+  const depthFormat = "depth24plus";
 
   // make pipelines for each combination
   const pipelines = vertModules.map((vertModule) =>
@@ -62,9 +63,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         buffers: [
           {
             arrayStride: 3 * 4, // 3 floats, 4 bytes each
-            stepMode: 'instance',
+            stepMode: "instance",
             attributes: [
-              { shaderLocation: 0, offset: 0, format: 'float32x3' }, // position
+              { shaderLocation: 0, offset: 0, format: "float32x3" }, // position
             ],
           },
         ],
@@ -75,12 +76,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           {
             blend: {
               color: {
-                srcFactor: 'one',
-                dstFactor: 'one-minus-src-alpha',
+                srcFactor: "one",
+                dstFactor: "one-minus-src-alpha",
               },
               alpha: {
-                srcFactor: 'one',
-                dstFactor: 'one-minus-src-alpha',
+                srcFactor: "one",
+                dstFactor: "one-minus-src-alpha",
               },
             },
           },
@@ -88,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       },
       depthStencil: {
         depthWriteEnabled: true,
-        depthCompare: 'less',
+        depthCompare: "less",
         format: depthFormat,
       },
     } as IGPURenderPipeline)
@@ -106,20 +107,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   };
 
   // Use canvas 2d to make texture data
-  const ctx = new OffscreenCanvas(64, 64).getContext('2d');
-  ctx.font = '60px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('🦋', 32, 32);
+  const ctx = new OffscreenCanvas(64, 64).getContext("2d");
+  ctx.font = "60px sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("🦋", 32, 32);
 
   const sampler: IGPUSampler = {};
   const texture: IGPUTexture = {
     size: [ctx.canvas.width, ctx.canvas.height],
-    format: 'rgba8unorm',
+    format: "rgba8unorm",
     usage:
-      GPUTextureUsage.COPY_DST |
-      GPUTextureUsage.TEXTURE_BINDING |
-      GPUTextureUsage.RENDER_ATTACHMENT,
+      GPUTextureUsage.COPY_DST
+      | GPUTextureUsage.TEXTURE_BINDING
+      | GPUTextureUsage.RENDER_ATTACHMENT,
     source: [
       { source: { source: ctx.canvas, flipY: true }, destination: {}, copySize: [ctx.canvas.width, ctx.canvas.height] },
     ],
@@ -132,24 +133,24 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       size: undefined,
     },
     s: sampler,
-    t: { texture: texture },
+    t: { texture },
   };
 
   const renderPassDescriptor: IGPURenderPassDescriptor = {
-    label: 'our basic canvas renderPass',
+    label: "our basic canvas renderPass",
     colorAttachments: [
       {
         view: { texture: { context: { canvasId: canvas.id } } },
         clearValue: [0.3, 0.3, 0.3, 1],
-        loadOp: 'clear',
-        storeOp: 'store',
+        loadOp: "clear",
+        storeOp: "store",
       },
     ],
     depthStencilAttachment: {
       view: undefined, // to be filled out when we render
       depthClearValue: 1.0,
-      depthLoadOp: 'clear',
-      depthStoreOp: 'store',
+      depthLoadOp: "clear",
+      depthStoreOp: "store",
     },
   };
 
@@ -159,9 +160,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     size: 10,
   };
 
-  gui.add(settings, 'fixedSize');
-  gui.add(settings, 'textured');
-  gui.add(settings, 'size', 0, 80);
+  gui.add(settings, "fixedSize");
+  gui.add(settings, "textured");
+  gui.add(settings, "size", 0, 80);
 
   function render(time: number)
   {

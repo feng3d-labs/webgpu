@@ -37,7 +37,6 @@ export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
         const bufferData = buffer.data;
         console.assert(!!bufferData, `初始化缓冲区时，当尺寸未定义时，必须设置data属性来计算尺寸。`);
 
-
         size = bufferData.byteLength;
     }
     // GPU缓冲区尺寸应该为4的倍数。

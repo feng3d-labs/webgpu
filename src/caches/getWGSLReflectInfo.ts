@@ -19,7 +19,7 @@ export function getWGSLReflectInfo(code: string): WgslReflect
 }
 const reflectMap: { [code: string]: WgslReflect } = {};
 
-export type IGPUBindGroupLayoutEntryMap = { [name: string]: IGPUBindGroupLayoutEntry; }
+export type IGPUBindGroupLayoutEntryMap = { [name: string]: IGPUBindGroupLayoutEntry; };
 
 export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayoutEntryMap
 {

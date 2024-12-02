@@ -14,7 +14,6 @@ export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContex
 
     const updateConfigure = () =>
     {
-
         //
         context.configuration = context.configuration || {};
         const format = (context.configuration as any).format = context.configuration.format || navigator.gpu.getPreferredCanvasFormat();
@@ -36,11 +35,11 @@ export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContex
             usage,
             format,
         });
-    }
+    };
 
     updateConfigure();
 
-    watcher.watchobject(context, { configuration: { usage: undefined, format: undefined, colorSpace: undefined, toneMapping: { mode: undefined }, alphaMode: undefined, } }, updateConfigure);
+    watcher.watchobject(context, { configuration: { usage: undefined, format: undefined, colorSpace: undefined, toneMapping: { mode: undefined }, alphaMode: undefined } }, updateConfigure);
 
     return gpuCanvasContext;
 }

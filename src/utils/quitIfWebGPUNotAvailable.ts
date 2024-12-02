@@ -10,8 +10,9 @@ export function quitIfWebGPUNotAvailable(
     if (!device)
     {
         quitIfAdapterNotAvailable(adapter);
-        fail('Unable to get a device for an unknown reason');
-        return;
+        fail("Unable to get a device for an unknown reason");
+
+return;
     }
 
     device.lost.then((reason) =>
@@ -29,9 +30,9 @@ function quitIfAdapterNotAvailable(
     adapter: GPUAdapter | null
 ): asserts adapter
 {
-    if (!('gpu' in navigator))
+    if (!("gpu" in navigator))
     {
-        fail('navigator.gpu is not defined - WebGPU not available in this browser');
+        fail("navigator.gpu is not defined - WebGPU not available in this browser");
     }
 
     if (!adapter)
@@ -47,7 +48,7 @@ const fail = (() =>
 
     function createErrorOutput()
     {
-        if (typeof document === 'undefined')
+        if (typeof document === "undefined")
         {
             // Not implemented in workers.
             return {
@@ -58,16 +59,16 @@ const fail = (() =>
             };
         }
 
-        const dialogBox = document.createElement('dialog');
+        const dialogBox = document.createElement("dialog");
         dialogBox.close();
         document.body.append(dialogBox);
 
-        const dialogText = document.createElement('pre');
-        dialogText.style.whiteSpace = 'pre-wrap';
+        const dialogText = document.createElement("pre");
+        dialogText.style.whiteSpace = "pre-wrap";
         dialogBox.append(dialogText);
 
-        const closeBtn = document.createElement('button');
-        closeBtn.textContent = 'OK';
+        const closeBtn = document.createElement("button");
+        closeBtn.textContent = "OK";
         closeBtn.onclick = () => dialogBox.close();
         dialogBox.append(closeBtn);
 

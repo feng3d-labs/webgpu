@@ -57,7 +57,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
         const map: ChainMap<[string, IGPURenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
         const _commands = passEncoder["_commands"] as any[];
 
-        let commands = map.get([renderPassFormat._key, renderObject]);
+        const commands = map.get([renderPassFormat._key, renderObject]);
         if (commands)
         {
             commands.forEach((v) => _commands.push(v));
@@ -157,12 +157,12 @@ function paichuWuxiaoCommands(commands: any[])
             }
         }
         else if (0
-            || v[0] == "setPipeline"
-            || v[0] == "setIndexBuffer"
-            || v[0] == "setViewport"
-            || v[0] == "setScissorRect"
-            || v[0] == "setBlendConstant"
-            || v[0] == "setStencilReference"
+            || v[0] === "setPipeline"
+            || v[0] === "setIndexBuffer"
+            || v[0] === "setViewport"
+            || v[0] === "setScissorRect"
+            || v[0] === "setBlendConstant"
+            || v[0] === "setStencilReference"
         )
         {
             if (!arrayEq0(_obj, v[0], v[1]))
@@ -185,6 +185,7 @@ function arrayEq0(_obj: any, name: string, args: any[])
     if (!oldArgs)
     {
         obj[name] = args;
+
         return false;
     }
 
@@ -193,9 +194,11 @@ function arrayEq0(_obj: any, name: string, args: any[])
         if (oldArgs[i] !== args[i])
         {
             obj[name] = args;
+
             return false;
         }
     }
+
     return true;
 }
 
@@ -206,6 +209,7 @@ function arrayEq1(_obj: any, name: string, index: number, args: any[])
     if (!oldArgs)
     {
         obj[index] = args;
+
         return false;
     }
 
@@ -214,8 +218,10 @@ function arrayEq1(_obj: any, name: string, index: number, args: any[])
         if (oldArgs[i] !== args[i])
         {
             obj[index] = args;
+
             return false;
         }
     }
+
     return true;
 }

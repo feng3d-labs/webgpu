@@ -44,7 +44,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
 
     if (label === undefined)
     {
-        label = "GPUTexture " + autoIndex++;
+        label = `GPUTexture ${autoIndex++}`;
     }
 
     gpuTexture = device.createTexture({

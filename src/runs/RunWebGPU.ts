@@ -97,11 +97,11 @@ export class RunWebGPU
 
         // 处理时间戳查询
         const timestampQuery = getGPURenderTimestampQuery(device, renderPass.timestampQuery);
-        timestampQuery.init(device, renderPassDescriptor)
+        timestampQuery.init(device, renderPassDescriptor);
 
         // 处理不被遮挡查询。
         const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
-        occlusionQuery.init(device, renderPassDescriptor)
+        occlusionQuery.init(device, renderPassDescriptor);
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
@@ -173,11 +173,11 @@ export class RunWebGPU
         const descriptor: GPUComputePassDescriptor = {};
         // 处理时间戳查询
         const timestampQuery = getGPURenderTimestampQuery(device, computePass?.timestampQuery);
-        timestampQuery.init(device, descriptor)
+        timestampQuery.init(device, descriptor);
 
         const passEncoder = commandEncoder.beginComputePass(descriptor);
 
-        this.runComputeObjects(device, passEncoder, computePass.computeObjects)
+        this.runComputeObjects(device, passEncoder, computePass.computeObjects);
 
         passEncoder.end();
 
@@ -276,7 +276,7 @@ export class RunWebGPU
 
     /**
      * 执行计算对象。
-     * 
+     *
      * @param device GPU设备。
      * @param passEncoder 计算通道编码器。
      * @param computeObject 计算对象。
@@ -302,8 +302,8 @@ export class RunWebGPU
 
     /**
      * 执行计算工作组。
-     * 
-     * @param passEncoder 计算通道编码器。 
+     *
+     * @param passEncoder 计算通道编码器。
      * @param workgroups 计算工作组。
      */
     protected runWorkgroups(passEncoder: GPUComputePassEncoder, workgroups?: IGPUWorkgroups)
@@ -314,7 +314,7 @@ export class RunWebGPU
 
     /**
      * 执行渲染对象。
-     * 
+     *
      * @param device GPU设备。
      * @param passEncoder 渲染通道编码器。
      * @param renderObject 渲染对象。
@@ -352,7 +352,7 @@ export class RunWebGPU
         let { fromWebGL, x, y, width, height, minDepth, maxDepth } = viewport;
         if (fromWebGL)
         {
-            y = attachmentSize.height - y - height
+            y = attachmentSize.height - y - height;
         }
         passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
     }
@@ -362,7 +362,7 @@ export class RunWebGPU
         let { fromWebGL, x, y, width, height } = scissorRect;
         if (fromWebGL)
         {
-            y = attachmentSize.height - y - height
+            y = attachmentSize.height - y - height;
         }
 
         passEncoder.setScissorRect(x, y, width, height);
@@ -370,7 +370,7 @@ export class RunWebGPU
 
     /**
      * 执行渲染管线。
-     * 
+     *
      * @param device GPU设备。
      * @param passEncoder 渲染通道编码器。
      * @param pipeline 渲染管线。
@@ -409,7 +409,7 @@ export class RunWebGPU
         vertexBuffers?.forEach((vertexBuffer, index) =>
         {
             const buffer = getIGPUBuffer(vertexBuffer.data);
-            (buffer as any).label = buffer.label || ("顶点属性 " + autoVertexIndex++);
+            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
             const gBuffer = getGPUBuffer(device, buffer);
             passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
         });

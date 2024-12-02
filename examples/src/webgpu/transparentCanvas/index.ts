@@ -1,9 +1,9 @@
-import { mat4, vec3 } from 'wgpu-matrix';
+import { mat4, vec3 } from "wgpu-matrix";
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from '../../meshes/cube';
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import basicVertWGSL from '../../shaders/basic.vert.wgsl';
-import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
+import basicVertWGSL from "../../shaders/basic.vert.wgsl";
+import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
 import { IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
@@ -19,7 +19,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         canvasId: canvas.id,
         configuration: {
             // The canvas alphaMode defaults to 'opaque', use 'premultiplied' for transparency.
-            alphaMode: 'premultiplied',
+            alphaMode: "premultiplied",
         },
     };
 
@@ -37,19 +37,19 @@ const init = async (canvas: HTMLCanvasElement) =>
             code: vertexPositionColorWGSL,
         },
         primitive: {
-            topology: 'triangle-list',
-            cullMode: 'back',
+            topology: "triangle-list",
+            cullMode: "back",
         },
 
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: 'less',
+            depthCompare: "less",
         },
     };
 
     const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
-        format: 'depth24plus',
+        format: "depth24plus",
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
@@ -63,16 +63,16 @@ const init = async (canvas: HTMLCanvasElement) =>
                 view: { texture: { context } }, // Assigned later
 
                 clearValue: [0, 0, 0, 0], // Clear alpha to 0
-                loadOp: 'clear',
-                storeOp: 'store',
+                loadOp: "clear",
+                storeOp: "store",
             },
         ],
         depthStencilAttachment: {
             view: { texture: depthTexture },
 
             depthClearValue: 1.0,
-            depthLoadOp: 'clear',
-            depthStoreOp: 'store',
+            depthLoadOp: "clear",
+            depthStoreOp: "store",
         },
     };
 

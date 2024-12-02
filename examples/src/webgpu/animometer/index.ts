@@ -93,7 +93,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         renderObjects0[i] = {
             ...renderObject,
             bindingResources: {
-                time: time,
+                time,
                 uniforms: {
                     bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
                 }

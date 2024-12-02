@@ -1,11 +1,11 @@
-import { GUI } from 'dat.gui';
-import { Mat4, mat4, quat, vec3 } from 'wgpu-matrix';
+import { GUI } from "dat.gui";
+import { Mat4, mat4, quat, vec3 } from "wgpu-matrix";
 
-import { convertGLBToJSONAndBinary, GLTFSkin } from './glbUtils';
-import gltfWGSL from './gltf.wgsl';
-import gridWGSL from './grid.wgsl';
-import { gridIndices } from './gridData';
-import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline, } from './gridUtils';
+import { convertGLBToJSONAndBinary, GLTFSkin } from "./glbUtils";
+import gltfWGSL from "./gltf.wgsl";
+import gridWGSL from "./grid.wgsl";
+import { gridIndices } from "./gridData";
+import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
 import { getIGPUBuffer, IGPUBindingResources, IGPUPassEncoder, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
@@ -44,7 +44,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       const is1 = 1 / scaling[0];
       const is2 = 1 / scaling[1];
       const is3 = 1 / scaling[2];
-    
+
       // Scale the matrix elements by the scaling factors
       const sm11 = mat[0] * is1;
       const sm12 = mat[1] * is2;
@@ -55,13 +55,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       const sm31 = mat[8] * is1;
       const sm32 = mat[9] * is2;
       const sm33 = mat[10] * is3;
-    
+
       // The trace of a square matrix is the sum of its diagonal entries
       // While the matrix trace has many interesting mathematical properties,
       // the primary purpose of the trace is to assess the characteristics of the rotation.
       const trace = sm11 + sm22 + sm33;
       let S = 0;
-    
+
       // If all matrix elements contribute equally to the rotation.
       if (trace > 0) {
         S = Math.sqrt(trace + 1.0) * 2;
@@ -91,7 +91,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         out[1] = (sm23 + sm32) / S;
         out[2] = 0.25 * S;
       }
-    
+
       return out;
     };
     */
@@ -110,27 +110,29 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         objectScale: 1,
         angle: 0.2,
         speed: 50,
-        object: 'Whale',
-        renderMode: 'NORMAL',
-        skinMode: 'ON',
+        object: "Whale",
+        renderMode: "NORMAL",
+        skinMode: "ON",
     };
 
     // Determine whether we want to render our whale or our skinned grid
-    gui.add(settings, 'object', ['Whale', 'Skinned Grid']).onChange(() =>
+    gui.add(settings, "object", ["Whale", "Skinned Grid"]).onChange(() =>
     {
-        if (settings.object === 'Skinned Grid')
+        if (settings.object === "Skinned Grid")
         {
             settings.cameraX = -10;
             settings.cameraY = 0;
             settings.objectScale = 1.27;
-        } else
+        }
+ else
         {
-            if (settings.skinMode === 'OFF')
+            if (settings.skinMode === "OFF")
             {
                 settings.cameraX = 0;
                 settings.cameraY = 0;
                 settings.cameraZ = -11;
-            } else
+            }
+ else
             {
                 settings.cameraX = 0;
                 settings.cameraY = -5.1;
@@ -141,7 +143,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // Output the mesh normals, its joints, or the weights that influence the movement of the joints
     gui
-        .add(settings, 'renderMode', ['NORMAL', 'JOINTS', 'WEIGHTS'])
+        .add(settings, "renderMode", ["NORMAL", "JOINTS", "WEIGHTS"])
         .onChange(() =>
         {
             const buffer = getIGPUBuffer(generalUniformsBuffer);
@@ -154,16 +156,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             buffer.writeBuffers = writeBuffers;
         });
     // Determine whether the mesh is static or whether skinning is activated
-    gui.add(settings, 'skinMode', ['ON', 'OFF']).onChange(() =>
+    gui.add(settings, "skinMode", ["ON", "OFF"]).onChange(() =>
     {
-        if (settings.object === 'Whale')
+        if (settings.object === "Whale")
         {
-            if (settings.skinMode === 'OFF')
+            if (settings.skinMode === "OFF")
             {
                 settings.cameraX = 0;
                 settings.cameraY = 0;
                 settings.cameraZ = -11;
-            } else
+            }
+ else
             {
                 settings.cameraX = 0;
                 settings.cameraY = -5.1;
@@ -178,13 +181,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
         buffer.writeBuffers = writeBuffers;
     });
-    const animFolder = gui.addFolder('Animation Settings');
-    animFolder.add(settings, 'angle', 0.05, 0.5).step(0.05);
-    animFolder.add(settings, 'speed', 10, 100).step(10);
+    const animFolder = gui.addFolder("Animation Settings");
+    animFolder.add(settings, "angle", 0.05, 0.5).step(0.05);
+    animFolder.add(settings, "speed", 10, 100).step(10);
 
     const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
-        format: 'depth24plus',
+        format: "depth24plus",
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
@@ -205,7 +208,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Fetch whale resources from the glb file
-    const whaleScene = await fetch('../../../assets/gltf/whale.glb')
+    const whaleScene = await fetch("../../../assets/gltf/whale.glb")
         .then((res) => res.arrayBuffer())
         .then((buffer) => convertGLBToJSONAndBinary(buffer));
 
@@ -247,17 +250,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     function getProjectionMatrix()
     {
-        if (settings.object !== 'Skinned Grid')
+        if (settings.object !== "Skinned Grid")
         {
             return perspectiveProjection;
         }
-        return orthographicProjection;
+
+return orthographicProjection;
     }
 
     function getViewMatrix()
     {
         const viewMatrix = mat4.identity();
-        if (settings.object === 'Skinned Grid')
+        if (settings.object === "Skinned Grid")
         {
             mat4.translate(
                 viewMatrix,
@@ -268,7 +272,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 ),
                 viewMatrix
             );
-        } else
+        }
+ else
         {
             mat4.translate(
                 viewMatrix,
@@ -276,7 +281,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 viewMatrix
             );
         }
-        return viewMatrix;
+
+return viewMatrix;
     }
 
     function getModelMatrix()
@@ -288,11 +294,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             settings.objectScale
         );
         mat4.scale(modelMatrix, scaleVector, modelMatrix);
-        if (settings.object === 'Whale')
+        if (settings.object === "Whale")
         {
             mat4.rotateY(modelMatrix, (Date.now() / 1000) * 0.5, modelMatrix);
         }
-        return modelMatrix;
+
+return modelMatrix;
     }
 
     // Pass Descriptor for GLTFs
@@ -302,15 +309,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0.3, 0.3, 0.3, 1.0],
-                loadOp: 'clear',
-                storeOp: 'store',
+                loadOp: "clear",
+                storeOp: "store",
             },
         ],
         depthStencilAttachment: {
             view: { texture: depthTexture },
-            depthLoadOp: 'clear',
+            depthLoadOp: "clear",
             depthClearValue: 1.0,
-            depthStoreOp: 'store',
+            depthStoreOp: "store",
         },
     };
 
@@ -321,8 +328,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0.3, 0.3, 0.3, 1.0],
-                loadOp: 'clear',
-                storeOp: 'store',
+                loadOp: "clear",
+                storeOp: "store",
             },
         ],
     };
@@ -356,9 +363,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Get initial bind pose positions
         animSkinnedGrid(bindPoses, 0);
         const bindPosesInv = bindPoses.map((bindPose) =>
-        {
-            return mat4.inverse(bindPose);
-        });
+        mat4.inverse(bindPose));
 
         return {
             transforms,
@@ -402,10 +407,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             if (joint === 1 || joint === 0)
             {
                 m = mat4.rotateY(origMatrix, -angle);
-            } else if (joint === 3 || joint === 4)
+            }
+ else if (joint === 3 || joint === 4)
             {
                 m = mat4.rotateX(origMatrix, joint === 3 ? angle : -angle);
-            } else
+            }
+ else
             {
                 m = mat4.rotateZ(origMatrix, angle);
             }
@@ -431,8 +438,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         animSkinnedGrid(gridBoneCollection.transforms, angle);
 
         // Write to mvp to camera buffer
-        let buffer = getIGPUBuffer(cameraBuffer);
-        let writeBuffers = buffer.writeBuffers || [];
+        const buffer = getIGPUBuffer(cameraBuffer);
+        const writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({
             bufferOffset: 0,
             data: projectionMatrix.buffer,
@@ -478,7 +485,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const passEncoders: IGPUPassEncoder[] = [];
 
-        if (settings.object === 'Whale')
+        if (settings.object === "Whale")
         {
             const renderObjects: IGPURenderObject[] = [];
             const bindingResources: IGPUBindingResources = {
@@ -494,7 +501,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 renderObjects
             };
             passEncoders.push(passEncoder);
-        } else
+        }
+ else
         {
             // Our skinned grid isn't checking for depth, so we pass it
             // a separate render descriptor that does not take in a depth texture
@@ -515,15 +523,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             passEncoders.push({
                 descriptor: skinnedGridRenderPassDescriptor,
                 renderObjects: [renderObject],
-            })
+            });
         }
 
-        webgpu.submit({ commandEncoders: [{ passEncoders: passEncoders }] });
+        webgpu.submit({ commandEncoders: [{ passEncoders }] });
 
         requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
-
 };
 
 const panel = new GUI({ width: 310 });

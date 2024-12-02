@@ -43,7 +43,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
             {
                 gBindGroup[getRealGPUBindGroup] = createBindGroup;
             }
-        }
+        };
 
         //
         if ((v.resource as IGPUBufferBinding).bufferView)
@@ -76,7 +76,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
             awaysUpdateFuncs.push(updateResource);
         }
-        else 
+        else
         {
             updateResource = () =>
             {
@@ -103,9 +103,9 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
     const createBindGroup = () =>
     {
-        onceUpdateFuncs.forEach(v => v());
+        onceUpdateFuncs.forEach((v) => v());
 
-        gBindGroup = device.createBindGroup({ layout, entries, });
+        gBindGroup = device.createBindGroup({ layout, entries });
 
         bindGroupMap.set(bindGroup, gBindGroup);
 

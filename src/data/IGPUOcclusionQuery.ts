@@ -17,7 +17,7 @@ export interface IGPUOcclusionQuery
 
     /**
      * 执行过程中由引擎自动填充
-     * 
+     *
      * @internal
      */
     _queryIndex?: GPUSize32;

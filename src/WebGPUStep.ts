@@ -32,7 +32,7 @@ export class WebGPUStep
         //
         if (this._currentRenderPassEncoder?.descriptor === descriptor) return;
         //
-        this._currentRenderPassEncoder = { descriptor: descriptor, renderObjects: [] };
+        this._currentRenderPassEncoder = { descriptor, renderObjects: [] };
         this._currentComputePassEncoder = null;
         this._currentSubmit.commandEncoders[0].passEncoders.push(this._currentRenderPassEncoder);
     }
