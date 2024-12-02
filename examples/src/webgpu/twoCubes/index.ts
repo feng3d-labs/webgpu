@@ -5,7 +5,7 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IBuffer, IBufferBinding, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -13,9 +13,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
-    const renderPass: IRenderPass = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -33,19 +33,14 @@ const init = async (canvas: HTMLCanvasElement) =>
     const offset = 256; // uniformBindGroup offset must be 256-byte aligned
     const uniformBufferSize = offset + matrixSize;
 
-    const uniformBuffer: IBuffer = {
-        size: uniformBufferSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    const uniformBuffer = new ArrayBuffer(uniformBufferSize);
+
+    const uniforms: IGPUBufferBinding = {
+        bufferView: new Uint8Array(uniformBuffer, 0, matrixSize),
+        modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const uniforms: IBufferBinding = {
-        buffer: uniformBuffer, offset: 0, size: matrixSize,
-        map: {
-            modelViewProjectionMatrix: null, // 在帧循环中设置
-        }
-    };
-
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {
@@ -53,8 +48,8 @@ const init = async (canvas: HTMLCanvasElement) =>
             },
         },
         vertices: {
-            position: { buffer: { data: cubeVertexArray }, offset: cubePositionOffset, vertexSize: cubeVertexSize },
-            uv: { buffer: { data: cubeVertexArray, usage: GPUBufferUsage.VERTEX }, offset: cubeUVOffset, vertexSize: cubeVertexSize },
+            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
         bindingResources: {
             uniforms,
@@ -62,14 +57,12 @@ const init = async (canvas: HTMLCanvasElement) =>
         draw: { vertexCount: cubeVertexCount },
     };
 
-    const uniforms1: IBufferBinding = {
-        buffer: uniformBuffer, offset, size: matrixSize,
-        map: {
-            modelViewProjectionMatrix: null, // 在帧循环中设置
-        }
+    const uniforms1: IGPUBufferBinding = {
+        bufferView: new Uint8Array(uniformBuffer, offset, matrixSize),
+        modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const renderObject1: IRenderObject = {
+    const renderObject1: IGPURenderObject = {
         ...renderObject,
         bindingResources: {
             uniforms: uniforms1,
@@ -128,14 +121,20 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         updateTransformationMatrix();
 
-        uniforms.map.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix1); // 需要赋值新对象才能触发数据变更上传GPU
-        uniforms1.map.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix2); // 需要赋值新对象才能触发数据变更上传GPU
+        uniforms.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix1); // 需要赋值新对象才能触发数据变更上传GPU
+        uniforms1.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix2); // 需要赋值新对象才能触发数据变更上传GPU
 
-        webgpu.renderPass(renderPass);
-        webgpu.renderObject(renderObject);
-        webgpu.renderObject(renderObject1);
+        const data: IGPUSubmit = {
+            commandEncoders: [
+                {
+                    passEncoders: [
+                        { descriptor: renderPassDescriptor, renderObjects: [renderObject, renderObject1] },
+                    ]
+                }
+            ],
+        };
 
-        webgpu.submit();
+        webgpu.submit(data);
 
         requestAnimationFrame(frame);
     }

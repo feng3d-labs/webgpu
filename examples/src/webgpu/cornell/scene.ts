@@ -1,6 +1,5 @@
-import { IBuffer, IVertexAttributes } from "webgpu-renderer";
-import { vec3 } from "wgpu-matrix";
-type Vec3 = vec3.default;
+import { IGPUBuffer, IGPUVertexAttributes } from "@feng3d/webgpu-renderer";
+import { Vec3, vec3 } from "wgpu-matrix";
 
 function reciprocal(v: Vec3)
 {
@@ -130,11 +129,10 @@ export default class Scene
 {
   readonly vertexCount: number;
   readonly indexCount: number;
-  readonly vertices: IBuffer;
-  readonly vertexAttributes: IVertexAttributes;
-  readonly indices: IBuffer;
-  readonly vertexBufferLayout: GPUVertexBufferLayout[];
-  readonly quadBuffer: IBuffer;
+  readonly vertices: Float32Array;
+  readonly vertexAttributes: IGPUVertexAttributes;
+  readonly indices: Uint16Array;
+  readonly quadBuffer: ArrayBufferView;
   readonly quads = [
     ...box({
       center: vec3.fromValues(0, 5, 0),
@@ -278,62 +276,23 @@ export default class Scene
       vertexCount += 4;
     }
 
-    const quadBuffer: IBuffer = {
-      size: quadStride * this.quads.length,
-      usage: GPUBufferUsage.STORAGE,
-      data: quadData,
+    const quadBuffer = quadData;
+
+    const vertices = vertexData;
+
+    const vertexAttributes: IGPUVertexAttributes = {
+      position: { data: vertices, format: "float32x4", offset: 0 * 4, arrayStride: vertexStride },
+      uv: { data: vertices, format: "float32x3", offset: 4 * 4, arrayStride: vertexStride },
+      emissive: { data: vertices, format: "float32x3", offset: 7 * 4, arrayStride: vertexStride },
     };
 
-    const vertices: IBuffer = {
-      size: vertexData.byteLength,
-      usage: GPUBufferUsage.VERTEX,
-      data: vertexData,
-    };
-
-    const vertexAttributes: IVertexAttributes = {
-      position: { buffer: vertices, offset: 0 * 4, vertexSize: vertexStride },
-      uv: { buffer: vertices, offset: 4 * 4, vertexSize: vertexStride },
-      emissive: { buffer: vertices, offset: 7 * 4, vertexSize: vertexStride },
-    };
-
-    const indices: IBuffer = {
-      size: indexData.byteLength,
-      usage: GPUBufferUsage.INDEX,
-      data: indexData,
-    };
-
-    const vertexBufferLayout: GPUVertexBufferLayout[] = [
-      {
-        arrayStride: vertexStride,
-        attributes: [
-          {
-            // position
-            shaderLocation: 0,
-            offset: 0 * 4,
-            format: "float32x4",
-          } as GPUVertexAttribute,
-          {
-            // uv
-            shaderLocation: 1,
-            offset: 4 * 4,
-            format: "float32x3",
-          } as GPUVertexAttribute,
-          {
-            // color
-            shaderLocation: 2,
-            offset: 7 * 4,
-            format: "float32x3",
-          } as GPUVertexAttribute,
-        ],
-      },
-    ];
+    const indices = indexData;
 
     this.vertexCount = vertexCount;
     this.indexCount = indexCount;
     this.vertices = vertices;
     this.vertexAttributes = vertexAttributes;
     this.indices = indices;
-    this.vertexBufferLayout = vertexBufferLayout;
     this.quadBuffer = quadBuffer;
   }
 }

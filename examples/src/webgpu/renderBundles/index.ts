@@ -6,15 +6,15 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IBindingResources, IBuffer, ICanvasContext, IRenderBundleObject, IRenderObject, IRenderPass, IRenderPassEncoder, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes, WebGPU } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
 
 interface Renderable
 {
-  renderObject?: IRenderObject;
-  vertexAttributes: IVertexAttributes;
-  indices: IBuffer;
+  renderObject?: IGPURenderObject;
+  vertexAttributes: IGPUVertexAttributes;
+  indices: Uint16Array;
   indexCount: number;
-  bindGroup?: IBindingResources;
+  bindGroup?: IGPUBindingResources;
 }
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
@@ -35,12 +35,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
 
-  const webgpu = await WebGPU.init();
-  const context: ICanvasContext = {
+  const webgpu = await new WebGPU().init();
+  const context: IGPUCanvasContext = {
     canvasId: canvas.id,
   };
 
-  const pipeline: IRenderPipeline = {
+  const pipeline: IGPURenderPipeline = {
     vertex: {
       code: meshWGSL,
     },
@@ -58,20 +58,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     // is rendered in front.
   };
 
-  const depthTexture: ITexture = {
+  const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
     usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
   const uniformBufferSize = 4 * 16; // 4x4 matrix
-  const uniformBuffer: IBuffer = {
-    size: uniformBufferSize,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  };
+  const uniformBuffer = new Uint8Array(uniformBufferSize);
 
   // Fetch the images and upload them into a GPUTexture.
-  let planetTexture: ITexture;
+  let planetTexture: IGPUTexture;
   {
     const response = await fetch(
       new URL("../../../assets/img/saturn.jpg", import.meta.url).toString()
@@ -86,7 +83,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     };
   }
 
-  let moonTexture: ITexture;
+  let moonTexture: IGPUTexture;
   {
     const response = await fetch(
       new URL("../../../assets/img/moon.jpg", import.meta.url).toString()
@@ -101,7 +98,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     };
   }
 
-  const sampler: ISampler = {
+  const sampler: IGPUSampler = {
     magFilter: "linear",
     minFilter: "linear",
   };
@@ -122,23 +119,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     );
 
     // Create a vertex buffer from the sphere data.
-    const vertices: IBuffer = {
-      size: sphereMesh.vertices.byteLength,
-      usage: GPUBufferUsage.VERTEX,
-      data: sphereMesh.vertices,
+    const vertices = sphereMesh.vertices;
+
+    const vertexAttributes: IGPUVertexAttributes = {
+      position: { data: vertices, format: "float32x3", offset: SphereLayout.positionsOffset, arrayStride: SphereLayout.vertexStride },
+      normal: { data: vertices, format: "float32x3", offset: SphereLayout.normalOffset, arrayStride: SphereLayout.vertexStride },
+      uv: { data: vertices, format: "float32x2", offset: SphereLayout.uvOffset, arrayStride: SphereLayout.vertexStride },
     };
 
-    const vertexAttributes: IVertexAttributes = {
-      position: { buffer: vertices, offset: SphereLayout.positionsOffset, vertexSize: SphereLayout.vertexStride },
-      normal: { buffer: vertices, offset: SphereLayout.normalOffset, vertexSize: SphereLayout.vertexStride },
-      uv: { buffer: vertices, offset: SphereLayout.uvOffset, vertexSize: SphereLayout.vertexStride },
-    };
-
-    const indices: IBuffer = {
-      size: sphereMesh.indices.byteLength,
-      usage: GPUBufferUsage.INDEX,
-      data: sphereMesh.indices,
-    };
+    const indices = sphereMesh.indices;
 
     return {
       vertexAttributes,
@@ -148,20 +137,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   }
 
   function createSphereBindGroup1(
-    texture: ITexture,
+    texture: IGPUTexture,
     transform: Float32Array
-  ): IBindingResources
+  ): IGPUBindingResources
   {
-    const uniformBufferSize = 4 * 16; // 4x4 matrix
-    const uniformBuffer: IBuffer = {
-      size: uniformBufferSize,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-      data: new Float32Array(transform),
-    };
+    const uniformBuffer = new Float32Array(transform);
 
-    const bindGroup: IBindingResources = {
+    const bindGroup: IGPUBindingResources = {
       modelMatrix: {
-        buffer: uniformBuffer,
+        bufferView: uniformBuffer,
       },
       meshSampler: sampler,
       meshTexture: { texture },
@@ -210,7 +194,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   }
   ensureEnoughAsteroids();
 
-  const renderPassDescriptor: IRenderPass = {
+  const renderPassDescriptor: IGPURenderPassDescriptor = {
     colorAttachments: [
       {
         view: { texture: { context } },
@@ -236,9 +220,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   );
   const modelViewProjectionMatrix = mat4.create();
 
-  const frameBindGroup: IBindingResources = {
+  const frameBindGroup: IGPUBindingResources = {
     uniforms: {
-      buffer: uniformBuffer,
+      bufferView: uniformBuffer,
     },
   };
 
@@ -260,10 +244,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
   // Render bundles function as partial, limited render passes, so we can use the
   // same code both to render the scene normally and to build the render bundle.
-  function renderScene(
-    passEncoder: IRenderPassEncoder | IRenderBundleObject
-  )
+  function renderScene()
   {
+    const ros: IGPURenderObject[] = [];
     // Loop through every renderable object and draw them individually.
     // (Because many of these meshes are repeated, with only the transforms
     // differing, instancing would be highly effective here. This sample
@@ -279,18 +262,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
           pipeline,
           bindingResources: { ...frameBindGroup, ...renderable.bindGroup },
           vertices: renderable.vertexAttributes,
-          index: { buffer: renderable.indices, indexFormat: "uint16" },
+          indices: renderable.indices,
           drawIndexed: { indexCount: renderable.indexCount },
         };
       }
 
-      passEncoder.renderObjects.push(renderable.renderObject);
+      ros.push(renderable.renderObject);
 
       if (++count > settings.asteroidCount)
       {
         break;
       }
     }
+
+    return ros;
   }
 
   // The render bundle can be encoded once and re-used as many times as needed.
@@ -304,16 +289,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   // textures used. Cases where the executed commands differ from frame-to-frame,
   // such as when using frustrum or occlusion culling, will not benefit from
   // using render bundles as much.
-  let renderBundle: IRenderBundleObject = {
+  let renderBundle: IGPURenderBundle = {
+    __type: "IGPURenderBundle",
     renderObjects: [],
   };
-  renderScene(renderBundle);
+  renderBundle.renderObjects = renderScene();
   function updateRenderBundle()
   {
-    const renderBundleEncoder: IRenderBundleObject = {
+    const renderBundleEncoder: IGPURenderBundle = {
+      __type: "IGPURenderBundle",
       renderObjects: [],
     };
-    renderScene(renderBundleEncoder);
+    renderBundleEncoder.renderObjects = renderScene();
     renderBundle = renderBundleEncoder;
   }
   updateRenderBundle();
@@ -323,28 +310,30 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     stats.begin();
 
     const transformationMatrix = getTransformationMatrix();
-    uniformBuffer.writeBuffers = [{ data: transformationMatrix }];
 
-    const renderPass: IRenderPassEncoder = {
-      renderPass: renderPassDescriptor,
-      renderObjects: [],
-    };
+    getIGPUBuffer(uniformBuffer).writeBuffers = [{ data: transformationMatrix }];
 
+    let renderObjects: IGPURenderPassObject[] = [];
     if (settings.useRenderBundles)
     {
       // Executing a bundle is equivalent to calling all of the commands encoded
       // in the render bundle as part of the current render pass.
-      renderPass.renderObjects.push(renderBundle);
+      renderObjects.push(renderBundle);
     }
     else
     {
       // Alternatively, the same render commands can be encoded manually, which
       // can take longer since each command needs to be interpreted by the
       // JavaScript virtual machine and re-validated each time.
-      renderPass.renderObjects = renderBundle.renderObjects;
+      renderObjects = renderBundle.renderObjects as any;
     }
 
-    const submit: ISubmit = {
+    const renderPass: IGPURenderPass = {
+      descriptor: renderPassDescriptor,
+      renderObjects,
+    };
+
+    const submit: IGPUSubmit = {
       commandEncoders: [
         {
           passEncoders: [renderPass],

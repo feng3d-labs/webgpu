@@ -1,131 +1,6 @@
-import { FunctionInfo, ResourceType, TemplateInfo, TypeInfo, VariableInfo, WgslReflect } from "wgsl_reflect";
-import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, StorageTextureType, TextureType } from "../types/TextureType";
-import { WGSLVertexType, wgslVertexTypeMap } from "../types/VertexFormat";
-
-/**
- * WGSL着色器反射信息。
- */
-export interface WGSLReflectInfo
-{
-    /**
-     * 入口函数映射。
-     */
-    entryMap: { [entryName: string]: WGSLEntryInfo };
-
-    /**
-     * 顶点入口信息。当存在多个时取第一个。
-     */
-    vertexEntryList: WGSLVertexEntryInfo[];
-
-    /**
-     * 顶点入口信息映射。
-     */
-    vertexEntryMap: { [entryPoint: string]: WGSLVertexEntryInfo };
-
-    /**
-     * 片元入口函数。当存在多个时取第一个。
-     */
-    fragmentEntryList: WGSLEntryInfo[];
-
-    /**
-     * 计算入口信息映射。
-     */
-    fragmentEntryMap: { [entryPoint: string]: WGSLEntryInfo };
-
-    /**
-     * 计算入口函数。当存在多个时取第一个。
-     */
-    computeEntryList: WGSLEntryInfo[];
-
-    /**
-     * 计算入口信息映射。
-     */
-    computeEntryMap: { [entryPoint: string]: WGSLEntryInfo };
-
-    /**
-     * 从WebGPU着色器代码获取的绑定资源信息表。
-     */
-    bindingResourceLayoutMap: WGSLBindingResourceInfoMap;
-}
-
-/**
- * WGSL着色器入口信息。
- */
-export interface WGSLEntryInfo
-{
-    /**
-     * 入口点名称
-     */
-    entryPoint: string;
-}
-
-/**
- * 顶点入口点信息。
- */
-export interface WGSLVertexEntryInfo extends WGSLEntryInfo
-{
-    /**
-     * 入口点名称
-     */
-    entryPoint: string;
-
-    /**
-     * 属性信息列表。
-     */
-    attributeInfos: WGSLVertexAttributeInfo[];
-}
-
-/**
- * WGSL中顶点属性信息。
- */
-export interface WGSLVertexAttributeInfo
-{
-    /**
-     * 属性名称
-     */
-    name: string;
-
-    /**
-     * 所在着色器位置。
-     */
-    shaderLocation: number;
-
-    /**
-     * GPU顶点数据格式。
-     */
-    format: GPUVertexFormat;
-
-    /**
-     * 顶点数据在WGSL中的类型。
-     */
-    wgslType: WGSLVertexType;
-
-    /**
-     * 可能对应的GPU顶点数据格式列表。
-     */
-    possibleFormats: GPUVertexFormat[];
-}
-
-/**
- * WebGPU着色器代码中获取的绑定资源信息。
- */
-export interface WGSLBindingResourceInfo
-{
-    name: string,
-    group: number,
-    binding: number,
-    type: "buffer" | "texture" | "storageTexture" | "externalTexture" | "sampler";
-    buffer?: { layout: GPUBufferBindingLayout, variableInfo: VariableInfo }
-    texture?: { layout: GPUTextureBindingLayout }
-    storageTexture?: { layout: GPUStorageTextureBindingLayout }
-    externalTexture?: { layout: GPUExternalTextureBindingLayout }
-    sampler?: { layout: GPUSamplerBindingLayout },
-}
-
-/**
- * 从WebGPU着色器代码获取的绑定资源信息表。
- */
-export type WGSLBindingResourceInfoMap = { [name: string]: WGSLBindingResourceInfo };
+import { ResourceType, TemplateInfo, WgslReflect } from "wgsl_reflect";
+import { IGPUBindGroupLayoutEntry } from "../internal/IGPUPipelineLayoutDescriptor";
+import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from "../types/TextureType";
 
 /**
  * 从WebGPU着色器代码中获取反射信息。
@@ -133,89 +8,40 @@ export type WGSLBindingResourceInfoMap = { [name: string]: WGSLBindingResourceIn
  * @param code WebGPU着色器代码。
  * @returns 从WebGPU着色器代码中获取的反射信息。
  */
-export function getWGSLReflectInfo(code: string)
+export function getWGSLReflectInfo(code: string): WgslReflect
 {
-    let reflectInfo = reflectMap.get(code);
-    if (reflectInfo)
-    {
-        return reflectInfo;
-    }
+    let reflect = reflectMap[code];
+    if (reflect) return reflect;
 
-    const reflect = new WgslReflect(code);
+    reflect = reflectMap[code] = new WgslReflect(code);
 
-    //
-    reflectInfo = {
-        entryMap: {},
-        vertexEntryList: [],
-        vertexEntryMap: {},
-        fragmentEntryList: [],
-        fragmentEntryMap: {},
-        computeEntryList: [],
-        computeEntryMap: {},
-        bindingResourceLayoutMap: {},
-    };
-
-    //
-    reflect.entry.vertex.forEach((v) =>
-    {
-        const name = v.name;
-        const attributeInfos = getAttributeInfos(v);
-
-        const vertexEntry: WGSLVertexEntryInfo = { entryPoint: name, attributeInfos };
-
-        reflectInfo.entryMap[vertexEntry.entryPoint] = vertexEntry;
-        reflectInfo.vertexEntryMap[vertexEntry.entryPoint] = vertexEntry;
-        reflectInfo.vertexEntryList.push(vertexEntry);
-    });
-    reflect.entry.fragment.forEach((v) =>
-    {
-        const name = v.name;
-        const entryInfo: WGSLEntryInfo = { entryPoint: name };
-
-        reflectInfo.entryMap[entryInfo.entryPoint] = entryInfo;
-        reflectInfo.fragmentEntryMap[entryInfo.entryPoint] = entryInfo;
-        reflectInfo.fragmentEntryList.push(entryInfo);
-    });
-    reflect.entry.compute.forEach((v) =>
-    {
-        const name = v.name;
-        const entryInfo: WGSLEntryInfo = { entryPoint: name };
-
-        reflectInfo.entryMap[entryInfo.entryPoint] = entryInfo;
-        reflectInfo.computeEntryMap[entryInfo.entryPoint] = entryInfo;
-        reflectInfo.computeEntryList.push(entryInfo);
-    });
-
-    //
-    reflectInfo.bindingResourceLayoutMap = getWGSLBindingResourceInfoMap(reflect);
-
-    //
-    reflectMap.set(code, reflectInfo);
-
-    return reflectInfo;
+    return reflect;
 }
-const reflectMap = new Map<string, WGSLReflectInfo>();
+const reflectMap: { [code: string]: WgslReflect } = {};
 
-/**
- * 从WebGPU着色器代码获取绑定资源信息表。
- *
- * @param code WebGPU着色器代码。
- * @returns 从WebGPU着色器代码获取的绑定资源信息表。
- */
-function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
+export type IGPUBindGroupLayoutEntryMap = { [name: string]: IGPUBindGroupLayoutEntry; };
+
+export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayoutEntryMap
 {
-    const bindingResourceLayoutMap: WGSLBindingResourceInfoMap = {};
+    if (shaderLayoutMap[code]) return shaderLayoutMap[code];
+
+    const reflect = getWGSLReflectInfo(code);
+
+    const entryMap: IGPUBindGroupLayoutEntryMap = shaderLayoutMap[code] = {};
 
     for (const uniform of reflect.uniforms)
     {
-        const { group, binding, name } = uniform;
+        const { binding, name } = uniform;
 
         const layout: GPUBufferBindingLayout = {
             type: "uniform",
             minBindingSize: uniform.size,
         };
 
-        bindingResourceLayoutMap[name] = { name, group, binding, buffer: { layout, variableInfo: uniform }, type: "buffer" };
+        entryMap[name] = {
+            variableInfo: uniform,
+            visibility: Visibility_ALL, binding, buffer: layout,
+        };
     }
 
     for (const storage of reflect.storage)
@@ -232,7 +58,10 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
                 type,
             };
 
-            bindingResourceLayoutMap[name] = { name, group, binding, buffer: { layout, variableInfo: storage }, type: "buffer" };
+            entryMap[name] = {
+                variableInfo: storage,
+                visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout
+            };
         }
         else if (storage.resourceType === ResourceType.StorageTexture)
         {
@@ -251,7 +80,10 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
                 viewDimension,
             };
 
-            bindingResourceLayoutMap[name] = { name, group, binding, storageTexture: { layout }, type: "storageTexture" };
+            entryMap[name] = {
+                variableInfo: storage,
+                visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout
+            };
         }
         else
         {
@@ -269,22 +101,10 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
 
         if (ExternalSampledTextureType[textureType])
         {
-            bindingResourceLayoutMap[name] = { name, group, binding, externalTexture: { layout: {} }, type: "externalTexture" };
-        }
-        else if (StorageTextureType[textureType])
-        {
-            const textureSecondType = (texture.type as TemplateInfo)?.format?.name as GPUTextureFormat;
-
-            const access = (texture.type as TemplateInfo).access;
-            console.assert(access === "write");
-
-            const layout: GPUStorageTextureBindingLayout = {
-                access: "write-only",
-                format: textureSecondType as any,
-                viewDimension,
+            entryMap[name] = {
+                variableInfo: texture,
+                visibility: Visibility_ALL, binding, externalTexture: {}
             };
-
-            bindingResourceLayoutMap[name] = { name, group, binding, storageTexture: { layout }, type: "storageTexture" };
         }
         else
         {
@@ -298,6 +118,12 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
             else if (textureSecondType === "f32")
             {
                 sampleType = "float";
+                // 判断是否使用 `textureLoad` 函数 对当前纹理进行非过滤采样。
+                const result = new RegExp(`\\s*textureLoad\\s*\\(\\s*${name}`).exec(code);
+                if (result)
+                {
+                    sampleType = "unfilterable-float";
+                }
             }
             else if (textureSecondType === "u32")
             {
@@ -323,7 +149,10 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
                 layout.multisampled = true;
             }
 
-            bindingResourceLayoutMap[name] = { name, group, binding, texture: { layout }, type: "texture" };
+            entryMap[name] = {
+                variableInfo: texture,
+                visibility: Visibility_ALL, binding, texture: layout
+            };
         }
     }
 
@@ -338,56 +167,22 @@ function getWGSLBindingResourceInfoMap(reflect: WgslReflect)
             layout.type = "comparison";
         }
 
-        bindingResourceLayoutMap[name] = { name, group, binding, sampler: { layout }, type: "sampler" };
+        entryMap[name] = {
+            variableInfo: sampler,
+            visibility: Visibility_ALL, binding, sampler: layout
+        };
     }
 
-    return bindingResourceLayoutMap;
+    return entryMap;
 }
+
+const shaderLayoutMap: { [code: string]: IGPUBindGroupLayoutEntryMap } = {};
 
 /**
- * 从顶点入口函数信息中获取顶点属性信息。
- *
- * @param vertexFunctionInfo 顶点入口函数信息。
- * @returns 顶点属性信息。
+ * 片段与计算着色器可见。
  */
-function getAttributeInfos(vertexFunctionInfo: FunctionInfo)
-{
-    const attributeInfos: WGSLVertexAttributeInfo[] = [];
-
-    vertexFunctionInfo.inputs.forEach((v) =>
-    {
-        // 跳过内置属性。
-        if (v.locationType === "builtin")
-        {
-            return;
-        }
-
-        const shaderLocation = v.location as number;
-        const attributeName = v.name;
-
-        const wgslType = getWGSLType(v.type);
-
-        const format = wgslVertexTypeMap[wgslType].format;
-        const possibleFormats = wgslVertexTypeMap[wgslType].possibleFormats;
-
-        attributeInfos.push({ name: attributeName, shaderLocation, format, wgslType, possibleFormats });
-    });
-
-    return attributeInfos;
-}
-
-function getWGSLType(type: TypeInfo)
-{
-    let wgslType = type.name;
-    if (isTemplateType(type))
-    {
-        wgslType += `<${type.format.name}>`;
-    }
-
-    return wgslType as WGSLVertexType;
-}
-
-function isTemplateType(type: TypeInfo): type is TemplateInfo
-{
-    return !!(type as TemplateInfo).format;
-}
+const Visibility_FRAGMENT_COMPUTE = 6; // GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
+/**
+ * 全部着色器可见。
+ */
+const Visibility_ALL = 7; //GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;

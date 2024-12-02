@@ -199,7 +199,7 @@
             }
         ],
         "camelcase": [
-            1,
+            0,
             {
                 "properties": "never"
             }

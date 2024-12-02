@@ -1,10 +1,10 @@
-import { mat4, vec3 } from "wgpu-matrix";
+import { Mat4, mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 import instancedVertWGSL from "../../shaders/instanced.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IBufferBinding, IRenderObject, IRenderPass, WebGPU } from "webgpu-renderer";
+import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -12,7 +12,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const webgpu = await WebGPU.init();
+    const webgpu = await new WebGPU().init();
 
     const xCount = 4;
     const yCount = 4;
@@ -27,7 +27,6 @@ const init = async (canvas: HTMLCanvasElement) =>
         100.0
     );
 
-    type Mat4 = mat4.default;
     const modelMatrices = new Array<Mat4>(numInstances);
     const mvpMatricesData = new Float32Array(matrixFloatCount * numInstances);
 
@@ -87,7 +86,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         }
     }
 
-    const renderPass: IRenderPass = {
+    const renderPass: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -101,7 +100,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: IGPURenderObject = {
         pipeline: {
             vertex: { code: instancedVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {
@@ -109,12 +108,12 @@ const init = async (canvas: HTMLCanvasElement) =>
             },
         },
         vertices: {
-            position: { buffer: { data: cubeVertexArray }, offset: cubePositionOffset, vertexSize: cubeVertexSize },
-            uv: { buffer: { data: cubeVertexArray }, offset: cubeUVOffset, vertexSize: cubeVertexSize },
+            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
         bindingResources: {
             uniforms: {
-                map: { modelViewProjectionMatrix: null }
+                modelViewProjectionMatrix: null
             },
         },
         draw: { vertexCount: cubeVertexCount, instanceCount: numInstances }
@@ -125,12 +124,19 @@ const init = async (canvas: HTMLCanvasElement) =>
         // Update the matrix data.
         updateTransformationMatrix();
 
-        (renderObject.bindingResources.uniforms as IBufferBinding).map.modelViewProjectionMatrix = new Float32Array(mvpMatricesData); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        (renderObject.bindingResources.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(mvpMatricesData); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
-        webgpu.renderPass(renderPass);
-        webgpu.renderObject(renderObject);
+        const data: IGPUSubmit = {
+            commandEncoders: [
+                {
+                    passEncoders: [
+                        { descriptor: renderPass, renderObjects: [renderObject] },
+                    ]
+                }
+            ],
+        };
 
-        webgpu.submit();
+        webgpu.submit(data);
 
         requestAnimationFrame(frame);
     }

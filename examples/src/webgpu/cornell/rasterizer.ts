@@ -1,4 +1,4 @@
-import { IBindingResources, ICommandEncoder, IRenderPass, IRenderPassEncoder, IRenderPipeline, ITexture, internal } from "webgpu-renderer";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPUTexture, IGPURenderPassDescriptor, IGPURenderPass, IGPURenderPipeline, WebGPU, internal } from "@feng3d/webgpu-renderer";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -12,23 +12,23 @@ export default class Rasterizer
 {
   private readonly common: Common;
   private readonly scene: Scene;
-  private readonly renderPassDescriptor: IRenderPass;
-  private readonly pipeline: IRenderPipeline;
-  private readonly bindGroup: IBindingResources;
+  private readonly renderPassDescriptor: IGPURenderPassDescriptor;
+  private readonly pipeline: IGPURenderPipeline;
+  private readonly bindGroup: IGPUBindingResources;
 
   constructor(
     common: Common,
     scene: Scene,
     radiosity: Radiosity,
-    framebuffer: ITexture
+    framebuffer: IGPUTexture,
   )
   {
     this.common = common;
     this.scene = scene;
 
-    const framebufferSize = internal.getIGPUTextureSize(framebuffer);
+    const framebufferSize = internal.getGPUTextureSize(framebuffer);
 
-    const depthTexture: ITexture = {
+    const depthTexture: IGPUTexture = {
       label: "RasterizerRenderer.depthTexture",
       size: [framebufferSize[0], framebufferSize[1]],
       format: "depth24plus",
@@ -77,11 +77,11 @@ export default class Rasterizer
 
     //
     this.renderPassEncoder = {
-      renderPass: this.renderPassDescriptor,
+      descriptor: this.renderPassDescriptor,
       renderObjects: [{
         pipeline: this.pipeline,
         vertices: this.scene.vertexAttributes,
-        index: { buffer: this.scene.indices, indexFormat: "uint16" },
+        indices: this.scene.indices,
         bindingResources: {
           ...this.common.uniforms.bindGroup,
           ...this.bindGroup,
@@ -90,9 +90,9 @@ export default class Rasterizer
       }],
     };
   }
-  private renderPassEncoder: IRenderPassEncoder;
+  private renderPassEncoder: IGPURenderPass;
 
-  encode(commandEncoder: ICommandEncoder)
+  encode(commandEncoder: IGPUCommandEncoder)
   {
     commandEncoder.passEncoders.push(this.renderPassEncoder);
   }
