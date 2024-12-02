@@ -94,7 +94,13 @@ export interface IGPUTextureBase
  *
  * @see GPUQueue.writeTexture
  */
-export type IGPUWriteTexture = [destination: IGPUWriteTextureDestination, data: BufferSource | SharedArrayBuffer, dataLayout: GPUImageDataLayout, size: GPUExtent3DStrict];
+export interface IGPUWriteTexture 
+{
+    destination?: IGPUWriteTextureDestination,
+    data: BufferSource | SharedArrayBuffer,
+    dataLayout: GPUImageDataLayout,
+    size: GPUExtent3DStrict
+};
 
 export interface IGPUTextureImageSource
 {

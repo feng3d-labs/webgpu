@@ -257,11 +257,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 );
             }
         }
-        writeTextures.push([
-            { mipLevel },
-            data,
-            { bytesPerRow: size * 4 },
-            [size, size]]);
+        writeTextures.push({
+            destination: { mipLevel },
+            data: data,
+            dataLayout: { bytesPerRow: size * 4 },
+            size: [size, size]
+        });
     }
     checkerboard.writeTextures = writeTextures;
 

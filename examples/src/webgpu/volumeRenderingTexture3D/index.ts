@@ -2,8 +2,6 @@ import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 import volumeWGSL from './volume.wgsl';
 
-const canvas = document.querySelector('canvas') as HTMLCanvasElement;
-
 const gui = new GUI();
 
 import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
@@ -80,14 +78,11 @@ const init = async (canvas: HTMLCanvasElement) =>
             size: [width, height, depth],
             format: format,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-            writeTextures: [
-                [
-                    {},
-                    byteArray,
-                    { bytesPerRow: bytesPerRow, rowsPerImage: blocksHigh },
-                    [width, height, depth]
-                ]
-            ]
+            writeTextures: [{
+                data: byteArray,
+                dataLayout: { bytesPerRow: bytesPerRow, rowsPerImage: blocksHigh },
+                size: [width, height, depth]
+            }],
         };
     }
 

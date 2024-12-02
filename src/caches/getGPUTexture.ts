@@ -84,7 +84,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
         {
             iGPUTextureBase.writeTextures.forEach((v) =>
             {
-                const [destination, data, dataLayout, size] = v;
+                const { destination, data, dataLayout, size } = v;
 
                 device.queue.writeTexture(
                     {
