@@ -1,16 +1,20 @@
 import { mat4 } from 'wgpu-matrix';
 import { GUI } from 'dat.gui';
 import volumeWGSL from './volume.wgsl';
-import { quitIfWebGPUNotAvailable } from '../util';
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 
 const gui = new GUI();
 
-import { IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResource, IGPUBindingResources, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureView, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+
+    const webgpu = await new WebGPU().init();
 
     // GUI parameters
     const params: { rotateCamera: boolean; near: number; far: number } = {
@@ -23,65 +27,27 @@ const init = async (canvas: HTMLCanvasElement) =>
     gui.add(params, 'near', 2.0, 7.0);
     gui.add(params, 'far', 2.0, 7.0);
 
-    const adapter = await navigator.gpu?.requestAdapter();
-    const device = await adapter?.requestDevice();
-    quitIfWebGPUNotAvailable(adapter, device);
-    const context = canvas.getContext('webgpu') as GPUCanvasContext;
-
     const sampleCount = 4;
 
-    const devicePixelRatio = window.devicePixelRatio;
-    canvas.width = canvas.clientWidth * devicePixelRatio;
-    canvas.height = canvas.clientHeight * devicePixelRatio;
-    const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-
-    context.configure({
-        device,
-        format: presentationFormat,
-    });
-
-    const pipeline = device.createRenderPipeline({
-        layout: 'auto',
+    const pipeline: IGPURenderPipeline = {
         vertex: {
-            module: device.createShaderModule({
-                code: volumeWGSL,
-            }),
+            code: volumeWGSL,
         },
         fragment: {
-            module: device.createShaderModule({
-                code: volumeWGSL,
-            }),
-            targets: [
-                {
-                    format: presentationFormat,
-                },
-            ],
+            code: volumeWGSL,
         },
         primitive: {
             topology: 'triangle-list',
             cullMode: 'back',
         },
-        multisample: {
-            count: sampleCount,
-        },
-    });
+    };
 
-    const texture = device.createTexture({
-        size: [canvas.width, canvas.height],
-        sampleCount,
-        format: presentationFormat,
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    });
-    const view = texture.createView();
-
-    const uniformBufferSize = 4 * 16; // 4x4 matrix
-    const uniformBuffer = device.createBuffer({
-        size: uniformBufferSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    const uniformBuffer: IGPUBindingResource = {
+        inverseModelViewProjectionMatrix: new Float32Array(16),
+    };
 
     // Fetch the image and upload it into a GPUTexture.
-    let volumeTexture: GPUTexture;
+    let volumeTexture: IGPUTexture;
     {
         const width = 180;
         const height = 216;
@@ -109,12 +75,12 @@ const init = async (canvas: HTMLCanvasElement) =>
         ).arrayBuffer();
         const byteArray = new Uint8Array(decompressedArrayBuffer);
 
-        volumeTexture = device.createTexture({
+        volumeTexture = {
             dimension: '3d',
             size: [width, height, depth],
             format: format,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-        });
+        };
 
         device.queue.writeTexture(
             {
@@ -127,43 +93,30 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler = device.createSampler({
+    const sampler: IGPUSampler = {
         magFilter: 'linear',
         minFilter: 'linear',
         mipmapFilter: 'linear',
         maxAnisotropy: 16,
-    });
+    };
 
-    const uniformBindGroup = device.createBindGroup({
-        layout: pipeline.getBindGroupLayout(0),
-        entries: [
-            {
-                binding: 0,
-                resource: {
-                    buffer: uniformBuffer,
-                },
-            },
-            {
-                binding: 1,
-                resource: sampler,
-            },
-            {
-                binding: 2,
-                resource: volumeTexture.createView(),
-            },
-        ],
-    });
+    const uniformBindGroup: IGPUBindingResources = {
+        uniforms: uniformBuffer,
+        sampler: sampler,
+        myTexture: { texture: volumeTexture },
+    };
 
-    const renderPassDescriptor: GPURenderPassDescriptor = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
-                view: undefined, // Assigned later
+                view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0.5, 0.5, 0.5, 1.0],
                 loadOp: 'clear',
                 storeOp: 'discard',
             },
         ],
+        multisample: sampleCount,
     };
 
     let rotation = 0;
@@ -206,18 +159,20 @@ const init = async (canvas: HTMLCanvasElement) =>
         const inverseModelViewProjection =
             getInverseModelViewProjectionMatrix(deltaTime);
         device.queue.writeBuffer(uniformBuffer, 0, inverseModelViewProjection);
-        renderPassDescriptor.colorAttachments[0].view = view;
-        renderPassDescriptor.colorAttachments[0].resolveTarget = context
-            .getCurrentTexture()
-            .createView();
 
-        const commandEncoder = device.createCommandEncoder();
-        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-        passEncoder.setPipeline(pipeline);
-        passEncoder.setBindGroup(0, uniformBindGroup);
-        passEncoder.draw(3);
-        passEncoder.end();
-        device.queue.submit([commandEncoder.finish()]);
+        const submit: IGPUSubmit = {
+            commandEncoders: [{
+                passEncoders: [{
+                    descriptor: renderPassDescriptor,
+                    renderObjects: [{
+                        pipeline,
+                        bindingResources: uniformBindGroup,
+                        draw: { vertexCount: 3 },
+                    }],
+                }]
+            }]
+        };
+        webgpu.submit(submit);
 
         requestAnimationFrame(frame);
     }
