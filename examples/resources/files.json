@@ -36,6 +36,7 @@
 		"cornell",
 		"a-buffer",
 		"skinnedMesh",
+		"textRenderingMsdf",
 		""
 	],
 	"Web Platform Integration": [

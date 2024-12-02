@@ -2,7 +2,7 @@
 
 <head>
   <meta charset='utf-8' />
-  <title>Skinned Mesh</title>
+  <title>Text Rendering - MSDF</title>
   <meta name='apple-mobile-web-app-capable' content='yes' />
   <meta name='full-screen' content='true' />
   <meta name='screen-orientation' content='portrait' />
@@ -35,11 +35,14 @@
 <body>
   <div>
     <p id="description" style="width: 600px;">
-      A demonstration of basic gltf loading and mesh skinning, ported from
-      https://webgl2fundamentals.org/webgl/lessons/webgl-skinning.html. Mesh data, per vertex attributes, and skin
-      inverseBindMatrices are taken from the json parsed from the binary output of the .glb file. Animations are
-      generated progrmatically, with animated joint matrices updated and passed to shaders per frame via uniform
-      buffers.
+      This example uses multichannel signed distance fields (MSDF) to render text. MSDF
+      fonts are more complex to implement than using Canvas 2D to generate text, but the resulting
+      text looks smoother while using less memory than the Canvas 2D approach, especially at high
+      zoom levels. They can be used to render larger amounts of text efficiently.
+
+      The font texture is generated using [Don McCurdy's MSDF font generation
+      tool](https://msdf-bmfont.donmccurdy.com/),
+      which is built on [Viktor Chlumský's msdfgen library](https://github.com/Chlumsky/msdfgen).
     </p>
     <canvas id="webgpu" style="width: 600px; height: 600px;"></canvas>
   </div>
