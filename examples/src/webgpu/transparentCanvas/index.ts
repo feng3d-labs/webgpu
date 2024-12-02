@@ -1,74 +1,40 @@
 import { mat4, vec3 } from 'wgpu-matrix';
 
-import { cubeVertexArray, cubeVertexSize, cubeUVOffset, cubePositionOffset, cubeVertexCount, } from '../../meshes/cube';
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from '../../meshes/cube';
 
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
-import { quitIfWebGPUNotAvailable } from '../util';
+
+import { IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+
 const init = async (canvas: HTMLCanvasElement) =>
 {
-    const adapter = await navigator.gpu?.requestAdapter();
-    const device = await adapter?.requestDevice();
-    quitIfWebGPUNotAvailable(adapter, device);
-
-    const context = canvas.getContext('webgpu') as GPUCanvasContext;
+    const webgpu = await new WebGPU().init();
 
     const devicePixelRatio = window.devicePixelRatio;
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
-    const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
 
-    context.configure({
-        device,
-        format: presentationFormat,
-        // The canvas alphaMode defaults to 'opaque', use 'premultiplied' for transparency.
-        alphaMode: 'premultiplied',
-    });
+    const context: IGPUCanvasContext = {
+        canvasId: canvas.id,
+        configuration: {
+            // The canvas alphaMode defaults to 'opaque', use 'premultiplied' for transparency.
+            alphaMode: 'premultiplied',
+        },
+    };
 
     // Create a vertex buffer from the cube data.
-    const verticesBuffer = device.createBuffer({
-        size: cubeVertexArray.byteLength,
-        usage: GPUBufferUsage.VERTEX,
-        mappedAtCreation: true,
-    });
-    new Float32Array(verticesBuffer.getMappedRange()).set(cubeVertexArray);
-    verticesBuffer.unmap();
+    const verticesBuffer: IGPUVertexAttributes = {
+        position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+        uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+    };
 
-    const pipeline = device.createRenderPipeline({
-        layout: 'auto',
+    const pipeline: IGPURenderPipeline = {
         vertex: {
-            module: device.createShaderModule({
-                code: basicVertWGSL,
-            }),
-            buffers: [
-                {
-                    arrayStride: cubeVertexSize,
-                    attributes: [
-                        {
-                            // position
-                            shaderLocation: 0,
-                            offset: cubePositionOffset,
-                            format: 'float32x4',
-                        },
-                        {
-                            // uv
-                            shaderLocation: 1,
-                            offset: cubeUVOffset,
-                            format: 'float32x2',
-                        },
-                    ],
-                },
-            ],
+            code: basicVertWGSL,
         },
         fragment: {
-            module: device.createShaderModule({
-                code: vertexPositionColorWGSL,
-            }),
-            targets: [
-                {
-                    format: presentationFormat,
-                },
-            ],
+            code: vertexPositionColorWGSL,
         },
         primitive: {
             topology: 'triangle-list',
@@ -78,38 +44,23 @@ const init = async (canvas: HTMLCanvasElement) =>
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: 'less',
-            format: 'depth24plus',
         },
-    });
+    };
 
-    const depthTexture = device.createTexture({
+    const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: 'depth24plus',
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    });
+    };
 
-    const uniformBufferSize = 4 * 16; // 4x4 matrix
-    const uniformBuffer = device.createBuffer({
-        size: uniformBufferSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    const uniformBindGroup = {
+        uniforms: { modelViewProjectionMatrix: undefined }
+    };
 
-    const uniformBindGroup = device.createBindGroup({
-        layout: pipeline.getBindGroupLayout(0),
-        entries: [
-            {
-                binding: 0,
-                resource: {
-                    buffer: uniformBuffer,
-                },
-            },
-        ],
-    });
-
-    const renderPassDescriptor: GPURenderPassDescriptor = {
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
-                view: undefined, // Assigned later
+                view: { texture: { context } }, // Assigned later
 
                 clearValue: [0, 0, 0, 0], // Clear alpha to 0
                 loadOp: 'clear',
@@ -117,7 +68,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             },
         ],
         depthStencilAttachment: {
-            view: depthTexture.createView(),
+            view: { texture: depthTexture },
 
             depthClearValue: 1.0,
             depthLoadOp: 'clear',
@@ -148,26 +99,21 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     function frame()
     {
-        const transformationMatrix = getTransformationMatrix();
-        device.queue.writeBuffer(
-            uniformBuffer,
-            0,
-            transformationMatrix.buffer,
-            transformationMatrix.byteOffset,
-            transformationMatrix.byteLength
-        );
-        renderPassDescriptor.colorAttachments[0].view = context
-            .getCurrentTexture()
-            .createView();
+        uniformBindGroup.uniforms.modelViewProjectionMatrix = getTransformationMatrix().slice();
 
-        const commandEncoder = device.createCommandEncoder();
-        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-        passEncoder.setPipeline(pipeline);
-        passEncoder.setBindGroup(0, uniformBindGroup);
-        passEncoder.setVertexBuffer(0, verticesBuffer);
-        passEncoder.draw(cubeVertexCount);
-        passEncoder.end();
-        device.queue.submit([commandEncoder.finish()]);
+        webgpu.submit({
+            commandEncoders: [{
+                passEncoders: [{
+                    descriptor: renderPassDescriptor,
+                    renderObjects: [{
+                        pipeline,
+                        bindingResources: uniformBindGroup,
+                        vertices: verticesBuffer,
+                        draw: { vertexCount: cubeVertexCount },
+                    }]
+                }]
+            }]
+        });
 
         requestAnimationFrame(frame);
     }
