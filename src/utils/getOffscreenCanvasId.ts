@@ -9,8 +9,14 @@ let OffscreenCanvasAutoId = 0;
 
 const OffscreenCanvasMap = {};
 
-globalThis["document"] = globalThis["document"] || {} as any;
-globalThis["document"].getElementById = globalThis["document"].getElementById || ((elementId: string) =>
+if (!globalThis.document)
 {
-    return OffscreenCanvasMap[elementId];
-});
+    globalThis.document = {} as any;
+}
+if (!globalThis.document.getElementById)
+{
+    globalThis.document.getElementById = (elementId: string) =>
+    {
+        return OffscreenCanvasMap[elementId];
+    };
+}
