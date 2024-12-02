@@ -38,6 +38,7 @@
 		"skinnedMesh",
 		"textRenderingMsdf",
 		"volumeRenderingTexture3D",
+		"wireframe",
 		""
 	],
 	"Web Platform Integration": [
