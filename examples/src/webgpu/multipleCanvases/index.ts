@@ -267,7 +267,7 @@ const init = async () =>
 
             // Get the current texture from the canvas context and
             // set it as the texture to render to.
-            const renderPassDescriptor: IGPURenderPassDescriptor = {
+            const renderPassDescriptor: IGPURenderPassDescriptor = canvasInfo["renderPassDescriptor"] = canvasInfo["renderPassDescriptor"] || {
                 label: 'our basic canvas renderPass',
                 colorAttachments: [
                     {
