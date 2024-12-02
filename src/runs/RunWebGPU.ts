@@ -22,7 +22,7 @@ import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQueryObject } from "../data/IGPUOcclusionQueryObject";
-import { IGPURenderBundleObject } from "../data/IGPURenderBundleObject";
+import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline } from "../data/IGPURenderObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
@@ -244,9 +244,9 @@ export class RunWebGPU
         passEncoder.endOcclusionQuery();
     }
 
-    protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundleObject)
+    protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundle)
     {
-        const renderBundleMap: ChainMap<[IGPURenderBundleObject, string], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
+        const renderBundleMap: ChainMap<[IGPURenderBundle, string], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
         //
         let gpuRenderBundle: GPURenderBundle = renderBundleMap.get([renderBundleObject, renderPassFormat._key]);
         if (!gpuRenderBundle)

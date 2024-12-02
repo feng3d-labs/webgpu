@@ -1,4 +1,4 @@
-import { IGPUTexture } from "./IGPUTexture";
+import { IGPUImageCopyTexture } from "./IGPUTexture";
 
 /**
  * GPU纹理间拷贝所包含信息。
@@ -28,29 +28,3 @@ export interface IGPUCopyTextureToTexture
     copySize: GPUExtent3DStrict;
 }
 
-/**
- * 被操作的纹理相关信息。
- *
- * {@link GPUCommandEncoder.copyTextureToTexture}
- * {@link GPUImageCopyTexture}
- */
-export interface IGPUImageCopyTexture extends Omit<GPUImageCopyTexture, "texture">
-{
-    /**
-     * Texture to copy to/from.
-     */
-    texture: IGPUTexture;
-    /**
-     * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
-     */
-    mipLevel?: GPUIntegerCoordinate;
-    /**
-     * Defines the origin of the copy - the minimum corner of the texture sub-region to copy to/from.
-     * Together with `copySize`, defines the full copy sub-region.
-     */
-    origin?: GPUOrigin3D;
-    /**
-     * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
-     */
-    aspect?: GPUTextureAspect;
-}

@@ -10,7 +10,7 @@ export * from "./data/IGPUCopyBufferToBuffer";
 export * from "./data/IGPUCopyTextureToTexture";
 export * from "./data/IGPUOcclusionQueryObject";
 export * from "./data/IGPUReadPixels";
-export * from "./data/IGPURenderBundleObject";
+export * from "./data/IGPURenderBundle";
 export * from "./data/IGPURenderObject";
 export * from "./data/IGPURenderPass";
 export * from "./data/IGPURenderPassColorAttachment";

@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundleObject, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
 
 interface Renderable
 {
@@ -289,15 +289,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   // textures used. Cases where the executed commands differ from frame-to-frame,
   // such as when using frustrum or occlusion culling, will not benefit from
   // using render bundles as much.
-  let renderBundle: IGPURenderBundleObject = {
-    __type: "IGPURenderBundleObject",
+  let renderBundle: IGPURenderBundle = {
+    __type: "IGPURenderBundle",
     renderObjects: [],
   };
   renderBundle.renderObjects = renderScene();
   function updateRenderBundle()
   {
-    const renderBundleEncoder: IGPURenderBundleObject = {
-      __type: "IGPURenderBundleObject",
+    const renderBundleEncoder: IGPURenderBundle = {
+      __type: "IGPURenderBundle",
       renderObjects: [],
     };
     renderBundleEncoder.renderObjects = renderScene();

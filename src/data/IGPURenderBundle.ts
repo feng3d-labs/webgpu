@@ -7,12 +7,12 @@ import { IGPURenderObject } from "./IGPURenderObject";
  *
  * {@link GPUDevice.createRenderBundleEncoder}
  */
-export interface IGPURenderBundleObject
+export interface IGPURenderBundle
 {
     /**
      * 数据类型。
      */
-    readonly __type: "IGPURenderBundleObject";
+    readonly __type: "IGPURenderBundle";
 
     /**
      * GPU渲染捆绑编码器描述。

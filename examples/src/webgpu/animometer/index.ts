@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IGPURenderBundleObject, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -119,8 +119,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         let startTime: number;
         const uniformTime = new Float32Array([0]);
 
-        const renderBundleObject: IGPURenderBundleObject = {
-            __type: "IGPURenderBundleObject",
+        const renderBundleObject: IGPURenderBundle = {
+            __type: "IGPURenderBundle",
             renderObjects
         };
 
