@@ -84,6 +84,7 @@ function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, depthStenc
     const depthCompare = depthStencil?.depthCompare ?? "less";
 
     const gpuDepthStencilState = {
+        ...depthStencil,
         depthWriteEnabled,
         depthCompare,
         format: depthStencilFormat,
