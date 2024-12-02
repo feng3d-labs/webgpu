@@ -1,13 +1,13 @@
 import { mat4, vec3 } from 'wgpu-matrix';
 
 import
-  {
-    cubeVertexArray,
-    cubeVertexSize,
-    cubeUVOffset,
-    cubePositionOffset,
-    cubeVertexCount,
-  } from '../../meshes/cube';
+{
+  cubeVertexArray,
+  cubeVertexSize,
+  cubeUVOffset,
+  cubePositionOffset,
+  cubeVertexCount,
+} from '../../meshes/cube';
 import { MsdfTextRenderer } from './msdfText';
 
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
@@ -15,26 +15,16 @@ import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl
 import { quitIfWebGPUNotAvailable } from '../util';
 
 import { getIGPUBuffer, IGPUBindingResources, IGPUPassEncoder, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
-import { GUI } from 'dat.gui';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
-  const adapter = await navigator.gpu?.requestAdapter();
-  const device = await adapter?.requestDevice();
-  quitIfWebGPUNotAvailable(adapter, device);
-
-  const context = canvas.getContext('webgpu') as GPUCanvasContext;
-
   const devicePixelRatio = window.devicePixelRatio || 1;
   canvas.width = canvas.clientWidth * devicePixelRatio;
   canvas.height = canvas.clientHeight * devicePixelRatio;
-  const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-  const depthFormat = 'depth24plus';
 
-  context.configure({
-    device,
-    format: presentationFormat,
-  });
+  const webgpu = await new WebGPU().init();
+
+  const depthFormat = 'depth24plus';
 
   const textRenderer = new MsdfTextRenderer(
     device,
