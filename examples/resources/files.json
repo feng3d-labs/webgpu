@@ -47,6 +47,7 @@
 		"transparentCanvas",
 		"multipleCanvases",
 		"videoUploading",
+		"worker",
 		""
 	],
 	"Benchmarks": [
