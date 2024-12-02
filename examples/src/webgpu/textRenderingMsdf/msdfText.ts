@@ -2,7 +2,7 @@ import { mat4, Mat4 } from 'wgpu-matrix';
 
 import msdfTextWGSL from './msdfText.wgsl';
 
-import { IGPUBindingResources, IGPURenderBundle, IGPURenderPipeline, IGPUSampler, IGPUTexture } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUTexture } from "@feng3d/webgpu-renderer";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -87,7 +87,7 @@ export class MsdfText
     private renderBundle: IGPURenderBundle,
     public measurements: MsdfTextMeasurements,
     public font: MsdfFont,
-    public textBuffer: GPUBuffer
+    public textBuffer: Float32Array
   )
   {
     mat4.identity(this.bufferArray);
@@ -101,13 +101,15 @@ export class MsdfText
     if (this.bufferArrayDirty)
     {
       this.bufferArrayDirty = false;
-      this.device.queue.writeBuffer(
-        this.textBuffer,
-        0,
-        this.bufferArray,
-        0,
-        this.bufferArray.length
-      );
+      const buffer = getIGPUBuffer(this.textBuffer);
+      const writeBuffers = buffer.writeBuffers || [];
+      writeBuffers.push({
+        bufferOffset: 0,
+        data: this.bufferArray,
+        dataOffset: 0,
+        size: this.bufferArray.length
+      });
+      buffer.writeBuffers = writeBuffers;
     }
     return this.renderBundle;
   }
@@ -435,16 +437,22 @@ export class MsdfTextRenderer
   {
     this.cameraUniformBuffer.set(projection, 0);
     this.cameraUniformBuffer.set(view, 16);
-    this.device.queue.writeBuffer(
-      this.cameraUniformBuffer,
-      0,
-      this.cameraUniformBuffer
-    );
+
+    const buffer = getIGPUBuffer(this.cameraUniformBuffer);
+    const writeBuffers = buffer.writeBuffers || [];
+    writeBuffers.push({
+      data: this.cameraUniformBuffer,
+    });
+    buffer.writeBuffers = writeBuffers;
   }
 
-  render(renderPass: GPURenderPassEncoder, ...text: MsdfText[])
+  render(renderObjects: IGPURenderPassObject[], ...text: MsdfText[])
   {
     const renderBundles = text.map((t) => t.getRenderBundle());
-    renderPass.executeBundles(renderBundles);
+
+    renderBundles.forEach((v) =>
+    {
+      renderObjects.push(v);
+    });
   }
 }

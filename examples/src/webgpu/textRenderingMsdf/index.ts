@@ -1,82 +1,70 @@
 import { mat4, vec3 } from 'wgpu-matrix';
 
-import
-{
-  cubeVertexArray,
-  cubeVertexSize,
-  cubeUVOffset,
-  cubePositionOffset,
-  cubeVertexCount,
-} from '../../meshes/cube';
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from '../../meshes/cube';
 import { MsdfTextRenderer } from './msdfText';
 
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
-import { quitIfWebGPUNotAvailable } from '../util';
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUPassEncoder, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
-  const devicePixelRatio = window.devicePixelRatio || 1;
-  canvas.width = canvas.clientWidth * devicePixelRatio;
-  canvas.height = canvas.clientHeight * devicePixelRatio;
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
 
-  const webgpu = await new WebGPU().init();
+    const webgpu = await new WebGPU().init();
 
-  const depthFormat = 'depth24plus';
+    const depthFormat = 'depth24plus';
 
-  const textRenderer = new MsdfTextRenderer(
-    device,
-    presentationFormat,
-    depthFormat
-  );
-  const font = await textRenderer.createFont(
-    new URL(
-      '../../../assets/font/ya-hei-ascii-msdf.json',
-      import.meta.url
-    ).toString()
-  );
+    const textRenderer = new MsdfTextRenderer();
+    const font = await textRenderer.createFont(
+        new URL(
+            '../../../assets/font/ya-hei-ascii-msdf.json',
+            import.meta.url
+        ).toString()
+    );
 
-  function getTextTransform(
-    position: [number, number, number],
-    rotation?: [number, number, number]
-  )
-  {
-    const textTransform = mat4.create();
-    mat4.identity(textTransform);
-    mat4.translate(textTransform, position, textTransform);
-    if (rotation && rotation[0] != 0)
+    function getTextTransform(
+        position: [number, number, number],
+        rotation?: [number, number, number]
+    )
     {
-      mat4.rotateX(textTransform, rotation[0], textTransform);
+        const textTransform = mat4.create();
+        mat4.identity(textTransform);
+        mat4.translate(textTransform, position, textTransform);
+        if (rotation && rotation[0] != 0)
+        {
+            mat4.rotateX(textTransform, rotation[0], textTransform);
+        }
+        if (rotation && rotation[1] != 0)
+        {
+            mat4.rotateY(textTransform, rotation[1], textTransform);
+        }
+        if (rotation && rotation[2] != 0)
+        {
+            mat4.rotateZ(textTransform, rotation[2], textTransform);
+        }
+        return textTransform;
     }
-    if (rotation && rotation[1] != 0)
-    {
-      mat4.rotateY(textTransform, rotation[1], textTransform);
-    }
-    if (rotation && rotation[2] != 0)
-    {
-      mat4.rotateZ(textTransform, rotation[2], textTransform);
-    }
-    return textTransform;
-  }
 
-  const textTransforms = [
-    getTextTransform([0, 0, 1.1]),
-    getTextTransform([0, 0, -1.1], [0, Math.PI, 0]),
-    getTextTransform([1.1, 0, 0], [0, Math.PI / 2, 0]),
-    getTextTransform([-1.1, 0, 0], [0, -Math.PI / 2, 0]),
-    getTextTransform([0, 1.1, 0], [-Math.PI / 2, 0, 0]),
-    getTextTransform([0, -1.1, 0], [Math.PI / 2, 0, 0]),
-  ];
+    const textTransforms = [
+        getTextTransform([0, 0, 1.1]),
+        getTextTransform([0, 0, -1.1], [0, Math.PI, 0]),
+        getTextTransform([1.1, 0, 0], [0, Math.PI / 2, 0]),
+        getTextTransform([-1.1, 0, 0], [0, -Math.PI / 2, 0]),
+        getTextTransform([0, 1.1, 0], [-Math.PI / 2, 0, 0]),
+        getTextTransform([0, -1.1, 0], [Math.PI / 2, 0, 0]),
+    ];
 
-  const titleText = textRenderer.formatText(font, `WebGPU`, {
-    centered: true,
-    pixelScale: 1 / 128,
-  });
-  const largeText = textRenderer.formatText(
-    font,
-    `
+    const titleText = textRenderer.formatText(font, `WebGPU`, {
+        centered: true,
+        pixelScale: 1 / 128,
+    });
+    const largeText = textRenderer.formatText(
+        font,
+        `
 WebGPU exposes an API for performing operations, such as rendering
 and computation, on a Graphics Processing Unit.
 
@@ -105,229 +93,205 @@ pipeline is defined by a GPURenderPipeline or a GPUComputePipeline
 object. The state not included in these pipeline objects is set
 during encoding with commands, such as beginRenderPass() or
 setBlendConstant().`,
-    { pixelScale: 1 / 256 }
-  );
-
-  const text = [
-    textRenderer.formatText(font, 'Front', {
-      centered: true,
-      pixelScale: 1 / 128,
-      color: [1, 0, 0, 1],
-    }),
-    textRenderer.formatText(font, 'Back', {
-      centered: true,
-      pixelScale: 1 / 128,
-      color: [0, 1, 1, 1],
-    }),
-    textRenderer.formatText(font, 'Right', {
-      centered: true,
-      pixelScale: 1 / 128,
-      color: [0, 1, 0, 1],
-    }),
-    textRenderer.formatText(font, 'Left', {
-      centered: true,
-      pixelScale: 1 / 128,
-      color: [1, 0, 1, 1],
-    }),
-    textRenderer.formatText(font, 'Top', {
-      centered: true,
-      pixelScale: 1 / 128,
-      color: [0, 0, 1, 1],
-    }),
-    textRenderer.formatText(font, 'Bottom', {
-      centered: true,
-      pixelScale: 1 / 128,
-      color: [1, 1, 0, 1],
-    }),
-
-    titleText,
-    largeText,
-  ];
-
-  // Create a vertex buffer from the cube data.
-  const verticesBuffer = device.createBuffer({
-    size: cubeVertexArray.byteLength,
-    usage: GPUBufferUsage.VERTEX,
-    mappedAtCreation: true,
-  });
-  new Float32Array(verticesBuffer.getMappedRange()).set(cubeVertexArray);
-  verticesBuffer.unmap();
-
-  const pipeline = device.createRenderPipeline({
-    layout: 'auto',
-    vertex: {
-      module: device.createShaderModule({
-        code: basicVertWGSL,
-      }),
-      buffers: [
-        {
-          arrayStride: cubeVertexSize,
-          attributes: [
-            {
-              // position
-              shaderLocation: 0,
-              offset: cubePositionOffset,
-              format: 'float32x4',
-            },
-            {
-              // uv
-              shaderLocation: 1,
-              offset: cubeUVOffset,
-              format: 'float32x2',
-            },
-          ],
-        },
-      ],
-    },
-    fragment: {
-      module: device.createShaderModule({
-        code: vertexPositionColorWGSL,
-      }),
-      targets: [
-        {
-          format: presentationFormat,
-        },
-      ],
-    },
-    primitive: {
-      // Backface culling since the cube is solid piece of geometry.
-      // Faces pointing away from the camera will be occluded by faces
-      // pointing toward the camera.
-      cullMode: 'back',
-    },
-
-    // Enable depth testing so that the fragment closest to the camera
-    // is rendered in front.
-    depthStencil: {
-      depthWriteEnabled: true,
-      depthCompare: 'less',
-      format: depthFormat,
-    },
-  });
-
-  const depthTexture = device.createTexture({
-    size: [canvas.width, canvas.height],
-    format: depthFormat,
-    usage: GPUTextureUsage.RENDER_ATTACHMENT,
-  });
-
-  const uniformBufferSize = 4 * 16; // 4x4 matrix
-  const uniformBuffer = device.createBuffer({
-    size: uniformBufferSize,
-    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-  });
-
-  const uniformBindGroup = device.createBindGroup({
-    layout: pipeline.getBindGroupLayout(0),
-    entries: [
-      {
-        binding: 0,
-        resource: {
-          buffer: uniformBuffer,
-        },
-      },
-    ],
-  });
-
-  const renderPassDescriptor: GPURenderPassDescriptor = {
-    colorAttachments: [
-      {
-        view: undefined, // Assigned later
-
-        clearValue: [0, 0, 0, 1],
-        loadOp: 'clear',
-        storeOp: 'store',
-      },
-    ],
-    depthStencilAttachment: {
-      view: depthTexture.createView(),
-
-      depthClearValue: 1.0,
-      depthLoadOp: 'clear',
-      depthStoreOp: 'store',
-    },
-  };
-
-  const aspect = canvas.width / canvas.height;
-  const projectionMatrix = mat4.perspective((2 * Math.PI) / 5, aspect, 1, 100.0);
-  const modelViewProjectionMatrix = mat4.create();
-
-  const start = Date.now();
-  function getTransformationMatrix()
-  {
-    const now = Date.now() / 5000;
-    const viewMatrix = mat4.identity();
-    mat4.translate(viewMatrix, vec3.fromValues(0, 0, -5), viewMatrix);
-
-    const modelMatrix = mat4.identity();
-    mat4.translate(modelMatrix, vec3.fromValues(0, 2, -3), modelMatrix);
-    mat4.rotate(
-      modelMatrix,
-      vec3.fromValues(Math.sin(now), Math.cos(now), 0),
-      1,
-      modelMatrix
+        { pixelScale: 1 / 256 }
     );
 
-    // Update the matrix for the cube
-    mat4.multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
-    mat4.multiply(
-      modelViewProjectionMatrix,
-      modelMatrix,
-      modelViewProjectionMatrix
-    );
+    const text = [
+        textRenderer.formatText(font, 'Front', {
+            centered: true,
+            pixelScale: 1 / 128,
+            color: [1, 0, 0, 1],
+        }),
+        textRenderer.formatText(font, 'Back', {
+            centered: true,
+            pixelScale: 1 / 128,
+            color: [0, 1, 1, 1],
+        }),
+        textRenderer.formatText(font, 'Right', {
+            centered: true,
+            pixelScale: 1 / 128,
+            color: [0, 1, 0, 1],
+        }),
+        textRenderer.formatText(font, 'Left', {
+            centered: true,
+            pixelScale: 1 / 128,
+            color: [1, 0, 1, 1],
+        }),
+        textRenderer.formatText(font, 'Top', {
+            centered: true,
+            pixelScale: 1 / 128,
+            color: [0, 0, 1, 1],
+        }),
+        textRenderer.formatText(font, 'Bottom', {
+            centered: true,
+            pixelScale: 1 / 128,
+            color: [1, 1, 0, 1],
+        }),
 
-    // Update the projection and view matrices for the text
-    textRenderer.updateCamera(projectionMatrix, viewMatrix);
+        titleText,
+        largeText,
+    ];
 
-    // Update the transform of all the text surrounding the cube
-    const textMatrix = mat4.create();
-    for (const [index, transform] of textTransforms.entries())
+    // Create a vertex buffer from the cube data.
+    const verticesBuffer: IGPUVertexAttributes = {
+        position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+        uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+    };
+
+    const pipeline: IGPURenderPipeline = {
+        vertex: {
+            code: basicVertWGSL,
+        },
+        fragment: {
+            code: vertexPositionColorWGSL,
+        },
+        primitive: {
+            // Backface culling since the cube is solid piece of geometry.
+            // Faces pointing away from the camera will be occluded by faces
+            // pointing toward the camera.
+            cullMode: 'back',
+        },
+
+        // Enable depth testing so that the fragment closest to the camera
+        // is rendered in front.
+        depthStencil: {
+            depthWriteEnabled: true,
+            depthCompare: 'less',
+        },
+    };
+
+    const depthTexture = device.createTexture({
+        size: [canvas.width, canvas.height],
+        format: depthFormat,
+        usage: GPUTextureUsage.RENDER_ATTACHMENT,
+    });
+
+    const uniformBufferSize = 4 * 16; // 4x4 matrix
+    const uniformBuffer = device.createBuffer({
+        size: uniformBufferSize,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+    });
+
+    const uniformBindGroup = device.createBindGroup({
+        layout: pipeline.getBindGroupLayout(0),
+        entries: [
+            {
+                binding: 0,
+                resource: {
+                    buffer: uniformBuffer,
+                },
+            },
+        ],
+    });
+
+    const renderPassDescriptor: IGPURenderPassDescriptor = {
+        colorAttachments: [
+            {
+                view: undefined, // Assigned later
+
+                clearValue: [0, 0, 0, 1],
+                loadOp: 'clear',
+                storeOp: 'store',
+            },
+        ],
+        depthStencilAttachment: {
+            view: { texture: depthTexture },
+
+            depthClearValue: 1.0,
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
+        },
+    };
+
+    const aspect = canvas.width / canvas.height;
+    const projectionMatrix = mat4.perspective((2 * Math.PI) / 5, aspect, 1, 100.0);
+    const modelViewProjectionMatrix = mat4.create();
+
+    const start = Date.now();
+    function getTransformationMatrix()
     {
-      mat4.multiply(modelMatrix, transform, textMatrix);
-      text[index].setTransform(textMatrix);
+        const now = Date.now() / 5000;
+        const viewMatrix = mat4.identity();
+        mat4.translate(viewMatrix, vec3.fromValues(0, 0, -5), viewMatrix);
+
+        const modelMatrix = mat4.identity();
+        mat4.translate(modelMatrix, vec3.fromValues(0, 2, -3), modelMatrix);
+        mat4.rotate(
+            modelMatrix,
+            vec3.fromValues(Math.sin(now), Math.cos(now), 0),
+            1,
+            modelMatrix
+        );
+
+        // Update the matrix for the cube
+        mat4.multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
+        mat4.multiply(
+            modelViewProjectionMatrix,
+            modelMatrix,
+            modelViewProjectionMatrix
+        );
+
+        // Update the projection and view matrices for the text
+        textRenderer.updateCamera(projectionMatrix, viewMatrix);
+
+        // Update the transform of all the text surrounding the cube
+        const textMatrix = mat4.create();
+        for (const [index, transform] of textTransforms.entries())
+        {
+            mat4.multiply(modelMatrix, transform, textMatrix);
+            text[index].setTransform(textMatrix);
+        }
+
+        // Update the transform of the larger block of text
+        const crawl = ((Date.now() - start) / 2500) % 14;
+        mat4.identity(textMatrix);
+        mat4.rotateX(textMatrix, -Math.PI / 8, textMatrix);
+        mat4.translate(textMatrix, [0, crawl - 3, 0], textMatrix);
+        titleText.setTransform(textMatrix);
+        mat4.translate(textMatrix, [-3, -0.1, 0], textMatrix);
+        largeText.setTransform(textMatrix);
+
+        return modelViewProjectionMatrix;
     }
 
-    // Update the transform of the larger block of text
-    const crawl = ((Date.now() - start) / 2500) % 14;
-    mat4.identity(textMatrix);
-    mat4.rotateX(textMatrix, -Math.PI / 8, textMatrix);
-    mat4.translate(textMatrix, [0, crawl - 3, 0], textMatrix);
-    titleText.setTransform(textMatrix);
-    mat4.translate(textMatrix, [-3, -0.1, 0], textMatrix);
-    largeText.setTransform(textMatrix);
+    function frame()
+    {
+        const transformationMatrix = getTransformationMatrix();
+        device.queue.writeBuffer(
+            uniformBuffer,
+            0,
+            transformationMatrix.buffer,
+            transformationMatrix.byteOffset,
+            transformationMatrix.byteLength
+        );
+        renderPassDescriptor.colorAttachments[0].view = context
+            .getCurrentTexture()
+            .createView();
 
-    return modelViewProjectionMatrix;
-  }
+        const renderObjects: IGPURenderPassObject[] = [];
 
-  function frame()
-  {
-    const transformationMatrix = getTransformationMatrix();
-    device.queue.writeBuffer(
-      uniformBuffer,
-      0,
-      transformationMatrix.buffer,
-      transformationMatrix.byteOffset,
-      transformationMatrix.byteLength
-    );
-    renderPassDescriptor.colorAttachments[0].view = context
-      .getCurrentTexture()
-      .createView();
+        renderObjects.push({
+            pipeline: pipeline,
+            bindingResources: uniformBindGroup,
+            vertices: verticesBuffer,
+            draw: { vertexCount: cubeVertexCount, instanceCount: 1 },
+        });
 
-    const commandEncoder = device.createCommandEncoder();
-    const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-    passEncoder.setPipeline(pipeline);
-    passEncoder.setBindGroup(0, uniformBindGroup);
-    passEncoder.setVertexBuffer(0, verticesBuffer);
-    passEncoder.draw(cubeVertexCount, 1, 0, 0);
+        textRenderer.render(renderObjects, ...text);
 
-    textRenderer.render(passEncoder, ...text);
+        const submit: IGPUSubmit = {
+            commandEncoders: [{
+                passEncoders: [{
+                    descriptor: renderPassDescriptor,
+                    renderObjects: renderObjects,
+                }]
+            }]
+        };
+        webgpu.submit(submit);
 
-    passEncoder.end();
-    device.queue.submit([commandEncoder.finish()]);
-
+        requestAnimationFrame(frame);
+    }
     requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
 };
 
 const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
