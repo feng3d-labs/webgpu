@@ -37,6 +37,7 @@
 		"a-buffer",
 		"skinnedMesh",
 		"textRenderingMsdf",
+		"volumeRenderingTexture3D",
 		""
 	],
 	"Web Platform Integration": [
