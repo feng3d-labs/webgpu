@@ -43,6 +43,7 @@
 	],
 	"Web Platform Integration": [
 		"resizeCanvas",
+		"resizeObserverHDDPI",
 		"videoUploading",
 		""
 	],
