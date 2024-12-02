@@ -1,12 +1,12 @@
-import { mat4 } from 'wgpu-matrix';
 import { GUI } from 'dat.gui';
+import { mat4 } from 'wgpu-matrix';
 import volumeWGSL from './volume.wgsl';
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 
 const gui = new GUI();
 
-import { IGPUBindingResource, IGPUBindingResources, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureView, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -42,7 +42,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const uniformBuffer: IGPUBindingResource = {
+    const uniformBuffer = {
         inverseModelViewProjectionMatrix: new Float32Array(16),
     };
 
@@ -80,16 +80,15 @@ const init = async (canvas: HTMLCanvasElement) =>
             size: [width, height, depth],
             format: format,
             usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+            writeTextures: [
+                [
+                    {},
+                    byteArray,
+                    { bytesPerRow: bytesPerRow, rowsPerImage: blocksHigh },
+                    [width, height, depth]
+                ]
+            ]
         };
-
-        device.queue.writeTexture(
-            {
-                texture: volumeTexture,
-            },
-            byteArray,
-            { bytesPerRow: bytesPerRow, rowsPerImage: blocksHigh },
-            [width, height, depth]
-        );
     }
 
     // Create a sampler with linear filtering for smooth interpolation.
@@ -102,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniformBindGroup: IGPUBindingResources = {
         uniforms: uniformBuffer,
-        sampler: sampler,
+        mySampler: sampler,
         myTexture: { texture: volumeTexture },
     };
 
@@ -158,7 +157,8 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         const inverseModelViewProjection =
             getInverseModelViewProjectionMatrix(deltaTime);
-        device.queue.writeBuffer(uniformBuffer, 0, inverseModelViewProjection);
+
+        uniformBuffer.inverseModelViewProjectionMatrix = inverseModelViewProjection;
 
         const submit: IGPUSubmit = {
             commandEncoders: [{
