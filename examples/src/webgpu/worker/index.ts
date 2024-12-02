@@ -2,7 +2,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 {
   // The web worker is created by passing a path to the worker's source file, which will then be
   // executed on a separate thread.
-  const worker = new Worker(new URL('./worker.ts', import.meta.url));
+  const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
 
   // The primary way to communicate with the worker is to send and receive messages.
   worker.addEventListener('message', (ev) =>

@@ -8,9 +8,42 @@ import {
   cubeVertexCount,
 } from '../../meshes/cube';
 
-import basicVertWGSL from '../../shaders/basic.vert.wgsl';
-import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
 import { quitIfWebGPUNotAvailable } from '../util';
+
+const basicVertWGSL =`
+struct Uniforms {
+  modelViewProjectionMatrix: mat4x4<f32>,
+}
+@binding(0) @group(0) var<uniform> uniforms : Uniforms;
+
+struct VertexOutput {
+  @builtin(position) Position: vec4<f32>,
+  @location(0) fragUV: vec2<f32>,
+  @location(1) fragPosition: vec4<f32>,
+}
+
+@vertex
+fn main(
+    @location(0) position: vec4<f32>,
+    @location(1) uv: vec2<f32>
+) -> VertexOutput {
+    var output: VertexOutput;
+    output.Position = uniforms.modelViewProjectionMatrix * position;
+    output.fragUV = uv;
+    output.fragPosition = 0.5 * (position + vec4(1.0, 1.0, 1.0, 1.0));
+    return output;
+}
+`;
+const vertexPositionColorWGSL = `
+@fragment
+fn main(
+    @location(0) fragUV: vec2<f32>,
+    @location(1) fragPosition: vec4<f32>
+) -> @location(0) vec4<f32> {
+    return fragPosition;
+}
+
+`;
 
 // The worker process can instantiate a WebGPU device immediately, but it still needs an
 // OffscreenCanvas to be able to display anything. Here we listen for an 'init' message from the
