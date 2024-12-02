@@ -6,7 +6,7 @@ import { MsdfTextRenderer } from './msdfText';
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
 
-import { IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -160,34 +160,22 @@ setBlendConstant().`,
         },
     };
 
-    const depthTexture = device.createTexture({
+    const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: depthFormat,
         usage: GPUTextureUsage.RENDER_ATTACHMENT,
-    });
+    };
 
-    const uniformBufferSize = 4 * 16; // 4x4 matrix
-    const uniformBuffer = device.createBuffer({
-        size: uniformBufferSize,
-        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    const uniformBuffer = new Float32Array(16);
 
-    const uniformBindGroup = device.createBindGroup({
-        layout: pipeline.getBindGroupLayout(0),
-        entries: [
-            {
-                binding: 0,
-                resource: {
-                    buffer: uniformBuffer,
-                },
-            },
-        ],
-    });
+    const uniformBindGroup: IGPUBindingResources = {
+        uniforms: { bufferView: uniformBuffer },
+    };
 
     const renderPassDescriptor: IGPURenderPassDescriptor = {
         colorAttachments: [
             {
-                view: undefined, // Assigned later
+                view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0, 0, 0, 1],
                 loadOp: 'clear',
@@ -257,16 +245,15 @@ setBlendConstant().`,
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
-        device.queue.writeBuffer(
-            uniformBuffer,
-            0,
-            transformationMatrix.buffer,
-            transformationMatrix.byteOffset,
-            transformationMatrix.byteLength
-        );
-        renderPassDescriptor.colorAttachments[0].view = context
-            .getCurrentTexture()
-            .createView();
+
+        const buffer = getIGPUBuffer(uniformBuffer);
+        const writeBuffers = buffer.writeBuffers || [];
+        writeBuffers.push({
+            data: transformationMatrix.buffer,
+            dataOffset: transformationMatrix.byteOffset,
+            size: transformationMatrix.byteLength
+        });
+        buffer.writeBuffers = writeBuffers;
 
         const renderObjects: IGPURenderPassObject[] = [];
 
