@@ -45,6 +45,7 @@
 		"resizeCanvas",
 		"resizeObserverHDDPI",
 		"transparentCanvas",
+		"multipleCanvases",
 		"videoUploading",
 		""
 	],
