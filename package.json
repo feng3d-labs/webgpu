@@ -2,11 +2,17 @@
   "name": "@feng3d/webgpu",
   "version": "0.0.1",
   "description": "webgpu渲染库",
-  "main": "src/index.ts",
-  "types": "src/index.ts",
-  "module": "src/index.ts",
   "author": "feng",
-  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "module": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts"
+    }
+  },
   "scripts": {
     "dev": "cd examples && npm run dev",
     "clean": "rimraf \"{lib,dist,public}\"",
@@ -34,6 +40,9 @@
     ".",
     "./examples"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "5.17.0",
     "@typescript-eslint/parser": "5.17.0",
