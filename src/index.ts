@@ -17,11 +17,13 @@ export * from "./data/IGPURenderPassColorAttachment";
 export * from "./data/IGPURenderPassDepthStencilAttachment";
 export * from "./data/IGPURenderPassDescriptor";
 export * from "./data/IGPUSampler";
+export * from "./data/IGPUScissorRect";
 export * from "./data/IGPUSubmit";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IGPUTimestampQuery";
 export * from "./data/IGPUVertexAttributes";
+export * from "./data/IGPUViewport";
 
 export * from "./caches/getIGPUBuffer";
 export * from "./types/VertexFormat";
