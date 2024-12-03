@@ -1,4 +1,4 @@
-import { IGPUDepthStencilState, IGPURenderPipeline, IGPUTexture } from "@feng3d/webgpu-renderer";
+import { IGPUDepthStencilState, IGPURenderPipeline, IGPUTexture } from "@feng3d/webgpu";
 
 export const create3DRenderPipeline = (
     label: string,

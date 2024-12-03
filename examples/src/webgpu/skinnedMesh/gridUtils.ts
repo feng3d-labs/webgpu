@@ -1,6 +1,6 @@
 import { gridIndices, gridJoints, gridVertices, gridWeights } from "./gridData";
 
-import { IGPURenderPipeline, IGPUVertexAttributes } from "@feng3d/webgpu-renderer";
+import { IGPURenderPipeline, IGPUVertexAttributes } from "@feng3d/webgpu";
 
 // Uses constant grid data to create appropriately sized GPU Buffers for our skinned grid
 export const createSkinnedGridBuffers = () =>

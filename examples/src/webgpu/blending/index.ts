@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IGPUBindingResources, IGPUBufferBinding, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureBase, IGPUTextureView, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUBufferBinding, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureBase, IGPUTextureView, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

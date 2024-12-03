@@ -2,7 +2,7 @@ import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from "../../meshes/cube";
 
-import { getOffscreenCanvasId, IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getOffscreenCanvasId, IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const basicVertWGSL = `
 struct Uniforms {

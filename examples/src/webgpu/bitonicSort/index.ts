@@ -4,7 +4,7 @@ import atomicToZero from "./atomicToZero.wgsl";
 import { NaiveBitonicCompute } from "./bitonicCompute";
 import BitonicDisplayRenderer from "./bitonicDisplay";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUCommandEncoder, IGPUComputePass, IGPUComputePipeline, IGPURenderPassDescriptor, IGPUSubmit, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUCommandEncoder, IGPUComputePass, IGPUComputePipeline, IGPURenderPassDescriptor, IGPUSubmit, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { watcher } from "@feng3d/watcher";
 
 // Type of step that will be executed in our shader

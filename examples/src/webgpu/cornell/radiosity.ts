@@ -1,4 +1,4 @@
-import { getIGPUBuffer, IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal } from "@feng3d/webgpu";
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";

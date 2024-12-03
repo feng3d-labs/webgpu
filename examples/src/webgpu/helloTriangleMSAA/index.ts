@@ -1,4 +1,4 @@
-import { IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 import redFragWGSL from "../../shaders/red.frag.wgsl";
 import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
 

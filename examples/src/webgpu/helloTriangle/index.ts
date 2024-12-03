@@ -1,4 +1,4 @@
-import { IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {

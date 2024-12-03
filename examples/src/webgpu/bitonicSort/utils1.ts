@@ -2,7 +2,7 @@ import type { GUI } from "dat.gui";
 import Stats from "stats.js";
 import { quitIfAdapterNotAvailable, quitIfWebGPUNotAvailable } from "../util";
 
-import { IGPUBindingResources, IGPUCommandEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline } from "@feng3d/webgpu";
 
 const fullscreenTexturedQuad
 = `

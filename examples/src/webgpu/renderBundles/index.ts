@@ -6,7 +6,7 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 interface Renderable
 {

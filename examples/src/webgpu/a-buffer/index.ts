@@ -7,7 +7,7 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

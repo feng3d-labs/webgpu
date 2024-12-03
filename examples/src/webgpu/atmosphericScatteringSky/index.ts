@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import atmosphericScatteringSkyWGSL from "./atmosphericScatteringSky.wgsl";
 
-import { IGPUCanvasContext, IGPUComputeObject, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUCanvasContext, IGPUComputeObject, IGPUTexture, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

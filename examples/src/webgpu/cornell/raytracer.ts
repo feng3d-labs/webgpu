@@ -1,4 +1,4 @@
-import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal, WebGPU } from "@feng3d/webgpu";
 
 import Common from "./common";
 import Radiosity from "./radiosity";

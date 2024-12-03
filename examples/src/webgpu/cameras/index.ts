@@ -5,7 +5,7 @@ import { ArcballCamera, WASDCamera } from "./camera";
 import cubeWGSL from "./cube.wgsl";
 import { createInputHandler } from "./input";
 
-import { IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

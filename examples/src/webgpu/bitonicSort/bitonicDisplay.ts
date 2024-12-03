@@ -2,7 +2,7 @@ import { Base2DRendererClass } from "./utils1";
 
 import bitonicDisplay from "./bitonicDisplay.frag.wgsl";
 
-import { IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUCommandEncoder, IGPURenderPassDescriptor } from "@feng3d/webgpu-renderer";
+import { IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUCommandEncoder, IGPURenderPassDescriptor } from "@feng3d/webgpu";
 
 interface BitonicDisplayRenderArgs
 {

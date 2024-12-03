@@ -1,4 +1,4 @@
-import { IGPUBuffer, IGPUVertexAttributes } from "@feng3d/webgpu-renderer";
+import { IGPUBuffer, IGPUVertexAttributes } from "@feng3d/webgpu";
 import { Vec3, vec3 } from "wgpu-matrix";
 
 function reciprocal(v: Vec3)

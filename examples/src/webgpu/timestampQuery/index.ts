@@ -1,4 +1,4 @@
-import { IGPUCanvasContext, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { IGPUCanvasContext, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
 

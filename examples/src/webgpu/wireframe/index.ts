@@ -5,7 +5,7 @@ import solidColorLitWGSL from "./solidColorLit.wgsl";
 import { randColor, randElement } from "./utils";
 import wireframeWGSL from "./wireframe.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

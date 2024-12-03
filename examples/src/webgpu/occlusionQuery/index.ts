@@ -3,7 +3,7 @@ import { mat4 } from "wgpu-matrix";
 import solidColorLitWGSL from "./solidColorLit.wgsl";
 
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const info = document.querySelector("#info");
 
