@@ -9,12 +9,12 @@ export default defineConfig({
         lib: {
             // Could also be a dictionary or array of multiple entry points
             entry: resolve(__dirname, 'src/index.ts'),
-            name: 'webgpu-simplify',
+            name: 'webgpu',
             // the proper extensions will be added
             fileName: 'index'
         },
-        minify: false,
-        sourcemap: true
+        minify: true,
+        sourcemap: false,
     },
     plugins: [
         shaderToString(),
