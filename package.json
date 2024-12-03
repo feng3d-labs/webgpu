@@ -28,8 +28,7 @@
   },
   "files": [
     "dist/",
-    "lib",
-    "src"
+    "lib"
   ],
   "workspaces": [
     ".",

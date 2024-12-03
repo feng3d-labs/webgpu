@@ -1,8 +1,8 @@
-
 export function getOffscreenCanvasId(canvas: OffscreenCanvas)
 {
-    const id = canvas["id"] = canvas["id"] || ("OffscreenCanvas_" + OffscreenCanvasAutoId++);
+    const id = canvas["id"] = canvas["id"] || (`OffscreenCanvas_${OffscreenCanvasAutoId++}`);
     OffscreenCanvasMap[id] = canvas;
+
     return id;
 }
 let OffscreenCanvasAutoId = 0;
@@ -15,8 +15,5 @@ if (!globalThis.document)
 }
 if (!globalThis.document.getElementById)
 {
-    globalThis.document.getElementById = (elementId: string) =>
-    {
-        return OffscreenCanvasMap[elementId];
-    };
+    globalThis.document.getElementById = (elementId: string) => OffscreenCanvasMap[elementId];
 }
