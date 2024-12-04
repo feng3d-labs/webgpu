@@ -12,7 +12,7 @@ export function quitIfWebGPUNotAvailable(
         quitIfAdapterNotAvailable(adapter);
         fail("Unable to get a device for an unknown reason");
 
-return;
+        return;
     }
 
     device.lost.then((reason) =>
