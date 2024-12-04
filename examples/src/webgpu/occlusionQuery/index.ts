@@ -231,7 +231,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         watcher.watch(renderPass, "occlusionQueryResults", () =>
         {
             const visible = objectInfos
-                .filter((_, i) => renderPass.occlusionQueryResults[i].result)
+                .filter((_, i) => renderPass.occlusionQueryResults[i].result.result)
                 .map(({ id }) => id)
                 .join("");
             info.textContent = `visible: ${visible}`;

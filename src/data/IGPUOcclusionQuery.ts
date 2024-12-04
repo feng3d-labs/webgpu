@@ -25,5 +25,13 @@ export interface IGPUOcclusionQuery
     /**
      * 渲染完成后由引擎自动填充。
      */
-    result?: boolean;
+    result?: IGLQueryResult;
+}
+
+export interface IGLQueryResult
+{
+    /**
+     * 查询结果。
+     */
+    result: number;
 }

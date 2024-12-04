@@ -75,7 +75,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly IGPURenderPa
 
                     occlusionQueryObjects.forEach((v, i) =>
                     {
-                        v.result = results[i] as any;
+                        v.result = { result: Number(results[i]) };
                     });
 
                     resultBuf.unmap();

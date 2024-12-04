@@ -10,6 +10,11 @@ import { IGPUTexture } from "./IGPUTexture";
 export interface IGPUTextureView
 {
     /**
+     * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
+     */
+    label?: string;
+
+    /**
      * 产生视图的纹理。
      */
     readonly texture: IGPUTexture;
