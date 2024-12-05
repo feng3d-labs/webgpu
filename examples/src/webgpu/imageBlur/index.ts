@@ -149,7 +149,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }],
     };
 
-    const gpuComputePassEncoder: IGPUComputePass = { __type: "IGPUComputePass", computeObjects: [] };
+    const gpuComputePassEncoder: IGPUComputePass = { __type: "ComputePass", computeObjects: [] };
     const submit: IGPUSubmit = {
         commandEncoders: [
             {

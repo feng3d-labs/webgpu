@@ -52,7 +52,7 @@ export default class Raytracer
     const framebufferSize = internal.getGPUTextureSize(this.framebuffer);
     //
     this.passEncoder = {
-      __type: "IGPUComputePass",
+      __type: "ComputePass",
       computeObjects: [{
         pipeline: this.pipeline,
         bindingResources: {

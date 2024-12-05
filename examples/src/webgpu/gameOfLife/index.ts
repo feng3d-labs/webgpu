@@ -121,7 +121,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             passEncodersArray[i] = [
                 {
-                    __type: "IGPUComputePass",
+                    __type: "ComputePass",
                     computeObjects: [{
                         pipeline: computePipeline,
                         bindingResources: i ? bindGroup1 : bindGroup0,

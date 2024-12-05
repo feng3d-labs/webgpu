@@ -98,7 +98,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const copyTextureToTexture: IGPUCopyTextureToTexture = {
-        __type: "IGPUCopyTextureToTexture",
+        __type: "CopyTextureToTexture",
         source: { texture: { context } },
         destination: { texture: cubeTexture },
         copySize: [canvas.width, canvas.height],

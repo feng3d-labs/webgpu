@@ -311,7 +311,7 @@ return viewProjMatrix;
         {
             // initialize the heads buffer
             passEncoders.push({
-                __type: "IGPUCopyBufferToBuffer",
+                __type: "CopyBufferToBuffer",
                 source: headsInitBuffer,
                 sourceOffset: 0,
                 destination: getIGPUBuffer(headsBuffer.bufferView),

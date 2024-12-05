@@ -20,7 +20,7 @@ export interface IGPURenderPass
     /**
      * 数据类型。
      */
-    readonly __type?: "IGPURenderPass";
+    readonly __type?: "RenderPass";
 
     /**
      * 渲染通道描述。

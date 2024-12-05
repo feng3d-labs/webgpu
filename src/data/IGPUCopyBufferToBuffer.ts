@@ -10,7 +10,7 @@ export interface IGPUCopyBufferToBuffer
     /**
      * 数据类型。
      */
-    readonly __type: "IGPUCopyBufferToBuffer";
+    readonly __type: "CopyBufferToBuffer";
 
     /**
      * 源缓冲区。

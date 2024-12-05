@@ -63,19 +63,19 @@ export class RunWebGPU
             {
                 this.runRenderPass(device, gpuCommandEncoder, passEncoder as IGPURenderPass);
             }
-            else if (passEncoder.__type === "IGPURenderPass")
+            else if (passEncoder.__type === "RenderPass")
             {
                 this.runRenderPass(device, gpuCommandEncoder, passEncoder);
             }
-            else if (passEncoder.__type === "IGPUComputePass")
+            else if (passEncoder.__type === "ComputePass")
             {
                 this.runComputePass(device, gpuCommandEncoder, passEncoder);
             }
-            else if (passEncoder.__type === "IGPUCopyTextureToTexture")
+            else if (passEncoder.__type === "CopyTextureToTexture")
             {
                 this.runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder);
             }
-            else if (passEncoder.__type === "IGPUCopyBufferToBuffer")
+            else if (passEncoder.__type === "CopyBufferToBuffer")
             {
                 this.runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder);
             }

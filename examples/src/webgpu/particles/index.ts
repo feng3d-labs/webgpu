@@ -202,7 +202,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       if (level === 0)
       {
         passEncoders.push({
-          __type: "IGPUComputePass",
+          __type: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapImportLevelPipeline,
             bindingResources: { ...probabilityMapBindGroup },
@@ -213,7 +213,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       else
       {
         passEncoders.push({
-          __type: "IGPUComputePass",
+          __type: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapExportLevelPipeline,
             bindingResources: { ...probabilityMapBindGroup },
@@ -280,7 +280,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   passEncoders.push(
     {
-      __type: "IGPUComputePass",
+      __type: "ComputePass",
       computeObjects: [{
         pipeline: computePipeline,
         bindingResources: { ...computeBindGroup },

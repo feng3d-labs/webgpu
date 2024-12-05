@@ -10,7 +10,7 @@ export interface IGPUCopyTextureToTexture
     /**
      * 数据类型。
      */
-    readonly __type: "IGPUCopyTextureToTexture";
+    readonly __type: "CopyTextureToTexture";
 
     /**
      * Combined with `copySize`, defines the region of the source texture subresources.
