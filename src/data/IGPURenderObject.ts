@@ -32,18 +32,18 @@ export interface IGPURenderObject
     readonly bindingResources?: IGPUBindingResources;
 
     /**
-     * 绘制图元相关参数。
+     * 根据顶点数据绘制图元。
      */
-    readonly draw?: IGPUDraw;
+    readonly drawVertex?: IGPUDrawVertex;
 
     /**
-     * 根据索引数据绘制图元相关参数。
+     * 根据索引数据绘制图元。
      */
     readonly drawIndexed?: IGPUDrawIndexed;
 }
 
 /**
- * 根据索引数据绘制图元相关参数。
+ * 根据索引数据绘制图元。
  *
  * {@link GPURenderCommandsMixin.drawIndexed}
  */
@@ -78,11 +78,11 @@ export interface IGPUDrawIndexed
 /**
  * Draws primitives.
  *
- * 绘制图元相关参数。
+ * 根据顶点数据绘制图元。
  *
  * @see GPURenderCommandsMixin.draw
  */
-export interface IGPUDraw
+export interface IGPUDrawVertex
 {
     /**
      * The number of vertices to draw.

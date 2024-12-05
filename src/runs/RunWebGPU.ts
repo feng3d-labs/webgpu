@@ -23,7 +23,7 @@ import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
-import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline } from "../data/IGPURenderObject";
+import { IGPUDrawVertex, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline } from "../data/IGPURenderObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUStencilReference } from "../data/IGPUStencilReference";
@@ -322,7 +322,7 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
     {
-        const { pipeline, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
+        const { pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
 
         this.runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
 
@@ -332,7 +332,7 @@ export class RunWebGPU
 
         this.runIndices(device, passEncoder, indices);
 
-        this.runDraw(passEncoder, draw);
+        this.runDrawVertex(passEncoder, drawVertex);
 
         this.runDrawIndexed(passEncoder, drawIndexed);
     }
@@ -429,7 +429,7 @@ export class RunWebGPU
         passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
     }
 
-    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDraw)
+    protected runDrawVertex(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDrawVertex)
     {
         if (!draw) return;
 
