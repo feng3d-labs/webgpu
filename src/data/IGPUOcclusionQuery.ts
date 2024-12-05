@@ -16,7 +16,7 @@ export interface IGPUOcclusionQuery
     renderObjects: IGPURenderObject[];
 
     /**
-     * 执行过程中由引擎自动填充
+     * 临时变量, 执行过程中由引擎自动填充
      *
      * @internal
      */
