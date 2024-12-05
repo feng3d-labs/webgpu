@@ -383,7 +383,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     pipeline: colorPassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
                     vertices,
-                    draw: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    drawVertex: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                 }]
         });
     }
@@ -413,7 +413,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     pipeline: depthPrePassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
                     vertices,
-                    draw: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    drawVertex: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                 }]
         });
         precisionErrorPassEncoders.push({
@@ -438,7 +438,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     pipeline: precisionPassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m], ...depthTextureBindGroup },
                     vertices,
-                    draw: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    drawVertex: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                 }]
         });
     }
@@ -468,7 +468,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     pipeline: depthPrePassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
                     vertices,
-                    draw: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    drawVertex: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                 }]
         });
         depthBufferPassEncoders.push({
@@ -485,7 +485,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 pipeline: textureQuadPassPipline,
                 bindingResources: { ...depthTextureBindGroup },
-                draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+                drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
             }]
         });
     }

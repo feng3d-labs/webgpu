@@ -353,7 +353,7 @@ return texture;
             ...font.bindGroup,
             ...bindGroup,
           },
-          draw: { vertexCount: 4, instanceCount: measurements.printedCharCount },
+          drawVertex: { vertexCount: 4, instanceCount: measurements.printedCharCount },
         }
       ],
     };

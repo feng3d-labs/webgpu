@@ -116,7 +116,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 modelViewProjectionMatrix: null
             },
         },
-        draw: { vertexCount: cubeVertexCount, instanceCount: numInstances }
+        drawVertex: { vertexCount: cubeVertexCount, instanceCount: numInstances }
     };
 
     function frame()

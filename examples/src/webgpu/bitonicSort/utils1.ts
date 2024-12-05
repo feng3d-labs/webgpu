@@ -140,7 +140,7 @@ export abstract class Base2DRendererClass
       renderObjects: [{
         pipeline,
         bindingResources,
-        draw: { vertexCount: 6, instanceCount: 1 }
+        drawVertex: { vertexCount: 6, instanceCount: 1 }
       }],
     };
     commandEncoder.passEncoders.push(passEncoder);

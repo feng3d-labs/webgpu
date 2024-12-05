@@ -368,7 +368,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 renderObjects.push({
                     pipeline,
                     bindingResources: wireframeBindGroups[bindGroupNdx],
-                    draw: { vertexCount: indices.length * countMult },
+                    drawVertex: { vertexCount: indices.length * countMult },
                 });
             });
         }

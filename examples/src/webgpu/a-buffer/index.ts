@@ -372,7 +372,7 @@ return viewProjMatrix;
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice]
                         },
-                        draw: { vertexCount: 6 },
+                        drawVertex: { vertexCount: 6 },
                     }
                 ]
             };

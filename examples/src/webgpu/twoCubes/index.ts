@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         bindingResources: {
             uniforms,
         },
-        draw: { vertexCount: cubeVertexCount },
+        drawVertex: { vertexCount: cubeVertexCount },
     };
 
     const uniforms1: IGPUBufferBinding = {

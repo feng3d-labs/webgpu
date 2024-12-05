@@ -104,7 +104,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     pipeline,
     vertices,
     bindingResources,
-    draw: { vertexCount: cubeVertexCount },
+    drawVertex: { vertexCount: cubeVertexCount },
   };
 
   const renderPassDescriptor: IGPURenderPassDescriptor = {

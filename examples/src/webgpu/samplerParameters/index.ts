@@ -323,7 +323,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 pipeline: texturedSquarePipeline,
                 bindingResources: bindingResources0,
-                draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
+                drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
             }
         );
     }
@@ -337,7 +337,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
+            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
         }
     );
     renderObjects.push(
@@ -345,7 +345,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
+            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
         }
     );
     renderObjects.push(
@@ -353,7 +353,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
+            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
         }
     );
     renderObjects.push(
@@ -361,7 +361,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
+            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
         }
     );
 

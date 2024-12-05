@@ -1,7 +1,7 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPUPrimitiveState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu";
+import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer, IGPUDrawIndexed, IGPUDrawVertex, IGPUFragmentState, IGPUPrimitiveState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -44,7 +44,7 @@ enum GLTFDataStructureType
 }
 
 export const alignTo = (val: number, align: number): number =>
-Math.floor((val + align - 1) / align) * align;
+    Math.floor((val + align - 1) / align) * align;
 
 const parseGltfDataStructureType = (type: string) =>
 {
@@ -179,7 +179,7 @@ const gltfElementSize = (
             throw Error("Unrecognized GLTF Component Type?");
     }
 
-return gltfDataStructureTypeNumComponents(type) * componentSize;
+    return gltfDataStructureTypeNumComponents(type) * componentSize;
 };
 
 // Convert differently depending on if the shader is a vertex or compute shader
@@ -318,7 +318,7 @@ export class GLTFAccessor
     {
         const elementSize = gltfElementSize(this.componentType, this.structureType);
 
-return Math.max(elementSize, this.view.byteStride);
+        return Math.max(elementSize, this.view.byteStride);
     }
 
     get byteLength()
@@ -455,7 +455,7 @@ export class GLTFPrimitive
     render(renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources)
     {
         let drawIndexed: IGPUDrawIndexed;
-        let draw: IGPUDraw;
+        let drawVertex: IGPUDrawVertex;
         if (this.indices)
         {
             drawIndexed = { indexCount: this.indices.length };
@@ -466,7 +466,7 @@ export class GLTFPrimitive
 
             const vertexCount = vertexAttribute.data.byteLength / gpuVertexFormatMap[vertexAttribute.format].byteSize;
 
-            draw = { vertexCount };
+            drawVertex = { vertexCount };
         }
 
         const renderObject: IGPURenderObject = {
@@ -475,7 +475,7 @@ export class GLTFPrimitive
             //if skin do something with bone bind group
             vertices: this.vertices,
             indices: this.indices,
-            draw,
+            drawVertex,
             drawIndexed,
         };
         renderObjects.push(renderObject);
@@ -580,7 +580,7 @@ export class BaseTransformation
         // Translate the transformationMatrix
         mat4.translate(dst, this.position, dst);
 
-return dst;
+        return dst;
     }
 }
 
@@ -640,7 +640,7 @@ export class GLTFNode
         {
             mat4.multiply(parentWorldMatrix, this.localMatrix, this.worldMatrix);
         }
- else
+        else
         {
             mat4.copy(this.localMatrix, this.worldMatrix);
         }
@@ -679,7 +679,7 @@ export class GLTFNode
                         ...this.skin.skinBindGroup,
                     });
                 }
- else
+                else
                 {
                     drawable.render(renderObjects, {
                         ...bindingResources,
@@ -1019,7 +1019,7 @@ export const convertGLBToJSONAndBinary = async (
         scenes.push(scene);
     }
 
-return {
+    return {
         meshes,
         nodes,
         scenes,

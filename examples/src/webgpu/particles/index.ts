@@ -293,7 +293,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: renderPipeline,
         bindingResources: { ...uniformBindGroup },
         vertices: { ...particlesVertices, ...quadVertices },
-        draw: { vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
+        drawVertex: { vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
       }],
     }
   );

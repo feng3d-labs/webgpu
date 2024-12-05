@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IGPUBindingResources, IGPUBufferBinding, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureBase, IGPUTextureView, WebGPU } from "@feng3d/webgpu";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureView, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -494,7 +494,7 @@ return texture;
         function updateUniforms(
             uniforms: Uniforms,
             canvas: HTMLCanvasElement,
-            texture: IGPUTextureBase
+            texture: IGPUTexture
         )
         {
             const projectionMatrix = mat4.ortho(
@@ -531,13 +531,13 @@ return texture;
         const ro: IGPURenderObject = {
             pipeline: dstPipeline,
             bindingResources: dstBindGroup,
-            draw: { vertexCount: 6 },
+            drawVertex: { vertexCount: 6 },
         };
 
         const ro1: IGPURenderObject = {
             pipeline: srcPipeline,
             bindingResources: srcBindGroup,
-            draw: { vertexCount: 6 },
+            drawVertex: { vertexCount: 6 },
         };
 
         pass.renderObjects = [

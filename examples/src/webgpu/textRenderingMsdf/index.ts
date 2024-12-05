@@ -262,7 +262,7 @@ setBlendConstant().`,
             pipeline,
             bindingResources: uniformBindGroup,
             vertices: verticesBuffer,
-            draw: { vertexCount: cubeVertexCount, instanceCount: 1 },
+            drawVertex: { vertexCount: cubeVertexCount, instanceCount: 1 },
         });
 
         textRenderer.render(renderObjects, ...text);

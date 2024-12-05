@@ -105,7 +105,7 @@ return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
                     renderObjects: [{
                         pipeline,
                         bindingResources: bindGroup,
-                        draw: { vertexCount: 3 },
+                        drawVertex: { vertexCount: 3 },
                     }]
                 }]
             }]

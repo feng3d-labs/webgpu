@@ -366,7 +366,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         bindingResources: {
           ...gBufferTexturesBindGroup,
         },
-        draw: { vertexCount: 6 },
+        drawVertex: { vertexCount: 6 },
       },
     ]
   });
@@ -380,7 +380,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           ...gBufferTexturesBindGroup,
           ...lightsBufferBindGroup,
         },
-        draw: { vertexCount: 6 },
+        drawVertex: { vertexCount: 6 },
       },
     ]
   });

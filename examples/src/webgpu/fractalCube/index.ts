@@ -94,7 +94,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
         },
-        draw: { vertexCount: cubeVertexCount },
+        drawVertex: { vertexCount: cubeVertexCount },
     };
 
     const copyTextureToTexture: IGPUCopyTextureToTexture = {

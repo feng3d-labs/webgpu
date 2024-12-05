@@ -115,7 +115,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     bindingResources: {
       uniforms,
     },
-    draw: { vertexCount: cubeVertexCount },
+    drawVertex: { vertexCount: cubeVertexCount },
   };
 
   const submit: IGPUSubmit = {

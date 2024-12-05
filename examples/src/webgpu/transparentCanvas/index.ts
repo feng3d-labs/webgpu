@@ -109,7 +109,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         pipeline,
                         bindingResources: uniformBindGroup,
                         vertices: verticesBuffer,
-                        draw: { vertexCount: cubeVertexCount },
+                        drawVertex: { vertexCount: cubeVertexCount },
                     }]
                 }]
             }]
