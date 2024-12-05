@@ -12,7 +12,7 @@ export interface IGPUTextureView
     /**
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
      */
-    label?: string;
+    readonly label?: string;
 
     /**
      * 产生视图的纹理。
