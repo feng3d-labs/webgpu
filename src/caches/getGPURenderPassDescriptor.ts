@@ -3,7 +3,7 @@ import { watcher } from "@feng3d/watcher";
 import { IGPURenderPassColorAttachment } from "../data/IGPURenderPassColorAttachment";
 import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
-import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
+import { IGPUTextureLike, IGPUTexture, IGPUCanvasTexture } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IGPUTexture_resize } from "../eventnames";
 import { NGPURenderPassColorAttachment } from "../internal/internal";
@@ -74,7 +74,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
         updateView();
 
         //
-        if ((v.view.texture as IGPUTextureFromContext).context)
+        if ((v.view.texture as IGPUCanvasTexture).context)
         {
             _updates.push(updateView);
         }
@@ -89,7 +89,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
             };
             updateResolveTarget();
             //
-            if ((v.resolveTarget?.texture as IGPUTextureFromContext)?.context)
+            if ((v.resolveTarget?.texture as IGPUCanvasTexture)?.context)
             {
                 _updates.push(updateResolveTarget);
             }
@@ -131,7 +131,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
  */
 function getAttachmentTextures(colorAttachments: readonly IGPURenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
 {
-    const textures: IGPUTexture[] = [];
+    const textures: IGPUTextureLike[] = [];
 
     for (let i = 0; i < colorAttachments.length; i++)
     {
@@ -172,18 +172,18 @@ function setIGPURenderPassAttachmentSize(colorAttachments: NGPURenderPassColorAt
  * @param texture 纹理描述。
  * @param attachmentSize 附件尺寸。
  */
-function setIGPUTextureSize(texture: IGPUTexture, attachmentSize: { width: number, height: number })
+function setIGPUTextureSize(texture: IGPUTextureLike, attachmentSize: { width: number, height: number })
 {
-    if ((texture as IGPUTextureFromContext).context)
+    if ((texture as IGPUCanvasTexture).context)
     {
-        texture = texture as IGPUTextureFromContext;
+        texture = texture as IGPUCanvasTexture;
         const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
         if (element.width !== attachmentSize.width) element.width = attachmentSize.width;
         if (element.height !== attachmentSize.height) element.height = attachmentSize.height;
     }
     else
     {
-        texture = texture as IGPUTextureBase;
+        texture = texture as IGPUTexture;
         if (texture.size[2])
         {
             texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
@@ -204,7 +204,7 @@ function setIGPUTextureSize(texture: IGPUTexture, attachmentSize: { width: numbe
  */
 function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
 {
-    const textures: IGPUTexture[] = [];
+    const textures: IGPUTextureLike[] = [];
 
     for (let i = 0; i < colorAttachments.length; i++)
     {
@@ -237,7 +237,7 @@ function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassCol
  * @param multisample 多重采样数量。
  * @returns 用于解决多重采样的纹理视图。
  */
-function getMultisampleTextureView(texture: IGPUTexture, multisample: number)
+function getMultisampleTextureView(texture: IGPUTextureLike, multisample: number)
 {
     let multisampleTextureView = multisampleTextureMap.get(texture);
     if (!multisampleTextureView)
@@ -245,7 +245,7 @@ function getMultisampleTextureView(texture: IGPUTexture, multisample: number)
         // 新增用于解决多重采样的纹理
         const size = getIGPUTextureSize(texture);
         const format = getGPUTextureFormat(texture);
-        const multisampleTexture: IGPUTexture = {
+        const multisampleTexture: IGPUTextureLike = {
             label: "自动生成多重采样的纹理",
             size,
             sampleCount: multisample,
@@ -259,7 +259,7 @@ function getMultisampleTextureView(texture: IGPUTexture, multisample: number)
     return multisampleTextureView;
 }
 
-const multisampleTextureMap = new WeakMap<IGPUTexture, IGPUTextureView>();
+const multisampleTextureMap = new WeakMap<IGPUTextureLike, IGPUTextureView>();
 
 /**
  * 获取深度模板附件完整描述。

@@ -4,7 +4,7 @@ import { getIGPUTextureSize } from "./caches/getIGPUTextureSize";
 import { IGPUBuffer } from "./data/IGPUBuffer";
 import { IGPUReadPixels } from "./data/IGPUReadPixels";
 import { IGPUSubmit } from "./data/IGPUSubmit";
-import { IGPUTexture } from "./data/IGPUTexture";
+import { IGPUTextureLike } from "./data/IGPUTexture";
 import { RunWebGPU } from "./runs/RunWebGPU";
 import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
@@ -73,7 +73,7 @@ export class WebGPU
      *
      * @param texture 需要被销毁的纹理。
      */
-    destoryTexture(texture: IGPUTexture)
+    destoryTexture(texture: IGPUTextureLike)
     {
         getGPUTexture(this.device, texture, false)?.destroy();
     }
@@ -85,7 +85,7 @@ export class WebGPU
      * @param invertY 是否Y轴翻转
      * @param premultiplyAlpha 是否预乘Alpha。
      */
-    textureInvertYPremultiplyAlpha(texture: IGPUTexture, options: { invertY?: boolean, premultiplyAlpha?: boolean })
+    textureInvertYPremultiplyAlpha(texture: IGPUTextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
         const gpuTexture = getGPUTexture(this.device, texture);
 
@@ -99,7 +99,7 @@ export class WebGPU
      * @param sourceTexture 源纹理。
      * @param targetTexture 目标纹理。
      */
-    copyDepthTexture(sourceTexture: IGPUTexture, targetTexture: IGPUTexture)
+    copyDepthTexture(sourceTexture: IGPUTextureLike, targetTexture: IGPUTextureLike)
     {
         const gpuSourceTexture = getGPUTexture(this.device, sourceTexture);
         const gpuTargetTexture = getGPUTexture(this.device, targetTexture);
@@ -148,7 +148,7 @@ export class WebGPU
         return result;
     }
 
-    getGPUTextureSize(input: IGPUTexture)
+    getGPUTextureSize(input: IGPUTextureLike)
     {
         return getIGPUTextureSize(input);
     }

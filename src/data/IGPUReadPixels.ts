@@ -1,4 +1,4 @@
-import { IGPUTexture } from "./IGPUTexture";
+import { IGPUTextureLike } from "./IGPUTexture";
 
 /**
  * 读取GPU纹理像素
@@ -8,7 +8,7 @@ export interface IGPUReadPixels
     /**
      * GPU纹理
      */
-    texture: IGPUTexture,
+    texture: IGPUTextureLike,
 
     /**
      * 读取位置。

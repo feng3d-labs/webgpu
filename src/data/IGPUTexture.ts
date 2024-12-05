@@ -1,16 +1,16 @@
 import { IGPUCanvasConfiguration } from "./IGPUCanvasConfiguration";
 
 /**
- * 纹理
+ * 类似纹理，包含画布纹理以及正常纹理。
  */
-export type IGPUTexture = IGPUTextureFromContext | IGPUTextureBase;
+export type IGPUTextureLike = IGPUCanvasTexture | IGPUTexture;
 
 export type IGPUTextureSize = [width: number, height?: number, depthOrArrayLayers?: number];
 
 /**
  * @see GPUTextureDescriptor
  */
-export interface IGPUTextureBase
+export interface IGPUTexture
 {
     /**
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
@@ -155,9 +155,9 @@ export interface IGPUWriteTextureDestination
 }
 
 /**
- * 从画布的WebGPU上下文获取纹理
+ * 画布纹理，从画布的WebGPU上下文获取纹理
  */
-export interface IGPUTextureFromContext
+export interface IGPUCanvasTexture
 {
     context: IGPUCanvasContext;
 }

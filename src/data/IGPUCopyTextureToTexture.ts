@@ -1,4 +1,4 @@
-import { IGPUTexture } from "./IGPUTexture";
+import { IGPUTextureLike } from "./IGPUTexture";
 
 /**
  * GPU纹理间拷贝所包含信息。
@@ -39,7 +39,7 @@ export interface IGPUImageCopyTexture
     /**
      * Texture to copy to/from.
      */
-    texture: IGPUTexture;
+    texture: IGPUTextureLike;
     /**
      * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
      */

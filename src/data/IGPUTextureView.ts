@@ -1,4 +1,4 @@
-import { IGPUTexture } from "./IGPUTexture";
+import { IGPUTextureLike } from "./IGPUTexture";
 
 /**
  * 视图纹理。
@@ -17,7 +17,7 @@ export interface IGPUTextureView
     /**
      * 产生视图的纹理。
      */
-    readonly texture: IGPUTexture;
+    readonly texture: IGPUTextureLike;
 
     /**
      * The format of the texture view. Must be either the {@link GPUTextureDescriptor#format} of the

@@ -4,7 +4,7 @@ import { getRealGPUBindGroup } from "../const";
 import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { IGPUExternalTexture } from "../data/IGPUExternalTexture";
 import { IGPUSampler } from "../data/IGPUSampler";
-import { IGPUTextureFromContext } from "../data/IGPUTexture";
+import { IGPUCanvasTexture } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
 import { IGPUBindGroupDescriptor } from "../internal/IGPUBindGroupDescriptor";
@@ -62,7 +62,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
                 anyEmitter.once(entry.resource, GPUTextureView_destroy, onResourceChanged);
             };
 
-            if (((v.resource as IGPUTextureView).texture as IGPUTextureFromContext).context)
+            if (((v.resource as IGPUTextureView).texture as IGPUCanvasTexture).context)
             {
                 awaysUpdateFuncs.push(updateResource);
             }

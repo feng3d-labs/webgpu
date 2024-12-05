@@ -1,6 +1,6 @@
 import { anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
-import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
+import { IGPUCanvasTexture, IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
@@ -12,15 +12,15 @@ import { getGPUCanvasContext } from "./getGPUCanvasContext";
  * @param iGPUTextureBase 纹理描述。
  * @returns GPU纹理。
  */
-export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreate = true)
+export function getGPUTexture(device: GPUDevice, texture: IGPUTextureLike, autoCreate = true)
 {
-    const textureMap: Map<IGPUTexture, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<IGPUTexture, GPUTexture>();
+    const textureMap: Map<IGPUTextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<IGPUTextureLike, GPUTexture>();
     let gpuTexture = textureMap.get(texture);
     if (gpuTexture) return gpuTexture;
 
-    if ((texture as IGPUTextureFromContext).context)
+    if ((texture as IGPUCanvasTexture).context)
     {
-        texture = texture as IGPUTextureFromContext;
+        texture = texture as IGPUCanvasTexture;
         const context = getGPUCanvasContext(device, texture.context);
 
         gpuTexture = context.getCurrentTexture();
@@ -30,16 +30,16 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
 
     if (!autoCreate) return null;
 
-    const iGPUTextureBase = texture as IGPUTextureBase;
+    const iGPUTexture = texture as IGPUTexture;
 
-    const { usage } = iGPUTextureBase;
-    let { label, mipLevelCount } = iGPUTextureBase;
+    const { usage } = iGPUTexture;
+    let { label, mipLevelCount } = iGPUTexture;
 
     // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
-    if (iGPUTextureBase.generateMipmap && mipLevelCount === undefined)
+    if (iGPUTexture.generateMipmap && mipLevelCount === undefined)
     {
         //
-        const maxSize = Math.max(iGPUTextureBase.size[0], iGPUTextureBase.size[1]);
+        const maxSize = Math.max(iGPUTexture.size[0], iGPUTexture.size[1]);
         mipLevelCount = 1 + Math.log2(maxSize) | 0;
     }
 
@@ -49,7 +49,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
     }
 
     gpuTexture = device.createTexture({
-        ...iGPUTextureBase,
+        ...iGPUTexture,
         label,
         mipLevelCount,
         usage,
@@ -58,9 +58,9 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
     // 初始化纹理数据
     const updateSource = () =>
     {
-        if (iGPUTextureBase.source)
+        if (iGPUTexture.source)
         {
-            iGPUTextureBase.source.forEach((v) =>
+            iGPUTexture.source.forEach((v) =>
             {
                 device.queue.copyExternalImageToTexture(
                     v.source,
@@ -71,19 +71,19 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
                     v.copySize
                 );
             });
-            iGPUTextureBase.source = null;
+            iGPUTexture.source = null;
         }
     };
     updateSource();
-    watcher.watch(iGPUTextureBase, "source", updateSource);
+    watcher.watch(iGPUTexture, "source", updateSource);
 
     // 监听写纹理操作
     const writeTexture = () =>
     {
         // 处理数据写入GPU缓冲
-        if (iGPUTextureBase.writeTextures)
+        if (iGPUTexture.writeTextures)
         {
-            iGPUTextureBase.writeTextures.forEach((v) =>
+            iGPUTexture.writeTextures.forEach((v) =>
             {
                 const { destination, data, dataLayout, size } = v;
 
@@ -97,11 +97,11 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
                     size,
                 );
             });
-            iGPUTextureBase.writeTextures = null;
+            iGPUTexture.writeTextures = null;
         }
     };
     writeTexture();
-    watcher.watch(iGPUTextureBase, "writeTextures", writeTexture);
+    watcher.watch(iGPUTexture, "writeTextures", writeTexture);
 
     // 监听纹理尺寸发生变化
     const resize = (newValue: GPUExtent3DStrict, oldValue: GPUExtent3DStrict) =>
@@ -121,10 +121,10 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
         //
         anyEmitter.emit(texture, IGPUTexture_resize);
     };
-    watcher.watch(iGPUTextureBase, "size", resize);
+    watcher.watch(iGPUTexture, "size", resize);
 
     // 自动生成 mipmap。
-    if (iGPUTextureBase.generateMipmap)
+    if (iGPUTexture.generateMipmap)
     {
         generateMipmap(device, gpuTexture);
     }
@@ -136,17 +136,17 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
         {
             oldDestroy.apply(gpuTexture);
             //
-            textureMap.delete(iGPUTextureBase);
+            textureMap.delete(iGPUTexture);
             // 派发销毁事件
             anyEmitter.emit(gpuTexture, GPUTexture_destroy);
             //
-            watcher.unwatch(iGPUTextureBase, "source", updateSource);
-            watcher.unwatch(iGPUTextureBase, "writeTextures", writeTexture);
-            watcher.unwatch(iGPUTextureBase, "size", resize);
+            watcher.unwatch(iGPUTexture, "source", updateSource);
+            watcher.unwatch(iGPUTexture, "writeTextures", writeTexture);
+            watcher.unwatch(iGPUTexture, "size", resize);
         };
     })(gpuTexture.destroy);
 
-    textureMap.set(iGPUTextureBase, gpuTexture);
+    textureMap.set(iGPUTexture, gpuTexture);
 
     return gpuTexture;
 }
