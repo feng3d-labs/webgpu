@@ -39,10 +39,10 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
     updateAttachmentSize(descriptor);
 
     // 获取颜色附件完整描述列表。
-    const colorAttachments = getIGPURenderPassColorAttachments(descriptor.colorAttachments, descriptor.multisample);
+    const colorAttachments = getIGPURenderPassColorAttachments(descriptor.colorAttachments, descriptor.sampleCount);
 
     // 获取深度模板附件
-    const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(descriptor.depthStencilAttachment, descriptor.attachmentSize, descriptor.multisample);
+    const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(descriptor.depthStencilAttachment, descriptor.attachmentSize, descriptor.sampleCount);
 
     // 附件尺寸变化时，渲染通道描述失效。
     const watchProperty = { attachmentSize: { width: 0, height: 0 } }; // 被监听的属性
@@ -234,10 +234,10 @@ function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassCol
  * 获取用于解决多重采样的纹理视图。
  *
  * @param texture 接收多重采样结果的纹理。
- * @param multisample 多重采样数量。
+ * @param sampleCount 多重采样数量。
  * @returns 用于解决多重采样的纹理视图。
  */
-function getMultisampleTextureView(texture: IGPUTextureLike, multisample: number)
+function getMultisampleTextureView(texture: IGPUTextureLike, sampleCount: number)
 {
     let multisampleTextureView = multisampleTextureMap.get(texture);
     if (!multisampleTextureView)
@@ -248,7 +248,7 @@ function getMultisampleTextureView(texture: IGPUTextureLike, multisample: number
         const multisampleTexture: IGPUTextureLike = {
             label: "自动生成多重采样的纹理",
             size,
-            sampleCount: multisample,
+            sampleCount: sampleCount,
             format,
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
         };
@@ -306,10 +306,10 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURen
  * 获取颜色附件完整描述列表。
  *
  * @param colorAttachments 颜色附件描述列表。
- * @param multisample 多重采样次数。
+ * @param sampleCount 多重采样次数。
  * @returns 颜色附件完整描述列表。
  */
-function getIGPURenderPassColorAttachments(colorAttachments: readonly IGPURenderPassColorAttachment[], multisample: number)
+function getIGPURenderPassColorAttachments(colorAttachments: readonly IGPURenderPassColorAttachment[], sampleCount: number)
 {
     const gpuColorAttachments: NGPURenderPassColorAttachment[] = colorAttachments.map((v) =>
     {
@@ -318,10 +318,10 @@ function getIGPURenderPassColorAttachments(colorAttachments: readonly IGPURender
         let view = v.view;
         let resolveTarget: IGPUTextureView;
 
-        if (multisample)
+        if (sampleCount)
         {
             resolveTarget = view;
-            view = getMultisampleTextureView(view.texture, multisample);
+            view = getMultisampleTextureView(view.texture, sampleCount);
         }
 
         return {

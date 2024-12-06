@@ -5,7 +5,7 @@
  *
  * {@link GPURenderCommandsMixin.setVertexBuffer}
  */
-export interface IGPUVertexBuffer
+export interface NGPUVertexBuffer
 {
     /**
      * Buffer containing vertex data to use for subsequent drawing commands.

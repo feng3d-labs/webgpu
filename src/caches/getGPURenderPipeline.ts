@@ -1,9 +1,10 @@
 import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
+import { NGPURenderPipeline } from "../internal/NGPURenderPipeline";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 
-export function getGPURenderPipeline(device: GPUDevice, descriptor: IGPURenderPipeline)
+export function getGPURenderPipeline(device: GPUDevice, descriptor: NGPURenderPipeline)
 {
     let pipeline = pipelineMap.get(descriptor);
     if (pipeline) return pipeline;

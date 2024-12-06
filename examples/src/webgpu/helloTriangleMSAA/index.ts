@@ -15,7 +15,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             view: { texture: { context: { canvasId: canvas.id } } },
             clearValue: [0.0, 0.0, 0.0, 1.0],
         }],
-        multisample: 4, // 设置多重采样数量
+        sampleCount: 4, // 设置多重采样数量
     };
 
     const renderObject: IGPURenderObject = {

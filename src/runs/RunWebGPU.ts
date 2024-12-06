@@ -11,8 +11,8 @@ import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUBuffer } from "../caches/getIGPUBuffer";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
-import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
+import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUBlendConstant } from "../data/IGPUBlendConstant";
@@ -384,7 +384,7 @@ export class RunWebGPU
      */
     protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
     {
-        const { pipeline } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
+        const { pipeline } = getNGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
 
         const gpuRenderPipeline = getGPURenderPipeline(device, pipeline);
         passEncoder.setPipeline(gpuRenderPipeline);
@@ -411,7 +411,7 @@ export class RunWebGPU
     {
         if (!vertices) return;
 
-        const { vertexBuffers } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
+        const { vertexBuffers } = getNGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
 
         vertexBuffers?.forEach((vertexBuffer, index) =>
         {

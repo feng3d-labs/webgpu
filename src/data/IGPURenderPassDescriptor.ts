@@ -29,7 +29,7 @@ export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 
     /**
      * 是否开启多重采样。WebGPU貌似只支持4重采样。如果在颜色附件中没有给出支持多重采样的纹理时则引擎将会自动为其添加。
      */
-    readonly multisample?: 4;
+    readonly sampleCount?: 4;
 
     /**
      * 附件尺寸。
