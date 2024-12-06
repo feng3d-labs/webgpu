@@ -4,9 +4,12 @@ import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { IGPUDepthStencilState } from "../data/IGPUDepthStencilState";
 import { IGPUFragmentState } from "../data/IGPUFragmentState";
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
+import { IGPUPrimitiveState } from "../data/IGPUPrimitiveState";
+import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
 import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexState } from "../data/IGPUVertexState";
+import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { NGPUFragmentState } from "../internal/NGPUFragmentState";
 import { NGPURenderPipeline } from "../internal/NGPURenderPipeline";
@@ -24,11 +27,17 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+export function getNGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, indices: IGPUIndicesDataTypes)
 {
-    let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices]);
+    const indexFormat = indices ? getIGPUIndexBuffer(indices).indexFormat : undefined;
+
+    let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
     if (!result)
     {
+        const { label, primitive } = renderPipeline;
+
+        const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
+
         // 获取完整的顶点阶段描述与顶点缓冲区列表。
         const { gpuVertexState, vertexBuffers } = getNGPUVertexState(renderPipeline.vertex, vertices);
 
@@ -43,7 +52,8 @@ export function getNGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
 
         //
         const pipeline: NGPURenderPipeline = {
-            ...renderPipeline,
+            label,
+            primitive: gpuPrimitive,
             vertex: gpuVertexState,
             fragment: gpuFragmentState,
             depthStencil: gpuDepthStencilState,
@@ -51,14 +61,14 @@ export function getNGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
         };
 
         result = { pipeline, vertexBuffers };
-        renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices], result);
+        renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices, indexFormat], result);
     }
 
     return result;
 }
 
 const renderPipelineMap = new ChainMap<
-    [IGPURenderPipeline, string, IGPUVertexAttributes],
+    [IGPURenderPipeline, string, IGPUVertexAttributes, GPUIndexFormat],
     {
         /**
          * GPU渲染管线描述。
@@ -70,6 +80,21 @@ const renderPipelineMap = new ChainMap<
         vertexBuffers: NGPUVertexBuffer[];
     }
 >();
+
+function getGPUPrimitiveState(primitive?: IGPUPrimitiveState, indexFormat?: GPUIndexFormat)
+{
+    let stripIndexFormat: GPUIndexFormat;
+    if (primitive?.topology === "triangle-strip" || primitive?.topology === "line-strip")
+    {
+        stripIndexFormat = indexFormat;
+    }
+
+    const gpuPrimitive: GPUPrimitiveState = {
+        ...primitive,
+        stripIndexFormat,
+    };
+    return gpuPrimitive;
+}
 
 function getGPUMultisampleState(multisampleState?: IGPUMultisampleState, sampleCount?: 4)
 {

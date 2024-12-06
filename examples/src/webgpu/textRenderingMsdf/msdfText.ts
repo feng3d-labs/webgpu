@@ -190,7 +190,6 @@ export class MsdfTextRenderer
       },
       primitive: {
         topology: "triangle-strip",
-        stripIndexFormat: "uint32",
       },
       depthStencil: {
         depthWriteEnabled: false,

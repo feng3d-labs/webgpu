@@ -26,7 +26,7 @@ import { IGPUDrawIndexed } from "../data/IGPUDrawIndexed";
 import { IGPUDrawVertex } from "../data/IGPUDrawVertex";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
-import { IGPURenderObject } from "../data/IGPURenderObject";
+import { IGPUIndicesDataTypes, IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
@@ -329,11 +329,11 @@ export class RunWebGPU
     {
         const { pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
 
-        this.runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
+        this.runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices, indices);
 
         this.runBindingResources(device, passEncoder, pipeline, bindingResources);
 
-        this.runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
+        this.runVertices(device, passEncoder, pipeline, renderPassFormat, vertices, indices);
 
         this.runIndices(device, passEncoder, indices);
 
@@ -382,9 +382,9 @@ export class RunWebGPU
      * @param passEncoder 渲染通道编码器。
      * @param pipeline 渲染管线。
      */
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, indices: IGPUIndicesDataTypes)
     {
-        const { pipeline } = getNGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
+        const { pipeline } = getNGPURenderPipeline(renderPipeline, renderPassFormat, vertices, indices);
 
         const gpuRenderPipeline = getGPURenderPipeline(device, pipeline);
         passEncoder.setPipeline(gpuRenderPipeline);
@@ -407,11 +407,11 @@ export class RunWebGPU
         passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
     }
 
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, indices: IGPUIndicesDataTypes)
     {
         if (!vertices) return;
 
-        const { vertexBuffers } = getNGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
+        const { vertexBuffers } = getNGPURenderPipeline(renderPipeline, renderPassFormat, vertices, indices);
 
         vertexBuffers?.forEach((vertexBuffer, index) =>
         {

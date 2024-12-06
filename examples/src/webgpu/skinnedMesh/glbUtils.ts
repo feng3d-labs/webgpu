@@ -433,7 +433,6 @@ export class GLTFPrimitive
         {
             primitive = {
                 topology: "triangle-strip",
-                stripIndexFormat: "uint16",
             };
         }
 

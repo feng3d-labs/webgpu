@@ -7,8 +7,10 @@ import { NGPUVertexState } from "./NGPUVertexState";
  */
 export interface NGPURenderPipeline extends IGPURenderPipeline
 {
-    vertex: NGPUVertexState
-    fragment: NGPUFragmentState,
-    depthStencil: GPUDepthStencilState,
-    multisample: GPUMultisampleState,
+    readonly label: string;
+    readonly primitive: GPUPrimitiveState;
+    readonly vertex: NGPUVertexState
+    readonly fragment: NGPUFragmentState,
+    readonly depthStencil: GPUDepthStencilState,
+    readonly multisample: GPUMultisampleState,
 }

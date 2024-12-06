@@ -14,7 +14,7 @@ export interface IGPUVertexAttribute
     /**
      * 顶点数据。
      */
-    data: IGPUVertexAttributeDataType;
+    data: IGPUVertexDataTypes;
 
     /**
      * 顶点数据格式。
@@ -45,7 +45,7 @@ export interface IGPUVertexAttribute
     readonly stepMode?: GPUVertexStepMode;
 }
 
-export type IGPUVertexAttributeDataType = | Float32Array
+export type IGPUVertexDataTypes = | Float32Array
     | Uint32Array
     | Int32Array
     | Uint16Array

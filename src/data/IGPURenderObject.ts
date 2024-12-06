@@ -25,9 +25,9 @@ export interface IGPURenderObject
     readonly vertices?: IGPUVertexAttributes;
 
     /**
-     * 索引数据。
+     * 顶点索引数据。
      */
-    readonly indices?: Uint16Array | Uint32Array,
+    readonly indices?: IGPUIndicesDataTypes;
 
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
@@ -45,5 +45,9 @@ export interface IGPURenderObject
     readonly drawIndexed?: IGPUDrawIndexed;
 }
 
+/**
+ * 顶点索引数据类型。
+ */
+export type IGPUIndicesDataTypes = Uint16Array | Uint32Array;
 
 
