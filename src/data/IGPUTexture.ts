@@ -34,7 +34,7 @@ export interface IGPUTexture
     /**
      * 是否生成 mipmap。
      */
-    generateMipmap?: boolean;
+    readonly generateMipmap?: boolean;
 
     /**
      * 向纹理中写入数据。
