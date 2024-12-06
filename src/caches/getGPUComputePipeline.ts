@@ -1,4 +1,4 @@
-import { IGPUComputePipeline } from "../data/IGPUComputeObject";
+import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";

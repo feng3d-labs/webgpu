@@ -1,8 +1,11 @@
 import { watcher } from "@feng3d/watcher";
 
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
-import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
+import { IGPUDepthStencilState } from "../data/IGPUDepthStencilState";
+import { IGPUFragmentState } from "../data/IGPUFragmentState";
+import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
+import { IGPUVertexState } from "../data/IGPUVertexState";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { IGPUVertexBuffer } from "../internal/IGPUVertexBuffer";
 import { NGPUVertexState } from "../internal/NGPUVertexState";

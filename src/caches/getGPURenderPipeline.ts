@@ -1,4 +1,4 @@
-import { IGPURenderPipeline } from "../data/IGPURenderObject";
+import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";

@@ -1,0 +1,43 @@
+import { IGPUDepthStencilState } from "./IGPUDepthStencilState";
+import { IGPUFragmentState } from "./IGPUFragmentState";
+import { IGPUMultisampleState } from "./IGPUMultisampleState";
+import { IGPUPrimitiveState } from "./IGPUPrimitiveState";
+import { IGPUVertexState } from "./IGPUVertexState";
+
+/**
+ * GPU渲染管线描述。
+ *
+ * {@link GPURenderPipelineDescriptor}
+ */
+export interface IGPURenderPipeline
+{
+    /**
+     * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
+     */
+    readonly label?: string;
+
+    /**
+     * Describes the primitive-related properties of the pipeline.
+     */
+    readonly primitive?: IGPUPrimitiveState;
+
+    /**
+     * 描述顶点着色器源码入口点以及顶点属性缓冲区布局。
+     */
+    readonly vertex: IGPUVertexState;
+
+    /**
+     * 片段着色器阶段描述。
+     */
+    readonly fragment?: IGPUFragmentState;
+
+    /**
+     * 深度模板阶段描述。
+     */
+    readonly depthStencil?: IGPUDepthStencilState;
+
+    /**
+     * 多重采样阶段描述。
+     */
+    readonly multisample?: IGPUMultisampleState;
+}

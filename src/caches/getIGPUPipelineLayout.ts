@@ -1,5 +1,5 @@
-import { IGPUComputePipeline } from "../data/IGPUComputeObject";
-import { IGPURenderPipeline } from "../data/IGPURenderObject";
+import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
+import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUBindGroupLayoutDescriptor, IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { getIGPUBindGroupLayoutEntryMap, IGPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 

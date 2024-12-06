@@ -1,4 +1,4 @@
-import { IGPUVertexState } from "../data/IGPURenderObject";
+import { IGPUVertexState } from "../data/IGPUVertexState";
 
 export interface NGPUVertexState extends IGPUVertexState
 {
