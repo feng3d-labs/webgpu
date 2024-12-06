@@ -8,11 +8,9 @@ import { getGPURenderPassDescriptor } from "../caches/getGPURenderPassDescriptor
 import { getGPURenderPassFormat } from "../caches/getGPURenderPassFormat";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
-import { getIGPUBuffer } from "../caches/getIGPUBuffer";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { getNGPURenderObject } from "../caches/getNGPURenderObject";
-import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUBlendConstant } from "../data/IGPUBlendConstant";
@@ -22,21 +20,17 @@ import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
-import { IGPUDrawIndexed } from "../data/IGPUDrawIndexed";
-import { IGPUDrawVertex } from "../data/IGPUDrawVertex";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
-import { IGPUIndicesDataTypes, IGPURenderObject } from "../data/IGPURenderObject";
+import { IGPURenderObject } from "../data/IGPURenderObject";
 import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUStencilReference } from "../data/IGPUStencilReference";
 import { IGPUSubmit } from "../data/IGPUSubmit";
-import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUViewport } from "../data/IGPUViewport";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
-import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
@@ -327,9 +321,7 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
     {
-        const { pipeline: gpuRenderPipeline, setBindGroups } = getNGPURenderObject(device, renderPassFormat, renderObject);
-
-        const { pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
+        const { pipeline: gpuRenderPipeline, setBindGroups, vertexBuffers, setIndexBuffer, drawVertex, drawIndexed } = getNGPURenderObject(device, renderPassFormat, renderObject);
 
         //
         passEncoder.setPipeline(gpuRenderPipeline);
@@ -340,13 +332,20 @@ export class RunWebGPU
             passEncoder.setBindGroup(i, v.bindGroup[getRealGPUBindGroup](), v.dynamicOffsets);
         });
 
-        this.runVertices(device, passEncoder, pipeline, renderPassFormat, vertices, indices);
+        //
+        vertexBuffers?.forEach((vertexBuffer, index) =>
+        {
+            passEncoder.setVertexBuffer(index, vertexBuffer.gBuffer, vertexBuffer.offset, vertexBuffer.size);
+        });
 
-        this.runIndices(device, passEncoder, indices);
+        //
+        setIndexBuffer && passEncoder.setIndexBuffer(setIndexBuffer.gBuffer, setIndexBuffer.indexFormat, setIndexBuffer.offset, setIndexBuffer.size);
 
-        this.runDrawVertex(passEncoder, drawVertex);
+        //
+        drawVertex && passEncoder.draw(drawVertex.vertexCount, drawVertex.instanceCount, drawVertex.firstVertex, drawVertex.firstInstance);
 
-        this.runDrawIndexed(passEncoder, drawIndexed);
+        //
+        drawIndexed && passEncoder.drawIndexed(drawIndexed.indexCount, drawIndexed.instanceCount, drawIndexed.firstIndex, drawIndexed.baseVertex, drawIndexed.firstInstance);
     }
 
     protected runBlendConstant(passEncoder: GPURenderPassEncoder, element: IGPUBlendConstant)
@@ -398,49 +397,5 @@ export class RunWebGPU
         const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup)[getRealGPUBindGroup]();
         passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
     }
-
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, indices: IGPUIndicesDataTypes)
-    {
-        if (!vertices) return;
-
-        const { vertexBuffers } = getNGPURenderPipeline(renderPipeline, renderPassFormat, vertices, indices);
-
-        vertexBuffers?.forEach((vertexBuffer, index) =>
-        {
-            const buffer = getIGPUBuffer(vertexBuffer.data);
-            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
-            const gBuffer = getGPUBuffer(device, buffer);
-            passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
-        });
-    }
-
-    protected runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array)
-    {
-        if (!indices) return;
-
-        const indexBuffer = getIGPUIndexBuffer(indices);
-
-        const { buffer, indexFormat, offset, size } = indexBuffer;
-        const gBuffer = getGPUBuffer(device, buffer);
-
-        passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
-    }
-
-    protected runDrawVertex(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDrawVertex)
-    {
-        if (!draw) return;
-
-        const { vertexCount, instanceCount, firstVertex, firstInstance } = draw;
-        passEncoder.draw(vertexCount, instanceCount, firstVertex, firstInstance);
-    }
-
-    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed?: IGPUDrawIndexed)
-    {
-        if (!drawIndexed) return;
-
-        const { indexCount, instanceCount, firstIndex, baseVertex, firstInstance } = drawIndexed;
-        passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
-    }
 }
 
-let autoVertexIndex = 0;

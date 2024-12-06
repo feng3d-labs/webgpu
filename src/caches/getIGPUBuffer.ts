@@ -1,4 +1,5 @@
 import { IGPUBuffer } from "../data/IGPUBuffer";
+import { IGPUVertexDataTypes } from "../data/IGPUVertexAttributes";
 
 export function getIGPUBuffer(bufferSource: BufferSource)
 {
@@ -15,3 +16,12 @@ export function getIGPUBuffer(bufferSource: BufferSource)
 
     return gpuBuffer;
 }
+
+export function getIGPUVertexBuffer(data: IGPUVertexDataTypes)
+{
+    const buffer = getIGPUBuffer(data);
+    (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
+
+    return buffer;
+}
+let autoVertexIndex = 0;
