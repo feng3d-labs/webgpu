@@ -544,7 +544,7 @@ return texture;
             ro,
 
             // draw source texture with blending
-            { __type: "IGPUBlendConstant", color: [...constant.color, constant.alpha] as any },
+            { __type: "BlendConstant", color: [...constant.color, constant.alpha] as any },
 
             ro1,
         ];

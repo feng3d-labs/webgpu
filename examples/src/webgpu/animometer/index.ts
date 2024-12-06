@@ -120,7 +120,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const uniformTime = new Float32Array([0]);
 
         const renderBundleObject: IGPURenderBundle = {
-            __type: "IGPURenderBundle",
+            __type: "RenderBundle",
             renderObjects
         };
 

@@ -9,7 +9,7 @@ export interface IGPUStencilReference
     /**
      * 数据类型。
      */
-    readonly __type: "IGPUStencilReference";
+    readonly __type: "StencilReference";
 
     /**
      * The new stencil reference value.

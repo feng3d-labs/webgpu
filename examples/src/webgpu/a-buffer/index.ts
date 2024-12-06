@@ -333,7 +333,7 @@ return viewProjMatrix;
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
-                        __type: "IGPUScissorRect",
+                        __type: "ScissorRect",
                         x: scissorX,
                         y: scissorY,
                         width: scissorWidth,
@@ -360,7 +360,7 @@ return viewProjMatrix;
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
-                        __type: "IGPUScissorRect",
+                        __type: "ScissorRect",
                         x: scissorX,
                         y: scissorY,
                         width: scissorWidth,

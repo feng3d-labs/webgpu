@@ -154,7 +154,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     });
 
     const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.map((ro) =>
-    ({ __type: "IGPUOcclusionQuery", renderObjects: [ro] }));
+    ({ __type: "OcclusionQuery", renderObjects: [ro] }));
 
     const renderPass: IGPURenderPass = {
         descriptor: renderPassDescriptor,

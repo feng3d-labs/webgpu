@@ -9,7 +9,7 @@ export interface IGPURenderObject
     /**
      * 数据类型。
      */
-    readonly __type?: "IGPURenderObject";
+    readonly __type?: "RenderObject";
 
     /**
      * GPU渲染管线描述。

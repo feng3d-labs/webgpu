@@ -290,14 +290,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   // such as when using frustrum or occlusion culling, will not benefit from
   // using render bundles as much.
   let renderBundle: IGPURenderBundle = {
-    __type: "IGPURenderBundle",
+    __type: "RenderBundle",
     renderObjects: [],
   };
   renderBundle.renderObjects = renderScene();
   function updateRenderBundle()
   {
     const renderBundleEncoder: IGPURenderBundle = {
-      __type: "IGPURenderBundle",
+      __type: "RenderBundle",
       renderObjects: [],
     };
     renderBundleEncoder.renderObjects = renderScene();

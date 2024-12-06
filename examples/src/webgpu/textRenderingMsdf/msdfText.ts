@@ -345,7 +345,7 @@ return texture;
     };
 
     const renderBundle: IGPURenderBundle = {
-      __type: "IGPURenderBundle",
+      __type: "RenderBundle",
       renderObjects: [
         {
           pipeline: font.pipeline,

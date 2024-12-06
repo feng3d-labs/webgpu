@@ -9,7 +9,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly IGPURenderPa
     let renderOcclusionQuery: GPURenderOcclusionQuery = renderObjects["_GPURenderOcclusionQuery"];
     if (renderOcclusionQuery) return renderOcclusionQuery;
 
-    const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.filter((cv) => cv.__type === "IGPUOcclusionQuery") as any;
+    const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.filter((cv) => cv.__type === "OcclusionQuery") as any;
     if (occlusionQueryObjects.length === 0)
     {
         renderObjects["_GPURenderOcclusionQuery"] = defautRenderOcclusionQuery;

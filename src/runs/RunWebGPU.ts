@@ -126,31 +126,31 @@ export class RunWebGPU
             {
                 this.runRenderObject(device, passEncoder, renderPassFormat, element as IGPURenderObject);
             }
-            else if (element.__type === "IGPURenderObject")
+            else if (element.__type === "RenderObject")
             {
                 this.runRenderObject(device, passEncoder, renderPassFormat, element);
             }
-            else if (element.__type === "IGPUViewport")
+            else if (element.__type === "Viewport")
             {
                 this.runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element);
             }
-            else if (element.__type === "IGPUScissorRect")
+            else if (element.__type === "ScissorRect")
             {
                 this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element);
             }
-            else if (element.__type === "IGPURenderBundle")
+            else if (element.__type === "RenderBundle")
             {
                 this.runRenderBundle(device, passEncoder, renderPassFormat, element);
             }
-            else if (element.__type === "IGPUOcclusionQuery")
+            else if (element.__type === "OcclusionQuery")
             {
                 this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
             }
-            else if (element.__type === "IGPUBlendConstant")
+            else if (element.__type === "BlendConstant")
             {
                 this.runBlendConstant(passEncoder, element);
             }
-            else if (element.__type === "IGPUStencilReference")
+            else if (element.__type === "StencilReference")
             {
                 this.runStencilReference(passEncoder, element);
             }

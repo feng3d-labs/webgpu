@@ -10,7 +10,7 @@ export interface IGPUBlendConstant
     /**
      * 数据类型。
      */
-    readonly __type?: "IGPUBlendConstant";
+    readonly __type?: "BlendConstant";
 
     readonly color: [r: number, g: number, b: number, a: number];
 }

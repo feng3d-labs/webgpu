@@ -10,7 +10,7 @@ export interface IGPUViewport
     /**
      * 数据类型。
      */
-    readonly __type: "IGPUViewport";
+    readonly __type: "Viewport";
 
     /**
      * 数据是否来着WebGL。

@@ -12,7 +12,7 @@ export interface IGPURenderBundle
     /**
      * 数据类型。
      */
-    readonly __type: "IGPURenderBundle";
+    readonly __type: "RenderBundle";
 
     /**
      * GPU渲染捆绑编码器描述。

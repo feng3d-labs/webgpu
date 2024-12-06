@@ -8,7 +8,7 @@ export interface IGPUOcclusionQuery
     /**
      * 数据类型。
      */
-    readonly __type: "IGPUOcclusionQuery";
+    readonly __type: "OcclusionQuery";
 
     /**
      * GPU渲染对象列表。
