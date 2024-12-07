@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -135,7 +135,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
-                clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+                clearValue: [0.0, 0.0, 0.0, 1.0],
             }
         ],
     };

@@ -120,22 +120,22 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       {
         view: gBufferTextureViews[0],
 
-        clearValue: {
-          r: Number.MAX_VALUE,
-          g: Number.MAX_VALUE,
-          b: Number.MAX_VALUE,
-          a: 1.0,
-        },
+        clearValue: [
+          Number.MAX_VALUE,
+          Number.MAX_VALUE,
+          Number.MAX_VALUE,
+          1.0,
+        ],
       },
       {
         view: gBufferTextureViews[1],
 
-        clearValue: { r: 0.0, g: 0.0, b: 1.0, a: 1.0 },
+        clearValue: [0.0, 0.0, 1.0, 1.0],
       },
       {
         view: gBufferTextureViews[2],
 
-        clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+        clearValue: [0.0, 0.0, 0.0, 1.0],
       },
     ],
     depthStencilAttachment: {
@@ -152,7 +152,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       {
         view: { texture: { context: { canvasId: canvas.id } } },
 
-        clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+        clearValue: [0.0, 0.0, 0.0, 1.0],
       }
     ],
   };

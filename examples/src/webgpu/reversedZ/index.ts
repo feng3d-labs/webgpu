@@ -217,7 +217,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         colorAttachments: [
             {
                 view: { texture: { context } },
-                clearValue: { r: 0.0, g: 0.0, b: 0.5, a: 1.0 },
+                clearValue: [0.0, 0.0, 0.5, 1.0],
             }
         ],
         depthStencilAttachment: {
@@ -251,7 +251,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
 
-                clearValue: { r: 0.0, g: 0.0, b: 0.5, a: 1.0 },
+                clearValue: [0.0, 0.0, 0.5, 1.0],
             },
         ],
     };

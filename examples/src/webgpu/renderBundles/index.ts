@@ -199,7 +199,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
       {
         view: { texture: { context } },
 
-        clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+        clearValue: [0.0, 0.0, 0.0, 1.0],
       },
     ],
     depthStencilAttachment: {

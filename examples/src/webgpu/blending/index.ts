@@ -51,7 +51,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ctx.restore();
         }
 
-return canvas;
+        return canvas;
     }
 
     // Generates a canvas with alternating colored and transparent stripes
@@ -117,7 +117,7 @@ return canvas;
             source: [{ source: { source, flipY }, destination: { premultipliedAlpha }, copySize: { width: source.width, height: source.height } }]
         };
 
-return texture;
+        return texture;
     }
 
     // create 2 textures with unpremultiplied alpha
@@ -205,7 +205,7 @@ return texture;
         },
     ];
 
-    const clearValue = [0, 0, 0, 0];
+    const clearValue: [red: number, green: number, blue: number, alpha: number] = [0, 0, 0, 0];
     const renderPassDescriptor: IGPURenderPassDescriptor = {
         label: "our basic canvas renderPass",
         colorAttachments: [

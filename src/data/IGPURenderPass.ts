@@ -1,3 +1,4 @@
+import { IRenderPass } from "@feng3d/render-api";
 import { IGPUBlendConstant } from "./IGPUBlendConstant";
 import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
@@ -15,13 +16,8 @@ import { IGPUViewport } from "./IGPUViewport";
  *
  * {@link GPURenderPassEncoder}
  */
-export interface IGPURenderPass
+export interface IGPURenderPass extends IRenderPass
 {
-    /**
-     * 数据类型。
-     */
-    readonly __type?: "RenderPass";
-
     /**
      * 渲染通道描述。
      */

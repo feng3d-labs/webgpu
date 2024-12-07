@@ -5,7 +5,7 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -297,7 +297,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
-                clearValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
+                clearValue: [0.2, 0.2, 0.2, 1.0],
             }
         ],
     };

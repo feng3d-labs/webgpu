@@ -1,3 +1,4 @@
+import { IRenderPassDescriptor } from "@feng3d/render-api";
 import { IGPURenderPassColorAttachment } from "./IGPURenderPassColorAttachment";
 import { IGPURenderPassDepthStencilAttachment } from "./IGPURenderPassDepthStencilAttachment";
 
@@ -6,8 +7,13 @@ import { IGPURenderPassDepthStencilAttachment } from "./IGPURenderPassDepthStenc
  *
  * {@link GPURenderPassDescriptor}
  */
-export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, "colorAttachments" | "depthStencilAttachment" | "occlusionQuerySet" | "timestampWrites">
+export interface IGPURenderPassDescriptor extends IRenderPassDescriptor
 {
+    /**
+     * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
+     */
+    label?: string;
+
     /**
      * The set of {@link GPURenderPassColorAttachment} values in this sequence defines which
      * color attachments will be output to when executing this render pass.
@@ -27,16 +33,18 @@ export interface IGPURenderPassDescriptor extends Omit<GPURenderPassDescriptor, 
     readonly depthStencilAttachment?: IGPURenderPassDepthStencilAttachment;
 
     /**
-     * 是否开启多重采样。WebGPU貌似只支持4重采样。如果在颜色附件中没有给出支持多重采样的纹理时则引擎将会自动为其添加。
-     */
-    readonly sampleCount?: 4;
-
-    /**
      * 附件尺寸。
      *
      * 默认从第一个有效附件纹理中获取尺寸。
      *
      * 该值被修改后将会改变所有附件的尺寸，并释放附件上过时的GPU纹理资源。
      */
-     attachmentSize?: { width: number, height: number };
+    attachmentSize?: { width: number, height: number };
+
+    /**
+     * The maximum number of draw calls that will be done in the render pass. Used by some
+     * implementations to size work injected before the render pass. Keeping the default value
+     * is a good default, unless it is known that more draw calls will be done.
+     */
+    maxDrawCount?: GPUSize64;
 }

@@ -1,4 +1,4 @@
-import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -16,7 +16,7 @@ function createBufferWithData(
     });
     device.queue.writeBuffer(buffer, 0, data);
 
-return buffer;
+    return buffer;
 }
 
 type Model = {
@@ -56,13 +56,13 @@ const init = async () =>
             max = 1;
             min = 0;
         }
- else if (max === undefined)
+        else if (max === undefined)
         {
             max = min;
             min = 0;
         }
 
-return Math.random() * (max - min) + min;
+        return Math.random() * (max - min) + min;
     }
 
     function randInt(min: number, max?: number)
@@ -158,7 +158,7 @@ return Math.random() * (max - min) + min;
             {
                 visibleCanvasSet.add(canvas);
             }
- else
+            else
             {
                 visibleCanvasSet.delete(canvas);
             }
@@ -167,7 +167,7 @@ return Math.random() * (max - min) + min;
 
     type CanvasInfo = {
         context: IGPUCanvasContext;
-        clearValue: number[];
+        clearValue: [number, number, number, number];
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
         uniformValues: Float32Array;
@@ -238,7 +238,7 @@ return Math.random() * (max - min) + min;
 
         canvasToInfoMap.set(canvas, {
             context,
-            clearValue: randColor(),
+            clearValue: randColor() as [number, number, number, number],
             worldViewProjectionMatrixValue,
             worldMatrixValue,
             uniformValues,
