@@ -14,12 +14,6 @@ export interface IGPURenderPassColorAttachment
     readonly view: IGPUTextureView;
 
     /**
-     * Indicates the depth slice index of {@link GPUTextureViewDimension#"3d"} {@link GPURenderPassColorAttachment#view}
-     * that will be output to for this color attachment.
-     */
-    readonly depthSlice?: GPUIntegerCoordinate;
-
-    /**
      * Indicates the value to clear {@link GPURenderPassColorAttachment#view} to prior to executing the
      * render pass. If not map/exist|provided, defaults to `{r: 0, g: 0, b: 0, a: 0}`. Ignored
      * if {@link GPURenderPassColorAttachment#loadOp} is not {@link GPULoadOp#"clear"}.
@@ -47,4 +41,10 @@ export interface IGPURenderPassColorAttachment
       * 默认 `"store"` 。
       */
     readonly storeOp?: GPUStoreOp;
+
+    /**
+     * Indicates the depth slice index of {@link GPUTextureViewDimension#"3d"} {@link GPURenderPassColorAttachment#view}
+     * that will be output to for this color attachment.
+     */
+    readonly depthSlice?: GPUIntegerCoordinate;
 }

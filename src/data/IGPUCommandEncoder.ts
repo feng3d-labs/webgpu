@@ -1,3 +1,4 @@
+import { ICommandEncoder } from "@feng3d/render-api";
 import { IGPUComputePass } from "./IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./IGPUCopyTextureToTexture";
@@ -8,7 +9,7 @@ import { IGPURenderPass } from "./IGPURenderPass";
  *
  * @see GPUCommandEncoder
  */
-export interface IGPUCommandEncoder
+export interface IGPUCommandEncoder extends ICommandEncoder
 {
     /**
      * 通道编码器列表。
