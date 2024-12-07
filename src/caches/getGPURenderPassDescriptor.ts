@@ -238,7 +238,7 @@ function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassCol
  * @param sampleCount 多重采样数量。
  * @returns 用于解决多重采样的纹理视图。
  */
-function getMultisampleTextureView(texture: IGPUTextureLike, sampleCount: number)
+function getMultisampleTextureView(texture: IGPUTextureLike, sampleCount: 4)
 {
     let multisampleTextureView = multisampleTextureMap.get(texture);
     if (!multisampleTextureView)
@@ -251,7 +251,6 @@ function getMultisampleTextureView(texture: IGPUTextureLike, sampleCount: number
             size,
             sampleCount,
             format,
-            usage: GPUTextureUsage.RENDER_ATTACHMENT,
         };
         multisampleTextureView = { texture: multisampleTexture };
         multisampleTextureMap.set(texture, multisampleTextureView);
@@ -282,7 +281,6 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURen
                 label: `自动生成的深度纹理`,
                 size: [attachmentSize.width, attachmentSize.height],
                 format: "depth24plus",
-                usage: GPUTextureUsage.RENDER_ATTACHMENT,
             }
         };
     }
@@ -310,7 +308,7 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURen
  * @param sampleCount 多重采样次数。
  * @returns 颜色附件完整描述列表。
  */
-function getIGPURenderPassColorAttachments(colorAttachments: readonly IGPURenderPassColorAttachment[], sampleCount: number)
+function getIGPURenderPassColorAttachments(colorAttachments: readonly IGPURenderPassColorAttachment[], sampleCount: 4)
 {
     const gpuColorAttachments: NGPURenderPassColorAttachment[] = colorAttachments.map((v) =>
     {

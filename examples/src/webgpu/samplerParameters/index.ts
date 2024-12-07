@@ -231,7 +231,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const checkerboard: IGPUTexture = {
         format: "rgba8unorm",
-        usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.TEXTURE_BINDING,
         size: [kTextureBaseSize, kTextureBaseSize],
         mipLevelCount: 4,
     };

@@ -77,7 +77,6 @@ const init = async (canvas: HTMLCanvasElement) =>
             dimension: "3d",
             size: [width, height, depth],
             format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
             writeTextures: [{
                 data: byteArray,
                 dataLayout: { bytesPerRow, rowsPerImage: blocksHigh },

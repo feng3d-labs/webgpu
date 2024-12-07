@@ -52,17 +52,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   // GBuffer texture render targets
   const gBufferTexture2DFloat32: IGPUTexture = {
     size: [canvas.width, canvas.height],
-    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     format: "rgba32float",
   };
   const gBufferTexture2DFloat16: IGPUTexture = {
     size: [canvas.width, canvas.height],
-    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     format: "rgba16float",
   };
   const gBufferTextureAlbedo: IGPUTexture = {
     size: [canvas.width, canvas.height],
-    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     format: "bgra8unorm",
   };
   const gBufferTextureViews: IGPUTextureView[] = [
@@ -112,7 +109,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
-    usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
   const writeGBufferPassDescriptor: IGPURenderPassDescriptor = {

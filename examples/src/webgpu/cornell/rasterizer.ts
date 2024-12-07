@@ -32,7 +32,6 @@ export default class Rasterizer
       label: "RasterizerRenderer.depthTexture",
       size: [framebufferSize[0], framebufferSize[1]],
       format: "depth24plus",
-      usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     this.renderPassDescriptor = {

@@ -5,6 +5,7 @@ import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
+import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
 
 /**
  * 获取GPU纹理 {@link GPUTexture} 。
@@ -33,8 +34,10 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTextureLike, autoC
 
     const iGPUTexture = texture as IGPUTexture;
 
-    const { usage } = iGPUTexture;
+    const { format, sampleCount } = iGPUTexture;
     let { label, mipLevelCount } = iGPUTexture;
+
+    const usage = getTextureUsageFromFormat(format, sampleCount);
 
     // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
     if (iGPUTexture.generateMipmap && mipLevelCount === undefined)

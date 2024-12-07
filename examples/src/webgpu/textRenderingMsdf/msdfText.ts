@@ -207,10 +207,6 @@ export class MsdfTextRenderer
       label: `MSDF font texture ${url}`,
       size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
-      usage:
-        GPUTextureUsage.TEXTURE_BINDING
-        | GPUTextureUsage.COPY_DST
-        | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{
         source: { source: imageBitmap },
         destination: {},

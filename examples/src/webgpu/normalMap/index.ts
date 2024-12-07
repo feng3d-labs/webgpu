@@ -64,7 +64,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
-    usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
   // Fetch the image and upload it into a GPUTexture.

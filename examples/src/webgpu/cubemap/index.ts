@@ -66,7 +66,6 @@ const init = async (canvas: HTMLCanvasElement) =>
             dimension: "2d",
             size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
             format: "rgba8unorm",
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
             source: textureSource,
         };
     }

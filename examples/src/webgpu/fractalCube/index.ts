@@ -20,7 +20,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     const cubeTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: presentationFormat,
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     // Create a sampler with linear filtering for smooth interpolation.

@@ -189,13 +189,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: depthBufferFormat,
-        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     };
 
     const defaultDepthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: depthBufferFormat,
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     const depthPrePassDescriptor: IGPURenderPassDescriptor = {

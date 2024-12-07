@@ -134,7 +134,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       size: [imageBitmap.width, imageBitmap.height, 1],
       mipLevelCount: numMipLevels,
       format: "rgba8unorm",
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
   }

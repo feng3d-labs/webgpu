@@ -49,7 +49,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const cubeTexture1: IGPUTexture = {
         size: [srcWidth, srcHeight, 1],
         format: "rgba8unorm",
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
         source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
 

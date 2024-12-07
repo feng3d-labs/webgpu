@@ -66,7 +66,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
-    usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
   // Fetch the image and upload it into a GPUTexture.
@@ -78,10 +77,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     cubeTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
-      usage:
-        GPUTextureUsage.TEXTURE_BINDING
-        | GPUTextureUsage.COPY_DST
-        | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{ source: { source: imageBitmap }, destination: {}, copySize: [imageBitmap.width, imageBitmap.height] }]
     };
   }

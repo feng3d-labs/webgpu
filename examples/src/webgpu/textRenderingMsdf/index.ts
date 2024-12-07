@@ -164,7 +164,6 @@ setBlendConstant().`,
     const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: depthFormat,
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     const uniformBuffer = new Float32Array(16);

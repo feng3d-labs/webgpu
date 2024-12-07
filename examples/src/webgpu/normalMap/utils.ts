@@ -43,10 +43,6 @@ export const createTextureFromImage = (
     const texture: IGPUTexture = {
         size: [bitmap.width, bitmap.height, 1],
         format: "rgba8unorm",
-        usage:
-            GPUTextureUsage.TEXTURE_BINDING
-            | GPUTextureUsage.COPY_DST
-            | GPUTextureUsage.RENDER_ATTACHMENT,
         source: [{ source: { source: bitmap }, destination: {}, copySize: [bitmap.width, bitmap.height] }]
     };
 

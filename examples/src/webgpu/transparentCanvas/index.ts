@@ -50,7 +50,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     const uniformBindGroup = {

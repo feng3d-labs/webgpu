@@ -60,7 +60,6 @@ export default class Radiosity
         scene.quads.length,
       ],
       format: Radiosity.lightmapFormat,
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING,
     };
     this.accumulationBuffer = new Uint8Array(Radiosity.lightmapWidth
       * Radiosity.lightmapHeight

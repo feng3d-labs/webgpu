@@ -44,7 +44,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     label: "framebuffer",
     size: [canvas.width, canvas.height],
     format: "rgba16float",
-    usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
   };
 
   const scene = new Scene();

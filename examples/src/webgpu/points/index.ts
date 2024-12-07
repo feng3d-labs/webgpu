@@ -117,10 +117,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const texture: IGPUTexture = {
     size: [ctx.canvas.width, ctx.canvas.height],
     format: "rgba8unorm",
-    usage:
-      GPUTextureUsage.COPY_DST
-      | GPUTextureUsage.TEXTURE_BINDING
-      | GPUTextureUsage.RENDER_ATTACHMENT,
     source: [
       { source: { source: ctx.canvas, flipY: true }, destination: {}, copySize: [ctx.canvas.width, ctx.canvas.height] },
     ],

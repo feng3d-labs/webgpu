@@ -43,7 +43,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Create the depth texture for rendering/sampling the shadow map.
     const shadowDepthTexture: IGPUTexture = {
         size: [shadowDepthTextureSize, shadowDepthTextureSize, 1],
-        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
         format: "depth32float",
     };
 
@@ -88,7 +87,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     const depthTexture: IGPUTexture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus-stencil8",
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     const renderPassDescriptor: IGPURenderPassDescriptor = {

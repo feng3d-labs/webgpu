@@ -61,7 +61,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
   const depthTexture: IGPUTexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
-    usage: GPUTextureUsage.RENDER_ATTACHMENT,
   };
 
   const uniformBufferSize = 4 * 16; // 4x4 matrix
@@ -78,7 +77,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     planetTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
   }
@@ -93,7 +91,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     moonTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
       source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
     };
   }
