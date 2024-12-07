@@ -1,4 +1,6 @@
+import { ITexture } from "@feng3d/render-api";
 import { IGPUCanvasConfiguration } from "./IGPUCanvasConfiguration";
+import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
  * 类似纹理，包含画布纹理以及正常纹理。
@@ -10,7 +12,7 @@ export type IGPUTextureSize = [width: number, height?: number, depthOrArrayLayer
 /**
  * @see GPUTextureDescriptor
  */
-export interface IGPUTexture
+export interface IGPUTexture extends ITexture
 {
     /**
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
@@ -152,30 +154,4 @@ export interface IGPUWriteTextureDestination
      * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
      */
     aspect?: GPUTextureAspect;
-}
-
-/**
- * 画布纹理，从画布的WebGPU上下文获取纹理
- */
-export interface IGPUCanvasTexture
-{
-    context: IGPUCanvasContext;
-}
-
-/**
- * @see GPUCanvasContext
- * @see HTMLCanvasElement.getContext
- * @see GPUCanvasContext.configure
- */
-export interface IGPUCanvasContext
-{
-    /**
-     * 画布id
-     */
-    readonly canvasId: string;
-
-    /**
-     * 画布配置。默认有引擎自动设置。
-     */
-    configuration?: IGPUCanvasConfiguration;
 }

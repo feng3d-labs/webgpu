@@ -1,9 +1,10 @@
 import { anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
+import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPURenderPassColorAttachment } from "../data/IGPURenderPassColorAttachment";
 import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
-import { IGPUTextureLike, IGPUTexture, IGPUCanvasTexture } from "../data/IGPUTexture";
+import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IGPUTexture_resize } from "../eventnames";
 import { NGPURenderPassColorAttachment } from "../internal/internal";
@@ -248,7 +249,7 @@ function getMultisampleTextureView(texture: IGPUTextureLike, sampleCount: number
         const multisampleTexture: IGPUTextureLike = {
             label: "自动生成多重采样的纹理",
             size,
-            sampleCount: sampleCount,
+            sampleCount,
             format,
             usage: GPUTextureUsage.RENDER_ATTACHMENT,
         };

@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { IGPUCanvasTexture } from "../data/IGPUTexture";
+import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUTextureView } from "../data/IGPUTextureView";
 import { GPUTexture_destroy, GPUTextureView_destroy } from "../eventnames";
 import { getGPUTexture } from "./getGPUTexture";

@@ -1,3 +1,4 @@
+import { ITextureView } from "@feng3d/render-api";
 import { IGPUTextureLike } from "./IGPUTexture";
 
 /**
@@ -7,7 +8,7 @@ import { IGPUTextureLike } from "./IGPUTexture";
  * @see GPUTexture.createView
  * @see GPUTextureViewDescriptor
  */
-export interface IGPUTextureView
+export interface IGPUTextureView extends ITextureView
 {
     /**
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
@@ -42,18 +43,10 @@ export interface IGPUTextureView
      */
     readonly aspect?: GPUTextureAspect;
     /**
-     * The first (most detailed) mipmap level accessible to the texture view.
-     */
-    readonly baseMipLevel?: GPUIntegerCoordinate;
-    /**
      * How many mipmap levels, starting with {@link GPUTextureViewDescriptor#baseMipLevel}, are accessible to
      * the texture view.
      */
     readonly mipLevelCount?: GPUIntegerCoordinate;
-    /**
-     * The index of the first array layer accessible to the texture view.
-     */
-    readonly baseArrayLayer?: GPUIntegerCoordinate;
     /**
      * How many array layers, starting with {@link GPUTextureViewDescriptor#baseArrayLayer}, are accessible
      * to the texture view.

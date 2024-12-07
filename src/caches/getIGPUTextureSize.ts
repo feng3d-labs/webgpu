@@ -1,4 +1,5 @@
-import { IGPUTextureLike, IGPUTexture, IGPUCanvasTexture, IGPUTextureSize } from "../data/IGPUTexture";
+import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
+import { IGPUTexture, IGPUTextureLike, IGPUTextureSize } from "../data/IGPUTexture";
 
 /**
  * 获取纹理尺寸。

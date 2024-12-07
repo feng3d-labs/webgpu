@@ -1,6 +1,7 @@
 import { anyEmitter } from "@feng3d/event";
 import { watcher } from "@feng3d/watcher";
-import { IGPUCanvasTexture, IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
+import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
+import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";

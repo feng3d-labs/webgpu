@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from "../../meshes/cube";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
 import { getOffscreenCanvasId, IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
@@ -153,7 +153,7 @@ async function init(canvas: OffscreenCanvas)
             passEncoders: [{
                 descriptor: renderPassDescriptor,
                 renderObjects: [{
-                    pipeline: pipeline,
+                    pipeline,
                     bindingResources: uniformBindGroup,
                     vertices: verticesBuffer,
                     drawVertex: { vertexCount: cubeVertexCount }
