@@ -6,6 +6,7 @@ import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
 import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
+import { getGPUTextureDimension } from "./getGPUTextureDimension";
 
 /**
  * 获取GPU纹理 {@link GPUTexture} 。
@@ -34,7 +35,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTextureLike, autoC
 
     const iGPUTexture = texture as IGPUTexture;
 
-    const { format, sampleCount } = iGPUTexture;
+    const { format, sampleCount, dimension } = iGPUTexture;
     let { label, mipLevelCount } = iGPUTexture;
 
     const usage = getTextureUsageFromFormat(format, sampleCount);
@@ -52,8 +53,11 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTextureLike, autoC
         label = `GPUTexture ${autoIndex++}`;
     }
 
+    const textureDimension = getGPUTextureDimension(dimension);
+
     gpuTexture = device.createTexture({
         ...iGPUTexture,
+        dimension: textureDimension,
         label,
         mipLevelCount,
         usage,

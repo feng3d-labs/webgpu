@@ -56,10 +56,6 @@ export interface IGPUTexture extends ITexture
      */
     sampleCount?: 4;
     /**
-     * Whether the texture is one-dimensional, an array of two-dimensional layers, or three-dimensional.
-     */
-    dimension?: GPUTextureDimension;
-    /**
      * The format of the texture.
      */
     format: GPUTextureFormat;
