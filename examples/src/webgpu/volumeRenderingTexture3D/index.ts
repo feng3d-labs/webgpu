@@ -110,7 +110,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 storeOp: "discard",
             },
         ],
-        sampleCount: sampleCount,
+        sampleCount,
     };
 
     let rotation = 0;

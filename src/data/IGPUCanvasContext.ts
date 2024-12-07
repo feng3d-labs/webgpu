@@ -1,3 +1,4 @@
+import { ICanvasContext } from "@feng3d/render-api";
 import { IGPUCanvasConfiguration } from "./IGPUCanvasConfiguration";
 
 /**
@@ -5,13 +6,8 @@ import { IGPUCanvasConfiguration } from "./IGPUCanvasConfiguration";
  * @see HTMLCanvasElement.getContext
  * @see GPUCanvasContext.configure
  */
-export interface IGPUCanvasContext
+export interface IGPUCanvasContext extends ICanvasContext
 {
-    /**
-     * 画布id
-     */
-    readonly canvasId: string;
-
     /**
      * 画布配置。默认有引擎自动设置。
      */

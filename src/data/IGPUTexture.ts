@@ -1,5 +1,4 @@
 import { ITexture } from "@feng3d/render-api";
-import { IGPUCanvasConfiguration } from "./IGPUCanvasConfiguration";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
