@@ -49,13 +49,6 @@ export interface IGPUTexture extends ITexture
      */
     mipLevelCount?: GPUIntegerCoordinate;
     /**
-     * The sample count of the texture. A {@link GPUTextureDescriptor#sampleCount} &gt; `1` indicates
-     * a multisampled texture.
-     * 
-     * WebGPU只支持4重采样。
-     */
-    sampleCount?: 4;
-    /**
      * Specifies what view {@link GPUTextureViewDescriptor#format} values will be allowed when calling
      * {@link GPUTexture#createView} on this texture (in addition to the texture's actual
      * {@link GPUTextureDescriptor#format}).

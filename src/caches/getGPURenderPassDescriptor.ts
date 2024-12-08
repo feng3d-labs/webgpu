@@ -11,6 +11,7 @@ import { NGPURenderPassColorAttachment } from "../internal/internal";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getIGPUTextureSize } from "./getIGPUTextureSize";
+import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 
 /**
  * 获取GPU渲染通道描述。
@@ -246,7 +247,7 @@ function getMultisampleTextureView(texture: IGPUTextureLike, sampleCount: 4)
         // 新增用于解决多重采样的纹理
         const size = getIGPUTextureSize(texture);
         const format = getGPUTextureFormat(texture);
-        const multisampleTexture: IGPUTextureLike = {
+        const multisampleTexture: IGPUTextureMultisample = {
             label: "自动生成多重采样的纹理",
             size,
             sampleCount,
