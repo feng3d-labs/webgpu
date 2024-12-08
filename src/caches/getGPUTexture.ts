@@ -45,7 +45,7 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTextureLike, autoC
     if (iGPUTexture.generateMipmap && mipLevelCount === undefined)
     {
         //
-        const maxSize = Math.max(iGPUTexture.size[0], iGPUTexture.size[1]);
+        const maxSize = Math.max(size[0], size[1]);
         mipLevelCount = 1 + Math.log2(maxSize) | 0;
     }
 
