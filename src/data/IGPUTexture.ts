@@ -56,10 +56,6 @@ export interface IGPUTexture extends ITexture
      */
     sampleCount?: 4;
     /**
-     * The format of the texture.
-     */
-    format: GPUTextureFormat;
-    /**
      * Specifies what view {@link GPUTextureViewDescriptor#format} values will be allowed when calling
      * {@link GPUTexture#createView} on this texture (in addition to the texture's actual
      * {@link GPUTextureDescriptor#format}).
