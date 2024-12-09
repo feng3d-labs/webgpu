@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { getTexImageSourceSize } from "@feng3d/render-api";
+import { getTexImageSourceSize, ITextureSize } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
@@ -120,7 +120,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
     watcher.watch(texture, "writeTextures", writeTexture);
 
     // 监听纹理尺寸发生变化
-    const resize = (newValue: GPUExtent3DStrict, oldValue: GPUExtent3DStrict) =>
+    const resize = (newValue: ITextureSize, oldValue: ITextureSize) =>
     {
         if (!!newValue && !!oldValue)
         {
@@ -153,12 +153,13 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
             oldDestroy.apply(gpuTexture);
             //
             textureMap.delete(texture);
-            // 派发销毁事件
-            anyEmitter.emit(gpuTexture, GPUTexture_destroy);
             //
             watcher.unwatch(texture, "source", updateSource);
             watcher.unwatch(texture, "writeTextures", writeTexture);
             watcher.unwatch(texture, "size", resize);
+
+            // 派发销毁事件
+            anyEmitter.emit(gpuTexture, GPUTexture_destroy);
         };
     })(gpuTexture.destroy);
 
