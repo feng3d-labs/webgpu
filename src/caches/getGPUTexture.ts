@@ -1,4 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
+import { getTexImageSourceSize } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
@@ -7,9 +8,7 @@ import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
 import { getGPUTextureDimension } from "./getGPUTextureDimension";
-import { getIGPUTextureLikeSize } from "./getIGPUTextureSize";
 import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
-import { getTexImageSourceSize } from "@feng3d/render-api";
 
 /**
  * 获取GPU纹理 {@link GPUTexture} 。
@@ -41,8 +40,6 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
 
     const { size, format, sampleCount, dimension, viewFormats } = texture as IGPUTextureMultisample;
     let { label, mipLevelCount } = texture;
-
-    getIGPUTextureLikeSize
 
     const usage = getTextureUsageFromFormat(format, sampleCount);
 

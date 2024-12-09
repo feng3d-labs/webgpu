@@ -1,4 +1,3 @@
-import { getTexImageSourceSize, ITextureSize } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUTexture, IGPUTextureLike, IGPUTextureSize } from "../data/IGPUTexture";
 
@@ -19,21 +18,4 @@ export function getIGPUTextureLikeSize(texture: IGPUTextureLike)
     }
 
     return (texture as IGPUTexture).size;
-}
-
-export function getIGPUTextureSize(texture: IGPUTexture): ITextureSize
-{
-    if (texture.size) return texture.size;
-
-    const source = texture.source;
-    for (let i = 0; i < source.length; i++)
-    {
-        const element = source[i];
-
-        if (!element.destination?.mipLevel)
-        {
-            return element.copySize || getTexImageSourceSize(element.source.source);
-        }
-    }
-    return undefined;
 }
