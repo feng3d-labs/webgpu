@@ -24,11 +24,6 @@ export interface IGPUTexture extends ITexture
     size: IGPUTextureSize;
 
     /**
-     * The number of mip levels the texture will contain.
-     */
-    mipLevelCount?: GPUIntegerCoordinate;
-
-    /**
      * 初始纹理数据。
      *
      * 使用 GPUQueue.copyExternalImageToTexture 进行初始化。
