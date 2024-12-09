@@ -3,11 +3,12 @@ import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
+import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
 import { getGPUTextureDimension } from "./getGPUTextureDimension";
+import { getIGPUTextureLikeSize } from "./getIGPUTextureSize";
 import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
-import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 
 /**
  * 获取GPU纹理 {@link GPUTexture} 。
@@ -16,28 +17,31 @@ import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
  * @param iGPUTextureBase 纹理描述。
  * @returns GPU纹理。
  */
-export function getGPUTexture(device: GPUDevice, texture: IGPUTextureLike, autoCreate = true)
+export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, autoCreate = true)
 {
-    const textureMap: Map<IGPUTextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<IGPUTextureLike, GPUTexture>();
-    let gpuTexture = textureMap.get(texture);
-    if (gpuTexture) return gpuTexture;
-
-    if ((texture as IGPUCanvasTexture).context)
+    let gpuTexture: GPUTexture;
+    if ((textureLike as IGPUCanvasTexture).context)
     {
-        texture = texture as IGPUCanvasTexture;
-        const context = getGPUCanvasContext(device, texture.context);
+        const canvasTexture = textureLike as IGPUCanvasTexture;
+        const context = getGPUCanvasContext(device, canvasTexture.context);
 
         gpuTexture = context.getCurrentTexture();
 
         return gpuTexture;
     }
 
-    if (!autoCreate) return null;
+    const texture = textureLike as IGPUTexture;
 
-    texture = texture as IGPUTexture;
+    const textureMap: Map<IGPUTextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<IGPUTextureLike, GPUTexture>();
+    gpuTexture = textureMap.get(texture);
+    if (gpuTexture) return gpuTexture;
+
+    if (!autoCreate) return null;
 
     const { size, format, sampleCount, dimension, viewFormats } = texture as IGPUTextureMultisample;
     let { label, mipLevelCount } = texture;
+
+    getIGPUTextureLikeSize
 
     const usage = getTextureUsageFromFormat(format, sampleCount);
 

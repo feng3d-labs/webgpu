@@ -1,6 +1,6 @@
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUTexture } from "./caches/getGPUTexture";
-import { getIGPUTextureSize } from "./caches/getIGPUTextureSize";
+import { getIGPUTextureLikeSize } from "./caches/getIGPUTextureSize";
 import { IGPUBuffer } from "./data/IGPUBuffer";
 import { IGPUReadPixels } from "./data/IGPUReadPixels";
 import { IGPUSubmit } from "./data/IGPUSubmit";
@@ -150,6 +150,6 @@ export class WebGPU
 
     getGPUTextureSize(input: IGPUTextureLike)
     {
-        return getIGPUTextureSize(input);
+        return getIGPUTextureLikeSize(input);
     }
 }

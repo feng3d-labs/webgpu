@@ -1,4 +1,4 @@
-import { ITexture } from "@feng3d/render-api";
+import { ITexture, ITextureSize } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
@@ -17,11 +17,6 @@ export interface IGPUTexture extends ITexture
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
      */
     readonly label?: string;
-
-    /**
-     * The width, height, and depth or layer count of the texture.
-     */
-    size: IGPUTextureSize;
 
     /**
      * 初始纹理数据。
@@ -84,9 +79,9 @@ export interface IGPUWriteTexture
 
 export interface IGPUTextureImageSource
 {
-    source: GPUImageCopyExternalImage,
-    destination: IGPUTextureSourceDestination,
-    copySize: GPUExtent3DStrict
+    readonly source: GPUImageCopyExternalImage,
+    readonly destination: IGPUTextureSourceDestination,
+    readonly copySize: ITextureSize
 }
 
 export interface IGPUTextureSourceDestination extends IGPUWriteTextureDestination

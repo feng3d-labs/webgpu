@@ -77,7 +77,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     planetTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
-      source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
+      source: [{ source: { source: imageBitmap }, destination: {}, copySize: [imageBitmap.width, imageBitmap.height] }],
     };
   }
 
@@ -91,7 +91,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     moonTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
-      source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
+      source: [{ source: { source: imageBitmap }, destination: {}, copySize: [imageBitmap.width, imageBitmap.height] }],
     };
   }
 

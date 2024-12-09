@@ -10,7 +10,7 @@ import { IGPUTexture_resize } from "../eventnames";
 import { NGPURenderPassColorAttachment } from "../internal/internal";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { getGPUTextureView } from "./getGPUTextureView";
-import { getIGPUTextureSize } from "./getIGPUTextureSize";
+import { getIGPUTextureLikeSize } from "./getIGPUTextureSize";
 import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 
 /**
@@ -245,7 +245,7 @@ function getMultisampleTextureView(texture: IGPUTextureLike, sampleCount: 4)
     if (!multisampleTextureView)
     {
         // 新增用于解决多重采样的纹理
-        const size = getIGPUTextureSize(texture);
+        const size = getIGPUTextureLikeSize(texture);
         const format = getGPUTextureFormat(texture);
         const multisampleTexture: IGPUTextureMultisample = {
             label: "自动生成多重采样的纹理",
@@ -346,7 +346,7 @@ function updateAttachmentSize(renderPass: IGPURenderPassDescriptor)
     const attachmentTextures = getAttachmentTextures(renderPass.colorAttachments, renderPass.depthStencilAttachment);
     if (!renderPass.attachmentSize)
     {
-        const textureSize = getIGPUTextureSize(attachmentTextures[0]);
+        const textureSize = getIGPUTextureLikeSize(attachmentTextures[0]);
         renderPass.attachmentSize = { width: textureSize[0], height: textureSize[1] };
     }
     attachmentTextures.forEach((v) => setIGPUTextureSize(v, renderPass.attachmentSize));
