@@ -9,6 +9,7 @@ import { getGPUCanvasContext } from "./getGPUCanvasContext";
 import { getGPUTextureDimension } from "./getGPUTextureDimension";
 import { getIGPUTextureLikeSize } from "./getIGPUTextureSize";
 import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
+import { getTexImageSourceSize } from "@feng3d/render-api";
 
 /**
  * 获取GPU纹理 {@link GPUTexture} 。
@@ -78,13 +79,15 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
         {
             texture.source.forEach((v) =>
             {
+                const copySize = v.copySize || getTexImageSourceSize(v.source.source);
+
                 device.queue.copyExternalImageToTexture(
                     v.source,
                     {
                         texture: gpuTexture,
                         ...v.destination,
                     },
-                    v.copySize
+                    copySize
                 );
             });
             texture.source = null;

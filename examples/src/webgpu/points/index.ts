@@ -29,7 +29,7 @@ function createFibonacciSphereVertices({
     vertices.push(x * radius, y * radius, z * radius);
   }
 
-return new Float32Array(vertices);
+  return new Float32Array(vertices);
 }
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -118,7 +118,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     size: [ctx.canvas.width, ctx.canvas.height],
     format: "rgba8unorm",
     source: [
-      { source: { source: ctx.canvas, flipY: true }, destination: {}, copySize: [ctx.canvas.width, ctx.canvas.height] },
+      { source: { source: ctx.canvas, flipY: true }, destination: {} },
     ],
   };
 

@@ -77,7 +77,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     cubeTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
-      source: [{ source: { source: imageBitmap }, destination: {}, copySize: [imageBitmap.width, imageBitmap.height] }]
+      source: [{ source: { source: imageBitmap }, destination: {} }]
     };
   }
 
@@ -141,7 +141,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const viewMatrix = camera.update(deltaTime, inputHandler());
     mat4.multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
 
-return modelViewProjectionMatrix;
+    return modelViewProjectionMatrix;
   }
 
   let lastFrameMS = Date.now();

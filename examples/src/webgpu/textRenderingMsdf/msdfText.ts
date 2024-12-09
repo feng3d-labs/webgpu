@@ -210,7 +210,6 @@ export class MsdfTextRenderer
       source: [{
         source: { source: imageBitmap },
         destination: {},
-        copySize: [imageBitmap.width, imageBitmap.height]
       }]
     };
 
