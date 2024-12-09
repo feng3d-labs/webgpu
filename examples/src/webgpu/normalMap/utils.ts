@@ -41,7 +41,6 @@ export const createTextureFromImage = (
 ) =>
 {
     const texture: IGPUTexture = {
-        size: [bitmap.width, bitmap.height, 1],
         format: "rgba8unorm",
         source: [{ source: { source: bitmap } }]
     };

@@ -75,7 +75,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const imageBitmap = await createImageBitmap(await response.blob());
 
     cubeTexture = {
-      size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
       source: [{ source: { source: imageBitmap } }]
     };

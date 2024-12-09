@@ -1,12 +1,10 @@
-import { ITexture, ITextureSize } from "@feng3d/render-api";
+import { ITexture, ITextureOrigin, ITextureSize } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
  * 类似纹理，包含画布纹理以及正常纹理。
  */
 export type IGPUTextureLike = IGPUCanvasTexture | IGPUTexture;
-
-export type IGPUTextureSize = [width: number, height?: number, depthOrArrayLayers?: number];
 
 /**
  * @see GPUTextureDescriptor
@@ -122,7 +120,7 @@ export interface IGPUWriteTextureDestination
      * Defines the origin of the copy - the minimum corner of the texture sub-region to copy to/from.
      * Together with `copySize`, defines the full copy sub-region.
      */
-    origin?: GPUOrigin3D;
+    origin?: ITextureOrigin;
     /**
      * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
      */

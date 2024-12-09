@@ -186,7 +186,7 @@ function setIGPUTextureSize(texture: IGPUTextureLike, attachmentSize: { width: n
     else
     {
         texture = texture as IGPUTexture;
-        if (texture.size[2])
+        if (texture.size?.[2])
         {
             texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
         }

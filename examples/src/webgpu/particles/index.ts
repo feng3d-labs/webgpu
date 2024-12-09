@@ -131,7 +131,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       numMipLevels++;
     }
     texture = {
-      size: [imageBitmap.width, imageBitmap.height, 1],
       mipLevelCount: numMipLevels,
       format: "rgba8unorm",
       source: [{ source: { source: imageBitmap } }],

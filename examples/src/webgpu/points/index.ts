@@ -115,7 +115,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const sampler: IGPUSampler = {};
   const texture: IGPUTexture = {
-    size: [ctx.canvas.width, ctx.canvas.height],
     format: "rgba8unorm",
     source: [
       { source: { source: ctx.canvas, flipY: true } },

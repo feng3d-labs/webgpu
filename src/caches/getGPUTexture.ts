@@ -8,6 +8,7 @@ import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
 import { getGPUTextureDimension } from "./getGPUTextureDimension";
+import { getIGPUTextureSize } from "./getIGPUTextureSize";
 import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
 
 /**
@@ -38,8 +39,11 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
 
     if (!autoCreate) return null;
 
-    const { size, format, sampleCount, dimension, viewFormats } = texture as IGPUTextureMultisample;
+    const { format, sampleCount, dimension, viewFormats } = texture as IGPUTextureMultisample;
     let { label, mipLevelCount } = texture;
+
+    const size = texture.size = getIGPUTextureSize(texture);
+    console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
 
     const usage = getTextureUsageFromFormat(format, sampleCount);
 
@@ -126,7 +130,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
         {
             if (newValue[0] === oldValue[0]
                 && newValue[1] === oldValue[1]
-                && newValue[2] === oldValue[2]
+                && (newValue[2] || 1) === (oldValue[2] || 1)
             )
             {
                 return;

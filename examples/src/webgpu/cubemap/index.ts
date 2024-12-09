@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const textureSource = imageBitmaps.map((v, i) =>
         {
             const item: IGPUTextureImageSource = {
-                source: { source: v }, destination: { origin: { x: 0, y: 0, z: i } }
+                source: { source: v }, destination: { origin: [0, 0, i] }
             };
 
             return item;
@@ -64,7 +64,6 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         cubemapTexture = {
             dimension: "2d",
-            size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
             format: "rgba8unorm",
             source: textureSource,
         };

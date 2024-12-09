@@ -205,7 +205,6 @@ export class MsdfTextRenderer
 
     const texture: IGPUTexture = {
       label: `MSDF font texture ${url}`,
-      size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
       source: [{
         source: { source: imageBitmap },
