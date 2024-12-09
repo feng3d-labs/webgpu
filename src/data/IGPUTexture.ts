@@ -80,7 +80,7 @@ export interface IGPUWriteTexture
 export interface IGPUTextureImageSource
 {
     readonly source: GPUImageCopyExternalImage,
-    readonly destination: IGPUTextureSourceDestination,
+    readonly destination?: IGPUTextureSourceDestination,
     readonly copySize?: ITextureSize
 }
 

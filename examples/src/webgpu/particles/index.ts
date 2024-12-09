@@ -134,7 +134,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       size: [imageBitmap.width, imageBitmap.height, 1],
       mipLevelCount: numMipLevels,
       format: "rgba8unorm",
-      source: [{ source: { source: imageBitmap }, destination: {} }],
+      source: [{ source: { source: imageBitmap } }],
     };
   }
 

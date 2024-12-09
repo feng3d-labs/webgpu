@@ -209,7 +209,6 @@ export class MsdfTextRenderer
       format: "rgba8unorm",
       source: [{
         source: { source: imageBitmap },
-        destination: {},
       }]
     };
 

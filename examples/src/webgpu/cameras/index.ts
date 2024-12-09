@@ -77,7 +77,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     cubeTexture = {
       size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
-      source: [{ source: { source: imageBitmap }, destination: {} }]
+      source: [{ source: { source: imageBitmap } }]
     };
   }
 

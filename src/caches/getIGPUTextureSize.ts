@@ -30,7 +30,7 @@ export function getIGPUTextureSize(texture: IGPUTexture): ITextureSize
     {
         const element = source[i];
 
-        if (!element.destination.mipLevel)
+        if (!element.destination?.mipLevel)
         {
             return element.copySize || getTexImageSourceSize(element.source.source);
         }
