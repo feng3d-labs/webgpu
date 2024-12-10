@@ -75,6 +75,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     const imageBitmap = await createImageBitmap(await response.blob());
 
     planetTexture = {
+      size: [imageBitmap.width, imageBitmap.height],
       format: "rgba8unorm",
       source: [{ source: { source: imageBitmap } }],
     };
@@ -88,6 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     const imageBitmap = await createImageBitmap(await response.blob());
 
     moonTexture = {
+      size: [imageBitmap.width, imageBitmap.height],
       format: "rgba8unorm",
       source: [{ source: { source: imageBitmap } }],
     };

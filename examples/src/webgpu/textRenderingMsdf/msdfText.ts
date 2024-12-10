@@ -51,7 +51,7 @@ export class MsdfFont
       char = this.defaultChar;
     }
 
-return char;
+    return char;
   }
 
   // Gets the distance in pixels a line should advance for a given character code. If the upcoming
@@ -68,7 +68,7 @@ return char;
       }
     }
 
-return char.xadvance;
+    return char.xadvance;
   }
 }
 
@@ -114,7 +114,7 @@ export class MsdfText
       buffer.writeBuffers = writeBuffers;
     }
 
-return this.renderBundle;
+    return this.renderBundle;
   }
 
   setTransform(matrix: Mat4)
@@ -204,6 +204,7 @@ export class MsdfTextRenderer
     const imageBitmap = await createImageBitmap(await response.blob());
 
     const texture: IGPUTexture = {
+      size: [imageBitmap.width, imageBitmap.height],
       label: `MSDF font texture ${url}`,
       format: "rgba8unorm",
       source: [{
@@ -211,7 +212,7 @@ export class MsdfTextRenderer
       }]
     };
 
-return texture;
+    return texture;
   }
 
   async createFont(fontJsonUrl: string): Promise<MsdfFont>
@@ -316,7 +317,7 @@ return texture;
         }
       );
     }
- else
+    else
     {
       measurements = this.measureText(
         font,

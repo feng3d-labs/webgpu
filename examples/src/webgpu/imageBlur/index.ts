@@ -47,6 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const [srcWidth, srcHeight] = [imageBitmap.width, imageBitmap.height];
     const cubeTexture1: IGPUTexture = {
+        size: [imageBitmap.width, imageBitmap.height],
         format: "rgba8unorm",
         source: [{ source: { source: imageBitmap } }],
     };
