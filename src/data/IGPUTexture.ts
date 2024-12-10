@@ -19,18 +19,10 @@ export interface IGPUTexture extends ITexture
     /**
      * 初始纹理数据。
      *
-     * 使用 GPUQueue.copyExternalImageToTexture 进行初始化。
-     *
      * @see GPUQueue.copyExternalImageToTexture
-     */
-    sources?: IGPUTextureImageSource[];
-
-    /**
-     * 向纹理中写入数据。
-     *
      * @see GPUQueue.writeTexture
      */
-    writeTextures?: IGPUTextureBufferSource[];
+    sources?: readonly IGPUTextureSource[];
 
     /**
      * Specifies what view {@link GPUTextureViewDescriptor#format} values will be allowed when calling
@@ -59,11 +51,14 @@ export interface IGPUTexture extends ITexture
 
 /**
  * 纹理资源
+ * 
+ * @see GPUQueue.copyExternalImageToTexture
+ * @see GPUQueue.writeTexture
  */
 export type IGPUTextureSource = IGPUTextureImageSource | IGPUTextureBufferSource;
 
 /**
- * 纹理的数据缓冲区资源。
+ * 纹理的数据资源。
  * 
  * @see GPUQueue.writeTexture
  */

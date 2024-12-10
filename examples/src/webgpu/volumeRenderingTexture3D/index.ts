@@ -77,7 +77,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             dimension: "3d",
             size: [width, height, depth],
             format,
-            writeTextures: [{
+            sources: [{
                 data: byteArray,
                 dataLayout: { bytesPerRow, rowsPerImage: blocksHigh },
                 size: [width, height, depth]

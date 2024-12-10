@@ -2,7 +2,7 @@ import { anyEmitter } from "@feng3d/event";
 import { getTexImageSourceSize, ITextureSize } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
-import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
+import { IGPUTexture, IGPUTextureBufferSource, IGPUTextureImageSource, IGPUTextureLike } from "../data/IGPUTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { generateMipmap } from "../utils/generate-mipmap";
@@ -87,32 +87,25 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
         {
             texture.sources.forEach((v) =>
             {
-                const copySize = v.copySize || getTexImageSourceSize(v.source.source);
+                // 处理图片纹理
+                const imageSource = v as IGPUTextureImageSource;
+                if (imageSource.source)
+                {
+                    const copySize = imageSource.copySize || getTexImageSourceSize(imageSource.source.source);
 
-                device.queue.copyExternalImageToTexture(
-                    v.source,
-                    {
-                        texture: gpuTexture,
-                        ...v.destination,
-                    },
-                    copySize
-                );
-            });
-            texture.sources = null;
-        }
-    };
-    updateTexture();
-    watcher.watch(texture, "sources", updateTexture);
+                    device.queue.copyExternalImageToTexture(
+                        imageSource.source,
+                        {
+                            texture: gpuTexture,
+                            ...v.destination,
+                        },
+                        copySize
+                    );
+                }
 
-    // 监听写纹理操作
-    const writeTexture = () =>
-    {
-        // 处理数据写入GPU缓冲
-        if (texture.writeTextures)
-        {
-            texture.writeTextures.forEach((v) =>
-            {
-                const { destination, data, dataLayout, size } = v;
+                // 处理数据纹理
+                const bufferSource = v as IGPUTextureBufferSource;
+                const { destination, data, dataLayout, size } = bufferSource;
 
                 device.queue.writeTexture(
                     {
@@ -124,11 +117,11 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                     size,
                 );
             });
-            texture.writeTextures = null;
+            texture.sources = null;
         }
     };
-    writeTexture();
-    watcher.watch(texture, "writeTextures", writeTexture);
+    updateTexture();
+    watcher.watch(texture, "sources", updateTexture);
 
     // 监听纹理尺寸发生变化
     const resize = (newValue: ITextureSize, oldValue: ITextureSize) =>
@@ -166,7 +159,6 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
             textureMap.delete(texture);
             //
             watcher.unwatch(texture, "sources", updateTexture);
-            watcher.unwatch(texture, "writeTextures", writeTexture);
             watcher.unwatch(texture, "size", resize);
 
             // 派发销毁事件
