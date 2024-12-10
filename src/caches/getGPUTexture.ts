@@ -101,6 +101,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                         },
                         copySize
                     );
+                    return;
                 }
 
                 // 处理数据纹理
