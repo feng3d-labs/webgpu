@@ -91,7 +91,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                 const imageSource = v as IGPUTextureImageSource;
                 if (imageSource.source)
                 {
-                    const copySize = imageSource.copySize || getTexImageSourceSize(imageSource.source.source);
+                    const copySize = imageSource.size || getTexImageSourceSize(imageSource.source.source);
 
                     device.queue.copyExternalImageToTexture(
                         imageSource.source,

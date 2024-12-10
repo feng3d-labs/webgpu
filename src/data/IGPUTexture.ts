@@ -66,6 +66,8 @@ export interface IGPUTextureBufferSource
 {
     /**
      * The texture subresource and origin to write to.
+     *
+     * 写入纹理描述。
      */
     destination?: IGPUWriteTextureDestination,
 
@@ -78,13 +80,15 @@ export interface IGPUTextureBufferSource
 
     /**
      * Layout of the content in `data`.
+     *
+     * 纹理数据布局。
      */
     dataLayout: IGPUImageDataLayout,
 
     /**
      * Extents of the content to write from `data` to `destination`.
      * 
-     * 写入纹理的尺寸。
+     * 写入尺寸。
      */
     size: ITextureSize
 }
@@ -104,6 +108,7 @@ export interface IGPUImageDataLayout
      * 读取数据偏移字节数（起点）。
      */
     offset?: number;
+
     /**
      * The stride, in bytes, between the beginning of each texel block row and the subsequent
      * texel block row.
@@ -138,7 +143,7 @@ export interface IGPUTextureImageSource
      * 
      * 读取图片资源描述。
      */
-    readonly source: IGPUImageCopyExternalImage,
+    readonly source: IGPUTextureCopyExternalImage,
 
     /**
      * The texture subresource and origin to write to, and its encoding metadata.
@@ -150,9 +155,9 @@ export interface IGPUTextureImageSource
     /**
      * Extents of the content to write from `source` to `destination`.
      * 
-     * 拷贝的纹理尺寸。
+     * 写入尺寸。
      */
-    readonly copySize?: ITextureSize
+    readonly size?: ITextureSize
 }
 
 /**
@@ -160,7 +165,7 @@ export interface IGPUTextureImageSource
  * 
  * @see GPUImageCopyExternalImage
  */
-export interface IGPUImageCopyExternalImage
+export interface IGPUTextureCopyExternalImage
 {
     /**
      * The source of the image copy. The copy source data is captured at the moment that
