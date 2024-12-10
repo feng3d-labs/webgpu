@@ -26,7 +26,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     const cubeTexture: IGPUTexture = {
         size: [imageBitmap.width, imageBitmap.height],
         format: "rgba8unorm",
-        sources: [{ source: { source: imageBitmap } }],
+        sources: [{ source: { image: imageBitmap } }],
     };
 
     // Create a sampler with linear filtering for smooth interpolation.

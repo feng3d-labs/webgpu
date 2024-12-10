@@ -91,14 +91,31 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                 const imageSource = v as IGPUTextureImageSource;
                 if (imageSource.source)
                 {
-                    const copySize = imageSource.size || getTexImageSourceSize(imageSource.source.source);
+                    const source = imageSource.source;
+                    //
+                    const gpuSource: GPUImageCopyExternalImage = {
+                        source: source.image,
+                        origin: source.origin,
+                        flipY: source.flipY,
+                    };
+
+                    //
+                    const destination = { ...imageSource.destination };
+                    const gpuDestination: GPUImageCopyTextureTagged = {
+                        colorSpace: destination.colorSpace,
+                        premultipliedAlpha: destination.premultipliedAlpha,
+                        mipLevel: destination.mipLevel,
+                        origin: destination.origin,
+                        aspect: destination.aspect,
+                        texture: gpuTexture,
+                    };
+
+                    //
+                    const copySize = imageSource.size || getTexImageSourceSize(imageSource.source.image);
 
                     device.queue.copyExternalImageToTexture(
-                        imageSource.source,
-                        {
-                            texture: gpuTexture,
-                            ...v.destination,
-                        },
+                        gpuSource,
+                        gpuDestination,
                         copySize
                     );
                     return;

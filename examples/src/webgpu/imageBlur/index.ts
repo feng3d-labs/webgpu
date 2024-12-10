@@ -49,7 +49,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const cubeTexture1: IGPUTexture = {
         size: [imageBitmap.width, imageBitmap.height],
         format: "rgba8unorm",
-        sources: [{ source: { source: imageBitmap } }],
+        sources: [{ source: { image: imageBitmap } }],
     };
 
     const textures: IGPUTexture[] = [0, 1].map(() =>

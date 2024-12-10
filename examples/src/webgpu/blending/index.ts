@@ -110,7 +110,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const texture: IGPUTexture = {
             format: "rgba8unorm",
             size: [source.width, source.height],
-            sources: [{ source: { source, flipY }, destination: { premultipliedAlpha } }]
+            sources: [{ source: { image: source, flipY }, destination: { premultipliedAlpha } }]
         };
 
         return texture;

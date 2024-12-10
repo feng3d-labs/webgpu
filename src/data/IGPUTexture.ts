@@ -174,7 +174,7 @@ export interface IGPUTextureCopyExternalImage
      * 
      * 读取的图片资源。
      */
-    source: GPUImageCopyExternalImageSource;
+    image: GPUImageCopyExternalImageSource;
 
     /**
      * Defines the origin of the copy - the minimum (top-left) corner of the source sub-region to copy from.
