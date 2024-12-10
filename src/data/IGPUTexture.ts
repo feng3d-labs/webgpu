@@ -1,4 +1,4 @@
-import { ITexture, ITextureOrigin, ITextureSize } from "@feng3d/render-api";
+import { ITexture, ITextureOrigin as ITextureOrigin3D, ITextureSize } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
@@ -64,9 +64,24 @@ export type IGPUTextureSource = IGPUTextureImageSource | IGPUTextureBufferSource
  */
 export interface IGPUTextureBufferSource
 {
+    /**
+     * The texture subresource and origin to write to.
+     */
     destination?: IGPUWriteTextureDestination,
+
+    /**
+     * Data to write into `destination`.
+     */
     data: BufferSource | SharedArrayBuffer,
+
+    /**
+     * Layout of the content in `data`.
+     */
     dataLayout: GPUImageDataLayout,
+
+    /**
+     * Extents of the content to write from `data` to `destination`.
+     */
     size: GPUExtent3DStrict
 }
 
@@ -77,11 +92,25 @@ export interface IGPUTextureBufferSource
  */
 export interface IGPUTextureImageSource
 {
+    /**
+     * source image and origin to copy to `destination`.
+     */
     readonly source: GPUImageCopyExternalImage,
+
+    /**
+     * The texture subresource and origin to write to, and its encoding metadata.
+     */
     readonly destination?: IGPUTextureSourceDestination,
+
+    /**
+     * Extents of the content to write from `source` to `destination`.
+     */
     readonly copySize?: ITextureSize
 }
 
+/**
+ * 写入纹理描述（图片资源）。
+ */
 export interface IGPUTextureSourceDestination extends IGPUWriteTextureDestination
 {
     /**
@@ -94,6 +123,7 @@ export interface IGPUTextureSourceDestination extends IGPUWriteTextureDestinatio
      * conversion may not be necessary. See [[#color-space-conversion-elision]].
      */
     colorSpace?: PredefinedColorSpace;
+
     /**
      * Describes whether the data written into the texture should have its RGB channels
      * premultiplied by the alpha channel, or not.
@@ -103,26 +133,38 @@ export interface IGPUTextureSourceDestination extends IGPUWriteTextureDestinatio
      * Note:
      * If {@link GPUImageCopyTextureTagged#premultipliedAlpha} matches the source image,
      * conversion may not be necessary. See [[#color-space-conversion-elision]].
+     * 
+     * 写入纹理后是否需要预乘透明度。
      */
     premultipliedAlpha?: boolean;
 }
 
 /**
+ * 写入纹理描述。
+ * 
  * @see GPUImageCopyTexture
  */
 export interface IGPUWriteTextureDestination
 {
     /**
      * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
+     * 
+     * 写入纹理的mipmap层级索引。
      */
-    mipLevel?: GPUIntegerCoordinate;
+    mipLevel?: number;
+
     /**
      * Defines the origin of the copy - the minimum corner of the texture sub-region to copy to/from.
      * Together with `copySize`, defines the full copy sub-region.
+     * 
+     * 写入纹理的位置。
      */
-    origin?: ITextureOrigin;
+    origin?: ITextureOrigin3D;
+
     /**
      * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
+     * 
+     * 写入纹理哪部分内容。
      */
     aspect?: GPUTextureAspect;
 }
