@@ -26,11 +26,6 @@ export interface IGPUTexture extends ITexture
     source?: IGPUTextureImageSource[];
 
     /**
-     * 是否生成 mipmap。
-     */
-    readonly generateMipmap?: boolean;
-
-    /**
      * 向纹理中写入数据。
      *
      * @see GPUQueue.writeTexture
