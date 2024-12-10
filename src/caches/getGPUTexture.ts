@@ -137,13 +137,17 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
 
                 // 处理数据纹理
                 const bufferSource = v as IGPUTextureBufferSource;
-                const { destination, data, dataLayout, size } = bufferSource;
+                const { data, dataLayout, size, mipLevel, textureOrigin, aspect } = bufferSource;
+
+                const gpuDestination: GPUImageCopyTexture = {
+                    mipLevel: mipLevel,
+                    origin: textureOrigin,
+                    aspect: aspect,
+                    texture: gpuTexture,
+                };
 
                 device.queue.writeTexture(
-                    {
-                        ...destination,
-                        texture: gpuTexture,
-                    },
+                    gpuDestination,
                     data,
                     dataLayout,
                     size,

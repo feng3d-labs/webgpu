@@ -65,13 +65,6 @@ export type IGPUTextureSource = IGPUTextureImageSource | IGPUTextureBufferSource
 export interface IGPUTextureBufferSource
 {
     /**
-     * The texture subresource and origin to write to.
-     *
-     * 写入纹理描述。
-     */
-    destination?: IGPUWriteTextureDestination,
-
-    /**
      * Data to write into `destination`.
      * 
      * 包含纹理的数据。
@@ -86,11 +79,33 @@ export interface IGPUTextureBufferSource
     dataLayout: IGPUImageDataLayout,
 
     /**
+     * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
+     * 
+     * 写入纹理的mipmap层级索引。
+     */
+    mipLevel?: number;
+
+    /**
+     * Defines the origin of the copy - the minimum corner of the texture sub-region to copy to/from.
+     * Together with `copySize`, defines the full copy sub-region.
+     * 
+     * 写入纹理的位置。
+     */
+    textureOrigin?: ITextureOrigin;
+
+    /**
      * Extents of the content to write from `data` to `destination`.
      * 
      * 写入尺寸。
      */
     size: ITextureSize
+
+    /**
+     * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
+     * 
+     * 写入纹理哪部分内容。
+     */
+    aspect?: GPUTextureAspect;
 }
 
 /**
@@ -157,32 +172,3 @@ export interface IGPUTextureImageSource extends ITextureImageSource
     colorSpace?: PredefinedColorSpace;
 }
 
-/**
- * 写入纹理描述。
- * 
- * @see GPUImageCopyTexture
- */
-export interface IGPUWriteTextureDestination
-{
-    /**
-     * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
-     * 
-     * 写入纹理的mipmap层级索引。
-     */
-    mipLevel?: number;
-
-    /**
-     * Defines the origin of the copy - the minimum corner of the texture sub-region to copy to/from.
-     * Together with `copySize`, defines the full copy sub-region.
-     * 
-     * 写入纹理的位置。
-     */
-    textureOrigin?: ITextureOrigin;
-
-    /**
-     * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
-     * 
-     * 写入纹理哪部分内容。
-     */
-    aspect?: GPUTextureAspect;
-}
