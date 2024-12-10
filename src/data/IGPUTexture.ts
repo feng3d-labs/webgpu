@@ -17,7 +17,7 @@ export interface IGPUTexture extends ITexture
     readonly label?: string;
 
     /**
-     * 初始纹理数据。
+     * 纹理资源。
      *
      * @see GPUQueue.copyExternalImageToTexture
      * @see GPUQueue.writeTexture
