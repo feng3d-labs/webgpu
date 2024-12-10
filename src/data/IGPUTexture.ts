@@ -147,13 +147,6 @@ export interface IGPUTextureImageSource extends ITextureImageSource
     textureOrigin?: ITextureOrigin3D;
 
     /**
-     * Extents of the content to write from `source` to `destination`.
-     * 
-     * 写入尺寸。
-     */
-    size?: ITextureSize
-
-    /**
      * 是否Y轴翻转图片。
      */
     flipY?: boolean;
