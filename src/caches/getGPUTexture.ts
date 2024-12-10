@@ -91,7 +91,25 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                 const imageSource = v as IGPUTextureImageSource;
                 if (imageSource.image)
                 {
-                    const { image, imageOrigin, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
+                    const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
+
+                    //
+                    const copySize = imageSource.size || getTexImageSourceSize(imageSource.image);
+
+                    let imageOrigin = imageSource.imageOrigin;
+
+                    // 转换为WebGPU翻转模式
+                    if (flipY)
+                    {
+                        let x = imageOrigin?.[0];
+                        let y = imageOrigin?.[1];
+
+                        const imageSize = getTexImageSourceSize(image);
+                        y = imageSize[1] - y - copySize[1];
+
+                        imageOrigin = [x, y];
+                    }
+
                     //
                     const gpuSource: GPUImageCopyExternalImage = {
                         source: image,
@@ -108,9 +126,6 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                         aspect: aspect,
                         texture: gpuTexture,
                     };
-
-                    //
-                    const copySize = imageSource.size || getTexImageSourceSize(imageSource.image);
 
                     device.queue.copyExternalImageToTexture(
                         gpuSource,

@@ -147,16 +147,6 @@ export interface IGPUTextureImageSource extends ITextureImageSource
     textureOrigin?: ITextureOrigin3D;
 
     /**
-     * 是否Y轴翻转图片。
-     */
-    flipY?: boolean;
-
-    /**
-     * 是否需要预乘透明度。
-     */
-    premultipliedAlpha?: boolean;
-
-    /**
      * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
      * 
      * 写入纹理的mipmap层级索引。
