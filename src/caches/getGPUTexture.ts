@@ -80,12 +80,12 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
     };
     createTexture();
 
-    // 初始化纹理数据
-    const updateSource = () =>
+    // 更新纹理
+    const updateTexture = () =>
     {
-        if (texture.source)
+        if (texture.sources)
         {
-            texture.source.forEach((v) =>
+            texture.sources.forEach((v) =>
             {
                 const copySize = v.copySize || getTexImageSourceSize(v.source.source);
 
@@ -98,11 +98,11 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                     copySize
                 );
             });
-            texture.source = null;
+            texture.sources = null;
         }
     };
-    updateSource();
-    watcher.watch(texture, "source", updateSource);
+    updateTexture();
+    watcher.watch(texture, "sources", updateTexture);
 
     // 监听写纹理操作
     const writeTexture = () =>
@@ -165,7 +165,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
             //
             textureMap.delete(texture);
             //
-            watcher.unwatch(texture, "source", updateSource);
+            watcher.unwatch(texture, "sources", updateTexture);
             watcher.unwatch(texture, "writeTextures", writeTexture);
             watcher.unwatch(texture, "size", resize);
 

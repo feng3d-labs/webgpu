@@ -207,7 +207,7 @@ export class MsdfTextRenderer
       size: [imageBitmap.width, imageBitmap.height],
       label: `MSDF font texture ${url}`,
       format: "rgba8unorm",
-      source: [{
+      sources: [{
         source: { source: imageBitmap },
       }]
     };

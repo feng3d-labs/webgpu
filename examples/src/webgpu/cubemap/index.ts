@@ -66,7 +66,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
             dimension: "2d",
             format: "rgba8unorm",
-            source: textureSource,
+            sources: textureSource,
         };
     }
 

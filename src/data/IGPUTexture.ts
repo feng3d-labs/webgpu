@@ -23,14 +23,14 @@ export interface IGPUTexture extends ITexture
      *
      * @see GPUQueue.copyExternalImageToTexture
      */
-    source?: IGPUTextureImageSource[];
+    sources?: IGPUTextureImageSource[];
 
     /**
      * 向纹理中写入数据。
      *
      * @see GPUQueue.writeTexture
      */
-    writeTextures?: IGPUWriteTexture[];
+    writeTextures?: IGPUTextureBufferSource[];
 
     /**
      * Specifies what view {@link GPUTextureViewDescriptor#format} values will be allowed when calling
@@ -58,11 +58,16 @@ export interface IGPUTexture extends ITexture
 }
 
 /**
- * 写纹理 GPUQueue.writeTexture 参数列表。
- *
+ * 纹理资源
+ */
+export type IGPUTextureSource = IGPUTextureImageSource | IGPUTextureBufferSource;
+
+/**
+ * 纹理的数据缓冲区资源。
+ * 
  * @see GPUQueue.writeTexture
  */
-export interface IGPUWriteTexture
+export interface IGPUTextureBufferSource
 {
     destination?: IGPUWriteTextureDestination,
     data: BufferSource | SharedArrayBuffer,
@@ -70,6 +75,11 @@ export interface IGPUWriteTexture
     size: GPUExtent3DStrict
 }
 
+/**
+ * 纹理的图片资源。
+ *
+ * @see GPUQueue.copyExternalImageToTexture
+ */
 export interface IGPUTextureImageSource
 {
     readonly source: GPUImageCopyExternalImage,
