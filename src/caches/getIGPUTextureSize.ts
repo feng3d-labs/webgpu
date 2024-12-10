@@ -21,15 +21,6 @@ export function getIGPUTextureLikeSize(texture: IGPUTextureLike)
     return (texture as IGPUTexture).size;
 }
 
-export function getIGPUTextureSize(texture: IGPUTexture): ITextureSize
-{
-    if (texture.size) return texture.size;
-
-    const sourceSize = getIGPUTextureSourceSize(texture.source);
-
-    return sourceSize;
-}
-
 export function getIGPUTextureSourceSize(source?: IGPUTextureImageSource[]): ITextureSize
 {
     if (!source) return undefined;

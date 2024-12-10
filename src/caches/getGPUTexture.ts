@@ -8,7 +8,6 @@ import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
 import { getGPUTextureDimension } from "./getGPUTextureDimension";
-import { getIGPUTextureSize } from "./getIGPUTextureSize";
 import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
 
 /**
@@ -39,40 +38,47 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
 
     if (!autoCreate) return null;
 
-    const { format, sampleCount, dimension, viewFormats } = texture as IGPUTextureMultisample;
-    let { label, mipLevelCount } = texture;
-
-    const size = texture.size = getIGPUTextureSize(texture);
-    console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
-
-    const usage = getTextureUsageFromFormat(format, sampleCount);
-
-    // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
-    if (texture.generateMipmap && mipLevelCount === undefined)
+    // 创建纹理
+    const createTexture = () =>
     {
-        //
-        const maxSize = Math.max(size[0], size[1]);
-        mipLevelCount = 1 + Math.log2(maxSize) | 0;
-    }
-    mipLevelCount = (texture as any).mipLevelCount = mipLevelCount || 1;
+        const { format, sampleCount, dimension, viewFormats } = texture as IGPUTextureMultisample;
+        let { label, mipLevelCount } = texture;
 
-    if (label === undefined)
-    {
-        label = `GPUTexture ${autoIndex++}`;
-    }
+        const size = texture.size;
+        console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
 
-    const textureDimension = getGPUTextureDimension(dimension);
+        const usage = getTextureUsageFromFormat(format, sampleCount);
 
-    gpuTexture = device.createTexture({
-        label,
-        size,
-        mipLevelCount,
-        sampleCount,
-        dimension: textureDimension,
-        format,
-        usage,
-        viewFormats,
-    });
+        // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
+        if (texture.generateMipmap && mipLevelCount === undefined)
+        {
+            //
+            const maxSize = Math.max(size[0], size[1]);
+            mipLevelCount = 1 + Math.log2(maxSize) | 0;
+        }
+        mipLevelCount = (texture as any).mipLevelCount = mipLevelCount || 1;
+
+        if (label === undefined)
+        {
+            label = `GPUTexture ${autoIndex++}`;
+        }
+
+        const textureDimension = getGPUTextureDimension(dimension);
+
+        gpuTexture = device.createTexture({
+            label,
+            size,
+            mipLevelCount,
+            sampleCount,
+            dimension: textureDimension,
+            format,
+            usage,
+            viewFormats,
+        });
+
+        textureMap.set(texture, gpuTexture);
+    };
+    createTexture();
 
     // 初始化纹理数据
     const updateSource = () =>
@@ -167,8 +173,6 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
             anyEmitter.emit(gpuTexture, GPUTexture_destroy);
         };
     })(gpuTexture.destroy);
-
-    textureMap.set(texture, gpuTexture);
 
     return gpuTexture;
 }
