@@ -1,4 +1,4 @@
-import { ITexture, ITextureOrigin as ITextureOrigin3D, ITextureSize } from "@feng3d/render-api";
+import { IImageOrigin, ITexture, ITextureOrigin as ITextureOrigin3D, ITextureSize } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
@@ -71,18 +71,59 @@ export interface IGPUTextureBufferSource
 
     /**
      * Data to write into `destination`.
+     * 
+     * 包含纹理的数据。
      */
     data: BufferSource | SharedArrayBuffer,
 
     /**
      * Layout of the content in `data`.
      */
-    dataLayout: GPUImageDataLayout,
+    dataLayout: IGPUImageDataLayout,
 
     /**
      * Extents of the content to write from `data` to `destination`.
+     * 
+     * 写入纹理的尺寸。
      */
-    size: GPUExtent3DStrict
+    size: ITextureSize
+}
+
+/**
+ * 写入纹理的数据布局描述。
+ * 
+ * @see GPUImageDataLayout
+ */
+export interface IGPUImageDataLayout
+{
+    /**
+     * The offset, in bytes, from the beginning of the image data source (such as a
+     * {@link GPUImageCopyBuffer#buffer|GPUImageCopyBuffer.buffer}) to the start of the image data
+     * within that source.
+     * 
+     * 读取数据偏移字节数（起点）。
+     */
+    offset?: number;
+    /**
+     * The stride, in bytes, between the beginning of each texel block row and the subsequent
+     * texel block row.
+     * Required if there are multiple texel block rows (i.e. the copy height or depth is more
+     * than one block).
+     * 
+     * 每行像素所占字节数。
+     */
+    bytesPerRow?: number;
+
+    /**
+     * Number of texel block rows per single texel image of the texture.
+     * {@link GPUImageDataLayout#rowsPerImage} &times;
+     * {@link GPUImageDataLayout#bytesPerRow} is the stride, in bytes, between the beginning of each
+     * texel image of data and the subsequent texel image.
+     * Required if there are multiple texel images (i.e. the copy depth is more than one).
+     * 
+     * 每张图片所占字节数。
+     */
+    rowsPerImage?: GPUSize32;
 }
 
 /**
@@ -94,22 +135,66 @@ export interface IGPUTextureImageSource
 {
     /**
      * source image and origin to copy to `destination`.
+     * 
+     * 读取图片资源描述。
      */
-    readonly source: GPUImageCopyExternalImage,
+    readonly source: IGPUImageCopyExternalImage,
 
     /**
      * The texture subresource and origin to write to, and its encoding metadata.
+     * 
+     * 写入纹理描述（图片资源）。
      */
     readonly destination?: IGPUTextureSourceDestination,
 
     /**
      * Extents of the content to write from `source` to `destination`.
+     * 
+     * 拷贝的纹理尺寸。
      */
     readonly copySize?: ITextureSize
 }
 
 /**
+ * 读取图片资源描述。
+ * 
+ * @see GPUImageCopyExternalImage
+ */
+export interface IGPUImageCopyExternalImage
+{
+    /**
+     * The source of the image copy. The copy source data is captured at the moment that
+     * {@link GPUQueue#copyExternalImageToTexture} is issued. Source size is determined as described
+     * by the external source dimensions table.
+     * 
+     * 读取的图片资源。
+     */
+    source: GPUImageCopyExternalImageSource;
+
+    /**
+     * Defines the origin of the copy - the minimum (top-left) corner of the source sub-region to copy from.
+     * Together with `copySize`, defines the full copy sub-region.
+     * 
+     * 读取图片像素坐标。
+     */
+    origin?: IImageOrigin;
+
+    /**
+     * Describes whether the source image is vertically flipped, or not.
+     * If this option is set to `true`, the copy is flipped vertically: the bottom row of the source
+     * region is copied into the first row of the destination region, and so on.
+     * The {@link GPUImageCopyExternalImage#origin} option is still relative to the top-left corner
+     * of the source image, increasing downward.
+     * 
+     * 是否Y轴翻转图片。
+     */
+    flipY?: boolean;
+}
+
+/**
  * 写入纹理描述（图片资源）。
+ * 
+ * @see GPUImageCopyTextureTagged
  */
 export interface IGPUTextureSourceDestination extends IGPUWriteTextureDestination
 {
