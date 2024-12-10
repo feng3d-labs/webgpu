@@ -1,4 +1,4 @@
-import { IImageOrigin, ITexture, ITextureOrigin as ITextureOrigin3D, ITextureSize } from "@feng3d/render-api";
+import { ITexture, ITextureImageSource, ITextureOrigin as ITextureOrigin3D, ITextureSize } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
@@ -136,18 +136,8 @@ export interface IGPUImageDataLayout
  *
  * @see GPUQueue.copyExternalImageToTexture
  */
-export interface IGPUTextureImageSource
+export interface IGPUTextureImageSource extends ITextureImageSource
 {
-    /**
-     * 图片资源。
-     */
-    image: GPUImageCopyExternalImageSource;
-
-    /**
-     * 读取图片上的像素坐标。
-     */
-    imageOrigin?: IImageOrigin;
-
     /**
      * Defines the origin of the copy - the minimum corner of the texture sub-region to copy to/from.
      * Together with `copySize`, defines the full copy sub-region.
