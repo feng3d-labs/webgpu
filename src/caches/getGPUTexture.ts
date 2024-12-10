@@ -89,14 +89,14 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
             {
                 // 处理图片纹理
                 const imageSource = v as IGPUTextureImageSource;
-                if (imageSource.source)
+                if (imageSource.image)
                 {
-                    const source = imageSource.source;
+                    const { image, imageOrigin, flipY } = imageSource;
                     //
                     const gpuSource: GPUImageCopyExternalImage = {
-                        source: source.image,
-                        origin: source.origin,
-                        flipY: source.flipY,
+                        source: image,
+                        origin: imageOrigin,
+                        flipY: flipY,
                     };
 
                     //
@@ -111,7 +111,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                     };
 
                     //
-                    const copySize = imageSource.size || getTexImageSourceSize(imageSource.source.image);
+                    const copySize = imageSource.size || getTexImageSourceSize(imageSource.image);
 
                     device.queue.copyExternalImageToTexture(
                         gpuSource,

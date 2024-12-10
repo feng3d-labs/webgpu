@@ -35,7 +35,7 @@ export function getIGPUTextureSourceSize(source?: IGPUTextureImageSource[]): ITe
         // 获取mipLevel为0的资源尺寸。
         if (!element.destination?.mipLevel)
         {
-            const copySize = element.size || getTexImageSourceSize(element.source.image);
+            const copySize = element.size || getTexImageSourceSize(element.image);
             if (width || height)
             {
                 console.assert(width === copySize[0] && height === copySize[1], `纹理资源中提供的尺寸不正确！`);

@@ -118,7 +118,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     size: [ctx.canvas.width, ctx.canvas.height],
     format: "rgba8unorm",
     sources: [
-      { source: { image: ctx.canvas, flipY: true } },
+      { image: ctx.canvas, flipY: true },
     ],
   };
 

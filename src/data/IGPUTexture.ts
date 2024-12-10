@@ -139,11 +139,19 @@ export interface IGPUImageDataLayout
 export interface IGPUTextureImageSource
 {
     /**
-     * source image and origin to copy to `destination`.
-     * 
-     * 读取图片资源描述。
+     * 读取的图片资源。
      */
-    readonly source: IGPUTextureCopyExternalImage,
+    image: GPUImageCopyExternalImageSource;
+
+    /**
+     * 读取图片像素坐标。
+     */
+    imageOrigin?: IImageOrigin;
+
+    /**
+     * 是否Y轴翻转图片。
+     */
+    flipY?: boolean;
 
     /**
      * The texture subresource and origin to write to, and its encoding metadata.
@@ -167,33 +175,7 @@ export interface IGPUTextureImageSource
  */
 export interface IGPUTextureCopyExternalImage
 {
-    /**
-     * The source of the image copy. The copy source data is captured at the moment that
-     * {@link GPUQueue#copyExternalImageToTexture} is issued. Source size is determined as described
-     * by the external source dimensions table.
-     * 
-     * 读取的图片资源。
-     */
-    image: GPUImageCopyExternalImageSource;
 
-    /**
-     * Defines the origin of the copy - the minimum (top-left) corner of the source sub-region to copy from.
-     * Together with `copySize`, defines the full copy sub-region.
-     * 
-     * 读取图片像素坐标。
-     */
-    origin?: IImageOrigin;
-
-    /**
-     * Describes whether the source image is vertically flipped, or not.
-     * If this option is set to `true`, the copy is flipped vertically: the bottom row of the source
-     * region is copied into the first row of the destination region, and so on.
-     * The {@link GPUImageCopyExternalImage#origin} option is still relative to the top-left corner
-     * of the source image, increasing downward.
-     * 
-     * 是否Y轴翻转图片。
-     */
-    flipY?: boolean;
 }
 
 /**
