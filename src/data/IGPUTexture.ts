@@ -147,13 +147,6 @@ export interface IGPUTextureImageSource extends ITextureImageSource
     textureOrigin?: ITextureOrigin3D;
 
     /**
-     * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
-     * 
-     * 写入纹理的mipmap层级索引。
-     */
-    mipLevel?: number;
-
-    /**
      * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
      * 
      * 写入纹理哪部分内容。
