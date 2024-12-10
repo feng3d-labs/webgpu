@@ -33,7 +33,7 @@ export function getIGPUTextureSourceSize(source?: IGPUTextureImageSource[]): ITe
     {
         const element = source[i];
         // 获取mipLevel为0的资源尺寸。
-        if (!element.destination?.mipLevel)
+        if (!element.mipLevel)
         {
             const copySize = element.size || getTexImageSourceSize(element.image);
             if (width || height)
@@ -46,7 +46,7 @@ export function getIGPUTextureSourceSize(source?: IGPUTextureImageSource[]): ITe
                 height = copySize[1];
             }
 
-            maxDepthOrArrayLayers = Math.max(maxDepthOrArrayLayers, element.destination?.origin?.[2] || 0);
+            maxDepthOrArrayLayers = Math.max(maxDepthOrArrayLayers, element.textureOrigin?.[2] || 0);
         }
     }
 

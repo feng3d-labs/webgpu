@@ -91,7 +91,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                 const imageSource = v as IGPUTextureImageSource;
                 if (imageSource.image)
                 {
-                    const { image, imageOrigin, flipY } = imageSource;
+                    const { image, imageOrigin, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
                     //
                     const gpuSource: GPUImageCopyExternalImage = {
                         source: image,
@@ -100,13 +100,12 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                     };
 
                     //
-                    const destination = { ...imageSource.destination };
                     const gpuDestination: GPUImageCopyTextureTagged = {
-                        colorSpace: destination.colorSpace,
-                        premultipliedAlpha: destination.premultipliedAlpha,
-                        mipLevel: destination.mipLevel,
-                        origin: destination.origin,
-                        aspect: destination.aspect,
+                        colorSpace: colorSpace,
+                        premultipliedAlpha: premultipliedAlpha,
+                        mipLevel: mipLevel,
+                        origin: textureOrigin,
+                        aspect: aspect,
                         texture: gpuTexture,
                     };
 

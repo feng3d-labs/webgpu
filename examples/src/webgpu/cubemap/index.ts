@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const textureSource = imageBitmaps.map((v, i) =>
         {
             const item: IGPUTextureImageSource = {
-                image: v, destination: { origin: [0, 0, i] }
+                image: v, textureOrigin: [0, 0, i]
             };
 
             return item;

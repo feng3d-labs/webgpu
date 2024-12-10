@@ -139,14 +139,29 @@ export interface IGPUImageDataLayout
 export interface IGPUTextureImageSource
 {
     /**
-     * 读取的图片资源。
+     * 图片资源。
      */
     image: GPUImageCopyExternalImageSource;
 
     /**
-     * 读取图片像素坐标。
+     * 读取图片上的像素坐标。
      */
     imageOrigin?: IImageOrigin;
+
+    /**
+     * Defines the origin of the copy - the minimum corner of the texture sub-region to copy to/from.
+     * Together with `copySize`, defines the full copy sub-region.
+     * 
+     * 写入纹理的位置。
+     */
+    textureOrigin?: ITextureOrigin3D;
+
+    /**
+     * Extents of the content to write from `source` to `destination`.
+     * 
+     * 写入尺寸。
+     */
+    size?: ITextureSize
 
     /**
      * 是否Y轴翻转图片。
@@ -154,37 +169,24 @@ export interface IGPUTextureImageSource
     flipY?: boolean;
 
     /**
-     * The texture subresource and origin to write to, and its encoding metadata.
-     * 
-     * 写入纹理描述（图片资源）。
+     * 是否需要预乘透明度。
      */
-    readonly destination?: IGPUTextureSourceDestination,
+    premultipliedAlpha?: boolean;
 
     /**
-     * Extents of the content to write from `source` to `destination`.
+     * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
      * 
-     * 写入尺寸。
+     * 写入纹理的mipmap层级索引。
      */
-    readonly size?: ITextureSize
-}
+    mipLevel?: number;
 
-/**
- * 读取图片资源描述。
- * 
- * @see GPUImageCopyExternalImage
- */
-export interface IGPUTextureCopyExternalImage
-{
+    /**
+     * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
+     * 
+     * 写入纹理哪部分内容。
+     */
+    aspect?: GPUTextureAspect;
 
-}
-
-/**
- * 写入纹理描述（图片资源）。
- * 
- * @see GPUImageCopyTextureTagged
- */
-export interface IGPUTextureSourceDestination extends IGPUWriteTextureDestination
-{
     /**
      * Describes the color space and encoding used to encode data into the destination texture.
      * This [[#color-space-conversions|may result]] in values outside of the range [0, 1]
@@ -195,20 +197,6 @@ export interface IGPUTextureSourceDestination extends IGPUWriteTextureDestinatio
      * conversion may not be necessary. See [[#color-space-conversion-elision]].
      */
     colorSpace?: PredefinedColorSpace;
-
-    /**
-     * Describes whether the data written into the texture should have its RGB channels
-     * premultiplied by the alpha channel, or not.
-     * If this option is set to `true` and the {@link GPUImageCopyExternalImage#source} is also
-     * premultiplied, the source RGB values must be preserved even if they exceed their
-     * corresponding alpha values.
-     * Note:
-     * If {@link GPUImageCopyTextureTagged#premultipliedAlpha} matches the source image,
-     * conversion may not be necessary. See [[#color-space-conversion-elision]].
-     * 
-     * 写入纹理后是否需要预乘透明度。
-     */
-    premultipliedAlpha?: boolean;
 }
 
 /**
@@ -231,7 +219,7 @@ export interface IGPUWriteTextureDestination
      * 
      * 写入纹理的位置。
      */
-    origin?: ITextureOrigin3D;
+    textureOrigin?: ITextureOrigin3D;
 
     /**
      * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
