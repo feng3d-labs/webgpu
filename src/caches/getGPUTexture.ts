@@ -147,11 +147,12 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                 };
 
                 // 计算 WebGPU 中支持的参数
-                let { offset, width, height } = dataLayout;
-                const [x, y, depthOrArrayLayers] = dataImageOrigin;
-
-                width = width || size[0];
-                height = height || size[1];
+                const offset = dataLayout?.offset || 0;
+                const width = dataLayout?.width || size[0];
+                const height = dataLayout?.height || size[1];
+                const x = dataImageOrigin?.[0] || 0;
+                const y = dataImageOrigin?.[1] || 0;
+                const depthOrArrayLayers = dataImageOrigin?.[2] || 0;
 
                 // 计算偏移
                 const gpuOffset =
