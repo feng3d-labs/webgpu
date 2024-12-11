@@ -137,7 +137,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
 
                 // 处理数据纹理
                 const bufferSource = v as IGPUTextureDataSource;
-                const { data, dataLayout, size, mipLevel, textureOrigin, aspect } = bufferSource;
+                const { data, dataLayout, dataImageOrigin, size, mipLevel, textureOrigin, aspect } = bufferSource;
 
                 const gpuDestination: GPUImageCopyTexture = {
                     mipLevel: mipLevel,
@@ -146,10 +146,30 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                     texture: gpuTexture,
                 };
 
+                // 计算 WebGPU 中支持的参数
+                let { offset, width, height } = dataLayout;
+                const [x, y, depthOrArrayLayers] = dataImageOrigin;
+
+                width = width || size[0];
+                height = height || size[1];
+
+                // 计算偏移
+                const gpuOffset =
+                    (offset || 0) // 头部
+                    + (depthOrArrayLayers || 0) * (width * height * bytesPerPixel) // 读取第几张图片
+                    + (x + (y * width)) * bytesPerPixel // 读取图片位置
+                    ;
+
+                const gpuDataLayout: GPUImageDataLayout = {
+                    offset: gpuOffset,
+                    bytesPerRow: width * bytesPerPixel,
+                    rowsPerImage: height,
+                };
+
                 device.queue.writeTexture(
                     gpuDestination,
                     data,
-                    dataLayout,
+                    gpuDataLayout,
                     size,
                 );
             });

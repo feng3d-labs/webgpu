@@ -1,4 +1,4 @@
-import { ITexture, ITextureDataSource, ITextureImageSource } from "@feng3d/render-api";
+import { ITexture, ITextureDataLayout, ITextureDataSource, ITextureImageSource } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
@@ -65,56 +65,11 @@ export type IGPUTextureSource = IGPUTextureImageSource | IGPUTextureDataSource;
 export interface IGPUTextureDataSource extends ITextureDataSource
 {
     /**
-     * Layout of the content in `data`.
-     *
-     * 纹理数据布局。
-     */
-    dataLayout: IGPUImageDataLayout,
-
-    /**
      * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
      * 
      * 写入纹理哪部分内容。
      */
     aspect?: GPUTextureAspect;
-}
-
-/**
- * 写入纹理的数据布局描述。
- * 
- * @see GPUImageDataLayout
- */
-export interface IGPUImageDataLayout
-{
-    /**
-     * The offset, in bytes, from the beginning of the image data source (such as a
-     * {@link GPUImageCopyBuffer#buffer|GPUImageCopyBuffer.buffer}) to the start of the image data
-     * within that source.
-     * 
-     * 读取数据偏移字节数（起点）。
-     */
-    offset?: number;
-
-    /**
-     * The stride, in bytes, between the beginning of each texel block row and the subsequent
-     * texel block row.
-     * Required if there are multiple texel block rows (i.e. the copy height or depth is more
-     * than one block).
-     * 
-     * 每行像素所占字节数。
-     */
-    bytesPerRow?: number;
-
-    /**
-     * Number of texel block rows per single texel image of the texture.
-     * {@link GPUImageDataLayout#rowsPerImage} &times;
-     * {@link GPUImageDataLayout#bytesPerRow} is the stride, in bytes, between the beginning of each
-     * texel image of data and the subsequent texel image.
-     * Required if there are multiple texel images (i.e. the copy depth is more than one).
-     * 
-     * 每张图片的高度。
-     */
-    rowsPerImage?: GPUSize32;
 }
 
 /**
