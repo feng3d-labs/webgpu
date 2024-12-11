@@ -65,13 +65,6 @@ export type IGPUTextureSource = IGPUTextureImageSource | IGPUTextureDataSource;
 export interface IGPUTextureDataSource extends ITextureDataSource
 {
     /**
-     * Data to write into `destination`.
-     * 
-     * 图片数据。
-     */
-    data: BufferSource,
-
-    /**
      * Layout of the content in `data`.
      *
      * 纹理数据布局。
