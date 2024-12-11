@@ -1,4 +1,4 @@
-import { ITexture, ITextureImageSource, ITextureOrigin, ITextureSize } from "@feng3d/render-api";
+import { ITexture, ITextureDataSource, ITextureImageSource } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
@@ -55,21 +55,21 @@ export interface IGPUTexture extends ITexture
  * @see GPUQueue.copyExternalImageToTexture
  * @see GPUQueue.writeTexture
  */
-export type IGPUTextureSource = IGPUTextureImageSource | IGPUTextureBufferSource;
+export type IGPUTextureSource = IGPUTextureImageSource | IGPUTextureDataSource;
 
 /**
  * 纹理的数据资源。
  * 
  * @see GPUQueue.writeTexture
  */
-export interface IGPUTextureBufferSource
+export interface IGPUTextureDataSource extends ITextureDataSource
 {
     /**
      * Data to write into `destination`.
      * 
-     * 包含纹理的数据。
+     * 图片数据。
      */
-    data: BufferSource | SharedArrayBuffer,
+    data: BufferSource,
 
     /**
      * Layout of the content in `data`.
@@ -77,28 +77,6 @@ export interface IGPUTextureBufferSource
      * 纹理数据布局。
      */
     dataLayout: IGPUImageDataLayout,
-
-    /**
-     * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
-     * 
-     * 写入纹理的mipmap层级索引。
-     */
-    mipLevel?: number;
-
-    /**
-     * Defines the origin of the copy - the minimum corner of the texture sub-region to copy to/from.
-     * Together with `copySize`, defines the full copy sub-region.
-     * 
-     * 写入纹理的位置。
-     */
-    textureOrigin?: ITextureOrigin;
-
-    /**
-     * Extents of the content to write from `data` to `destination`.
-     * 
-     * 写入尺寸。
-     */
-    size: ITextureSize
 
     /**
      * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
