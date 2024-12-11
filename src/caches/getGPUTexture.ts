@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { getTexImageSourceSize, ITextureSize } from "@feng3d/render-api";
+import { getTexImageSourceSize, getTextureBytesPerPixel, ITextureSize } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUTexture, IGPUTextureDataSource, IGPUTextureImageSource, IGPUTextureLike } from "../data/IGPUTexture";
@@ -153,6 +153,9 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                 const x = dataImageOrigin?.[0] || 0;
                 const y = dataImageOrigin?.[1] || 0;
                 const depthOrArrayLayers = dataImageOrigin?.[2] || 0;
+
+                // 获取纹理每个像素对应的字节数量。
+                const bytesPerPixel = getTextureBytesPerPixel(texture.format);
 
                 // 计算偏移
                 const gpuOffset =

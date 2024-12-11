@@ -260,7 +260,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             __type: "TextureDataSource",
             mipLevel,
             data,
-            dataLayout: { bytesPerRow: size * 4 },
+            dataLayout: { width: size },
             size: [size, size]
         });
     }
