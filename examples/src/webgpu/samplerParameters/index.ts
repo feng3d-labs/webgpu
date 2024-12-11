@@ -257,6 +257,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
         }
         writeTextures.push({
+            __type: "TextureDataSource",
             mipLevel,
             data,
             dataLayout: { bytesPerRow: size * 4 },

@@ -78,9 +78,10 @@ const init = async (canvas: HTMLCanvasElement) =>
             size: [width, height, depth],
             format,
             sources: [{
+                __type: "TextureDataSource",
                 data: byteArray,
                 dataLayout: { bytesPerRow, rowsPerImage: blocksHigh },
-                size: [width, height, depth]
+                size: [width, height, depth],
             }],
         };
     }

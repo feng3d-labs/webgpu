@@ -119,7 +119,7 @@ export interface IGPUImageDataLayout
      * texel image of data and the subsequent texel image.
      * Required if there are multiple texel images (i.e. the copy depth is more than one).
      * 
-     * 每张图片所占字节数。
+     * 每张图片的高度。
      */
     rowsPerImage?: GPUSize32;
 }
