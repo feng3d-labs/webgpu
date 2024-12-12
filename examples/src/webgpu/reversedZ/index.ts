@@ -10,8 +10,8 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -197,7 +197,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         format: depthBufferFormat,
     };
 
-    const depthPrePassDescriptor: IGPURenderPassDescriptor = {
+    const depthPrePassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [],
         depthStencilAttachment: {
             view: { texture: depthTexture },
@@ -212,7 +212,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // the scene twice using different depth buffer mode on splitted viewport
     // of the same canvas
     // see the difference of the loadOp of the colorAttachments
-    const drawPassDescriptor: IGPURenderPassDescriptor = {
+    const drawPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -228,7 +228,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const drawPassLoadDescriptor: IGPURenderPassDescriptor = {
+    const drawPassLoadDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -245,7 +245,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
     const drawPassDescriptors = [drawPassDescriptor, drawPassLoadDescriptor];
 
-    const textureQuadPassDescriptor: IGPURenderPassDescriptor = {
+    const textureQuadPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -254,7 +254,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         ],
     };
-    const textureQuadPassLoadDescriptor: IGPURenderPassDescriptor = {
+    const textureQuadPassLoadDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },

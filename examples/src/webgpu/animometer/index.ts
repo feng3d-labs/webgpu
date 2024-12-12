@@ -2,7 +2,8 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor } from "@feng3d/render-api";
+import { IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -101,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     }
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },

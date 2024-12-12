@@ -6,8 +6,8 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 const shadowDepthTextureSize = 1024;
 
@@ -90,7 +90,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         format: "depth24plus-stencil8",
     };
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -202,7 +202,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         return viewProjMatrix as Float32Array;
     }
 
-    const shadowPassDescriptor: IGPURenderPassDescriptor = {
+    const shadowPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [],
         depthStencilAttachment: {
             view: { texture: shadowDepthTexture },

@@ -1,9 +1,8 @@
-import { IRenderPass } from "@feng3d/render-api";
+import { IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
 import { IGPUBlendConstant } from "./IGPUBlendConstant";
 import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
 import { IGPURenderObject } from "./IGPURenderObject";
-import { IGPURenderPassDescriptor } from "./IGPURenderPassDescriptor";
 import { IGPUScissorRect } from "./IGPUScissorRect";
 import { IGPUStencilReference } from "./IGPUStencilReference";
 import { IGPUTimestampQuery } from "./IGPUTimestampQuery";
@@ -21,7 +20,7 @@ export interface IGPURenderPass extends IRenderPass
     /**
      * 渲染通道描述。
      */
-    readonly descriptor: IGPURenderPassDescriptor;
+    readonly descriptor: IRenderPassDescriptor;
 
     /**
      * 渲染对象列表

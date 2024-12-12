@@ -1,4 +1,4 @@
-import { IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
@@ -6,7 +6,7 @@ import distanceSizedPointsVertWGSL from "./distance-sized-points.vert.wgsl";
 import fixedSizePointsVertWGSL from "./fixed-size-points.vert.wgsl";
 import orangeFragWGSL from "./orange.frag.wgsl";
 import texturedFragWGSL from "./textured.frag.wgsl";
-import { ITexture } from "@feng3d/render-api";
+import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
 
 // See: https://www.google.com/search?q=fibonacci+sphere
 function createFibonacciSphereVertices({
@@ -133,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         t: { texture },
     };
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         label: "our basic canvas renderPass",
         colorAttachments: [
             {

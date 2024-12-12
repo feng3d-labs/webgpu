@@ -4,8 +4,8 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleCubemapWGSL from "./sampleCubemap.frag.wgsl";
 
-import { ITexture, ITextureImageSource } from "@feng3d/render-api";
-import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ITexture, ITextureImageSource } from "@feng3d/render-api";
+import { IGPUBufferBinding, IGPURenderObject, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -107,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         );
     }
 
-    const renderPass: IGPURenderPassDescriptor = {
+    const renderPass: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },

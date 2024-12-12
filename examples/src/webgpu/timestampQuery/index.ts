@@ -1,4 +1,4 @@
-import { IGPUCanvasContext, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IGPUCanvasContext, IGPURenderObject, IGPURenderPipeline, IGPUSubmit, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -7,9 +7,9 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import fragmentWGSL from "../../shaders/black.frag.wgsl";
 
+import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import PerfCounter from "./PerfCounter";
-import { ITexture } from "@feng3d/render-api";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -90,7 +90,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         format: "depth24plus",
     };
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } }, // Assigned later

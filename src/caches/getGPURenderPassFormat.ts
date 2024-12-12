@@ -1,5 +1,5 @@
+import { IRenderPassDescriptor } from "@feng3d/render-api";
 import { getGPUTextureFormat } from "../caches/getGPUTextureFormat";
-import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 
 /**
@@ -8,7 +8,7 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
  * @param descriptor 渲染通道描述。
  * @returns
  */
-export function getGPURenderPassFormat(descriptor: IGPURenderPassDescriptor): IGPURenderPassFormat
+export function getGPURenderPassFormat(descriptor: IRenderPassDescriptor): IGPURenderPassFormat
 {
     let gpuRenderPassFormat: IGPURenderPassFormat = descriptor[_RenderPassFormat];
     if (gpuRenderPassFormat) return gpuRenderPassFormat;

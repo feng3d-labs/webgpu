@@ -7,8 +7,8 @@ import gridWGSL from "./grid.wgsl";
 import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
-import { ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUPassEncoder, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUPassEncoder, IGPURenderObject, IGPURenderPass, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             settings.cameraY = 0;
             settings.objectScale = 1.27;
         }
- else
+        else
         {
             if (settings.skinMode === "OFF")
             {
@@ -133,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.cameraY = 0;
                 settings.cameraZ = -11;
             }
- else
+            else
             {
                 settings.cameraX = 0;
                 settings.cameraY = -5.1;
@@ -167,7 +167,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.cameraY = 0;
                 settings.cameraZ = -11;
             }
- else
+            else
             {
                 settings.cameraX = 0;
                 settings.cameraY = -5.1;
@@ -255,7 +255,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             return perspectiveProjection;
         }
 
-return orthographicProjection;
+        return orthographicProjection;
     }
 
     function getViewMatrix()
@@ -273,7 +273,7 @@ return orthographicProjection;
                 viewMatrix
             );
         }
- else
+        else
         {
             mat4.translate(
                 viewMatrix,
@@ -282,7 +282,7 @@ return orthographicProjection;
             );
         }
 
-return viewMatrix;
+        return viewMatrix;
     }
 
     function getModelMatrix()
@@ -299,11 +299,11 @@ return viewMatrix;
             mat4.rotateY(modelMatrix, (Date.now() / 1000) * 0.5, modelMatrix);
         }
 
-return modelMatrix;
+        return modelMatrix;
     }
 
     // Pass Descriptor for GLTFs
-    const gltfRenderPassDescriptor: IGPURenderPassDescriptor = {
+    const gltfRenderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -322,7 +322,7 @@ return modelMatrix;
     };
 
     // Pass descriptor for grid with no depth testing
-    const skinnedGridRenderPassDescriptor: IGPURenderPassDescriptor = {
+    const skinnedGridRenderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -363,7 +363,7 @@ return modelMatrix;
         // Get initial bind pose positions
         animSkinnedGrid(bindPoses, 0);
         const bindPosesInv = bindPoses.map((bindPose) =>
-        mat4.inverse(bindPose));
+            mat4.inverse(bindPose));
 
         return {
             transforms,
@@ -408,11 +408,11 @@ return modelMatrix;
             {
                 m = mat4.rotateY(origMatrix, -angle);
             }
- else if (joint === 3 || joint === 4)
+            else if (joint === 3 || joint === 4)
             {
                 m = mat4.rotateX(origMatrix, joint === 3 ? angle : -angle);
             }
- else
+            else
             {
                 m = mat4.rotateZ(origMatrix, angle);
             }
@@ -502,7 +502,7 @@ return modelMatrix;
             };
             passEncoders.push(passEncoder);
         }
- else
+        else
         {
             // Our skinned grid isn't checking for depth, so we pass it
             // a separate render descriptor that does not take in a depth texture

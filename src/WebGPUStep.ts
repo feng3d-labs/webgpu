@@ -4,7 +4,7 @@ import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderObject } from "./data/IGPURenderObject";
 import { IGPURenderPass, IGPURenderPassObject } from "./data/IGPURenderPass";
-import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
+import { IRenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { WebGPU } from "./WebGPU";
 
@@ -26,7 +26,7 @@ export class WebGPUStep
         this.webGPU = webGPU;
     }
 
-    renderPass(descriptor: IGPURenderPassDescriptor)
+    renderPass(descriptor: IRenderPassDescriptor)
     {
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
         //

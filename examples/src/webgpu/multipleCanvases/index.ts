@@ -1,4 +1,5 @@
-import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -174,7 +175,7 @@ const init = async () =>
         bindGroup: IGPUBindingResources;
         rotation: number;
         model: Model;
-        renderPassDescriptor?: IGPURenderPassDescriptor
+        renderPassDescriptor?: IRenderPassDescriptor
     };
 
     const outerElem = document.querySelector("#outer");
@@ -271,7 +272,7 @@ const init = async () =>
 
             // Get the current texture from the canvas context and
             // set it as the texture to render to.
-            const renderPassDescriptor: IGPURenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
+            const renderPassDescriptor: IRenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
                 label: "our basic canvas renderPass",
                 colorAttachments: [
                     {

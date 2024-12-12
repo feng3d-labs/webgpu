@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { ITexture, ITextureView } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ITexture, ITextureView } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -203,7 +203,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ];
 
     const clearValue: [red: number, green: number, blue: number, alpha: number] = [0, 0, 0, 0];
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         label: "our basic canvas renderPass",
         colorAttachments: [
             {

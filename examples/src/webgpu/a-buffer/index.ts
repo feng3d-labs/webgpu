@@ -7,8 +7,8 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { ITexture, ITextureView } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ITexture, ITextureView } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -91,7 +91,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "translucentPipeline",
     };
 
-    const translucentPassDescriptor: IGPURenderPassDescriptor = {
+    const translucentPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 loadOp: "load",
@@ -127,7 +127,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "compositePipeline",
     };
 
-    const compositePassDescriptor: IGPURenderPassDescriptor = {
+    const compositePassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -247,7 +247,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             sliceInfo: { sliceStartY: undefined },
         };
 
-        const opaquePassDescriptor: IGPURenderPassDescriptor = {
+        const opaquePassDescriptor: IRenderPassDescriptor = {
             colorAttachments: [
                 {
                     view: { texture: { context } },

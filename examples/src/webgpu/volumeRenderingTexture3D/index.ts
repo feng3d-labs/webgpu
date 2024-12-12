@@ -4,8 +4,8 @@ import volumeWGSL from "./volume.wgsl";
 
 const gui = new GUI();
 
-import { ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         myTexture: { texture: volumeTexture },
     };
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later

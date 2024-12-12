@@ -1,7 +1,8 @@
 import { GUI } from "dat.gui";
 import checkerWGSL from "./checker.wgsl";
 
-import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IGPUBindingResources, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor } from "@feng3d/render-api";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -87,7 +88,7 @@ return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
         uni.color1 = cssColorToRGBA(settings.color1);
         uni.size = settings.size;
 
-        const renderPassDescriptor: IGPURenderPassDescriptor = {
+        const renderPassDescriptor: IRenderPassDescriptor = {
             colorAttachments: [
                 {
                     view: { texture: { context: { canvasId: canvas.id } } },

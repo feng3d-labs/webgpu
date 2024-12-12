@@ -1,9 +1,7 @@
 import { anyEmitter } from "@feng3d/event";
-import { IRenderPassColorAttachment, ITextureLike, ITextureView } from "@feng3d/render-api";
+import { IRenderPassColorAttachment, IRenderPassDepthStencilAttachment, IRenderPassDescriptor, ITextureLike, ITextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
-import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
-import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPUTexture_resize } from "../eventnames";
 import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { NGPURenderPassColorAttachment } from "../internal/internal";
@@ -18,9 +16,9 @@ import { getIGPUTextureLikeSize } from "./getIGPUTextureSize";
  * @param descriptor 渲染通道描述。
  * @returns GPU渲染通道描述。
  */
-export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURenderPassDescriptor): GPURenderPassDescriptor
+export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IRenderPassDescriptor): GPURenderPassDescriptor
 {
-    const renderPassDescriptorMap: Map<IGPURenderPassDescriptor, GPURenderPassDescriptor> = device["_RenderPassDescriptorMap"] = device["_RenderPassDescriptorMap"] || new Map();
+    const renderPassDescriptorMap: Map<IRenderPassDescriptor, GPURenderPassDescriptor> = device["_RenderPassDescriptorMap"] = device["_RenderPassDescriptorMap"] || new Map();
     let renderPassDescriptor = renderPassDescriptorMap.get(descriptor);
     if (renderPassDescriptor)
     {
@@ -129,7 +127,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
  *
  * @returns 渲染通道附件上的纹理描述列表。
  */
-function getAttachmentTextures(colorAttachments: readonly IRenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
+function getAttachmentTextures(colorAttachments: readonly IRenderPassColorAttachment[], depthStencilAttachment?: IRenderPassDepthStencilAttachment)
 {
     const textures: ITextureLike[] = [];
 
@@ -160,7 +158,7 @@ function getAttachmentTextures(colorAttachments: readonly IRenderPassColorAttach
  * @param renderPass 渲染通道描述。
  * @param attachmentSize 附件尺寸。
  */
-function setIGPURenderPassAttachmentSize(colorAttachments: NGPURenderPassColorAttachment[], depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: { width: number; height: number; })
+function setIGPURenderPassAttachmentSize(colorAttachments: NGPURenderPassColorAttachment[], depthStencilAttachment: IRenderPassDepthStencilAttachment, attachmentSize: { width: number; height: number; })
 {
     const attachmentTextures = getIGPURenderPassAttachmentTextures(colorAttachments, depthStencilAttachment);
     attachmentTextures.forEach((v) => setIGPUTextureSize(v, attachmentSize));
@@ -201,7 +199,7 @@ function setIGPUTextureSize(texture: ITextureLike, attachmentSize: { width: numb
  * @param depthStencilAttachment 深度模板附件。
  * @returns 渲染通道附件上的纹理描述列表。
  */
-function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
+function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassColorAttachment[], depthStencilAttachment?: IRenderPassDepthStencilAttachment)
 {
     const textures: ITextureLike[] = [];
 
@@ -267,7 +265,7 @@ const multisampleTextureMap = new WeakMap<ITextureLike, ITextureView>();
  * @param multisample 多重采样次数。
  * @returns 深度模板附件完整描述。
  */
-function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURenderPassDepthStencilAttachment, attachmentSize: { width: number, height: number }, multisample: number)
+function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IRenderPassDepthStencilAttachment, attachmentSize: { width: number, height: number }, multisample: number)
 {
     if (!depthStencilAttachment) return undefined;
 
@@ -283,12 +281,12 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURen
         };
     }
 
-    const depthClearValue = depthStencilAttachment.depthClearValue;
-    const depthLoadOp = depthStencilAttachment.depthLoadOp;
+    const depthClearValue = (depthStencilAttachment.depthClearValue !== undefined) ? depthStencilAttachment.depthClearValue : 1;
+    const depthLoadOp = depthStencilAttachment.depthLoadOp || "load";
     const depthStoreOp = depthStencilAttachment.depthStoreOp;
 
     //
-    const gpuDepthStencilAttachment: IGPURenderPassDepthStencilAttachment = {
+    const gpuDepthStencilAttachment: IRenderPassDepthStencilAttachment = {
         ...depthStencilAttachment,
         view,
         depthClearValue,
@@ -338,7 +336,7 @@ function getIGPURenderPassColorAttachments(colorAttachments: readonly IRenderPas
  *
  * @param renderPass 渲染通道描述。
  */
-function updateAttachmentSize(renderPass: IGPURenderPassDescriptor)
+function updateAttachmentSize(renderPass: IRenderPassDescriptor)
 {
     const attachmentTextures = getAttachmentTextures(renderPass.colorAttachments, renderPass.depthStencilAttachment);
     if (!renderPass.attachmentSize)
