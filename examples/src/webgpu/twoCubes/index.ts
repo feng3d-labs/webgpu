@@ -1,12 +1,13 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
+import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPUBufferBinding, WebGPU } from "@feng3d/webgpu";
+
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { IGPUBufferBinding, IGPURenderObject, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -41,7 +42,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {
@@ -63,7 +64,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const renderObject1: IGPURenderObject = {
+    const renderObject1: IRenderObject = {
         ...renderObject,
         bindingResources: {
             uniforms: uniforms1,

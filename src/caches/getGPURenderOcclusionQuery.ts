@@ -1,10 +1,10 @@
 import { anyEmitter } from "@feng3d/event";
-import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
-import { IGPURenderPassObject } from "../data/IGPURenderPass";
-import { GPUQueue_submit } from "../eventnames";
-import { IRenderPass } from "@feng3d/render-api";
+import { IRenderPass, IRenderPassObject } from "@feng3d/render-api";
 
-export function getGPURenderOcclusionQuery(renderObjects?: readonly IGPURenderPassObject[]): GPURenderOcclusionQuery
+import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
+import { GPUQueue_submit } from "../eventnames";
+
+export function getGPURenderOcclusionQuery(renderObjects?: readonly IRenderPassObject[]): GPURenderOcclusionQuery
 {
     if (!renderObjects) return defautRenderOcclusionQuery;
     let renderOcclusionQuery: GPURenderOcclusionQuery = renderObjects["_GPURenderOcclusionQuery"];

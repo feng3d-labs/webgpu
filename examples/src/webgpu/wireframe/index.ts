@@ -1,5 +1,5 @@
-import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import { mat3, mat4 } from "wgpu-matrix";
@@ -260,7 +260,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 gui.add(settings, "alphaThreshold", 0, 1).onChange(updateThickness)
             );
         }
- else
+        else
         {
             guis.push(
                 gui.add(settings, "depthBias", -3, 3, 1).onChange(rebuildLitPipeline),
@@ -302,7 +302,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const viewProjection = mat4.multiply(projection, view);
 
-        const renderObjects: IGPURenderObject[] = [];
+        const renderObjects: IRenderObject[] = [];
 
         objectInfos.forEach(
             (

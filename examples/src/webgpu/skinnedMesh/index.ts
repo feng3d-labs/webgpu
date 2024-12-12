@@ -7,8 +7,8 @@ import gridWGSL from "./grid.wgsl";
 import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
-import { IPassEncoder, IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderObject, WebGPU } from "@feng3d/webgpu";
+import { IPassEncoder, IRenderObject, IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -487,7 +487,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         if (settings.object === "Whale")
         {
-            const renderObjects: IGPURenderObject[] = [];
+            const renderObjects: IRenderObject[] = [];
             const bindingResources: IGPUBindingResources = {
                 ...cameraBGCluster,
                 ...generalUniformsBGCLuster,
@@ -508,7 +508,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // a separate render descriptor that does not take in a depth texture
             // Pass in vertex and index buffers generated from our static skinned grid
             // data at ./gridData.ts
-            const renderObject: IGPURenderObject = {
+            const renderObject: IRenderObject = {
                 pipeline: skinnedGridPipeline,
                 bindingResources: {
                     ...cameraBGCluster,

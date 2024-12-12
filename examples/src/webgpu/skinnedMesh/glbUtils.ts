@@ -1,7 +1,8 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer, IGPUDrawIndexed, IGPUDrawVertex, IGPUFragmentState, IGPUPrimitiveState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu";
+import { IRenderObject } from "@feng3d/render-api";
+import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer, IGPUDrawIndexed, IGPUDrawVertex, IGPUFragmentState, IGPUPrimitiveState, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -451,7 +452,7 @@ export class GLTFPrimitive
         this.renderPipeline = rpDescript;
     }
 
-    render(renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources)
+    render(renderObjects: IRenderObject[], bindingResources: IGPUBindingResources)
     {
         let drawIndexed: IGPUDrawIndexed;
         let drawVertex: IGPUDrawVertex;
@@ -468,7 +469,7 @@ export class GLTFPrimitive
             drawVertex = { vertexCount };
         }
 
-        const renderObject: IGPURenderObject = {
+        const renderObject: IRenderObject = {
             pipeline: this.renderPipeline,
             bindingResources,
             //if skin do something with bone bind group
@@ -508,7 +509,7 @@ export class GLTFMesh
         }
     }
 
-    render(renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources)
+    render(renderObjects: IRenderObject[], bindingResources: IGPUBindingResources)
     {
         // We take a pretty simple approach to start. Just loop through all the primitives and
         // call their individual draw methods
@@ -663,7 +664,7 @@ export class GLTFNode
     }
 
     renderDrawables(
-        renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources
+        renderObjects: IRenderObject[], bindingResources: IGPUBindingResources
     )
     {
         if (this.drawables !== undefined)

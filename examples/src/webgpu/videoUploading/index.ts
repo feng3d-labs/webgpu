@@ -1,5 +1,5 @@
-import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { IGPURenderObject, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPUSampler, WebGPU } from "@feng3d/webgpu";
 
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import sampleExternalTextureWGSL from "../../shaders/sampleExternalTexture.frag.wgsl";
@@ -37,7 +37,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: fullscreenTexturedQuadWGSL }, fragment: { code: sampleExternalTextureWGSL },
         },

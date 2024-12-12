@@ -3,8 +3,8 @@ import { GUI } from "dat.gui";
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { IGPUComputeObject, IGPURenderObject, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPUComputeObject, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -91,7 +91,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
             primitive: {
@@ -106,7 +106,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         drawVertex: { vertexCount: 3, instanceCount: numParticles }
     };
 
-    const renderObject1: IGPURenderObject = {
+    const renderObject1: IRenderObject = {
         ...renderObject,
         vertices: {
             ...renderObject.vertices,

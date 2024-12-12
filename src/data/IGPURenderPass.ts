@@ -2,7 +2,6 @@ import { IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
 import { IGPUBlendConstant } from "./IGPUBlendConstant";
 import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
-import { IGPURenderObject } from "./IGPURenderObject";
 import { IGPUScissorRect } from "./IGPUScissorRect";
 import { IGPUStencilReference } from "./IGPUStencilReference";
 import { IGPUTimestampQuery } from "./IGPUTimestampQuery";
@@ -20,11 +19,6 @@ declare module "@feng3d/render-api"
     export interface IRenderPass
     {
         /**
-         * 渲染对象列表
-         */
-        renderObjects?: readonly IGPURenderPassObject[];
-
-        /**
          * 渲染不被遮挡查询结果。具体数据保存在各子项的"result"属性中。
          *
          * 当提交WebGPU后自动获取结果后填充该属性。
@@ -38,20 +32,14 @@ declare module "@feng3d/render-api"
          */
         timestampQuery?: IGPUTimestampQuery;
     }
-}
 
-/**
- * 渲染通道中的执行项。
- */
-export type IGPURenderPassObject = IGPURenderPassObjectMap[keyof IGPURenderPassObjectMap];
-
-export interface IGPURenderPassObjectMap
-{
-    IGPURenderObject: IGPURenderObject;
-    IGPUViewport: IGPUViewport;
-    IGPUScissorRect: IGPUScissorRect;
-    IGPURenderBundle: IGPURenderBundle;
-    IGPUOcclusionQuery: IGPUOcclusionQuery;
-    IGPUBlendConstant: IGPUBlendConstant;
-    IGPUStencilReference: IGPUStencilReference;
+    export interface IRenderPassObjectMap
+    {
+        IGPUViewport: IGPUViewport;
+        IGPUScissorRect: IGPUScissorRect;
+        IGPURenderBundle: IGPURenderBundle;
+        IGPUOcclusionQuery: IGPUOcclusionQuery;
+        IGPUBlendConstant: IGPUBlendConstant;
+        IGPUStencilReference: IGPUStencilReference;
+    }
 }

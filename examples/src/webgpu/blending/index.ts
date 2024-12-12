@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, IRenderPassObject, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderPipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -514,30 +514,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         updateUniforms(srcUniform, canvas, srcTexture);
         updateUniforms(dstUniform, canvas, dstTexture);
 
-        const pass: IRenderPass = {
-            descriptor: renderPassDescriptor,
-            renderObjects: []
-        };
-
-        const submit: ISubmit = {
-            commandEncoders: [{
-                passEncoders: [pass]
-            }],
-        };
-
-        const ro: IGPURenderObject = {
+        const ro: IRenderObject = {
             pipeline: dstPipeline,
             bindingResources: dstBindGroup,
             drawVertex: { vertexCount: 6 },
         };
 
-        const ro1: IGPURenderObject = {
+        const ro1: IRenderObject = {
             pipeline: srcPipeline,
             bindingResources: srcBindGroup,
             drawVertex: { vertexCount: 6 },
         };
 
-        pass.renderObjects = [
+        const renderObjects: IRenderPassObject[] = [
             ro,
 
             // draw source texture with blending
@@ -545,6 +534,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             ro1,
         ];
+
+        const submit: ISubmit = {
+            commandEncoders: [{
+                passEncoders: [{
+                    descriptor: renderPassDescriptor,
+                    renderObjects: renderObjects
+                }]
+            }],
+        };
 
         webgpu.submit(submit);
     }

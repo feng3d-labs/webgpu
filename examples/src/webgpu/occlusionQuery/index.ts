@@ -2,9 +2,9 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import solidColorLitWGSL from "./solidColorLit.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IRenderObject, IRenderPass, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderObject, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu";
 
 const info = document.querySelector("#info");
 
@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline,
         vertices: {
             position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
@@ -140,9 +140,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         drawIndexed: { indexCount: indices.length },
     };
 
-    const renderObjects: IGPURenderObject[] = objectInfos.map((v) =>
+    const renderObjects: IRenderObject[] = objectInfos.map((v) =>
     {
-        const ro: IGPURenderObject = {
+        const ro: IRenderObject = {
             ...renderObject,
             bindingResources: {
                 uni: {

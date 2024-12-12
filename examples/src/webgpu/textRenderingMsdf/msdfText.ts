@@ -2,8 +2,8 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler } from "@feng3d/webgpu";
+import { IRenderPassObject, ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle, IGPURenderPipeline, IGPUSampler } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -444,7 +444,7 @@ export class MsdfTextRenderer
     buffer.writeBuffers = writeBuffers;
   }
 
-  render(renderObjects: IGPURenderPassObject[], ...text: MsdfText[])
+  render(renderObjects: IRenderPassObject[], ...text: MsdfText[])
   {
     const renderBundles = text.map((t) => t.getRenderBundle());
 

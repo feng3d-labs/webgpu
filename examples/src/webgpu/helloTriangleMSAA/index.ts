@@ -1,5 +1,5 @@
-import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { IGPURenderObject, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 import redFragWGSL from "../../shaders/red.frag.wgsl";
 import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
@@ -20,7 +20,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         sampleCount: 4, // 设置多重采样数量
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },

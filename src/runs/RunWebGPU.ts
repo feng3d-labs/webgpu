@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, IRenderPass, ISubmit } from "@feng3d/render-api";
+import { ICommandEncoder, IRenderObject, IRenderPass, IRenderPassObject, ISubmit } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -22,8 +22,6 @@ import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
-import { IGPURenderObject } from "../data/IGPURenderObject";
-import { IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUStencilReference } from "../data/IGPUStencilReference";
@@ -114,7 +112,7 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, renderPass);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IGPURenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IRenderPassObject[])
     {
         if (!renderObjects) return;
         //
@@ -122,7 +120,7 @@ export class RunWebGPU
         {
             if (!element.__type)
             {
-                this.runRenderObject(device, passEncoder, renderPassFormat, element as IGPURenderObject);
+                this.runRenderObject(device, passEncoder, renderPassFormat, element as IRenderObject);
             }
             else if (element.__type === "RenderObject")
             {
@@ -154,7 +152,7 @@ export class RunWebGPU
             }
             else
             {
-                throw `未处理 ${(element as IGPURenderPassObject).__type} 类型的渲染通道对象！`;
+                throw `未处理 ${(element as IRenderPassObject).__type} 类型的渲染通道对象！`;
             }
         });
     }
@@ -263,12 +261,12 @@ export class RunWebGPU
         passEncoder.executeBundles([gpuRenderBundle]);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IGPURenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IRenderObject[])
     {
         //
         renderObjects.forEach((element) =>
         {
-            this.runRenderObject(device, passEncoder, renderPassFormat, element as IGPURenderObject);
+            this.runRenderObject(device, passEncoder, renderPassFormat, element as IRenderObject);
         });
     }
 
@@ -318,7 +316,7 @@ export class RunWebGPU
      * @param renderObject 渲染对象。
      * @param renderPass 渲染通道。
      */
-    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
+    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
     {
         const { pipeline: gpuRenderPipeline, setBindGroups, vertexBuffers, setIndexBuffer, drawVertex, drawIndexed } = getNGPURenderObject(device, renderPassFormat, renderObject);
 

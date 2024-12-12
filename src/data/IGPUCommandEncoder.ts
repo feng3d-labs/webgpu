@@ -11,13 +11,4 @@ declare module "@feng3d/render-api"
         IGPUCopyTextureToTexture: IGPUCopyTextureToTexture;
         IGPUCopyBufferToBuffer: IGPUCopyBufferToBuffer;
     }
-
-    /**
-     * 命令编码器。
-     *
-     * @see GPUCommandEncoder
-     */
-    export interface ICommandEncoder
-    {
-    }
 }

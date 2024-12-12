@@ -1,4 +1,4 @@
-import { IGPURenderObject } from "./IGPURenderObject";
+import { IRenderObject } from "@feng3d/render-api";
 
 /**
  * GPU渲染捆绑对象。
@@ -22,7 +22,7 @@ export interface IGPURenderBundle
     /**
      * GPU渲染对象列表。
      */
-    renderObjects: readonly IGPURenderObject[];
+    renderObjects: readonly IRenderObject[];
 }
 
 /**

@@ -1,5 +1,5 @@
-import { IRenderPass, IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderObject, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderPipeline, IGPUSampler, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import Stats from "stats-js";
@@ -12,7 +12,7 @@ import meshWGSL from "./mesh.wgsl";
 
 interface Renderable
 {
-    renderObject?: IGPURenderObject;
+    renderObject?: IRenderObject;
     vertexAttributes: IGPUVertexAttributes;
     indices: Uint16Array;
     indexCount: number;
@@ -245,7 +245,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     // same code both to render the scene normally and to build the render bundle.
     function renderScene()
     {
-        const ros: IGPURenderObject[] = [];
+        const ros: IRenderObject[] = [];
         // Loop through every renderable object and draw them individually.
         // (Because many of these meshes are repeated, with only the transforms
         // differing, instancing would be highly effective here. This sample
@@ -312,7 +312,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
         getIGPUBuffer(uniformBuffer).writeBuffers = [{ data: transformationMatrix }];
 
-        let renderObjects: IGPURenderPassObject[] = [];
+        let renderObjects: IRenderPassObject[] = [];
         if (settings.useRenderBundles)
         {
             // Executing a bundle is equivalent to calling all of the commands encoded

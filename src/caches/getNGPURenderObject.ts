@@ -1,4 +1,5 @@
-import { IGPUIndicesDataTypes, IGPURenderObject } from "../data/IGPURenderObject";
+import { IRenderObject } from "@feng3d/render-api";
+import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
 import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { NGPURenderObject, NGPUSetBindGroup, NGPUSetIndexBuffer, NGPUVertexBuffer1 } from "../internal/NGPURenderObject";
@@ -9,7 +10,7 @@ import { getIGPUVertexBuffer } from "./getIGPUBuffer";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 import { getNGPURenderPipeline } from "./getNGPURenderPipeline";
 
-export function getNGPURenderObject(device: GPUDevice, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
+export function getNGPURenderObject(device: GPUDevice, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
 {
     const { pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
 
