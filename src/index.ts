@@ -28,7 +28,6 @@ export * from "./data/IGPURenderPassDescriptor";
 export * from "./data/IGPURenderPipeline";
 export * from "./data/IGPUSampler";
 export * from "./data/IGPUScissorRect";
-export * from "./data/IGPUSubmit";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IGPUTimestampQuery";
