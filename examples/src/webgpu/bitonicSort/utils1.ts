@@ -2,8 +2,8 @@ import type { GUI } from "dat.gui";
 import Stats from "stats.js";
 import { quitIfAdapterNotAvailable, quitIfWebGPUNotAvailable } from "../util";
 
-import { ICommandEncoder, IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPipeline } from "@feng3d/webgpu";
+import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline } from "@feng3d/render-api";
+import { IGPUBindingResources } from "@feng3d/webgpu";
 
 const fullscreenTexturedQuad
     = `
@@ -125,14 +125,14 @@ export abstract class Base2DRendererClass
         ...args: unknown[]
     ): void;
     renderPassDescriptor: IRenderPassDescriptor;
-    pipeline: IGPURenderPipeline;
+    pipeline: IRenderPipeline;
     bindGroupMap: Record<string, GPUBindGroup>;
     currentBindGroupName: string;
 
     executeRun(
         commandEncoder: ICommandEncoder,
         renderPassDescriptor: IRenderPassDescriptor,
-        pipeline: IGPURenderPipeline,
+        pipeline: IRenderPipeline,
         bindingResources?: IGPUBindingResources
     )
     {
@@ -169,7 +169,7 @@ export abstract class Base2DRendererClass
         code: string,
     )
     {
-        const renderPipeline: IGPURenderPipeline = {
+        const renderPipeline: IRenderPipeline = {
             label: `${label}.pipeline`,
             vertex: {
                 code: fullscreenTexturedQuad,

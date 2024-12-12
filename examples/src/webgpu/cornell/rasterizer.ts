@@ -1,6 +1,6 @@
-import { IGPUBindingResources, IGPURenderPipeline } from "@feng3d/webgpu";
+import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources } from "@feng3d/webgpu";
 
-import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
 import Common from "./common";
 import Radiosity from "./radiosity";
 import rasterizerWGSL from "./rasterizer.wgsl";
@@ -14,7 +14,7 @@ export default class Rasterizer
     private readonly common: Common;
     private readonly scene: Scene;
     private readonly renderPassDescriptor: IRenderPassDescriptor;
-    private readonly pipeline: IGPURenderPipeline;
+    private readonly pipeline: IRenderPipeline;
     private readonly bindGroup: IGPUBindingResources;
 
     constructor(

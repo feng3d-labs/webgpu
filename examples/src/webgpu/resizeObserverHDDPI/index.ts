@@ -1,14 +1,14 @@
 import { GUI } from "dat.gui";
 import checkerWGSL from "./checker.wgsl";
 
-import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { IGPUBindingResources, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const webgpu = await new WebGPU().init();
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: { code: checkerWGSL },
         fragment: {
             code: checkerWGSL,

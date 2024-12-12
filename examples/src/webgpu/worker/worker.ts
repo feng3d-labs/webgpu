@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { getOffscreenCanvasId, IGPUCanvasContext, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { getOffscreenCanvasId, IGPUCanvasContext, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
@@ -78,7 +78,7 @@ async function init(canvas: OffscreenCanvas)
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },

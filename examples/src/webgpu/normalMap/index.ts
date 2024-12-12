@@ -1,5 +1,5 @@
-import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
 import { createBoxMeshWithTangents } from "../../meshes/box";
@@ -232,7 +232,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const texturedCubePipeline: IGPURenderPipeline = create3DRenderPipeline(
+    const texturedCubePipeline: IRenderPipeline = create3DRenderPipeline(
         "NormalMappingRender",
         normalMapWGSL,
         // Position,   normal       uv           tangent      bitangent

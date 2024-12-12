@@ -2,7 +2,6 @@ import { IRenderObject } from "@feng3d/render-api";
 import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPUDrawIndexed } from "./IGPUDrawIndexed";
 import { IGPUDrawVertex } from "./IGPUDrawVertex";
-import { IGPURenderPipeline } from "./IGPURenderPipeline";
 import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
 
 declare module "@feng3d/render-api"
@@ -16,11 +15,6 @@ declare module "@feng3d/render-api"
          * 数据类型。
          */
         readonly __type?: "RenderObject";
-
-        /**
-         * GPU渲染管线描述。
-         */
-        readonly pipeline: IGPURenderPipeline;
 
         /**
          * 顶点属性数据映射。

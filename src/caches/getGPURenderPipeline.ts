@@ -1,4 +1,4 @@
-import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
+import { IRenderPipeline } from "@feng3d/render-api";
 import { NGPURenderPipeline } from "../internal/NGPURenderPipeline";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
@@ -39,4 +39,4 @@ export function getGPURenderPipeline(device: GPUDevice, descriptor: NGPURenderPi
     return pipeline;
 }
 
-const pipelineMap = new Map<IGPURenderPipeline, GPURenderPipeline>();
+const pipelineMap = new Map<IRenderPipeline, GPURenderPipeline>();

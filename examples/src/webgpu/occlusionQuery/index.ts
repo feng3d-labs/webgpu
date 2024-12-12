@@ -2,9 +2,9 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import solidColorLitWGSL from "./solidColorLit.wgsl";
 
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, WebGPU } from "@feng3d/webgpu";
 
 const info = document.querySelector("#info");
 
@@ -21,7 +21,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: solidColorLitWGSL,
         },

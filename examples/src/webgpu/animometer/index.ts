@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { IGPURenderBundle, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { IGPURenderBundle, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -33,7 +33,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const vec4Size = 4 * Float32Array.BYTES_PER_ELEMENT;
 
-    const pipelineDesc: IGPURenderPipeline = {
+    const pipelineDesc: IRenderPipeline = {
         vertex: {
             code: animometerWGSL,
         },
@@ -45,7 +45,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         ...pipelineDesc,
     };
 

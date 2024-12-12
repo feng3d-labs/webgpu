@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, IRenderObject, IRenderPass, IRenderPassObject, ISubmit } from "@feng3d/render-api";
+import { ICommandEncoder, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, ISubmit } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -22,7 +22,6 @@ import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
-import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUStencilReference } from "../data/IGPUStencilReference";
 import { IGPUViewport } from "../data/IGPUViewport";
@@ -378,7 +377,7 @@ export class RunWebGPU
         passEncoder.setScissorRect(x, y, width, height);
     }
 
-    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IRenderPipeline, bindingResources: IGPUBindingResources)
     {
         // 计算 bindGroups
         const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);

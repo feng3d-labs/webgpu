@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import { mat3, mat4 } from "wgpu-matrix";
@@ -48,7 +48,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return model;
     });
 
-    let litPipeline: IGPURenderPipeline;
+    let litPipeline: IRenderPipeline;
     function rebuildLitPipeline()
     {
         litPipeline = {
@@ -76,7 +76,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
     rebuildLitPipeline();
 
-    const wireframePipeline: IGPURenderPipeline = {
+    const wireframePipeline: IRenderPipeline = {
         label: "wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const barycentricCoordinatesBasedWireframePipeline: IGPURenderPipeline = {
+    const barycentricCoordinatesBasedWireframePipeline: IRenderPipeline = {
         label: "barycentric coordinates based wireframe pipeline",
         vertex: {
             code: wireframeWGSL,

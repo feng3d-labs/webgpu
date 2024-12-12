@@ -1,5 +1,5 @@
-import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPURenderPipeline, IGPUSampler, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUSampler, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
@@ -93,7 +93,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 depthCompare: "less",
                 format: depthFormat,
             },
-        } as IGPURenderPipeline)
+        } as IRenderPipeline)
         )
     );
 

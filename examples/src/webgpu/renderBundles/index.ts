@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderPipeline, IGPUSampler, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPUSampler, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import Stats from "stats-js";
@@ -42,7 +42,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         canvasId: canvas.id,
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: meshWGSL,
         },

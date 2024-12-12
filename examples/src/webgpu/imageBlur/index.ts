@@ -3,8 +3,8 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -24,7 +24,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const fullscreenQuadPipeline1: IGPURenderPipeline = {
+    const fullscreenQuadPipeline1: IRenderPipeline = {
         vertex: {
             code: fullscreenTexturedQuadWGSL,
         },

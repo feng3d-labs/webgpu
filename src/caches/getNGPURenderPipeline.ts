@@ -1,12 +1,12 @@
 import { watcher } from "@feng3d/watcher";
 
+import { IRenderPipeline } from "@feng3d/render-api";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { IGPUDepthStencilState } from "../data/IGPUDepthStencilState";
 import { IGPUFragmentState } from "../data/IGPUFragmentState";
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
 import { IGPUPrimitiveState } from "../data/IGPUPrimitiveState";
 import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
-import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexState } from "../data/IGPUVertexState";
 import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
@@ -27,7 +27,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, indices: IGPUIndicesDataTypes)
+export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, indices: IGPUIndicesDataTypes)
 {
     const indexFormat = indices ? getIGPUIndexBuffer(indices).indexFormat : undefined;
 
@@ -68,7 +68,7 @@ export function getNGPURenderPipeline(renderPipeline: IGPURenderPipeline, render
 }
 
 const renderPipelineMap = new ChainMap<
-    [IGPURenderPipeline, string, IGPUVertexAttributes, GPUIndexFormat],
+    [IRenderPipeline, string, IGPUVertexAttributes, GPUIndexFormat],
     {
         /**
          * GPU渲染管线描述。

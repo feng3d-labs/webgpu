@@ -1,8 +1,8 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { IRenderObject } from "@feng3d/render-api";
-import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer, IGPUDrawIndexed, IGPUDrawVertex, IGPUFragmentState, IGPUPrimitiveState, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPipeline } from "@feng3d/render-api";
+import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer, IGPUDrawIndexed, IGPUDrawVertex, IGPUFragmentState, IGPUPrimitiveState, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -342,7 +342,7 @@ interface AttributeMapInterface
 export class GLTFPrimitive
 {
     topology: GLTFRenderMode;
-    renderPipeline: IGPURenderPipeline;
+    renderPipeline: IRenderPipeline;
     private attributeMap: AttributeMapInterface;
     private attributes: string[] = [];
     vertices: IGPUVertexAttributes;
@@ -437,7 +437,7 @@ export class GLTFPrimitive
             };
         }
 
-        const rpDescript: IGPURenderPipeline = {
+        const rpDescript: IRenderPipeline = {
             label: `${label}.pipeline`,
             vertex: vertexState,
             fragment: fragmentState,

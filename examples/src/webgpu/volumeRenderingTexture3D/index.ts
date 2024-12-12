@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import volumeWGSL from "./volume.wgsl";
 
-import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 
 const gui = new GUI();
 
@@ -28,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const sampleCount = 4;
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: volumeWGSL,
         },

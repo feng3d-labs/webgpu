@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPassObject, ISubmit, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
@@ -141,7 +141,7 @@ setBlendConstant().`,
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },

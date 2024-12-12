@@ -1,5 +1,6 @@
+import { IRenderPipeline } from "@feng3d/render-api";
+
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
-import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUBindGroupLayoutDescriptor, IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { getIGPUBindGroupLayoutEntryMap, IGPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 
@@ -9,10 +10,10 @@ import { getIGPUBindGroupLayoutEntryMap, IGPUBindGroupLayoutEntryMap } from "./g
  * @param pipeline GPU管线。
  * @returns 管线布局。
  */
-export function getIGPUPipelineLayout(pipeline: IGPURenderPipeline | IGPUComputePipeline): IGPUPipelineLayoutDescriptor
+export function getIGPUPipelineLayout(pipeline: IRenderPipeline | IGPUComputePipeline): IGPUPipelineLayoutDescriptor
 {
-    const vertexCode = (pipeline as IGPURenderPipeline).vertex?.code;
-    const fragmentCode = (pipeline as IGPURenderPipeline).fragment?.code;
+    const vertexCode = (pipeline as IRenderPipeline).vertex?.code;
+    const fragmentCode = (pipeline as IRenderPipeline).fragment?.code;
     const computeCode = (pipeline as IGPUComputePipeline).compute?.code;
     //
     const code = vertexCode + fragmentCode + computeCode;

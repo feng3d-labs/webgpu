@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUCanvasContext, IGPURenderPipeline, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUCanvasContext, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -61,7 +61,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniforms = { modelViewProjectionMatrix: null };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },

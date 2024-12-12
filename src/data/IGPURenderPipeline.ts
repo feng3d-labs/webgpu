@@ -1,43 +1,48 @@
+import { IRenderPipeline } from "@feng3d/render-api";
 import { IGPUDepthStencilState } from "./IGPUDepthStencilState";
 import { IGPUFragmentState } from "./IGPUFragmentState";
 import { IGPUMultisampleState } from "./IGPUMultisampleState";
 import { IGPUPrimitiveState } from "./IGPUPrimitiveState";
 import { IGPUVertexState } from "./IGPUVertexState";
 
-/**
- * GPU渲染管线描述。
- *
- * {@link GPURenderPipelineDescriptor}
- */
-export interface IGPURenderPipeline
+declare module "@feng3d/render-api"
 {
     /**
-     * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
+     * GPU渲染管线。
+     *
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/GPUDevice/createRenderPipeline
      */
-    readonly label?: string;
+    export interface IRenderPipeline
+    {
+        /**
+         * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
+         */
+        readonly label?: string;
 
-    /**
-     * Describes the primitive-related properties of the pipeline.
-     */
-    readonly primitive?: IGPUPrimitiveState;
+        /**
+         * Describes the primitive-related properties of the pipeline.
+         */
+        readonly primitive?: IGPUPrimitiveState;
 
-    /**
-     * 描述顶点着色器源码入口点以及顶点属性缓冲区布局。
-     */
-    readonly vertex: IGPUVertexState;
+        /**
+         * 描述顶点着色器源码入口点以及顶点属性缓冲区布局。
+         */
+        readonly vertex: IGPUVertexState;
 
-    /**
-     * 片段着色器阶段描述。
-     */
-    readonly fragment?: IGPUFragmentState;
+        /**
+         * 片段着色器阶段描述。
+         */
+        readonly fragment?: IGPUFragmentState;
 
-    /**
-     * 深度模板阶段描述。
-     */
-    readonly depthStencil?: IGPUDepthStencilState;
+        /**
+         * 深度模板阶段描述。
+         */
+        readonly depthStencil?: IGPUDepthStencilState;
 
-    /**
-     * 多重采样阶段描述。
-     */
-    readonly multisample?: IGPUMultisampleState;
+        /**
+         * 多重采样阶段描述。
+         */
+        readonly multisample?: IGPUMultisampleState;
+    }
+
 }

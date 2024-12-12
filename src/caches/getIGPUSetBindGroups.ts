@@ -1,18 +1,18 @@
+import { IRenderPipeline } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
+
 import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
-import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUBuffer";
 
-export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
+export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IRenderPipeline, bindingResources: IGPUBindingResources)
 {
     //
     let gpuSetBindGroups = bindGroupsMap.get([pipeline, bindingResources]);
@@ -31,7 +31,7 @@ export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IGPURenderP
     return gpuSetBindGroups;
 }
 
-const bindGroupsMap = new ChainMap<[IGPUComputePipeline | IGPURenderPipeline, IGPUBindingResources], IGPUSetBindGroup[]>();
+const bindGroupsMap = new ChainMap<[IGPUComputePipeline | IRenderPipeline, IGPUBindingResources], IGPUSetBindGroup[]>();
 
 function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bindingResources: IGPUBindingResources): IGPUSetBindGroup
 {

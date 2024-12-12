@@ -5,8 +5,8 @@ import { ArcballCamera, WASDCamera } from "./camera";
 import cubeWGSL from "./cube.wgsl";
 import { createInputHandler } from "./input";
 
-import { IRenderObject, IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPURenderPipeline, IGPUSampler, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUSampler, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: cubeWGSL,
         },

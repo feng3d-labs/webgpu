@@ -10,8 +10,8 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         cullMode: "back",
     };
 
-    const writeGBuffersPipeline: IGPURenderPipeline = {
+    const writeGBuffersPipeline: IRenderPipeline = {
         vertex: {
             code: vertexWriteGBuffers,
         },
@@ -84,7 +84,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         primitive,
     };
 
-    const gBuffersDebugViewPipeline: IGPURenderPipeline = {
+    const gBuffersDebugViewPipeline: IRenderPipeline = {
         vertex: {
             code: vertexTextureQuad,
         },
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
         primitive,
     };
-    const deferredRenderPipeline: IGPURenderPipeline = {
+    const deferredRenderPipeline: IRenderPipeline = {
         vertex: {
             code: vertexTextureQuad,
         },

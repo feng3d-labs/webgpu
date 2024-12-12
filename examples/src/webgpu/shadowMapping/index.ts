@@ -6,8 +6,8 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPipeline, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 const shadowDepthTextureSize = 1024;
 
@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         cullMode: "back",
     };
 
-    const shadowPipeline: IGPURenderPipeline = {
+    const shadowPipeline: IRenderPipeline = {
         vertex: {
             code: vertexShadowWGSL,
         },
@@ -68,7 +68,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Create a bind group layout which holds the scene uniforms and
     // the texture+sampler for depth. We create it manually because the WebPU
     // implementation doesn't infer this from the shader (yet).
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: vertexWGSL,
         },

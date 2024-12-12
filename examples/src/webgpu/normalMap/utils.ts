@@ -1,5 +1,5 @@
-import { ITexture } from "@feng3d/render-api";
-import { IGPUDepthStencilState, IGPURenderPipeline } from "@feng3d/webgpu";
+import { IRenderPipeline, ITexture } from "@feng3d/render-api";
+import { IGPUDepthStencilState } from "@feng3d/webgpu";
 
 export const create3DRenderPipeline = (
     label: string,
@@ -19,7 +19,7 @@ export const create3DRenderPipeline = (
         };
     }
 
-    const pipelineDescriptor: IGPURenderPipeline = {
+    const pipelineDescriptor: IRenderPipeline = {
         label: `${label}.pipeline`,
         vertex: {
             code: vertexShader,
