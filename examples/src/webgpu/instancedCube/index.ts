@@ -105,7 +105,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: instancedVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
         },
         vertices: {

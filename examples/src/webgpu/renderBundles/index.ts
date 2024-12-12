@@ -53,7 +53,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             // Backface culling since the sphere is solid piece of geometry.
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
-            cullMode: "back",
+            cullFace: "back",
         },
 
         // Enable depth testing so that the fragment closest to the camera

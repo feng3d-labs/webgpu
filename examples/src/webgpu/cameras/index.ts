@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
         primitive: {
             topology: "triangle-list",
-            cullMode: "back",
+            cullFace: "back",
         },
         depthStencil: {
             depthWriteEnabled: true,

@@ -124,7 +124,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
             primitive: {
-                cullMode: "none",
+                cullFace: "none",
             },
         },
         vertices: {

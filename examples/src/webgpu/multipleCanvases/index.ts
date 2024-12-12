@@ -123,7 +123,7 @@ const init = async () =>
             ...module,
         },
         primitive: {
-            cullMode: "back",
+            cullFace: "back",
         },
         depthStencil: {
             depthWriteEnabled: true,

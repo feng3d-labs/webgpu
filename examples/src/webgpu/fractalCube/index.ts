@@ -80,7 +80,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleSelfWGSL },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
         },
         vertices: {

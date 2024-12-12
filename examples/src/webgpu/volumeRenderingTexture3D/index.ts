@@ -37,7 +37,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         primitive: {
             topology: "triangle-list",
-            cullMode: "back",
+            cullFace: "back",
         },
     };
 

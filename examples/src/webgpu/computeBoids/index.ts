@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
         },
         vertices: {

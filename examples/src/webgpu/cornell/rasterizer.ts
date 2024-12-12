@@ -71,7 +71,7 @@ export default class Rasterizer
                 code: rasterizerWGSL + common.wgsl,
             },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
         };
 

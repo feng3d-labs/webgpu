@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleTextureMixColorWGSL },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
         },
         vertices: {

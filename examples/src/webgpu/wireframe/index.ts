@@ -60,7 +60,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 code: solidColorLitWGSL,
             },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
             depthStencil: {
                 depthWriteEnabled: true,

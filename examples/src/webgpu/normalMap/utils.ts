@@ -29,7 +29,7 @@ export const create3DRenderPipeline = (
         },
         primitive: {
             topology,
-            cullMode,
+            cullFace: cullMode,
         },
         depthStencil,
     };

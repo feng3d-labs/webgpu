@@ -179,7 +179,7 @@ export abstract class Base2DRendererClass
             },
             primitive: {
                 topology: "triangle-list",
-                cullMode: "none",
+                cullFace: "none",
             },
         };
 

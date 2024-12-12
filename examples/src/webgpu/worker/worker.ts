@@ -91,7 +91,7 @@ async function init(canvas: OffscreenCanvas)
             // Backface culling since the cube is solid piece of geometry.
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
-            cullMode: "back",
+            cullFace: "back",
         },
 
         // Enable depth testing so that the fragment closest to the camera

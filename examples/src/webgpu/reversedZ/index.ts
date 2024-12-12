@@ -93,7 +93,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: vertexDepthPrePassWGSL,
         },
         primitive: {
-            cullMode: "back",
+            cullFace: "back",
         },
     };
 
@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: fragmentPrecisionErrorPassWGSL,
         },
         primitive: {
-            cullMode: "back",
+            cullFace: "back",
         },
     };
 
@@ -154,7 +154,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: fragmentWGSL,
         },
         primitive: {
-            cullMode: "back",
+            cullFace: "back",
         },
     };
 
