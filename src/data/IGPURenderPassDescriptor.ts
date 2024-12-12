@@ -1,5 +1,4 @@
-import { IRenderPassDescriptor } from "@feng3d/render-api";
-import { IGPURenderPassColorAttachment } from "./IGPURenderPassColorAttachment";
+import { IRenderPassColorAttachment, IRenderPassDescriptor } from "@feng3d/render-api";
 import { IGPURenderPassDepthStencilAttachment } from "./IGPURenderPassDepthStencilAttachment";
 
 /**
@@ -20,7 +19,7 @@ export interface IGPURenderPassDescriptor extends IRenderPassDescriptor
      * Due to compatible usage list|usage compatibility, no color attachment
      * may alias another attachment or any resource used inside the render pass.
      */
-    readonly colorAttachments: readonly IGPURenderPassColorAttachment[];
+    readonly colorAttachments: readonly IRenderPassColorAttachment[];
 
     /**
      * The {@link GPURenderPassDepthStencilAttachment} value that defines the depth/stencil

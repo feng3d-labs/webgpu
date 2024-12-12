@@ -1,8 +1,7 @@
 import { anyEmitter } from "@feng3d/event";
-import { ITextureLike, ITextureView } from "@feng3d/render-api";
+import { IRenderPassColorAttachment, ITextureLike, ITextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
-import { IGPURenderPassColorAttachment } from "../data/IGPURenderPassColorAttachment";
 import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
 import { IGPUTexture_resize } from "../eventnames";
@@ -130,7 +129,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: IGPURe
  *
  * @returns 渲染通道附件上的纹理描述列表。
  */
-function getAttachmentTextures(colorAttachments: readonly IGPURenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
+function getAttachmentTextures(colorAttachments: readonly IRenderPassColorAttachment[], depthStencilAttachment?: IGPURenderPassDepthStencilAttachment)
 {
     const textures: ITextureLike[] = [];
 
@@ -307,7 +306,7 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: IGPURen
  * @param sampleCount 多重采样次数。
  * @returns 颜色附件完整描述列表。
  */
-function getIGPURenderPassColorAttachments(colorAttachments: readonly IGPURenderPassColorAttachment[], sampleCount: 4)
+function getIGPURenderPassColorAttachments(colorAttachments: readonly IRenderPassColorAttachment[], sampleCount: 4)
 {
     const gpuColorAttachments: NGPURenderPassColorAttachment[] = colorAttachments.map((v) =>
     {
