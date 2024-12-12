@@ -1,5 +1,6 @@
-import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal, WebGPU } from "@feng3d/webgpu";
+import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, internal } from "@feng3d/webgpu";
 
+import { ITexture } from "@feng3d/render-api";
 import Common from "./common";
 import Radiosity from "./radiosity";
 import raytracerWGSL from "./raytracer.wgsl";
@@ -10,7 +11,7 @@ import raytracerWGSL from "./raytracer.wgsl";
 export default class Raytracer
 {
   private readonly common: Common;
-  private readonly framebuffer: IGPUTexture;
+  private readonly framebuffer: ITexture;
   private readonly pipeline: IGPUComputePipeline;
   private readonly bindGroup: IGPUBindingResources;
 
@@ -20,7 +21,7 @@ export default class Raytracer
   constructor(
     common: Common,
     radiosity: Radiosity,
-    framebuffer: IGPUTexture,
+    framebuffer: ITexture,
   )
   {
     this.common = common;

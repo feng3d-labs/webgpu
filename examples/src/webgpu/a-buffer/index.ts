@@ -7,7 +7,8 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -166,7 +167,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         canvas.width = canvas.clientWidth * devicePixelRatio;
         canvas.height = canvas.clientHeight * devicePixelRatio;
 
-        const depthTexture: IGPUTexture = {
+        const depthTexture: ITexture = {
             size: [canvas.width, canvas.height],
             format: "depth24plus",
             label: "depthTexture",
@@ -288,7 +289,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             const viewProjMatrix = mat4.multiply(projectionMatrix, viewMatrix);
 
-return viewProjMatrix;
+            return viewProjMatrix;
         }
 
         const passEncoders: IGPUPassEncoder[] = [];
@@ -354,7 +355,7 @@ return viewProjMatrix;
 
             // Composite the opaque and translucent objects
             const compositePassEncoder: IGPURenderPass
-            = {
+                = {
                 descriptor: compositePassDescriptor,
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame

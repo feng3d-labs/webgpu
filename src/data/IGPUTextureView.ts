@@ -1,6 +1,5 @@
-import { ITextureView } from "@feng3d/render-api";
+import { ITextureLike, ITextureView } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
-import { IGPUTextureLike } from "./IGPUTexture";
 
 declare module "@feng3d/render-api"
 {
@@ -30,7 +29,7 @@ export interface IGPUTextureView extends ITextureView
     /**
      * 产生视图的纹理。
      */
-    readonly texture: IGPUTextureLike;
+    readonly texture: ITextureLike;
 
     /**
      * The format of the texture view. Must be either the {@link GPUTextureDescriptor#format} of the

@@ -5,7 +5,8 @@ import { ArcballCamera, WASDCamera } from "./camera";
 import cubeWGSL from "./cube.wgsl";
 import { createInputHandler } from "./input";
 
-import { IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -63,13 +64,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     },
   };
 
-  const depthTexture: IGPUTexture = {
+  const depthTexture: ITexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
   };
 
   // Fetch the image and upload it into a GPUTexture.
-  let cubeTexture: IGPUTexture;
+  let cubeTexture: ITexture;
   {
     const response = await fetch("../../../assets/img/Di-3d.png");
     const imageBitmap = await createImageBitmap(await response.blob());

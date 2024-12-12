@@ -1,4 +1,5 @@
-import { IGPUDepthStencilState, IGPURenderPipeline, IGPUTexture } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { IGPUDepthStencilState, IGPURenderPipeline } from "@feng3d/webgpu";
 
 export const create3DRenderPipeline = (
     label: string,
@@ -40,7 +41,7 @@ export const createTextureFromImage = (
     bitmap: ImageBitmap
 ) =>
 {
-    const texture: IGPUTexture = {
+    const texture: ITexture = {
         size: [bitmap.width, bitmap.height],
         format: "rgba8unorm",
         sources: [{ image: bitmap }]

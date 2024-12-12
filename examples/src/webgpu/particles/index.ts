@@ -7,7 +7,8 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -110,7 +111,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   // ////////////////////////////////////////////////////////////////////////////
   // Texture
   // ////////////////////////////////////////////////////////////////////////////
-  let texture: IGPUTexture;
+  let texture: ITexture;
   let textureWidth = 1;
   let textureHeight = 1;
   let numMipLevels = 1;

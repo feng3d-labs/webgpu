@@ -2,7 +2,8 @@ import { GUI } from "dat.gui";
 
 import atmosphericScatteringSkyWGSL from "./atmosphericScatteringSky.wgsl";
 
-import { IGPUCanvasContext, IGPUComputeObject, IGPUTexture, WebGPU } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { IGPUCanvasContext, IGPUComputeObject, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -20,7 +21,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const framebuffer: IGPUTexture = {
+    const framebuffer: ITexture = {
         label: "framebuffer",
         size: [canvas.width, canvas.height],
         format: "rgba16float",

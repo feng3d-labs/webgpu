@@ -1,8 +1,7 @@
 import { anyEmitter } from "@feng3d/event";
-import { getTexImageSourceSize, getTextureBytesPerPixel, ITextureDataSource, ITextureImageSource, ITextureSize } from "@feng3d/render-api";
+import { getTexImageSourceSize, getTextureBytesPerPixel, ITexture, ITextureDataSource, ITextureImageSource, ITextureLike, ITextureSize } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
-import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { generateMipmap } from "../utils/generate-mipmap";
@@ -17,10 +16,10 @@ import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
  * @param iGPUTextureBase 纹理描述。
  * @returns GPU纹理。
  */
-export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, autoCreate = true)
+export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, autoCreate = true)
 {
     let gpuTexture: GPUTexture;
-    if ((textureLike as IGPUCanvasTexture).context)
+    if ("context" in textureLike)
     {
         const canvasTexture = textureLike as IGPUCanvasTexture;
         const context = getGPUCanvasContext(device, canvasTexture.context);
@@ -30,9 +29,9 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
         return gpuTexture;
     }
 
-    const texture = textureLike as IGPUTexture;
+    const texture = textureLike as ITexture;
 
-    const textureMap: Map<IGPUTextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<IGPUTextureLike, GPUTexture>();
+    const textureMap: Map<ITextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<ITextureLike, GPUTexture>();
     gpuTexture = textureMap.get(texture);
     if (gpuTexture) return gpuTexture;
 

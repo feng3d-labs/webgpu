@@ -1,4 +1,5 @@
-import { getIGPUBuffer, IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder } from "@feng3d/webgpu";
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";
@@ -15,7 +16,7 @@ export default class Radiosity
   static readonly lightmapHeight = 256;
 
   // The output lightmap.
-  readonly lightmap: IGPUTexture;
+  readonly lightmap: ITexture;
 
   // Number of photons emitted per workgroup.
   // This is equal to the workgroup size (one photon per invocation)
@@ -104,7 +105,7 @@ export default class Radiosity
       },
     };
 
-    const lightmapSize = internal.getGPUTextureSize(this.lightmap);
+    const lightmapSize = this.lightmap.size;
 
     this.passEncoders = [{
       __type: "ComputePass",

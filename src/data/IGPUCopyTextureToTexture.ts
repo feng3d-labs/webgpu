@@ -1,4 +1,4 @@
-import { IGPUTextureLike } from "./IGPUTexture";
+import { ITextureLike } from "@feng3d/render-api";
 
 /**
  * GPU纹理间拷贝所包含信息。
@@ -39,7 +39,7 @@ export interface IGPUImageCopyTexture
     /**
      * Texture to copy to/from.
      */
-    texture: IGPUTextureLike;
+    texture: ITextureLike;
     /**
      * Mip-map level of the {@link GPUImageCopyTexture#texture} to copy to/from.
      */

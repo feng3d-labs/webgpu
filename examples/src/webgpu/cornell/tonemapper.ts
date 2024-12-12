@@ -1,7 +1,8 @@
-import { IGPUBindingResources, IGPUCanvasTexture, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, IGPUTexture, internal } from "@feng3d/webgpu";
+import { IGPUBindingResources, IGPUCanvasTexture, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, internal } from "@feng3d/webgpu";
 
 import Common from "./common";
 import tonemapperWGSL from "./tonemapper.wgsl";
+import { ITexture } from "@feng3d/render-api";
 
 /**
  * Tonemapper implements a tonemapper to convert a linear-light framebuffer to
@@ -18,11 +19,11 @@ export default class Tonemapper
 
   constructor(
     common: Common,
-    input: IGPUTexture,
+    input: ITexture,
     output: IGPUCanvasTexture,
   )
   {
-    const inputSize = internal.getGPUTextureSize(input);
+    const inputSize = input.size;
 
     this.width = inputSize[0];
     this.height = inputSize[1];

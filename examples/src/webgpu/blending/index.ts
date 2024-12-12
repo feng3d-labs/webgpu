@@ -2,7 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureView, WebGPU } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTextureView, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -107,7 +108,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     )
     {
         const { flipY, premultipliedAlpha } = options;
-        const texture: IGPUTexture = {
+        const texture: ITexture = {
             format: "rgba8unorm",
             size: [source.width, source.height],
             sources: [{ image: source, flipY, premultipliedAlpha }]
@@ -490,7 +491,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         function updateUniforms(
             uniforms: Uniforms,
             canvas: HTMLCanvasElement,
-            texture: IGPUTexture
+            texture: ITexture
         )
         {
             const projectionMatrix = mat4.ortho(

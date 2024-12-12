@@ -1,4 +1,4 @@
-import { IGPUTextureLike } from "./IGPUTexture";
+import { ITextureLike } from "@feng3d/render-api";
 
 /**
  * 读取GPU纹理像素
@@ -8,7 +8,7 @@ export interface IGPUReadPixels
     /**
      * GPU纹理
      */
-    texture: IGPUTextureLike,
+    texture: ITextureLike,
 
     /**
      * 读取位置。

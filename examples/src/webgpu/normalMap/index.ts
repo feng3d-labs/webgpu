@@ -1,4 +1,5 @@
-import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
 import { createBoxMeshWithTangents } from "../../meshes/box";
@@ -61,62 +62,62 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   };
 
   // Create normal mapping resources and pipeline
-  const depthTexture: IGPUTexture = {
+  const depthTexture: ITexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
   };
 
   // Fetch the image and upload it into a GPUTexture.
-  let woodAlbedoTexture: IGPUTexture;
+  let woodAlbedoTexture: ITexture;
   {
     const response = await fetch("../../../assets/img/wood_albedo.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     woodAlbedoTexture = createTextureFromImage(imageBitmap);
   }
 
-  let spiralNormalTexture: IGPUTexture;
+  let spiralNormalTexture: ITexture;
   {
     const response = await fetch("../../../assets/img/spiral_normal.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     spiralNormalTexture = createTextureFromImage(imageBitmap);
   }
 
-  let spiralHeightTexture: IGPUTexture;
+  let spiralHeightTexture: ITexture;
   {
     const response = await fetch("../../../assets/img/spiral_height.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     spiralHeightTexture = createTextureFromImage(imageBitmap);
   }
 
-  let toyboxNormalTexture: IGPUTexture;
+  let toyboxNormalTexture: ITexture;
   {
     const response = await fetch("../../../assets/img/toybox_normal.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     toyboxNormalTexture = createTextureFromImage(imageBitmap);
   }
 
-  let toyboxHeightTexture: IGPUTexture;
+  let toyboxHeightTexture: ITexture;
   {
     const response = await fetch("../../../assets/img/toybox_height.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     toyboxHeightTexture = createTextureFromImage(imageBitmap);
   }
 
-  let brickwallAlbedoTexture: IGPUTexture;
+  let brickwallAlbedoTexture: ITexture;
   {
     const response = await fetch("../../../assets/img/brickwall_albedo.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     brickwallAlbedoTexture = createTextureFromImage(imageBitmap);
   }
 
-  let brickwallNormalTexture: IGPUTexture;
+  let brickwallNormalTexture: ITexture;
   {
     const response = await fetch("../../../assets/img/brickwall_normal.png");
     const imageBitmap = await createImageBitmap(await response.blob());
     brickwallNormalTexture = createTextureFromImage(imageBitmap);
   }
 
-  let brickwallHeightTexture: IGPUTexture;
+  let brickwallHeightTexture: ITexture;
   {
     const response = await fetch("../../../assets/img/brickwall_height.png");
     const imageBitmap = await createImageBitmap(await response.blob());
@@ -208,7 +209,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const now = Date.now() / 1000;
     mat4.rotateY(modelMatrix, now * -0.5, modelMatrix);
 
-return modelMatrix;
+    return modelMatrix;
   }
 
   // Change the model mapping type

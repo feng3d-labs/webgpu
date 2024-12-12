@@ -4,7 +4,8 @@ import volumeWGSL from "./volume.wgsl";
 
 const gui = new GUI();
 
-import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -45,7 +46,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     // Fetch the image and upload it into a GPUTexture.
-    let volumeTexture: IGPUTexture;
+    let volumeTexture: ITexture;
     {
         const width = 180;
         const height = 216;

@@ -10,7 +10,8 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -50,15 +51,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   }
 
   // GBuffer texture render targets
-  const gBufferTexture2DFloat32: IGPUTexture = {
+  const gBufferTexture2DFloat32: ITexture = {
     size: [canvas.width, canvas.height],
     format: "rgba32float",
   };
-  const gBufferTexture2DFloat16: IGPUTexture = {
+  const gBufferTexture2DFloat16: ITexture = {
     size: [canvas.width, canvas.height],
     format: "rgba16float",
   };
-  const gBufferTextureAlbedo: IGPUTexture = {
+  const gBufferTextureAlbedo: ITexture = {
     size: [canvas.width, canvas.height],
     format: "bgra8unorm",
   };
@@ -106,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     primitive,
   };
 
-  const depthTexture: IGPUTexture = {
+  const depthTexture: ITexture = {
     size: [canvas.width, canvas.height],
     format: "depth24plus",
   };

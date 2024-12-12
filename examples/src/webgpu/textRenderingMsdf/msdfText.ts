@@ -2,7 +2,8 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUTexture } from "@feng3d/webgpu";
+import { ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -203,7 +204,7 @@ export class MsdfTextRenderer
     const response = await fetch(url);
     const imageBitmap = await createImageBitmap(await response.blob());
 
-    const texture: IGPUTexture = {
+    const texture: ITexture = {
       size: [imageBitmap.width, imageBitmap.height],
       label: `MSDF font texture ${url}`,
       format: "rgba8unorm",
@@ -223,7 +224,7 @@ export class MsdfTextRenderer
     const i = fontJsonUrl.lastIndexOf("/");
     const baseUrl = i !== -1 ? fontJsonUrl.substring(0, i + 1) : undefined;
 
-    const pagePromises: Promise<IGPUTexture>[] = [];
+    const pagePromises: Promise<ITexture>[] = [];
     for (const pageUrl of json.pages)
     {
       pagePromises.push(this.loadTexture(baseUrl + pageUrl));
