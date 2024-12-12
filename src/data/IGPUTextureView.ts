@@ -1,5 +1,17 @@
 import { ITextureView } from "@feng3d/render-api";
+import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 import { IGPUTextureLike } from "./IGPUTexture";
+
+declare module "@feng3d/render-api"
+{
+    export interface ITextureLikeMap
+    {
+        /**
+         * 画布纹理。
+         */
+        IGPUCanvasTexture: IGPUCanvasTexture;
+    }
+}
 
 /**
  * 视图纹理。
