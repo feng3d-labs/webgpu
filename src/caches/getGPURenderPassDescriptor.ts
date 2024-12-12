@@ -1,11 +1,10 @@
 import { anyEmitter } from "@feng3d/event";
-import { ITextureLike } from "@feng3d/render-api";
+import { ITextureLike, ITextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPURenderPassColorAttachment } from "../data/IGPURenderPassColorAttachment";
 import { IGPURenderPassDepthStencilAttachment } from "../data/IGPURenderPassDepthStencilAttachment";
 import { IGPURenderPassDescriptor } from "../data/IGPURenderPassDescriptor";
-import { IGPUTextureView } from "../data/IGPUTextureView";
 import { IGPUTexture_resize } from "../eventnames";
 import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { NGPURenderPassColorAttachment } from "../internal/internal";
@@ -259,7 +258,7 @@ function getMultisampleTextureView(texture: ITextureLike, sampleCount: 4)
     return multisampleTextureView;
 }
 
-const multisampleTextureMap = new WeakMap<ITextureLike, IGPUTextureView>();
+const multisampleTextureMap = new WeakMap<ITextureLike, ITextureView>();
 
 /**
  * 获取深度模板附件完整描述。
@@ -315,7 +314,7 @@ function getIGPURenderPassColorAttachments(colorAttachments: readonly IGPURender
         if (!v) return undefined;
 
         let view = v.view;
-        let resolveTarget: IGPUTextureView;
+        let resolveTarget: ITextureView;
 
         if (sampleCount)
         {

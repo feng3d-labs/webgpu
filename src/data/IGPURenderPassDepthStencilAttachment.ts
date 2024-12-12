@@ -1,4 +1,4 @@
-import { IGPUTextureView } from "./IGPUTextureView";
+import { ITextureView } from "@feng3d/render-api";
 
 /**
  * GPU渲染通道深度模板附件。
@@ -13,7 +13,7 @@ export interface IGPURenderPassDepthStencilAttachment
      *
      * 当值为空时，将自动从颜色附件中获取尺寸来创建深度纹理。
      */
-    readonly view?: IGPUTextureView;
+    readonly view?: ITextureView;
 
     /**
      * Indicates the value to clear {@link GPURenderPassDepthStencilAttachment#view}'s depth component

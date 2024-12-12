@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTextureView, WebGPU } from "@feng3d/webgpu";
+import { ITexture, ITextureView } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -94,7 +94,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
     const context: IGPUCanvasContext = { canvasId: canvas.id, configuration: {} };
-    const canvasTexture: IGPUTextureView = { texture: { context } };
+    const canvasTexture: ITextureView = { texture: { context } };
 
     // Get a WebGPU context from the canvas and configure it
     const webgpu = await new WebGPU().init();

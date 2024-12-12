@@ -1,5 +1,4 @@
-import { IRenderPassColorAttachment } from "@feng3d/render-api";
-import { IGPUTextureView } from "./IGPUTextureView";
+import { IRenderPassColorAttachment, ITextureView } from "@feng3d/render-api";
 
 /**
  * GPU渲染通道颜色附件。
@@ -12,7 +11,7 @@ export interface IGPURenderPassColorAttachment extends IRenderPassColorAttachmen
      * A {@link GPUTextureView} describing the texture subresource that will be output to for this
      * color attachment.
      */
-    readonly view: IGPUTextureView;
+    readonly view: ITextureView;
 
     /**
      * The store operation to perform on {@link GPURenderPassColorAttachment#view}

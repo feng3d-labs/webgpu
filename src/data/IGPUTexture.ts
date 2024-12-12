@@ -44,6 +44,8 @@ declare module "@feng3d/render-api"
     }
 
     /**
+     * 
+     * @see GPUDevice.createTexture
      * @see GPUTextureDescriptor
      */
     export interface ITexture

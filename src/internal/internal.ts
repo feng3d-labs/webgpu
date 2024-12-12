@@ -1,5 +1,5 @@
+import { ITextureView } from "@feng3d/render-api";
 import { IGPURenderPassColorAttachment } from "../data/IGPURenderPassColorAttachment";
-import { IGPUTextureView } from "../data/IGPUTextureView";
 
 /**
  * 内部使用
@@ -11,5 +11,5 @@ export interface NGPURenderPassColorAttachment extends IGPURenderPassColorAttach
      * output for this color attachment if {@link GPURenderPassColorAttachment#view} is
      * multisampled.
      */
-    resolveTarget?: IGPUTextureView;
+    resolveTarget?: ITextureView;
 }

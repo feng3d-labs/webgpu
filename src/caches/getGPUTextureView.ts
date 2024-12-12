@@ -1,12 +1,12 @@
 import { anyEmitter } from "@feng3d/event";
+import { ITextureView } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
-import { IGPUTextureView } from "../data/IGPUTextureView";
 import { GPUTexture_destroy, GPUTextureView_destroy } from "../eventnames";
 import { getGPUTexture } from "./getGPUTexture";
 
-export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
+export function getGPUTextureView(device: GPUDevice, view: ITextureView)
 {
-    const textureViewMap: WeakMap<IGPUTextureView, GPUTextureView> = device["_textureViewMap"] = device["_textureViewMap"] || new WeakMap<IGPUTextureView, GPUTextureView>();
+    const textureViewMap: WeakMap<ITextureView, GPUTextureView> = device["_textureViewMap"] = device["_textureViewMap"] || new WeakMap<ITextureView, GPUTextureView>();
 
     if ((view.texture as IGPUCanvasTexture).context)
     {

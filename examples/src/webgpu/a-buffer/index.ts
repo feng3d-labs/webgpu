@@ -7,8 +7,8 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { ITexture, ITextureView } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -173,7 +173,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             label: "depthTexture",
         };
 
-        const depthTextureView: IGPUTextureView = {
+        const depthTextureView: ITextureView = {
             label: "depthTextureView",
             texture: depthTexture,
         };
