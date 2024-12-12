@@ -2,7 +2,6 @@ import { IRenderPipeline } from "@feng3d/render-api";
 import { IGPUDepthStencilState } from "./IGPUDepthStencilState";
 import { IGPUFragmentState } from "./IGPUFragmentState";
 import { IGPUMultisampleState } from "./IGPUMultisampleState";
-import { IGPUPrimitiveState } from "./IGPUPrimitiveState";
 import { IGPUVertexState } from "./IGPUVertexState";
 
 declare module "@feng3d/render-api"
@@ -18,11 +17,6 @@ declare module "@feng3d/render-api"
          * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
          */
         readonly label?: string;
-
-        /**
-         * Describes the primitive-related properties of the pipeline.
-         */
-        readonly primitive?: IGPUPrimitiveState;
 
         /**
          * 描述顶点着色器源码入口点以及顶点属性缓冲区布局。

@@ -1,11 +1,10 @@
 import { watcher } from "@feng3d/watcher";
 
-import { IRenderPipeline } from "@feng3d/render-api";
+import { IPrimitiveState, IRenderPipeline } from "@feng3d/render-api";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { IGPUDepthStencilState } from "../data/IGPUDepthStencilState";
 import { IGPUFragmentState } from "../data/IGPUFragmentState";
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
-import { IGPUPrimitiveState } from "../data/IGPUPrimitiveState";
 import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUVertexState } from "../data/IGPUVertexState";
@@ -81,7 +80,7 @@ const renderPipelineMap = new ChainMap<
     }
 >();
 
-function getGPUPrimitiveState(primitive?: IGPUPrimitiveState, indexFormat?: GPUIndexFormat)
+function getGPUPrimitiveState(primitive?: IPrimitiveState, indexFormat?: GPUIndexFormat)
 {
     let stripIndexFormat: GPUIndexFormat;
     if (primitive?.topology === "triangle-strip" || primitive?.topology === "line-strip")
