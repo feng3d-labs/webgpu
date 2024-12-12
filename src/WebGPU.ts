@@ -1,10 +1,9 @@
-import { ITextureLike } from "@feng3d/render-api";
+import { ISubmit, ITextureLike } from "@feng3d/render-api";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUTextureLikeSize } from "./caches/getIGPUTextureSize";
 import { IGPUBuffer } from "./data/IGPUBuffer";
 import { IGPUReadPixels } from "./data/IGPUReadPixels";
-import { IGPUSubmit } from "./data/IGPUSubmit";
 import { RunWebGPU } from "./runs/RunWebGPU";
 import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
@@ -63,7 +62,7 @@ export class WebGPU
      *
      * @see GPUQueue.submit
      */
-    submit(submit: IGPUSubmit)
+    submit(submit: ISubmit)
     {
         this._runWebGPU.runSubmit(this.device, submit);
     }

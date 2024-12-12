@@ -2,8 +2,8 @@ import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { IGPUBufferBinding, IGPUCanvasContext, IGPUCopyTextureToTexture, IGPURenderObject, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBufferBinding, IGPUCanvasContext, IGPUCopyTextureToTexture, IGPURenderObject, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleSelfWGSL from "./sampleSelf.frag.wgsl";
 
@@ -110,7 +110,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         (renderObject.bindingResources.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(transformationMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

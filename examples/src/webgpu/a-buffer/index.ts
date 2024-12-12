@@ -7,8 +7,8 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { IPassEncoder, IRenderPass, IRenderPassDescriptor, ITexture, ITextureView } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IPassEncoder, IRenderPass, IRenderPassDescriptor, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -379,7 +379,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             passEncoders.push(compositePassEncoder);
         }
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders,
             }],

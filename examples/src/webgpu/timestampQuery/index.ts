@@ -1,4 +1,5 @@
-import { IGPUCanvasContext, IGPURenderObject, IGPURenderPipeline, IGPUSubmit, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUCanvasContext, IGPURenderObject, IGPURenderPipeline, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -7,7 +8,6 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import fragmentWGSL from "../../shaders/black.frag.wgsl";
 
-import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import PerfCounter from "./PerfCounter";
 
@@ -118,7 +118,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         drawVertex: { vertexCount: cubeVertexCount },
     };
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
         commandEncoders: [
             {
                 passEncoders: [

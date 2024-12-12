@@ -1,8 +1,8 @@
-import { IRenderPassDescriptor } from "@feng3d/render-api";
+import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPURenderObject, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import sampleExternalTextureWGSL from "../../shaders/sampleExternalTexture.frag.wgsl";
-
-import { IGPURenderObject, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -52,7 +52,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     function frame()
     {
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

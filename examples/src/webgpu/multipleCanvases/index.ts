@@ -1,5 +1,5 @@
-import { IPassEncoder, IRenderPassDescriptor } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IPassEncoder, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -327,7 +327,7 @@ const init = async () =>
             });
         });
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders,
             }]

@@ -6,8 +6,8 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPURenderPipeline, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 const shadowDepthTextureSize = 1024;
 
@@ -213,7 +213,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
         commandEncoders: [
             {
                 passEncoders: [

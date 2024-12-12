@@ -1,9 +1,9 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { getOffscreenCanvasId, IGPUCanvasContext, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
-import { IRenderPassDescriptor } from "@feng3d/render-api";
-import { getOffscreenCanvasId, IGPUCanvasContext, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
 const basicVertWGSL = `
 struct Uniforms {
@@ -149,7 +149,7 @@ async function init(canvas: OffscreenCanvas)
         return modelViewProjectionMatrix;
     }
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
         commandEncoders: [{
             passEncoders: [{
                 descriptor: renderPassDescriptor,

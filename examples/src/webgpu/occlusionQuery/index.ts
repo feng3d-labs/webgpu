@@ -2,9 +2,9 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import solidColorLitWGSL from "./solidColorLit.wgsl";
 
+import { IRenderPass, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderObject, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
-import { IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderObject, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu";
 
 const info = document.querySelector("#info");
 
@@ -163,7 +163,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         renderObjects: occlusionQueryObjects,
     };
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
         commandEncoders: [
             {
                 passEncoders: [

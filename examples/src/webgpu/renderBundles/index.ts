@@ -1,13 +1,14 @@
+import { IRenderPass, IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderObject, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+
 import { GUI } from "dat.gui";
 import Stats from "stats-js";
-
 import { mat4, vec3 } from "wgpu-matrix";
+
 import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderObject, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 interface Renderable
 {
@@ -331,7 +332,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             renderObjects,
         };
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [renderPass],

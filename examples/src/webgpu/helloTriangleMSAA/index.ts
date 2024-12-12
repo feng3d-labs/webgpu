@@ -1,7 +1,8 @@
-import { IGPURenderObject, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPURenderObject, WebGPU } from "@feng3d/webgpu";
+
 import redFragWGSL from "../../shaders/red.frag.wgsl";
 import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
-import { IRenderPassDescriptor } from "@feng3d/render-api";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -28,7 +29,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     function frame()
     {
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

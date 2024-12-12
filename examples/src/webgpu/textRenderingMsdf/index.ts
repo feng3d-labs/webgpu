@@ -6,8 +6,8 @@ import { MsdfTextRenderer } from "./msdfText";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassObject, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassObject, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -267,7 +267,7 @@ setBlendConstant().`,
 
         textRenderer.render(renderObjects, ...text);
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

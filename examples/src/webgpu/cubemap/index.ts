@@ -4,8 +4,8 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleCubemapWGSL from "./sampleCubemap.frag.wgsl";
 
-import { IRenderPassDescriptor, ITexture, ITextureImageSource } from "@feng3d/render-api";
-import { IGPUBufferBinding, IGPURenderObject, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ISubmit, ITexture, ITextureImageSource } from "@feng3d/render-api";
+import { IGPUBufferBinding, IGPURenderObject, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -147,7 +147,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         (renderObject.bindingResources.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

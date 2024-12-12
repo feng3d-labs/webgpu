@@ -5,7 +5,7 @@ import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderObject } from "./data/IGPURenderObject";
 import { IRenderPass, IGPURenderPassObject } from "./data/IGPURenderPass";
 import { IRenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
-import { IGPUSubmit } from "./data/IGPUSubmit";
+import { ISubmit } from "./data/IGPUSubmit";
 import { WebGPU } from "./WebGPU";
 
 /**
@@ -15,7 +15,7 @@ import { WebGPU } from "./WebGPU";
  */
 export class WebGPUStep
 {
-    private _currentSubmit: IGPUSubmit;
+    private _currentSubmit: ISubmit;
     private _currentRenderPassEncoder: IRenderPass;
     private _currentComputePassEncoder: IGPUComputePass;
 
@@ -81,7 +81,7 @@ export class WebGPUStep
      *
      * @see GPUQueue.submit
      */
-    submit(submit?: IGPUSubmit)
+    submit(submit?: ISubmit)
     {
         if (!submit)
         {

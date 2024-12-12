@@ -4,9 +4,9 @@ import atomicToZero from "./atomicToZero.wgsl";
 import { NaiveBitonicCompute } from "./bitonicCompute";
 import BitonicDisplayRenderer from "./bitonicDisplay";
 
-import { ICommandEncoder, IRenderPassDescriptor } from "@feng3d/render-api";
+import { ICommandEncoder, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUComputePass, IGPUComputePipeline, IGPUSubmit, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 // Type of step that will be executed in our shader
 enum StepEnum
@@ -375,7 +375,7 @@ async function init(
         nextBlockHeightController.setValue(2);
 
         // Reset Total Swaps by setting atomic value to 0
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [{
                     __type: "ComputePass",
@@ -725,7 +725,7 @@ async function init(
         iGPUBuffer.writeBuffers = writeBuffers;
 
         const commandEncoder: ICommandEncoder = { passEncoders: [] };
-        const submit: IGPUSubmit = { commandEncoders: [commandEncoder] };
+        const submit: ISubmit = { commandEncoders: [commandEncoder] };
 
         bitonicDisplayRenderer.startRun(commandEncoder, {
             highlight: settings["Display Mode"] === "Elements" ? 0 : 1,

@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, ITexture, ITextureView } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderObject, IGPURenderPipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -519,7 +519,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: []
         };
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [pass]
             }],

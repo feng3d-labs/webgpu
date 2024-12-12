@@ -5,8 +5,8 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IRenderPassDescriptor } from "@feng3d/render-api";
-import { IGPUBufferBinding, IGPURenderObject, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPUBufferBinding, IGPURenderObject, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         uniforms.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix1); // 需要赋值新对象才能触发数据变更上传GPU
         uniforms1.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix2); // 需要赋值新对象才能触发数据变更上传GPU
 
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

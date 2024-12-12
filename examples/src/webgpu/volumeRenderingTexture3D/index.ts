@@ -2,10 +2,10 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import volumeWGSL from "./volume.wgsl";
 
-const gui = new GUI();
+import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPURenderPipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 
-import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+const gui = new GUI();
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -156,7 +156,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         uniformBuffer.inverseModelViewProjectionMatrix = inverseModelViewProjection;
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

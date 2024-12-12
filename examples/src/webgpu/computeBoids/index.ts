@@ -3,8 +3,8 @@ import { GUI } from "dat.gui";
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
 
-import { IGPUComputeObject, IGPURenderObject, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
-import { IRenderPassDescriptor } from "@feng3d/render-api";
+import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPUComputeObject, IGPURenderObject, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -124,7 +124,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let t = 0;
     function frame()
     {
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

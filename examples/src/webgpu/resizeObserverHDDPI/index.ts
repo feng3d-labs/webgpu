@@ -1,8 +1,8 @@
 import { GUI } from "dat.gui";
 import checkerWGSL from "./checker.wgsl";
 
-import { IGPUBindingResources, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
-import { IRenderPassDescriptor } from "@feng3d/render-api";
+import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPURenderPipeline, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -99,7 +99,7 @@ return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
             ],
         };
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

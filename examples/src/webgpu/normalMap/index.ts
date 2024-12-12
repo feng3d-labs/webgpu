@@ -1,5 +1,5 @@
-import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPURenderPipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
 import { createBoxMeshWithTangents } from "../../meshes/box";
@@ -312,7 +312,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         mapInfo.depthScale = settings.depthScale;
         mapInfo.depthLayers = settings.depthLayers;
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

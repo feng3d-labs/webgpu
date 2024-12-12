@@ -1,4 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
+import { ICommandEncoder, IRenderPass, ISubmit } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -26,18 +27,16 @@ import { IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUStencilReference } from "../data/IGPUStencilReference";
-import { IGPUSubmit } from "../data/IGPUSubmit";
 import { IGPUViewport } from "../data/IGPUViewport";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
-import { ICommandEncoder, IRenderPass } from "@feng3d/render-api";
 
 export class RunWebGPU
 {
-    runSubmit(device: GPUDevice, submit: IGPUSubmit)
+    runSubmit(device: GPUDevice, submit: ISubmit)
     {
         const commandBuffers = submit.commandEncoders.map((v) =>
         {

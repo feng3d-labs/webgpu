@@ -10,8 +10,8 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, ITexture, ITextureView } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -394,7 +394,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             getIGPUBuffer(cameraUniformBuffer).writeBuffers = [{ data: cameraViewProj }];
         }
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: settings.mode === "gBuffers view" ? gBuffersPassEncoders : passEncoders,

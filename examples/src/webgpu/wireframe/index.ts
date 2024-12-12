@@ -1,3 +1,6 @@
+import { IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+
 import { GUI } from "dat.gui";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
@@ -5,8 +8,6 @@ import solidColorLitWGSL from "./solidColorLit.wgsl";
 import { randColor, randElement } from "./utils";
 import wireframeWGSL from "./wireframe.wgsl";
 
-import { IRenderPassDescriptor } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPURenderObject, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -374,7 +375,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             });
         }
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

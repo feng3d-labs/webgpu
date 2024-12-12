@@ -5,8 +5,8 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { IRenderPassDescriptor, ITexture, ITextureSource } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, ISubmit, ITexture, ITextureSource } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -366,7 +366,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     );
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
         commandEncoders: [
             {
                 passEncoders: [
