@@ -1,6 +1,6 @@
-import { getTexImageSourceSize, ITextureSize } from "@feng3d/render-api";
+import { getTexImageSourceSize, ITextureImageSource, ITextureSize } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
-import { IGPUTexture, IGPUTextureImageSource, IGPUTextureLike } from "../data/IGPUTexture";
+import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
 
 /**
  * 获取纹理尺寸。
@@ -21,7 +21,7 @@ export function getIGPUTextureLikeSize(texture: IGPUTextureLike)
     return (texture as IGPUTexture).size;
 }
 
-export function getIGPUTextureSourceSize(source?: IGPUTextureImageSource[]): ITextureSize
+export function getIGPUTextureSourceSize(source?: ITextureImageSource[]): ITextureSize
 {
     if (!source) return undefined;
 

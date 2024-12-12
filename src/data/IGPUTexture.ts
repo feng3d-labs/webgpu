@@ -1,10 +1,54 @@
-import { ITexture, ITextureDataLayout, ITextureDataSource, ITextureImageSource } from "@feng3d/render-api";
+import { ITexture } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 /**
  * 类似纹理，包含画布纹理以及正常纹理。
  */
 export type IGPUTextureLike = IGPUCanvasTexture | IGPUTexture;
+
+declare module "@feng3d/render-api"
+{
+    /**
+     * 纹理的图片资源。
+     *
+     * @see GPUQueue.copyExternalImageToTexture
+     */
+    export interface ITextureImageSource
+    {
+        /**
+         * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
+         * 
+         * 写入纹理哪部分内容。
+         */
+        aspect?: GPUTextureAspect;
+
+        /**
+         * Describes the color space and encoding used to encode data into the destination texture.
+         * This [[#color-space-conversions|may result]] in values outside of the range [0, 1]
+         * being written to the target texture, if its format can represent them.
+         * Otherwise, the results are clamped to the target texture format's range.
+         * Note:
+         * If {@link GPUImageCopyTextureTagged#colorSpace} matches the source image,
+         * conversion may not be necessary. See [[#color-space-conversion-elision]].
+         */
+        colorSpace?: PredefinedColorSpace;
+    }
+
+    /**
+     * 纹理的数据资源。
+     * 
+     * @see GPUQueue.writeTexture
+     */
+    export interface ITextureDataSource
+    {
+        /**
+         * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
+         * 
+         * 写入纹理哪部分内容。
+         */
+        aspect?: GPUTextureAspect;
+    }
+}
 
 /**
  * @see GPUTextureDescriptor
@@ -15,14 +59,6 @@ export interface IGPUTexture extends ITexture
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
      */
     readonly label?: string;
-
-    /**
-     * 纹理资源。
-     *
-     * @see GPUQueue.copyExternalImageToTexture
-     * @see GPUQueue.writeTexture
-     */
-    sources?: readonly IGPUTextureSource[];
 
     /**
      * Specifies what view {@link GPUTextureViewDescriptor#format} values will be allowed when calling
@@ -48,53 +84,3 @@ export interface IGPUTexture extends ITexture
      */
     viewFormats?: Iterable<GPUTextureFormat>;
 }
-
-/**
- * 纹理资源
- * 
- * @see GPUQueue.copyExternalImageToTexture
- * @see GPUQueue.writeTexture
- */
-export type IGPUTextureSource = IGPUTextureImageSource | IGPUTextureDataSource;
-
-/**
- * 纹理的数据资源。
- * 
- * @see GPUQueue.writeTexture
- */
-export interface IGPUTextureDataSource extends ITextureDataSource
-{
-    /**
-     * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
-     * 
-     * 写入纹理哪部分内容。
-     */
-    aspect?: GPUTextureAspect;
-}
-
-/**
- * 纹理的图片资源。
- *
- * @see GPUQueue.copyExternalImageToTexture
- */
-export interface IGPUTextureImageSource extends ITextureImageSource
-{
-    /**
-     * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
-     * 
-     * 写入纹理哪部分内容。
-     */
-    aspect?: GPUTextureAspect;
-
-    /**
-     * Describes the color space and encoding used to encode data into the destination texture.
-     * This [[#color-space-conversions|may result]] in values outside of the range [0, 1]
-     * being written to the target texture, if its format can represent them.
-     * Otherwise, the results are clamped to the target texture format's range.
-     * Note:
-     * If {@link GPUImageCopyTextureTagged#colorSpace} matches the source image,
-     * conversion may not be necessary. See [[#color-space-conversion-elision]].
-     */
-    colorSpace?: PredefinedColorSpace;
-}
-

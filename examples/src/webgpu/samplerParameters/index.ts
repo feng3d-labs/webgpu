@@ -5,7 +5,8 @@ import { mat4 } from "wgpu-matrix";
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureSource, WebGPU } from "@feng3d/webgpu";
+import { ITextureSource } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -241,7 +242,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         [255, 193, 7, 255], // yellow
         [216, 27, 96, 255], // pink
     ];
-    const writeTextures: IGPUTextureSource[] = [];
+    const writeTextures: ITextureSource[] = [];
     for (let mipLevel = 0; mipLevel < kTextureMipLevels; ++mipLevel)
     {
         const size = 2 ** (kTextureMipLevels - mipLevel); // 16, 8, 4, 2

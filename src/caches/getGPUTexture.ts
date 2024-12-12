@@ -1,8 +1,8 @@
 import { anyEmitter } from "@feng3d/event";
-import { getTexImageSourceSize, getTextureBytesPerPixel, ITextureSize } from "@feng3d/render-api";
+import { getTexImageSourceSize, getTextureBytesPerPixel, ITextureDataSource, ITextureImageSource, ITextureSize } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
-import { IGPUTexture, IGPUTextureDataSource, IGPUTextureImageSource, IGPUTextureLike } from "../data/IGPUTexture";
+import { IGPUTexture, IGPUTextureLike } from "../data/IGPUTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { generateMipmap } from "../utils/generate-mipmap";
@@ -88,7 +88,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
             texture.sources.forEach((v) =>
             {
                 // 处理图片纹理
-                const imageSource = v as IGPUTextureImageSource;
+                const imageSource = v as ITextureImageSource;
                 if (imageSource.image)
                 {
                     const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
@@ -136,7 +136,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: IGPUTextureLike, a
                 }
 
                 // 处理数据纹理
-                const bufferSource = v as IGPUTextureDataSource;
+                const bufferSource = v as ITextureDataSource;
                 const { data, dataLayout, dataImageOrigin, size, mipLevel, textureOrigin, aspect } = bufferSource;
 
                 const gpuDestination: GPUImageCopyTexture = {
