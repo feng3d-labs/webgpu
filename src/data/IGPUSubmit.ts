@@ -1,5 +1,4 @@
-import { ISubmit } from "@feng3d/render-api";
-import { IGPUCommandEncoder } from "./IGPUCommandEncoder";
+import { ICommandEncoder, ISubmit } from "@feng3d/render-api";
 
 /**
  * 一次 GPU 提交。
@@ -11,5 +10,5 @@ export interface IGPUSubmit extends ISubmit
     /**
      * 命令编码器列表。
      */
-    commandEncoders: IGPUCommandEncoder[];
+    commandEncoders: ICommandEncoder[];
 }

@@ -1,5 +1,5 @@
-import { IRenderPassDescriptor } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IPassEncoder, IRenderPassDescriptor } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -254,7 +254,7 @@ const init = async () =>
         time *= 0.001; // convert to seconds;
 
         // make a command encoder to start encoding commands
-        const passEncoders: IGPUPassEncoder[] = [];
+        const passEncoders: IPassEncoder[] = [];
 
         visibleCanvasSet.forEach((canvas) =>
         {

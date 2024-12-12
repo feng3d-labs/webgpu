@@ -2,8 +2,8 @@ import { Base2DRendererClass } from "./utils1";
 
 import bitonicDisplay from "./bitonicDisplay.frag.wgsl";
 
-import { IRenderPassDescriptor } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUBufferBinding, IGPUCommandEncoder } from "@feng3d/webgpu";
+import { ICommandEncoder, IRenderPassDescriptor } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUBufferBinding } from "@feng3d/webgpu";
 
 interface BitonicDisplayRenderArgs
 {
@@ -43,7 +43,7 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
         };
     }
 
-    startRun(commandEncoder: IGPUCommandEncoder, args: BitonicDisplayRenderArgs)
+    startRun(commandEncoder: ICommandEncoder, args: BitonicDisplayRenderArgs)
     {
         this.setArguments(args);
         super.executeRun(commandEncoder, this.renderPassDescriptor, this.pipeline, this.computeBGDescript);

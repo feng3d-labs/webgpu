@@ -4,9 +4,9 @@ import atomicToZero from "./atomicToZero.wgsl";
 import { NaiveBitonicCompute } from "./bitonicCompute";
 import BitonicDisplayRenderer from "./bitonicDisplay";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUCommandEncoder, IGPUComputePass, IGPUComputePipeline, IGPUSubmit, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { ICommandEncoder, IRenderPassDescriptor } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { IRenderPassDescriptor } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUComputePass, IGPUComputePipeline, IGPUSubmit, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 // Type of step that will be executed in our shader
 enum StepEnum
@@ -724,7 +724,7 @@ async function init(
         writeBuffers.push({ bufferOffset: 8, data: stepDetails });
         iGPUBuffer.writeBuffers = writeBuffers;
 
-        const commandEncoder: IGPUCommandEncoder = { passEncoders: [] };
+        const commandEncoder: ICommandEncoder = { passEncoders: [] };
         const submit: IGPUSubmit = { commandEncoders: [commandEncoder] };
 
         bitonicDisplayRenderer.startRun(commandEncoder, {

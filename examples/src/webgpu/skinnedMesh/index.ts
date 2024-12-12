@@ -7,8 +7,8 @@ import gridWGSL from "./grid.wgsl";
 import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
-import { IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUPassEncoder, IGPURenderObject, WebGPU } from "@feng3d/webgpu";
+import { IPassEncoder, IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderObject, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -483,7 +483,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Node 6 should be the only node with a drawable mesh so hopefully this works fine
         whaleScene.skins[0].update(6, whaleScene.nodes);
 
-        const passEncoders: IGPUPassEncoder[] = [];
+        const passEncoders: IPassEncoder[] = [];
 
         if (settings.object === "Whale")
         {

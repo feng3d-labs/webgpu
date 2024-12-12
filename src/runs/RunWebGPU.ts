@@ -14,7 +14,6 @@ import { getNGPURenderObject } from "../caches/getNGPURenderObject";
 import { getRealGPUBindGroup } from "../const";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUBlendConstant } from "../data/IGPUBlendConstant";
-import { IGPUCommandEncoder } from "../data/IGPUCommandEncoder";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
@@ -34,7 +33,7 @@ import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
-import { IRenderPass } from "@feng3d/render-api";
+import { ICommandEncoder, IRenderPass } from "@feng3d/render-api";
 
 export class RunWebGPU
 {
@@ -53,7 +52,7 @@ export class RunWebGPU
         anyEmitter.emit(device.queue, GPUQueue_submit);
     }
 
-    protected runCommandEncoder(device: GPUDevice, commandEncoder: IGPUCommandEncoder)
+    protected runCommandEncoder(device: GPUDevice, commandEncoder: ICommandEncoder)
     {
         const gpuCommandEncoder = device.createCommandEncoder();
 

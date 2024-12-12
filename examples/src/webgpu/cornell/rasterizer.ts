@@ -1,6 +1,6 @@
-import { IGPUBindingResources, IGPUCommandEncoder, IGPURenderPipeline, internal } from "@feng3d/webgpu";
+import { IGPUBindingResources, IGPURenderPipeline } from "@feng3d/webgpu";
 
-import { IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
 import Common from "./common";
 import Radiosity from "./radiosity";
 import rasterizerWGSL from "./rasterizer.wgsl";
@@ -92,7 +92,7 @@ export default class Rasterizer
     }
     private renderPassEncoder: IRenderPass;
 
-    encode(commandEncoder: IGPUCommandEncoder)
+    encode(commandEncoder: ICommandEncoder)
     {
         commandEncoder.passEncoders.push(this.renderPassEncoder);
     }

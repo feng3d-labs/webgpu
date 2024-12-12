@@ -1,6 +1,6 @@
-import { IGPUBindingResources, IGPUCommandEncoder, IGPUComputePipeline, IGPUPassEncoder, internal } from "@feng3d/webgpu";
+import { IGPUBindingResources, IGPUComputePipeline } from "@feng3d/webgpu";
 
-import { ITexture } from "@feng3d/render-api";
+import { ICommandEncoder, IPassEncoder, ITexture } from "@feng3d/render-api";
 import Common from "./common";
 import Radiosity from "./radiosity";
 import raytracerWGSL from "./raytracer.wgsl";
@@ -50,7 +50,7 @@ export default class Raytracer
       },
     };
 
-    const framebufferSize = internal.getGPUTextureSize(this.framebuffer);
+    const framebufferSize = this.framebuffer.size;
     //
     this.passEncoder = {
       __type: "ComputePass",
@@ -67,9 +67,9 @@ export default class Raytracer
       }],
     };
   }
-  private passEncoder: IGPUPassEncoder;
+  private passEncoder: IPassEncoder;
 
-  encode(commandEncoder: IGPUCommandEncoder)
+  encode(commandEncoder: ICommandEncoder)
   {
     commandEncoder.passEncoders.push(this.passEncoder);
   }
