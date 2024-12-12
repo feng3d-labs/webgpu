@@ -7,8 +7,8 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -268,7 +268,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const view = mat4.create();
   const mvp = mat4.create();
 
-  const passEncoders: (IGPUComputePass | IGPURenderPass)[] = [];
+  const passEncoders: (IGPUComputePass | IRenderPass)[] = [];
 
   const submit: IGPUSubmit = {
     commandEncoders: [

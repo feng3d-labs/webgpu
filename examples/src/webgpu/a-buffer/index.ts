@@ -7,8 +7,8 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { IRenderPassDescriptor, ITexture, ITextureView } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, ITexture, ITextureView } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -295,7 +295,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const passEncoders: IGPUPassEncoder[] = [];
 
         // Draw the opaque objects
-        const opaquePassEncoder: IGPURenderPass = {
+        const opaquePassEncoder: IRenderPass = {
             descriptor: opaquePassDescriptor,
             renderObjects: [{
                 pipeline: opaquePipeline,
@@ -328,7 +328,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             // Draw the translucent objects
 
-            const translucentPassEncoder: IGPURenderPass = {
+            const translucentPassEncoder: IRenderPass = {
                 descriptor: translucentPassDescriptor,
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
@@ -354,7 +354,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             passEncoders.push(translucentPassEncoder);
 
             // Composite the opaque and translucent objects
-            const compositePassEncoder: IGPURenderPass
+            const compositePassEncoder: IRenderPass
                 = {
                 descriptor: compositePassDescriptor,
                 renderObjects: [

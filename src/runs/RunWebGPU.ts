@@ -23,7 +23,7 @@ import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPURenderObject } from "../data/IGPURenderObject";
-import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
+import { IGPURenderPassObject } from "../data/IGPURenderPass";
 import { IGPURenderPipeline } from "../data/IGPURenderPipeline";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUStencilReference } from "../data/IGPUStencilReference";
@@ -34,6 +34,7 @@ import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
+import { IRenderPass } from "@feng3d/render-api";
 
 export class RunWebGPU
 {
@@ -60,7 +61,7 @@ export class RunWebGPU
         {
             if (!passEncoder.__type)
             {
-                this.runRenderPass(device, gpuCommandEncoder, passEncoder as IGPURenderPass);
+                this.runRenderPass(device, gpuCommandEncoder, passEncoder as IRenderPass);
             }
             else if (passEncoder.__type === "RenderPass")
             {
@@ -87,7 +88,7 @@ export class RunWebGPU
         return gpuCommandEncoder.finish();
     }
 
-    protected runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
+    protected runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IRenderPass)
     {
         const { descriptor, renderObjects } = renderPass;
 

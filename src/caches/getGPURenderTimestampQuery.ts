@@ -1,6 +1,6 @@
 import { anyEmitter } from "@feng3d/event";
+import { IRenderPass } from "@feng3d/render-api";
 import { IGPUComputePass } from "../data/IGPUComputePass";
-import { IGPURenderPass } from "../data/IGPURenderPass";
 import { IGPUTimestampQuery } from "../data/IGPUTimestampQuery";
 import { GPUQueue_submit } from "../eventnames";
 
@@ -121,7 +121,7 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: I
 interface GPURenderTimestampQuery
 {
     init: (device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor) => void
-    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass | IGPUComputePass) => void
+    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IRenderPass | IGPUComputePass) => void
 }
 
 const defautGPURenderTimestampQuery = { init: () => { }, resolve: () => { } };

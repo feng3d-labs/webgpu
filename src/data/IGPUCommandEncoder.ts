@@ -1,8 +1,7 @@
-import { ICommandEncoder } from "@feng3d/render-api";
+import { ICommandEncoder, IRenderPass } from "@feng3d/render-api";
 import { IGPUComputePass } from "./IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./IGPUCopyTextureToTexture";
-import { IGPURenderPass } from "./IGPURenderPass";
 
 declare module "@feng3d/render-api"
 {
@@ -36,4 +35,4 @@ export interface IGPUCommandEncoder extends ICommandEncoder
  *
  * 通道可以理解为源数据通过某种操作到目标数据的映射，该操作可以是计算模块、也可以是渲染模块、也可以是简单的拷贝或者转换。
  */
-export type IGPUPassEncoder = IGPUComputePass | IGPURenderPass | IGPUCopyTextureToTexture | IGPUCopyBufferToBuffer;
+export type IGPUPassEncoder = IGPUComputePass | IRenderPass | IGPUCopyTextureToTexture | IGPUCopyBufferToBuffer;

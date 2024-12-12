@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IRenderPassDescriptor } from "@feng3d/render-api";
-import { IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
+import { IGPURenderBundle, IGPURenderObject, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects
         };
 
-        const renderPasss: (IGPURenderPass)[] = [];
+        const renderPasss: IRenderPass[] = [];
         const submit: IGPUSubmit = {
             commandEncoders: [
                 {

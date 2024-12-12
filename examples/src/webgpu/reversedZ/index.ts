@@ -10,8 +10,8 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -364,7 +364,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
     gui.add(settings, "mode", ["color", "precision-error", "depth-texture"]);
 
-    const colorPassEncoders: IGPURenderPass[] = [];
+    const colorPassEncoders: IRenderPass[] = [];
 
     for (const m of depthBufferModes)
     {
@@ -387,7 +387,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    const precisionErrorPassEncoders: IGPURenderPass[] = [];
+    const precisionErrorPassEncoders: IRenderPass[] = [];
     for (const m of depthBufferModes)
     {
         precisionErrorPassEncoders.push({
@@ -442,7 +442,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    const depthBufferPassEncoders: IGPURenderPass[] = [];
+    const depthBufferPassEncoders: IRenderPass[] = [];
     for (const m of depthBufferModes)
     {
         depthBufferPassEncoders.push({
@@ -495,7 +495,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         uniforms.modelMatrix = mvpMatricesData.slice(0);
 
-        let passEncoders: IGPURenderPass[];
+        let passEncoders: IRenderPass[];
 
         if (settings.mode === "color")
         {

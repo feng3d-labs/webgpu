@@ -3,8 +3,8 @@ import { mat4 } from "wgpu-matrix";
 import solidColorLitWGSL from "./solidColorLit.wgsl";
 
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderObject, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
-import { IRenderPassDescriptor } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderObject, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
 
 const info = document.querySelector("#info");
 
@@ -157,7 +157,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.map((ro) =>
     ({ __type: "OcclusionQuery", renderObjects: [ro] }));
 
-    const renderPass: IGPURenderPass = {
+    const renderPass: IRenderPass = {
         descriptor: renderPassDescriptor,
         // renderObjects: renderObjects,
         renderObjects: occlusionQueryObjects,

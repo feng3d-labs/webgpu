@@ -4,8 +4,8 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
-import { IRenderPassDescriptor } from "@feng3d/render-api";
+import { IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -114,7 +114,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ],
         };
 
-        const passEncodersArray: (IGPUComputePass | IGPURenderPass)[][] = [];
+        const passEncodersArray: (IGPUComputePass | IRenderPass)[][] = [];
         for (let i = 0; i < 2; i++)
         {
             const vertices1: IGPUVertexAttributes = {};

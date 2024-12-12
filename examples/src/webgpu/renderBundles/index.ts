@@ -6,8 +6,8 @@ import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
 
-import { IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPURenderObject, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 interface Renderable
 {
@@ -326,7 +326,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             renderObjects = renderBundle.renderObjects as any;
         }
 
-        const renderPass: IGPURenderPass = {
+        const renderPass: IRenderPass = {
             descriptor: renderPassDescriptor,
             renderObjects,
         };

@@ -3,7 +3,7 @@ import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPass, IGPURenderPassObject } from "./data/IGPURenderPass";
+import { IRenderPass, IGPURenderPassObject } from "./data/IGPURenderPass";
 import { IRenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
 import { IGPUSubmit } from "./data/IGPUSubmit";
 import { WebGPU } from "./WebGPU";
@@ -16,7 +16,7 @@ import { WebGPU } from "./WebGPU";
 export class WebGPUStep
 {
     private _currentSubmit: IGPUSubmit;
-    private _currentRenderPassEncoder: IGPURenderPass;
+    private _currentRenderPassEncoder: IRenderPass;
     private _currentComputePassEncoder: IGPUComputePass;
 
     readonly webGPU: WebGPU;
