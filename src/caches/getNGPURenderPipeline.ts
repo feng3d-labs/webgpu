@@ -88,9 +88,19 @@ function getGPUPrimitiveState(primitive?: IPrimitiveState, indexFormat?: GPUInde
         stripIndexFormat = indexFormat;
     }
 
+    const topology: GPUPrimitiveTopology = primitive?.topology || "triangle-list";
+    const cullMode: GPUCullMode = primitive?.cullFace || "none";
+    const frontFace: GPUFrontFace = primitive?.frontFace || "ccw";
+    const unclippedDepth: boolean = primitive?.unclippedDepth || false;
+
+    //
     const gpuPrimitive: GPUPrimitiveState = {
         ...primitive,
+        topology,
         stripIndexFormat,
+        frontFace,
+        cullMode,
+        unclippedDepth,
     };
     return gpuPrimitive;
 }
