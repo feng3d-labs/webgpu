@@ -5,6 +5,7 @@ export * from "./data/IGPUBuffer";
 export * from "./data/IGPUBufferBinding";
 export * from "./data/IGPUCanvasContext";
 export * from "./data/IGPUCanvasTexture";
+export * from "./data/IGPUColorTargetState";
 export * from "./data/IGPUCommandEncoder";
 export * from "./data/IGPUComputeObject";
 export * from "./data/IGPUComputePass";
