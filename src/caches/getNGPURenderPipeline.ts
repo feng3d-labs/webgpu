@@ -1,8 +1,7 @@
-import { IBlendState, IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState, IWriteMask } from "@feng3d/render-api";
+import { IBlendState, IDepthStencilState, IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState, IWriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
-import { IGPUDepthStencilState } from "../data/IGPUDepthStencilState";
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
 import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
@@ -122,7 +121,7 @@ function getGPUMultisampleState(multisampleState?: IGPUMultisampleState, sampleC
  * @param depthStencilFormat 深度模板附件纹理格式。
  * @returns 深度模板阶段完整描述。
  */
-function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, depthStencilFormat?: GPUTextureFormat)
+function getGPUDepthStencilState(depthStencil: IDepthStencilState, depthStencilFormat?: GPUTextureFormat)
 {
     if (!depthStencilFormat) return undefined;
     //

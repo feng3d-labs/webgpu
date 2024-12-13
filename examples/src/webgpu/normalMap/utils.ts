@@ -1,5 +1,4 @@
-import { IRenderPipeline, ITexture } from "@feng3d/render-api";
-import { IGPUDepthStencilState } from "@feng3d/webgpu";
+import { IDepthStencilState, IRenderPipeline, ITexture } from "@feng3d/render-api";
 
 export const create3DRenderPipeline = (
     label: string,
@@ -10,7 +9,7 @@ export const create3DRenderPipeline = (
     cullMode: GPUCullMode = "back"
 ) =>
 {
-    let depthStencil: IGPUDepthStencilState;
+    let depthStencil: IDepthStencilState;
     if (depthTest)
     {
         depthStencil = {
