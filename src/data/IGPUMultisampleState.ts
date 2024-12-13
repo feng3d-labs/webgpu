@@ -1,8 +1,9 @@
+import { IRenderPassDescriptor } from "@feng3d/render-api";
 
 /**
  * 多重采样阶段描述。
  *
- * 多重采样次数将由 {@link IGPURenderPassDescriptor.multisample} 覆盖。
+ * 多重采样次数将由 {@link IRenderPassDescriptor.multisample} 覆盖。
  */
 export interface IGPUMultisampleState
 {
