@@ -11,7 +11,6 @@ export * from "./data/IGPUComputePass";
 export * from "./data/IGPUComputePipeline";
 export * from "./data/IGPUCopyBufferToBuffer";
 export * from "./data/IGPUCopyTextureToTexture";
-export * from "./data/IGPUDepthStencilState";
 export * from "./data/IGPUDrawIndexed";
 export * from "./data/IGPUDrawVertex";
 export * from "./data/IGPUOcclusionQuery";
