@@ -161,60 +161,77 @@ declare module "@feng3d/render-api"
         "one-minus-src1-alpha": "one-minus-src1-alpha";
     }
 
-
     /**
      * 深度模板阶段描述。
      *
      * `format` 将从深度附件 {@link IGPURenderPassDescriptor.depthStencilAttachment} 纹理上获取。
      *
      * {@link GPUDepthStencilState}
+     * 
+     * @see https://www.orillusion.com/zh/webgpu.html#depth-stencil-state
      */
     export interface IDepthStencilState
     {
         /**
-         * Indicates if this {@link GPURenderPipeline} can modify
-         * {@link GPURenderPassDescriptor#depthStencilAttachment} depth values.
+         * 指示这个 GPURenderPipeline 是否可以修改 depthStencilAttachment 深度值。
          *
          * 默认为 `true` 。
          */
         readonly depthWriteEnabled?: boolean;
 
         /**
-         * The comparison operation used to test fragment depths against
-         * {@link GPURenderPassDescriptor#depthStencilAttachment} depth values.
+         * 用于测试片元深度与 depthStencilAttachment 深度值的比较操作。
          *
          * 默认 `'less'` 。
          */
         readonly depthCompare?: GPUCompareFunction;
 
         /**
-         * Defines how stencil comparisons and operations are performed for front-facing primitives.
+         * 定义了如何为朝前的图元执行模板比较和操作。
+         * 
+         * 默认为 {}。
          */
         readonly stencilFront?: IGPUStencilFaceState;
+
         /**
-         * Defines how stencil comparisons and operations are performed for back-facing primitives.
+         * 定义了如何为朝后的图元执行模板比较和操作。
+         * 
+         * 默认为 {}。
          */
         readonly stencilBack?: IGPUStencilFaceState;
+
         /**
-         * Bitmask controlling which {@link GPURenderPassDescriptor#depthStencilAttachment} stencil value
-         * bits are read when performing stencil comparison tests.
+         * 掩码控制在执行模板比较测试时读取哪些 depthStencilAttachment 模板值位。
+         * 
+         * 默认为 0xFFFFFFFF 。
          */
         readonly stencilReadMask?: GPUStencilValue;
+
         /**
-         * Bitmask controlling which {@link GPURenderPassDescriptor#depthStencilAttachment} stencil value
-         * bits are written to when performing stencil operations.
+         * 掩码控制可以写入哪些 depthStencilAttachment 模板值位。
+         * 
+         * 默认为 0xFFFFFFFF 。
          */
         readonly stencilWriteMask?: GPUStencilValue;
+
         /**
-         * Constant depth bias added to each triangle fragment. See [$biased fragment depth$] for details.
-         */
+         * 添加到每个片元的恒定深度偏差。
+         * 
+         * 默认为 0 。
+        */
         readonly depthBias?: GPUDepthBias;
+
         /**
-         * Depth bias that scales with the triangle fragment’s slope. See [$biased fragment depth$] for details.
+         * 与片元的斜率成比例的深度偏差。
+         * 
+         * 默认为 0 。
          */
         readonly depthBiasSlopeScale?: number;
+
         /**
-         * The maximum depth bias of a triangle fragment. See [$biased fragment depth$] for details.
+         * 片元的最大深度偏差。
+         * 
+         * 默认为 0 。
          */
         readonly depthBiasClamp?: number;
     }

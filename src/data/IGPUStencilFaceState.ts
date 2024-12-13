@@ -1,36 +1,34 @@
 
 /**
  * {@link GPUStencilFaceState}
+ * 
+ * @see https://www.orillusion.com/zh/webgpu.html#dictdef-gpustencilfacestate
  */
 export interface IGPUStencilFaceState
 {
     /**
-     * The {@link GPUCompareFunction} used when testing the {@link RenderState#[[stencilReference]]} value
-     * against the fragment's {@link GPURenderPassDescriptor#depthStencilAttachment} stencil values.
+     * 在测试片元与 depthStencilAttachment 模板值时使用的 GPUCompareFunction。
      * 
      * 默认为 "always"。
      */
     readonly compare?: GPUCompareFunction;
 
     /**
-     * The {@link GPUStencilOperation} performed if the fragment stencil comparison test described by
-     * {@link GPUStencilFaceState#compare} fails.
+     * 如果片元模板比较测试（由 compare 描述）失败，则执行的 GPUStencilOperation。
      * 
      * 默认为 "keep"。
      */
     readonly failOp?: GPUStencilOperation;
 
     /**
-     * The {@link GPUStencilOperation} performed if the fragment depth comparison described by
-     * {@link GPUDepthStencilState#depthCompare} fails.
+     * 如果由 depthCompare 描述的片元深度比较失败，则执行的 GPUStencilOperation。
      * 
      * 默认为 "keep"。
      */
     readonly depthFailOp?: GPUStencilOperation;
 
     /**
-     * The {@link GPUStencilOperation} performed if the fragment stencil comparison test described by
-     * {@link GPUStencilFaceState#compare} passes.
+     * 如果片元模板比较测试通过，则执行由compare描述的GPUStencilOperation。
      * 
      * 默认为 "keep"。
      */
