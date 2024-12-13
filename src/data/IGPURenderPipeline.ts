@@ -148,4 +148,15 @@ declare module "@feng3d/render-api"
          */
         readonly blend?: IBlendState;
     }
+
+    /**
+     * 扩展仅WebGPU支持的混合参数。 "src1" | "one-minus-src1" | "src1-alpha" | "one-minus-src1-alpha" 需要开启扩展 `dual-source-blending` 。 
+     */
+    export interface IBlendFactorMap
+    {
+        "src1": "src1";
+        "one-minus-src1": "one-minus-src1";
+        "src1-alpha": "src1-alpha";
+        "one-minus-src1-alpha": "one-minus-src1-alpha";
+    }
 }
