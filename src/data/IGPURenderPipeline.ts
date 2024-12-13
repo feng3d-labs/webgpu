@@ -18,16 +18,6 @@ declare module "@feng3d/render-api"
         readonly label?: string;
 
         /**
-         * 描述顶点着色器源码入口点。
-         */
-        readonly vertex: IVertexState;
-
-        /**
-         * 片段着色器阶段描述。
-         */
-        readonly fragment?: IFragmentState;
-
-        /**
          * 深度模板阶段描述。
          */
         readonly depthStencil?: IDepthStencilState;
@@ -172,62 +162,6 @@ declare module "@feng3d/render-api"
      */
     export interface IDepthStencilState
     {
-        /**
-         * 指示这个 GPURenderPipeline 是否可以修改 depthStencilAttachment 深度值。
-         *
-         * 默认为 `true` 。
-         */
-        readonly depthWriteEnabled?: boolean;
-
-        /**
-         * 用于测试片元深度与 depthStencilAttachment 深度值的比较操作。
-         *
-         * 默认 `'less'` 。
-         */
-        readonly depthCompare?: GPUCompareFunction;
-
-        /**
-         * 定义了如何为朝前的图元执行模板比较和操作。
-         * 
-         * 默认为 {}。
-         */
-        readonly stencilFront?: IGPUStencilFaceState;
-
-        /**
-         * 定义了如何为朝后的图元执行模板比较和操作。
-         * 
-         * 默认为 {}。
-         */
-        readonly stencilBack?: IGPUStencilFaceState;
-
-        /**
-         * 掩码控制在执行模板比较测试时读取哪些 depthStencilAttachment 模板值位。
-         * 
-         * 默认为 0xFFFFFFFF 。
-         */
-        readonly stencilReadMask?: GPUStencilValue;
-
-        /**
-         * 掩码控制可以写入哪些 depthStencilAttachment 模板值位。
-         * 
-         * 默认为 0xFFFFFFFF 。
-         */
-        readonly stencilWriteMask?: GPUStencilValue;
-
-        /**
-         * 添加到每个片元的恒定深度偏差。
-         * 
-         * 默认为 0 。
-        */
-        readonly depthBias?: GPUDepthBias;
-
-        /**
-         * 与片元的斜率成比例的深度偏差。
-         * 
-         * 默认为 0 。
-         */
-        readonly depthBiasSlopeScale?: number;
-
         /**
          * 片元的最大深度偏差。
          * 
