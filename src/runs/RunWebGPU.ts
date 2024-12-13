@@ -24,7 +24,6 @@ import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
-import { IGPUStencilReference } from "../data/IGPUStencilReference";
 import { IGPUViewport } from "../data/IGPUViewport";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
@@ -145,10 +144,6 @@ export class RunWebGPU
             else if (element.__type === "BlendConstant")
             {
                 this.runBlendConstant(passEncoder, element);
-            }
-            else if (element.__type === "StencilReference")
-            {
-                this.runStencilReference(passEncoder, element);
             }
             else
             {
@@ -320,7 +315,20 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
     {
-        const { pipeline: gpuRenderPipeline, setBindGroups, vertexBuffers, setIndexBuffer, drawVertex, drawIndexed } = getNGPURenderObject(device, renderPassFormat, renderObject);
+        const { pipeline: gpuRenderPipeline, setBindGroups, vertexBuffers, setIndexBuffer, drawVertex, drawIndexed, stencilReference } = getNGPURenderObject(device, renderPassFormat, renderObject);
+
+        // 设置模板测试替换值
+        if (stencilReference !== undefined)
+        {
+            if ("setStencilReference" in passEncoder)
+            {
+                passEncoder.setStencilReference(stencilReference);
+            }
+            else
+            {
+                console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 stencilReference 值！`);
+            }
+        }
 
         //
         passEncoder.setPipeline(gpuRenderPipeline);
@@ -350,11 +358,6 @@ export class RunWebGPU
     protected runBlendConstant(passEncoder: GPURenderPassEncoder, element: IGPUBlendConstant)
     {
         passEncoder.setBlendConstant(element.color);
-    }
-
-    protected runStencilReference(passEncoder: GPURenderPassEncoder, element: IGPUStencilReference)
-    {
-        passEncoder.setStencilReference(element.reference);
     }
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)

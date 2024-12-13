@@ -7,9 +7,9 @@ import { getGPUBindGroup } from "./getGPUBindGroup";
 import { getGPUBuffer } from "./getGPUBuffer";
 import { getGPURenderPipeline } from "./getGPURenderPipeline";
 import { getIGPUVertexBuffer } from "./getIGPUBuffer";
+import { IGPUShader } from "./getIGPUPipelineLayout";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 import { getNGPURenderPipeline } from "./getNGPURenderPipeline";
-import { IGPUShader } from "./getIGPUPipelineLayout";
 
 export function getNGPURenderObject(device: GPUDevice, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
 {
@@ -49,6 +49,7 @@ export function getNGPURenderObject(device: GPUDevice, renderPassFormat: IGPURen
         setIndexBuffer,
         drawVertex,
         drawIndexed,
+        stencilReference: nPipeline.stencilReference,
     };
 
     return nRenderObject;

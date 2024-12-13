@@ -12,4 +12,9 @@ export interface NGPURenderPipeline
     readonly fragment: NGPUFragmentState,
     readonly depthStencil: GPUDepthStencilState,
     readonly multisample: GPUMultisampleState,
+
+    /**
+     * 如果任意模板测试结果使用了 "replace" 运算，则需要再渲染前设置 `stencilReference` 值。
+     */
+    readonly stencilReference: number;
 }

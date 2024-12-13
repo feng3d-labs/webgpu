@@ -3,7 +3,6 @@ import { IGPUBlendConstant } from "./IGPUBlendConstant";
 import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
 import { IGPUScissorRect } from "./IGPUScissorRect";
-import { IGPUStencilReference } from "./IGPUStencilReference";
 import { IGPUTimestampQuery } from "./IGPUTimestampQuery";
 import { IGPUViewport } from "./IGPUViewport";
 
@@ -40,6 +39,5 @@ declare module "@feng3d/render-api"
         IGPURenderBundle: IGPURenderBundle;
         IGPUOcclusionQuery: IGPUOcclusionQuery;
         IGPUBlendConstant: IGPUBlendConstant;
-        IGPUStencilReference: IGPUStencilReference;
     }
 }

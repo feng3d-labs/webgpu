@@ -47,6 +47,9 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
         const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
 
         //
+        const stencilReference = getStencilReference(renderPipeline.depthStencil);
+
+        //
         const pipeline: NGPURenderPipeline = {
             label,
             primitive: gpuPrimitive,
@@ -54,6 +57,7 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
             fragment: gpuFragmentState,
             depthStencil: gpuDepthStencilState,
             multisample: gpuMultisampleState,
+            stencilReference,
         };
 
         result = { pipeline, vertexBuffers };
@@ -76,6 +80,33 @@ const renderPipelineMap = new ChainMap<
         vertexBuffers: NGPUVertexBuffer[];
     }
 >();
+
+/**
+ * 如果任意模板测试结果使用了 "replace" 运算，则需要再渲染前设置 `stencilReference` 值。
+ * 
+ * @param depthStencil 
+ * @returns 
+ */
+function getStencilReference(depthStencil?: IDepthStencilState)
+{
+    if (!depthStencil) return undefined;
+
+    // 如果开启了模板测试，则需要设置模板索引值
+    let stencilReference: number;
+    if (0
+        || depthStencil.stencilFront.failOp === "replace"
+        || depthStencil.stencilFront.depthFailOp === "replace"
+        || depthStencil.stencilFront.passOp === "replace"
+        || depthStencil.stencilBack.failOp === "replace"
+        || depthStencil.stencilBack.depthFailOp === "replace"
+        || depthStencil.stencilBack.passOp === "replace"
+    )
+    {
+        stencilReference = depthStencil?.stencilReference ?? 0;
+    }
+
+    return stencilReference;
+}
 
 function getGPUPrimitiveState(primitive?: IPrimitiveState, indexFormat?: GPUIndexFormat)
 {
