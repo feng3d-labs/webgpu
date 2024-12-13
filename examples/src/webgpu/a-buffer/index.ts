@@ -81,7 +81,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: translucentWGSL,
             targets: [
                 {
-                    writeMask: 0x0,
+                    writeMask: [false, false, false, false],
                 },
             ],
         },

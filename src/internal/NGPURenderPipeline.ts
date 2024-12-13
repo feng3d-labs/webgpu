@@ -1,11 +1,10 @@
-import { IRenderPipeline } from "@feng3d/render-api";
 import { NGPUFragmentState } from "./NGPUFragmentState";
 import { NGPUVertexState } from "./NGPUVertexState";
 
 /**
  * 内部对象。
  */
-export interface NGPURenderPipeline extends IRenderPipeline
+export interface NGPURenderPipeline
 {
     readonly label: string;
     readonly primitive: GPUPrimitiveState;

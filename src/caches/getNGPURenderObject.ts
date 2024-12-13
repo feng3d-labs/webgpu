@@ -9,17 +9,20 @@ import { getGPURenderPipeline } from "./getGPURenderPipeline";
 import { getIGPUVertexBuffer } from "./getIGPUBuffer";
 import { getIGPUSetBindGroups } from "./getIGPUSetBindGroups";
 import { getNGPURenderPipeline } from "./getNGPURenderPipeline";
+import { IGPUShader } from "./getIGPUPipelineLayout";
 
 export function getNGPURenderObject(device: GPUDevice, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
 {
     const { pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
+
+    const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
 
     // 
     const { pipeline: nPipeline, vertexBuffers } = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
     const gpuRenderPipeline = getGPURenderPipeline(device, nPipeline);
 
     // 计算 bindGroups
-    const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);
+    const setBindGroups = getIGPUSetBindGroups(shader, bindingResources);
     const gpuBindGroups: NGPUSetBindGroup[] = setBindGroups?.map((setBindGroup, index) =>
     {
         const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup);

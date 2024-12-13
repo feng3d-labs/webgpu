@@ -1,24 +1,30 @@
-import { IRenderPipeline } from "@feng3d/render-api";
 
-import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
 import { IGPUBindGroupLayoutDescriptor, IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { getIGPUBindGroupLayoutEntryMap, IGPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
+
+export type IGPUShader = { readonly vertex?: string, readonly fragment?: string, readonly compute?: string };
+
+export function getIGPUShaderKey(shader: IGPUShader)
+{
+    return shader.vertex + shader.fragment + shader.compute;
+}
 
 /**
  * 从GPU管线中获取管线布局。
  *
- * @param pipeline GPU管线。
+ * @param shader GPU管线。
  * @returns 管线布局。
  */
-export function getIGPUPipelineLayout(pipeline: IRenderPipeline | IGPUComputePipeline): IGPUPipelineLayoutDescriptor
+export function getIGPUPipelineLayout(shader: IGPUShader): IGPUPipelineLayoutDescriptor
 {
-    const vertexCode = (pipeline as IRenderPipeline).vertex?.code;
-    const fragmentCode = (pipeline as IRenderPipeline).fragment?.code;
-    const computeCode = (pipeline as IGPUComputePipeline).compute?.code;
+    const vertexCode = shader.vertex;
+    const fragmentCode = shader.fragment;
+    const computeCode = shader.compute;
+
+    const shaderKey = getIGPUShaderKey(shader);
+
     //
-    const code = vertexCode + fragmentCode + computeCode;
-    //
-    let gpuPipelineLayout = gpuPipelineLayoutMap[code];
+    let gpuPipelineLayout = gpuPipelineLayoutMap[shaderKey];
     if (gpuPipelineLayout) return gpuPipelineLayout;
 
     let entryMap: IGPUBindGroupLayoutEntryMap = {};
@@ -74,7 +80,7 @@ export function getIGPUPipelineLayout(pipeline: IRenderPipeline | IGPUComputePip
     }
 
     //
-    gpuPipelineLayout = gpuPipelineLayoutMap[code] = { bindGroupLayouts };
+    gpuPipelineLayout = gpuPipelineLayoutMap[shaderKey] = { bindGroupLayouts };
 
     return gpuPipelineLayout;
 }

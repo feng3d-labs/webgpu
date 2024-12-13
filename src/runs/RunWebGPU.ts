@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { ICommandEncoder, IRenderObject, IRenderPass, IRenderPassObject, ISubmit } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -10,6 +10,7 @@ import { getGPURenderPassFormat } from "../caches/getGPURenderPassFormat";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
+import { IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { getNGPURenderObject } from "../caches/getNGPURenderObject";
 import { getRealGPUBindGroup } from "../const";
@@ -280,9 +281,11 @@ export class RunWebGPU
     {
         const { pipeline, bindingResources, workgroups } = computeObject;
 
+        const shader: IGPUShader = { compute: pipeline.compute.code };
+
         this.runComputePipeline(device, passEncoder, pipeline);
 
-        this.runBindingResources(device, passEncoder, pipeline, bindingResources);
+        this.runBindingResources(device, passEncoder, shader, bindingResources);
 
         this.runWorkgroups(passEncoder, workgroups);
     }
@@ -377,10 +380,10 @@ export class RunWebGPU
         passEncoder.setScissorRect(x, y, width, height);
     }
 
-    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IRenderPipeline, bindingResources: IGPUBindingResources)
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: IGPUBindingResources)
     {
         // 计算 bindGroups
-        const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);
+        const setBindGroups = getIGPUSetBindGroups(shader, bindingResources);
 
         setBindGroups?.forEach((setBindGroup, index) =>
         {

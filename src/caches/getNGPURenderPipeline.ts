@@ -1,4 +1,4 @@
-import { IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState } from "@feng3d/render-api";
+import { IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState, IWriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -313,17 +313,31 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
             const colorTargetState = fragmentState.targets?.[i];
 
             //
-            let writeMask = colorTargetState?.writeMask;
-            if (writeMask === undefined)
+            const writeMask: IWriteMask = colorTargetState?.writeMask || [true, true, true, true];
+            let gpuWriteMask = 0;
+            if (writeMask[0])
             {
-                writeMask = 15;
+                gpuWriteMask += 1;
             }
+            if (writeMask[1])
+            {
+                gpuWriteMask += 2;
+            }
+            if (writeMask[2])
+            {
+                gpuWriteMask += 4;
+            }
+            if (writeMask[3])
+            {
+                gpuWriteMask += 8;
+            }
+
             //
             const blend = colorTargetState?.blend;
             //
             const colorOperation: GPUBlendOperation = blend?.color?.operation || "add";
-            let colorSrcFactor: GPUBlendFactor = blend?.color?.srcFactor || "src-alpha";
-            let colorDstFactor: GPUBlendFactor = blend?.color?.dstFactor || "one-minus-src-alpha";
+            let colorSrcFactor: GPUBlendFactor = blend?.color?.srcFactor || "one";
+            let colorDstFactor: GPUBlendFactor = blend?.color?.dstFactor || "zero";
             if (colorOperation === "max" || colorOperation === "min")
             {
                 colorSrcFactor = colorDstFactor = "one";
@@ -352,7 +366,7 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
                         dstFactor: alphaDstFactor,
                     },
                 },
-                writeMask: writeMask,
+                writeMask: gpuWriteMask,
             };
 
             return gpuColorTargetState;

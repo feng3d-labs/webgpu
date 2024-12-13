@@ -133,6 +133,8 @@ declare module "@feng3d/render-api"
 
     /**
      * 属性 `format` 将由渲染通道中附件给出。
+     * 
+     * @see https://gpuweb.github.io/gpuweb/#dictdef-gpucolortargetstate
      */
     export interface IColorTargetState
     {
@@ -141,13 +143,11 @@ declare module "@feng3d/render-api"
          * color target.
          */
         readonly blend?: IBlendState;
-
-        /**
-         * Bitmask controlling which channels are are written to when drawing to this color target.
-         */
-        readonly writeMask?: GPUColorWriteFlags;
     }
 
+    /**
+     * https://gpuweb.github.io/gpuweb/#dictdef-gpublendstate
+     */
     export interface IBlendState
     {
         /**
@@ -161,6 +161,9 @@ declare module "@feng3d/render-api"
         readonly alpha?: IBlendComponent;
     }
 
+    /**
+     * @see https://gpuweb.github.io/gpuweb/#dictdef-gpucolortargetstate
+     */
     export interface IBlendComponent
     {
         /**
@@ -175,13 +178,13 @@ declare module "@feng3d/render-api"
         /**
          * Defines the {@link GPUBlendFactor} operation to be performed on values from the fragment shader.
          * 
-         * 默认为 "src-alpha"。
+         * 默认为 "one"。
          */
         readonly srcFactor?: GPUBlendFactor;
         /**
          * Defines the {@link GPUBlendFactor} operation to be performed on values from the target attachment.
          * 
-         * 默认为 "one-minus-src-alpha"。
+         * 默认为 "zero"。
          */
         readonly dstFactor?: GPUBlendFactor;
     }

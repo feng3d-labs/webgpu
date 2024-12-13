@@ -1,28 +1,27 @@
-import { IRenderPipeline } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 
-import { getIGPUPipelineLayout } from "../caches/getIGPUPipelineLayout";
+import { getIGPUPipelineLayout, getIGPUShaderKey, IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
-import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
 import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUBuffer";
 
-export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IRenderPipeline, bindingResources: IGPUBindingResources)
+export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: IGPUBindingResources)
 {
+    const shaderKey = getIGPUShaderKey(shader);
     //
-    let gpuSetBindGroups = bindGroupsMap.get([pipeline, bindingResources]);
+    let gpuSetBindGroups = bindGroupsMap.get([shaderKey, bindingResources]);
     if (gpuSetBindGroups) return gpuSetBindGroups;
 
     gpuSetBindGroups = [];
-    bindGroupsMap.set([pipeline, bindingResources], gpuSetBindGroups);
+    bindGroupsMap.set([shaderKey, bindingResources], gpuSetBindGroups);
 
     //
-    const layout = getIGPUPipelineLayout(pipeline);
+    const layout = getIGPUPipelineLayout(shader);
     layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
     {
         gpuSetBindGroups[group] = getIGPUSetBindGroup(bindGroupLayout, bindingResources);
@@ -31,7 +30,7 @@ export function getIGPUSetBindGroups(pipeline: IGPUComputePipeline | IRenderPipe
     return gpuSetBindGroups;
 }
 
-const bindGroupsMap = new ChainMap<[IGPUComputePipeline | IRenderPipeline, IGPUBindingResources], IGPUSetBindGroup[]>();
+const bindGroupsMap = new ChainMap<[string, IGPUBindingResources], IGPUSetBindGroup[]>();
 
 function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bindingResources: IGPUBindingResources): IGPUSetBindGroup
 {
