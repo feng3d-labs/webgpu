@@ -1,5 +1,4 @@
-import { IFragmentState } from "@feng3d/render-api";
-import { IGPUColorTargetState } from "../data/IGPUColorTargetState";
+import { IColorTargetState, IFragmentState } from "@feng3d/render-api";
 
 /**
  * 内部对象。
@@ -7,7 +6,7 @@ import { IGPUColorTargetState } from "../data/IGPUColorTargetState";
 export interface NGPUFragmentState extends IFragmentState
 {
     readonly entryPoint: string;
-    readonly targets: readonly IGPUColorTargetState[];
+    readonly targets: readonly IColorTargetState[];
     readonly constants: Readonly<Record<
         string,
         GPUPipelineConstantValue

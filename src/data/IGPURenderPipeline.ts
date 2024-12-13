@@ -1,5 +1,4 @@
 import { IRenderPipeline } from "@feng3d/render-api";
-import { IGPUColorTargetState } from "./IGPUColorTargetState";
 import { IGPUDepthStencilState } from "./IGPUDepthStencilState";
 import { IGPUMultisampleState } from "./IGPUMultisampleState";
 
@@ -108,7 +107,7 @@ declare module "@feng3d/render-api"
          * A list of {@link GPUColorTargetState} defining the formats and behaviors of the color targets
          * this pipeline writes to.
          */
-        readonly targets?: readonly IGPUColorTargetState[];
+        readonly targets?: readonly IColorTargetState[];
 
         /**
          * Specifies the values of pipeline-overridable constants in the shader module
@@ -130,5 +129,52 @@ declare module "@feng3d/render-api"
             string,
             GPUPipelineConstantValue
         >>;
+    }
+
+    /**
+     * 属性 `format` 将由渲染通道中附件给出。
+     */
+    export interface IColorTargetState
+    {
+        /**
+         * The blending behavior for this color target. If left undefined, disables blending for this
+         * color target.
+         */
+        readonly blend?: IBlendState;
+
+        /**
+         * Bitmask controlling which channels are are written to when drawing to this color target.
+         */
+        readonly writeMask?: GPUColorWriteFlags;
+    }
+
+    export interface IBlendState
+    {
+        /**
+         * Defines the blending behavior of the corresponding render target for color channels.
+         */
+        readonly color?: IBlendComponent;
+
+        /**
+         * Defines the blending behavior of the corresponding render target for the alpha channel.
+         */
+        readonly alpha?: IBlendComponent;
+    }
+
+    export interface IBlendComponent
+    {
+        /**
+         * Defines the {@link GPUBlendOperation} used to calculate the values written to the target
+         * attachment components.
+         */
+        readonly operation?: GPUBlendOperation;
+        /**
+         * Defines the {@link GPUBlendFactor} operation to be performed on values from the fragment shader.
+         */
+        readonly srcFactor?: GPUBlendFactor;
+        /**
+         * Defines the {@link GPUBlendFactor} operation to be performed on values from the target attachment.
+         */
+        readonly dstFactor?: GPUBlendFactor;
     }
 }
