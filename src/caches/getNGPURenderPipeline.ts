@@ -310,13 +310,50 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
         {
             if (!v) return undefined;
 
-            const gpuColorTargetState: GPUColorTargetState = { format: v };
-
             const colorTargetState = fragmentState.targets?.[i];
-            if (colorTargetState)
+
+            //
+            let writeMask = colorTargetState?.writeMask;
+            if (writeMask === undefined)
             {
-                Object.assign(gpuColorTargetState, colorTargetState);
+                writeMask = 15;
             }
+            //
+            const blend = colorTargetState?.blend;
+            //
+            const colorOperation: GPUBlendOperation = blend?.color?.operation || "add";
+            let colorSrcFactor: GPUBlendFactor = blend?.color?.srcFactor || "src-alpha";
+            let colorDstFactor: GPUBlendFactor = blend?.color?.dstFactor || "one-minus-src-alpha";
+            if (colorOperation === "max" || colorOperation === "min")
+            {
+                colorSrcFactor = colorDstFactor = "one";
+            }
+            //
+            const alphaOperation: GPUBlendOperation = blend?.alpha?.operation || colorOperation;
+            let alphaSrcFactor: GPUBlendFactor = blend?.alpha?.srcFactor || colorSrcFactor;
+            let alphaDstFactor: GPUBlendFactor = blend?.alpha?.dstFactor || colorDstFactor;
+            if (alphaOperation === "max" || alphaOperation === "min")
+            {
+                alphaSrcFactor = alphaDstFactor = "one";
+            }
+
+            //
+            const gpuColorTargetState: GPUColorTargetState = {
+                format: v,
+                blend: {
+                    color: {
+                        operation: colorOperation,
+                        srcFactor: colorSrcFactor,
+                        dstFactor: colorDstFactor,
+                    },
+                    alpha: {
+                        operation: alphaOperation,
+                        srcFactor: alphaSrcFactor,
+                        dstFactor: alphaDstFactor,
+                    },
+                },
+                writeMask: writeMask,
+            };
 
             return gpuColorTargetState;
         });

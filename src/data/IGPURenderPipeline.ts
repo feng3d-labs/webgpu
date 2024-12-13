@@ -166,14 +166,22 @@ declare module "@feng3d/render-api"
         /**
          * Defines the {@link GPUBlendOperation} used to calculate the values written to the target
          * attachment components.
+         * 
+         * 默认为 "add"。
+         * 
+         * 当 `operation` 值为 "min" 或 "max" 时， `srcFactor` 与 `dstFactor` 将会被引擎自动使用 "one"。
          */
         readonly operation?: GPUBlendOperation;
         /**
          * Defines the {@link GPUBlendFactor} operation to be performed on values from the fragment shader.
+         * 
+         * 默认为 "src-alpha"。
          */
         readonly srcFactor?: GPUBlendFactor;
         /**
          * Defines the {@link GPUBlendFactor} operation to be performed on values from the target attachment.
+         * 
+         * 默认为 "one-minus-src-alpha"。
          */
         readonly dstFactor?: GPUBlendFactor;
     }
