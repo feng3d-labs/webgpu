@@ -1,9 +1,9 @@
-import { IGPUVertexState } from "../data/IGPUVertexState";
+import { IVertexState } from "@feng3d/render-api";
 
 /**
  * 内部对象。
  */
-export interface NGPUVertexState extends IGPUVertexState
+export interface NGPUVertexState extends IVertexState
 {
     readonly entryPoint: string;
     readonly constants: Readonly<Record<

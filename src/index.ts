@@ -32,7 +32,6 @@ export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IGPUTimestampQuery";
 export * from "./data/IGPUVertexAttributes";
-export * from "./data/IGPUVertexState";
 export * from "./data/IGPUViewport";
 
 export * from "./caches/getIGPUBuffer";

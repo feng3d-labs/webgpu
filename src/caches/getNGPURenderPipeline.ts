@@ -1,13 +1,12 @@
+import { IPrimitiveState, IRenderPipeline, IVertexState } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-
-import { IPrimitiveState, IRenderPipeline } from "@feng3d/render-api";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
+
 import { IGPUDepthStencilState } from "../data/IGPUDepthStencilState";
 import { IGPUFragmentState } from "../data/IGPUFragmentState";
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
 import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
-import { IGPUVertexState } from "../data/IGPUVertexState";
 import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { NGPUFragmentState } from "../internal/NGPUFragmentState";
@@ -148,7 +147,7 @@ function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, depthStenc
  * @param vertices 顶点数据。
  * @returns 完整的顶点阶段描述与顶点缓冲区列表。
  */
-function getNGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAttributes)
+function getNGPUVertexState(vertexState: IVertexState, vertices: IGPUVertexAttributes)
 {
     let result = vertexStateMap.get([vertexState, vertices]);
     if (!result)
@@ -188,7 +187,7 @@ function getNGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAt
     return result;
 }
 
-const vertexStateMap = new ChainMap<[IGPUVertexState, IGPUVertexAttributes], {
+const vertexStateMap = new ChainMap<[IVertexState, IGPUVertexAttributes], {
     gpuVertexState: NGPUVertexState;
     vertexBuffers: NGPUVertexBuffer[];
 }>();
