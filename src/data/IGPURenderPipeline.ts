@@ -1,4 +1,4 @@
-import { IRenderPipeline } from "@feng3d/render-api";
+import { IBlendState } from "@feng3d/render-api";
 import { IGPUDepthStencilState } from "./IGPUDepthStencilState";
 import { IGPUMultisampleState } from "./IGPUMultisampleState";
 
@@ -141,51 +141,11 @@ declare module "@feng3d/render-api"
         /**
          * The blending behavior for this color target. If left undefined, disables blending for this
          * color target.
+         * 
+         * 定义如何混合到目标颜色中。
+         * 
+         * 默认 `undefined`，表示不进行混合。
          */
         readonly blend?: IBlendState;
-    }
-
-    /**
-     * https://gpuweb.github.io/gpuweb/#dictdef-gpublendstate
-     */
-    export interface IBlendState
-    {
-        /**
-         * Defines the blending behavior of the corresponding render target for color channels.
-         */
-        readonly color?: IBlendComponent;
-
-        /**
-         * Defines the blending behavior of the corresponding render target for the alpha channel.
-         */
-        readonly alpha?: IBlendComponent;
-    }
-
-    /**
-     * @see https://gpuweb.github.io/gpuweb/#dictdef-gpucolortargetstate
-     */
-    export interface IBlendComponent
-    {
-        /**
-         * Defines the {@link GPUBlendOperation} used to calculate the values written to the target
-         * attachment components.
-         * 
-         * 默认为 "add"。
-         * 
-         * 当 `operation` 值为 "min" 或 "max" 时， `srcFactor` 与 `dstFactor` 将会被引擎自动使用 "one"。
-         */
-        readonly operation?: GPUBlendOperation;
-        /**
-         * Defines the {@link GPUBlendFactor} operation to be performed on values from the fragment shader.
-         * 
-         * 默认为 "one"。
-         */
-        readonly srcFactor?: GPUBlendFactor;
-        /**
-         * Defines the {@link GPUBlendFactor} operation to be performed on values from the target attachment.
-         * 
-         * 默认为 "zero"。
-         */
-        readonly dstFactor?: GPUBlendFactor;
     }
 }

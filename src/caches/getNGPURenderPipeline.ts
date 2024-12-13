@@ -1,4 +1,4 @@
-import { IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState, IWriteMask } from "@feng3d/render-api";
+import { IBlendState, IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState, IWriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -306,67 +306,22 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
             console.assert(!!fragment, `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
         }
 
-        const targets = colorAttachments.map((v, i) =>
+        const targets = colorAttachments.map((format, i) =>
         {
-            if (!v) return undefined;
+            if (!format) return undefined;
 
             const colorTargetState = fragmentState.targets?.[i];
 
             //
-            const writeMask: IWriteMask = colorTargetState?.writeMask || [true, true, true, true];
-            let gpuWriteMask = 0;
-            if (writeMask[0])
-            {
-                gpuWriteMask += 1;
-            }
-            if (writeMask[1])
-            {
-                gpuWriteMask += 2;
-            }
-            if (writeMask[2])
-            {
-                gpuWriteMask += 4;
-            }
-            if (writeMask[3])
-            {
-                gpuWriteMask += 8;
-            }
+            const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
 
-            //
-            const blend = colorTargetState?.blend;
-            //
-            const colorOperation: GPUBlendOperation = blend?.color?.operation || "add";
-            let colorSrcFactor: GPUBlendFactor = blend?.color?.srcFactor || "one";
-            let colorDstFactor: GPUBlendFactor = blend?.color?.dstFactor || "zero";
-            if (colorOperation === "max" || colorOperation === "min")
-            {
-                colorSrcFactor = colorDstFactor = "one";
-            }
-            //
-            const alphaOperation: GPUBlendOperation = blend?.alpha?.operation || colorOperation;
-            let alphaSrcFactor: GPUBlendFactor = blend?.alpha?.srcFactor || colorSrcFactor;
-            let alphaDstFactor: GPUBlendFactor = blend?.alpha?.dstFactor || colorDstFactor;
-            if (alphaOperation === "max" || alphaOperation === "min")
-            {
-                alphaSrcFactor = alphaDstFactor = "one";
-            }
+            const blend: GPUBlendState = getGPUBlendState(colorTargetState?.blend);
 
             //
             const gpuColorTargetState: GPUColorTargetState = {
-                format: v,
-                blend: {
-                    color: {
-                        operation: colorOperation,
-                        srcFactor: colorSrcFactor,
-                        dstFactor: colorDstFactor,
-                    },
-                    alpha: {
-                        operation: alphaOperation,
-                        srcFactor: alphaSrcFactor,
-                        dstFactor: alphaDstFactor,
-                    },
-                },
-                writeMask: gpuWriteMask,
+                format,
+                blend,
+                writeMask,
             };
 
             return gpuColorTargetState;
@@ -386,6 +341,67 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
 }
 
 const fragmentStateMap = new ChainMap<[IFragmentState, string], NGPUFragmentState>();
+
+function getGPUBlendState(blend?: IBlendState): GPUBlendState
+{
+    if (!blend) undefined;
+
+    //
+    const colorOperation: GPUBlendOperation = blend?.color?.operation || "add";
+    let colorSrcFactor: GPUBlendFactor = blend?.color?.srcFactor || "one";
+    let colorDstFactor: GPUBlendFactor = blend?.color?.dstFactor || "zero";
+    if (colorOperation === "max" || colorOperation === "min")
+    {
+        colorSrcFactor = colorDstFactor = "one";
+    }
+    //
+    const alphaOperation: GPUBlendOperation = blend?.alpha?.operation || colorOperation;
+    let alphaSrcFactor: GPUBlendFactor = blend?.alpha?.srcFactor || colorSrcFactor;
+    let alphaDstFactor: GPUBlendFactor = blend?.alpha?.dstFactor || colorDstFactor;
+    if (alphaOperation === "max" || alphaOperation === "min")
+    {
+        alphaSrcFactor = alphaDstFactor = "one";
+    }
+
+    const gpuBlend: GPUBlendState = {
+        color: {
+            operation: colorOperation,
+            srcFactor: colorSrcFactor,
+            dstFactor: colorDstFactor,
+        },
+        alpha: {
+            operation: alphaOperation,
+            srcFactor: alphaSrcFactor,
+            dstFactor: alphaDstFactor,
+        },
+    };
+
+    return gpuBlend;
+}
+
+function getGPUColorWriteFlags(writeMask?: IWriteMask)
+{
+    if (!writeMask) return 15;
+
+    let gpuWriteMask: GPUColorWriteFlags = 0;
+    if (writeMask[0])
+    {
+        gpuWriteMask += 1;
+    }
+    if (writeMask[1])
+    {
+        gpuWriteMask += 2;
+    }
+    if (writeMask[2])
+    {
+        gpuWriteMask += 4;
+    }
+    if (writeMask[3])
+    {
+        gpuWriteMask += 8;
+    }
+    return gpuWriteMask;
+}
 
 function getWGSLType(type: TypeInfo)
 {
