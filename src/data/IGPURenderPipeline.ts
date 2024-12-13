@@ -1,7 +1,6 @@
 import { IBlendState } from "@feng3d/render-api";
 
 import { IGPUMultisampleState } from "./IGPUMultisampleState";
-import { IGPUStencilFaceState } from "./IGPUStencilFaceState";
 
 declare module "@feng3d/render-api"
 {
@@ -16,11 +15,6 @@ declare module "@feng3d/render-api"
          * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
          */
         readonly label?: string;
-
-        /**
-         * 深度模板阶段描述。
-         */
-        readonly depthStencil?: IDepthStencilState;
 
         /**
          * 多重采样阶段描述。
