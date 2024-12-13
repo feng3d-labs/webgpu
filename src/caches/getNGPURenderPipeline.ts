@@ -1,9 +1,8 @@
-import { IPrimitiveState, IRenderPipeline, IVertexState } from "@feng3d/render-api";
+import { IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { IGPUDepthStencilState } from "../data/IGPUDepthStencilState";
-import { IGPUFragmentState } from "../data/IGPUFragmentState";
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
 import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
 import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
@@ -281,7 +280,7 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttribut
  * @param colorAttachmentTextureFormats 颜色附件格式。
  * @returns 片段阶段完整描述。
  */
-function getNGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments: readonly GPUTextureFormat[])
+function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: readonly GPUTextureFormat[])
 {
     if (!fragmentState) return undefined;
 
@@ -335,7 +334,7 @@ function getNGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments
     return gpuFragmentState;
 }
 
-const fragmentStateMap = new ChainMap<[IGPUFragmentState, string], NGPUFragmentState>();
+const fragmentStateMap = new ChainMap<[IFragmentState, string], NGPUFragmentState>();
 
 function getWGSLType(type: TypeInfo)
 {

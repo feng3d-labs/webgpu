@@ -15,7 +15,6 @@ export * from "./data/IGPUCopyTextureToTexture";
 export * from "./data/IGPUDepthStencilState";
 export * from "./data/IGPUDrawIndexed";
 export * from "./data/IGPUDrawVertex";
-export * from "./data/IGPUFragmentState";
 export * from "./data/IGPUOcclusionQuery";
 export * from "./data/IGPUPrimitiveState";
 export * from "./data/IGPUReadPixels";
