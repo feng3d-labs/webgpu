@@ -34,11 +34,6 @@ declare module "@feng3d/render-api"
     export interface IVertexState
     {
         /**
-         * 着色器源码，将由 {@link GPUDevice.createShaderModule} 生成 {@link GPUShaderModule} 。
-         */
-        readonly code: string;
-
-        /**
          * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to
          * perform its work.
          *
@@ -76,23 +71,12 @@ declare module "@feng3d/render-api"
     export interface IFragmentState
     {
         /**
-         * 着色器源码，将由 {@link GPUDevice.createShaderModule} 生成 {@link GPUShaderModule} 。
-         */
-        readonly code: string;
-
-        /**
          * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to
          * perform its work.
          *
          * 入口函数可选。默认从着色器中进行反射获取。
          */
         readonly entryPoint?: string;
-
-        /**
-         * A list of {@link GPUColorTargetState} defining the formats and behaviors of the color targets
-         * this pipeline writes to.
-         */
-        readonly targets?: readonly IColorTargetState[];
 
         /**
          * Specifies the values of pipeline-overridable constants in the shader module
@@ -114,24 +98,6 @@ declare module "@feng3d/render-api"
             string,
             GPUPipelineConstantValue
         >>;
-    }
-
-    /**
-     * 属性 `format` 将由渲染通道中附件给出。
-     * 
-     * @see https://gpuweb.github.io/gpuweb/#dictdef-gpucolortargetstate
-     */
-    export interface IColorTargetState
-    {
-        /**
-         * The blending behavior for this color target. If left undefined, disables blending for this
-         * color target.
-         * 
-         * 定义如何混合到目标颜色中。
-         * 
-         * 默认 `undefined`，表示不进行混合。
-         */
-        readonly blend?: IBlendState;
     }
 
     /**
