@@ -1,5 +1,4 @@
-import { IRenderPipeline } from "@feng3d/render-api";
-import { IGPUVertexAttributes } from "@feng3d/webgpu";
+import { IRenderPipeline, IVertexAttributes } from "@feng3d/render-api";
 
 import { gridIndices, gridJoints, gridVertices, gridWeights } from "./gridData";
 
@@ -8,7 +7,7 @@ export const createSkinnedGridBuffers = () =>
 {
     // Utility function that creates GPUBuffers from data
 
-    const vertices: IGPUVertexAttributes = {
+    const vertices: IVertexAttributes = {
         vert_pos: { data: gridVertices, format: "float32x2" },
         joints: { data: gridJoints, format: "uint32x4" },
         weights: { data: gridWeights, format: "float32x4" },

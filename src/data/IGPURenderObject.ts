@@ -1,8 +1,7 @@
-import { IRenderObject } from "@feng3d/render-api";
+import { IRenderObject, IVertexAttributes } from "@feng3d/render-api";
 import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPUDrawIndexed } from "./IGPUDrawIndexed";
 import { IGPUDrawVertex } from "./IGPUDrawVertex";
-import { IGPUVertexAttributes } from "./IGPUVertexAttributes";
 
 declare module "@feng3d/render-api"
 {
@@ -11,16 +10,6 @@ declare module "@feng3d/render-api"
      */
     export interface IRenderObject
     {
-        /**
-         * 数据类型。
-         */
-        readonly __type?: "RenderObject";
-
-        /**
-         * 顶点属性数据映射。
-         */
-        readonly vertices?: IGPUVertexAttributes;
-
         /**
          * 顶点索引数据。
          */

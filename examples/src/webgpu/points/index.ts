@@ -1,5 +1,5 @@
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUSampler, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUSampler, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
@@ -103,7 +103,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     });
     const kNumPoints = vertexData.length / 3;
 
-    const vertices: IGPUVertexAttributes = {
+    const vertices: IVertexAttributes = {
         position: { data: vertexData, format: "float32x3", arrayStride: 12, stepMode: "instance" },
     };
 

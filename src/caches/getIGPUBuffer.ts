@@ -1,5 +1,5 @@
+import { IVertexDataTypes } from "@feng3d/render-api";
 import { IGPUBuffer } from "../data/IGPUBuffer";
-import { IGPUVertexDataTypes } from "../data/IGPUVertexAttributes";
 
 export function getIGPUBuffer(bufferSource: BufferSource)
 {
@@ -17,7 +17,7 @@ export function getIGPUBuffer(bufferSource: BufferSource)
     return gpuBuffer;
 }
 
-export function getIGPUVertexBuffer(data: IGPUVertexDataTypes)
+export function getIGPUVertexBuffer(data: IVertexDataTypes)
 {
     const buffer = getIGPUBuffer(data);
     (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);

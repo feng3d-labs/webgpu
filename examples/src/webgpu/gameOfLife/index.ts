@@ -4,8 +4,8 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const squareVertices = new Uint32Array([0, 0, 0, 1, 1, 0, 1, 1]);
-    const verticesSquareBuffer: IGPUVertexAttributes = {
+    const verticesSquareBuffer: IVertexAttributes = {
         pos: { data: squareVertices, format: "uint32x2" }
     };
 
@@ -40,9 +40,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let wholeTime = 0;
     let loopTimes = 0;
     let buffer0: Uint32Array;
-    let verticesBuffer0: IGPUVertexAttributes;
+    let verticesBuffer0: IVertexAttributes;
     let buffer1: Uint32Array;
-    let verticesBuffer1: IGPUVertexAttributes;
+    let verticesBuffer1: IVertexAttributes;
     let render: () => void;
     function resetGameData()
     {
@@ -117,7 +117,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const passEncodersArray: (IGPUComputePass | IRenderPass)[][] = [];
         for (let i = 0; i < 2; i++)
         {
-            const vertices1: IGPUVertexAttributes = {};
+            const vertices1: IVertexAttributes = {};
             Object.assign(vertices1, i ? verticesBuffer1 : verticesBuffer0, verticesSquareBuffer);
 
             passEncodersArray[i] = [

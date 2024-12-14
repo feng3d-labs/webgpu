@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUCanvasContext, IGPUTimestampQuery, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUCanvasContext, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     const perfDisplay = document.querySelector("#info pre");
 
     // Create a vertex buffer from the cube data.
-    const vertices: IGPUVertexAttributes = {
+    const vertices: IVertexAttributes = {
         position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };

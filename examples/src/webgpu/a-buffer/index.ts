@@ -7,8 +7,8 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -35,7 +35,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Create the model vertex buffer
-    const vertices: IGPUVertexAttributes = {
+    const vertices: IVertexAttributes = {
         position: { data: new Float32Array(mesh.positions.flat()), format: "float32x3", arrayStride: 12 }
     };
     // Create the model index buffer

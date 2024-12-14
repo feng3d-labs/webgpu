@@ -28,13 +28,13 @@ import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
-import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { IGPUViewport } from "../data/IGPUViewport";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { ChainMap } from "../utils/ChainMap";
+import { IVertexAttributes } from "@feng3d/render-api/src/data/IVertexAttributes";
 
 export class RunWebGPU
 {
@@ -333,7 +333,7 @@ export class RunWebGPU
         this.runDrawIndexed(passEncoder, drawIndexed);
     }
 
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IGPUVertexAttributes, indices: IGPUIndicesDataTypes)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IGPUIndicesDataTypes)
     {
         // 
         const { pipeline: nPipeline } = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
@@ -403,7 +403,7 @@ export class RunWebGPU
         });
     }
 
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IGPUVertexAttributes, indices: IGPUIndicesDataTypes)
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IGPUIndicesDataTypes)
     {
         const { vertexBuffers } = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
 

@@ -1,5 +1,5 @@
-import { IPassEncoder, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IPassEncoder, IRenderPassDescriptor, IRenderPipeline, ISubmit, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -23,14 +23,14 @@ function createBufferWithData(
 type Model = {
     vertices: Float32Array;
     indices: Uint32Array;
-    vertexAttributes: IGPUVertexAttributes,
+    vertexAttributes: IVertexAttributes,
 };
 
 function createVertexAndIndexBuffer(
     { vertices, indices }: { vertices: Float32Array; indices: Uint32Array }
 ): Model
 {
-    const vertexAttributes: IGPUVertexAttributes = {
+    const vertexAttributes: IVertexAttributes = {
         position: { data: vertices, format: "float32x3", offset: 0, arrayStride: 6 * 4 },
         normal: { data: vertices, format: "float32x3", offset: 3 * 4, arrayStride: 6 * 4 },
     };

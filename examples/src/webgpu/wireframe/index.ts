@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import { mat3, mat4 } from "wgpu-matrix";
@@ -31,7 +31,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     type Model = {
         vertices: Float32Array;
         indices: Uint32Array;
-        vertexAttributes: IGPUVertexAttributes
+        vertexAttributes: IVertexAttributes
     };
 
     const models = Object.values(modelData).map((v) =>

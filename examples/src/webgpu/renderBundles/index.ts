@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPUSampler, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPUSampler, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import Stats from "stats-js";
@@ -13,7 +13,7 @@ import meshWGSL from "./mesh.wgsl";
 interface Renderable
 {
     renderObject?: IRenderObject;
-    vertexAttributes: IGPUVertexAttributes;
+    vertexAttributes: IVertexAttributes;
     indices: Uint16Array;
     indexCount: number;
     bindGroup?: IGPUBindingResources;
@@ -120,7 +120,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         // Create a vertex buffer from the sphere data.
         const vertices = sphereMesh.vertices;
 
-        const vertexAttributes: IGPUVertexAttributes = {
+        const vertexAttributes: IVertexAttributes = {
             position: { data: vertices, format: "float32x3", offset: SphereLayout.positionsOffset, arrayStride: SphereLayout.vertexStride },
             normal: { data: vertices, format: "float32x3", offset: SphereLayout.normalOffset, arrayStride: SphereLayout.vertexStride },
             uv: { data: vertices, format: "float32x2", offset: SphereLayout.uvOffset, arrayStride: SphereLayout.vertexStride },

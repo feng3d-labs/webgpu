@@ -1,10 +1,9 @@
-import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState, IWriteMask } from "@feng3d/render-api";
+import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IPrimitiveState, IRenderPipeline, IVertexAttributes, IVertexState, IWriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
 import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
-import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
 import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { NGPUFragmentState } from "../internal/NGPUFragmentState";
@@ -23,7 +22,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes, indices: IGPUIndicesDataTypes)
+export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IVertexAttributes, indices: IGPUIndicesDataTypes)
 {
     const indexFormat = indices ? getIGPUIndexBuffer(indices).indexFormat : undefined;
 
@@ -71,7 +70,7 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
 }
 
 const renderPipelineMap = new ChainMap<
-    [IRenderPipeline, string, IGPUVertexAttributes, GPUIndexFormat],
+    [IRenderPipeline, string, IVertexAttributes, GPUIndexFormat],
     {
         /**
          * GPU渲染管线描述。
@@ -186,7 +185,7 @@ function getGPUDepthStencilState(depthStencil: IDepthStencilState, depthStencilF
  * @param vertices 顶点数据。
  * @returns 完整的顶点阶段描述与顶点缓冲区列表。
  */
-function getNGPUVertexState(vertexState: IVertexState, vertices: IGPUVertexAttributes)
+function getNGPUVertexState(vertexState: IVertexState, vertices: IVertexAttributes)
 {
     let result = vertexStateMap.get([vertexState, vertices]);
     if (!result)
@@ -226,7 +225,7 @@ function getNGPUVertexState(vertexState: IVertexState, vertices: IGPUVertexAttri
     return result;
 }
 
-const vertexStateMap = new ChainMap<[IVertexState, IGPUVertexAttributes], {
+const vertexStateMap = new ChainMap<[IVertexState, IVertexAttributes], {
     gpuVertexState: NGPUVertexState;
     vertexBuffers: NGPUVertexBuffer[];
 }>();
@@ -238,7 +237,7 @@ const vertexStateMap = new ChainMap<[IVertexState, IGPUVertexAttributes], {
  * @param vertices 顶点数据。
  * @returns 顶点缓冲区布局数组以及顶点缓冲区数组。
  */
-function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
+function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: IVertexAttributes)
 {
     const vertexBufferLayouts: GPUVertexBufferLayout[] = [];
 

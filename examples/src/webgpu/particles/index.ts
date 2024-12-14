@@ -7,8 +7,8 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -31,7 +31,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const particlesBuffer = new Float32Array(numParticles * particleInstanceByteSize / 4);
 
-  const particlesVertices: IGPUVertexAttributes = {
+  const particlesVertices: IVertexAttributes = {
     position: { data: particlesBuffer, format: "float32x3", offset: particlePositionOffset, arrayStride: particleInstanceByteSize, stepMode: "instance" },
     color: { data: particlesBuffer, format: "float32x4", offset: particleColorOffset, arrayStride: particleInstanceByteSize, stepMode: "instance" },
   };
@@ -104,7 +104,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   ];
   const quadVertexBuffer = new Float32Array(vertexData);
 
-  const quadVertices: IGPUVertexAttributes = {
+  const quadVertices: IVertexAttributes = {
     quad_pos: { data: quadVertexBuffer, format: "float32x2" }
   };
 
