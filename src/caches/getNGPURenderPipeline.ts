@@ -94,18 +94,25 @@ function getStencilReference(depthStencil?: IDepthStencilState)
 {
     if (!depthStencil) return undefined;
 
+    const { stencilFront, stencilBack } = depthStencil;
+
     // 如果开启了模板测试，则需要设置模板索引值
     let stencilReference: number;
-    if (0
-        || depthStencil.stencilFront.failOp === "replace"
-        || depthStencil.stencilFront.depthFailOp === "replace"
-        || depthStencil.stencilFront.passOp === "replace"
-        || depthStencil.stencilBack.failOp === "replace"
-        || depthStencil.stencilBack.depthFailOp === "replace"
-        || depthStencil.stencilBack.passOp === "replace"
-    )
+    if (stencilFront)
     {
-        stencilReference = depthStencil?.stencilReference ?? 0;
+        const { failOp, depthFailOp, passOp } = stencilFront;
+        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
+        {
+            stencilReference = depthStencil?.stencilReference ?? 0;
+        }
+    }
+    if (stencilBack)
+    {
+        const { failOp, depthFailOp, passOp } = stencilBack;
+        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
+        {
+            stencilReference = depthStencil?.stencilReference ?? 0;
+        }
     }
 
     return stencilReference;
