@@ -15,7 +15,6 @@ import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { getNGPURenderObject } from "../caches/getNGPURenderObject";
 import { getRealGPUBindGroup } from "../const";
 import { IGPUBindingResources } from "../data/IGPUBindingResources";
-import { IGPUBlendConstant } from "../data/IGPUBlendConstant";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
@@ -140,10 +139,6 @@ export class RunWebGPU
             else if (element.__type === "OcclusionQuery")
             {
                 this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
-            }
-            else if (element.__type === "BlendConstant")
-            {
-                this.runBlendConstant(passEncoder, element);
             }
             else
             {
@@ -315,7 +310,7 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
     {
-        const { pipeline: gpuRenderPipeline, setBindGroups, vertexBuffers, setIndexBuffer, drawVertex, drawIndexed, stencilReference } = getNGPURenderObject(device, renderPassFormat, renderObject);
+        const { pipeline: gpuRenderPipeline, setBindGroups, vertexBuffers, setIndexBuffer, drawVertex, drawIndexed, stencilReference, blendConstantColor } = getNGPURenderObject(device, renderPassFormat, renderObject);
 
         // 设置模板测试替换值
         if (stencilReference !== undefined)
@@ -327,6 +322,18 @@ export class RunWebGPU
             else
             {
                 console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 stencilReference 值！`);
+            }
+        }
+
+        if (blendConstantColor !== undefined)
+        {
+            if ("setBlendConstant" in passEncoder)
+            {
+                passEncoder.setBlendConstant(blendConstantColor);
+            }
+            else
+            {
+                console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 setBlendConstant 值！`);
             }
         }
 
@@ -353,11 +360,6 @@ export class RunWebGPU
 
         //
         drawIndexed && passEncoder.drawIndexed(drawIndexed.indexCount, drawIndexed.instanceCount, drawIndexed.firstIndex, drawIndexed.baseVertex, drawIndexed.firstInstance);
-    }
-
-    protected runBlendConstant(passEncoder: GPURenderPassEncoder, element: IGPUBlendConstant)
-    {
-        passEncoder.setBlendConstant(element.color);
     }
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)

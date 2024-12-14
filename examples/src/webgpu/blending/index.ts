@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
+import { IBlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
 import { IGPUBindingResources, IGPUCanvasContext, IGPUSampler, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -324,13 +324,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kPresets = keysOf(presets);
     type Preset = (typeof kPresets)[number];
 
-    const color: GPUBlendComponent = {
+    const color: IBlendComponent = {
         operation: "add",
         srcFactor: "one",
         dstFactor: "one-minus-src",
     };
 
-    const alpha: GPUBlendComponent = {
+    const alpha: IBlendComponent = {
         operation: "add",
         srcFactor: "one",
         dstFactor: "one-minus-src",
@@ -439,20 +439,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    function makeBlendComponentValid(blend)
-    {
-        const { operation } = blend;
-        if (operation === "min" || operation === "max")
-        {
-            blend.srcFactor = "one";
-            blend.dstFactor = "one";
-        }
-    }
-
     function render()
     {
-        makeBlendComponentValid(color);
-        makeBlendComponentValid(alpha);
         gui.updateDisplay();
 
         const srcPipeline: IRenderPipeline = {
@@ -465,6 +453,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 targets: [
                     {
                         blend: {
+                            constantColor: [...constant.color, constant.alpha] as any,
                             color,
                             alpha,
                         },
@@ -528,10 +517,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const renderObjects: IRenderPassObject[] = [
             ro,
-
-            // draw source texture with blending
-            { __type: "BlendConstant", color: [...constant.color, constant.alpha] as any },
-
             ro1,
         ];
 

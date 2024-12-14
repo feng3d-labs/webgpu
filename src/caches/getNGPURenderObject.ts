@@ -50,6 +50,7 @@ export function getNGPURenderObject(device: GPUDevice, renderPassFormat: IGPURen
         drawVertex,
         drawIndexed,
         stencilReference: nPipeline.stencilReference,
+        blendConstantColor: nPipeline.blendConstantColor,
     };
 
     return nRenderObject;

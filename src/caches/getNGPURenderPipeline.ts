@@ -1,4 +1,4 @@
-import { IBlendState, IDepthStencilState, IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState, IWriteMask } from "@feng3d/render-api";
+import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IPrimitiveState, IRenderPipeline, IVertexState, IWriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -46,8 +46,10 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
         // 从渲染通道上获取多重采样数量
         const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
 
-        //
+        // 
         const stencilReference = getStencilReference(renderPipeline.depthStencil);
+        // 
+        const blendConstantColor = getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend)
 
         //
         const pipeline: NGPURenderPipeline = {
@@ -58,6 +60,7 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
             depthStencil: gpuDepthStencilState,
             multisample: gpuMultisampleState,
             stencilReference,
+            blendConstantColor,
         };
 
         result = { pipeline, vertexBuffers };

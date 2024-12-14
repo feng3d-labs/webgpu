@@ -1,5 +1,4 @@
 import { IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
-import { IGPUBlendConstant } from "./IGPUBlendConstant";
 import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
 import { IGPUScissorRect } from "./IGPUScissorRect";
@@ -38,6 +37,5 @@ declare module "@feng3d/render-api"
         IGPUScissorRect: IGPUScissorRect;
         IGPURenderBundle: IGPURenderBundle;
         IGPUOcclusionQuery: IGPUOcclusionQuery;
-        IGPUBlendConstant: IGPUBlendConstant;
     }
 }
