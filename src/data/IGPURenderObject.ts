@@ -1,7 +1,6 @@
-import { IRenderObject, IVertexAttributes } from "@feng3d/render-api";
+import { IRenderObject } from "@feng3d/render-api";
 import { IGPUBindingResources } from "./IGPUBindingResources";
 import { IGPUDrawIndexed } from "./IGPUDrawIndexed";
-import { IGPUDrawVertex } from "./IGPUDrawVertex";
 
 declare module "@feng3d/render-api"
 {
@@ -16,13 +15,23 @@ declare module "@feng3d/render-api"
         readonly bindingResources?: IGPUBindingResources;
 
         /**
-         * 根据顶点数据绘制图元。
-         */
-        readonly drawVertex?: IGPUDrawVertex;
-
-        /**
          * 根据索引数据绘制图元。
          */
         readonly drawIndexed?: IGPUDrawIndexed;
+    }
+
+    /**
+     * Draws primitives.
+     *
+     * 根据顶点数据绘制图元。
+     *
+     * @see GPURenderCommandsMixin.draw
+     */
+    export interface IDrawVertex
+    {
+        /**
+         * First instance to draw.
+         */
+        readonly firstInstance?: number;
     }
 }
