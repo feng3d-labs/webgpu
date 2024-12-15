@@ -11,11 +11,6 @@ declare module "@feng3d/render-api"
     export interface IRenderObject
     {
         /**
-         * 顶点索引数据。
-         */
-        readonly indices?: IGPUIndicesDataTypes;
-
-        /**
          * 绑定资源。包含数值、纹理、采样、外部纹理。
          */
         readonly bindingResources?: IGPUBindingResources;
@@ -31,10 +26,3 @@ declare module "@feng3d/render-api"
         readonly drawIndexed?: IGPUDrawIndexed;
     }
 }
-
-/**
- * 顶点索引数据类型。
- */
-export type IGPUIndicesDataTypes = Uint16Array | Uint32Array;
-
-

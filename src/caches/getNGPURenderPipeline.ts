@@ -1,9 +1,8 @@
-import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IPrimitiveState, IRenderPipeline, IVertexAttributes, IVertexState, IWriteMask } from "@feng3d/render-api";
+import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IIndicesDataTypes, IPrimitiveState, IRenderPipeline, IVertexAttributes, IVertexState, IWriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
-import { IGPUIndicesDataTypes } from "../data/IGPURenderObject";
 import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { NGPUFragmentState } from "../internal/NGPUFragmentState";
@@ -22,7 +21,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IVertexAttributes, indices: IGPUIndicesDataTypes)
+export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IVertexAttributes, indices: IIndicesDataTypes)
 {
     const indexFormat = indices ? getIGPUIndexBuffer(indices).indexFormat : undefined;
 
