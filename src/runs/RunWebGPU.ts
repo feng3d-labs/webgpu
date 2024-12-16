@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { ICommandEncoder, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, ISubmit } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -22,7 +22,6 @@ import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
-import { IGPUDrawIndexed } from "../data/IGPUDrawIndexed";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
@@ -435,7 +434,7 @@ export class RunWebGPU
         passEncoder.draw(drawVertex.vertexCount, drawVertex.instanceCount, drawVertex.firstVertex, drawVertex.firstInstance);
     }
 
-    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed: IGPUDrawIndexed)
+    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed: IDrawIndexed)
     {
         if (!drawIndexed) return;
         //

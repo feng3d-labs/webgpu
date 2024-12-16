@@ -1,6 +1,5 @@
 import { IRenderObject } from "@feng3d/render-api";
 import { IGPUBindingResources } from "./IGPUBindingResources";
-import { IGPUDrawIndexed } from "./IGPUDrawIndexed";
 
 declare module "@feng3d/render-api"
 {
@@ -17,7 +16,7 @@ declare module "@feng3d/render-api"
         /**
          * 根据索引数据绘制图元。
          */
-        readonly drawIndexed?: IGPUDrawIndexed;
+        readonly drawIndexed?: IDrawIndexed;
     }
 
     /**
@@ -31,6 +30,29 @@ declare module "@feng3d/render-api"
     {
         /**
          * First instance to draw.
+         */
+        readonly firstInstance?: number;
+    }
+
+
+    /**
+     * 根据索引数据绘制图元。
+     *
+     * {@link GPURenderCommandsMixin.drawIndexed}
+     */
+    export interface IDrawIndexed
+    {
+        /**
+         * Added to each index value before indexing into the vertex buffers.
+         * 
+         * 默认为 0 。
+         */
+        readonly baseVertex?: number;
+
+        /**
+         * First instance to draw.
+         * 
+         * 默认为 0 。
          */
         readonly firstInstance?: number;
     }
