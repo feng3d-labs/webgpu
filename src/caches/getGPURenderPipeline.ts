@@ -19,14 +19,14 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NGPURend
             module: getGPUShaderModule(device, renderPipeline.vertex.code),
         },
         primitive: renderPipeline.primitive,
-        depthStencil: renderPipeline.depthStencil as any,
+        depthStencil: renderPipeline.depthStencil,
         multisample: renderPipeline.multisample,
     };
 
     if (renderPipeline.fragment)
     {
         gpuRenderPipelineDescriptor.fragment = {
-            ...renderPipeline.fragment as any,
+            ...renderPipeline.fragment,
             module: getGPUShaderModule(device, renderPipeline.fragment.code),
         };
     }

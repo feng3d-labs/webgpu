@@ -164,7 +164,7 @@ function getGPUDepthStencilState(depthStencil: IDepthStencilState, depthStencilF
 {
     if (!depthStencilFormat) return undefined;
     //
-    const depthWriteEnabled = depthStencil?.depthWriteEnabled ?? false;
+    const depthWriteEnabled = depthStencil?.depthWriteEnabled ?? true;
     const depthCompare = depthStencil?.depthCompare ?? "less";
 
     const gpuDepthStencilState: GPUDepthStencilState = {
