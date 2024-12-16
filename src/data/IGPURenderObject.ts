@@ -12,11 +12,6 @@ declare module "@feng3d/render-api"
          * 绑定资源。包含数值、纹理、采样、外部纹理。
          */
         readonly bindingResources?: IGPUBindingResources;
-
-        /**
-         * 根据索引数据绘制图元。
-         */
-        readonly drawIndexed?: IDrawIndexed;
     }
 
     /**
