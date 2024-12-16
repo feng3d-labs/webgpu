@@ -1,4 +1,4 @@
-import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IIndicesDataTypes, IPrimitiveState, IRenderPipeline, IVertexAttributes, IVertexState, IWriteMask } from "@feng3d/render-api";
+import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IIndicesDataTypes, IPrimitiveState, IRenderPipeline, IStencilFaceState, IVertexAttributes, IVertexState, IWriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -164,17 +164,34 @@ function getGPUDepthStencilState(depthStencil: IDepthStencilState, depthStencilF
 {
     if (!depthStencilFormat) return undefined;
     //
-    const depthWriteEnabled = depthStencil?.depthWriteEnabled ?? true;
-    const depthCompare = depthStencil?.depthCompare ?? "less";
-
     const gpuDepthStencilState: GPUDepthStencilState = {
-        ...depthStencil,
-        depthWriteEnabled,
-        depthCompare,
         format: depthStencilFormat,
+        depthWriteEnabled: depthStencil?.depthWriteEnabled ?? true,
+        depthCompare: depthStencil?.depthCompare ?? "less",
+        stencilFront: getGPUStencilFaceState(depthStencil?.stencilFront),
+        stencilBack: getGPUStencilFaceState(depthStencil?.stencilBack),
+        stencilReadMask: depthStencil?.stencilReadMask ?? 0xFFFFFFFF,
+        stencilWriteMask: depthStencil?.stencilWriteMask ?? 0xFFFFFFFF,
+        depthBias: depthStencil?.depthBias ?? 0,
+        depthBiasSlopeScale: depthStencil?.depthBiasSlopeScale ?? 0,
+        depthBiasClamp: depthStencil?.depthBiasClamp ?? 0,
     };
 
     return gpuDepthStencilState;
+}
+
+function getGPUStencilFaceState(stencilFaceState?: IStencilFaceState)
+{
+    if (!stencilFaceState) return {};
+
+    const gpuStencilFaceState: GPUStencilFaceState = {
+        compare: stencilFaceState.compare ?? "always",
+        failOp: stencilFaceState.failOp ?? "keep",
+        depthFailOp: stencilFaceState.depthFailOp ?? "keep",
+        passOp: stencilFaceState.passOp ?? "keep",
+    };
+
+    return gpuStencilFaceState;
 }
 
 /**
