@@ -333,13 +333,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
-                        __type: "ScissorRect",
-                        x: scissorX,
-                        y: scissorY,
-                        width: scissorWidth,
-                        height: scissorHeight
-                    },
-                    {
+                        scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
                         pipeline: translucentPipeline,
                         bindingResources: {
                             ...bindingResources,
@@ -360,13 +354,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
-                        __type: "ScissorRect",
-                        x: scissorX,
-                        y: scissorY,
-                        width: scissorWidth,
-                        height: scissorHeight
-                    },
-                    {
+                        scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
                         pipeline: compositePipeline,
                         bindingResources: {
                             ...bindingResources,

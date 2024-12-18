@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, ISubmit, IVertexAttributes, IViewport } from "@feng3d/render-api";
+import { ICommandEncoder, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IVertexAttributes, IViewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -24,7 +24,6 @@ import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
-import { IGPUScissorRect } from "../data/IGPUScissorRect";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
@@ -124,10 +123,6 @@ export class RunWebGPU
             else if (element.__type === "RenderObject")
             {
                 this.runRenderObject(device, passEncoder, renderPassFormat, element);
-            }
-            else if (element.__type === "ScissorRect")
-            {
-                this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element);
             }
             else if (element.__type === "RenderBundle")
             {
@@ -307,13 +302,17 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
     {
-        const { viewport, pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
+        const { viewport, scissorRect, pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
 
         const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
 
         if ("setViewport" in passEncoder)
         {
             this.runViewport(passEncoder, renderPassFormat.attachmentSize, viewport);
+        }
+        if ("setScissorRect" in passEncoder)
+        {
+            this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
         }
 
         this.runRenderPipeline(device, passEncoder, renderPassFormat, pipeline, vertices, indices);
@@ -382,16 +381,23 @@ export class RunWebGPU
         }
     }
 
-    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: IGPUScissorRect)
+    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: IScissorRect)
     {
-        const { fromWebGL, x, width, height } = scissorRect;
-        let { y } = scissorRect;
-        if (fromWebGL)
+        if (scissorRect)
         {
-            y = attachmentSize.height - y - height;
-        }
+            const { fromWebGL, x, width, height } = scissorRect;
+            let { y } = scissorRect;
+            if (fromWebGL)
+            {
+                y = attachmentSize.height - y - height;
+            }
 
-        passEncoder.setScissorRect(x, y, width, height);
+            passEncoder.setScissorRect(x, y, width, height);
+        }
+        else
+        {
+            passEncoder.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
+        }
     }
 
     protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: IGPUBindingResources)

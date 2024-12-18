@@ -1,7 +1,6 @@
 import { IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
 import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
-import { IGPUScissorRect } from "./IGPUScissorRect";
 import { IGPUTimestampQuery } from "./IGPUTimestampQuery";
 
 declare module "@feng3d/render-api"
@@ -32,7 +31,6 @@ declare module "@feng3d/render-api"
 
     export interface IRenderPassObjectMap
     {
-        IGPUScissorRect: IGPUScissorRect;
         IGPURenderBundle: IGPURenderBundle;
         IGPUOcclusionQuery: IGPUOcclusionQuery;
     }
