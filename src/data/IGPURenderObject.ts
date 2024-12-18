@@ -24,13 +24,6 @@ declare module "@feng3d/render-api"
     export interface IViewport
     {
         /**
-         * 数据是否来着WebGL。
-         *
-         * WebGL以左下角为起始点，WebGPU以左上角为起点。
-         */
-        readonly fromWebGL?: boolean;
-
-        /**
          * Minimum depth value of the viewport.
          * 
          * 0.0 ≤ minDepth ≤ 1.0 并且 minDepth ≤ maxDepth

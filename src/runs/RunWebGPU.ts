@@ -367,9 +367,15 @@ export class RunWebGPU
     {
         if (viewport)
         {
-            const { fromWebGL, x, width, height, minDepth, maxDepth } = viewport;
-            let { y } = viewport;
-            if (fromWebGL)
+            const isYup = viewport.isYup ?? true;
+            const x = viewport.x ?? 0;
+            let y = viewport.y ?? 0;
+            const width = viewport.width ?? attachmentSize.width;
+            const height = viewport.height ?? attachmentSize.height;
+            const minDepth = viewport.minDepth ?? 0;
+            const maxDepth = viewport.maxDepth ?? 0;
+
+            if (isYup)
             {
                 y = attachmentSize.height - y - height;
             }
