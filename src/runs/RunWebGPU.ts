@@ -391,9 +391,13 @@ export class RunWebGPU
     {
         if (scissorRect)
         {
-            const { fromWebGL, x, width, height } = scissorRect;
-            let { y } = scissorRect;
-            if (fromWebGL)
+            const isYup = scissorRect.isYup ?? true;
+            const x = scissorRect.x ?? 0;
+            let y = scissorRect.y ?? 0;
+            const width = scissorRect.width ?? attachmentSize.width;
+            const height = scissorRect.height ?? attachmentSize.height;
+
+            if (isYup)
             {
                 y = attachmentSize.height - y - height;
             }
