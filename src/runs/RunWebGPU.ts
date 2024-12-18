@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { ICommandEncoder, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, ISubmit, IVertexAttributes, IViewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -25,13 +25,11 @@ import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUScissorRect } from "../data/IGPUScissorRect";
-import { IGPUViewport } from "../data/IGPUViewport";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { ChainMap } from "../utils/ChainMap";
-import { IVertexAttributes } from "@feng3d/render-api/src/data/IVertexAttributes";
 
 export class RunWebGPU
 {
@@ -126,10 +124,6 @@ export class RunWebGPU
             else if (element.__type === "RenderObject")
             {
                 this.runRenderObject(device, passEncoder, renderPassFormat, element);
-            }
-            else if (element.__type === "Viewport")
-            {
-                this.runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element);
             }
             else if (element.__type === "ScissorRect")
             {
@@ -313,9 +307,14 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
     {
-        const { pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
+        const { viewport, pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
 
         const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
+
+        if ("setViewport" in passEncoder)
+        {
+            this.runViewport(passEncoder, renderPassFormat.attachmentSize, viewport);
+        }
 
         this.runRenderPipeline(device, passEncoder, renderPassFormat, pipeline, vertices, indices);
 
@@ -365,15 +364,22 @@ export class RunWebGPU
         }
     }
 
-    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)
+    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IViewport)
     {
-        const { fromWebGL, x, width, height, minDepth, maxDepth } = viewport;
-        let { y } = viewport;
-        if (fromWebGL)
+        if (viewport)
         {
-            y = attachmentSize.height - y - height;
+            const { fromWebGL, x, width, height, minDepth, maxDepth } = viewport;
+            let { y } = viewport;
+            if (fromWebGL)
+            {
+                y = attachmentSize.height - y - height;
+            }
+            passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
         }
-        passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
+        else
+        {
+            passEncoder.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
+        }
     }
 
     protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: IGPUScissorRect)

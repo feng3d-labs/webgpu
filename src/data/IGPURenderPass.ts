@@ -3,7 +3,6 @@ import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
 import { IGPUScissorRect } from "./IGPUScissorRect";
 import { IGPUTimestampQuery } from "./IGPUTimestampQuery";
-import { IGPUViewport } from "./IGPUViewport";
 
 declare module "@feng3d/render-api"
 {
@@ -33,7 +32,6 @@ declare module "@feng3d/render-api"
 
     export interface IRenderPassObjectMap
     {
-        IGPUViewport: IGPUViewport;
         IGPUScissorRect: IGPUScissorRect;
         IGPURenderBundle: IGPURenderBundle;
         IGPUOcclusionQuery: IGPUOcclusionQuery;

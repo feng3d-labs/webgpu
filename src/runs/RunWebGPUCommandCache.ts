@@ -135,6 +135,13 @@ function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder 
             //
             _passEncoder[v[0]].apply(_passEncoder, v[1]);
         }
+        else if (v[0] === "setViewport")
+        {
+            if ("setViewport" in _passEncoder)
+            {
+                _passEncoder[v[0]].apply(_passEncoder, v[1]);
+            }
+        }
         else
         {
             _passEncoder[v[0]].apply(_passEncoder, v[1]);

@@ -377,8 +377,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 }
             },
             renderObjects: [
-                { __type: "Viewport", x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                 {
+                    viewport: { x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: colorPassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
                     vertices,
@@ -400,15 +400,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             renderObjects: [
                 {
-                    __type: "Viewport",
-                    x: (canvas.width * m) / 2,
-                    y: 0,
-                    width: canvas.width / 2,
-                    height: canvas.height,
-                    minDepth: 0,
-                    maxDepth: 1
-                },
-                {
+                    viewport: { x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
                     vertices,
@@ -425,15 +417,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             renderObjects: [
                 {
-                    __type: "Viewport",
-                    x: (canvas.width * m) / 2,
-                    y: 0,
-                    width: canvas.width / 2,
-                    height: canvas.height,
-                    minDepth: 0,
-                    maxDepth: 1
-                },
-                {
+                    viewport: { x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: precisionPassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m], ...depthTextureBindGroup },
                     vertices,
@@ -455,15 +439,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             renderObjects: [
                 {
-                    __type: "Viewport",
-                    x: (canvas.width * m) / 2,
-                    y: 0,
-                    width: canvas.width / 2,
-                    height: canvas.height,
-                    minDepth: 0,
-                    maxDepth: 1
-                },
-                {
+                    viewport: { x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
                     vertices,
@@ -472,20 +448,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
         depthBufferPassEncoders.push({
             descriptor: textureQuadPassDescriptors1[m],
-            renderObjects: [{
-                __type: "Viewport",
-                x: (canvas.width * m) / 2,
-                y: 0,
-                width: canvas.width / 2,
-                height: canvas.height,
-                minDepth: 0,
-                maxDepth: 1
-            },
-            {
-                pipeline: textureQuadPassPipline,
-                bindingResources: { ...depthTextureBindGroup },
-                drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
-            }]
+            renderObjects: [
+                {
+                    viewport: { x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
+                    pipeline: textureQuadPassPipline,
+                    bindingResources: { ...depthTextureBindGroup },
+                    drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+                }]
         });
     }
 
