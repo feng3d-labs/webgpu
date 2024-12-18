@@ -1,9 +1,9 @@
 import { IRenderObject, IRenderPassObject } from "@feng3d/render-api";
 
-import { getRealGPUBindGroup } from "../const";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { RunWebGPU } from "./RunWebGPU";
+import { getRealGPUBindGroup } from "../const";
 
 /**
  * 套壳模式（RunWebGPUCommandCache）优于覆盖函数(RunWebGPUCommandCache1)的形式。
@@ -12,44 +12,59 @@ export class RunWebGPUCommandCache extends RunWebGPU
 {
     protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IRenderPassObject[])
     {
-        const map: ChainMap<[string, IRenderPassObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
-        let commands = map.get([renderPassFormat._key, renderObjects]);
-        if (!commands)
+        const map: ChainMap<[string, IRenderPassObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
+        let caches = map.get([renderPassFormat._key, renderObjects]);
+        if (!caches)
         {
             // 收集命令
             const renderPassRecord = new GPURenderPassRecord();
-            renderPassRecord["_commands"] = commands = [];
-            map.set([renderPassFormat._key, renderObjects], commands);
+            const commands = renderPassRecord["_commands"] = [];
 
             super.runRenderPassObjects(device, renderPassRecord, renderPassFormat, renderObjects);
 
             // 排除无效命令
-            paichuWuxiaoCommands(commands);
+            paichuWuxiaoCommands(renderPassFormat.attachmentSize, commands);
+
+            //
+            const setBindGroupCommands = commands.filter((v) => v[0] === "setBindGroup");
+
+            caches = { commands, setBindGroupCommands };
+
+            map.set([renderPassFormat._key, renderObjects], caches);
         }
 
         // 执行命令
-        runCommands(passEncoder, commands);
+        runCommands(passEncoder, caches);
     }
 
     protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IRenderObject[])
     {
-        const map: ChainMap<[string, IRenderObject[]], Array<any>> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
-        let commands = map.get([renderPassFormat._key, renderObjects]);
-        if (!commands)
+        const map: ChainMap<[string, IRenderObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
+        let caches = map.get([renderPassFormat._key, renderObjects]);
+        if (!caches)
         {
             // 收集命令
-            const renderBundleRecord = new GPURenderBundleRecord();
-            renderBundleRecord["_commands"] = commands = [];
-            map.set([renderPassFormat._key, renderObjects], commands);
+            // const renderBundleRecord = new GPURenderBundleRecord();
+            const renderBundleRecord = new GPURenderPassRecord();
+            const commands = renderBundleRecord["_commands"] = [];
 
-            super.runRenderBundleObjects(device, renderBundleRecord, renderPassFormat, renderObjects);
+            super.runRenderBundleObjects(device, renderBundleRecord as any, renderPassFormat, renderObjects);
 
             // 排除无效命令
-            paichuWuxiaoCommands(commands);
+            paichuWuxiaoCommands(renderPassFormat.attachmentSize, commands);
+            //
+            const setBindGroupCommands = commands.filter((v) => v[0] === "setBindGroup");
+
+            caches = { commands, setBindGroupCommands };
+
+            map.set([renderPassFormat._key, renderObjects], caches);
         }
 
+        // 排除在 GPURenderBundleEncoder 中不支持的命令
+        const commands = caches.commands.filter((v) => (v[0] in bundleEncoder));
+
         // 执行命令
-        runCommands(bundleEncoder, commands);
+        runCommands(bundleEncoder, { ...caches, commands });
     }
 
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
@@ -125,37 +140,36 @@ class GPURenderPassRecord implements GPURenderPassEncoder
     insertDebugMarker(...args: any): undefined { this["_commands"].push(["insertDebugMarker", args]); }
 }
 
-function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder | GPURenderBundleEncoder, commands: any[])
+function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder | GPURenderBundleEncoder, caches: {
+    commands: Array<any>;
+    setBindGroupCommands: Array<any>;
+})
 {
+    const { commands, setBindGroupCommands } = caches;
+
+    setBindGroupCommands.forEach((v) =>
+    {
+        v[1][1] = v[1][1][getRealGPUBindGroup]();
+    });
+
     commands.forEach((v) =>
     {
-        if (v[0] === "setBindGroup")
-        {
-            v[1][1] = v[1][1][getRealGPUBindGroup]();
-            //
-            _passEncoder[v[0]].apply(_passEncoder, v[1]);
-        }
-        else if (
-            v[0] === "setViewport"
-            || v[0] === "setScissorRect"
-        )
-        {
-            _passEncoder[v[0]]?.apply(_passEncoder, v[1]);
-        }
-        else
-        {
-            _passEncoder[v[0]].apply(_passEncoder, v[1]);
-        }
+        _passEncoder[v[0]].apply(_passEncoder, v[1]);
     });
 }
 
-function paichuWuxiaoCommands(commands: any[])
+function paichuWuxiaoCommands(attachmentSize: { readonly width: number; readonly height: number; }, commands: any[])
 {
-    const _obj = { setBindGroup: [], setVertexBuffer: [] };
+    const _obj = {
+        setBindGroup: [], setVertexBuffer: [],
+        setViewport: [0, 0, attachmentSize.width, attachmentSize.height, 0, 1],
+        setScissorRect: [0, 0, attachmentSize.width, attachmentSize.height],
+    };
     //
     let length = 0;
     commands.concat().forEach((v) =>
     {
+        // 排除重复的无效命令
         if (v[0] === "setBindGroup" || v[0] === "setVertexBuffer")
         {
             if (!arrayEq1(_obj, v[0], v[1][0], v[1]))
