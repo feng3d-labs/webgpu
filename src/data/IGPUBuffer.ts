@@ -1,4 +1,4 @@
-import { IBuffer } from "@feng3d/render-api";
+import { IBuffer, IWriteBuffer } from "@feng3d/render-api";
 
 /**
  * GPU缓冲区。
@@ -41,7 +41,7 @@ export interface IGPUBuffer extends IBuffer
  *
  * {@link GPUQueue.writeBuffer}
  */
-export interface IGPUWriteBuffer
+export interface IGPUWriteBuffer extends IWriteBuffer
 {
     /**
      * Offset in bytes into `buffer` to begin writing at.
@@ -51,7 +51,7 @@ export interface IGPUWriteBuffer
     /**
      * Data to write into `buffer`.
      */
-    data: SharedArrayBuffer | BufferSource,
+    // data: SharedArrayBuffer | BufferSource,
 
     /**
      * Offset in into `data` to begin writing from. Given in elements if `data` is a `TypedArray` and bytes otherwise.
