@@ -1,10 +1,12 @@
+import { IBuffer } from "@feng3d/render-api";
+
 /**
  * GPU缓冲区。
  *
  * {@link GPUBufferDescriptor}
  * {@link GPUBuffer}
  */
-export interface IGPUBuffer
+export interface IGPUBuffer extends IBuffer
 {
     /**
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
@@ -17,13 +19,6 @@ export interface IGPUBuffer
      * 如果没有设置，引擎将设置为 data 的字节长度。
      */
     readonly size?: GPUSize64;
-
-    /**
-     * 缓冲初始数据，只上传一次GPU。
-     *
-     * 当值不为空时，将使用 {@link GPUBufferDescriptor.mappedAtCreation} 方式上传数据。
-     */
-    data?: BufferSource;
 
     /**
      * The allowed usages for the buffer.
