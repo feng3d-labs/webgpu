@@ -3,7 +3,7 @@ import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
-import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
+import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { NGPUFragmentState } from "../internal/NGPUFragmentState";
 import { NGPURenderPipeline } from "../internal/NGPURenderPipeline";
@@ -23,7 +23,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  */
 export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IVertexAttributes, indices: IIndicesDataTypes)
 {
-    const indexFormat = indices ? getIGPUIndexBuffer(indices).indexFormat : undefined;
+    const indexFormat = indices ? getIGPUSetIndexBuffer(indices).indexFormat : undefined;
 
     let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
     if (!result)

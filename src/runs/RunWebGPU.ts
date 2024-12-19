@@ -26,7 +26,7 @@ import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
-import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
+import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
 import { ChainMap } from "../utils/ChainMap";
 
 export class RunWebGPU
@@ -439,7 +439,7 @@ export class RunWebGPU
     {
         if (!indices) return;
 
-        const indexBuffer = getIGPUIndexBuffer(indices);
+        const indexBuffer = getIGPUSetIndexBuffer(indices);
 
         const { buffer, indexFormat, offset, size } = indexBuffer;
         const gBuffer = getGPUBuffer(device, buffer);

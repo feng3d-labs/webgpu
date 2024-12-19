@@ -5,7 +5,7 @@ import { IGPUBuffer } from "../data/IGPUBuffer";
  *
  * {@link GPURenderCommandsMixin.setIndexBuffer}
  */
-export interface IGPUIndexBuffer
+export interface IGPUSetIndexBuffer
 {
     /**
      * Buffer containing index data to use for subsequent drawing commands.
