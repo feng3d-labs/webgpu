@@ -1,4 +1,4 @@
-import { IGPUBuffer } from "./IGPUBuffer";
+import { IBuffer } from "@feng3d/render-api";
 
 /**
  * GPU缓冲区之间拷贝。
@@ -15,7 +15,7 @@ export interface IGPUCopyBufferToBuffer
     /**
      * 源缓冲区。
      */
-    source: IGPUBuffer,
+    source: IBuffer,
 
     /**
      * 默认为0。
@@ -25,7 +25,7 @@ export interface IGPUCopyBufferToBuffer
     /**
      * 目标缓冲区。
      */
-    destination: IGPUBuffer,
+    destination: IBuffer,
 
     /**
      * 默认为0。

@@ -1,8 +1,7 @@
-import { ISubmit, ITextureLike } from "@feng3d/render-api";
+import { IBuffer, ISubmit, ITextureLike } from "@feng3d/render-api";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUTextureLikeSize } from "./caches/getIGPUTextureSize";
-import { IGPUBuffer } from "./data/IGPUBuffer";
 import { IGPUReadPixels } from "./data/IGPUReadPixels";
 import { RunWebGPU } from "./runs/RunWebGPU";
 import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
@@ -135,7 +134,7 @@ export class WebGPU
      * @param size 读取字节数量。
      * @returns CPU数据缓冲区。
      */
-    async readBuffer(buffer: IGPUBuffer, offset?: GPUSize64, size?: GPUSize64)
+    async readBuffer(buffer: IBuffer, offset?: GPUSize64, size?: GPUSize64)
     {
         const gpuBuffer = getGPUBuffer(this.device, buffer);
         await gpuBuffer.mapAsync(GPUMapMode.READ);

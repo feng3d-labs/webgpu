@@ -1,8 +1,8 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { IDrawIndexed, IDrawVertex, IFragmentState, IPrimitiveState, IRenderObject, IRenderPipeline, IVertexAttributes, IVertexState } from "@feng3d/render-api";
-import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer } from "@feng3d/webgpu";
+import { IBuffer, IDrawIndexed, IDrawVertex, IFragmentState, IPrimitiveState, IRenderObject, IRenderPipeline, IVertexAttributes, IVertexState } from "@feng3d/render-api";
+import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -245,7 +245,7 @@ export class GLTFBufferView
     byteStride: number;
     view: Uint8Array;
     needsUpload: boolean;
-    gpuBuffer: IGPUBuffer;
+    gpuBuffer: IBuffer;
     usage: number;
     constructor(buffer: GLTFBuffer, view: BufferView)
     {
@@ -285,7 +285,7 @@ export class GLTFBufferView
     upload()
     {
         // Note: must align to 4 byte size when mapped at creation is true
-        const buf: IGPUBuffer = {
+        const buf: IBuffer = {
             size: alignTo(this.view.byteLength, 4),
             usage: this.usage,
             data: this.view,

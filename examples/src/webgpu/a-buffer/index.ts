@@ -7,8 +7,8 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { IBuffer, IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -224,7 +224,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             data: undefined,
         };
 
-        const headsInitBuffer: IGPUBuffer = {
+        const headsInitBuffer: IBuffer = {
             size: (1 + canvas.width * sliceHeight) * Uint32Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.COPY_SRC,
             label: "headsInitBuffer",

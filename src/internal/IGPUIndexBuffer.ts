@@ -1,4 +1,4 @@
-import { IGPUBuffer } from "../data/IGPUBuffer";
+import { IBuffer } from "@feng3d/render-api";
 
 /**
  * GPU渲染时使用的索引缓冲区。
@@ -12,7 +12,7 @@ export interface IGPUSetIndexBuffer
      *
      * 顶点索引缓冲区，包含提供给后续绘制命令使用的顶点索引数据。
      */
-    buffer: IGPUBuffer;
+    buffer: IBuffer;
 
     /**
      * Format of the index data contained in `buffer`.

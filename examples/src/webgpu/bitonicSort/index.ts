@@ -4,9 +4,9 @@ import atomicToZero from "./atomicToZero.wgsl";
 import { NaiveBitonicCompute } from "./bitonicCompute";
 import BitonicDisplayRenderer from "./bitonicDisplay";
 
-import { ICommandEncoder, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IBuffer, ICommandEncoder, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUBufferBinding, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, IGPUBindingResources, IGPUBufferBinding, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 // Type of step that will be executed in our shader
 enum StepEnum
@@ -262,7 +262,7 @@ async function init(
     const elementsOutputBuffer: IGPUBufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize)
     };
-    const elementsStagingBuffer: IGPUBuffer = {
+    const elementsStagingBuffer: IBuffer = {
         size: elementsBufferSize,
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     };
@@ -272,7 +272,7 @@ async function init(
     const atomicSwapsOutputBuffer: IGPUBufferBinding = {
         bufferView: new Uint32Array(1)
     };
-    const atomicSwapsStagingBuffer: IGPUBuffer = {
+    const atomicSwapsStagingBuffer: IBuffer = {
         size: Uint32Array.BYTES_PER_ELEMENT,
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     };
