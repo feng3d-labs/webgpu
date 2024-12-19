@@ -1,7 +1,7 @@
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
 import { IGPUComputePass } from "./data/IGPUComputePass";
 import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
-import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
+import { ICopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
 import { IRenderObject } from "./data/IGPURenderObject";
 import { IRenderPass, IRenderPassObject } from "./data/IGPURenderPass";
 import { IRenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
@@ -56,7 +56,7 @@ export class WebGPUStep
         this._currentComputePassEncoder.computeObjects.push(computeObject);
     }
 
-    copyTextureToTexture(copyTextureToTexture: IGPUCopyTextureToTexture)
+    copyTextureToTexture(copyTextureToTexture: ICopyTextureToTexture)
     {
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
 

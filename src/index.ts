@@ -10,7 +10,6 @@ export * from "./data/IGPUComputeObject";
 export * from "./data/IGPUComputePass";
 export * from "./data/IGPUComputePipeline";
 export * from "./data/IGPUCopyBufferToBuffer";
-export * from "./data/IGPUCopyTextureToTexture";
 export * from "./data/IGPUOcclusionQuery";
 export * from "./data/IGPUPrimitiveState";
 export * from "./data/IGPUReadPixels";

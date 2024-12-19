@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IVertexAttributes, IViewport } from "@feng3d/render-api";
+import { ICommandEncoder, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IVertexAttributes, IViewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -21,7 +21,6 @@ import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
 import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
-import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
@@ -171,7 +170,7 @@ export class RunWebGPU
         });
     }
 
-    protected runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: IGPUCopyTextureToTexture)
+    protected runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: ICopyTextureToTexture)
     {
         const sourceTexture = getGPUTexture(device, copyTextureToTexture.source.texture);
         const destinationTexture = getGPUTexture(device, copyTextureToTexture.destination.texture);
