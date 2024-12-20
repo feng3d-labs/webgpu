@@ -11,7 +11,11 @@ export function getTextureUsageFromFormat(format: GPUTextureFormat, sampleCount?
 {
     let usage: GPUTextureUsageFlags;
     // 包含深度以及多重采样的纹理不支持 STORAGE_BINDING
-    if (format.indexOf("depth") !== -1 || sampleCount || format === "r8unorm")
+    if (format.indexOf("depth") !== -1 // 包含深度的纹理 
+        || sampleCount // 多重采样纹理
+        || format === "r8unorm"
+        || format === "bgra8unorm" // chrome@123 不支持，但chrome@130支持
+    )
     {
         usage = (0
             | GPUTextureUsage.COPY_SRC

@@ -222,6 +222,8 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
 
             // 派发销毁事件
             anyEmitter.emit(gpuTexture, GPUTexture_destroy);
+
+            return undefined;
         };
     })(gpuTexture.destroy);
 
