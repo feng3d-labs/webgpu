@@ -28,6 +28,15 @@ export class WebGPU
         // 获取支持的特性
         const features: GPUFeatureName[] = [];
         adapter?.features.forEach((v) => { features.push(v as any); });
+        // 判断请求的特性是否被支持
+        const requiredFeatures = Array.from(descriptor?.requiredFeatures || [])
+        if (requiredFeatures.length > 0)
+        {
+            for (let i = 0; i < requiredFeatures.length; i++)
+            {
+                console.assert(features.indexOf(requiredFeatures[i]) !== -1, `当前 GPUAdapter 不支持特性 ${requiredFeatures[i]}！`);
+            }
+        }
         // 默认开启当前本机支持的所有WebGPU特性。
         descriptor = descriptor || {};
         descriptor.requiredFeatures = (descriptor.requiredFeatures || features) as any;
