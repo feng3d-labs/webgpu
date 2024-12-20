@@ -32,10 +32,15 @@ export class WebGPU
         const requiredFeatures = Array.from(descriptor?.requiredFeatures || [])
         if (requiredFeatures.length > 0)
         {
-            for (let i = 0; i < requiredFeatures.length; i++)
+            for (let i = requiredFeatures.length - 1; i >= 0; i--)
             {
-                console.assert(features.indexOf(requiredFeatures[i]) !== -1, `当前 GPUAdapter 不支持特性 ${requiredFeatures[i]}！`);
+                if (features.indexOf(requiredFeatures[i]) === -1)
+                {
+                    console.error(`当前 GPUAdapter 不支持特性 ${requiredFeatures[i]}！`);
+                    requiredFeatures.splice(i, 1);
+                }
             }
+            descriptor.requiredFeatures = requiredFeatures;
         }
         // 默认开启当前本机支持的所有WebGPU特性。
         descriptor = descriptor || {};
