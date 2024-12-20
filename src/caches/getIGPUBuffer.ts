@@ -9,7 +9,7 @@ export function getIGPUBuffer(bufferSource: BufferSource)
     }
 
     const gpuBuffer: IBuffer = arrayBuffer["_IGPUBuffer"] = arrayBuffer["_IGPUBuffer"] || {
-        size: arrayBuffer.byteLength,
+        size: Math.ceil(arrayBuffer.byteLength / 4) * 4,
         data: arrayBuffer,
     };
 
