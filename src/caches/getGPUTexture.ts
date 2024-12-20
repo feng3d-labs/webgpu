@@ -46,7 +46,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
         const size = texture.size;
         console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
 
-        const usage = getTextureUsageFromFormat(format, sampleCount);
+        const usage = getTextureUsageFromFormat(device, format, sampleCount);
 
         // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
         if (texture.generateMipmap && mipLevelCount === undefined)
