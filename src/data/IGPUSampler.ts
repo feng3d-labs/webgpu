@@ -15,20 +15,6 @@ export interface IGPUSampler extends ISampler
     readonly label?: string;
 
     /**
-     */
-    addressModeU?: GPUAddressMode;
-
-    /**
-     */
-    addressModeV?: GPUAddressMode;
-
-    /**
-     * Specifies the {{GPUAddressMode|address modes}} for the texture width, height, and depth
-     * coordinates, respectively.
-     */
-    addressModeW?: GPUAddressMode;
-
-    /**
      * Specifies the sampling behavior when the sampled area is smaller than or equal to one
      * texel.
      */
