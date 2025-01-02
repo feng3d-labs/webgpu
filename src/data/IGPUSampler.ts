@@ -1,3 +1,5 @@
+import { ISampler } from "@feng3d/render-api";
+
 /**
  * GPU采样器描述。
  *
@@ -5,7 +7,7 @@
  *
  * {@link GPUSamplerDescriptor}
  */
-export interface IGPUSampler
+export interface IGPUSampler extends ISampler
 {
     /**
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
@@ -15,35 +17,43 @@ export interface IGPUSampler
     /**
      */
     addressModeU?: GPUAddressMode;
+
     /**
      */
     addressModeV?: GPUAddressMode;
+
     /**
      * Specifies the {{GPUAddressMode|address modes}} for the texture width, height, and depth
      * coordinates, respectively.
      */
     addressModeW?: GPUAddressMode;
+
     /**
      * Specifies the sampling behavior when the sampled area is smaller than or equal to one
      * texel.
      */
     magFilter?: GPUFilterMode;
+
     /**
      * Specifies the sampling behavior when the sampled area is larger than one texel.
      */
     minFilter?: GPUFilterMode;
+
     /**
      * Specifies behavior for sampling between mipmap levels.
      */
     mipmapFilter?: GPUMipmapFilterMode;
+
     /**
      */
     lodMinClamp?: number;
+
     /**
      * Specifies the minimum and maximum levels of detail, respectively, used internally when
      * sampling a texture.
      */
     lodMaxClamp?: number;
+
     /**
      * When provided the sampler will be a comparison sampler with the specified
      * {@link GPUCompareFunction}.
@@ -51,6 +61,7 @@ export interface IGPUSampler
      * implementation-dependent and may differ from the normal filtering rules.
      */
     compare?: GPUCompareFunction;
+
     /**
      * Specifies the maximum anisotropy value clamp used by the sampler. Anisotropic filtering is
      * enabled when {@link GPUSamplerDescriptor#maxAnisotropy} is &gt; 1 and the implementation supports it.
