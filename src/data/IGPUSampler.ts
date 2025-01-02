@@ -15,22 +15,6 @@ export interface IGPUSampler extends ISampler
     readonly label?: string;
 
     /**
-     * Specifies the sampling behavior when the sampled area is smaller than or equal to one
-     * texel.
-     */
-    magFilter?: GPUFilterMode;
-
-    /**
-     * Specifies the sampling behavior when the sampled area is larger than one texel.
-     */
-    minFilter?: GPUFilterMode;
-
-    /**
-     * Specifies behavior for sampling between mipmap levels.
-     */
-    mipmapFilter?: GPUMipmapFilterMode;
-
-    /**
      */
     lodMinClamp?: number;
 

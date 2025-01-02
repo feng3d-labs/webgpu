@@ -28,6 +28,9 @@ export function getGPUSampler(device: GPUDevice, sampler: IGPUSampler)
     sampler.addressModeU = sampler.addressModeU ?? "clamp-to-edge";
     sampler.addressModeV = sampler.addressModeV ?? "clamp-to-edge";
     sampler.addressModeW = sampler.addressModeW ?? "clamp-to-edge";
+    sampler.magFilter = sampler.magFilter ?? "nearest";
+    sampler.minFilter = sampler.minFilter ?? "nearest";
+    sampler.mipmapFilter = sampler.mipmapFilter ?? "nearest";
 
     //
     gSampler = device.createSampler(sampler);
