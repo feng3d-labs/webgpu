@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { getTexImageSourceSize, getTextureBytesPerPixel, ITexture, ITextureDataSource, ITextureImageSource, ITextureLike, ITextureSize } from "@feng3d/render-api";
+import { getTexImageSourceSize, getTextureBytesPerPixel, ITexture, ITextureDataSource, ITextureImageSource, ITextureLike, ITextureSize, ITextureSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
@@ -80,11 +80,24 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
     createTexture();
 
     // 更新纹理
-    const updateTexture = () =>
+    const updateSources = () =>
     {
         if (texture.sources)
         {
+            const writeTextures: ITextureSource[] = [];
             texture.sources.forEach((v) =>
+            {
+                writeTextures.push(v)
+            })
+            texture.writeTextures = writeTextures.concat(texture.writeTextures || []);
+        }
+    };
+
+    const updateWriteTextures = () =>
+    {
+        if (texture.writeTextures)
+        {
+            texture.writeTextures.forEach((v) =>
             {
                 // 处理图片纹理
                 const imageSource = v as ITextureImageSource;
@@ -176,11 +189,13 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                     size,
                 );
             });
-            texture.sources = null;
+            texture.writeTextures = null;
         }
     };
-    updateTexture();
-    watcher.watch(texture, "sources", updateTexture);
+
+    updateSources();
+    watcher.watch(texture, "sources", updateSources);
+    watcher.watch(texture, "writeTextures", updateWriteTextures);
 
     // 监听纹理尺寸发生变化
     const resize = (newValue: ITextureSize, oldValue: ITextureSize) =>
@@ -217,8 +232,9 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
             //
             textureMap.delete(texture);
             //
-            watcher.unwatch(texture, "sources", updateTexture);
             watcher.unwatch(texture, "size", resize);
+            watcher.unwatch(texture, "sources", updateSources);
+            watcher.unwatch(texture, "writeTextures", updateWriteTextures);
 
             // 派发销毁事件
             anyEmitter.emit(gpuTexture, GPUTexture_destroy);
