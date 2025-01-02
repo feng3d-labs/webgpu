@@ -25,9 +25,9 @@ export function getGPUSampler(device: GPUDevice, sampler: IGPUSampler)
     if (gSampler) return gSampler;
 
     // 处理默认值
-    sampler.addressModeU = sampler.addressModeU ?? "clamp-to-edge";
-    sampler.addressModeV = sampler.addressModeV ?? "clamp-to-edge";
-    sampler.addressModeW = sampler.addressModeW ?? "clamp-to-edge";
+    sampler.addressModeU = sampler.addressModeU ?? "repeat";
+    sampler.addressModeV = sampler.addressModeV ?? "repeat";
+    sampler.addressModeW = sampler.addressModeW ?? "repeat";
     sampler.magFilter = sampler.magFilter ?? "nearest";
     sampler.minFilter = sampler.minFilter ?? "nearest";
     sampler.mipmapFilter = sampler.mipmapFilter ?? "nearest";
