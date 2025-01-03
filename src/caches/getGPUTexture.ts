@@ -92,6 +92,8 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
             texture.writeTextures = writeTextures.concat(texture.writeTextures || []);
         }
     };
+    updateSources();
+    watcher.watch(texture, "sources", updateSources);
 
     const updateWriteTextures = () =>
     {
@@ -193,8 +195,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
         }
     };
 
-    updateSources();
-    watcher.watch(texture, "sources", updateSources);
+    updateWriteTextures();
     watcher.watch(texture, "writeTextures", updateWriteTextures);
 
     // 监听纹理尺寸发生变化
