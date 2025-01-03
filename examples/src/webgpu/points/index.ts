@@ -1,5 +1,5 @@
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
-import { IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
@@ -114,7 +114,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ctx.textBaseline = "middle";
     ctx.fillText("🦋", 32, 32);
 
-    const sampler: IGPUSampler = {};
+    const sampler: ISampler = {};
     const texture: ITexture = {
         size: [ctx.canvas.width, ctx.canvas.height],
         format: "rgba8unorm",

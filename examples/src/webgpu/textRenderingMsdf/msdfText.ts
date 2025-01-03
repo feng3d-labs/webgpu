@@ -2,8 +2,8 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { IRenderPassObject, IRenderPipeline, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle, IGPUSampler } from "@feng3d/webgpu";
+import { IRenderPassObject, IRenderPipeline, ISampler, ITexture } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -150,7 +150,7 @@ export interface MsdfTextFormattingOptions
 export class MsdfTextRenderer
 {
   pipelinePromise: IRenderPipeline;
-  sampler: IGPUSampler;
+  sampler: ISampler;
 
   cameraUniformBuffer: Float32Array = new Float32Array(16 * 2);
 

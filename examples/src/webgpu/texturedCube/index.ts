@@ -5,8 +5,8 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleTextureMixColorWGSL from "../../shaders/sampleTextureMixColor.frag.wgsl";
 
-import { IRenderObject, IRenderPassDescriptor, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBufferBinding, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBufferBinding, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -31,7 +31,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
     };

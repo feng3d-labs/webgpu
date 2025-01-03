@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import volumeWGSL from "./volume.wgsl";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUBindingResources, WebGPU } from "@feng3d/webgpu";
 
 const gui = new GUI();
 
@@ -88,7 +88,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
         mipmapFilter: "linear",

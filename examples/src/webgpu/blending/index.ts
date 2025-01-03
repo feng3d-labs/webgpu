@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IBlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IBlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -135,7 +135,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         { premultipliedAlpha: true }
     );
 
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
         mipmapFilter: "linear",

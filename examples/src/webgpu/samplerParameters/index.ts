@@ -1,8 +1,8 @@
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, ITextureSource } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureSource } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBindingResources, WebGPU } from "@feng3d/webgpu";
 
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
@@ -176,7 +176,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
      */
     function updateSamplerResources()
     {
-        const sampler: IGPUSampler = {
+        const sampler: ISampler = {
             ...samplerDescriptor,
             maxAnisotropy:
                 samplerDescriptor.minFilter === "linear"

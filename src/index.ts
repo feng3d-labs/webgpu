@@ -20,7 +20,6 @@ export * from "./data/IGPURenderPassColorAttachment";
 export * from "./data/IGPURenderPassDepthStencilAttachment";
 export * from "./data/IGPURenderPassDescriptor";
 export * from "./data/IGPURenderPipeline";
-export * from "./data/IGPUSampler";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IGPUTimestampQuery";

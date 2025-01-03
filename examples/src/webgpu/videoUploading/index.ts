@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { IGPUSampler, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, ISampler, ISubmit } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import sampleExternalTextureWGSL from "../../shaders/sampleExternalTexture.frag.wgsl";
@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
 
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
     };

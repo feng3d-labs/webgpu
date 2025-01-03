@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, IGPUSampler, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import Stats from "stats-js";
@@ -8,7 +8,6 @@ import { mat4, vec3 } from "wgpu-matrix";
 import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
 
 import meshWGSL from "./mesh.wgsl";
-
 
 interface Renderable
 {
@@ -97,7 +96,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         };
     }
 
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
