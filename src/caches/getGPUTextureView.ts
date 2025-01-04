@@ -24,7 +24,7 @@ export function getGPUTextureView(device: GPUDevice, view: ITextureView)
     //
     const texture = view.texture as ITexture;
     const gpuTexture = getGPUTexture(device, texture);
-    const dimension = view.dimension ?? texture.dimension ?? gpuTexture.dimension;
+    const dimension = view.dimension ?? texture.dimension;
 
     textureView = gpuTexture.createView({ ...view, dimension });
     textureViewMap.set(view, textureView);
