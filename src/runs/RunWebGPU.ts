@@ -301,7 +301,7 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
     {
-        const { viewport, scissorRect, pipeline, vertices, indices, bindingResources, drawVertex, drawIndexed } = renderObject;
+        const { viewport, scissorRect, pipeline, vertices, indices, uniforms: bindingResources, drawVertex, drawIndexed } = renderObject;
 
         const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
 

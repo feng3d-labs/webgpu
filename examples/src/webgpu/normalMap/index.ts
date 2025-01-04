@@ -331,7 +331,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             vert_bitan: { data: box.vertices, offset: 44, format: "float32x3", arrayStride: box.vertexStride },
                         },
                         indices: box.indices,
-                        bindingResources: bindingResourcesList[currentSurfaceBindGroup],
+                        uniforms: bindingResourcesList[currentSurfaceBindGroup],
                         drawIndexed: { indexCount: box.indices.length },
                     }],
                 }]

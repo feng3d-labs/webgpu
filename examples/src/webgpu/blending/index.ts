@@ -505,13 +505,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const ro: IRenderObject = {
             pipeline: dstPipeline,
-            bindingResources: dstBindGroup,
+            uniforms: dstBindGroup,
             drawVertex: { vertexCount: 6 },
         };
 
         const ro1: IRenderObject = {
             pipeline: srcPipeline,
-            bindingResources: srcBindGroup,
+            uniforms: srcBindGroup,
             drawVertex: { vertexCount: 6 },
         };
 

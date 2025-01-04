@@ -258,7 +258,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             {
                 renderable.renderObject = {
                     pipeline,
-                    bindingResources: { ...frameBindGroup, ...renderable.bindGroup },
+                    uniforms: { ...frameBindGroup, ...renderable.bindGroup },
                     vertices: renderable.vertexAttributes,
                     indices: renderable.indices,
                     drawIndexed: { indexCount: renderable.indexCount },

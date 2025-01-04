@@ -41,7 +41,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: fullscreenTexturedQuadWGSL }, fragment: { code: sampleExternalTextureWGSL },
         },
-        bindingResources: {
+        uniforms: {
             mySampler: sampler,
             myTexture: {
                 source: video,

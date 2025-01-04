@@ -331,7 +331,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         renderObjects: [
             {
                 pipeline: writeGBuffersPipeline,
-                bindingResources: {
+                uniforms: {
                     ...sceneUniformBindGroup,
                 },
                 vertices,
@@ -360,7 +360,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         renderObjects: [
             {
                 pipeline: gBuffersDebugViewPipeline,
-                bindingResources: {
+                uniforms: {
                     ...gBufferTexturesBindGroup,
                 },
                 drawVertex: { vertexCount: 6 },
@@ -373,7 +373,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         renderObjects: [
             {
                 pipeline: deferredRenderPipeline,
-                bindingResources: {
+                uniforms: {
                     ...gBufferTexturesBindGroup,
                     ...lightsBufferBindGroup,
                 },

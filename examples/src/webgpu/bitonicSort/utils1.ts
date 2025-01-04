@@ -140,7 +140,7 @@ export abstract class Base2DRendererClass
             descriptor: renderPassDescriptor,
             renderObjects: [{
                 pipeline,
-                bindingResources,
+                uniforms: bindingResources,
                 drawVertex: { vertexCount: 6, instanceCount: 1 }
             }],
         };

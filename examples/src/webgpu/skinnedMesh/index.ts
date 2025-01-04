@@ -510,7 +510,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // data at ./gridData.ts
             const renderObject: IRenderObject = {
                 pipeline: skinnedGridPipeline,
-                bindingResources: {
+                uniforms: {
                     ...cameraBGCluster,
                     ...generalUniformsBGCLuster,
                     ...skinnedGridBoneBGCluster,

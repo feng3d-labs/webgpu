@@ -321,7 +321,7 @@ const init = async () =>
                     pipeline,
                     vertices: vertexAttributes,
                     indices,
-                    bindingResources: bindGroup,
+                    uniforms: bindGroup,
                     drawIndexed: { indexCount: indices.length },
                 }],
             });

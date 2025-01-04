@@ -137,7 +137,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     renderObjects: [
                         {
                             pipeline: renderPipeline,
-                            bindingResources: uniformBindGroup,
+                            uniforms: uniformBindGroup,
                             vertices: vertices1,
                             drawVertex: { vertexCount: 4, instanceCount: length },
                         }

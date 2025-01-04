@@ -132,7 +132,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
         },
         indices,
-        bindingResources: {
+        uniforms: {
             uni: {
                 bufferView: undefined,
             },
@@ -144,7 +144,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         const ro: IRenderObject = {
             ...renderObject,
-            bindingResources: {
+            uniforms: {
                 uni: {
                     bufferView: v.uniformBuffer,
                 },
@@ -221,7 +221,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
-                const buffer = (renderObjects[i].bindingResources.uni as IGPUBufferBinding).bufferView;
+                const buffer = (renderObjects[i].uniforms.uni as IGPUBufferBinding).bufferView;
                 getIGPUBuffer(buffer).data = uniformValues.slice();
             }
         );

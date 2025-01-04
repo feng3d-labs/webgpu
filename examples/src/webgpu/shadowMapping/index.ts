@@ -222,7 +222,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         renderObjects: [
                             {
                                 pipeline: shadowPipeline,
-                                bindingResources: {
+                                uniforms: {
                                     ...sceneBindGroupForShadow,
                                     ...modelBindGroup,
                                 },
@@ -237,7 +237,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         renderObjects: [
                             {
                                 pipeline,
-                                bindingResources: {
+                                uniforms: {
                                     ...sceneBindGroupForRender,
                                     ...modelBindGroup,
                                 },

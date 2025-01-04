@@ -162,7 +162,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
                         pipeline,
-                        bindingResources: uniformBindGroup,
+                        uniforms: uniformBindGroup,
                         drawVertex: { vertexCount: 3 },
                     }],
                 }]

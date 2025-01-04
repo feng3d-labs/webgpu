@@ -291,7 +291,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       descriptor: renderPassDescriptor,
       renderObjects: [{
         pipeline: renderPipeline,
-        bindingResources: { ...uniformBindGroup },
+        uniforms: { ...uniformBindGroup },
         vertices: { ...particlesVertices, ...quadVertices },
         drawVertex: { vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
       }],

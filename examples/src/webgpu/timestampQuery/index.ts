@@ -112,7 +112,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     const renderObject: IRenderObject = {
         pipeline,
         vertices,
-        bindingResources: {
+        uniforms: {
             uniforms,
         },
         drawVertex: { vertexCount: cubeVertexCount },

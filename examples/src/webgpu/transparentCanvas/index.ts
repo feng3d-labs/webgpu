@@ -107,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
                         pipeline,
-                        bindingResources: uniformBindGroup,
+                        uniforms: uniformBindGroup,
                         vertices: verticesBuffer,
                         drawVertex: { vertexCount: cubeVertexCount },
                     }]

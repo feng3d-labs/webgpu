@@ -343,7 +343,7 @@ export class MsdfTextRenderer
       renderObjects: [
         {
           pipeline: font.pipeline,
-          bindingResources: {
+          uniforms: {
             ...font.bindGroup,
             ...bindGroup,
           },

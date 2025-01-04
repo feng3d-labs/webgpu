@@ -62,7 +62,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             position: { data: vertexBuffer, format: "float32x4", offset: 0, arrayStride: 2 * vec4Size },
             color: { data: vertexBuffer, format: "float32x4", offset: vec4Size, arrayStride: 2 * vec4Size },
         },
-        bindingResources: {},
+        uniforms: {},
         drawVertex: { vertexCount: 3, instanceCount: 1 },
     };
 
@@ -93,7 +93,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         renderObjects0[i] = {
             ...renderObject,
-            bindingResources: {
+            uniforms: {
                 time,
                 uniforms: {
                     bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),

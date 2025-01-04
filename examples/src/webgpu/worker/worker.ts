@@ -155,7 +155,7 @@ async function init(canvas: OffscreenCanvas)
                 descriptor: renderPassDescriptor,
                 renderObjects: [{
                     pipeline,
-                    bindingResources: uniformBindGroup,
+                    uniforms: uniformBindGroup,
                     vertices: verticesBuffer,
                     drawVertex: { vertexCount: cubeVertexCount }
                 }]

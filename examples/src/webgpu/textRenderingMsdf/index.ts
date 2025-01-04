@@ -261,7 +261,7 @@ setBlendConstant().`,
 
         renderObjects.push({
             pipeline,
-            bindingResources: uniformBindGroup,
+            uniforms: uniformBindGroup,
             vertices: verticesBuffer,
             drawVertex: { vertexCount: cubeVertexCount, instanceCount: 1 },
         });

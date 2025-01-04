@@ -112,7 +112,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
             uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        bindingResources: {
+        uniforms: {
             uniforms: {
                 modelViewProjectionMatrix: null
             },
@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         // Update the matrix data.
         updateTransformationMatrix();
 
-        (renderObject.bindingResources.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(mvpMatricesData); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        (renderObject.uniforms.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(mvpMatricesData); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
         const data: ISubmit = {
             commandEncoders: [

@@ -99,7 +99,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const renderObject: IRenderObject = {
         pipeline,
         vertices,
-        bindingResources,
+        uniforms: bindingResources,
         drawVertex: { vertexCount: cubeVertexCount },
     };
 

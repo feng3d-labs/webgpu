@@ -82,7 +82,7 @@ export default class Rasterizer
                 pipeline: this.pipeline,
                 vertices: this.scene.vertexAttributes,
                 indices: this.scene.indices,
-                bindingResources: {
+                uniforms: {
                     ...this.common.uniforms.bindGroup,
                     ...this.bindGroup,
                 },

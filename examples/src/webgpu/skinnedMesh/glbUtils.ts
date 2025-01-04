@@ -471,7 +471,7 @@ export class GLTFPrimitive
 
         const renderObject: IRenderObject = {
             pipeline: this.renderPipeline,
-            bindingResources,
+            uniforms: bindingResources,
             //if skin do something with bone bind group
             vertices: this.vertices,
             indices: this.indices,

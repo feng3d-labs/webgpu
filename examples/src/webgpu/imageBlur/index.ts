@@ -144,7 +144,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         descriptor: renderPassDescriptor,
         renderObjects: [{
             pipeline: fullscreenQuadPipeline1,
-            bindingResources: showResultBindGroup1,
+            uniforms: showResultBindGroup1,
             drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
         }],
     };
