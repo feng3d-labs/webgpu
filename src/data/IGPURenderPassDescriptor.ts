@@ -10,11 +10,6 @@ declare module "@feng3d/render-api"
     export interface IRenderPassDescriptor
     {
         /**
-         * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
-         */
-        label?: string;
-
-        /**
          * 附件尺寸。
          *
          * 默认从第一个有效附件纹理中获取尺寸。

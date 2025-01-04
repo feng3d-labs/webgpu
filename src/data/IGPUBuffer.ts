@@ -11,11 +11,6 @@ declare module "@feng3d/render-api"
     export interface IBuffer
     {
         /**
-         * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
-         */
-        readonly label?: string;
-
-        /**
          * The allowed usages for the buffer.
          *
          * 默认  GPUBufferUsage.COPY_SRC

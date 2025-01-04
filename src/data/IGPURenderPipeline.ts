@@ -12,11 +12,6 @@ declare module "@feng3d/render-api"
     export interface IRenderPipeline
     {
         /**
-         * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
-         */
-        readonly label?: string;
-
-        /**
          * 多重采样阶段描述。
          */
         readonly multisample?: IGPUMultisampleState;

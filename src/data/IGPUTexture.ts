@@ -51,11 +51,6 @@ declare module "@feng3d/render-api"
     export interface ITexture
     {
         /**
-         * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
-         */
-        readonly label?: string;
-
-        /**
          * Specifies what view {@link GPUTextureViewDescriptor#format} values will be allowed when calling
          * {@link GPUTexture#createView} on this texture (in addition to the texture's actual
          * {@link GPUTextureDescriptor#format}).
