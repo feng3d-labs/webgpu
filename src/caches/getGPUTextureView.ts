@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ITextureView } from "@feng3d/render-api";
+import { ITexture, ITextureView } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { GPUTexture_destroy, GPUTextureView_destroy } from "../eventnames";
 import { getGPUTexture } from "./getGPUTexture";
@@ -22,8 +22,11 @@ export function getGPUTextureView(device: GPUDevice, view: ITextureView)
     if (textureView) return textureView;
 
     //
-    const gpuTexture = getGPUTexture(device, view.texture);
-    textureView = gpuTexture.createView(view);
+    const texture = view.texture as ITexture;
+    const gpuTexture = getGPUTexture(device, texture);
+    const dimension = view.dimension ?? texture.dimension ?? gpuTexture.dimension;
+
+    textureView = gpuTexture.createView({ ...view, dimension });
     textureViewMap.set(view, textureView);
     // 销毁纹理时清除对应的纹理视图。
     anyEmitter.once(gpuTexture, GPUTexture_destroy, () =>

@@ -65,7 +65,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         cubemapTexture = {
             size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
-            dimension: "2d",
+            dimension: "cube",
             format: "rgba8unorm",
             sources: textureSource,
         };
@@ -136,7 +136,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 modelViewProjectionMatrix: new Float32Array(16)
             },
             mySampler: sampler,
-            myTexture: { texture: cubemapTexture, dimension: "cube" },
+            myTexture: { texture: cubemapTexture },
         },
         drawVertex: { vertexCount: cubeVertexCount },
     };
