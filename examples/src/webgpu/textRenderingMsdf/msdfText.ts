@@ -2,8 +2,8 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { IRenderPassObject, IRenderPipeline, ISampler, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle } from "@feng3d/webgpu";
+import { IRenderPassObject, IRenderPipeline, ISampler, ITexture, IUniforms } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPURenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -33,7 +33,7 @@ export class MsdfFont
   defaultChar: MsdfChar;
   constructor(
     public pipeline: IRenderPipeline,
-    public bindGroup: IGPUBindingResources,
+    public bindGroup: IUniforms,
     public lineHeight: number,
     public chars: { [x: number]: MsdfChar },
     public kernings: KerningMap
@@ -256,7 +256,7 @@ export class MsdfTextRenderer
 
     const pageTextures = await Promise.all(pagePromises);
 
-    const bindGroup: IGPUBindingResources = {
+    const bindGroup: IUniforms = {
       fontTexture: { texture: pageTextures[0] },
       fontSampler: this.sampler,
       chars: { bufferView: charsArray }
@@ -333,7 +333,7 @@ export class MsdfTextRenderer
       );
     }
 
-    const bindGroup: IGPUBindingResources = {
+    const bindGroup: IUniforms = {
       camera: { bufferView: this.cameraUniformBuffer },
       text: { bufferView: textBuffer },
     };

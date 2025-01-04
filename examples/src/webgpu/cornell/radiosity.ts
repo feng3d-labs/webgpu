@@ -1,5 +1,6 @@
-import { ICommandEncoder, IPassEncoder, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePipeline } from "@feng3d/webgpu";
+import { ICommandEncoder, IPassEncoder, ITexture, IUniforms } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUComputePipeline } from "@feng3d/webgpu";
+
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
 import Scene from "./scene";
@@ -38,7 +39,7 @@ export default class Radiosity
     private readonly scene: Scene;
     private readonly radiosityPipeline: IGPUComputePipeline;
     private readonly accumulationToLightmapPipeline: IGPUComputePipeline;
-    private readonly bindGroup: IGPUBindingResources;
+    private readonly bindGroup: IUniforms;
     private readonly accumulationBuffer: ArrayBufferView;
     private readonly uniformBuffer: ArrayBufferView;
 
@@ -113,7 +114,7 @@ export default class Radiosity
                 // Dispatch the radiosity workgroups
                 {
                     pipeline: this.radiosityPipeline,
-                    bindingResources: {
+                    uniforms: {
                         ...this.common.uniforms.bindGroup,
                         ...this.bindGroup,
                     },
@@ -122,7 +123,7 @@ export default class Radiosity
                 // Then copy the 'accumulation' data to 'lightmap'
                 {
                     pipeline: this.accumulationToLightmapPipeline,
-                    bindingResources: {
+                    uniforms: {
                         ...this.common.uniforms.bindGroup,
                         ...this.bindGroup,
                     },

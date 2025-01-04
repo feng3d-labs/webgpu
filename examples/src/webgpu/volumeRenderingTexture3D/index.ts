@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import volumeWGSL from "./volume.wgsl";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBindingResources, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 const gui = new GUI();
 
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         maxAnisotropy: 16,
     };
 
-    const uniformBindGroup: IGPUBindingResources = {
+    const uniformBindGroup: IUniforms = {
         uniforms: uniformBuffer,
         mySampler: sampler,
         myTexture: { texture: volumeTexture },

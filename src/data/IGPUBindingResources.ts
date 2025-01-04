@@ -1,23 +1,14 @@
-import { ISampler, ITextureView } from "@feng3d/render-api";
+import { ISampler } from "@feng3d/render-api";
 import { IGPUBufferBinding } from "./IGPUBufferBinding";
 import { IGPUExternalTexture } from "./IGPUExternalTexture";
 
-/**
- * GPU绑定的资源映射。
- */
-export interface IGPUBindingResources
+declare module "@feng3d/render-api"
 {
-    [name: string]: IGPUBindingResource
+    export interface IUniformTypeMap
+    {
+        ISampler: ISampler;
+        ITextureView: ITextureView;
+        IGPUBufferBinding: IGPUBufferBinding;
+        IGPUExternalTexture: IGPUExternalTexture;
+    }
 }
-
-/**
- * 绑定资源。
- *
- * @see GPUBindingResource
- */
-export type IGPUBindingResource =
-    | ISampler
-    | ITextureView
-    | IGPUBufferBinding
-    | IGPUExternalTexture
-    ;

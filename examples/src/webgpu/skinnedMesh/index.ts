@@ -7,8 +7,8 @@ import gridWGSL from "./grid.wgsl";
 import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
-import { IPassEncoder, IRenderObject, IRenderPass, IRenderPassDescriptor, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, WebGPU } from "@feng3d/webgpu";
+import { IPassEncoder, IRenderObject, IRenderPass, IRenderPassDescriptor, ITexture, IUniforms } from "@feng3d/render-api";
+import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -193,7 +193,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const cameraBuffer = new Float32Array(48);
 
-    const cameraBGCluster: IGPUBindingResources = {
+    const cameraBGCluster: IUniforms = {
         camera_uniforms: {
             bufferView: cameraBuffer,
         }
@@ -201,7 +201,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const generalUniformsBuffer = new Uint32Array(2);
 
-    const generalUniformsBGCLuster: IGPUBindingResources = {
+    const generalUniformsBGCLuster: IUniforms = {
         general_uniforms: {
             bufferView: generalUniformsBuffer,
         },
@@ -227,7 +227,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Buffer for our uniforms, joints, and inverse bind matrices
     const skinnedGridJointUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
     const skinnedGridInverseBindUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
-    const skinnedGridBoneBGCluster: IGPUBindingResources = {
+    const skinnedGridBoneBGCluster: IUniforms = {
         joint_matrices: { bufferView: skinnedGridJointUniformBuffer },
         inverse_bind_matrices: { bufferView: skinnedGridInverseBindUniformBuffer },
     };
@@ -488,7 +488,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         if (settings.object === "Whale")
         {
             const renderObjects: IRenderObject[] = [];
-            const bindingResources: IGPUBindingResources = {
+            const bindingResources: IUniforms = {
                 ...cameraBGCluster,
                 ...generalUniformsBGCLuster,
             };

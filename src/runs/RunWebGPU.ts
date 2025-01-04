@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IVertexAttributes, IViewport } from "@feng3d/render-api";
+import { ICommandEncoder, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IUniforms, IVertexAttributes, IViewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -16,7 +16,6 @@ import { IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
-import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
@@ -260,7 +259,7 @@ export class RunWebGPU
      */
     protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
     {
-        const { pipeline, bindingResources, workgroups } = computeObject;
+        const { pipeline, uniforms: bindingResources, workgroups } = computeObject;
 
         const shader: IGPUShader = { compute: pipeline.compute.code };
 
@@ -409,7 +408,7 @@ export class RunWebGPU
         }
     }
 
-    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: IGPUBindingResources)
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: IUniforms)
     {
         // 计算 bindGroups
         const setBindGroups = getIGPUSetBindGroups(shader, bindingResources);

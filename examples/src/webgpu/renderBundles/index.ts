@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUCanvasContext, IGPURenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import Stats from "stats-js";
@@ -15,7 +15,7 @@ interface Renderable
     vertexAttributes: IVertexAttributes;
     indices: Uint16Array;
     indexCount: number;
-    bindGroup?: IGPUBindingResources;
+    bindGroup?:   IUniforms;
 }
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
@@ -137,11 +137,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     function createSphereBindGroup1(
         texture: ITexture,
         transform: Float32Array
-    ): IGPUBindingResources
+    ):   IUniforms
     {
         const uniformBuffer = new Float32Array(transform);
 
-        const bindGroup: IGPUBindingResources = {
+        const bindGroup:   IUniforms = {
             modelMatrix: {
                 bufferView: uniformBuffer,
             },
@@ -218,7 +218,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     );
     const modelViewProjectionMatrix = mat4.create();
 
-    const frameBindGroup: IGPUBindingResources = {
+    const frameBindGroup:   IUniforms = {
         uniforms: {
             bufferView: uniformBuffer,
         },

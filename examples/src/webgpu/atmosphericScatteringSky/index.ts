@@ -48,7 +48,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: {
             compute: { code: atmosphericScatteringSkyWGSL }
         },
-        bindingResources: {
+        uniforms: {
             uniformBuffer,
             outTexture: { texture: framebuffer }
         },

@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResource, IGPUBindingResources, IGPUBufferBinding, WebGPU } from "@feng3d/webgpu";
+import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IUniformType, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUBufferBinding, WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import { mat3, mat4 } from "wgpu-matrix";
@@ -140,8 +140,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             thickness: number;
             alphaThreshold: number;
         };
-        litBindGroup: IGPUBindingResources;
-        wireframeBindGroups: IGPUBindingResources[];
+        litBindGroup: IUniforms;
+        wireframeBindGroups: IUniforms[];
         model: Model;
     };
 
@@ -153,7 +153,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Make a uniform buffer and type array views
         // for our uniforms.
         const uniformValues = new Float32Array(16 + 16 + 4);
-        const uniformBuffer: IGPUBindingResource = {
+        const uniformBuffer: IUniformType = {
             bufferView: uniformValues,
         };
         const kWorldViewProjectionMatrixOffset = 0;
@@ -173,7 +173,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const model = randElement(models);
 
         // Make a bind group for this uniform
-        const litBindGroup: IGPUBindingResources = {
+        const litBindGroup: IUniforms = {
             uni: uniformBuffer,
         };
 
@@ -195,14 +195,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // We're creating 2 bindGroups, one for each pipeline.
         // We could create just one since they are identical. To do
         // so we'd have to manually create a bindGroupLayout.
-        const wireframeBindGroup: IGPUBindingResources = {
+        const wireframeBindGroup: IUniforms = {
             uni: uniformBuffer,
             positions: { bufferView: model.vertices },
             indices: { bufferView: model.indices },
             line: lineUniformBuffer,
         };
 
-        const barycentricCoordinatesBasedWireframeBindGroup: IGPUBindingResources = {
+        const barycentricCoordinatesBasedWireframeBindGroup: IUniforms = {
             uni: uniformBuffer,
             positions: { bufferView: model.vertices },
             indices: { bufferView: model.indices },

@@ -4,9 +4,9 @@ import atomicToZero from "./atomicToZero.wgsl";
 import { NaiveBitonicCompute } from "./bitonicCompute";
 import BitonicDisplayRenderer from "./bitonicDisplay";
 
-import { IBuffer, ICommandEncoder, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IBuffer, ICommandEncoder, IRenderPassDescriptor, ISubmit, IUniforms } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBindingResources, IGPUBufferBinding, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, IGPUBufferBinding, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 // Type of step that will be executed in our shader
 enum StepEnum
@@ -283,7 +283,7 @@ async function init(
         bufferView: new Float32Array(4),
     };
 
-    const computeBGCluster: IGPUBindingResources = {
+    const computeBGCluster: IUniforms = {
         input_data: elementsInputBuffer,
         data: elementsInputBuffer,
         output_data: elementsOutputBuffer,
@@ -381,7 +381,7 @@ async function init(
                     __type: "ComputePass",
                     computeObjects: [{
                         pipeline: atomicToZeroComputePipeline,
-                        bindingResources: computeBGCluster,
+                        uniforms: computeBGCluster,
                         workgroups: { workgroupCountX: 1 },
                     }]
                 }]
@@ -740,7 +740,7 @@ async function init(
                 timestampQuery: querySet,
                 computeObjects: [{
                     pipeline: computePipeline,
-                    bindingResources: computeBGCluster,
+                    uniforms: computeBGCluster,
                     workgroups: { workgroupCountX: settings["Workgroups Per Step"] },
                 }]
             };

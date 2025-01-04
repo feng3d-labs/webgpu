@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IBlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureView } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { IBlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureView, IUniforms } from "@feng3d/render-api";
+import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -163,25 +163,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const srcUniform = { matrix: new Float32Array(16) };
     const dstUniform = { matrix: new Float32Array(16) };
 
-    const srcBindGroupUnpremultipliedAlpha: IGPUBindingResources = {
+    const srcBindGroupUnpremultipliedAlpha:          IUniforms = {
         ourSampler: sampler,
         ourTexture: { texture: srcTextureUnpremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupUnpremultipliedAlpha: IGPUBindingResources = {
+    const dstBindGroupUnpremultipliedAlpha:          IUniforms = {
         ourSampler: sampler,
         ourTexture: { texture: dstTextureUnpremultipliedAlpha },
         uni: dstUniform,
     };
 
-    const srcBindGroupPremultipliedAlpha: IGPUBindingResources = {
+    const srcBindGroupPremultipliedAlpha:          IUniforms = {
         ourSampler: sampler,
         ourTexture: { texture: srcTexturePremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupPremultipliedAlpha: IGPUBindingResources = {
+    const dstBindGroupPremultipliedAlpha:          IUniforms = {
         ourSampler: sampler,
         ourTexture: { texture: dstTexturePremultipliedAlpha },
         uni: dstUniform,

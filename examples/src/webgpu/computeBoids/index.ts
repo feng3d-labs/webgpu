@@ -1,10 +1,9 @@
+import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPUComputeObject, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
-
-import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { IGPUComputeObject, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -55,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: {
             compute: { code: updateSpritesWGSL }
         },
-        bindingResources: {
+        uniforms: {
             params: simParams,
             particlesA: {
                 bufferView: particleBuffers[0],
@@ -69,14 +68,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const computeObject1: IGPUComputeObject = {
         ...computeObject0,
-        bindingResources: {
-            ...computeObject0.bindingResources,
+        uniforms: {
+            ...computeObject0.uniforms,
             particlesA: {
-                ...computeObject0.bindingResources.particlesA,
+                ...computeObject0.uniforms.particlesA,
                 bufferView: particleBuffers[1],
             },
             particlesB: {
-                ...computeObject0.bindingResources.particlesA,
+                ...computeObject0.uniforms.particlesA,
                 bufferView: particleBuffers[0],
             },
         },

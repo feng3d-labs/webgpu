@@ -7,8 +7,8 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -75,7 +75,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     + 0;
   const uniformBuffer = new Uint8Array(uniformBufferSize);
 
-  const uniformBindGroup: IGPUBindingResources = {
+  const uniformBindGroup:    IUniforms = {
     render_params: {
       bufferView: uniformBuffer,
     },
@@ -180,7 +180,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       const levelWidth = textureWidth >> level;
       const levelHeight = textureHeight >> level;
-      const probabilityMapBindGroup: IGPUBindingResources = {
+      const probabilityMapBindGroup:    IUniforms = {
         ubo: { bufferView: probabilityMapUBOBuffer },
         buf_in: { bufferView: level & 1 ? bufferA : bufferB },
         buf_out: { bufferView: level & 1 ? bufferB : bufferA },
@@ -205,7 +205,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           __type: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapImportLevelPipeline,
-            bindingResources: { ...probabilityMapBindGroup },
+            uniforms: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
         });
@@ -216,7 +216,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           __type: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapExportLevelPipeline,
-            bindingResources: { ...probabilityMapBindGroup },
+            uniforms: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
         });
@@ -251,7 +251,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       code: simulateWGSL,
     },
   };
-  const computeBindGroup: IGPUBindingResources = {
+  const computeBindGroup:    IUniforms = {
     sim_params: {
       bufferView: simulationUBOBuffer,
     },
@@ -283,7 +283,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       __type: "ComputePass",
       computeObjects: [{
         pipeline: computePipeline,
-        bindingResources: { ...computeBindGroup },
+        uniforms: { ...computeBindGroup },
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
       }]
     },

@@ -1,8 +1,8 @@
 import { GUI } from "dat.gui";
 import checkerWGSL from "./checker.wgsl";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
-import { IGPUBindingResources, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -21,7 +21,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         size: undefined,
     };
 
-    const bindGroup: IGPUBindingResources = {
+    const bindGroup:  IUniforms = {
         uni,
     };
 

@@ -1,8 +1,8 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { IBuffer, IDrawIndexed, IDrawVertex, IFragmentState, IPrimitiveState, IRenderObject, IRenderPipeline, IVertexAttributes, IVertexState } from "@feng3d/render-api";
-import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources } from "@feng3d/webgpu";
+import { IBuffer, IDrawIndexed, IDrawVertex, IFragmentState, IPrimitiveState, IRenderObject, IRenderPipeline, IUniforms, IVertexAttributes, IVertexState } from "@feng3d/render-api";
+import { getIGPUBuffer, gpuVertexFormatMap } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -452,7 +452,7 @@ export class GLTFPrimitive
         this.renderPipeline = rpDescript;
     }
 
-    render(renderObjects: IRenderObject[], bindingResources: IGPUBindingResources)
+    render(renderObjects: IRenderObject[], bindingResources: IUniforms)
     {
         let drawIndexed: IDrawIndexed;
         let drawVertex: IDrawVertex;
@@ -509,7 +509,7 @@ export class GLTFMesh
         }
     }
 
-    render(renderObjects: IRenderObject[], bindingResources: IGPUBindingResources)
+    render(renderObjects: IRenderObject[], bindingResources: IUniforms)
     {
         // We take a pretty simple approach to start. Just loop through all the primitives and
         // call their individual draw methods
@@ -664,7 +664,7 @@ export class GLTFNode
     }
 
     renderDrawables(
-        renderObjects: IRenderObject[], bindingResources: IGPUBindingResources
+        renderObjects: IRenderObject[], bindingResources: IUniforms
     )
     {
         if (this.drawables !== undefined)
@@ -733,7 +733,7 @@ export class GLTFSkin
     // [5, 2, 3] means our joint info is at nodes 5, 2, and 3
     joints: number[];
     // Bind Group for this skin's uniform buffer
-    skinBindGroup: IGPUBindingResources;
+    skinBindGroup: IUniforms;
     // Static bindGroupLayout shared across all skins
     // In a larger shader with more properties, certain bind groups
     // would likely have to be combined due to device limitations in the number of bind groups

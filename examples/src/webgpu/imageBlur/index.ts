@@ -3,8 +3,8 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -66,14 +66,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const blurParamsBuffer = new Uint8Array(8);
 
-    const computeConstants: IGPUBindingResources = {
+    const computeConstants:   IUniforms = {
         samp: sampler,
         params: {
             bufferView: blurParamsBuffer,
         },
     };
 
-    const computeBindGroup0: IGPUBindingResources = {
+    const computeBindGroup0:   IUniforms = {
         inputTex: { texture: cubeTexture1 },
         outputTex: { texture: textures[0] },
         flip: {
@@ -81,7 +81,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const computeBindGroup1: IGPUBindingResources = {
+    const computeBindGroup1:   IUniforms = {
         inputTex: { texture: textures[0] },
         outputTex: { texture: textures[1] },
         flip: {
@@ -89,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const computeBindGroup2: IGPUBindingResources = {
+    const computeBindGroup2:   IUniforms = {
         inputTex: { texture: textures[1] },
         outputTex: { texture: textures[0] },
         flip: {
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const showResultBindGroup1: IGPUBindingResources = {
+    const showResultBindGroup1:   IUniforms = {
         mySampler: sampler,
         myTexture: { texture: textures[1] },
     };
@@ -161,15 +161,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     };
 
-    const bindingResources0: IGPUBindingResources = {
+    const bindingResources0:   IUniforms = {
         ...computeConstants,
         ...computeBindGroup0,
     };
-    const bindingResources1: IGPUBindingResources = {
+    const bindingResources1:   IUniforms = {
         ...computeConstants,
         ...computeBindGroup1,
     };
-    const bindingResources2: IGPUBindingResources = {
+    const bindingResources2:   IUniforms = {
         ...computeConstants,
         ...computeBindGroup2,
     };
@@ -181,12 +181,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         gpuComputePassEncoder.computeObjects = [
             {
                 pipeline: blurPipeline,
-                bindingResources: bindingResources0,
+                uniforms: bindingResources0,
                 workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
             },
             {
                 pipeline: blurPipeline,
-                bindingResources: bindingResources1,
+                uniforms: bindingResources1,
                 workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
             },
         ];
@@ -196,7 +196,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             gpuComputePassEncoder.computeObjects.push(
                 {
                     pipeline: blurPipeline,
-                    bindingResources: bindingResources2,
+                    uniforms: bindingResources2,
                     workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
                 }
             );
@@ -204,7 +204,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             gpuComputePassEncoder.computeObjects.push(
                 {
                     pipeline: blurPipeline,
-                    bindingResources: bindingResources1,
+                    uniforms: bindingResources1,
                     workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
                 }
             );

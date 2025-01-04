@@ -1,4 +1,4 @@
-import { IGPUBindingResource } from "../data/IGPUBindingResources";
+import { IUniformType } from "@feng3d/render-api";
 
 /**
  * GPU 绑定组。
@@ -33,5 +33,5 @@ export interface IGPUBindGroupEntry extends Omit<GPUBindGroupEntry, "resource">
      * The resource to bind, which may be a {@link GPUSampler}, {@link GPUTextureView},
      * {@link GPUExternalTexture}, or {@link GPUBufferBinding}.
      */
-    resource: IGPUBindingResource;
+    resource: IUniformType;
 }

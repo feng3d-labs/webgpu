@@ -4,8 +4,8 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, IVertexAttributes } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -74,13 +74,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             cell: { data: buffer1, format: "uint32", stepMode: "instance" }
         };
 
-        const bindGroup0: IGPUBindingResources = {
+        const bindGroup0:    IUniforms = {
             size: { bufferView: sizeBuffer },
             current: { bufferView: buffer0 },
             next: { bufferView: buffer1 },
         };
 
-        const bindGroup1: IGPUBindingResources = {
+        const bindGroup1:    IUniforms = {
             size: { bufferView: sizeBuffer },
             current: { bufferView: buffer1 },
             next: { bufferView: buffer0 },
@@ -98,7 +98,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         };
 
-        const uniformBindGroup: IGPUBindingResources = {
+        const uniformBindGroup:    IUniforms = {
             size: {
                 bufferView: sizeBuffer,
                 offset: 0,
@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     __type: "ComputePass",
                     computeObjects: [{
                         pipeline: computePipeline,
-                        bindingResources: i ? bindGroup1 : bindGroup0,
+                        uniforms: i ? bindGroup1 : bindGroup0,
                         workgroups: {
                             workgroupCountX: GameOptions.width / GameOptions.workgroupSize,
                             workgroupCountY: GameOptions.height / GameOptions.workgroupSize

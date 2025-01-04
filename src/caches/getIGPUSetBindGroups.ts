@@ -1,8 +1,8 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 
+import { IUniforms } from "@feng3d/render-api";
 import { getIGPUPipelineLayout, getIGPUShaderKey, IGPUShader } from "../caches/getIGPUPipelineLayout";
-import { IGPUBindingResources } from "../data/IGPUBindingResources";
 import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
@@ -10,7 +10,7 @@ import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
 import { getIGPUBuffer } from "./getIGPUBuffer";
 
-export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: IGPUBindingResources)
+export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: IUniforms)
 {
     const shaderKey = getIGPUShaderKey(shader);
     //
@@ -30,9 +30,9 @@ export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: IGPUB
     return gpuSetBindGroups;
 }
 
-const bindGroupsMap = new ChainMap<[string, IGPUBindingResources], IGPUSetBindGroup[]>();
+const bindGroupsMap = new ChainMap<[string, IUniforms], IGPUSetBindGroup[]>();
 
-function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bindingResources: IGPUBindingResources): IGPUSetBindGroup
+function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bindingResources: IUniforms): IGPUSetBindGroup
 {
     const map: ChainMap<Array<any>, IGPUSetBindGroup> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
     const subBindingResources = bindGroupLayout.entryNames.map((v) => bindingResources[v]);

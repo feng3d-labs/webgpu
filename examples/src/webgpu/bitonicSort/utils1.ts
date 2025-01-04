@@ -2,8 +2,7 @@ import type { GUI } from "dat.gui";
 import Stats from "stats.js";
 import { quitIfAdapterNotAvailable, quitIfWebGPUNotAvailable } from "../util";
 
-import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline } from "@feng3d/render-api";
-import { IGPUBindingResources } from "@feng3d/webgpu";
+import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, IUniforms } from "@feng3d/render-api";
 
 const fullscreenTexturedQuad
     = `
@@ -133,7 +132,7 @@ export abstract class Base2DRendererClass
         commandEncoder: ICommandEncoder,
         renderPassDescriptor: IRenderPassDescriptor,
         pipeline: IRenderPipeline,
-        bindingResources?: IGPUBindingResources
+        bindingResources?:           IUniforms
     )
     {
         const passEncoder: IRenderPass = {

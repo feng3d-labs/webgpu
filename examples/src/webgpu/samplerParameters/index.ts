@@ -1,8 +1,8 @@
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureSource } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureSource, IUniforms } from "@feng3d/render-api";
+import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
@@ -304,7 +304,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const renderObjects: IRenderPassObject[] = [];
 
-    const bindingResources0: IGPUBindingResources = {
+    const bindingResources0: IUniforms = {
         config: { bufferView: bufConfig },
         matrices: { bufferView: bufMatrices },
         samp: null, // 帧更新中设置
@@ -328,7 +328,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         );
     }
 
-    const bindingResources1: IGPUBindingResources = {
+    const bindingResources1: IUniforms = {
         tex: { texture: checkerboard },
     };
     const kLastViewport = (kViewportGridSize - 1) * kViewportGridStride + 1;

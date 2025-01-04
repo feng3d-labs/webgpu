@@ -10,8 +10,8 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
-import { IGPUBindingResources, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -269,7 +269,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         textureQuadPassLoadDescriptor,
     ];
 
-    const depthTextureBindGroup: IGPUBindingResources = {
+    const depthTextureBindGroup: IUniforms = {
         depthTexture: { texture: depthTexture },
     };
 
@@ -290,7 +290,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         viewProjectionMatrix: cameraMatrixReversedDepthBuffer,
     };
 
-    const uniformBindGroups: IGPUBindingResources[] = [
+    const uniformBindGroups: IUniforms[] = [
         {
             uniforms,
             camera: camera0,

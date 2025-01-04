@@ -1,5 +1,5 @@
-import { IPassEncoder, IRenderPassDescriptor, IRenderPipeline, ISubmit, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { IPassEncoder, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -172,7 +172,7 @@ const init = async () =>
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
         uniformValues: Float32Array;
-        bindGroup: IGPUBindingResources;
+        bindGroup:  IUniforms;
         rotation: number;
         model: Model;
         renderPassDescriptor?: IRenderPassDescriptor
@@ -224,7 +224,7 @@ const init = async () =>
         colorValue.set(randColor());
 
         // Make a bind group for this uniform
-        const bindGroup: IGPUBindingResources = {
+        const bindGroup:  IUniforms = {
             uni: {
                 bufferView: uniformValues,
                 worldViewProjectionMatrix: undefined,

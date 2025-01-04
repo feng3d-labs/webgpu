@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, WebGPU } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
@@ -49,7 +49,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             mat4.rotateZ(textTransform, rotation[2], textTransform);
         }
 
-return textTransform;
+        return textTransform;
     }
 
     const textTransforms = [
@@ -170,7 +170,7 @@ setBlendConstant().`,
 
     const uniformBuffer = new Float32Array(16);
 
-    const uniformBindGroup: IGPUBindingResources = {
+    const uniformBindGroup: IUniforms = {
         uniforms: { bufferView: uniformBuffer },
     };
 

@@ -6,8 +6,8 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
-import { IGPUBindingResources, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 const shadowDepthTextureSize = 1024;
 
@@ -117,13 +117,13 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Rounded to the nearest multiple of 16.
     const sceneUniformBuffer = new Uint8Array(2 * 4 * 16 + 4 * 4);
 
-    const sceneBindGroupForShadow: IGPUBindingResources = {
+    const sceneBindGroupForShadow: IUniforms = {
         scene: {
             bufferView: sceneUniformBuffer,
         },
     };
 
-    const sceneBindGroupForRender: IGPUBindingResources = {
+    const sceneBindGroupForRender: IUniforms = {
         scene: {
             bufferView: sceneUniformBuffer,
         },
@@ -133,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const modelBindGroup: IGPUBindingResources = {
+    const modelBindGroup: IUniforms = {
         model: {
             bufferView: modelUniformBuffer,
         },

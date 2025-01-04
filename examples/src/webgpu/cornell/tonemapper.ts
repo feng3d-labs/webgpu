@@ -1,8 +1,8 @@
-import { IGPUBindingResources, IGPUCanvasTexture, IGPUComputePipeline } from "@feng3d/webgpu";
+import { ICommandEncoder, IPassEncoder, ITexture, IUniforms } from "@feng3d/render-api";
+import { IGPUCanvasTexture, IGPUComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
 import tonemapperWGSL from "./tonemapper.wgsl";
-import { ICommandEncoder, IPassEncoder, ITexture } from "@feng3d/render-api";
 
 /**
  * Tonemapper implements a tonemapper to convert a linear-light framebuffer to
@@ -10,7 +10,7 @@ import { ICommandEncoder, IPassEncoder, ITexture } from "@feng3d/render-api";
  */
 export default class Tonemapper
 {
-    private readonly bindGroup: IGPUBindingResources;
+    private readonly bindGroup: IUniforms;
     private readonly pipeline: IGPUComputePipeline;
     private readonly width: number;
     private readonly height: number;
@@ -48,7 +48,7 @@ export default class Tonemapper
             __type: "ComputePass",
             computeObjects: [{
                 pipeline: this.pipeline,
-                bindingResources: {
+                uniforms: {
                     ...this.bindGroup,
                 },
                 workgroups: {

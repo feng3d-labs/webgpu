@@ -1,4 +1,4 @@
-import { IGPUBindingResources } from "./IGPUBindingResources";
+import { IUniforms } from "@feng3d/render-api";
 import { IGPUComputePipeline } from "./IGPUComputePipeline";
 import { IGPUWorkgroups } from "./IGPUWorkgroups";
 
@@ -21,7 +21,7 @@ export interface IGPUComputeObject
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
      */
-    readonly bindingResources?: IGPUBindingResources;
+    readonly uniforms?: IUniforms;
 
     /**
      * {@link GPUComputePassEncoder.dispatchWorkgroups}

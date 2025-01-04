@@ -10,8 +10,8 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -180,7 +180,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const cameraUniformBuffer = new Uint8Array(4 * 16);
 
-    const sceneUniformBindGroup: IGPUBindingResources = {
+    const sceneUniformBindGroup: IUniforms = {
         uniforms: {
             bufferView: modelUniformBuffer,
         },
@@ -189,7 +189,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const gBufferTexturesBindGroup: IGPUBindingResources = {
+    const gBufferTexturesBindGroup: IUniforms = {
         gBufferPosition: gBufferTextureViews[0],
         gBufferNormal: gBufferTextureViews[1],
         gBufferAlbedo: gBufferTextureViews[2],
@@ -239,7 +239,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: lightUpdate,
         },
     };
-    const lightsBufferBindGroup: IGPUBindingResources = {
+    const lightsBufferBindGroup: IUniforms = {
         lightsBuffer: {
             bufferView: lightsBuffer,
         },
@@ -247,7 +247,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             bufferView: configUniformBuffer,
         },
     };
-    const lightsBufferComputeBindGroup: IGPUBindingResources = {
+    const lightsBufferComputeBindGroup: IUniforms = {
         lightsBuffer: {
             bufferView: lightsBuffer,
         },
@@ -345,7 +345,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         computeObjects: [
             {
                 pipeline: lightUpdateComputePipeline,
-                bindingResources: {
+                uniforms: {
                     ...lightsBufferComputeBindGroup,
                 },
                 workgroups: { workgroupCountX: Math.ceil(kMaxNumLights / 64) },
