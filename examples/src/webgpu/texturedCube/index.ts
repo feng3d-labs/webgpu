@@ -50,6 +50,10 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
+    const uniforms = {
+        modelViewProjectionMatrix: new Float32Array(16)
+    };
+
     const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleTextureMixColorWGSL },
@@ -62,9 +66,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
         bindingResources: {
-            uniforms: {
-                modelViewProjectionMatrix: new Float32Array(16)
-            },
+            uniforms,
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
         },
@@ -101,7 +103,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        (renderObject.bindingResources.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(transformationMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        uniforms.modelViewProjectionMatrix = transformationMatrix.slice(); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
         const data: ISubmit = {
             commandEncoders: [
