@@ -132,7 +132,6 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
 
         let Cls: Float32ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor;
         type Type = Float32Array | Int32Array | Uint32Array;
-        let ClsName: "Float32Array" | "Int32Array" | "Uint32Array";
         const update = () =>
         {
             let data: Type;
@@ -158,17 +157,14 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
             )
             {
                 Cls = Float32Array;
-                ClsName = "Float32Array";
             }
             else if (member.type.name === "i32" || subTypeName === "i32" || subsubTypeName === "i32")
             {
                 Cls = Int32Array;
-                ClsName = "Int32Array";
             }
             else if (member.type.name === "u32" || subTypeName === "u32" || subsubTypeName === "u32")
             {
                 Cls = Uint32Array;
-                ClsName = "Uint32Array";
             }
             else
             {
@@ -182,7 +178,7 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
             {
                 data = new Cls((memberData as ArrayBufferView).buffer);
             }
-            else if (memberData.constructor.name !== ClsName)
+            else if (memberData.constructor.name !== Cls.name)
             {
                 data = new Cls(memberData as ArrayLike<number>);
             }
