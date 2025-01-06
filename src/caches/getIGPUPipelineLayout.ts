@@ -17,15 +17,15 @@ export function getIGPUShaderKey(shader: IGPUShader)
  */
 export function getIGPUPipelineLayout(shader: IGPUShader): IGPUPipelineLayoutDescriptor
 {
-    const vertexCode = shader.vertex;
-    const fragmentCode = shader.fragment;
-    const computeCode = shader.compute;
-
     const shaderKey = getIGPUShaderKey(shader);
 
     //
     let gpuPipelineLayout = gpuPipelineLayoutMap[shaderKey];
     if (gpuPipelineLayout) return gpuPipelineLayout;
+
+    const vertexCode = shader.vertex;
+    const fragmentCode = shader.fragment;
+    const computeCode = shader.compute;
 
     let entryMap: IGPUBindGroupLayoutEntryMap = {};
     if (vertexCode)
