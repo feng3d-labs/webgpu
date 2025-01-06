@@ -6,8 +6,13 @@ import { IUniformType } from "@feng3d/render-api";
  * @see GPUBindGroupDescriptor
  * @see GPUDevice.createBindGroup
  */
-export interface IGPUBindGroupDescriptor extends Omit<GPUBindGroupDescriptor, "layout" | "entries">
+export interface IGPUBindGroupDescriptor
 {
+    /**
+     * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
+     */
+    label?: string;
+
     /**
      * The {@link IGPUBindGroupLayoutDescriptor} the entries of this bind group will conform to.
      */
@@ -27,8 +32,10 @@ export interface IGPUBindGroupDescriptor extends Omit<GPUBindGroupDescriptor, "l
  *
  * @see GPUBindGroupEntry
  */
-export interface IGPUBindGroupEntry extends Omit<GPUBindGroupEntry, "resource">
+export interface IGPUBindGroupEntry
 {
+    binding: GPUIndex32;
+
     /**
      * The resource to bind, which may be a {@link GPUSampler}, {@link GPUTextureView},
      * {@link GPUExternalTexture}, or {@link GPUBufferBinding}.
