@@ -1,7 +1,7 @@
 import { watcher } from "@feng3d/watcher";
 import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 
-import { IUniforms } from "@feng3d/render-api";
+import { IUniforms, UnReadonly } from "@feng3d/render-api";
 import { getIGPUPipelineLayout, getIGPUShaderKey, IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
@@ -62,20 +62,8 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
             //
             if (entry1.buffer)
             {
-                //
-                const size = variableInfo.size;
-
-                const uniformData = bindingResource as IGPUBufferBinding;
-
-                // 是否存在默认值。
-                const hasDefautValue = !!uniformData.bufferView;
-                if (!uniformData.bufferView)
-                {
-                    (uniformData as any).bufferView = new Uint8Array(size);
-                }
-
                 // 更新缓冲区绑定的数据。
-                updateBufferBinding(variableInfo, uniformData, hasDefautValue);
+                updateBufferBinding(variableInfo, bindingResource as IGPUBufferBinding);
             }
 
             return bindingResource;
@@ -97,10 +85,9 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
  *
  * @param variableInfo
  * @param uniformData
- * @param hasDefautValue 是否存在默认值。
  * @returns
  */
-function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding, hasDefautValue: boolean)
+function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding)
 {
     if (!variableInfo.members)
     {
@@ -120,6 +107,14 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
         // return;
     }
     uniformData["_variableInfo"] = variableInfo as any;
+
+    const size = variableInfo.size;
+    // 是否存在默认值。
+    const hasDefautValue = !!uniformData.bufferView;
+    if (!hasDefautValue)
+    {
+        (uniformData as UnReadonly<IGPUBufferBinding>).bufferView = new Uint8Array(size);
+    }
 
     const buffer = getIGPUBuffer(uniformData.bufferView);
     (buffer as any).label = buffer.label || (`BufferBinding ${variableInfo.name}`);
