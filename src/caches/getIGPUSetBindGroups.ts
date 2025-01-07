@@ -169,10 +169,6 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
             {
                 data = new Cls([memberData]);
             }
-            else if ((memberData as ArrayBufferView).buffer)
-            {
-                data = new Cls((memberData as ArrayBufferView).buffer);
-            }
             else if (memberData.constructor.name !== Cls.name)
             {
                 data = new Cls(memberData as ArrayLike<number>);
@@ -182,11 +178,11 @@ function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBuffer
                 data = memberData as any;
             }
             const writeBuffers = buffer.writeBuffers ?? [];
-            writeBuffers.push({ data: data.buffer, bufferOffset: offset + member.offset, size: member.size });
+            writeBuffers.push({ data: data.buffer, bufferOffset: offset + member.offset, size: Math.min(member.size, data.byteLength) });
             buffer.writeBuffers = writeBuffers;
         };
 
         update();
-        watcher.watch(uniformData, member.name as any, update);
+        watcher.watch(uniformData, member.name as any, update, undefined, false);
     });
 }

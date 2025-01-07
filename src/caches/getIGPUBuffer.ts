@@ -1,6 +1,6 @@
-import { IBuffer, IVertexDataTypes, UnReadonly } from "@feng3d/render-api";
+import { IBuffer, IVertexDataTypes, TypedArray, UnReadonly } from "@feng3d/render-api";
 
-export function getIGPUBuffer(bufferSource: BufferSource)
+export function getIGPUBuffer(bufferSource: TypedArray)
 {
     let arrayBuffer = bufferSource as ArrayBuffer;
     if ((bufferSource as ArrayBufferView).buffer)
