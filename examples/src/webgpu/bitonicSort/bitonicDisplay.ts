@@ -1,4 +1,4 @@
-import { Base2DRendererClass } from "./utils1";
+import { Base2DRendererClass } from "./utils";
 
 import bitonicDisplay from "./bitonicDisplay.frag.wgsl";
 
