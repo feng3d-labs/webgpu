@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IUniforms, IVertexAttributes, IViewport } from "@feng3d/render-api";
+import { ICommandEncoder, ICopyBufferToBuffer, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IUniforms, IVertexAttributes, IViewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -19,7 +19,6 @@ import { getRealGPUBindGroup } from "../const";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
-import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
@@ -191,7 +190,7 @@ export class RunWebGPU
         );
     }
 
-    protected runCopyBufferToBuffer(device: GPUDevice, commandEncoder: GPUCommandEncoder, v: IGPUCopyBufferToBuffer)
+    protected runCopyBufferToBuffer(device: GPUDevice, commandEncoder: GPUCommandEncoder, v: ICopyBufferToBuffer)
     {
         v.sourceOffset ||= 0;
         v.destinationOffset ||= 0;

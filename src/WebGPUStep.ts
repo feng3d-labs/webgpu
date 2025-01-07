@@ -1,11 +1,7 @@
+import { ICopyBufferToBuffer, ICopyTextureToTexture, IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, ISubmit } from "@feng3d/render-api";
+
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
 import { IGPUComputePass } from "./data/IGPUComputePass";
-import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
-import { ICopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
-import { IRenderObject } from "./data/IGPURenderObject";
-import { IRenderPass, IRenderPassObject } from "./data/IGPURenderPass";
-import { IRenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
-import { ISubmit } from "./data/IGPUSubmit";
 import { WebGPU } from "./WebGPU";
 
 /**
@@ -65,7 +61,7 @@ export class WebGPUStep
         this._currentSubmit.commandEncoders[0].passEncoders.push(copyTextureToTexture);
     }
 
-    copyBufferToBuffer(copyBufferToBuffer: IGPUCopyBufferToBuffer)
+    copyBufferToBuffer(copyBufferToBuffer: ICopyBufferToBuffer)
     {
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
 
