@@ -7,7 +7,7 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { IBuffer, IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
+import { IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -224,20 +224,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             data: undefined,
         };
 
-        const headsInitBuffer: IBuffer = {
-            size: (1 + canvas.width * sliceHeight) * Uint32Array.BYTES_PER_ELEMENT,
-            usage: GPUBufferUsage.COPY_SRC,
-            label: "headsInitBuffer",
-        };
-        {
-            const buffer = new Uint32Array(headsInitBuffer.size / Uint32Array.BYTES_PER_ELEMENT);
-
-            for (let i = 0; i < buffer.length; ++i)
-            {
-                buffer[i] = 0xffffffff;
-            }
-            headsInitBuffer.data = buffer;
-        }
+        const headsInitBuffer = new Uint32Array(1 + canvas.width * sliceHeight);
+        headsInitBuffer.fill(0xffffffff);
 
         const bindingResources = {
             uniforms,
@@ -312,11 +300,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // initialize the heads buffer
             passEncoders.push({
                 __type: "CopyBufferToBuffer",
-                source: headsInitBuffer,
-                sourceOffset: 0,
+                source: getIGPUBuffer(headsInitBuffer),
                 destination: getIGPUBuffer(headsBuffer.bufferView),
-                destinationOffset: 0,
-                size: headsInitBuffer.size
             });
 
             const scissorX = 0;
