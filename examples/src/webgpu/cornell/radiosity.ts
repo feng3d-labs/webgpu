@@ -40,8 +40,8 @@ export default class Radiosity
     private readonly radiosityPipeline: IGPUComputePipeline;
     private readonly accumulationToLightmapPipeline: IGPUComputePipeline;
     private readonly bindGroup: IUniforms;
-    private readonly accumulationBuffer: ArrayBufferView;
-    private readonly uniformBuffer: ArrayBufferView;
+    private readonly accumulationBuffer: Uint8Array;
+    private readonly uniformBuffer: Uint8Array;
 
     // The 'accumulation' buffer average value
     private accumulationMean = 0;

@@ -16,11 +16,11 @@ export default class Common
     bindGroup: IUniforms;
   };
 
-  private readonly uniformBuffer: ArrayBufferView;
+  private readonly uniformBuffer: Uint8Array;
 
   private frame = 0;
 
-  constructor(quads: ArrayBufferView)
+  constructor(quads: Float32Array)
   {
     this.uniformBuffer = new Uint8Array(0 //
       + 4 * 16 // mvp

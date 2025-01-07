@@ -1,3 +1,5 @@
+import { TypedArray } from "@feng3d/render-api";
+
 /**
  * 缓冲区绑定。
  *
@@ -5,10 +7,10 @@
  */
 export interface IGPUBufferBinding
 {
-    [name: string]: ArrayBufferView | ArrayLike<number> | number;
+    [name: string]: TypedArray | ArrayLike<number> | number;
 
     /**
      * 如果未设置引擎将自动生成。
      */
-    readonly bufferView?: ArrayBufferView;
+    readonly bufferView?: TypedArray;
 }

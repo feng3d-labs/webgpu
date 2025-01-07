@@ -132,7 +132,7 @@ export default class Scene
   readonly vertices: Float32Array;
   readonly vertexAttributes: IVertexAttributes;
   readonly indices: Uint16Array;
-  readonly quadBuffer: ArrayBufferView;
+  readonly quadBuffer: Float32Array;
   readonly quads = [
     ...box({
       center: vec3.fromValues(0, 5, 0),
