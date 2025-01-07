@@ -1,6 +1,3 @@
-import type { GUI } from "dat.gui";
-import Stats from "stats.js";
-
 import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, IUniforms } from "@feng3d/render-api";
 
 const fullscreenTexturedQuad
@@ -38,18 +35,6 @@ fn vert_main(@builtin(vertex_index) VertexIndex: u32) -> VertexOutput {
 
 `;
 
-export type ShaderKeyInterface<T extends string[]> = {
-    [K in T[number]]: number;
-};
-
-export type SampleInitParams = {
-    canvas: HTMLCanvasElement;
-    gui?: GUI;
-    stats?: Stats;
-};
-
-export type SampleInit = (params: SampleInitParams) => void;
-
 export abstract class Base2DRendererClass
 {
     abstract switchBindGroup(name: string): void;
@@ -78,23 +63,6 @@ export abstract class Base2DRendererClass
             }],
         };
         commandEncoder.passEncoders.push(passEncoder);
-    }
-
-    setUniformArguments<T, K extends readonly string[]>(
-        device: GPUDevice,
-        uniformBuffer: GPUBuffer,
-        instance: T,
-        keys: K
-    )
-    {
-        for (let i = 0; i < keys.length; i++)
-        {
-            device.queue.writeBuffer(
-                uniformBuffer,
-                i * 4,
-                new Float32Array([instance[keys[i]]])
-            );
-        }
     }
 
     create2DRenderPipeline(
