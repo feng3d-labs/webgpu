@@ -1,14 +1,13 @@
 import { watcher } from "@feng3d/watcher";
-import { TemplateInfo, VariableInfo } from "wgsl_reflect";
 
-import { IUniforms, UnReadonly } from "@feng3d/render-api";
+import { IUniforms } from "@feng3d/render-api";
 import { getIGPUPipelineLayout, getIGPUShaderKey, IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
-import { getIGPUBuffer } from "./getIGPUBuffer";
+import { updateBufferBinding } from "../utils/updateBufferBinding";
 
 export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: IUniforms)
 {
@@ -79,110 +78,4 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
     });
 
     return setBindGroup;
-}
-
-/**
- *
- * @param variableInfo
- * @param uniformData
- * @returns
- */
-function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding)
-{
-    if (!variableInfo.members)
-    {
-        return;
-    }
-
-    if (uniformData["_variableInfo"] !== undefined)
-    {
-        const preVariableInfo = uniformData["_variableInfo"] as any as VariableInfo;
-        if (preVariableInfo.resourceType !== variableInfo.resourceType
-            || preVariableInfo.size !== variableInfo.size
-        )
-        {
-            console.warn(`updateBufferBinding 出现一份数据对应多个 variableInfo`, { uniformData, variableInfo, preVariableInfo });
-        }
-
-        // return;
-    }
-    uniformData["_variableInfo"] = variableInfo as any;
-
-    const size = variableInfo.size;
-    // 是否存在默认值。
-    const hasDefautValue = !!uniformData.bufferView;
-    if (!hasDefautValue)
-    {
-        (uniformData as UnReadonly<IGPUBufferBinding>).bufferView = new Uint8Array(size);
-    }
-
-    const buffer = getIGPUBuffer(uniformData.bufferView);
-    (buffer as any).label = buffer.label || (`BufferBinding ${variableInfo.name}`);
-    const offset = uniformData.bufferView.byteOffset;
-
-    variableInfo.members.forEach((member) =>
-    {
-        const subTypeName = (member.type as TemplateInfo).format?.name;
-        const subsubTypeName = (member.type as any).format?.format?.name;
-
-        let Cls: Float32ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor;
-        type Type = Float32Array | Int32Array | Uint32Array;
-        const update = () =>
-        {
-            let data: Type;
-            const memberData = uniformData[member.name];
-            if (memberData === undefined)
-            {
-                if (!hasDefautValue)
-                {
-                    console.warn(`没有找到 binding ${member.name} 值！`);
-                }
-
-                return;
-            }
-            if (
-                member.type.name === "f32"
-                || member.type.name === "mat4x4f"
-                || member.type.name === "vec2f"
-                || member.type.name === "vec3f"
-                || member.type.name === "vec4f"
-                //
-                || subTypeName === "f32"
-                || subsubTypeName === "f32"
-            )
-            {
-                Cls = Float32Array;
-            }
-            else if (member.type.name === "i32" || subTypeName === "i32" || subsubTypeName === "i32")
-            {
-                Cls = Int32Array;
-            }
-            else if (member.type.name === "u32" || subTypeName === "u32" || subsubTypeName === "u32")
-            {
-                Cls = Uint32Array;
-            }
-            else
-            {
-                console.error(`未处理缓冲区绑定类型为 ${member.type.name} 的 ${member.name} 成员！`);
-            }
-            if (typeof memberData === "number")
-            {
-                data = new Cls([memberData]);
-            }
-            else if (memberData.constructor.name !== Cls.name)
-            {
-                data = new Cls(memberData as ArrayLike<number>);
-            }
-            else
-            {
-                data = memberData as any;
-            }
-            const writeBuffers = buffer.writeBuffers ?? [];
-            writeBuffers.push({ data: data.buffer, bufferOffset: offset + member.offset, size: Math.min(member.size, data.byteLength) });
-            buffer.writeBuffers = writeBuffers;
-        };
-
-        update();
-        watcher.watch(uniformData, member.name as any, update, undefined, false);
-    });
 }

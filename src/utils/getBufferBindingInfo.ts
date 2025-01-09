@@ -17,7 +17,7 @@ export function getBufferBindingInfo(type: TypeInfo, paths: string[] = [], offse
         for (let i = 0; i < structInfo.members.length; i++)
         {
             const memberInfo = structInfo.members[i];
-            getBufferBindingInfo(memberInfo.type, paths.concat(type.name), offset + memberInfo.offset, bufferBindingInfo);
+            getBufferBindingInfo(memberInfo.type, paths.concat(memberInfo.name), offset + memberInfo.offset, bufferBindingInfo);
         }
     }
     else if (type.isArray)
