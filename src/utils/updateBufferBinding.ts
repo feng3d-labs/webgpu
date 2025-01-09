@@ -6,7 +6,8 @@ import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { IBufferBindingInfo, getBufferBindingInfo } from "./getBufferBindingInfo";
 
 /**
- *
+ * 初始化缓冲区绑定。
+ * 
  * @param variableInfo
  * @param uniformData
  * @returns

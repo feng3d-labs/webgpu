@@ -29,7 +29,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     );
 
     const modelMatrices = new Array<Mat4>(numInstances);
-    const mvpMatricesData = new Float32Array(matrixFloatCount * numInstances);
+    let mvpMatricesData: Float32Array[] = [];
 
     const step = 4.0;
 
@@ -79,7 +79,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 mat4.multiply(viewMatrix, tmpMat4, tmpMat4);
                 mat4.multiply(projectionMatrix, tmpMat4, tmpMat4);
 
-                mvpMatricesData.set(tmpMat4, m);
+                mvpMatricesData[i] = tmpMat4.slice();
 
                 i++;
                 m += matrixFloatCount;
@@ -114,28 +114,26 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         uniforms: {
             uniforms: {
-                modelViewProjectionMatrix: null
+                modelViewProjectionMatrix: mvpMatricesData
             },
         },
         drawVertex: { vertexCount: cubeVertexCount, instanceCount: numInstances }
+    };
+
+    const data: ISubmit = {
+        commandEncoders: [
+            {
+                passEncoders: [
+                    { descriptor: renderPass, renderObjects: [renderObject] },
+                ]
+            }
+        ],
     };
 
     function frame()
     {
         // Update the matrix data.
         updateTransformationMatrix();
-
-        (renderObject.uniforms.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(mvpMatricesData); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
-
-        const data: ISubmit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPass, renderObjects: [renderObject] },
-                    ]
-                }
-            ],
-        };
 
         webgpu.submit(data);
 
