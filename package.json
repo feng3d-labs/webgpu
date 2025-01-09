@@ -59,7 +59,7 @@
   "dependencies": {
     "@feng3d/render-api": "0.0.1",
     "@feng3d/event": "^0.8.4",
-    "@feng3d/watcher": "^0.8.6",
+    "@feng3d/watcher": "^0.8.7",
     "@webgpu/types": "0.1.49",
     "stats.js": "^0.17.0",
     "wgsl_reflect": "^1.0.16"
