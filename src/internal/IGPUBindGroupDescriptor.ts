@@ -1,4 +1,6 @@
-import { IUniformType } from "@feng3d/render-api";
+import { ISampler, ITextureView } from "@feng3d/render-api";
+import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
+import { IGPUExternalTexture } from "../data/IGPUExternalTexture";
 
 /**
  * GPU 绑定组。
@@ -40,5 +42,7 @@ export interface IGPUBindGroupEntry
      * The resource to bind, which may be a {@link GPUSampler}, {@link GPUTextureView},
      * {@link GPUExternalTexture}, or {@link GPUBufferBinding}.
      */
-    resource: IUniformType;
+    resource: IGPUBindingResource;
 }
+
+export type IGPUBindingResource = ISampler | ITextureView | IGPUBufferBinding | IGPUExternalTexture;

@@ -3,7 +3,7 @@ import { watcher } from "@feng3d/watcher";
 import { VariableInfo } from "wgsl_reflect";
 import { getIGPUBuffer } from "../caches/getIGPUBuffer";
 import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
-import { IBufferBindingInfo, getBufferBindingInfo } from "./getBufferBindingInfo";
+import { IBufferBindingInfo } from "./getBufferBindingInfo";
 
 /**
  * 初始化缓冲区绑定。
@@ -12,26 +12,21 @@ import { IBufferBindingInfo, getBufferBindingInfo } from "./getBufferBindingInfo
  * @param uniformData
  * @returns
  */
-export function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGPUBufferBinding)
+export function updateBufferBinding(resourceName: string, bufferBindingInfo: IBufferBindingInfo, uniformData: IGPUBufferBinding)
 {
-    if (!variableInfo.members)
-    {
-        return;
-    }
-
     if (uniformData["_variableInfo"] !== undefined)
     {
         const preVariableInfo = uniformData["_variableInfo"] as any as VariableInfo;
-        if (preVariableInfo.size !== variableInfo.size)
+        if (preVariableInfo.size !== bufferBindingInfo.size)
         {
-            console.warn(`updateBufferBinding ${variableInfo.name} 出现一份数据对应多个 variableInfo`, { uniformData, variableInfo, preVariableInfo });
+            console.warn(`updateBufferBinding ${resourceName} 出现一份数据对应多个 variableInfo`, { uniformData, bufferBindingInfo, preVariableInfo });
         }
 
         return;
     }
-    uniformData["_variableInfo"] = variableInfo as any;
+    uniformData["_variableInfo"] = bufferBindingInfo as any;
 
-    const size = variableInfo.size;
+    const size = bufferBindingInfo.size;
     // 是否存在默认值。
     const hasDefautValue = !!uniformData.bufferView;
     if (!hasDefautValue)
@@ -40,10 +35,8 @@ export function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGP
     }
 
     const buffer = getIGPUBuffer(uniformData.bufferView);
-    (buffer as any).label = buffer.label || (`BufferBinding ${variableInfo.name}`);
     const offset = uniformData.bufferView.byteOffset;
 
-    const bufferBindingInfo: IBufferBindingInfo = variableInfo["_bufferBindingInfo"] ||= getBufferBindingInfo(variableInfo.type);
     for (let i = 0; i < bufferBindingInfo.items.length; i++)
     {
         const { paths, offset: itemInfoOffset, size: itemInfoSize, Cls } = bufferBindingInfo.items[i];

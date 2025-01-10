@@ -7,7 +7,9 @@ import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
+import { getBufferBindingInfo, IBufferBindingInfo } from "../utils/getBufferBindingInfo";
 import { updateBufferBinding } from "../utils/updateBufferBinding";
+import { getIGPUBuffer } from "./getIGPUBuffer";
 
 export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: IUniforms)
 {
@@ -61,8 +63,13 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
             //
             if (entry1.buffer)
             {
+                const bufferBinding = bindingResource as IGPUBufferBinding;
+                const bufferBindingInfo: IBufferBindingInfo = variableInfo["_bufferBindingInfo"] ||= getBufferBindingInfo(variableInfo.type);
                 // 更新缓冲区绑定的数据。
-                updateBufferBinding(variableInfo, bindingResource as IGPUBufferBinding);
+                updateBufferBinding(resourceName, bufferBindingInfo, bufferBinding);
+                //
+                const buffer = getIGPUBuffer(bufferBinding.bufferView);
+                (buffer as any).label = buffer.label || (`BufferBinding ${variableInfo.name}`);
             }
 
             entry.resource = bindingResource;
