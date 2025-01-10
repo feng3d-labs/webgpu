@@ -1,12 +1,10 @@
+import { IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
-
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleTextureMixColorWGSL from "../../shaders/sampleTextureMixColor.frag.wgsl";
-
-import { IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUBufferBinding, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {

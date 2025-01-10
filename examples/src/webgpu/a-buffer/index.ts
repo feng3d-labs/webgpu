@@ -1,3 +1,5 @@
+import { IBufferBinding, IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -7,8 +9,6 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -49,7 +49,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         16 * Float32Array.BYTES_PER_ELEMENT + 2 * Uint32Array.BYTES_PER_ELEMENT,
         16
     );
-    const uniforms: IGPUBufferBinding = {
+    const uniforms: IBufferBinding = {
         bufferView: new Uint8Array(uniformsSize),
         modelViewProjectionMatrix: undefined,
         maxStorableFragments: undefined,
@@ -199,7 +199,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const sliceHeight = Math.ceil(canvas.height / numSlices);
         const linkedListBufferSize = sliceHeight * bytesPerline;
 
-        const linkedListBuffer: IGPUBufferBinding = {
+        const linkedListBuffer: IBufferBinding = {
             bufferView: new Uint8Array(linkedListBufferSize),
             // data: [{ color: undefined, depth: undefined, next: undefined }]
         };
@@ -218,7 +218,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // for a given pixel.
         // * numFragments : u32
         // * data : array<u32>
-        const headsBuffer: IGPUBufferBinding = {
+        const headsBuffer: IBufferBinding = {
             bufferView: new Uint32Array(1 + canvas.width * sliceHeight),
             numFragments: undefined,
             data: undefined,

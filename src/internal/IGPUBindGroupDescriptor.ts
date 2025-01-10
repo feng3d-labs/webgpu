@@ -1,5 +1,4 @@
-import { ISampler, ITextureView } from "@feng3d/render-api";
-import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
+import { IBufferBinding, ISampler, ITextureView } from "@feng3d/render-api";
 import { IGPUExternalTexture } from "../data/IGPUExternalTexture";
 
 /**
@@ -45,4 +44,4 @@ export interface IGPUBindGroupEntry
     resource: IGPUBindingResource;
 }
 
-export type IGPUBindingResource = ISampler | ITextureView | IGPUBufferBinding | IGPUExternalTexture;
+export type IGPUBindingResource = ISampler | ITextureView | IBufferBinding | IGPUExternalTexture;

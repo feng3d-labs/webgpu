@@ -1,9 +1,7 @@
-import { Base2DRendererClass } from "./utils";
+import { IBufferBinding, ICommandEncoder, IRenderPassDescriptor, IUniforms } from "@feng3d/render-api";
 
 import bitonicDisplay from "./bitonicDisplay.frag.wgsl";
-
-import { ICommandEncoder, IRenderPassDescriptor, IUniforms } from "@feng3d/render-api";
-import { IGPUBufferBinding } from "@feng3d/webgpu";
+import { Base2DRendererClass } from "./utils";
 
 interface BitonicDisplayRenderArgs
 {
@@ -26,7 +24,7 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
         this.renderPassDescriptor = renderPassDescriptor;
         this.computeBGDescript = computeBGDescript;
 
-        const fragment_uniforms: IGPUBufferBinding = {
+        const fragment_uniforms: IBufferBinding = {
             highlight: undefined,
         };
 

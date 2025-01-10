@@ -1,8 +1,7 @@
 import { watcher } from "@feng3d/watcher";
 
-import { IUniforms } from "@feng3d/render-api";
+import { IBufferBinding, IUniforms } from "@feng3d/render-api";
 import { getIGPUPipelineLayout, getIGPUShaderKey, IGPUShader } from "../caches/getIGPUPipelineLayout";
-import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
 import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
@@ -63,7 +62,7 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
             //
             if (entry1.buffer)
             {
-                const bufferBinding = bindingResource as IGPUBufferBinding;
+                const bufferBinding = bindingResource as IBufferBinding;
                 const bufferBindingInfo: IBufferBindingInfo = variableInfo["_bufferBindingInfo"] ||= getBufferBindingInfo(variableInfo.type);
                 // 更新缓冲区绑定的数据。
                 updateBufferBinding(resourceName, bufferBindingInfo, bufferBinding);

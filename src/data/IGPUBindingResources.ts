@@ -1,5 +1,4 @@
 import { ISampler } from "@feng3d/render-api";
-import { IGPUBufferBinding } from "./IGPUBufferBinding";
 import { IGPUExternalTexture } from "./IGPUExternalTexture";
 
 declare module "@feng3d/render-api"
@@ -8,7 +7,6 @@ declare module "@feng3d/render-api"
     {
         ISampler: ISampler;
         ITextureView: ITextureView;
-        IGPUBufferBinding: IGPUBufferBinding;
         IGPUExternalTexture: IGPUExternalTexture;
     }
 }

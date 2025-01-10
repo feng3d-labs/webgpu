@@ -1,12 +1,12 @@
+import { IBuffer, IBufferBinding, ICommandEncoder, IRenderPassDescriptor, ISubmit, IUniforms } from "@feng3d/render-api";
+import { watcher } from "@feng3d/watcher";
+import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import Stats from "stats.js";
+
 import atomicToZero from "./atomicToZero.wgsl";
 import { NaiveBitonicCompute } from "./bitonicCompute";
 import BitonicDisplayRenderer from "./bitonicDisplay";
-
-import { IBuffer, ICommandEncoder, IRenderPassDescriptor, ISubmit, IUniforms } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBufferBinding, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 // Type of step that will be executed in our shader
 enum StepEnum
@@ -256,10 +256,10 @@ async function init(
     const elementsBufferSize
         = Float32Array.BYTES_PER_ELEMENT * totalElementOptions[0];
     // Initialize input, output, staging buffers
-    const elementsInputBuffer: IGPUBufferBinding = {
+    const elementsInputBuffer: IBufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize)
     };
-    const elementsOutputBuffer: IGPUBufferBinding = {
+    const elementsOutputBuffer: IBufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize)
     };
     const elementsStagingBuffer: IBuffer = {
@@ -269,7 +269,7 @@ async function init(
 
     // Initialize atomic swap buffer on GPU and CPU. Counts number of swaps actually performed by
     // compute shader (when value at index x is greater than value at index y)
-    const atomicSwapsOutputBuffer: IGPUBufferBinding = {
+    const atomicSwapsOutputBuffer: IBufferBinding = {
         bufferView: new Uint32Array(1)
     };
     const atomicSwapsStagingBuffer: IBuffer = {
@@ -278,7 +278,7 @@ async function init(
     };
 
     // Create uniform buffer for compute shader
-    const computeUniformsBuffer: IGPUBufferBinding = {
+    const computeUniformsBuffer: IBufferBinding = {
         // width, height, blockHeight, algo
         bufferView: new Float32Array(4),
     };

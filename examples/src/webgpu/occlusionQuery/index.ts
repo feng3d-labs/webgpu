@@ -1,10 +1,11 @@
+import { IBufferBinding, IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { watcher } from "@feng3d/watcher";
+import { getIGPUBuffer, IGPUOcclusionQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
+
 import solidColorLitWGSL from "./solidColorLit.wgsl";
 
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, WebGPU } from "@feng3d/webgpu";
 
 const info = document.querySelector("#info");
 
@@ -221,7 +222,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
-                const buffer = (renderObjects[i].uniforms.uni as IGPUBufferBinding).bufferView;
+                const buffer = (renderObjects[i].uniforms.uni as IBufferBinding).bufferView;
                 getIGPUBuffer(buffer).data = uniformValues.slice();
             }
         );

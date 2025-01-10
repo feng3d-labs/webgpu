@@ -1,8 +1,8 @@
-import { UnReadonly } from "@feng3d/render-api";
+import { IBufferBinding, UnReadonly } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { VariableInfo } from "wgsl_reflect";
+
 import { getIGPUBuffer } from "../caches/getIGPUBuffer";
-import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
 import { IBufferBindingInfo } from "./getBufferBindingInfo";
 
 /**
@@ -12,7 +12,7 @@ import { IBufferBindingInfo } from "./getBufferBindingInfo";
  * @param uniformData
  * @returns
  */
-export function updateBufferBinding(resourceName: string, bufferBindingInfo: IBufferBindingInfo, uniformData: IGPUBufferBinding)
+export function updateBufferBinding(resourceName: string, bufferBindingInfo: IBufferBindingInfo, uniformData: IBufferBinding)
 {
     if (uniformData["_variableInfo"] !== undefined)
     {
@@ -31,7 +31,7 @@ export function updateBufferBinding(resourceName: string, bufferBindingInfo: IBu
     const hasDefautValue = !!uniformData.bufferView;
     if (!hasDefautValue)
     {
-        (uniformData as UnReadonly<IGPUBufferBinding>).bufferView = new Uint8Array(size);
+        (uniformData as UnReadonly<IBufferBinding>).bufferView = new Uint8Array(size);
     }
 
     const buffer = getIGPUBuffer(uniformData.bufferView);
