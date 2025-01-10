@@ -53,7 +53,7 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
 
         const resourceName = variableInfo.name;
 
-        const getResource = () =>
+        const updateResource = () =>
         {
             const bindingResource = bindingResources[resourceName];
             console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
@@ -65,16 +65,12 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
                 updateBufferBinding(variableInfo, bindingResource as IGPUBufferBinding);
             }
 
-            return bindingResource;
+            entry.resource = bindingResource;
         };
 
-        entry.resource = getResource();
-
         //
-        watcher.watch(bindingResources, resourceName, () =>
-        {
-            entry.resource = getResource();
-        });
+        updateResource();
+        watcher.watch(bindingResources, resourceName, updateResource);
     });
 
     return setBindGroup;
