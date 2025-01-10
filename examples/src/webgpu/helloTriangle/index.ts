@@ -3,6 +3,10 @@ import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+
     const webgpu = await new WebGPU().init(); // 初始化WebGPU
 
     const submit: ISubmit = { // 一次GPU提交
@@ -29,13 +33,10 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ` },
                                 fragment: { // 片段着色器
                                     code: `
-                                        struct Uniforms {
-                                            color : vec4<f32>,
-                                        }
-                                        @binding(0) @group(0) var<uniform> uniforms : Uniforms;
+                                        @binding(0) @group(0) var<uniform> color : vec4<f32>;
                                         @fragment
                                         fn main() -> @location(0) vec4f {
-                                            return uniforms.color;
+                                            return color;
                                         }
                                     ` },
                             },
@@ -43,7 +44,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: "float32x2" }, // 顶点坐标数据
                             },
                             indices: new Uint16Array([0, 1, 2]), // 顶点索引数据
-                            uniforms: { uniforms: { color: new Float32Array([1, 0, 0, 1]) } }, // Uniform 颜色值。
+                            uniforms: { color: [1, 1, 0, 0] }, // Uniform 颜色值。
                             drawIndexed: { indexCount: 3 }, // 绘制命令
                         }]
                     },
