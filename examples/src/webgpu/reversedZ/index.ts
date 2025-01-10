@@ -44,7 +44,6 @@ const xCount = 1;
 const yCount = 5;
 const numInstances = xCount * yCount;
 const matrixFloatCount = 16; // 4x4 matrix
-const matrixStride = 4 * matrixFloatCount; // 64;
 
 const depthRangeRemapMatrix = mat4.identity();
 depthRangeRemapMatrix[10] = -1;
@@ -273,36 +272,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         depthTexture: { texture: depthTexture },
     };
 
-    const uniformBufferSize = numInstances * matrixStride;
-
-    const uniformBuffer = new Float32Array(uniformBufferSize / 4);
     const cameraMatrixBuffer = new Float32Array(16);
     const cameraMatrixReversedDepthBuffer = new Float32Array(16);
 
-    const uniforms = {
-        modelMatrix: uniformBuffer,
-    };
-
-    const camera0 = {
-        viewProjectionMatrix: cameraMatrixBuffer,
-    };
-    const camera1 = {
-        viewProjectionMatrix: cameraMatrixReversedDepthBuffer,
-    };
-
-    const uniformBindGroups: IUniforms[] = [
-        {
-            uniforms,
-            camera: camera0,
-        },
-        {
-            uniforms,
-            camera: camera1,
-        },
-    ];
-
     const modelMatrices = new Array<Mat4>(numInstances);
-    const mvpMatricesData = new Float32Array(matrixFloatCount * numInstances);
+    const mvpMatricesData: Float32Array[] = [];
 
     let m = 0;
     for (let x = 0; x < xCount; x++)
@@ -324,6 +298,28 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             m++;
         }
     }
+
+    const uniforms = {
+        modelMatrix: mvpMatricesData,
+    };
+
+    const camera0 = {
+        viewProjectionMatrix: cameraMatrixBuffer,
+    };
+    const camera1 = {
+        viewProjectionMatrix: cameraMatrixReversedDepthBuffer,
+    };
+
+    const uniformBindGroups: IUniforms[] = [
+        {
+            uniforms,
+            camera: camera0,
+        },
+        {
+            uniforms,
+            camera: camera1,
+        },
+    ];
 
     const viewMatrix = mat4.translation(vec3.fromValues(0, 0, -12));
 
@@ -347,7 +343,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         const now = Date.now() / 1000;
 
-        for (let i = 0, m = 0; i < numInstances; i++, m += matrixFloatCount)
+        for (let i = 0; i < numInstances; i++)
         {
             mat4.rotate(
                 modelMatrices[i],
@@ -355,14 +351,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 (Math.PI / 180) * 30,
                 tmpMat4
             );
-            mvpMatricesData.set(tmpMat4, m);
+            mvpMatricesData[i] = tmpMat4.slice();
         }
     }
 
     const settings = {
         mode: "color",
     };
-    gui.add(settings, "mode", ["color", "precision-error", "depth-texture"]);
+    gui.add(settings, "mode", ["color", "precision-error", "depth-texture"]).onChange(updateSubmit);
 
     const colorPassEncoders: IRenderPass[] = [];
 
@@ -458,12 +454,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    function frame()
+    let submit: ISubmit;
+
+    function updateSubmit()
     {
-        updateTransformationMatrix();
-
-        uniforms.modelMatrix = mvpMatricesData.slice(0);
-
         let passEncoders: IRenderPass[];
 
         if (settings.mode === "color")
@@ -480,18 +474,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             passEncoders = depthBufferPassEncoders;
         }
 
-        const submit: ISubmit = {
+        submit = {
             commandEncoders: [
                 {
                     passEncoders,
                 }
             ]
         };
+    }
+
+    function frame()
+    {
+        updateTransformationMatrix();
 
         webgpu.submit(submit);
 
         requestAnimationFrame(frame);
     }
+
+    updateSubmit();
     requestAnimationFrame(frame);
 };
 
