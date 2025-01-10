@@ -22,14 +22,12 @@ export function updateBufferBinding(variableInfo: VariableInfo, uniformData: IGP
     if (uniformData["_variableInfo"] !== undefined)
     {
         const preVariableInfo = uniformData["_variableInfo"] as any as VariableInfo;
-        if (preVariableInfo.resourceType !== variableInfo.resourceType
-            || preVariableInfo.size !== variableInfo.size
-        )
+        if (preVariableInfo.size !== variableInfo.size)
         {
-            console.warn(`updateBufferBinding 出现一份数据对应多个 variableInfo`, { uniformData, variableInfo, preVariableInfo });
+            console.warn(`updateBufferBinding ${variableInfo.name} 出现一份数据对应多个 variableInfo`, { uniformData, variableInfo, preVariableInfo });
         }
 
-        // return;
+        return;
     }
     uniformData["_variableInfo"] = variableInfo as any;
 
