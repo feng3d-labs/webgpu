@@ -62,16 +62,20 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
             //
             if (entry1.buffer)
             {
-                const bufferBinding = bindingResource as IBufferBinding;
+                const bufferBinding = ((typeof bindingResource === "number") ? [bindingResource] : bindingResource) as IBufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
                 const bufferBindingInfo: IBufferBindingInfo = variableInfo["_bufferBindingInfo"] ||= getBufferBindingInfo(variableInfo.type);
                 // 更新缓冲区绑定的数据。
                 updateBufferBinding(resourceName, bufferBindingInfo, bufferBinding);
                 //
                 const buffer = getIGPUBuffer(bufferBinding.bufferView);
                 (buffer as any).label = buffer.label || (`BufferBinding ${variableInfo.name}`);
+                //
+                entry.resource = bufferBinding;
             }
-
-            entry.resource = bindingResource;
+            else
+            {
+                entry.resource = bindingResource;
+            }
         };
 
         //
