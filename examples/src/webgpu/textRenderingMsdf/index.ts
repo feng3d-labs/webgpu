@@ -1,12 +1,14 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
-import { MsdfTextRenderer } from "./msdfText";
+import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import { MsdfTextRenderer } from "./msdfText";
+
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -47,7 +49,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             mat4.rotateZ(textTransform, rotation[2], textTransform);
         }
 
-return textTransform;
+        return textTransform;
     }
 
     const textTransforms = [
@@ -134,12 +136,12 @@ setBlendConstant().`,
     ];
 
     // Create a vertex buffer from the cube data.
-    const verticesBuffer: IGPUVertexAttributes = {
+    const verticesBuffer: IVertexAttributes = {
         position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -150,7 +152,7 @@ setBlendConstant().`,
             // Backface culling since the cube is solid piece of geometry.
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
-            cullMode: "back",
+            cullFace: "back",
         },
 
         // Enable depth testing so that the fragment closest to the camera
@@ -161,19 +163,18 @@ setBlendConstant().`,
         },
     };
 
-    const depthTexture: IGPUTexture = {
+    const depthTexture: ITexture = {
         size: [canvas.width, canvas.height],
         format: depthFormat,
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     const uniformBuffer = new Float32Array(16);
 
-    const uniformBindGroup: IGPUBindingResources = {
+    const uniformBindGroup: IUniforms = {
         uniforms: { bufferView: uniformBuffer },
     };
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -256,18 +257,18 @@ setBlendConstant().`,
         });
         buffer.writeBuffers = writeBuffers;
 
-        const renderObjects: IGPURenderPassObject[] = [];
+        const renderObjects: IRenderPassObject[] = [];
 
         renderObjects.push({
             pipeline,
-            bindingResources: uniformBindGroup,
+            uniforms: uniformBindGroup,
             vertices: verticesBuffer,
-            draw: { vertexCount: cubeVertexCount, instanceCount: 1 },
+            drawVertex: { vertexCount: cubeVertexCount, instanceCount: 1 },
         });
 
         textRenderer.render(renderObjects, ...text);
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

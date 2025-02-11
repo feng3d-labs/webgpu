@@ -1,11 +1,12 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
+import { IRenderPassDescriptor, IRenderPipeline, ITexture, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
-
-import { IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -24,12 +25,12 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     // Create a vertex buffer from the cube data.
-    const verticesBuffer: IGPUVertexAttributes = {
+    const verticesBuffer: IVertexAttributes = {
         position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -38,7 +39,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         primitive: {
             topology: "triangle-list",
-            cullMode: "back",
+            cullFace: "back",
         },
 
         depthStencil: {
@@ -47,17 +48,16 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const depthTexture: IGPUTexture = {
+    const depthTexture: ITexture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     const uniformBindGroup = {
         uniforms: { modelViewProjectionMatrix: undefined }
     };
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } }, // Assigned later
@@ -107,9 +107,9 @@ const init = async (canvas: HTMLCanvasElement) =>
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
                         pipeline,
-                        bindingResources: uniformBindGroup,
+                        uniforms: uniformBindGroup,
                         vertices: verticesBuffer,
-                        draw: { vertexCount: cubeVertexCount },
+                        drawVertex: { vertexCount: cubeVertexCount },
                     }]
                 }]
             }]

@@ -1,4 +1,4 @@
-import { IGPUBuffer, IGPUVertexAttributes } from "@feng3d/webgpu-renderer";
+import { IVertexAttributes } from "@feng3d/render-api";
 import { Vec3, vec3 } from "wgpu-matrix";
 
 function reciprocal(v: Vec3)
@@ -130,9 +130,9 @@ export default class Scene
   readonly vertexCount: number;
   readonly indexCount: number;
   readonly vertices: Float32Array;
-  readonly vertexAttributes: IGPUVertexAttributes;
+  readonly vertexAttributes: IVertexAttributes;
   readonly indices: Uint16Array;
-  readonly quadBuffer: ArrayBufferView;
+  readonly quadBuffer: Float32Array;
   readonly quads = [
     ...box({
       center: vec3.fromValues(0, 5, 0),
@@ -280,7 +280,7 @@ export default class Scene
 
     const vertices = vertexData;
 
-    const vertexAttributes: IGPUVertexAttributes = {
+    const vertexAttributes: IVertexAttributes = {
       position: { data: vertices, format: "float32x4", offset: 0 * 4, arrayStride: vertexStride },
       uv: { data: vertices, format: "float32x3", offset: 4 * 4, arrayStride: vertexStride },
       emissive: { data: vertices, format: "float32x3", offset: 7 * 4, arrayStride: vertexStride },

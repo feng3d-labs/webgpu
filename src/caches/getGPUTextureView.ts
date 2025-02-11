@@ -1,14 +1,14 @@
 import { anyEmitter } from "@feng3d/event";
-import { IGPUTextureFromContext } from "../data/IGPUTexture";
-import { IGPUTextureView } from "../data/IGPUTextureView";
+import { ITexture, ITextureView } from "@feng3d/render-api";
+import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { GPUTexture_destroy, GPUTextureView_destroy } from "../eventnames";
 import { getGPUTexture } from "./getGPUTexture";
 
-export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
+export function getGPUTextureView(device: GPUDevice, view: ITextureView)
 {
-    const textureViewMap: WeakMap<IGPUTextureView, GPUTextureView> = device["_textureViewMap"] = device["_textureViewMap"] || new WeakMap<IGPUTextureView, GPUTextureView>();
+    const textureViewMap: WeakMap<ITextureView, GPUTextureView> = device["_textureViewMap"] = device["_textureViewMap"] || new WeakMap<ITextureView, GPUTextureView>();
 
-    if ((view.texture as IGPUTextureFromContext).context)
+    if ((view.texture as IGPUCanvasTexture).context)
     {
         const texture = getGPUTexture(device, view.texture);
 
@@ -22,8 +22,11 @@ export function getGPUTextureView(device: GPUDevice, view: IGPUTextureView)
     if (textureView) return textureView;
 
     //
-    const gpuTexture = getGPUTexture(device, view.texture);
-    textureView = gpuTexture.createView(view);
+    const texture = view.texture as ITexture;
+    const gpuTexture = getGPUTexture(device, texture);
+    const dimension = view.dimension ?? texture.dimension;
+
+    textureView = gpuTexture.createView({ ...view, dimension });
     textureViewMap.set(view, textureView);
     // 销毁纹理时清除对应的纹理视图。
     anyEmitter.once(gpuTexture, GPUTexture_destroy, () =>

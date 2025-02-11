@@ -1,9 +1,13 @@
 import { anyEmitter } from "@feng3d/event";
+import { getTexImageSourceSize, getTextureBytesPerPixel, ITexture, ITextureDataSource, ITextureImageSource, ITextureLike, ITextureSize, ITextureSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
+import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
+import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
+import { getGPUTextureDimension } from "./getGPUTextureDimension";
+import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
 
 /**
  * 获取GPU纹理 {@link GPUTexture} 。
@@ -12,105 +16,196 @@ import { getGPUCanvasContext } from "./getGPUCanvasContext";
  * @param iGPUTextureBase 纹理描述。
  * @returns GPU纹理。
  */
-export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreate = true)
+export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, autoCreate = true)
 {
-    const textureMap: Map<IGPUTexture, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<IGPUTexture, GPUTexture>();
-    let gpuTexture = textureMap.get(texture);
-    if (gpuTexture) return gpuTexture;
-
-    if ((texture as IGPUTextureFromContext).context)
+    let gpuTexture: GPUTexture;
+    if ("context" in textureLike)
     {
-        texture = texture as IGPUTextureFromContext;
-        const context = getGPUCanvasContext(device, texture.context);
+        const canvasTexture = textureLike as IGPUCanvasTexture;
+        const context = getGPUCanvasContext(device, canvasTexture.context);
 
         gpuTexture = context.getCurrentTexture();
 
         return gpuTexture;
     }
 
+    const texture = textureLike as ITexture;
+
+    const textureMap: Map<ITextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<ITextureLike, GPUTexture>();
+    gpuTexture = textureMap.get(texture);
+    if (gpuTexture) return gpuTexture;
+
     if (!autoCreate) return null;
 
-    const iGPUTextureBase = texture as IGPUTextureBase;
-
-    const { usage } = iGPUTextureBase;
-    let { label, mipLevelCount } = iGPUTextureBase;
-
-    // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
-    if (iGPUTextureBase.generateMipmap && mipLevelCount === undefined)
+    // 创建纹理
+    const createTexture = () =>
     {
-        //
-        const maxSize = Math.max(iGPUTextureBase.size[0], iGPUTextureBase.size[1]);
-        mipLevelCount = 1 + Math.log2(maxSize) | 0;
-    }
+        const { format, sampleCount, dimension, viewFormats } = texture as IGPUTextureMultisample;
+        let { label, mipLevelCount } = texture;
 
-    if (label === undefined)
-    {
-        label = `GPUTexture ${autoIndex++}`;
-    }
+        const size = texture.size;
+        console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
 
-    gpuTexture = device.createTexture({
-        ...iGPUTextureBase,
-        label,
-        mipLevelCount,
-        usage,
-    });
+        const usage = getTextureUsageFromFormat(device, format, sampleCount);
 
-    // 初始化纹理数据
-    const updateSource = () =>
-    {
-        if (iGPUTextureBase.source)
+        // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
+        if (texture.generateMipmap && mipLevelCount === undefined)
         {
-            iGPUTextureBase.source.forEach((v) =>
+            //
+            const maxSize = Math.max(size[0], size[1]);
+            mipLevelCount = 1 + Math.log2(maxSize) | 0;
+        }
+        mipLevelCount = (texture as any).mipLevelCount = mipLevelCount || 1;
+
+        if (label === undefined)
+        {
+            label = `GPUTexture ${autoIndex++}`;
+        }
+
+        const textureDimension = getGPUTextureDimension(dimension);
+
+        gpuTexture = device.createTexture({
+            label,
+            size,
+            mipLevelCount,
+            sampleCount,
+            dimension: textureDimension,
+            format,
+            usage,
+            viewFormats,
+        });
+
+        textureMap.set(texture, gpuTexture);
+    };
+    createTexture();
+
+    // 更新纹理
+    const updateSources = () =>
+    {
+        if (texture.sources)
+        {
+            const writeTextures: ITextureSource[] = [];
+            texture.sources.forEach((v) =>
             {
-                device.queue.copyExternalImageToTexture(
-                    v.source,
-                    {
-                        texture: gpuTexture,
-                        ...v.destination,
-                    },
-                    v.copySize
-                );
-            });
-            iGPUTextureBase.source = null;
+                writeTextures.push(v)
+            })
+            texture.writeTextures = writeTextures.concat(texture.writeTextures || []);
         }
     };
-    updateSource();
-    watcher.watch(iGPUTextureBase, "source", updateSource);
+    updateSources();
+    watcher.watch(texture, "sources", updateSources);
 
-    // 监听写纹理操作
-    const writeTexture = () =>
+    const updateWriteTextures = () =>
     {
-        // 处理数据写入GPU缓冲
-        if (iGPUTextureBase.writeTextures)
+        if (texture.writeTextures)
         {
-            iGPUTextureBase.writeTextures.forEach((v) =>
+            texture.writeTextures.forEach((v) =>
             {
-                const { destination, data, dataLayout, size } = v;
+                // 处理图片纹理
+                const imageSource = v as ITextureImageSource;
+                if (imageSource.image)
+                {
+                    const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
+
+                    //
+                    const copySize = imageSource.size || getTexImageSourceSize(imageSource.image);
+
+                    let imageOrigin = imageSource.imageOrigin;
+
+                    // 转换为WebGPU翻转模式
+                    if (flipY)
+                    {
+                        let x = imageOrigin?.[0];
+                        let y = imageOrigin?.[1];
+
+                        const imageSize = getTexImageSourceSize(image);
+                        y = imageSize[1] - y - copySize[1];
+
+                        imageOrigin = [x, y];
+                    }
+
+                    //
+                    const gpuSource: GPUImageCopyExternalImage = {
+                        source: image,
+                        origin: imageOrigin,
+                        flipY: flipY,
+                    };
+
+                    //
+                    const gpuDestination: GPUImageCopyTextureTagged = {
+                        colorSpace: colorSpace,
+                        premultipliedAlpha: premultipliedAlpha,
+                        mipLevel: mipLevel,
+                        origin: textureOrigin,
+                        aspect: aspect,
+                        texture: gpuTexture,
+                    };
+
+                    device.queue.copyExternalImageToTexture(
+                        gpuSource,
+                        gpuDestination,
+                        copySize
+                    );
+                    return;
+                }
+
+                // 处理数据纹理
+                const bufferSource = v as ITextureDataSource;
+                const { data, dataLayout, dataImageOrigin, size, mipLevel, textureOrigin, aspect } = bufferSource;
+
+                const gpuDestination: GPUImageCopyTexture = {
+                    mipLevel: mipLevel,
+                    origin: textureOrigin,
+                    aspect: aspect,
+                    texture: gpuTexture,
+                };
+
+                // 计算 WebGPU 中支持的参数
+                const offset = dataLayout?.offset || 0;
+                const width = dataLayout?.width || size[0];
+                const height = dataLayout?.height || size[1];
+                const x = dataImageOrigin?.[0] || 0;
+                const y = dataImageOrigin?.[1] || 0;
+                const depthOrArrayLayers = dataImageOrigin?.[2] || 0;
+
+                // 获取纹理每个像素对应的字节数量。
+                const bytesPerPixel = getTextureBytesPerPixel(texture.format);
+
+                // 计算偏移
+                const gpuOffset =
+                    (offset || 0) // 头部
+                    + (depthOrArrayLayers || 0) * (width * height * bytesPerPixel) // 读取第几张图片
+                    + (x + (y * width)) * bytesPerPixel // 读取图片位置
+                    ;
+
+                const gpuDataLayout: GPUImageDataLayout = {
+                    offset: gpuOffset,
+                    bytesPerRow: width * bytesPerPixel,
+                    rowsPerImage: height,
+                };
 
                 device.queue.writeTexture(
-                    {
-                        ...destination,
-                        texture: gpuTexture,
-                    },
+                    gpuDestination,
                     data,
-                    dataLayout,
+                    gpuDataLayout,
                     size,
                 );
             });
-            iGPUTextureBase.writeTextures = null;
+            texture.writeTextures = null;
         }
     };
-    writeTexture();
-    watcher.watch(iGPUTextureBase, "writeTextures", writeTexture);
+
+    updateWriteTextures();
+    watcher.watch(texture, "writeTextures", updateWriteTextures);
 
     // 监听纹理尺寸发生变化
-    const resize = (newValue: GPUExtent3DStrict, oldValue: GPUExtent3DStrict) =>
+    const resize = (newValue: ITextureSize, oldValue: ITextureSize) =>
     {
         if (!!newValue && !!oldValue)
         {
             if (newValue[0] === oldValue[0]
                 && newValue[1] === oldValue[1]
-                && newValue[2] === oldValue[2]
+                && (newValue[2] || 1) === (oldValue[2] || 1)
             )
             {
                 return;
@@ -121,10 +216,10 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
         //
         anyEmitter.emit(texture, IGPUTexture_resize);
     };
-    watcher.watch(iGPUTextureBase, "size", resize);
+    watcher.watch(texture, "size", resize);
 
     // 自动生成 mipmap。
-    if (iGPUTextureBase.generateMipmap)
+    if (texture.generateMipmap)
     {
         generateMipmap(device, gpuTexture);
     }
@@ -136,17 +231,18 @@ export function getGPUTexture(device: GPUDevice, texture: IGPUTexture, autoCreat
         {
             oldDestroy.apply(gpuTexture);
             //
-            textureMap.delete(iGPUTextureBase);
+            textureMap.delete(texture);
+            //
+            watcher.unwatch(texture, "size", resize);
+            watcher.unwatch(texture, "sources", updateSources);
+            watcher.unwatch(texture, "writeTextures", updateWriteTextures);
+
             // 派发销毁事件
             anyEmitter.emit(gpuTexture, GPUTexture_destroy);
-            //
-            watcher.unwatch(iGPUTextureBase, "source", updateSource);
-            watcher.unwatch(iGPUTextureBase, "writeTextures", writeTexture);
-            watcher.unwatch(iGPUTextureBase, "size", resize);
+
+            return undefined;
         };
     })(gpuTexture.destroy);
-
-    textureMap.set(iGPUTextureBase, gpuTexture);
 
     return gpuTexture;
 }

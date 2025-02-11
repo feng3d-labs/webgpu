@@ -1,4 +1,4 @@
-import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IGPUTexture";
+import { ITextureLike } from "@feng3d/render-api";
 
 /**
  * 获取纹理格式。
@@ -6,16 +6,16 @@ import { IGPUTexture, IGPUTextureBase, IGPUTextureFromContext } from "../data/IG
  * @param texture 纹理。
  * @returns 纹理格式。
  */
-export function getGPUTextureFormat(texture: IGPUTexture)
+export function getGPUTextureFormat(texture: ITextureLike)
 {
     if (!texture) return undefined;
 
-    if ((texture as IGPUTextureFromContext).context)
+    if ("context" in texture)
     {
-        const format = (texture as IGPUTextureFromContext).context?.configuration?.format || navigator.gpu.getPreferredCanvasFormat();
+        const format = texture.context?.configuration?.format || navigator.gpu.getPreferredCanvasFormat();
 
         return format;
     }
 
-    return (texture as IGPUTextureBase).format;
+    return texture.format;
 }

@@ -2,9 +2,10 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import volumeWGSL from "./volume.wgsl";
 
-const gui = new GUI();
+import { IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
-import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+const gui = new GUI();
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -27,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const sampleCount = 4;
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: volumeWGSL,
         },
@@ -36,7 +37,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         primitive: {
             topology: "triangle-list",
-            cullMode: "back",
+            cullFace: "back",
         },
     };
 
@@ -45,7 +46,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     // Fetch the image and upload it into a GPUTexture.
-    let volumeTexture: IGPUTexture;
+    let volumeTexture: ITexture;
     {
         const width = 180;
         const height = 216;
@@ -77,30 +78,30 @@ const init = async (canvas: HTMLCanvasElement) =>
             dimension: "3d",
             size: [width, height, depth],
             format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
-            writeTextures: [{
+            sources: [{
+                __type: "TextureDataSource",
                 data: byteArray,
-                dataLayout: { bytesPerRow, rowsPerImage: blocksHigh },
-                size: [width, height, depth]
+                dataLayout: { width, height },
+                size: [width, height, depth],
             }],
         };
     }
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
         mipmapFilter: "linear",
         maxAnisotropy: 16,
     };
 
-    const uniformBindGroup: IGPUBindingResources = {
+    const uniformBindGroup: IUniforms = {
         uniforms: uniformBuffer,
         mySampler: sampler,
         myTexture: { texture: volumeTexture },
     };
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -110,7 +111,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 storeOp: "discard",
             },
         ],
-        multisample: sampleCount,
+        sampleCount,
     };
 
     let rotation = 0;
@@ -155,14 +156,14 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         uniformBuffer.inverseModelViewProjectionMatrix = inverseModelViewProjection;
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
                         pipeline,
-                        bindingResources: uniformBindGroup,
-                        draw: { vertexCount: 3 },
+                        uniforms: uniformBindGroup,
+                        drawVertex: { vertexCount: 3 },
                     }],
                 }]
             }]

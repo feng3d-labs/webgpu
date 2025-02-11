@@ -1,8 +1,9 @@
+import { IBufferBinding, ICopyTextureToTexture, IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
+import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
-import { IGPUBufferBinding, IGPUCanvasContext, IGPUCopyTextureToTexture, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleSelfWGSL from "./sampleSelf.frag.wgsl";
 
@@ -17,14 +18,13 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // We will copy the frame's rendering results into this texture and
     // sample it on the next frame.
-    const cubeTexture: IGPUTexture = {
+    const cubeTexture: ITexture = {
         size: [canvas.width, canvas.height],
         format: presentationFormat,
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -62,7 +62,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         }
     };
 
-    const renderPass: IGPURenderPassDescriptor = {
+    const renderPass: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -76,29 +76,29 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleSelfWGSL },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
         },
         vertices: {
             position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
             uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        bindingResources: {
+        uniforms: {
             uniforms: {
                 modelViewProjectionMatrix: new Float32Array(16)
             },
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
         },
-        draw: { vertexCount: cubeVertexCount },
+        drawVertex: { vertexCount: cubeVertexCount },
     };
 
-    const copyTextureToTexture: IGPUCopyTextureToTexture = {
-        __type: "IGPUCopyTextureToTexture",
+    const copyTextureToTexture: ICopyTextureToTexture = {
+        __type: "CopyTextureToTexture",
         source: { texture: { context } },
         destination: { texture: cubeTexture },
         copySize: [canvas.width, canvas.height],
@@ -108,9 +108,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        (renderObject.bindingResources.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(transformationMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        (renderObject.uniforms.uniforms as IBufferBinding).modelViewProjectionMatrix = transformationMatrix;
 
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

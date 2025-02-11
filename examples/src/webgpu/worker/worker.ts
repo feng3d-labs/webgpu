@@ -1,8 +1,9 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize, } from "../../meshes/cube";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, IVertexAttributes } from "@feng3d/render-api";
+import { getOffscreenCanvasId, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
-import { getOffscreenCanvasId, IGPUCanvasContext, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
 const basicVertWGSL = `
 struct Uniforms {
@@ -72,12 +73,12 @@ async function init(canvas: OffscreenCanvas)
     const context: IGPUCanvasContext = { canvasId: getOffscreenCanvasId(canvas) };
 
     // Create a vertex buffer from the cube data.
-    const verticesBuffer: IGPUVertexAttributes = {
+    const verticesBuffer: IVertexAttributes = {
         position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -90,7 +91,7 @@ async function init(canvas: OffscreenCanvas)
             // Backface culling since the cube is solid piece of geometry.
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
-            cullMode: "back",
+            cullFace: "back",
         },
 
         // Enable depth testing so that the fragment closest to the camera
@@ -105,7 +106,7 @@ async function init(canvas: OffscreenCanvas)
         uniforms: { modelViewProjectionMatrix: undefined },
     };
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } }, // Assigned later
@@ -148,15 +149,15 @@ async function init(canvas: OffscreenCanvas)
         return modelViewProjectionMatrix;
     }
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
         commandEncoders: [{
             passEncoders: [{
                 descriptor: renderPassDescriptor,
                 renderObjects: [{
-                    pipeline: pipeline,
-                    bindingResources: uniformBindGroup,
+                    pipeline,
+                    uniforms: uniformBindGroup,
                     vertices: verticesBuffer,
-                    draw: { vertexCount: cubeVertexCount }
+                    drawVertex: { vertexCount: cubeVertexCount }
                 }]
             }]
         }]

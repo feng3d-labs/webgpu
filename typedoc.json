@@ -1,9 +1,9 @@
 {
-    "name": "webgpu-renderer",
+    "name": "@feng3d/webgpu",
     "$schema": "https://typedoc.org/schema.json",
     "entryPoints": [
         "src/index.ts"
     ],
-    "sourceLinkTemplate": "https://gitee.com/feng3d/webgpu-renderer/tree/master/{path}#L{line}",
+    "sourceLinkTemplate": "https://gitee.com/feng3d/webgpu/tree/master/{path}#L{line}",
     "out": "public/docs"
 }

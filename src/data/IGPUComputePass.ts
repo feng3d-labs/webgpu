@@ -12,7 +12,7 @@ export interface IGPUComputePass
     /**
      * 数据类型。
      */
-    readonly __type: "IGPUComputePass";
+    readonly __type: "ComputePass";
 
     /**
      * 计算对象列表。

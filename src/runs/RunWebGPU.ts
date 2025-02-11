@@ -1,4 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
+import { ICommandEncoder, ICopyBufferToBuffer, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IUniforms, IVertexAttributes, IViewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -9,36 +10,26 @@ import { getGPURenderPassFormat } from "../caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
-import { getIGPUBuffer } from "../caches/getIGPUBuffer";
+import { getIGPUVertexBuffer } from "../caches/getIGPUBuffer";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
-import { getIGPURenderPipeline } from "../caches/getIGPURenderPipeline";
+import { IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
+import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
-import { IGPUBindingResources } from "../data/IGPUBindingResources";
-import { IGPUBlendConstant } from "../data/IGPUBlendConstant";
-import { IGPUCommandEncoder } from "../data/IGPUCommandEncoder";
-import { IGPUComputeObject, IGPUComputePipeline, IGPUWorkgroups } from "../data/IGPUComputeObject";
+import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPUComputePass } from "../data/IGPUComputePass";
-import { IGPUCopyBufferToBuffer } from "../data/IGPUCopyBufferToBuffer";
-import { IGPUCopyTextureToTexture } from "../data/IGPUCopyTextureToTexture";
+import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
-import { IGPUDraw, IGPUDrawIndexed, IGPURenderObject, IGPURenderPipeline } from "../data/IGPURenderObject";
-import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
-import { IGPUScissorRect } from "../data/IGPUScissorRect";
-import { IGPUStencilReference } from "../data/IGPUStencilReference";
-import { IGPUSubmit } from "../data/IGPUSubmit";
-import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
-import { IGPUViewport } from "../data/IGPUViewport";
+import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
-import { getIGPUIndexBuffer } from "../internal/getIGPUIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
-import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
+import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
 import { ChainMap } from "../utils/ChainMap";
 
 export class RunWebGPU
 {
-    runSubmit(device: GPUDevice, submit: IGPUSubmit)
+    runSubmit(device: GPUDevice, submit: ISubmit)
     {
         const commandBuffers = submit.commandEncoders.map((v) =>
         {
@@ -53,7 +44,7 @@ export class RunWebGPU
         anyEmitter.emit(device.queue, GPUQueue_submit);
     }
 
-    protected runCommandEncoder(device: GPUDevice, commandEncoder: IGPUCommandEncoder)
+    protected runCommandEncoder(device: GPUDevice, commandEncoder: ICommandEncoder)
     {
         const gpuCommandEncoder = device.createCommandEncoder();
 
@@ -61,21 +52,21 @@ export class RunWebGPU
         {
             if (!passEncoder.__type)
             {
-                this.runRenderPass(device, gpuCommandEncoder, passEncoder as IGPURenderPass);
+                this.runRenderPass(device, gpuCommandEncoder, passEncoder as IRenderPass);
             }
-            else if (passEncoder.__type === "IGPURenderPass")
+            else if (passEncoder.__type === "RenderPass")
             {
                 this.runRenderPass(device, gpuCommandEncoder, passEncoder);
             }
-            else if (passEncoder.__type === "IGPUComputePass")
+            else if (passEncoder.__type === "ComputePass")
             {
                 this.runComputePass(device, gpuCommandEncoder, passEncoder);
             }
-            else if (passEncoder.__type === "IGPUCopyTextureToTexture")
+            else if (passEncoder.__type === "CopyTextureToTexture")
             {
                 this.runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder);
             }
-            else if (passEncoder.__type === "IGPUCopyBufferToBuffer")
+            else if (passEncoder.__type === "CopyBufferToBuffer")
             {
                 this.runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder);
             }
@@ -88,7 +79,7 @@ export class RunWebGPU
         return gpuCommandEncoder.finish();
     }
 
-    protected runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass)
+    protected runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IRenderPass)
     {
         const { descriptor, renderObjects } = renderPass;
 
@@ -116,7 +107,7 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, renderPass);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IGPURenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IRenderPassObject[])
     {
         if (!renderObjects) return;
         //
@@ -124,39 +115,23 @@ export class RunWebGPU
         {
             if (!element.__type)
             {
-                this.runRenderObject(device, passEncoder, renderPassFormat, element as IGPURenderObject);
+                this.runRenderObject(device, passEncoder, renderPassFormat, element as IRenderObject);
             }
-            else if (element.__type === "IGPURenderObject")
+            else if (element.__type === "RenderObject")
             {
                 this.runRenderObject(device, passEncoder, renderPassFormat, element);
             }
-            else if (element.__type === "IGPUViewport")
-            {
-                this.runViewport(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element);
-            }
-            else if (element.__type === "IGPUScissorRect")
-            {
-                this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, element);
-            }
-            else if (element.__type === "IGPURenderBundle")
+            else if (element.__type === "RenderBundle")
             {
                 this.runRenderBundle(device, passEncoder, renderPassFormat, element);
             }
-            else if (element.__type === "IGPUOcclusionQuery")
+            else if (element.__type === "OcclusionQuery")
             {
                 this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
             }
-            else if (element.__type === "IGPUBlendConstant")
-            {
-                this.runBlendConstant(passEncoder, element);
-            }
-            else if (element.__type === "IGPUStencilReference")
-            {
-                this.runStencilReference(passEncoder, element);
-            }
             else
             {
-                throw `未处理 ${(element as IGPURenderPassObject).__type} 类型的渲染通道对象！`;
+                throw `未处理 ${(element as IRenderPassObject).__type} 类型的渲染通道对象！`;
             }
         });
     }
@@ -193,7 +168,7 @@ export class RunWebGPU
         });
     }
 
-    protected runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: IGPUCopyTextureToTexture)
+    protected runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: ICopyTextureToTexture)
     {
         const sourceTexture = getGPUTexture(device, copyTextureToTexture.source.texture);
         const destinationTexture = getGPUTexture(device, copyTextureToTexture.destination.texture);
@@ -215,7 +190,7 @@ export class RunWebGPU
         );
     }
 
-    protected runCopyBufferToBuffer(device: GPUDevice, commandEncoder: GPUCommandEncoder, v: IGPUCopyBufferToBuffer)
+    protected runCopyBufferToBuffer(device: GPUDevice, commandEncoder: GPUCommandEncoder, v: ICopyBufferToBuffer)
     {
         v.sourceOffset ||= 0;
         v.destinationOffset ||= 0;
@@ -265,12 +240,12 @@ export class RunWebGPU
         passEncoder.executeBundles([gpuRenderBundle]);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IGPURenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IRenderObject[])
     {
         //
         renderObjects.forEach((element) =>
         {
-            this.runRenderObject(device, passEncoder, renderPassFormat, element as IGPURenderObject);
+            this.runRenderObject(device, passEncoder, renderPassFormat, element as IRenderObject);
         });
     }
 
@@ -283,11 +258,13 @@ export class RunWebGPU
      */
     protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
     {
-        const { pipeline, bindingResources, workgroups } = computeObject;
+        const { pipeline, uniforms: bindingResources, workgroups } = computeObject;
+
+        const shader: IGPUShader = { compute: pipeline.compute.code };
 
         this.runComputePipeline(device, passEncoder, pipeline);
 
-        this.runBindingResources(device, passEncoder, pipeline, bindingResources);
+        this.runBindingResources(device, passEncoder, shader, bindingResources);
 
         this.runWorkgroups(passEncoder, workgroups);
     }
@@ -320,130 +297,167 @@ export class RunWebGPU
      * @param renderObject 渲染对象。
      * @param renderPass 渲染通道。
      */
-    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IGPURenderObject)
+    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
     {
-        const { pipeline, vertices, indices, bindingResources, draw, drawIndexed } = renderObject;
+        const { viewport, scissorRect, pipeline, vertices, indices, uniforms: bindingResources, drawVertex, drawIndexed } = renderObject;
 
-        this.runRenderPipeline(device, passEncoder, pipeline, renderPassFormat, vertices);
+        const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
 
-        this.runBindingResources(device, passEncoder, pipeline, bindingResources);
+        if ("setViewport" in passEncoder)
+        {
+            this.runViewport(passEncoder, renderPassFormat.attachmentSize, viewport);
+        }
+        if ("setScissorRect" in passEncoder)
+        {
+            this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
+        }
 
-        this.runVertices(device, passEncoder, pipeline, renderPassFormat, vertices);
+        this.runRenderPipeline(device, passEncoder, renderPassFormat, pipeline, vertices, indices);
+
+        this.runBindingResources(device, passEncoder, shader, bindingResources);
+
+        this.runVertices(device, passEncoder, renderPassFormat, pipeline, vertices, indices);
 
         this.runIndices(device, passEncoder, indices);
 
-        this.runDraw(passEncoder, draw);
+        this.runDrawVertex(passEncoder, drawVertex);
 
         this.runDrawIndexed(passEncoder, drawIndexed);
     }
 
-    protected runBlendConstant(passEncoder: GPURenderPassEncoder, element: IGPUBlendConstant)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IIndicesDataTypes)
     {
-        passEncoder.setBlendConstant(element.color);
-    }
+        // 
+        const { pipeline: nPipeline } = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
+        const gpuRenderPipeline = getGPURenderPipeline(device, nPipeline);
 
-    protected runStencilReference(passEncoder: GPURenderPassEncoder, element: IGPUStencilReference)
-    {
-        passEncoder.setStencilReference(element.reference);
-    }
-
-    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IGPUViewport)
-    {
-        const { fromWebGL, x, width, height, minDepth, maxDepth } = viewport;
-        let { y } = viewport;
-        if (fromWebGL)
-        {
-            y = attachmentSize.height - y - height;
-        }
-        passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
-    }
-
-    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: IGPUScissorRect)
-    {
-        const { fromWebGL, x, width, height } = scissorRect;
-        let { y } = scissorRect;
-        if (fromWebGL)
-        {
-            y = attachmentSize.height - y - height;
-        }
-
-        passEncoder.setScissorRect(x, y, width, height);
-    }
-
-    /**
-     * 执行渲染管线。
-     *
-     * @param device GPU设备。
-     * @param passEncoder 渲染通道编码器。
-     * @param pipeline 渲染管线。
-     */
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
-    {
-        const { pipeline } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
-
-        const gpuRenderPipeline = getGPURenderPipeline(device, pipeline);
+        //
         passEncoder.setPipeline(gpuRenderPipeline);
+
+        // 设置模板测试替换值
+        if (nPipeline.stencilReference !== undefined)
+        {
+            if ("setStencilReference" in passEncoder)
+            {
+                passEncoder.setStencilReference(nPipeline.stencilReference);
+            }
+            else
+            {
+                console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 stencilReference 值！`);
+            }
+        }
+
+        if (nPipeline.blendConstantColor !== undefined)
+        {
+            if ("setBlendConstant" in passEncoder)
+            {
+                passEncoder.setBlendConstant(nPipeline.blendConstantColor);
+            }
+            else
+            {
+                console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 setBlendConstant 值！`);
+            }
+        }
     }
 
-    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, pipeline: IGPUComputePipeline | IGPURenderPipeline, bindingResources: IGPUBindingResources)
+    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IViewport)
+    {
+        if (viewport)
+        {
+            const isYup = viewport.isYup ?? true;
+            const x = viewport.x ?? 0;
+            let y = viewport.y ?? 0;
+            const width = viewport.width ?? attachmentSize.width;
+            const height = viewport.height ?? attachmentSize.height;
+            const minDepth = viewport.minDepth ?? 0;
+            const maxDepth = viewport.maxDepth ?? 0;
+
+            if (isYup)
+            {
+                y = attachmentSize.height - y - height;
+            }
+            passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
+        }
+        else
+        {
+            passEncoder.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
+        }
+    }
+
+    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: IScissorRect)
+    {
+        if (scissorRect)
+        {
+            const isYup = scissorRect.isYup ?? true;
+            const x = scissorRect.x ?? 0;
+            let y = scissorRect.y ?? 0;
+            const width = scissorRect.width ?? attachmentSize.width;
+            const height = scissorRect.height ?? attachmentSize.height;
+
+            if (isYup)
+            {
+                y = attachmentSize.height - y - height;
+            }
+
+            passEncoder.setScissorRect(x, y, width, height);
+        }
+        else
+        {
+            passEncoder.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
+        }
+    }
+
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: IUniforms)
     {
         // 计算 bindGroups
-        const setBindGroups = getIGPUSetBindGroups(pipeline, bindingResources);
+        const setBindGroups = getIGPUSetBindGroups(shader, bindingResources);
 
         setBindGroups?.forEach((setBindGroup, index) =>
         {
-            this.runSetBindGroup(device, passEncoder, index, setBindGroup);
+            const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup)[getRealGPUBindGroup]();
+            passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
         });
     }
 
-    protected runSetBindGroup(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, index: number, setBindGroup: IGPUSetBindGroup)
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IIndicesDataTypes)
     {
-        const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup)[getRealGPUBindGroup]();
-        passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
-    }
+        const { vertexBuffers } = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
 
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
-    {
-        if (!vertices) return;
-
-        const { vertexBuffers } = getIGPURenderPipeline(renderPipeline, renderPassFormat, vertices);
-
-        vertexBuffers?.forEach((vertexBuffer, index) =>
+        // 
+        vertexBuffers?.map((vertexBuffer, index) =>
         {
-            const buffer = getIGPUBuffer(vertexBuffer.data);
-            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
+            const buffer = getIGPUVertexBuffer(vertexBuffer.data)
             const gBuffer = getGPUBuffer(device, buffer);
+
             passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
         });
     }
 
-    protected runIndices(device: GPUDevice, passEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, indices: Uint16Array | Uint32Array)
+    protected runIndices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, indices: IIndicesDataTypes)
     {
         if (!indices) return;
 
-        const indexBuffer = getIGPUIndexBuffer(indices);
+        const indexBuffer = getIGPUSetIndexBuffer(indices);
 
         const { buffer, indexFormat, offset, size } = indexBuffer;
         const gBuffer = getGPUBuffer(device, buffer);
 
+        //
         passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
     }
 
-    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, draw?: IGPUDraw)
+    protected runDrawVertex(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawVertex: IDrawVertex)
     {
-        if (!draw) return;
-
-        const { vertexCount, instanceCount, firstVertex, firstInstance } = draw;
-        passEncoder.draw(vertexCount, instanceCount, firstVertex, firstInstance);
+        if (!drawVertex) return;
+        //
+        passEncoder.draw(drawVertex.vertexCount, drawVertex.instanceCount, drawVertex.firstVertex, drawVertex.firstInstance);
     }
 
-    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed?: IGPUDrawIndexed)
+    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed: IDrawIndexed)
     {
         if (!drawIndexed) return;
-
-        const { indexCount, instanceCount, firstIndex, baseVertex, firstInstance } = drawIndexed;
-        passEncoder.drawIndexed(indexCount, instanceCount, firstIndex, baseVertex, firstInstance);
+        //
+        passEncoder.drawIndexed(drawIndexed.indexCount, drawIndexed.instanceCount, drawIndexed.firstIndex, drawIndexed.baseVertex, drawIndexed.firstInstance);
     }
 }
 
-let autoVertexIndex = 0;

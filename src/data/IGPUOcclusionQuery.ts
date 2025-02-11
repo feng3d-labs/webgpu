@@ -1,4 +1,4 @@
-import { IGPURenderObject } from "./IGPURenderObject";
+import { IRenderObject } from "@feng3d/render-api";
 
 /**
  * 被查询的渲染对象列表
@@ -8,15 +8,15 @@ export interface IGPUOcclusionQuery
     /**
      * 数据类型。
      */
-    readonly __type: "IGPUOcclusionQuery";
+    readonly __type: "OcclusionQuery";
 
     /**
      * GPU渲染对象列表。
      */
-    renderObjects: IGPURenderObject[];
+    renderObjects: IRenderObject[];
 
     /**
-     * 执行过程中由引擎自动填充
+     * 临时变量, 执行过程中由引擎自动填充
      *
      * @internal
      */
@@ -25,5 +25,13 @@ export interface IGPUOcclusionQuery
     /**
      * 渲染完成后由引擎自动填充。
      */
-    result?: boolean;
+    result?: IGLQueryResult;
+}
+
+export interface IGLQueryResult
+{
+    /**
+     * 查询结果。
+     */
+    result: number;
 }

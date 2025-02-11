@@ -2,7 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IGPUBindingResources, IGPUBufferBinding, IGPUCanvasContext, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, IGPUTextureBase, IGPUTextureView, WebGPU } from "@feng3d/webgpu-renderer";
+import { IBlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureView, IUniforms } from "@feng3d/render-api";
+import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -51,7 +52,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ctx.restore();
         }
 
-return canvas;
+        return canvas;
     }
 
     // Generates a canvas with alternating colored and transparent stripes
@@ -93,7 +94,7 @@ return canvas;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
     const context: IGPUCanvasContext = { canvasId: canvas.id, configuration: {} };
-    const canvasTexture: IGPUTextureView = { texture: { context } };
+    const canvasTexture: ITextureView = { texture: { context } };
 
     // Get a WebGPU context from the canvas and configure it
     const webgpu = await new WebGPU().init();
@@ -107,17 +108,13 @@ return canvas;
     )
     {
         const { flipY, premultipliedAlpha } = options;
-        const texture: IGPUTexture = {
+        const texture: ITexture = {
             format: "rgba8unorm",
             size: [source.width, source.height],
-            usage:
-                GPUTextureUsage.TEXTURE_BINDING
-                | GPUTextureUsage.COPY_DST
-                | GPUTextureUsage.RENDER_ATTACHMENT,
-            source: [{ source: { source, flipY }, destination: { premultipliedAlpha }, copySize: { width: source.width, height: source.height } }]
+            sources: [{ image: source, flipY, premultipliedAlpha }]
         };
 
-return texture;
+        return texture;
     }
 
     // create 2 textures with unpremultiplied alpha
@@ -138,7 +135,7 @@ return texture;
         { premultipliedAlpha: true }
     );
 
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
         mipmapFilter: "linear",
@@ -166,25 +163,25 @@ return texture;
     const srcUniform = { matrix: new Float32Array(16) };
     const dstUniform = { matrix: new Float32Array(16) };
 
-    const srcBindGroupUnpremultipliedAlpha: IGPUBindingResources = {
+    const srcBindGroupUnpremultipliedAlpha:          IUniforms = {
         ourSampler: sampler,
         ourTexture: { texture: srcTextureUnpremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupUnpremultipliedAlpha: IGPUBindingResources = {
+    const dstBindGroupUnpremultipliedAlpha:          IUniforms = {
         ourSampler: sampler,
         ourTexture: { texture: dstTextureUnpremultipliedAlpha },
         uni: dstUniform,
     };
 
-    const srcBindGroupPremultipliedAlpha: IGPUBindingResources = {
+    const srcBindGroupPremultipliedAlpha:          IUniforms = {
         ourSampler: sampler,
         ourTexture: { texture: srcTexturePremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupPremultipliedAlpha: IGPUBindingResources = {
+    const dstBindGroupPremultipliedAlpha:          IUniforms = {
         ourSampler: sampler,
         ourTexture: { texture: dstTexturePremultipliedAlpha },
         uni: dstUniform,
@@ -205,8 +202,8 @@ return texture;
         },
     ];
 
-    const clearValue = [0, 0, 0, 0];
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const clearValue: [red: number, green: number, blue: number, alpha: number] = [0, 0, 0, 0];
+    const renderPassDescriptor: IRenderPassDescriptor = {
         label: "our basic canvas renderPass",
         colorAttachments: [
             {
@@ -327,13 +324,13 @@ return texture;
     const kPresets = keysOf(presets);
     type Preset = (typeof kPresets)[number];
 
-    const color: GPUBlendComponent = {
+    const color: IBlendComponent = {
         operation: "add",
         srcFactor: "one",
         dstFactor: "one-minus-src",
     };
 
-    const alpha: GPUBlendComponent = {
+    const alpha: IBlendComponent = {
         operation: "add",
         srcFactor: "one",
         dstFactor: "one-minus-src",
@@ -432,7 +429,7 @@ return texture;
     clearFolder.add(clear, "alpha", 0, 1).onChange(render);
     clearFolder.addColor(new GUIColorHelper(clear.color), "value").onChange(render);
 
-    const dstPipeline: IGPURenderPipeline = {
+    const dstPipeline: IRenderPipeline = {
         label: "hardcoded textured quad pipeline",
         vertex: {
             code: texturedQuadWGSL,
@@ -442,23 +439,11 @@ return texture;
         },
     };
 
-    function makeBlendComponentValid(blend)
-    {
-        const { operation } = blend;
-        if (operation === "min" || operation === "max")
-        {
-            blend.srcFactor = "one";
-            blend.dstFactor = "one";
-        }
-    }
-
     function render()
     {
-        makeBlendComponentValid(color);
-        makeBlendComponentValid(alpha);
         gui.updateDisplay();
 
-        const srcPipeline: IGPURenderPipeline = {
+        const srcPipeline: IRenderPipeline = {
             label: "hardcoded textured quad pipeline",
             vertex: {
                 code: texturedQuadWGSL,
@@ -468,6 +453,7 @@ return texture;
                 targets: [
                     {
                         blend: {
+                            constantColor: [...constant.color, constant.alpha] as any,
                             color,
                             alpha,
                         },
@@ -494,7 +480,7 @@ return texture;
         function updateUniforms(
             uniforms: Uniforms,
             canvas: HTMLCanvasElement,
-            texture: IGPUTextureBase
+            texture: ITexture
         )
         {
             const projectionMatrix = mat4.ortho(
@@ -517,37 +503,31 @@ return texture;
         updateUniforms(srcUniform, canvas, srcTexture);
         updateUniforms(dstUniform, canvas, dstTexture);
 
-        const pass: IGPURenderPass = {
-            descriptor: renderPassDescriptor,
-            renderObjects: []
-        };
-
-        const submit: IGPUSubmit = {
-            commandEncoders: [{
-                passEncoders: [pass]
-            }],
-        };
-
-        const ro: IGPURenderObject = {
+        const ro: IRenderObject = {
             pipeline: dstPipeline,
-            bindingResources: dstBindGroup,
-            draw: { vertexCount: 6 },
+            uniforms: dstBindGroup,
+            drawVertex: { vertexCount: 6 },
         };
 
-        const ro1: IGPURenderObject = {
+        const ro1: IRenderObject = {
             pipeline: srcPipeline,
-            bindingResources: srcBindGroup,
-            draw: { vertexCount: 6 },
+            uniforms: srcBindGroup,
+            drawVertex: { vertexCount: 6 },
         };
 
-        pass.renderObjects = [
+        const renderObjects: IRenderPassObject[] = [
             ro,
-
-            // draw source texture with blending
-            { __type: "IGPUBlendConstant", color: [...constant.color, constant.alpha] as any },
-
             ro1,
         ];
+
+        const submit: ISubmit = {
+            commandEncoders: [{
+                passEncoders: [{
+                    descriptor: renderPassDescriptor,
+                    renderObjects: renderObjects
+                }]
+            }],
+        };
 
         webgpu.submit(submit);
     }

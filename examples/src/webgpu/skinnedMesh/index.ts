@@ -7,7 +7,8 @@ import gridWGSL from "./grid.wgsl";
 import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUPassEncoder, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IPassEncoder, IRenderObject, IRenderPass, IRenderPassDescriptor, ITexture, IUniforms } from "@feng3d/render-api";
+import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -124,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             settings.cameraY = 0;
             settings.objectScale = 1.27;
         }
- else
+        else
         {
             if (settings.skinMode === "OFF")
             {
@@ -132,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.cameraY = 0;
                 settings.cameraZ = -11;
             }
- else
+            else
             {
                 settings.cameraX = 0;
                 settings.cameraY = -5.1;
@@ -166,7 +167,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.cameraY = 0;
                 settings.cameraZ = -11;
             }
- else
+            else
             {
                 settings.cameraX = 0;
                 settings.cameraY = -5.1;
@@ -185,15 +186,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     animFolder.add(settings, "angle", 0.05, 0.5).step(0.05);
     animFolder.add(settings, "speed", 10, 100).step(10);
 
-    const depthTexture: IGPUTexture = {
+    const depthTexture: ITexture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
     const cameraBuffer = new Float32Array(48);
 
-    const cameraBGCluster: IGPUBindingResources = {
+    const cameraBGCluster: IUniforms = {
         camera_uniforms: {
             bufferView: cameraBuffer,
         }
@@ -201,7 +201,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const generalUniformsBuffer = new Uint32Array(2);
 
-    const generalUniformsBGCLuster: IGPUBindingResources = {
+    const generalUniformsBGCLuster: IUniforms = {
         general_uniforms: {
             bufferView: generalUniformsBuffer,
         },
@@ -227,7 +227,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Buffer for our uniforms, joints, and inverse bind matrices
     const skinnedGridJointUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
     const skinnedGridInverseBindUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
-    const skinnedGridBoneBGCluster: IGPUBindingResources = {
+    const skinnedGridBoneBGCluster: IUniforms = {
         joint_matrices: { bufferView: skinnedGridJointUniformBuffer },
         inverse_bind_matrices: { bufferView: skinnedGridInverseBindUniformBuffer },
     };
@@ -255,7 +255,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             return perspectiveProjection;
         }
 
-return orthographicProjection;
+        return orthographicProjection;
     }
 
     function getViewMatrix()
@@ -273,7 +273,7 @@ return orthographicProjection;
                 viewMatrix
             );
         }
- else
+        else
         {
             mat4.translate(
                 viewMatrix,
@@ -282,7 +282,7 @@ return orthographicProjection;
             );
         }
 
-return viewMatrix;
+        return viewMatrix;
     }
 
     function getModelMatrix()
@@ -299,11 +299,11 @@ return viewMatrix;
             mat4.rotateY(modelMatrix, (Date.now() / 1000) * 0.5, modelMatrix);
         }
 
-return modelMatrix;
+        return modelMatrix;
     }
 
     // Pass Descriptor for GLTFs
-    const gltfRenderPassDescriptor: IGPURenderPassDescriptor = {
+    const gltfRenderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -322,7 +322,7 @@ return modelMatrix;
     };
 
     // Pass descriptor for grid with no depth testing
-    const skinnedGridRenderPassDescriptor: IGPURenderPassDescriptor = {
+    const skinnedGridRenderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -363,7 +363,7 @@ return modelMatrix;
         // Get initial bind pose positions
         animSkinnedGrid(bindPoses, 0);
         const bindPosesInv = bindPoses.map((bindPose) =>
-        mat4.inverse(bindPose));
+            mat4.inverse(bindPose));
 
         return {
             transforms,
@@ -408,11 +408,11 @@ return modelMatrix;
             {
                 m = mat4.rotateY(origMatrix, -angle);
             }
- else if (joint === 3 || joint === 4)
+            else if (joint === 3 || joint === 4)
             {
                 m = mat4.rotateX(origMatrix, joint === 3 ? angle : -angle);
             }
- else
+            else
             {
                 m = mat4.rotateZ(origMatrix, angle);
             }
@@ -483,12 +483,12 @@ return modelMatrix;
         // Node 6 should be the only node with a drawable mesh so hopefully this works fine
         whaleScene.skins[0].update(6, whaleScene.nodes);
 
-        const passEncoders: IGPUPassEncoder[] = [];
+        const passEncoders: IPassEncoder[] = [];
 
         if (settings.object === "Whale")
         {
-            const renderObjects: IGPURenderObject[] = [];
-            const bindingResources: IGPUBindingResources = {
+            const renderObjects: IRenderObject[] = [];
+            const bindingResources: IUniforms = {
                 ...cameraBGCluster,
                 ...generalUniformsBGCLuster,
             };
@@ -496,21 +496,21 @@ return modelMatrix;
             {
                 scene.root.renderDrawables(renderObjects, bindingResources);
             }
-            const passEncoder: IGPURenderPass = {
+            const passEncoder: IRenderPass = {
                 descriptor: gltfRenderPassDescriptor,
                 renderObjects
             };
             passEncoders.push(passEncoder);
         }
- else
+        else
         {
             // Our skinned grid isn't checking for depth, so we pass it
             // a separate render descriptor that does not take in a depth texture
             // Pass in vertex and index buffers generated from our static skinned grid
             // data at ./gridData.ts
-            const renderObject: IGPURenderObject = {
+            const renderObject: IRenderObject = {
                 pipeline: skinnedGridPipeline,
-                bindingResources: {
+                uniforms: {
                     ...cameraBGCluster,
                     ...generalUniformsBGCLuster,
                     ...skinnedGridBoneBGCluster,

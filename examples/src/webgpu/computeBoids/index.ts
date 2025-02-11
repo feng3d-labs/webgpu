@@ -1,9 +1,9 @@
+import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IGPUComputeObject, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 
 import spriteWGSL from "./sprite.wgsl";
 import updateSpritesWGSL from "./updateSprites.wgsl";
-
-import { IGPUComputeObject, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: {
             compute: { code: updateSpritesWGSL }
         },
-        bindingResources: {
+        uniforms: {
             params: simParams,
             particlesA: {
                 bufferView: particleBuffers[0],
@@ -68,20 +68,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const computeObject1: IGPUComputeObject = {
         ...computeObject0,
-        bindingResources: {
-            ...computeObject0.bindingResources,
+        uniforms: {
+            ...computeObject0.uniforms,
             particlesA: {
-                ...computeObject0.bindingResources.particlesA,
+                ...computeObject0.uniforms.particlesA,
                 bufferView: particleBuffers[1],
             },
             particlesB: {
-                ...computeObject0.bindingResources.particlesA,
+                ...computeObject0.uniforms.particlesA,
                 bufferView: particleBuffers[0],
             },
         },
     };
 
-    const renderPass: IGPURenderPassDescriptor = {
+    const renderPass: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -90,11 +90,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
         },
         vertices: {
@@ -102,10 +102,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             a_particleVel: { data: particleBuffers[0], format: "float32x2", offset: 2 * 4, arrayStride: 4 * 4, stepMode: "instance" },
             a_pos: { data: vertexBufferData, format: "float32x2" },
         },
-        draw: { vertexCount: 3, instanceCount: numParticles }
+        drawVertex: { vertexCount: 3, instanceCount: numParticles }
     };
 
-    const renderObject1: IGPURenderObject = {
+    const renderObject1: IRenderObject = {
         ...renderObject,
         vertices: {
             ...renderObject.vertices,
@@ -123,11 +123,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let t = 0;
     function frame()
     {
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { __type: "IGPUComputePass", computeObjects: [[computeObject0, computeObject1][t % 2]] },
+                        { __type: "ComputePass", computeObjects: [[computeObject0, computeObject1][t % 2]] },
                         { descriptor: renderPass, renderObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
                     ]
                 }

@@ -1,10 +1,8 @@
+import { IBuffer, ISubmit, ITextureLike } from "@feng3d/render-api";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUTexture } from "./caches/getGPUTexture";
-import { getIGPUTextureSize } from "./caches/getIGPUTextureSize";
-import { IGPUBuffer } from "./data/IGPUBuffer";
+import { getIGPUTextureLikeSize } from "./caches/getIGPUTextureSize";
 import { IGPUReadPixels } from "./data/IGPUReadPixels";
-import { IGPUSubmit } from "./data/IGPUSubmit";
-import { IGPUTexture } from "./data/IGPUTexture";
 import { RunWebGPU } from "./runs/RunWebGPU";
 import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
@@ -30,6 +28,20 @@ export class WebGPU
         // 获取支持的特性
         const features: GPUFeatureName[] = [];
         adapter?.features.forEach((v) => { features.push(v as any); });
+        // 判断请求的特性是否被支持
+        const requiredFeatures = Array.from(descriptor?.requiredFeatures || [])
+        if (requiredFeatures.length > 0)
+        {
+            for (let i = requiredFeatures.length - 1; i >= 0; i--)
+            {
+                if (features.indexOf(requiredFeatures[i]) === -1)
+                {
+                    console.error(`当前 GPUAdapter 不支持特性 ${requiredFeatures[i]}！`);
+                    requiredFeatures.splice(i, 1);
+                }
+            }
+            descriptor.requiredFeatures = requiredFeatures;
+        }
         // 默认开启当前本机支持的所有WebGPU特性。
         descriptor = descriptor || {};
         descriptor.requiredFeatures = (descriptor.requiredFeatures || features) as any;
@@ -63,7 +75,7 @@ export class WebGPU
      *
      * @see GPUQueue.submit
      */
-    submit(submit: IGPUSubmit)
+    submit(submit: ISubmit)
     {
         this._runWebGPU.runSubmit(this.device, submit);
     }
@@ -73,7 +85,7 @@ export class WebGPU
      *
      * @param texture 需要被销毁的纹理。
      */
-    destoryTexture(texture: IGPUTexture)
+    destoryTexture(texture: ITextureLike)
     {
         getGPUTexture(this.device, texture, false)?.destroy();
     }
@@ -85,7 +97,7 @@ export class WebGPU
      * @param invertY 是否Y轴翻转
      * @param premultiplyAlpha 是否预乘Alpha。
      */
-    textureInvertYPremultiplyAlpha(texture: IGPUTexture, options: { invertY?: boolean, premultiplyAlpha?: boolean })
+    textureInvertYPremultiplyAlpha(texture: ITextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
         const gpuTexture = getGPUTexture(this.device, texture);
 
@@ -99,7 +111,7 @@ export class WebGPU
      * @param sourceTexture 源纹理。
      * @param targetTexture 目标纹理。
      */
-    copyDepthTexture(sourceTexture: IGPUTexture, targetTexture: IGPUTexture)
+    copyDepthTexture(sourceTexture: ITextureLike, targetTexture: ITextureLike)
     {
         const gpuSourceTexture = getGPUTexture(this.device, sourceTexture);
         const gpuTargetTexture = getGPUTexture(this.device, targetTexture);
@@ -136,7 +148,7 @@ export class WebGPU
      * @param size 读取字节数量。
      * @returns CPU数据缓冲区。
      */
-    async readBuffer(buffer: IGPUBuffer, offset?: GPUSize64, size?: GPUSize64)
+    async readBuffer(buffer: IBuffer, offset?: GPUSize64, size?: GPUSize64)
     {
         const gpuBuffer = getGPUBuffer(this.device, buffer);
         await gpuBuffer.mapAsync(GPUMapMode.READ);
@@ -148,8 +160,8 @@ export class WebGPU
         return result;
     }
 
-    getGPUTextureSize(input: IGPUTexture)
+    getGPUTextureSize(input: ITextureLike)
     {
-        return getIGPUTextureSize(input);
+        return getIGPUTextureLikeSize(input);
     }
 }

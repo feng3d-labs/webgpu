@@ -1,11 +1,11 @@
 import { GUI } from "dat.gui";
-
 import { mat4 } from "wgpu-matrix";
+
+import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureSource, IUniforms } from "@feng3d/render-api";
+import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
-
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPURenderObject, IGPURenderPassDescriptor, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -176,7 +176,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
      */
     function updateSamplerResources()
     {
-        const sampler: IGPUSampler = {
+        const sampler: ISampler = {
             ...samplerDescriptor,
             maxAnisotropy:
                 samplerDescriptor.minFilter === "linear"
@@ -229,9 +229,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kTextureMipLevels = 4;
     const kTextureBaseSize = 16;
 
-    const checkerboard: IGPUTexture = {
+    const checkerboard: ITexture = {
         format: "rgba8unorm",
-        usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.TEXTURE_BINDING,
         size: [kTextureBaseSize, kTextureBaseSize],
         mipLevelCount: 4,
     };
@@ -242,7 +241,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         [255, 193, 7, 255], // yellow
         [216, 27, 96, 255], // pink
     ];
-    const writeTextures = checkerboard.writeTextures || [];
+    const writeTextures: ITextureSource[] = [];
     for (let mipLevel = 0; mipLevel < kTextureMipLevels; ++mipLevel)
     {
         const size = 2 ** (kTextureMipLevels - mipLevel); // 16, 8, 4, 2
@@ -258,19 +257,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
         }
         writeTextures.push({
-            destination: { mipLevel },
+            __type: "TextureDataSource",
+            mipLevel,
             data,
-            dataLayout: { bytesPerRow: size * 4 },
+            dataLayout: { width: size },
             size: [size, size]
         });
     }
-    checkerboard.writeTextures = writeTextures;
+    checkerboard.sources = writeTextures;
 
     //
     // "Debug" view of the actual texture contents
     //
 
-    const showTexturePipeline: IGPURenderPipeline = {
+    const showTexturePipeline: IRenderPipeline = {
         vertex: { code: showTextureWGSL }, fragment: { code: showTextureWGSL }
     };
 
@@ -278,7 +278,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Pipeline for drawing the test squares
     //
 
-    const texturedSquarePipeline: IGPURenderPipeline = {
+    const texturedSquarePipeline: IRenderPipeline = {
         vertex: { code: texturedSquareWGSL, constants: { kTextureBaseSize, kViewportSize } }, fragment: { code: texturedSquareWGSL },
     };
 
@@ -293,18 +293,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const bufMatrices = kMatrices;
 
-    const renderPass: IGPURenderPassDescriptor = {
+    const renderPass: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
-                clearValue: { r: 0.2, g: 0.2, b: 0.2, a: 1.0 },
+                clearValue: [0.2, 0.2, 0.2, 1.0],
             }
         ],
     };
 
-    const renderObjects: IGPURenderPassObject[] = [];
+    const renderObjects: IRenderPassObject[] = [];
 
-    const bindingResources0: IGPUBindingResources = {
+    const bindingResources0: IUniforms = {
         config: { bufferView: bufConfig },
         matrices: { bufferView: bufMatrices },
         samp: null, // 帧更新中设置
@@ -319,53 +319,53 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const vpY = kViewportGridStride * Math.floor(i / kViewportGridSize) + 1;
 
         renderObjects.push(
-            { __type: "IGPUViewport", x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
             {
+                viewport: {isYup: false, x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
                 pipeline: texturedSquarePipeline,
-                bindingResources: bindingResources0,
-                draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
+                uniforms: bindingResources0,
+                drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
             }
         );
     }
 
-    const bindingResources1: IGPUBindingResources = {
+    const bindingResources1: IUniforms = {
         tex: { texture: checkerboard },
     };
     const kLastViewport = (kViewportGridSize - 1) * kViewportGridStride + 1;
     renderObjects.push(
-        { __type: "IGPUViewport", x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
         {
+            viewport: {isYup: false, x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            bindingResources: bindingResources1,
-            draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
+            uniforms: bindingResources1,
+            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
         }
     );
     renderObjects.push(
-        { __type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
         {
+            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            bindingResources: bindingResources1,
-            draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
+            uniforms: bindingResources1,
+            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
         }
     );
     renderObjects.push(
-        { __type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
         {
+            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            bindingResources: bindingResources1,
-            draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
+            uniforms: bindingResources1,
+            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
         }
     );
     renderObjects.push(
-        { __type: "IGPUViewport", x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
         {
+            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            bindingResources: bindingResources1,
-            draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
+            uniforms: bindingResources1,
+            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
         }
     );
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
         commandEncoders: [
             {
                 passEncoders: [

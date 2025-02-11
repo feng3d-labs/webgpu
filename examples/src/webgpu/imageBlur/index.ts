@@ -3,7 +3,8 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -23,7 +24,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const fullscreenQuadPipeline1: IGPURenderPipeline = {
+    const fullscreenQuadPipeline1: IRenderPipeline = {
         vertex: {
             code: fullscreenTexturedQuadWGSL,
         },
@@ -32,7 +33,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -46,19 +47,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const imageBitmap = await createImageBitmap(img);
 
     const [srcWidth, srcHeight] = [imageBitmap.width, imageBitmap.height];
-    const cubeTexture1: IGPUTexture = {
-        size: [srcWidth, srcHeight, 1],
+    const cubeTexture1: ITexture = {
+        size: [imageBitmap.width, imageBitmap.height],
         format: "rgba8unorm",
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-        source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
+        sources: [{ image: imageBitmap }],
     };
 
-    const textures: IGPUTexture[] = [0, 1].map(() =>
+    const textures: ITexture[] = [0, 1].map(() =>
     ({
         size: [srcWidth, srcHeight],
         format: "rgba8unorm",
         usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
-    } as IGPUTexture));
+    } as ITexture));
 
     const buffer0 = new Uint32Array([0]);
 
@@ -66,14 +66,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const blurParamsBuffer = new Uint8Array(8);
 
-    const computeConstants: IGPUBindingResources = {
+    const computeConstants:   IUniforms = {
         samp: sampler,
         params: {
             bufferView: blurParamsBuffer,
         },
     };
 
-    const computeBindGroup0: IGPUBindingResources = {
+    const computeBindGroup0:   IUniforms = {
         inputTex: { texture: cubeTexture1 },
         outputTex: { texture: textures[0] },
         flip: {
@@ -81,7 +81,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const computeBindGroup1: IGPUBindingResources = {
+    const computeBindGroup1:   IUniforms = {
         inputTex: { texture: textures[0] },
         outputTex: { texture: textures[1] },
         flip: {
@@ -89,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const computeBindGroup2: IGPUBindingResources = {
+    const computeBindGroup2:   IUniforms = {
         inputTex: { texture: textures[1] },
         outputTex: { texture: textures[0] },
         flip: {
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const showResultBindGroup1: IGPUBindingResources = {
+    const showResultBindGroup1:   IUniforms = {
         mySampler: sampler,
         myTexture: { texture: textures[1] },
     };
@@ -131,26 +131,26 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     updateSettings();
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
-                clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+                clearValue: [0.0, 0.0, 0.0, 1.0],
             }
         ],
     };
 
-    const gpuRenderPassEncoder: IGPURenderPass = {
+    const gpuRenderPassEncoder: IRenderPass = {
         descriptor: renderPassDescriptor,
         renderObjects: [{
             pipeline: fullscreenQuadPipeline1,
-            bindingResources: showResultBindGroup1,
-            draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+            uniforms: showResultBindGroup1,
+            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
         }],
     };
 
-    const gpuComputePassEncoder: IGPUComputePass = { __type: "IGPUComputePass", computeObjects: [] };
-    const submit: IGPUSubmit = {
+    const gpuComputePassEncoder: IGPUComputePass = { __type: "ComputePass", computeObjects: [] };
+    const submit: ISubmit = {
         commandEncoders: [
             {
                 passEncoders: [
@@ -161,15 +161,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     };
 
-    const bindingResources0: IGPUBindingResources = {
+    const bindingResources0:   IUniforms = {
         ...computeConstants,
         ...computeBindGroup0,
     };
-    const bindingResources1: IGPUBindingResources = {
+    const bindingResources1:   IUniforms = {
         ...computeConstants,
         ...computeBindGroup1,
     };
-    const bindingResources2: IGPUBindingResources = {
+    const bindingResources2:   IUniforms = {
         ...computeConstants,
         ...computeBindGroup2,
     };
@@ -181,12 +181,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         gpuComputePassEncoder.computeObjects = [
             {
                 pipeline: blurPipeline,
-                bindingResources: bindingResources0,
+                uniforms: bindingResources0,
                 workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
             },
             {
                 pipeline: blurPipeline,
-                bindingResources: bindingResources1,
+                uniforms: bindingResources1,
                 workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
             },
         ];
@@ -196,7 +196,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             gpuComputePassEncoder.computeObjects.push(
                 {
                     pipeline: blurPipeline,
-                    bindingResources: bindingResources2,
+                    uniforms: bindingResources2,
                     workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
                 }
             );
@@ -204,7 +204,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             gpuComputePassEncoder.computeObjects.push(
                 {
                     pipeline: blurPipeline,
-                    bindingResources: bindingResources1,
+                    uniforms: bindingResources1,
                     workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
                 }
             );

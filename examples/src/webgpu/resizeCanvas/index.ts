@@ -1,26 +1,28 @@
+import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
+
 import redFragWGSL from "../../shaders/red.frag.wgsl";
 import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
 
-import { IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 import styles from "./animatedCanvasSize.module.css";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const webgpu = await new WebGPU().init();
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [{
             view: { texture: { context: { canvasId: canvas.id } } },
             clearValue: [0.0, 0.0, 0.0, 1.0],
         }],
-        multisample: 4, // 设置多重采样数量
+        sampleCount: 4, // 设置多重采样数量
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
-        draw: { vertexCount: 3 },
+        drawVertex: { vertexCount: 3 },
     };
 
     canvas.classList.add(styles.animatedCanvasSize);
@@ -32,7 +34,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const currentHeight = canvas.clientHeight * devicePixelRatio;
         renderPassDescriptor.attachmentSize = { width: currentWidth, height: currentHeight };
 
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

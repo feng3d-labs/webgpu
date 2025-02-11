@@ -1,11 +1,10 @@
+import { IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
-
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleTextureMixColorWGSL from "../../shaders/sampleTextureMixColor.frag.wgsl";
-
-import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -23,20 +22,19 @@ const init = async (canvas: HTMLCanvasElement) =>
     ).toString();
     await img.decode();
     const imageBitmap = await createImageBitmap(img);
-    const cubeTexture: IGPUTexture = {
+    const cubeTexture: ITexture = {
         size: [imageBitmap.width, imageBitmap.height],
         format: "rgba8unorm",
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-        source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
+        sources: [{ image: imageBitmap }],
     };
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
 
-    const renderPass: IGPURenderPassDescriptor = {
+    const renderPass: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -50,25 +48,27 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IGPURenderObject = {
+    const uniforms = {
+        modelViewProjectionMatrix: new Float32Array(16)
+    };
+
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleTextureMixColorWGSL },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
         },
         vertices: {
             position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
             uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        bindingResources: {
-            uniforms: {
-                modelViewProjectionMatrix: new Float32Array(16)
-            },
+        uniforms: {
+            uniforms,
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
         },
-        draw: { vertexCount: cubeVertexCount },
+        drawVertex: { vertexCount: cubeVertexCount },
     };
 
     const aspect = canvas.width / canvas.height;
@@ -101,9 +101,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        (renderObject.bindingResources.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(transformationMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        uniforms.modelViewProjectionMatrix = transformationMatrix.slice(); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

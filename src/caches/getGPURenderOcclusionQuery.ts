@@ -1,15 +1,16 @@
 import { anyEmitter } from "@feng3d/event";
+import { IRenderPass, IRenderPassObject } from "@feng3d/render-api";
+
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
-import { IGPURenderPass, IGPURenderPassObject } from "../data/IGPURenderPass";
 import { GPUQueue_submit } from "../eventnames";
 
-export function getGPURenderOcclusionQuery(renderObjects?: readonly IGPURenderPassObject[]): GPURenderOcclusionQuery
+export function getGPURenderOcclusionQuery(renderObjects?: readonly IRenderPassObject[]): GPURenderOcclusionQuery
 {
     if (!renderObjects) return defautRenderOcclusionQuery;
     let renderOcclusionQuery: GPURenderOcclusionQuery = renderObjects["_GPURenderOcclusionQuery"];
     if (renderOcclusionQuery) return renderOcclusionQuery;
 
-    const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.filter((cv) => cv.__type === "IGPUOcclusionQuery") as any;
+    const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.filter((cv) => cv.__type === "OcclusionQuery") as any;
     if (occlusionQueryObjects.length === 0)
     {
         renderObjects["_GPURenderOcclusionQuery"] = defautRenderOcclusionQuery;
@@ -43,7 +44,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly IGPURenderPa
      * @param commandEncoder
      * @param renderPass
      */
-    const resolve = (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass) =>
+    const resolve = (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IRenderPass) =>
     {
         resolveBuf = resolveBuf || device.createBuffer({
             label: "resolveBuffer",
@@ -75,7 +76,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly IGPURenderPa
 
                     occlusionQueryObjects.forEach((v, i) =>
                     {
-                        v.result = results[i] as any;
+                        v.result = { result: Number(results[i]) };
                     });
 
                     resultBuf.unmap();
@@ -100,7 +101,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly IGPURenderPa
 interface GPURenderOcclusionQuery
 {
     init: (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) => void
-    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IGPURenderPass) => void
+    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IRenderPass) => void
 }
 
 const defautRenderOcclusionQuery = { init: () => { }, resolve: () => { } };

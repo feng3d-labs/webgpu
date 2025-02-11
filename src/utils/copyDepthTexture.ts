@@ -1,4 +1,4 @@
-import wgsl from "./copyDepthTexture.wgsl";
+import { copyDepthTexture_wgsl as wgsl } from "./copyDepthTexture.wgsl";
 
 /**
  * 拷贝 深度纹理到 普通纹理。
