@@ -1,5 +1,18 @@
 # @feng3d/webgpu
 
+feng3d引擎的WebGPU渲染器，可以让用户无需直接接触WebGPU的API，只需提供渲染所需数据，组织好数据结构便可使用WebGPU渲染，并且支持动态修改数据从而实现动态渲染。
+
+## 示例
+
+[@feng3d/webgpu示例](https://feng3d.com/webgpu/)
+
+这里完整实现了webgpu的[官方示例](https://github.com/webgpu/webgpu-samples)。
+
+## 安装
+```
+npm install @feng3d/webgpu
+```
+
 ## 如何使用
 ```
 import { IGPUSubmit, WebGPU } from "@feng3d/webgpu";
