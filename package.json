@@ -2,6 +2,7 @@
   "name": "@feng3d/webgpu",
   "version": "0.0.3",
   "description": "webgpu渲染库",
+  "homepage": "https://feng3d.com/webgpu/",
   "author": "feng",
   "type": "module",
   "main": "./src/index.ts",
