@@ -1,7 +1,8 @@
 {
   "name": "@feng3d/webgpu",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "webgpu渲染库",
+  "homepage": "https://feng3d.com/webgpu/",
   "author": "feng",
   "type": "module",
   "main": "./src/index.ts",
@@ -57,7 +58,7 @@
     "vitest": "^0.32.2"
   },
   "dependencies": {
-    "@feng3d/render-api": "0.0.1",
+    "@feng3d/render-api": "0.0.2",
     "@feng3d/event": "^0.8.4",
     "@feng3d/watcher": "^0.8.7",
     "@webgpu/types": "0.1.49",

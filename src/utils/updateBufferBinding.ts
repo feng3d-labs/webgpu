@@ -7,7 +7,7 @@ import { IBufferBindingInfo } from "./getBufferBindingInfo";
 
 /**
  * 初始化缓冲区绑定。
- * 
+ *
  * @param variableInfo
  * @param uniformData
  * @returns
@@ -52,7 +52,8 @@ export function updateBufferBinding(resourceName: string, bufferBindingInfo: IBu
                     {
                         console.warn(`没有找到 统一块变量属性 ${paths.join(".")} 的值！`);
                     }
-                    return;
+
+return;
                 }
             }
 
@@ -73,7 +74,7 @@ export function updateBufferBinding(resourceName: string, bufferBindingInfo: IBu
             const writeBuffers = buffer.writeBuffers ?? [];
             writeBuffers.push({ bufferOffset: offset + itemInfoOffset, data: data.buffer, dataOffset: data.byteOffset, size: Math.min(itemInfoSize, data.byteLength) });
             buffer.writeBuffers = writeBuffers;
-        }
+        };
 
         update();
         watcher.watchchain(uniformData, paths.join("."), update, undefined, false);
