@@ -1,5 +1,5 @@
+import { IBuffer, UnReadonly } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { IGPUBuffer } from "../data/IGPUBuffer";
 
 /**
  * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。
@@ -24,26 +24,17 @@ const defaultGPUBufferUsage = 0
  * @param buffer
  * @returns
  */
-export function getGPUBuffer(device: GPUDevice, buffer: IGPUBuffer)
+export function getGPUBuffer(device: GPUDevice, buffer: IBuffer)
 {
-    const gBufferMap: WeakMap<IGPUBuffer, GPUBuffer> = device["_gBufferMap"] = device["_gBufferMap"] || new WeakMap<IGPUBuffer, GPUBuffer>();
+    const gBufferMap: WeakMap<IBuffer, GPUBuffer> = device["_gBufferMap"] = device["_gBufferMap"] || new WeakMap<IBuffer, GPUBuffer>();
 
     let gBuffer: GPUBuffer = gBufferMap.get(buffer);
     if (gBuffer) return gBuffer;
 
-    let size = buffer.size;
-    if (buffer.size === undefined)
-    {
-        const bufferData = buffer.data;
-        console.assert(!!bufferData, `初始化缓冲区时，当尺寸未定义时，必须设置data属性来计算尺寸。`);
+    const size = buffer.size;
+    console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
 
-        size = bufferData.byteLength;
-    }
-    // GPU缓冲区尺寸应该为4的倍数。
-    size = Math.ceil(buffer.size / 4) * 4;
-    (buffer as any).size = size;
-
-    (buffer as any).usage = buffer.usage ?? defaultGPUBufferUsage;
+    (buffer as UnReadonly<IBuffer>).usage = buffer.usage ?? defaultGPUBufferUsage;
 
     const label = buffer.label;
     const usage = buffer.usage;

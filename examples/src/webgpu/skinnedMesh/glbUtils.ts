@@ -1,7 +1,8 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { getIGPUBuffer, gpuVertexFormatMap, IGPUBindingResources, IGPUBuffer, IGPUDraw, IGPUDrawIndexed, IGPUFragmentState, IGPUPrimitiveState, IGPURenderObject, IGPURenderPipeline, IGPUVertexAttributes, IGPUVertexState } from "@feng3d/webgpu-renderer";
+import { IBuffer, IDrawIndexed, IDrawVertex, IFragmentState, IPrimitiveState, IRenderObject, IRenderPipeline, IUniforms, IVertexAttributes, IVertexState } from "@feng3d/render-api";
+import { getIGPUBuffer, gpuVertexFormatMap } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -44,7 +45,7 @@ enum GLTFDataStructureType
 }
 
 export const alignTo = (val: number, align: number): number =>
-Math.floor((val + align - 1) / align) * align;
+    Math.floor((val + align - 1) / align) * align;
 
 const parseGltfDataStructureType = (type: string) =>
 {
@@ -179,7 +180,7 @@ const gltfElementSize = (
             throw Error("Unrecognized GLTF Component Type?");
     }
 
-return gltfDataStructureTypeNumComponents(type) * componentSize;
+    return gltfDataStructureTypeNumComponents(type) * componentSize;
 };
 
 // Convert differently depending on if the shader is a vertex or compute shader
@@ -244,7 +245,7 @@ export class GLTFBufferView
     byteStride: number;
     view: Uint8Array;
     needsUpload: boolean;
-    gpuBuffer: IGPUBuffer;
+    gpuBuffer: IBuffer;
     usage: number;
     constructor(buffer: GLTFBuffer, view: BufferView)
     {
@@ -284,7 +285,7 @@ export class GLTFBufferView
     upload()
     {
         // Note: must align to 4 byte size when mapped at creation is true
-        const buf: IGPUBuffer = {
+        const buf: IBuffer = {
             size: alignTo(this.view.byteLength, 4),
             usage: this.usage,
             data: this.view,
@@ -318,7 +319,7 @@ export class GLTFAccessor
     {
         const elementSize = gltfElementSize(this.componentType, this.structureType);
 
-return Math.max(elementSize, this.view.byteStride);
+        return Math.max(elementSize, this.view.byteStride);
     }
 
     get byteLength()
@@ -341,10 +342,10 @@ interface AttributeMapInterface
 export class GLTFPrimitive
 {
     topology: GLTFRenderMode;
-    renderPipeline: IGPURenderPipeline;
+    renderPipeline: IRenderPipeline;
     private attributeMap: AttributeMapInterface;
     private attributes: string[] = [];
-    vertices: IGPUVertexAttributes;
+    vertices: IVertexAttributes;
     indices: Uint16Array | Uint32Array;
     constructor(
         topology: GLTFRenderMode,
@@ -414,12 +415,12 @@ export class GLTFPrimitive
         );
         VertexInputShaderString += "}";
 
-        const vertexState: IGPUVertexState = {
+        const vertexState: IVertexState = {
             // Shader stage info
             code: VertexInputShaderString + vertexShader,
         };
 
-        const fragmentState: IGPUFragmentState = {
+        const fragmentState: IFragmentState = {
             // Shader info
             code: VertexInputShaderString + fragmentShader,
             // Output render target info
@@ -428,16 +429,15 @@ export class GLTFPrimitive
 
         // Our loader only supports triangle lists and strips, so by default we set
         // the primitive topology to triangle list, and check if it's instead a triangle strip
-        let primitive: IGPUPrimitiveState = { topology: "triangle-list" };
+        let primitive: IPrimitiveState = { topology: "triangle-list" };
         if (this.topology == GLTFRenderMode.TRIANGLE_STRIP)
         {
             primitive = {
                 topology: "triangle-strip",
-                stripIndexFormat: "uint16",
             };
         }
 
-        const rpDescript: IGPURenderPipeline = {
+        const rpDescript: IRenderPipeline = {
             label: `${label}.pipeline`,
             vertex: vertexState,
             fragment: fragmentState,
@@ -452,10 +452,10 @@ export class GLTFPrimitive
         this.renderPipeline = rpDescript;
     }
 
-    render(renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources)
+    render(renderObjects: IRenderObject[], bindingResources: IUniforms)
     {
-        let drawIndexed: IGPUDrawIndexed;
-        let draw: IGPUDraw;
+        let drawIndexed: IDrawIndexed;
+        let drawVertex: IDrawVertex;
         if (this.indices)
         {
             drawIndexed = { indexCount: this.indices.length };
@@ -466,16 +466,16 @@ export class GLTFPrimitive
 
             const vertexCount = vertexAttribute.data.byteLength / gpuVertexFormatMap[vertexAttribute.format].byteSize;
 
-            draw = { vertexCount };
+            drawVertex = { vertexCount };
         }
 
-        const renderObject: IGPURenderObject = {
+        const renderObject: IRenderObject = {
             pipeline: this.renderPipeline,
-            bindingResources,
+            uniforms: bindingResources,
             //if skin do something with bone bind group
             vertices: this.vertices,
             indices: this.indices,
-            draw,
+            drawVertex,
             drawIndexed,
         };
         renderObjects.push(renderObject);
@@ -509,7 +509,7 @@ export class GLTFMesh
         }
     }
 
-    render(renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources)
+    render(renderObjects: IRenderObject[], bindingResources: IUniforms)
     {
         // We take a pretty simple approach to start. Just loop through all the primitives and
         // call their individual draw methods
@@ -580,7 +580,7 @@ export class BaseTransformation
         // Translate the transformationMatrix
         mat4.translate(dst, this.position, dst);
 
-return dst;
+        return dst;
     }
 }
 
@@ -640,7 +640,7 @@ export class GLTFNode
         {
             mat4.multiply(parentWorldMatrix, this.localMatrix, this.worldMatrix);
         }
- else
+        else
         {
             mat4.copy(this.localMatrix, this.worldMatrix);
         }
@@ -664,7 +664,7 @@ export class GLTFNode
     }
 
     renderDrawables(
-        renderObjects: IGPURenderObject[], bindingResources: IGPUBindingResources
+        renderObjects: IRenderObject[], bindingResources: IUniforms
     )
     {
         if (this.drawables !== undefined)
@@ -679,7 +679,7 @@ export class GLTFNode
                         ...this.skin.skinBindGroup,
                     });
                 }
- else
+                else
                 {
                     drawable.render(renderObjects, {
                         ...bindingResources,
@@ -733,7 +733,7 @@ export class GLTFSkin
     // [5, 2, 3] means our joint info is at nodes 5, 2, and 3
     joints: number[];
     // Bind Group for this skin's uniform buffer
-    skinBindGroup: IGPUBindingResources;
+    skinBindGroup: IUniforms;
     // Static bindGroupLayout shared across all skins
     // In a larger shader with more properties, certain bind groups
     // would likely have to be combined due to device limitations in the number of bind groups
@@ -1019,7 +1019,7 @@ export const convertGLBToJSONAndBinary = async (
         scenes.push(scene);
     }
 
-return {
+    return {
         meshes,
         nodes,
         scenes,

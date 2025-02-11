@@ -2,7 +2,8 @@ import { GUI } from "dat.gui";
 
 import atmosphericScatteringSkyWGSL from "./atmosphericScatteringSky.wgsl";
 
-import { IGPUCanvasContext, IGPUComputeObject, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
+import { ITexture } from "@feng3d/render-api";
+import { IGPUCanvasContext, IGPUComputeObject, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -20,11 +21,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const framebuffer: IGPUTexture = {
+    const framebuffer: ITexture = {
         label: "framebuffer",
         size: [canvas.width, canvas.height],
         format: "rgba16float",
-        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
     };
 
     const uniformBuffer = {
@@ -48,7 +48,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: {
             compute: { code: atmosphericScatteringSkyWGSL }
         },
-        bindingResources: {
+        uniforms: {
             uniformBuffer,
             outTexture: { texture: framebuffer }
         },
@@ -59,7 +59,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function frame()
     {
         webgpu.submit({
-            commandEncoders: [{ passEncoders: [{ __type: "IGPUComputePass", computeObjects: [computeObject0] }] }]
+            commandEncoders: [{ passEncoders: [{ __type: "ComputePass", computeObjects: [computeObject0] }] }]
         });
 
         ++t;

@@ -1,3 +1,5 @@
+import { IBufferBinding, IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -7,7 +9,6 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-import { getIGPUBuffer, IGPUBuffer, IGPUBufferBinding, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUTextureView, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -34,7 +35,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Create the model vertex buffer
-    const vertices: IGPUVertexAttributes = {
+    const vertices: IVertexAttributes = {
         position: { data: new Float32Array(mesh.positions.flat()), format: "float32x3", arrayStride: 12 }
     };
     // Create the model index buffer
@@ -48,14 +49,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         16 * Float32Array.BYTES_PER_ELEMENT + 2 * Uint32Array.BYTES_PER_ELEMENT,
         16
     );
-    const uniforms: IGPUBufferBinding = {
+    const uniforms: IBufferBinding = {
         bufferView: new Uint8Array(uniformsSize),
         modelViewProjectionMatrix: undefined,
         maxStorableFragments: undefined,
         targetWidth: undefined,
     };
 
-    const opaquePipeline: IGPURenderPipeline = {
+    const opaquePipeline: IRenderPipeline = {
         vertex: {
             code: opaqueWGSL,
         },
@@ -72,7 +73,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "opaquePipeline",
     };
 
-    const translucentPipeline: IGPURenderPipeline = {
+    const translucentPipeline: IRenderPipeline = {
         vertex: {
             code: translucentWGSL,
         },
@@ -80,7 +81,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: translucentWGSL,
             targets: [
                 {
-                    writeMask: 0x0,
+                    writeMask: [false, false, false, false],
                 },
             ],
         },
@@ -90,7 +91,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "translucentPipeline",
     };
 
-    const translucentPassDescriptor: IGPURenderPassDescriptor = {
+    const translucentPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 loadOp: "load",
@@ -101,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "translucentPassDescriptor",
     };
 
-    const compositePipeline: IGPURenderPipeline = {
+    const compositePipeline: IRenderPipeline = {
         vertex: {
             code: compositeWGSL,
         },
@@ -126,7 +127,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "compositePipeline",
     };
 
-    const compositePassDescriptor: IGPURenderPassDescriptor = {
+    const compositePassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -166,14 +167,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         canvas.width = canvas.clientWidth * devicePixelRatio;
         canvas.height = canvas.clientHeight * devicePixelRatio;
 
-        const depthTexture: IGPUTexture = {
+        const depthTexture: ITexture = {
             size: [canvas.width, canvas.height],
             format: "depth24plus",
-            usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
             label: "depthTexture",
         };
 
-        const depthTextureView: IGPUTextureView = {
+        const depthTextureView: ITextureView = {
             label: "depthTextureView",
             texture: depthTexture,
         };
@@ -199,7 +199,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const sliceHeight = Math.ceil(canvas.height / numSlices);
         const linkedListBufferSize = sliceHeight * bytesPerline;
 
-        const linkedListBuffer: IGPUBufferBinding = {
+        const linkedListBuffer: IBufferBinding = {
             bufferView: new Uint8Array(linkedListBufferSize),
             // data: [{ color: undefined, depth: undefined, next: undefined }]
         };
@@ -218,26 +218,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // for a given pixel.
         // * numFragments : u32
         // * data : array<u32>
-        const headsBuffer: IGPUBufferBinding = {
+        const headsBuffer: IBufferBinding = {
             bufferView: new Uint32Array(1 + canvas.width * sliceHeight),
             numFragments: undefined,
             data: undefined,
         };
 
-        const headsInitBuffer: IGPUBuffer = {
-            size: (1 + canvas.width * sliceHeight) * Uint32Array.BYTES_PER_ELEMENT,
-            usage: GPUBufferUsage.COPY_SRC,
-            label: "headsInitBuffer",
-        };
-        {
-            const buffer = new Uint32Array(headsInitBuffer.size / Uint32Array.BYTES_PER_ELEMENT);
-
-            for (let i = 0; i < buffer.length; ++i)
-            {
-                buffer[i] = 0xffffffff;
-            }
-            headsInitBuffer.data = buffer;
-        }
+        const headsInitBuffer = new Uint32Array(1 + canvas.width * sliceHeight);
+        headsInitBuffer.fill(0xffffffff);
 
         const bindingResources = {
             uniforms,
@@ -247,7 +235,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             sliceInfo: { sliceStartY: undefined },
         };
 
-        const opaquePassDescriptor: IGPURenderPassDescriptor = {
+        const opaquePassDescriptor: IRenderPassDescriptor = {
             colorAttachments: [
                 {
                     view: { texture: { context } },
@@ -289,17 +277,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             const viewProjMatrix = mat4.multiply(projectionMatrix, viewMatrix);
 
-return viewProjMatrix;
+            return viewProjMatrix;
         }
 
-        const passEncoders: IGPUPassEncoder[] = [];
+        const passEncoders: IPassEncoder[] = [];
 
         // Draw the opaque objects
-        const opaquePassEncoder: IGPURenderPass = {
+        const opaquePassEncoder: IRenderPass = {
             descriptor: opaquePassDescriptor,
             renderObjects: [{
                 pipeline: opaquePipeline,
-                bindingResources,
+                uniforms: bindingResources,
                 vertices,
                 indices,
                 drawIndexed: { indexCount: mesh.triangles.length * 3, instanceCount: 8 },
@@ -311,12 +299,9 @@ return viewProjMatrix;
         {
             // initialize the heads buffer
             passEncoders.push({
-                __type: "IGPUCopyBufferToBuffer",
-                source: headsInitBuffer,
-                sourceOffset: 0,
+                __type: "CopyBufferToBuffer",
+                source: getIGPUBuffer(headsInitBuffer),
                 destination: getIGPUBuffer(headsBuffer.bufferView),
-                destinationOffset: 0,
-                size: headsInitBuffer.size
             });
 
             const scissorX = 0;
@@ -328,20 +313,14 @@ return viewProjMatrix;
 
             // Draw the translucent objects
 
-            const translucentPassEncoder: IGPURenderPass = {
+            const translucentPassEncoder: IRenderPass = {
                 descriptor: translucentPassDescriptor,
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
-                        __type: "IGPUScissorRect",
-                        x: scissorX,
-                        y: scissorY,
-                        width: scissorWidth,
-                        height: scissorHeight
-                    },
-                    {
+                        scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
                         pipeline: translucentPipeline,
-                        bindingResources: {
+                        uniforms: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice],
                         },
@@ -354,32 +333,26 @@ return viewProjMatrix;
             passEncoders.push(translucentPassEncoder);
 
             // Composite the opaque and translucent objects
-            const compositePassEncoder: IGPURenderPass
-            = {
+            const compositePassEncoder: IRenderPass
+                = {
                 descriptor: compositePassDescriptor,
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
-                        __type: "IGPUScissorRect",
-                        x: scissorX,
-                        y: scissorY,
-                        width: scissorWidth,
-                        height: scissorHeight
-                    },
-                    {
+                        scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
                         pipeline: compositePipeline,
-                        bindingResources: {
+                        uniforms: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice]
                         },
-                        draw: { vertexCount: 6 },
+                        drawVertex: { vertexCount: 6 },
                     }
                 ]
             };
             passEncoders.push(compositePassEncoder);
         }
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders,
             }],

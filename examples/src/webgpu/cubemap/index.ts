@@ -1,10 +1,10 @@
+import { IBufferBinding, IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture, ITextureImageSource } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import sampleCubemapWGSL from "./sampleCubemap.frag.wgsl";
-
-import { IGPUBufferBinding, IGPUTextureImageSource, IGPURenderObject, IGPURenderPassDescriptor, IGPUSampler, IGPUSubmit, IGPUTexture, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -16,7 +16,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Fetch the 6 separate images for negative/positive x, y, z axis of a cubemap
     // and upload it into a GPUTexture.
-    let cubemapTexture: IGPUTexture;
+    let cubemapTexture: ITexture;
     {
         // The order of the array layers is [+X, -X, +Y, -Y, +Z, -Z]
         const imgSrcs = [
@@ -55,23 +55,22 @@ const init = async (canvas: HTMLCanvasElement) =>
         const imageBitmaps = await Promise.all(promises);
         const textureSource = imageBitmaps.map((v, i) =>
         {
-            const item: IGPUTextureImageSource = {
-                source: { source: v }, destination: { origin: { x: 0, y: 0, z: i } }, copySize: { width: v.width, height: v.height }
+            const item: ITextureImageSource = {
+                image: v, textureOrigin: [0, 0, i]
             };
 
             return item;
         });
 
         cubemapTexture = {
-            dimension: "2d",
             size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
+            dimension: "cube",
             format: "rgba8unorm",
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-            source: textureSource,
+            sources: textureSource,
         };
     }
 
-    const sampler: IGPUSampler = {
+    const sampler: ISampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -107,7 +106,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         );
     }
 
-    const renderPass: IGPURenderPassDescriptor = {
+    const renderPass: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -120,34 +119,34 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
             primitive: {
-                cullMode: "none",
+                cullFace: "none",
             },
         },
         vertices: {
             position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
             uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        bindingResources: {
+        uniforms: {
             uniforms: {
                 modelViewProjectionMatrix: new Float32Array(16)
             },
             mySampler: sampler,
-            myTexture: { texture: cubemapTexture, dimension: "cube" },
+            myTexture: { texture: cubemapTexture },
         },
-        draw: { vertexCount: cubeVertexCount },
+        drawVertex: { vertexCount: cubeVertexCount },
     };
 
     function frame()
     {
         updateTransformationMatrix();
 
-        (renderObject.bindingResources.uniforms as IGPUBufferBinding).modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        (renderObject.uniforms.uniforms as IBufferBinding).modelViewProjectionMatrix = modelViewProjectionMatrix;
 
-        const data: IGPUSubmit = {
+        const data: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: [

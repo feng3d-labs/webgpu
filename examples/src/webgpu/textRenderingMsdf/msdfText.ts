@@ -2,7 +2,8 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPURenderBundle, IGPURenderPassObject, IGPURenderPipeline, IGPUSampler, IGPUTexture } from "@feng3d/webgpu-renderer";
+import { IRenderPassObject, IRenderPipeline, ISampler, ITexture, IUniforms } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPURenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -31,8 +32,8 @@ export class MsdfFont
   charCount: number;
   defaultChar: MsdfChar;
   constructor(
-    public pipeline: IGPURenderPipeline,
-    public bindGroup: IGPUBindingResources,
+    public pipeline: IRenderPipeline,
+    public bindGroup: IUniforms,
     public lineHeight: number,
     public chars: { [x: number]: MsdfChar },
     public kernings: KerningMap
@@ -51,7 +52,7 @@ export class MsdfFont
       char = this.defaultChar;
     }
 
-return char;
+    return char;
   }
 
   // Gets the distance in pixels a line should advance for a given character code. If the upcoming
@@ -68,7 +69,7 @@ return char;
       }
     }
 
-return char.xadvance;
+    return char.xadvance;
   }
 }
 
@@ -114,7 +115,7 @@ export class MsdfText
       buffer.writeBuffers = writeBuffers;
     }
 
-return this.renderBundle;
+    return this.renderBundle;
   }
 
   setTransform(matrix: Mat4)
@@ -148,8 +149,8 @@ export interface MsdfTextFormattingOptions
 
 export class MsdfTextRenderer
 {
-  pipelinePromise: IGPURenderPipeline;
-  sampler: IGPUSampler;
+  pipelinePromise: IRenderPipeline;
+  sampler: ISampler;
 
   cameraUniformBuffer: Float32Array = new Float32Array(16 * 2);
 
@@ -190,7 +191,6 @@ export class MsdfTextRenderer
       },
       primitive: {
         topology: "triangle-strip",
-        stripIndexFormat: "uint32",
       },
       depthStencil: {
         depthWriteEnabled: false,
@@ -204,22 +204,16 @@ export class MsdfTextRenderer
     const response = await fetch(url);
     const imageBitmap = await createImageBitmap(await response.blob());
 
-    const texture: IGPUTexture = {
+    const texture: ITexture = {
+      size: [imageBitmap.width, imageBitmap.height],
       label: `MSDF font texture ${url}`,
-      size: [imageBitmap.width, imageBitmap.height, 1],
       format: "rgba8unorm",
-      usage:
-        GPUTextureUsage.TEXTURE_BINDING
-        | GPUTextureUsage.COPY_DST
-        | GPUTextureUsage.RENDER_ATTACHMENT,
-      source: [{
-        source: { source: imageBitmap },
-        destination: {},
-        copySize: [imageBitmap.width, imageBitmap.height]
+      sources: [{
+        image: imageBitmap,
       }]
     };
 
-return texture;
+    return texture;
   }
 
   async createFont(fontJsonUrl: string): Promise<MsdfFont>
@@ -230,7 +224,7 @@ return texture;
     const i = fontJsonUrl.lastIndexOf("/");
     const baseUrl = i !== -1 ? fontJsonUrl.substring(0, i + 1) : undefined;
 
-    const pagePromises: Promise<IGPUTexture>[] = [];
+    const pagePromises: Promise<ITexture>[] = [];
     for (const pageUrl of json.pages)
     {
       pagePromises.push(this.loadTexture(baseUrl + pageUrl));
@@ -262,7 +256,7 @@ return texture;
 
     const pageTextures = await Promise.all(pagePromises);
 
-    const bindGroup: IGPUBindingResources = {
+    const bindGroup: IUniforms = {
       fontTexture: { texture: pageTextures[0] },
       fontSampler: this.sampler,
       chars: { bufferView: charsArray }
@@ -324,7 +318,7 @@ return texture;
         }
       );
     }
- else
+    else
     {
       measurements = this.measureText(
         font,
@@ -339,21 +333,21 @@ return texture;
       );
     }
 
-    const bindGroup: IGPUBindingResources = {
+    const bindGroup: IUniforms = {
       camera: { bufferView: this.cameraUniformBuffer },
       text: { bufferView: textBuffer },
     };
 
     const renderBundle: IGPURenderBundle = {
-      __type: "IGPURenderBundle",
+      __type: "RenderBundle",
       renderObjects: [
         {
           pipeline: font.pipeline,
-          bindingResources: {
+          uniforms: {
             ...font.bindGroup,
             ...bindGroup,
           },
-          draw: { vertexCount: 4, instanceCount: measurements.printedCharCount },
+          drawVertex: { vertexCount: 4, instanceCount: measurements.printedCharCount },
         }
       ],
     };
@@ -450,7 +444,7 @@ return texture;
     buffer.writeBuffers = writeBuffers;
   }
 
-  render(renderObjects: IGPURenderPassObject[], ...text: MsdfText[])
+  render(renderObjects: IRenderPassObject[], ...text: MsdfText[])
   {
     const renderBundles = text.map((t) => t.getRenderBundle());
 

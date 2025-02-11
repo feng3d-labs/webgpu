@@ -3,7 +3,7 @@ export interface IGPURenderPassFormat
     readonly attachmentSize: { readonly width: number, readonly height: number }
     readonly colorFormats: readonly GPUTextureFormat[],
     readonly depthStencilFormat: GPUTextureFormat,
-    readonly multisample?: 4
+    readonly sampleCount?: 4
     /**
      * 初始化后被自动赋值，用于识别通道格式是否相同。
      */

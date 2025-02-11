@@ -10,7 +10,8 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { IGPUBindingResources, IGPUCanvasContext, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -43,7 +44,6 @@ const xCount = 1;
 const yCount = 5;
 const numInstances = xCount * yCount;
 const matrixFloatCount = 16; // 4x4 matrix
-const matrixStride = 4 * matrixFloatCount; // 64;
 
 const depthRangeRemapMatrix = mat4.identity();
 depthRangeRemapMatrix[10] = -1;
@@ -78,7 +78,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const vertices: IGPUVertexAttributes = {
+    const vertices: IVertexAttributes = {
         position: { data: geometryVertexArray, format: "float32x4", offset: geometryPositionOffset, arrayStride: geometryVertexSize },
         color: { data: geometryVertexArray, format: "float32x4", offset: geometryColorOffset, arrayStride: geometryVertexSize },
     };
@@ -87,18 +87,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // depthPrePass is used to render scene to the depth texture
     // this is not needed if you just want to use reversed z to render a scene
-    const depthPrePassRenderPipelineDescriptorBase: IGPURenderPipeline = {
+    const depthPrePassRenderPipelineDescriptorBase: IRenderPipeline = {
         vertex: {
             code: vertexDepthPrePassWGSL,
         },
         primitive: {
-            cullMode: "back",
+            cullFace: "back",
         },
     };
 
     // we need the depthCompare to fit the depth buffer mode we are using.
     // this is the same for other passes
-    const depthPrePassPipelines: IGPURenderPipeline[] = [];
+    const depthPrePassPipelines: IRenderPipeline[] = [];
     depthPrePassPipelines[DepthBufferMode.Default] = {
         ...depthPrePassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -116,7 +116,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // precisionPass is to draw precision error as color of depth value stored in depth buffer
     // compared to that directly calcualated in the shader
-    const precisionPassRenderPipelineDescriptorBase: IGPURenderPipeline = {
+    const precisionPassRenderPipelineDescriptorBase: IRenderPipeline = {
         vertex: {
             code: vertexPrecisionErrorPassWGSL,
         },
@@ -124,11 +124,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: fragmentPrecisionErrorPassWGSL,
         },
         primitive: {
-            cullMode: "back",
+            cullFace: "back",
         },
     };
 
-    const precisionPassPipelines: IGPURenderPipeline[] = [];
+    const precisionPassPipelines: IRenderPipeline[] = [];
     precisionPassPipelines[DepthBufferMode.Default] = {
         ...precisionPassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -145,7 +145,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // colorPass is the regular render pass to render the scene
-    const colorPassRenderPipelineDescriptorBase: IGPURenderPipeline = {
+    const colorPassRenderPipelineDescriptorBase: IRenderPipeline = {
         vertex: {
             code: vertexWGSL,
         },
@@ -153,12 +153,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: fragmentWGSL,
         },
         primitive: {
-            cullMode: "back",
+            cullFace: "back",
         },
     };
 
     //
-    const colorPassPipelines: IGPURenderPipeline[] = [];
+    const colorPassPipelines: IRenderPipeline[] = [];
     colorPassPipelines[DepthBufferMode.Default] = {
         ...colorPassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -177,7 +177,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // textureQuadPass is draw a full screen quad of depth texture
     // to see the difference of depth value using reversed z compared to default depth buffer usage
     // 0.0 will be the furthest and 1.0 will be the closest
-    const textureQuadPassPipline: IGPURenderPipeline = {
+    const textureQuadPassPipline: IRenderPipeline = {
         vertex: {
             code: vertexTextureQuadWGSL,
         },
@@ -186,19 +186,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const depthTexture: IGPUTexture = {
+    const depthTexture: ITexture = {
         size: [canvas.width, canvas.height],
         format: depthBufferFormat,
-        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
     };
 
-    const defaultDepthTexture: IGPUTexture = {
+    const defaultDepthTexture: ITexture = {
         size: [canvas.width, canvas.height],
         format: depthBufferFormat,
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
-    const depthPrePassDescriptor: IGPURenderPassDescriptor = {
+    const depthPrePassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [],
         depthStencilAttachment: {
             view: { texture: depthTexture },
@@ -213,11 +211,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // the scene twice using different depth buffer mode on splitted viewport
     // of the same canvas
     // see the difference of the loadOp of the colorAttachments
-    const drawPassDescriptor: IGPURenderPassDescriptor = {
+    const drawPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
-                clearValue: { r: 0.0, g: 0.0, b: 0.5, a: 1.0 },
+                clearValue: [0.0, 0.0, 0.5, 1.0],
             }
         ],
         depthStencilAttachment: {
@@ -229,7 +227,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const drawPassLoadDescriptor: IGPURenderPassDescriptor = {
+    const drawPassLoadDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -246,16 +244,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
     const drawPassDescriptors = [drawPassDescriptor, drawPassLoadDescriptor];
 
-    const textureQuadPassDescriptor: IGPURenderPassDescriptor = {
+    const textureQuadPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
 
-                clearValue: { r: 0.0, g: 0.0, b: 0.5, a: 1.0 },
+                clearValue: [0.0, 0.0, 0.5, 1.0],
             },
         ],
     };
-    const textureQuadPassLoadDescriptor: IGPURenderPassDescriptor = {
+    const textureQuadPassLoadDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -270,40 +268,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         textureQuadPassLoadDescriptor,
     ];
 
-    const depthTextureBindGroup: IGPUBindingResources = {
+    const depthTextureBindGroup: IUniforms = {
         depthTexture: { texture: depthTexture },
     };
 
-    const uniformBufferSize = numInstances * matrixStride;
-
-    const uniformBuffer = new Float32Array(uniformBufferSize / 4);
     const cameraMatrixBuffer = new Float32Array(16);
     const cameraMatrixReversedDepthBuffer = new Float32Array(16);
 
-    const uniforms = {
-        modelMatrix: uniformBuffer,
-    };
-
-    const camera0 = {
-        viewProjectionMatrix: cameraMatrixBuffer,
-    };
-    const camera1 = {
-        viewProjectionMatrix: cameraMatrixReversedDepthBuffer,
-    };
-
-    const uniformBindGroups: IGPUBindingResources[] = [
-        {
-            uniforms,
-            camera: camera0,
-        },
-        {
-            uniforms,
-            camera: camera1,
-        },
-    ];
-
     const modelMatrices = new Array<Mat4>(numInstances);
-    const mvpMatricesData = new Float32Array(matrixFloatCount * numInstances);
+    const mvpMatricesData: Float32Array[] = [];
 
     let m = 0;
     for (let x = 0; x < xCount; x++)
@@ -325,6 +298,28 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             m++;
         }
     }
+
+    const uniforms = {
+        modelMatrix: mvpMatricesData,
+    };
+
+    const camera0 = {
+        viewProjectionMatrix: cameraMatrixBuffer,
+    };
+    const camera1 = {
+        viewProjectionMatrix: cameraMatrixReversedDepthBuffer,
+    };
+
+    const uniformBindGroups: IUniforms[] = [
+        {
+            uniforms,
+            camera: camera0,
+        },
+        {
+            uniforms,
+            camera: camera1,
+        },
+    ];
 
     const viewMatrix = mat4.translation(vec3.fromValues(0, 0, -12));
 
@@ -348,7 +343,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         const now = Date.now() / 1000;
 
-        for (let i = 0, m = 0; i < numInstances; i++, m += matrixFloatCount)
+        for (let i = 0; i < numInstances; i++)
         {
             mat4.rotate(
                 modelMatrices[i],
@@ -356,16 +351,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 (Math.PI / 180) * 30,
                 tmpMat4
             );
-            mvpMatricesData.set(tmpMat4, m);
+            mvpMatricesData[i] = tmpMat4.slice();
         }
     }
 
     const settings = {
         mode: "color",
     };
-    gui.add(settings, "mode", ["color", "precision-error", "depth-texture"]);
+    gui.add(settings, "mode", ["color", "precision-error", "depth-texture"]).onChange(updateSubmit);
 
-    const colorPassEncoders: IGPURenderPass[] = [];
+    const colorPassEncoders: IRenderPass[] = [];
 
     for (const m of depthBufferModes)
     {
@@ -378,17 +373,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 }
             },
             renderObjects: [
-                { __type: "IGPUViewport", x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                 {
+                    viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: colorPassPipelines[m],
-                    bindingResources: { ...uniformBindGroups[m] },
+                    uniforms: { ...uniformBindGroups[m] },
                     vertices,
-                    draw: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    drawVertex: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                 }]
         });
     }
 
-    const precisionErrorPassEncoders: IGPURenderPass[] = [];
+    const precisionErrorPassEncoders: IRenderPass[] = [];
     for (const m of depthBufferModes)
     {
         precisionErrorPassEncoders.push({
@@ -401,19 +396,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             renderObjects: [
                 {
-                    __type: "IGPUViewport",
-                    x: (canvas.width * m) / 2,
-                    y: 0,
-                    width: canvas.width / 2,
-                    height: canvas.height,
-                    minDepth: 0,
-                    maxDepth: 1
-                },
-                {
+                    viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
-                    bindingResources: { ...uniformBindGroups[m] },
+                    uniforms: { ...uniformBindGroups[m] },
                     vertices,
-                    draw: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    drawVertex: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                 }]
         });
         precisionErrorPassEncoders.push({
@@ -426,24 +413,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             renderObjects: [
                 {
-                    __type: "IGPUViewport",
-                    x: (canvas.width * m) / 2,
-                    y: 0,
-                    width: canvas.width / 2,
-                    height: canvas.height,
-                    minDepth: 0,
-                    maxDepth: 1
-                },
-                {
+                    viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: precisionPassPipelines[m],
-                    bindingResources: { ...uniformBindGroups[m], ...depthTextureBindGroup },
+                    uniforms: { ...uniformBindGroups[m], ...depthTextureBindGroup },
                     vertices,
-                    draw: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    drawVertex: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                 }]
         });
     }
 
-    const depthBufferPassEncoders: IGPURenderPass[] = [];
+    const depthBufferPassEncoders: IRenderPass[] = [];
     for (const m of depthBufferModes)
     {
         depthBufferPassEncoders.push({
@@ -456,47 +435,30 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             renderObjects: [
                 {
-                    __type: "IGPUViewport",
-                    x: (canvas.width * m) / 2,
-                    y: 0,
-                    width: canvas.width / 2,
-                    height: canvas.height,
-                    minDepth: 0,
-                    maxDepth: 1
-                },
-                {
+                    viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
-                    bindingResources: { ...uniformBindGroups[m] },
+                    uniforms: { ...uniformBindGroups[m] },
                     vertices,
-                    draw: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    drawVertex: { vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                 }]
         });
         depthBufferPassEncoders.push({
             descriptor: textureQuadPassDescriptors1[m],
-            renderObjects: [{
-                __type: "IGPUViewport",
-                x: (canvas.width * m) / 2,
-                y: 0,
-                width: canvas.width / 2,
-                height: canvas.height,
-                minDepth: 0,
-                maxDepth: 1
-            },
-            {
-                pipeline: textureQuadPassPipline,
-                bindingResources: { ...depthTextureBindGroup },
-                draw: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
-            }]
+            renderObjects: [
+                {
+                    viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
+                    pipeline: textureQuadPassPipline,
+                    uniforms: { ...depthTextureBindGroup },
+                    drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+                }]
         });
     }
 
-    function frame()
+    let submit: ISubmit;
+
+    function updateSubmit()
     {
-        updateTransformationMatrix();
-
-        uniforms.modelMatrix = mvpMatricesData.slice(0);
-
-        let passEncoders: IGPURenderPass[];
+        let passEncoders: IRenderPass[];
 
         if (settings.mode === "color")
         {
@@ -512,18 +474,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             passEncoders = depthBufferPassEncoders;
         }
 
-        const submit: IGPUSubmit = {
+        submit = {
             commandEncoders: [
                 {
                     passEncoders,
                 }
             ]
         };
+    }
+
+    function frame()
+    {
+        updateTransformationMatrix();
 
         webgpu.submit(submit);
 
         requestAnimationFrame(frame);
     }
+
+    updateSubmit();
     requestAnimationFrame(frame);
 };
 

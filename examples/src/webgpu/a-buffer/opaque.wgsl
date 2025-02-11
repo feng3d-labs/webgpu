@@ -1,5 +1,7 @@
 struct Uniforms {
   modelViewProjectionMatrix: mat4x4f,
+  maxStorableFragments: u32,
+  targetWidth: u32,
 };
 
 @binding(0) @group(0) var<uniform> uniforms: Uniforms;

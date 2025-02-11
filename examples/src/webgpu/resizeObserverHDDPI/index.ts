@@ -1,13 +1,14 @@
 import { GUI } from "dat.gui";
 import checkerWGSL from "./checker.wgsl";
 
-import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const webgpu = await new WebGPU().init();
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: { code: checkerWGSL },
         fragment: {
             code: checkerWGSL,
@@ -20,7 +21,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         size: undefined,
     };
 
-    const bindGroup: IGPUBindingResources = {
+    const bindGroup:  IUniforms = {
         uni,
     };
 
@@ -87,7 +88,7 @@ return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
         uni.color1 = cssColorToRGBA(settings.color1);
         uni.size = settings.size;
 
-        const renderPassDescriptor: IGPURenderPassDescriptor = {
+        const renderPassDescriptor: IRenderPassDescriptor = {
             colorAttachments: [
                 {
                     view: { texture: { context: { canvasId: canvas.id } } },
@@ -98,14 +99,14 @@ return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
             ],
         };
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
                         pipeline,
-                        bindingResources: bindGroup,
-                        draw: { vertexCount: 3 },
+                        uniforms: bindGroup,
+                        drawVertex: { vertexCount: 3 },
                     }]
                 }]
             }]

@@ -1,50 +1,33 @@
-import { IGPUTextureView } from "./IGPUTextureView";
+import { ITextureView } from "@feng3d/render-api";
 
-/**
- * GPU渲染通道颜色附件。
- *
- * {@link GPURenderPassColorAttachment}
- */
-export interface IGPURenderPassColorAttachment
+declare module "@feng3d/render-api"
 {
-    /**
-     * A {@link GPUTextureView} describing the texture subresource that will be output to for this
-     * color attachment.
-     */
-    readonly view: IGPUTextureView;
 
     /**
-     * Indicates the depth slice index of {@link GPUTextureViewDimension#"3d"} {@link GPURenderPassColorAttachment#view}
-     * that will be output to for this color attachment.
-     */
-    readonly depthSlice?: GPUIntegerCoordinate;
-
-    /**
-     * Indicates the value to clear {@link GPURenderPassColorAttachment#view} to prior to executing the
-     * render pass. If not map/exist|provided, defaults to `{r: 0, g: 0, b: 0, a: 0}`. Ignored
-     * if {@link GPURenderPassColorAttachment#loadOp} is not {@link GPULoadOp#"clear"}.
-     * The components of {@link GPURenderPassColorAttachment#clearValue} are all double values.
-     * They are converted [$to a texel value of texture format$] matching the render attachment.
-     * If conversion fails, a validation error is generated.
+     * GPU渲染通道颜色附件。
      *
-     * 默认 `[0, 0, 0, 0]` 。
+     * {@link GPURenderPassColorAttachment}
      */
-    readonly clearValue?: GPUColor;
+    export interface IRenderPassColorAttachment
+    {
+        /**
+         * A {@link GPUTextureView} describing the texture subresource that will be output to for this
+         * color attachment.
+         */
+        readonly view?: ITextureView;
 
-    /**
-     * Indicates the load operation to perform on {@link GPURenderPassColorAttachment#view} prior to
-     * executing the render pass.
-     * Note: It is recommended to prefer clearing; see {@link GPULoadOp#"clear"} for details.
-     *
-     * 默认 `"clear"` 。
-    */
-    readonly loadOp?: GPULoadOp;
+        /**
+         * The store operation to perform on {@link GPURenderPassColorAttachment#view}
+         * after executing the render pass.
+         *
+          * 默认 `"store"` 。
+          */
+        readonly storeOp?: GPUStoreOp;
 
-    /**
-     * The store operation to perform on {@link GPURenderPassColorAttachment#view}
-     * after executing the render pass.
-     *
-      * 默认 `"store"` 。
-      */
-    readonly storeOp?: GPUStoreOp;
+        /**
+         * Indicates the depth slice index of {@link GPUTextureViewDimension#"3d"} {@link GPURenderPassColorAttachment#view}
+         * that will be output to for this color attachment.
+         */
+        readonly depthSlice?: GPUIntegerCoordinate;
+    }
 }

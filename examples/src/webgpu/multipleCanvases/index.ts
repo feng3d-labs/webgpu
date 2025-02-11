@@ -1,4 +1,5 @@
-import { getIGPUBuffer, IGPUBindingResources, IGPUCanvasContext, IGPUPassEncoder, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { IPassEncoder, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -16,20 +17,20 @@ function createBufferWithData(
     });
     device.queue.writeBuffer(buffer, 0, data);
 
-return buffer;
+    return buffer;
 }
 
 type Model = {
     vertices: Float32Array;
     indices: Uint32Array;
-    vertexAttributes: IGPUVertexAttributes,
+    vertexAttributes: IVertexAttributes,
 };
 
 function createVertexAndIndexBuffer(
     { vertices, indices }: { vertices: Float32Array; indices: Uint32Array }
 ): Model
 {
-    const vertexAttributes: IGPUVertexAttributes = {
+    const vertexAttributes: IVertexAttributes = {
         position: { data: vertices, format: "float32x3", offset: 0, arrayStride: 6 * 4 },
         normal: { data: vertices, format: "float32x3", offset: 3 * 4, arrayStride: 6 * 4 },
     };
@@ -56,13 +57,13 @@ const init = async () =>
             max = 1;
             min = 0;
         }
- else if (max === undefined)
+        else if (max === undefined)
         {
             max = min;
             min = 0;
         }
 
-return Math.random() * (max - min) + min;
+        return Math.random() * (max - min) + min;
     }
 
     function randInt(min: number, max?: number)
@@ -113,7 +114,7 @@ return Math.random() * (max - min) + min;
   `,
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         label: "our hardcoded red triangle pipeline",
         vertex: {
             ...module,
@@ -122,7 +123,7 @@ return Math.random() * (max - min) + min;
             ...module,
         },
         primitive: {
-            cullMode: "back",
+            cullFace: "back",
         },
         depthStencil: {
             depthWriteEnabled: true,
@@ -158,7 +159,7 @@ return Math.random() * (max - min) + min;
             {
                 visibleCanvasSet.add(canvas);
             }
- else
+            else
             {
                 visibleCanvasSet.delete(canvas);
             }
@@ -167,14 +168,14 @@ return Math.random() * (max - min) + min;
 
     type CanvasInfo = {
         context: IGPUCanvasContext;
-        clearValue: number[];
+        clearValue: [number, number, number, number];
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
         uniformValues: Float32Array;
-        bindGroup: IGPUBindingResources;
+        bindGroup:  IUniforms;
         rotation: number;
         model: Model;
-        renderPassDescriptor?: IGPURenderPassDescriptor
+        renderPassDescriptor?: IRenderPassDescriptor
     };
 
     const outerElem = document.querySelector("#outer");
@@ -223,7 +224,7 @@ return Math.random() * (max - min) + min;
         colorValue.set(randColor());
 
         // Make a bind group for this uniform
-        const bindGroup: IGPUBindingResources = {
+        const bindGroup:  IUniforms = {
             uni: {
                 bufferView: uniformValues,
                 worldViewProjectionMatrix: undefined,
@@ -238,7 +239,7 @@ return Math.random() * (max - min) + min;
 
         canvasToInfoMap.set(canvas, {
             context,
-            clearValue: randColor(),
+            clearValue: randColor() as [number, number, number, number],
             worldViewProjectionMatrixValue,
             worldMatrixValue,
             uniformValues,
@@ -253,7 +254,7 @@ return Math.random() * (max - min) + min;
         time *= 0.001; // convert to seconds;
 
         // make a command encoder to start encoding commands
-        const passEncoders: IGPUPassEncoder[] = [];
+        const passEncoders: IPassEncoder[] = [];
 
         visibleCanvasSet.forEach((canvas) =>
         {
@@ -271,7 +272,7 @@ return Math.random() * (max - min) + min;
 
             // Get the current texture from the canvas context and
             // set it as the texture to render to.
-            const renderPassDescriptor: IGPURenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
+            const renderPassDescriptor: IRenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
                 label: "our basic canvas renderPass",
                 colorAttachments: [
                     {
@@ -320,13 +321,13 @@ return Math.random() * (max - min) + min;
                     pipeline,
                     vertices: vertexAttributes,
                     indices,
-                    bindingResources: bindGroup,
+                    uniforms: bindGroup,
                     drawIndexed: { indexCount: indices.length },
                 }],
             });
         });
 
-        const submit: IGPUSubmit = {
+        const submit: ISubmit = {
             commandEncoders: [{
                 passEncoders,
             }]

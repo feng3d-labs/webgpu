@@ -1,9 +1,11 @@
+import { IBufferBinding, IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { watcher } from "@feng3d/watcher";
+import { getIGPUBuffer, IGPUOcclusionQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
+
 import solidColorLitWGSL from "./solidColorLit.wgsl";
 
-import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUBufferBinding, IGPUOcclusionQuery, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const info = document.querySelector("#info");
 
@@ -20,7 +22,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: solidColorLitWGSL,
         },
@@ -29,7 +31,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
         primitive: {
             topology: "triangle-list",
-            cullMode: "back",
+            cullFace: "back",
         },
         depthStencil: {
             depthWriteEnabled: true,
@@ -108,7 +110,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const vertexBuf = vertexData;
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -124,14 +126,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline,
         vertices: {
             position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
             normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
         },
         indices,
-        bindingResources: {
+        uniforms: {
             uni: {
                 bufferView: undefined,
             },
@@ -139,11 +141,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         drawIndexed: { indexCount: indices.length },
     };
 
-    const renderObjects: IGPURenderObject[] = objectInfos.map((v) =>
+    const renderObjects: IRenderObject[] = objectInfos.map((v) =>
     {
-        const ro: IGPURenderObject = {
+        const ro: IRenderObject = {
             ...renderObject,
-            bindingResources: {
+            uniforms: {
                 uni: {
                     bufferView: v.uniformBuffer,
                 },
@@ -154,15 +156,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     });
 
     const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.map((ro) =>
-    ({ __type: "IGPUOcclusionQuery", renderObjects: [ro] }));
+    ({ __type: "OcclusionQuery", renderObjects: [ro] }));
 
-    const renderPass: IGPURenderPass = {
+    const renderPass: IRenderPass = {
         descriptor: renderPassDescriptor,
         // renderObjects: renderObjects,
         renderObjects: occlusionQueryObjects,
     };
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
         commandEncoders: [
             {
                 passEncoders: [
@@ -220,7 +222,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
-                const buffer = (renderObjects[i].bindingResources.uni as IGPUBufferBinding).bufferView;
+                const buffer = (renderObjects[i].uniforms.uni as IBufferBinding).bufferView;
                 getIGPUBuffer(buffer).data = uniformValues.slice();
             }
         );
@@ -231,7 +233,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         watcher.watch(renderPass, "occlusionQueryResults", () =>
         {
             const visible = objectInfos
-                .filter((_, i) => renderPass.occlusionQueryResults[i].result)
+                .filter((_, i) => renderPass.occlusionQueryResults[i].result.result)
                 .map(({ id }) => id)
                 .join("");
             info.textContent = `visible: ${visible}`;

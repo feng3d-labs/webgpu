@@ -1,11 +1,13 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
+import { IBufferBinding, IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
+
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
-import { IGPUBufferBinding, IGPURenderObject, IGPURenderPassDescriptor, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -15,7 +17,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -35,36 +37,36 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniformBuffer = new ArrayBuffer(uniformBufferSize);
 
-    const uniforms: IGPUBufferBinding = {
+    const uniforms: IBufferBinding = {
         bufferView: new Uint8Array(uniformBuffer, 0, matrixSize),
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {
-                cullMode: "back",
+                cullFace: "back",
             },
         },
         vertices: {
             position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
             uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        bindingResources: {
+        uniforms: {
             uniforms,
         },
-        draw: { vertexCount: cubeVertexCount },
+        drawVertex: { vertexCount: cubeVertexCount },
     };
 
-    const uniforms1: IGPUBufferBinding = {
+    const uniforms1: IBufferBinding = {
         bufferView: new Uint8Array(uniformBuffer, offset, matrixSize),
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const renderObject1: IGPURenderObject = {
+    const renderObject1: IRenderObject = {
         ...renderObject,
-        bindingResources: {
+        uniforms: {
             uniforms: uniforms1,
         },
     };
@@ -117,22 +119,22 @@ const init = async (canvas: HTMLCanvasElement) =>
         );
     }
 
+    const data: ISubmit = {
+        commandEncoders: [
+            {
+                passEncoders: [
+                    { descriptor: renderPassDescriptor, renderObjects: [renderObject, renderObject1] },
+                ]
+            }
+        ],
+    };
+
     function frame()
     {
         updateTransformationMatrix();
 
-        uniforms.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix1); // 需要赋值新对象才能触发数据变更上传GPU
-        uniforms1.modelViewProjectionMatrix = new Float32Array(modelViewProjectionMatrix2); // 需要赋值新对象才能触发数据变更上传GPU
-
-        const data: IGPUSubmit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPassDescriptor, renderObjects: [renderObject, renderObject1] },
-                    ]
-                }
-            ],
-        };
+        uniforms.modelViewProjectionMatrix = modelViewProjectionMatrix1;
+        uniforms1.modelViewProjectionMatrix = modelViewProjectionMatrix2;
 
         webgpu.submit(data);
 

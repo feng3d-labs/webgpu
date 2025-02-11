@@ -2,7 +2,8 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IGPURenderBundle, IGPURenderObject, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, WebGPU } from "@feng3d/webgpu-renderer";
+import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { IGPURenderBundle, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -32,7 +33,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const vec4Size = 4 * Float32Array.BYTES_PER_ELEMENT;
 
-    const pipelineDesc: IGPURenderPipeline = {
+    const pipelineDesc: IRenderPipeline = {
         vertex: {
             code: animometerWGSL,
         },
@@ -44,7 +45,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         ...pipelineDesc,
     };
 
@@ -55,14 +56,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         0.1, -0.1, 0, 1, /**/ 0, 0, 1, 1,
     ]);
 
-    const renderObject: IGPURenderObject = {
+    const renderObject: IRenderObject = {
         pipeline,
         vertices: {
             position: { data: vertexBuffer, format: "float32x4", offset: 0, arrayStride: 2 * vec4Size },
             color: { data: vertexBuffer, format: "float32x4", offset: vec4Size, arrayStride: 2 * vec4Size },
         },
-        bindingResources: {},
-        draw: { vertexCount: 3, instanceCount: 1 },
+        uniforms: {},
+        drawVertex: { vertexCount: 3, instanceCount: 1 },
     };
 
     const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
@@ -87,12 +88,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         value: 0,
     };
 
-    const renderObjects0: IGPURenderObject[] = [];
+    const renderObjects0: IRenderObject[] = [];
     for (let i = 0; i < maxTriangles; ++i)
     {
         renderObjects0[i] = {
             ...renderObject,
-            bindingResources: {
+            uniforms: {
                 time,
                 uniforms: {
                     bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
@@ -101,11 +102,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     }
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
-                clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+                clearValue: [0.0, 0.0, 0.0, 1.0],
             }
         ],
     };
@@ -120,12 +121,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const uniformTime = new Float32Array([0]);
 
         const renderBundleObject: IGPURenderBundle = {
-            __type: "IGPURenderBundle",
+            __type: "RenderBundle",
             renderObjects
         };
 
-        const renderPasss: (IGPURenderPass)[] = [];
-        const submit: IGPUSubmit = {
+        const renderPasss: IRenderPass[] = [];
+        const submit: ISubmit = {
             commandEncoders: [
                 {
                     passEncoders: renderPasss,

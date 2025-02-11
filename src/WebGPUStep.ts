@@ -1,11 +1,7 @@
+import { ICopyBufferToBuffer, ICopyTextureToTexture, IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, ISubmit } from "@feng3d/render-api";
+
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
 import { IGPUComputePass } from "./data/IGPUComputePass";
-import { IGPUCopyBufferToBuffer } from "./data/IGPUCopyBufferToBuffer";
-import { IGPUCopyTextureToTexture } from "./data/IGPUCopyTextureToTexture";
-import { IGPURenderObject } from "./data/IGPURenderObject";
-import { IGPURenderPass, IGPURenderPassObject } from "./data/IGPURenderPass";
-import { IGPURenderPassDescriptor } from "./data/IGPURenderPassDescriptor";
-import { IGPUSubmit } from "./data/IGPUSubmit";
 import { WebGPU } from "./WebGPU";
 
 /**
@@ -15,8 +11,8 @@ import { WebGPU } from "./WebGPU";
  */
 export class WebGPUStep
 {
-    private _currentSubmit: IGPUSubmit;
-    private _currentRenderPassEncoder: IGPURenderPass;
+    private _currentSubmit: ISubmit;
+    private _currentRenderPassEncoder: IRenderPass;
     private _currentComputePassEncoder: IGPUComputePass;
 
     readonly webGPU: WebGPU;
@@ -26,7 +22,7 @@ export class WebGPUStep
         this.webGPU = webGPU;
     }
 
-    renderPass(descriptor: IGPURenderPassDescriptor)
+    renderPass(descriptor: IRenderPassDescriptor)
     {
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
         //
@@ -37,9 +33,9 @@ export class WebGPUStep
         this._currentSubmit.commandEncoders[0].passEncoders.push(this._currentRenderPassEncoder);
     }
 
-    renderObject(renderObject: IGPURenderObject)
+    renderObject(renderObject: IRenderObject)
     {
-        (this._currentRenderPassEncoder.renderObjects as IGPURenderPassObject[]).push(renderObject);
+        (this._currentRenderPassEncoder.renderObjects as IRenderPassObject[]).push(renderObject);
     }
 
     computePass()
@@ -47,7 +43,7 @@ export class WebGPUStep
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
         //
         this._currentRenderPassEncoder = null;
-        this._currentComputePassEncoder = { __type: "IGPUComputePass", computeObjects: [] };
+        this._currentComputePassEncoder = { __type: "ComputePass", computeObjects: [] };
         this._currentSubmit.commandEncoders[0].passEncoders.push(this._currentComputePassEncoder);
     }
 
@@ -56,7 +52,7 @@ export class WebGPUStep
         this._currentComputePassEncoder.computeObjects.push(computeObject);
     }
 
-    copyTextureToTexture(copyTextureToTexture: IGPUCopyTextureToTexture)
+    copyTextureToTexture(copyTextureToTexture: ICopyTextureToTexture)
     {
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
 
@@ -65,7 +61,7 @@ export class WebGPUStep
         this._currentSubmit.commandEncoders[0].passEncoders.push(copyTextureToTexture);
     }
 
-    copyBufferToBuffer(copyBufferToBuffer: IGPUCopyBufferToBuffer)
+    copyBufferToBuffer(copyBufferToBuffer: ICopyBufferToBuffer)
     {
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
 
@@ -81,7 +77,7 @@ export class WebGPUStep
      *
      * @see GPUQueue.submit
      */
-    submit(submit?: IGPUSubmit)
+    submit(submit?: ISubmit)
     {
         if (!submit)
         {

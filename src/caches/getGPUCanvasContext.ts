@@ -1,5 +1,5 @@
 import { watcher } from "@feng3d/watcher";
-import { IGPUCanvasContext } from "../data/IGPUTexture";
+import { IGPUCanvasContext } from "../data/IGPUCanvasContext";
 
 export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContext)
 {

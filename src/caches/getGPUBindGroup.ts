@@ -1,11 +1,9 @@
 import { anyEmitter } from "@feng3d/event";
+import { IBufferBinding, ISampler, ITextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
-import { IGPUBufferBinding } from "../data/IGPUBufferBinding";
+import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUExternalTexture } from "../data/IGPUExternalTexture";
-import { IGPUSampler } from "../data/IGPUSampler";
-import { IGPUTextureFromContext } from "../data/IGPUTexture";
-import { IGPUTextureView } from "../data/IGPUTextureView";
 import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
 import { IGPUBindGroupDescriptor } from "../internal/IGPUBindGroupDescriptor";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
@@ -46,23 +44,23 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         };
 
         //
-        if ((v.resource as IGPUBufferBinding).bufferView)
+        if ((v.resource as IBufferBinding).bufferView)
         {
             updateResource = () =>
             {
-                entry.resource = getGPUBufferBinding(device, v.resource as IGPUBufferBinding);
+                entry.resource = getGPUBufferBinding(device, v.resource as IBufferBinding);
             };
         }
-        else if ((v.resource as IGPUTextureView).texture)
+        else if ((v.resource as ITextureView).texture)
         {
             updateResource = () =>
             {
-                entry.resource = getGPUTextureView(device, v.resource as IGPUTextureView);
+                entry.resource = getGPUTextureView(device, v.resource as ITextureView);
 
                 anyEmitter.once(entry.resource, GPUTextureView_destroy, onResourceChanged);
             };
 
-            if (((v.resource as IGPUTextureView).texture as IGPUTextureFromContext).context)
+            if (((v.resource as ITextureView).texture as IGPUCanvasTexture).context)
             {
                 awaysUpdateFuncs.push(updateResource);
             }
@@ -80,8 +78,8 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         {
             updateResource = () =>
             {
-                entry.resource = getGPUSampler(device, v.resource as IGPUSampler);
-                anyEmitter.once(v.resource as IGPUSampler, IGPUSampler_changed, onResourceChanged);
+                entry.resource = getGPUSampler(device, v.resource as ISampler);
+                anyEmitter.once(v.resource as ISampler, IGPUSampler_changed, onResourceChanged);
             };
         }
 

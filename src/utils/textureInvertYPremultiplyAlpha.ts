@@ -1,4 +1,4 @@
-import wgsl from "./textureInvertYPremultiplyAlpha.wgsl";
+import { textureInvertYPremultiplyAlpha_wgsl as wgsl } from "./textureInvertYPremultiplyAlpha.wgsl";
 
 /**
  * 操作纹理进行Y轴翻转或进行预乘Alpha。

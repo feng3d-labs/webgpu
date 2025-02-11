@@ -6,7 +6,8 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IGPUBindingResources, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU, getIGPUBuffer } from "@feng3d/webgpu-renderer";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 const shadowDepthTextureSize = 1024;
 
@@ -27,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         vertexBuffer.set(mesh.normals[i], 6 * i + 3);
     }
 
-    const vertices: IGPUVertexAttributes = {
+    const vertices: IVertexAttributes = {
         position: { data: vertexBuffer, format: "float32x3", offset: 0, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
         normal: { data: vertexBuffer, format: "float32x3", offset: Float32Array.BYTES_PER_ELEMENT * 3, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
     };
@@ -41,9 +42,8 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 
     // Create the depth texture for rendering/sampling the shadow map.
-    const shadowDepthTexture: IGPUTexture = {
+    const shadowDepthTexture: ITexture = {
         size: [shadowDepthTextureSize, shadowDepthTextureSize, 1],
-        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
         format: "depth32float",
     };
 
@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         cullMode: "back",
     };
 
-    const shadowPipeline: IGPURenderPipeline = {
+    const shadowPipeline: IRenderPipeline = {
         vertex: {
             code: vertexShadowWGSL,
         },
@@ -68,7 +68,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Create a bind group layout which holds the scene uniforms and
     // the texture+sampler for depth. We create it manually because the WebPU
     // implementation doesn't infer this from the shader (yet).
-    const pipeline: IGPURenderPipeline = {
+    const pipeline: IRenderPipeline = {
         vertex: {
             code: vertexWGSL,
         },
@@ -85,17 +85,16 @@ const init = async (canvas: HTMLCanvasElement) =>
         primitive,
     };
 
-    const depthTexture: IGPUTexture = {
+    const depthTexture: ITexture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus-stencil8",
-        usage: GPUTextureUsage.RENDER_ATTACHMENT,
     };
 
-    const renderPassDescriptor: IGPURenderPassDescriptor = {
+    const renderPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
-                clearValue: { r: 0.5, g: 0.5, b: 0.5, a: 1.0 },
+                clearValue: [0.5, 0.5, 0.5, 1.0],
             }
         ],
         depthStencilAttachment: {
@@ -118,13 +117,13 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Rounded to the nearest multiple of 16.
     const sceneUniformBuffer = new Uint8Array(2 * 4 * 16 + 4 * 4);
 
-    const sceneBindGroupForShadow: IGPUBindingResources = {
+    const sceneBindGroupForShadow: IUniforms = {
         scene: {
             bufferView: sceneUniformBuffer,
         },
     };
 
-    const sceneBindGroupForRender: IGPUBindingResources = {
+    const sceneBindGroupForRender: IUniforms = {
         scene: {
             bufferView: sceneUniformBuffer,
         },
@@ -134,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const modelBindGroup: IGPUBindingResources = {
+    const modelBindGroup: IUniforms = {
         model: {
             bufferView: modelUniformBuffer,
         },
@@ -203,7 +202,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         return viewProjMatrix as Float32Array;
     }
 
-    const shadowPassDescriptor: IGPURenderPassDescriptor = {
+    const shadowPassDescriptor: IRenderPassDescriptor = {
         colorAttachments: [],
         depthStencilAttachment: {
             view: { texture: shadowDepthTexture },
@@ -214,7 +213,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
         commandEncoders: [
             {
                 passEncoders: [
@@ -223,7 +222,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         renderObjects: [
                             {
                                 pipeline: shadowPipeline,
-                                bindingResources: {
+                                uniforms: {
                                     ...sceneBindGroupForShadow,
                                     ...modelBindGroup,
                                 },
@@ -238,7 +237,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         renderObjects: [
                             {
                                 pipeline,
-                                bindingResources: {
+                                uniforms: {
                                     ...sceneBindGroupForRender,
                                     ...modelBindGroup,
                                 },

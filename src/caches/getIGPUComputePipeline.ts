@@ -1,6 +1,7 @@
 import { FunctionInfo } from "wgsl_reflect";
-import { IGPUComputePipeline, IGPUComputeStage } from "../data/IGPUComputeObject";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
+import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
+import { IGPUComputeStage } from "../data/IGPUComputeStage";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。

@@ -1,29 +1,22 @@
-import { watcher } from "@feng3d/watcher";
-import { IGPUSampler } from "../data/IGPUSampler";
 import { anyEmitter } from "@feng3d/event";
+import { ISampler } from "@feng3d/render-api";
+import { watcher } from "@feng3d/watcher";
 import { IGPUSampler_changed } from "../eventnames";
 
-/**
- * GPU采样器默认值。
- */
-export const defaultSampler: IGPUSampler = {
-    addressModeU: undefined,
-    addressModeV: undefined,
-    addressModeW: undefined,
-    magFilter: undefined,
-    minFilter: undefined,
-    mipmapFilter: undefined,
-    lodMinClamp: undefined,
-    lodMaxClamp: undefined,
-    compare: undefined,
-    maxAnisotropy: undefined,
-};
-
-export function getGPUSampler(device: GPUDevice, sampler: IGPUSampler)
+export function getGPUSampler(device: GPUDevice, sampler: ISampler)
 {
     let gSampler = samplerMap.get(sampler);
     if (gSampler) return gSampler;
 
+    // 处理默认值
+    sampler.addressModeU = sampler.addressModeU ?? "repeat";
+    sampler.addressModeV = sampler.addressModeV ?? "repeat";
+    sampler.addressModeW = sampler.addressModeW ?? "repeat";
+    sampler.magFilter = sampler.magFilter ?? "nearest";
+    sampler.minFilter = sampler.minFilter ?? "nearest";
+    sampler.mipmapFilter = sampler.mipmapFilter ?? "nearest";
+
+    //
     gSampler = device.createSampler(sampler);
     samplerMap.set(sampler, gSampler);
 
@@ -39,4 +32,20 @@ export function getGPUSampler(device: GPUDevice, sampler: IGPUSampler)
 
     return gSampler;
 }
-const samplerMap = new WeakMap<IGPUSampler, GPUSampler>();
+const samplerMap = new WeakMap<ISampler, GPUSampler>();
+
+/**
+ * GPU采样器默认值。
+ */
+const defaultSampler: ISampler = {
+    addressModeU: undefined,
+    addressModeV: undefined,
+    addressModeW: undefined,
+    magFilter: undefined,
+    minFilter: undefined,
+    mipmapFilter: undefined,
+    lodMinClamp: undefined,
+    lodMaxClamp: undefined,
+    compare: undefined,
+    maxAnisotropy: undefined,
+};

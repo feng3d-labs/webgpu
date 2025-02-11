@@ -1,41 +1,41 @@
-import { IGPURenderPipeline } from "../data/IGPURenderObject";
+import { NGPURenderPipeline } from "../internal/NGPURenderPipeline";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 
-export function getGPURenderPipeline(device: GPUDevice, descriptor: IGPURenderPipeline)
+export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NGPURenderPipeline)
 {
-    let pipeline = pipelineMap.get(descriptor);
+    let pipeline = pipelineMap.get(renderPipeline);
     if (pipeline) return pipeline;
 
     // 从GPU管线中获取管线布局。
-    const gpuPipelineLayout = getIGPUPipelineLayout(descriptor);
+    const gpuPipelineLayout = getIGPUPipelineLayout({ vertex: renderPipeline.vertex.code, fragment: renderPipeline.fragment?.code });
     const layout = getGPUPipelineLayout(device, gpuPipelineLayout);
 
     const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
         layout,
         vertex: {
-            ...descriptor.vertex,
-            module: getGPUShaderModule(device, descriptor.vertex.code),
+            ...renderPipeline.vertex,
+            module: getGPUShaderModule(device, renderPipeline.vertex.code),
         },
-        primitive: descriptor.primitive,
-        depthStencil: descriptor.depthStencil as any,
-        multisample: descriptor.multisample,
+        primitive: renderPipeline.primitive,
+        depthStencil: renderPipeline.depthStencil,
+        multisample: renderPipeline.multisample,
     };
 
-    if (descriptor.fragment)
+    if (renderPipeline.fragment)
     {
         gpuRenderPipelineDescriptor.fragment = {
-            ...descriptor.fragment as any,
-            module: getGPUShaderModule(device, descriptor.fragment.code),
+            ...renderPipeline.fragment,
+            module: getGPUShaderModule(device, renderPipeline.fragment.code),
         };
     }
 
     pipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
 
-    pipelineMap.set(descriptor, pipeline);
+    pipelineMap.set(renderPipeline, pipeline);
 
     return pipeline;
 }
 
-const pipelineMap = new Map<IGPURenderPipeline, GPURenderPipeline>();
+const pipelineMap = new Map<NGPURenderPipeline, GPURenderPipeline>();

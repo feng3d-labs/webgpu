@@ -7,7 +7,8 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { getIGPUBuffer, IGPUBindingResources, IGPUComputePass, IGPUComputePipeline, IGPURenderPass, IGPURenderPassDescriptor, IGPURenderPipeline, IGPUSubmit, IGPUTexture, IGPUVertexAttributes, WebGPU } from "@feng3d/webgpu-renderer";
+import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -30,12 +31,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   const particlesBuffer = new Float32Array(numParticles * particleInstanceByteSize / 4);
 
-  const particlesVertices: IGPUVertexAttributes = {
+  const particlesVertices: IVertexAttributes = {
     position: { data: particlesBuffer, format: "float32x3", offset: particlePositionOffset, arrayStride: particleInstanceByteSize, stepMode: "instance" },
     color: { data: particlesBuffer, format: "float32x4", offset: particleColorOffset, arrayStride: particleInstanceByteSize, stepMode: "instance" },
   };
 
-  const renderPipeline: IGPURenderPipeline = {
+  const renderPipeline: IRenderPipeline = {
     vertex: {
       code: particleWGSL,
     },
@@ -74,17 +75,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     + 0;
   const uniformBuffer = new Uint8Array(uniformBufferSize);
 
-  const uniformBindGroup: IGPUBindingResources = {
+  const uniformBindGroup:    IUniforms = {
     render_params: {
       bufferView: uniformBuffer,
     },
   };
 
-  const renderPassDescriptor: IGPURenderPassDescriptor = {
+  const renderPassDescriptor: IRenderPassDescriptor = {
     colorAttachments: [
       {
         view: { texture: { context: { canvasId: canvas.id } } },
-        clearValue: { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+        clearValue: [0.0, 0.0, 0.0, 1.0],
       },
     ],
     depthStencilAttachment: {
@@ -103,14 +104,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   ];
   const quadVertexBuffer = new Float32Array(vertexData);
 
-  const quadVertices: IGPUVertexAttributes = {
+  const quadVertices: IVertexAttributes = {
     quad_pos: { data: quadVertexBuffer, format: "float32x2" }
   };
 
   // ////////////////////////////////////////////////////////////////////////////
   // Texture
   // ////////////////////////////////////////////////////////////////////////////
-  let texture: IGPUTexture;
+  let texture: ITexture;
   let textureWidth = 1;
   let textureHeight = 1;
   let numMipLevels = 1;
@@ -131,11 +132,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       numMipLevels++;
     }
     texture = {
-      size: [imageBitmap.width, imageBitmap.height, 1],
+      size: [imageBitmap.width, imageBitmap.height],
       mipLevelCount: numMipLevels,
       format: "rgba8unorm",
-      usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-      source: [{ source: { source: imageBitmap }, destination: {}, copySize: { width: imageBitmap.width, height: imageBitmap.height } }],
+      sources: [{ image: imageBitmap }],
     };
   }
 
@@ -168,7 +168,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const passEncoders: IGPUComputePass[] = [];
 
-    const submit: IGPUSubmit = {
+    const submit: ISubmit = {
       commandEncoders: [
         {
           passEncoders,
@@ -180,7 +180,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       const levelWidth = textureWidth >> level;
       const levelHeight = textureHeight >> level;
-      const probabilityMapBindGroup: IGPUBindingResources = {
+      const probabilityMapBindGroup:    IUniforms = {
         ubo: { bufferView: probabilityMapUBOBuffer },
         buf_in: { bufferView: level & 1 ? bufferA : bufferB },
         buf_out: { bufferView: level & 1 ? bufferB : bufferA },
@@ -202,10 +202,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       if (level === 0)
       {
         passEncoders.push({
-          __type: "IGPUComputePass",
+          __type: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapImportLevelPipeline,
-            bindingResources: { ...probabilityMapBindGroup },
+            uniforms: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
         });
@@ -213,10 +213,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       else
       {
         passEncoders.push({
-          __type: "IGPUComputePass",
+          __type: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapExportLevelPipeline,
-            bindingResources: { ...probabilityMapBindGroup },
+            uniforms: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
         });
@@ -251,7 +251,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       code: simulateWGSL,
     },
   };
-  const computeBindGroup: IGPUBindingResources = {
+  const computeBindGroup:    IUniforms = {
     sim_params: {
       bufferView: simulationUBOBuffer,
     },
@@ -268,9 +268,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const view = mat4.create();
   const mvp = mat4.create();
 
-  const passEncoders: (IGPUComputePass | IGPURenderPass)[] = [];
+  const passEncoders: (IGPUComputePass | IRenderPass)[] = [];
 
-  const submit: IGPUSubmit = {
+  const submit: ISubmit = {
     commandEncoders: [
       {
         passEncoders,
@@ -280,10 +280,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   passEncoders.push(
     {
-      __type: "IGPUComputePass",
+      __type: "ComputePass",
       computeObjects: [{
         pipeline: computePipeline,
-        bindingResources: { ...computeBindGroup },
+        uniforms: { ...computeBindGroup },
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
       }]
     },
@@ -291,9 +291,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       descriptor: renderPassDescriptor,
       renderObjects: [{
         pipeline: renderPipeline,
-        bindingResources: { ...uniformBindGroup },
+        uniforms: { ...uniformBindGroup },
         vertices: { ...particlesVertices, ...quadVertices },
-        draw: { vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
+        drawVertex: { vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
       }],
     }
   );

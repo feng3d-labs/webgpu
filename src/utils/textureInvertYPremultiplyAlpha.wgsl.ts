@@ -1,3 +1,7 @@
+export const textureInvertYPremultiplyAlpha_wgsl = /* wgsl */`
+override invertY = false;
+override premultiplyAlpha = false;
+
 struct VarysStruct {
     @builtin( position ) Position: vec4<f32>,
     @location( 0 ) vUV : vec2<f32>
@@ -24,6 +28,10 @@ fn vsmain(
     );
 
     Varys.vUV = tex[ VertexIndex ];
+    if(invertY)
+    {
+        Varys.vUV.y = 1.0 - Varys.vUV.y;
+    }
     Varys.Position = vec4<f32>( pos[ VertexIndex ], 0.0, 1.0 );
 
     return Varys;
@@ -34,7 +42,7 @@ struct FragmentOut {
 };
 
 @group(0) @binding(0) var mySampler: sampler;
-@group(0) @binding(1) var myTexture: texture_depth_2d;
+@group(0) @binding(1) var myTexture: texture_2d<f32>;
 
 @fragment
 fn fsmain(Varys : VarysStruct) -> FragmentOut {
@@ -42,8 +50,13 @@ fn fsmain(Varys : VarysStruct) -> FragmentOut {
     var output: FragmentOut;
 
     var color = textureSample(myTexture, mySampler, Varys.vUV);
+    if(premultiplyAlpha)
+    {
+        color = vec4<f32>(color.rgb * color.a, color.a);
+    }
     
-    output.color0 = vec4<f32>(color,color,color,1.0);
+    output.color0 = color;
 
     return output;
 }
+`;

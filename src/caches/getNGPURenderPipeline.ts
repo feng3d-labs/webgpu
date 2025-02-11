@@ -1,10 +1,13 @@
+import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IIndicesDataTypes, IPrimitiveState, IRenderPipeline, IStencilFaceState, IVertexAttributes, IVertexState, IWriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
-import { IGPUDepthStencilState, IGPUFragmentState, IGPURenderPipeline, IGPUVertexState } from "../data/IGPURenderObject";
-import { IGPUVertexAttributes } from "../data/IGPUVertexAttributes";
+
+import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
+import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
-import { IGPUVertexBuffer } from "../internal/IGPUVertexBuffer";
+import { NGPUFragmentState } from "../internal/NGPUFragmentState";
+import { NGPURenderPipeline } from "../internal/NGPURenderPipeline";
+import { NGPUVertexBuffer } from "../internal/NGPUVertexBuffer";
 import { NGPUVertexState } from "../internal/NGPUVertexState";
 import { gpuVertexFormatMap, WGSLVertexType } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
@@ -18,55 +21,137 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getIGPURenderPipeline(renderPipeline: IGPURenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IGPUVertexAttributes)
+export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IVertexAttributes, indices: IIndicesDataTypes)
 {
-    let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices]);
+    const indexFormat = indices ? getIGPUSetIndexBuffer(indices).indexFormat : undefined;
+
+    let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
     if (!result)
     {
+        const { label, primitive } = renderPipeline;
+
+        const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
+
         // 获取完整的顶点阶段描述与顶点缓冲区列表。
-        const { gpuVertexState, vertexBuffers } = getIGPUVertexState(renderPipeline.vertex, vertices);
+        const { gpuVertexState, vertexBuffers } = getNGPUVertexState(renderPipeline.vertex, vertices);
 
         // 获取片段阶段完整描述。
-        const gpuFragmentState = getIGPUFragmentState(renderPipeline.fragment, renderPassFormat.colorFormats);
+        const gpuFragmentState = getNGPUFragmentState(renderPipeline.fragment, renderPassFormat.colorFormats);
 
         // 获取深度模板阶段完整描述。
         const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
 
         // 从渲染通道上获取多重采样数量
-        const multisample: GPUMultisampleState = {
-            ...renderPipeline.multisample,
-            count: renderPassFormat.multisample,
-        };
+        const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
+
+        // 
+        const stencilReference = getStencilReference(renderPipeline.depthStencil);
+        // 
+        const blendConstantColor = getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend)
 
         //
-        const pipeline: IGPURenderPipeline = {
-            ...renderPipeline,
+        const pipeline: NGPURenderPipeline = {
+            label,
+            primitive: gpuPrimitive,
             vertex: gpuVertexState,
             fragment: gpuFragmentState,
             depthStencil: gpuDepthStencilState,
-            multisample,
+            multisample: gpuMultisampleState,
+            stencilReference,
+            blendConstantColor,
         };
 
         result = { pipeline, vertexBuffers };
-        renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices], result);
+        renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices, indexFormat], result);
     }
 
     return result;
 }
 
 const renderPipelineMap = new ChainMap<
-    [IGPURenderPipeline, string, IGPUVertexAttributes],
+    [IRenderPipeline, string, IVertexAttributes, GPUIndexFormat],
     {
         /**
          * GPU渲染管线描述。
          */
-        pipeline: IGPURenderPipeline;
+        pipeline: NGPURenderPipeline;
         /**
          * GPU渲染时使用的顶点缓冲区列表。
          */
-        vertexBuffers: IGPUVertexBuffer[];
+        vertexBuffers: NGPUVertexBuffer[];
     }
 >();
+
+/**
+ * 如果任意模板测试结果使用了 "replace" 运算，则需要再渲染前设置 `stencilReference` 值。
+ * 
+ * @param depthStencil 
+ * @returns 
+ */
+function getStencilReference(depthStencil?: IDepthStencilState)
+{
+    if (!depthStencil) return undefined;
+
+    const { stencilFront, stencilBack } = depthStencil;
+
+    // 如果开启了模板测试，则需要设置模板索引值
+    let stencilReference: number;
+    if (stencilFront)
+    {
+        const { failOp, depthFailOp, passOp } = stencilFront;
+        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
+        {
+            stencilReference = depthStencil?.stencilReference ?? 0;
+        }
+    }
+    if (stencilBack)
+    {
+        const { failOp, depthFailOp, passOp } = stencilBack;
+        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
+        {
+            stencilReference = depthStencil?.stencilReference ?? 0;
+        }
+    }
+
+    return stencilReference;
+}
+
+function getGPUPrimitiveState(primitive?: IPrimitiveState, indexFormat?: GPUIndexFormat)
+{
+    let stripIndexFormat: GPUIndexFormat;
+    if (primitive?.topology === "triangle-strip" || primitive?.topology === "line-strip")
+    {
+        stripIndexFormat = indexFormat;
+    }
+
+    const topology: GPUPrimitiveTopology = primitive?.topology || "triangle-list";
+    const cullMode: GPUCullMode = primitive?.cullFace || "none";
+    const frontFace: GPUFrontFace = primitive?.frontFace || "ccw";
+    const unclippedDepth: boolean = primitive?.unclippedDepth || false;
+
+    //
+    const gpuPrimitive: GPUPrimitiveState = {
+        ...primitive,
+        topology,
+        stripIndexFormat,
+        frontFace,
+        cullMode,
+        unclippedDepth,
+    };
+    return gpuPrimitive;
+}
+
+function getGPUMultisampleState(multisampleState?: IGPUMultisampleState, sampleCount?: 4)
+{
+    if (!sampleCount) return undefined;
+
+    const gpuMultisampleState: GPUMultisampleState = {
+        ...multisampleState,
+        count: sampleCount,
+    };
+
+    return gpuMultisampleState;
+}
 
 /**
  * 获取深度模板阶段完整描述。
@@ -75,21 +160,38 @@ const renderPipelineMap = new ChainMap<
  * @param depthStencilFormat 深度模板附件纹理格式。
  * @returns 深度模板阶段完整描述。
  */
-function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, depthStencilFormat?: GPUTextureFormat)
+function getGPUDepthStencilState(depthStencil: IDepthStencilState, depthStencilFormat?: GPUTextureFormat)
 {
     if (!depthStencilFormat) return undefined;
     //
-    const depthWriteEnabled = depthStencil?.depthWriteEnabled ?? true;
-    const depthCompare = depthStencil?.depthCompare ?? "less";
-
-    const gpuDepthStencilState = {
-        ...depthStencil,
-        depthWriteEnabled,
-        depthCompare,
+    const gpuDepthStencilState: GPUDepthStencilState = {
         format: depthStencilFormat,
+        depthWriteEnabled: depthStencil?.depthWriteEnabled ?? true,
+        depthCompare: depthStencil?.depthCompare ?? "less",
+        stencilFront: getGPUStencilFaceState(depthStencil?.stencilFront),
+        stencilBack: getGPUStencilFaceState(depthStencil?.stencilBack),
+        stencilReadMask: depthStencil?.stencilReadMask ?? 0xFFFFFFFF,
+        stencilWriteMask: depthStencil?.stencilWriteMask ?? 0xFFFFFFFF,
+        depthBias: depthStencil?.depthBias ?? 0,
+        depthBiasSlopeScale: depthStencil?.depthBiasSlopeScale ?? 0,
+        depthBiasClamp: depthStencil?.depthBiasClamp ?? 0,
     };
 
     return gpuDepthStencilState;
+}
+
+function getGPUStencilFaceState(stencilFaceState?: IStencilFaceState)
+{
+    if (!stencilFaceState) return {};
+
+    const gpuStencilFaceState: GPUStencilFaceState = {
+        compare: stencilFaceState.compare ?? "always",
+        failOp: stencilFaceState.failOp ?? "keep",
+        depthFailOp: stencilFaceState.depthFailOp ?? "keep",
+        passOp: stencilFaceState.passOp ?? "keep",
+    };
+
+    return gpuStencilFaceState;
 }
 
 /**
@@ -99,7 +201,7 @@ function getGPUDepthStencilState(depthStencil: IGPUDepthStencilState, depthStenc
  * @param vertices 顶点数据。
  * @returns 完整的顶点阶段描述与顶点缓冲区列表。
  */
-function getIGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAttributes)
+function getNGPUVertexState(vertexState: IVertexState, vertices: IVertexAttributes)
 {
     let result = vertexStateMap.get([vertexState, vertices]);
     if (!result)
@@ -123,7 +225,7 @@ function getIGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAt
             console.assert(!!vertex, `WGSL着色器 ${code} 中不存在指定顶点入口点 ${entryPoint} 。`);
         }
 
-        const { vertexBufferLayouts, vertexBuffers } = getVertexBuffers(vertex, vertices);
+        const { vertexBufferLayouts, vertexBuffers } = getNGPUVertexBuffers(vertex, vertices);
 
         const gpuVertexState: NGPUVertexState = {
             code,
@@ -139,9 +241,9 @@ function getIGPUVertexState(vertexState: IGPUVertexState, vertices: IGPUVertexAt
     return result;
 }
 
-const vertexStateMap = new ChainMap<[IGPUVertexState, IGPUVertexAttributes], {
+const vertexStateMap = new ChainMap<[IVertexState, IVertexAttributes], {
     gpuVertexState: NGPUVertexState;
-    vertexBuffers: IGPUVertexBuffer[];
+    vertexBuffers: NGPUVertexBuffer[];
 }>();
 
 /**
@@ -151,11 +253,11 @@ const vertexStateMap = new ChainMap<[IGPUVertexState, IGPUVertexAttributes], {
  * @param vertices 顶点数据。
  * @returns 顶点缓冲区布局数组以及顶点缓冲区数组。
  */
-function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
+function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: IVertexAttributes)
 {
     const vertexBufferLayouts: GPUVertexBufferLayout[] = [];
 
-    const vertexBuffers: IGPUVertexBuffer[] = [];
+    const vertexBuffers: NGPUVertexBuffer[] = [];
 
     const map: WeakMap<any, number> = new WeakMap();
 
@@ -233,13 +335,13 @@ function getVertexBuffers(vertex: FunctionInfo, vertices: IGPUVertexAttributes)
  * @param colorAttachmentTextureFormats 颜色附件格式。
  * @returns 片段阶段完整描述。
  */
-function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments: readonly GPUTextureFormat[])
+function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: readonly GPUTextureFormat[])
 {
     if (!fragmentState) return undefined;
 
     const colorAttachmentsKey = colorAttachments.toString();
 
-    let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
+    let gpuFragmentState: NGPUFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
     if (!gpuFragmentState)
     {
         const code = fragmentState.code;
@@ -259,17 +361,23 @@ function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments
             console.assert(!!fragment, `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
         }
 
-        const targets = colorAttachments.map((v, i) =>
+        const targets = colorAttachments.map((format, i) =>
         {
-            if (!v) return undefined;
-
-            const gpuColorTargetState: GPUColorTargetState = { format: v };
+            if (!format) return undefined;
 
             const colorTargetState = fragmentState.targets?.[i];
-            if (colorTargetState)
-            {
-                Object.assign(gpuColorTargetState, colorTargetState);
-            }
+
+            //
+            const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
+
+            const blend: GPUBlendState = getGPUBlendState(colorTargetState?.blend);
+
+            //
+            const gpuColorTargetState: GPUColorTargetState = {
+                format,
+                blend,
+                writeMask,
+            };
 
             return gpuColorTargetState;
         });
@@ -287,7 +395,68 @@ function getIGPUFragmentState(fragmentState: IGPUFragmentState, colorAttachments
     return gpuFragmentState;
 }
 
-const fragmentStateMap = new ChainMap<[IGPUFragmentState, string], IGPUFragmentState>();
+const fragmentStateMap = new ChainMap<[IFragmentState, string], NGPUFragmentState>();
+
+function getGPUBlendState(blend?: IBlendState): GPUBlendState
+{
+    if (!blend) undefined;
+
+    //
+    const colorOperation: GPUBlendOperation = blend?.color?.operation || "add";
+    let colorSrcFactor: GPUBlendFactor = blend?.color?.srcFactor || "one";
+    let colorDstFactor: GPUBlendFactor = blend?.color?.dstFactor || "zero";
+    if (colorOperation === "max" || colorOperation === "min")
+    {
+        colorSrcFactor = colorDstFactor = "one";
+    }
+    //
+    const alphaOperation: GPUBlendOperation = blend?.alpha?.operation || colorOperation;
+    let alphaSrcFactor: GPUBlendFactor = blend?.alpha?.srcFactor || colorSrcFactor;
+    let alphaDstFactor: GPUBlendFactor = blend?.alpha?.dstFactor || colorDstFactor;
+    if (alphaOperation === "max" || alphaOperation === "min")
+    {
+        alphaSrcFactor = alphaDstFactor = "one";
+    }
+
+    const gpuBlend: GPUBlendState = {
+        color: {
+            operation: colorOperation,
+            srcFactor: colorSrcFactor,
+            dstFactor: colorDstFactor,
+        },
+        alpha: {
+            operation: alphaOperation,
+            srcFactor: alphaSrcFactor,
+            dstFactor: alphaDstFactor,
+        },
+    };
+
+    return gpuBlend;
+}
+
+function getGPUColorWriteFlags(writeMask?: IWriteMask)
+{
+    if (!writeMask) return 15;
+
+    let gpuWriteMask: GPUColorWriteFlags = 0;
+    if (writeMask[0])
+    {
+        gpuWriteMask += 1;
+    }
+    if (writeMask[1])
+    {
+        gpuWriteMask += 2;
+    }
+    if (writeMask[2])
+    {
+        gpuWriteMask += 4;
+    }
+    if (writeMask[3])
+    {
+        gpuWriteMask += 8;
+    }
+    return gpuWriteMask;
+}
 
 function getWGSLType(type: TypeInfo)
 {

@@ -1,4 +1,4 @@
-import { IGPUDepthStencilState, IGPURenderPipeline, IGPUTexture } from "@feng3d/webgpu-renderer";
+import { IDepthStencilState, IRenderPipeline, ITexture } from "@feng3d/render-api";
 
 export const create3DRenderPipeline = (
     label: string,
@@ -9,7 +9,7 @@ export const create3DRenderPipeline = (
     cullMode: GPUCullMode = "back"
 ) =>
 {
-    let depthStencil: IGPUDepthStencilState;
+    let depthStencil: IDepthStencilState;
     if (depthTest)
     {
         depthStencil = {
@@ -18,7 +18,7 @@ export const create3DRenderPipeline = (
         };
     }
 
-    const pipelineDescriptor: IGPURenderPipeline = {
+    const pipelineDescriptor: IRenderPipeline = {
         label: `${label}.pipeline`,
         vertex: {
             code: vertexShader,
@@ -28,7 +28,7 @@ export const create3DRenderPipeline = (
         },
         primitive: {
             topology,
-            cullMode,
+            cullFace: cullMode,
         },
         depthStencil,
     };
@@ -40,15 +40,11 @@ export const createTextureFromImage = (
     bitmap: ImageBitmap
 ) =>
 {
-    const texture: IGPUTexture = {
-        size: [bitmap.width, bitmap.height, 1],
+    const texture: ITexture = {
+        size: [bitmap.width, bitmap.height],
         format: "rgba8unorm",
-        usage:
-            GPUTextureUsage.TEXTURE_BINDING
-            | GPUTextureUsage.COPY_DST
-            | GPUTextureUsage.RENDER_ATTACHMENT,
-        source: [{ source: { source: bitmap }, destination: {}, copySize: [bitmap.width, bitmap.height] }]
+        sources: [{ image: bitmap }]
     };
 
-return texture;
+    return texture;
 };
