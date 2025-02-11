@@ -44,10 +44,10 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
         // 从渲染通道上获取多重采样数量
         const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
 
-        // 
+        //
         const stencilReference = getStencilReference(renderPipeline.depthStencil);
-        // 
-        const blendConstantColor = getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend)
+        //
+        const blendConstantColor = getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend);
 
         //
         const pipeline: NGPURenderPipeline = {
@@ -84,9 +84,9 @@ const renderPipelineMap = new ChainMap<
 
 /**
  * 如果任意模板测试结果使用了 "replace" 运算，则需要再渲染前设置 `stencilReference` 值。
- * 
- * @param depthStencil 
- * @returns 
+ *
+ * @param depthStencil
+ * @returns
  */
 function getStencilReference(depthStencil?: IDepthStencilState)
 {
@@ -138,7 +138,8 @@ function getGPUPrimitiveState(primitive?: IPrimitiveState, indexFormat?: GPUInde
         cullMode,
         unclippedDepth,
     };
-    return gpuPrimitive;
+
+return gpuPrimitive;
 }
 
 function getGPUMultisampleState(multisampleState?: IGPUMultisampleState, sampleCount?: 4)
@@ -455,7 +456,8 @@ function getGPUColorWriteFlags(writeMask?: IWriteMask)
     {
         gpuWriteMask += 8;
     }
-    return gpuWriteMask;
+
+return gpuWriteMask;
 }
 
 function getWGSLType(type: TypeInfo)

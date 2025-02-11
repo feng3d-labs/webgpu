@@ -8,7 +8,7 @@ export interface IGPUTextureMultisample extends ITexture
     /**
      * The sample count of the texture. A {@link GPUTextureDescriptor#sampleCount} &gt; `1` indicates
      * a multisampled texture.
-     * 
+     *
      * WebGPU只支持4重采样。
      */
     sampleCount: 4;
