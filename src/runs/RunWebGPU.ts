@@ -327,7 +327,7 @@ export class RunWebGPU
 
     protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IIndicesDataTypes)
     {
-        // 
+        //
         const { pipeline: nPipeline } = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
         const gpuRenderPipeline = getGPURenderPipeline(device, nPipeline);
 
@@ -423,10 +423,10 @@ export class RunWebGPU
     {
         const { vertexBuffers } = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
 
-        // 
-        vertexBuffers?.map((vertexBuffer, index) =>
+        //
+        vertexBuffers?.forEach((vertexBuffer, index) =>
         {
-            const buffer = getIGPUVertexBuffer(vertexBuffer.data)
+            const buffer = getIGPUVertexBuffer(vertexBuffer.data);
             const gBuffer = getGPUBuffer(device, buffer);
 
             passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);

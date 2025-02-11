@@ -29,7 +29,7 @@ export class WebGPU
         const features: GPUFeatureName[] = [];
         adapter?.features.forEach((v) => { features.push(v as any); });
         // 判断请求的特性是否被支持
-        const requiredFeatures = Array.from(descriptor?.requiredFeatures || [])
+        const requiredFeatures = Array.from(descriptor?.requiredFeatures || []);
         if (requiredFeatures.length > 0)
         {
             for (let i = requiredFeatures.length - 1; i >= 0; i--)

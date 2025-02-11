@@ -87,8 +87,8 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
             const writeTextures: ITextureSource[] = [];
             texture.sources.forEach((v) =>
             {
-                writeTextures.push(v)
-            })
+                writeTextures.push(v);
+            });
             texture.writeTextures = writeTextures.concat(texture.writeTextures || []);
         }
     };
@@ -115,7 +115,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                     // 转换为WebGPU翻转模式
                     if (flipY)
                     {
-                        let x = imageOrigin?.[0];
+                        const x = imageOrigin?.[0];
                         let y = imageOrigin?.[1];
 
                         const imageSize = getTexImageSourceSize(image);
@@ -128,16 +128,16 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                     const gpuSource: GPUImageCopyExternalImage = {
                         source: image,
                         origin: imageOrigin,
-                        flipY: flipY,
+                        flipY,
                     };
 
                     //
                     const gpuDestination: GPUImageCopyTextureTagged = {
-                        colorSpace: colorSpace,
-                        premultipliedAlpha: premultipliedAlpha,
-                        mipLevel: mipLevel,
+                        colorSpace,
+                        premultipliedAlpha,
+                        mipLevel,
                         origin: textureOrigin,
-                        aspect: aspect,
+                        aspect,
                         texture: gpuTexture,
                     };
 
@@ -146,7 +146,8 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                         gpuDestination,
                         copySize
                     );
-                    return;
+
+return;
                 }
 
                 // 处理数据纹理
@@ -154,9 +155,9 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                 const { data, dataLayout, dataImageOrigin, size, mipLevel, textureOrigin, aspect } = bufferSource;
 
                 const gpuDestination: GPUImageCopyTexture = {
-                    mipLevel: mipLevel,
+                    mipLevel,
                     origin: textureOrigin,
-                    aspect: aspect,
+                    aspect,
                     texture: gpuTexture,
                 };
 
@@ -172,8 +173,8 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                 const bytesPerPixel = getTextureBytesPerPixel(texture.format);
 
                 // 计算偏移
-                const gpuOffset =
-                    (offset || 0) // 头部
+                const gpuOffset
+                    = (offset || 0) // 头部
                     + (depthOrArrayLayers || 0) * (width * height * bytesPerPixel) // 读取第几张图片
                     + (x + (y * width)) * bytesPerPixel // 读取图片位置
                     ;

@@ -11,7 +11,7 @@ declare module "@feng3d/render-api"
     {
         /**
          * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
-         * 
+         *
          * 写入纹理哪部分内容。
          */
         aspect?: GPUTextureAspect;
@@ -30,21 +30,21 @@ declare module "@feng3d/render-api"
 
     /**
      * 纹理的数据资源。
-     * 
+     *
      * @see GPUQueue.writeTexture
      */
     export interface ITextureDataSource
     {
         /**
          * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
-         * 
+         *
          * 写入纹理哪部分内容。
          */
         aspect?: GPUTextureAspect;
     }
 
     /**
-     * 
+     *
      * @see GPUDevice.createTexture
      * @see GPUTextureDescriptor
      */

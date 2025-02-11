@@ -96,7 +96,7 @@ declare module "@feng3d/render-api"
     }
 
     /**
-     * 扩展仅WebGPU支持的混合参数。 "src1" | "one-minus-src1" | "src1-alpha" | "one-minus-src1-alpha" 需要开启扩展 `dual-source-blending` 。 
+     * 扩展仅WebGPU支持的混合参数。 "src1" | "one-minus-src1" | "src1-alpha" | "one-minus-src1-alpha" 需要开启扩展 `dual-source-blending` 。
      */
     export interface IBlendFactorMap
     {
@@ -112,14 +112,14 @@ declare module "@feng3d/render-api"
      * `format` 将从深度附件 {@link IGPURenderPassDescriptor.depthStencilAttachment} 纹理上获取。
      *
      * {@link GPUDepthStencilState}
-     * 
+     *
      * @see https://www.orillusion.com/zh/webgpu.html#depth-stencil-state
      */
     export interface IDepthStencilState
     {
         /**
          * 片元的最大深度偏差。
-         * 
+         *
          * 默认为 0 。
          */
         readonly depthBiasClamp?: number;
