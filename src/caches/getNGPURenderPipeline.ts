@@ -71,9 +71,11 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
         result._version++;
         renderPipeline._version = ~~renderPipeline._version + 1;
         renderPipelineMap.delete([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
-        watcher.unwatch(vertexStateResult, "version", onchanged);
+        watcher.unwatch(vertexStateResult, "_version", onchanged);
+        watcher.unwatch(gpuFragmentState, "_version", onchanged);
     }
-    watcher.watch(vertexStateResult, "version", onchanged);
+    watcher.watch(vertexStateResult, "_version", onchanged);
+    watcher.watch(gpuFragmentState, "_version", onchanged);
 
     return result;
 }
@@ -247,7 +249,7 @@ function getNGPUVertexState(vertexState: IVertexState, vertices: IVertexAttribut
     };
 
     //
-    result = { version: 0, gpuVertexState, vertexBuffers };
+    result = { _version: 0, gpuVertexState, vertexBuffers };
     vertexStateMap.set([vertexState, vertices], result);
 
     // 监听变化
@@ -256,7 +258,7 @@ function getNGPUVertexState(vertexState: IVertexState, vertices: IVertexAttribut
     {
         vertexStateMap.delete([vertexState, vertices]);
         watcher.unwatchobject(vertexState, watchpropertys, onchanged);
-        result.version++;
+        result._version++;
     };
     watcher.watchobject(vertexState, watchpropertys, onchanged);
 
@@ -269,7 +271,7 @@ const vertexStateMap = new ChainMap<[IVertexState, IVertexAttributes], {
     /**
      * 版本号，用于版本控制。
      */
-    version: number;
+    _version: number;
 }>();
 
 /**
@@ -368,56 +370,64 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
     const colorAttachmentsKey = colorAttachments.toString();
 
     let gpuFragmentState: NGPUFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
-    
-    if (!gpuFragmentState)
+    if (gpuFragmentState) return gpuFragmentState;
+
+    const code = fragmentState.code;
+    let entryPoint = fragmentState.entryPoint;
+    let fragment: FunctionInfo;
+    const reflect = getWGSLReflectInfo(code);
+    if (!entryPoint)
     {
-        const code = fragmentState.code;
-        let entryPoint = fragmentState.entryPoint;
-        let fragment: FunctionInfo;
-        const reflect = getWGSLReflectInfo(code);
-        if (!entryPoint)
-        {
-            fragment = reflect.entry.fragment[0];
-            console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
-            entryPoint = fragment.name;
-        }
-        else
-        {
-            // 验证着色器中包含指定片段入口函数。
-            fragment = reflect.entry.fragment.filter((v) => v.name === entryPoint)[0];
-            console.assert(!!fragment, `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
-        }
+        fragment = reflect.entry.fragment[0];
+        console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
+        entryPoint = fragment.name;
+    }
+    else
+    {
+        // 验证着色器中包含指定片段入口函数。
+        fragment = reflect.entry.fragment.filter((v) => v.name === entryPoint)[0];
+        console.assert(!!fragment, `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
+    }
 
-        const targets = colorAttachments.map((format, i) =>
-        {
-            if (!format) return undefined;
+    const targets = colorAttachments.map((format, i) =>
+    {
+        if (!format) return undefined;
 
-            const colorTargetState = fragmentState.targets?.[i];
+        const colorTargetState = fragmentState.targets?.[i];
 
-            //
-            const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
+        //
+        const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
 
-            const blend: GPUBlendState = getGPUBlendState(colorTargetState?.blend);
+        const blend: GPUBlendState = getGPUBlendState(colorTargetState?.blend);
 
-            //
-            const gpuColorTargetState: GPUColorTargetState = {
-                format,
-                blend,
-                writeMask,
-            };
-
-            return gpuColorTargetState;
-        });
-
-        gpuFragmentState = {
-            code,
-            entryPoint,
-            targets,
-            constants: fragmentState.constants
+        //
+        const gpuColorTargetState: GPUColorTargetState = {
+            format,
+            blend,
+            writeMask,
         };
 
-        fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
-    }
+        return gpuColorTargetState;
+    });
+
+    gpuFragmentState = {
+        code,
+        entryPoint,
+        targets,
+        constants: fragmentState.constants
+    };
+
+    fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
+
+    // 监听变化
+    const watchpropertys: gPartial<IFragmentState> = { code: "" };
+    const onchanged = () =>
+    {
+        fragmentStateMap.delete([fragmentState, colorAttachmentsKey]);
+        gpuFragmentState._version = ~~gpuFragmentState._version + 1;
+        watcher.unwatchobject(fragmentState, watchpropertys, onchanged);
+    };
+    watcher.watchobject(fragmentState, watchpropertys, onchanged);
 
     return gpuFragmentState;
 }

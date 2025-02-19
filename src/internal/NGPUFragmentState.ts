@@ -10,4 +10,6 @@ export interface NGPUFragmentState
         string,
         GPUPipelineConstantValue
     >>;
+
+    _version?: number;
 }
