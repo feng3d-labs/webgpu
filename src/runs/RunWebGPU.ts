@@ -26,6 +26,7 @@ import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
 import { ChainMap } from "../utils/ChainMap";
+import { watcher } from "@feng3d/watcher";
 
 export class RunWebGPU
 {
@@ -361,8 +362,6 @@ export class RunWebGPU
                 console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 setBlendConstant 值！`);
             }
         }
-
-        renderPipelineResult._version++;
     }
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IViewport)

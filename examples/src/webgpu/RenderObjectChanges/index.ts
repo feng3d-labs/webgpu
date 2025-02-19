@@ -91,7 +91,6 @@ const init = async (canvas: HTMLCanvasElement) =>
                 `;
         //
         // renderObject.uniforms.color = [0, 1, 0, 1];
-        renderObject._version = ~~renderObject._version + 1;
     };
 };
 

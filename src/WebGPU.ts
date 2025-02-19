@@ -18,6 +18,7 @@ import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultipl
 export class WebGPU
 {
     private _runWebGPU: RunWebGPU = new RunWebGPUCommandCache();
+    // private _runWebGPU: RunWebGPU = new RunWebGPU();
 
     /**
      * 初始化 WebGPU 获取 GPUDevice 。

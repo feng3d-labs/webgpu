@@ -69,6 +69,7 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
     const onchanged = () =>
     {
         result._version++;
+        renderPipeline._version = ~~renderPipeline._version + 1;
         renderPipelineMap.delete([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
         watcher.unwatch(vertexStateResult, "version", onchanged);
     }
@@ -367,6 +368,7 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
     const colorAttachmentsKey = colorAttachments.toString();
 
     let gpuFragmentState: NGPUFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
+    
     if (!gpuFragmentState)
     {
         const code = fragmentState.code;
