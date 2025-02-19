@@ -139,7 +139,7 @@ function getGPUPrimitiveState(primitive?: IPrimitiveState, indexFormat?: GPUInde
         unclippedDepth,
     };
 
-return gpuPrimitive;
+    return gpuPrimitive;
 }
 
 function getGPUMultisampleState(multisampleState?: IGPUMultisampleState, sampleCount?: 4)
@@ -205,39 +205,35 @@ function getGPUStencilFaceState(stencilFaceState?: IStencilFaceState)
 function getNGPUVertexState(vertexState: IVertexState, vertices: IVertexAttributes)
 {
     let result = vertexStateMap.get([vertexState, vertices]);
-    if (!result)
+    if (result) return result;
+
+    const code = vertexState.code;
+
+    // 解析顶点着色器
+    const reflect = getWGSLReflectInfo(code);
+    let vertex: FunctionInfo;
+    //
+    let entryPoint = vertexState.entryPoint;
+    if (!entryPoint)
     {
-        const code = vertexState.code;
-
-        // 解析顶点着色器
-        const reflect = getWGSLReflectInfo(code);
-        let vertex: FunctionInfo;
-        //
-        let entryPoint = vertexState.entryPoint;
-        if (!entryPoint)
-        {
-            vertex = reflect.entry.vertex[0];
-            console.assert(!!vertex, `WGSL着色器 ${code} 中不存在顶点入口点。`);
-            entryPoint = vertex.name;
-        }
-        else
-        {
-            vertex = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
-            console.assert(!!vertex, `WGSL着色器 ${code} 中不存在指定顶点入口点 ${entryPoint} 。`);
-        }
-
-        const { vertexBufferLayouts, vertexBuffers } = getNGPUVertexBuffers(vertex, vertices);
-
-        const gpuVertexState: NGPUVertexState = {
-            code,
-            entryPoint,
-            buffers: vertexBufferLayouts,
-            constants: vertexState.constants,
-        };
-
-        result = { gpuVertexState, vertexBuffers };
-        vertexStateMap.set([vertexState, vertices], result);
+        console.assert(!!reflect.entry.vertex[0], `WGSL着色器 ${code} 中不存在顶点入口点。`);
+        entryPoint = reflect.entry.vertex[0].name;
     }
+
+    vertex = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
+    console.assert(!!vertex, `WGSL着色器 ${code} 中不存在顶点入口点 ${entryPoint} 。`);
+
+    const { vertexBufferLayouts, vertexBuffers } = getNGPUVertexBuffers(vertex, vertices);
+
+    const gpuVertexState: NGPUVertexState = {
+        code,
+        entryPoint,
+        buffers: vertexBufferLayouts,
+        constants: vertexState.constants,
+    };
+
+    result = { gpuVertexState, vertexBuffers };
+    vertexStateMap.set([vertexState, vertices], result);
 
     return result;
 }
@@ -457,7 +453,7 @@ function getGPUColorWriteFlags(writeMask?: IWriteMask)
         gpuWriteMask += 8;
     }
 
-return gpuWriteMask;
+    return gpuWriteMask;
 }
 
 function getWGSLType(type: TypeInfo)
