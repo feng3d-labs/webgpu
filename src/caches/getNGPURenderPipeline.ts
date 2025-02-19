@@ -2,6 +2,7 @@ import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState,
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
+import { gPartial } from "@feng3d/polyfill";
 import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
 import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
@@ -26,44 +27,52 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
     const indexFormat = indices ? getIGPUSetIndexBuffer(indices).indexFormat : undefined;
 
     let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
-    if (!result)
+    if (result) return result;
+
+    const { label, primitive } = renderPipeline;
+
+    const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
+
+    // 获取完整的顶点阶段描述与顶点缓冲区列表。
+    const vertexStateResult = getNGPUVertexState(renderPipeline.vertex, vertices);
+
+    // 获取片段阶段完整描述。
+    const gpuFragmentState = getNGPUFragmentState(renderPipeline.fragment, renderPassFormat.colorFormats);
+
+    // 获取深度模板阶段完整描述。
+    const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
+
+    // 从渲染通道上获取多重采样数量
+    const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
+
+    //
+    const stencilReference = getStencilReference(renderPipeline.depthStencil);
+    //
+    const blendConstantColor = getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend);
+
+    //
+    const pipeline: NGPURenderPipeline = {
+        label,
+        primitive: gpuPrimitive,
+        vertex: vertexStateResult.gpuVertexState,
+        fragment: gpuFragmentState,
+        depthStencil: gpuDepthStencilState,
+        multisample: gpuMultisampleState,
+        stencilReference,
+        blendConstantColor,
+    };
+
+    result = { _version: 0, pipeline, vertexBuffers: vertexStateResult.vertexBuffers };
+    renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices, indexFormat], result);
+
+    // 监听管线变化
+    const onchanged = () =>
     {
-        const { label, primitive } = renderPipeline;
-
-        const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
-
-        // 获取完整的顶点阶段描述与顶点缓冲区列表。
-        const { gpuVertexState, vertexBuffers } = getNGPUVertexState(renderPipeline.vertex, vertices);
-
-        // 获取片段阶段完整描述。
-        const gpuFragmentState = getNGPUFragmentState(renderPipeline.fragment, renderPassFormat.colorFormats);
-
-        // 获取深度模板阶段完整描述。
-        const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
-
-        // 从渲染通道上获取多重采样数量
-        const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
-
-        //
-        const stencilReference = getStencilReference(renderPipeline.depthStencil);
-        //
-        const blendConstantColor = getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend);
-
-        //
-        const pipeline: NGPURenderPipeline = {
-            label,
-            primitive: gpuPrimitive,
-            vertex: gpuVertexState,
-            fragment: gpuFragmentState,
-            depthStencil: gpuDepthStencilState,
-            multisample: gpuMultisampleState,
-            stencilReference,
-            blendConstantColor,
-        };
-
-        result = { pipeline, vertexBuffers };
-        renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices, indexFormat], result);
+        result._version++;
+        renderPipelineMap.delete([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
+        watcher.unwatch(vertexStateResult, "version", onchanged);
     }
+    watcher.watch(vertexStateResult, "version", onchanged);
 
     return result;
 }
@@ -79,6 +88,10 @@ const renderPipelineMap = new ChainMap<
          * GPU渲染时使用的顶点缓冲区列表。
          */
         vertexBuffers: NGPUVertexBuffer[];
+        /**
+         * 版本号
+         */
+        _version: number;
     }
 >();
 
@@ -232,8 +245,19 @@ function getNGPUVertexState(vertexState: IVertexState, vertices: IVertexAttribut
         constants: vertexState.constants,
     };
 
-    result = { gpuVertexState, vertexBuffers };
+    //
+    result = { version: 0, gpuVertexState, vertexBuffers };
     vertexStateMap.set([vertexState, vertices], result);
+
+    // 监听变化
+    const watchpropertys: gPartial<IVertexState> = { code: "" };
+    const onchanged = () =>
+    {
+        vertexStateMap.delete([vertexState, vertices]);
+        watcher.unwatchobject(vertexState, watchpropertys, onchanged);
+        result.version++;
+    };
+    watcher.watchobject(vertexState, watchpropertys, onchanged);
 
     return result;
 }
@@ -241,6 +265,10 @@ function getNGPUVertexState(vertexState: IVertexState, vertices: IVertexAttribut
 const vertexStateMap = new ChainMap<[IVertexState, IVertexAttributes], {
     gpuVertexState: NGPUVertexState;
     vertexBuffers: NGPUVertexBuffer[];
+    /**
+     * 版本号，用于版本控制。
+     */
+    version: number;
 }>();
 
 /**

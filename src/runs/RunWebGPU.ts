@@ -328,7 +328,10 @@ export class RunWebGPU
     protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IIndicesDataTypes)
     {
         //
-        const { pipeline: nPipeline } = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
+        const renderPipelineResult = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
+
+        const nPipeline = renderPipelineResult.pipeline;
+
         const gpuRenderPipeline = getGPURenderPipeline(device, nPipeline);
 
         //
@@ -358,6 +361,8 @@ export class RunWebGPU
                 console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 setBlendConstant 值！`);
             }
         }
+
+        renderPipelineResult._version++;
     }
 
     protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IViewport)
@@ -421,10 +426,10 @@ export class RunWebGPU
 
     protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IIndicesDataTypes)
     {
-        const { vertexBuffers } = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
+        const renderPipeline = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
 
         //
-        vertexBuffers?.forEach((vertexBuffer, index) =>
+        renderPipeline.vertexBuffers?.forEach((vertexBuffer, index) =>
         {
             const buffer = getIGPUVertexBuffer(vertexBuffer.data);
             const gBuffer = getGPUBuffer(device, buffer);

@@ -26,6 +26,8 @@ export interface IGPUOcclusionQuery
      * 渲染完成后由引擎自动填充。
      */
     result?: IGLQueryResult;
+
+    _version?: number;
 }
 
 export interface IGLQueryResult

@@ -1,9 +1,10 @@
 import { IRenderObject, IRenderPassObject } from "@feng3d/render-api";
 
+import { watcher } from "@feng3d/watcher";
+import { getRealGPUBindGroup } from "../const";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { RunWebGPU } from "./RunWebGPU";
-import { getRealGPUBindGroup } from "../const";
 
 /**
  * 套壳模式（RunWebGPUCommandCache）优于覆盖函数(RunWebGPUCommandCache1)的形式。
@@ -31,6 +32,15 @@ export class RunWebGPUCommandCache extends RunWebGPU
             caches = { commands, setBindGroupCommands };
 
             map.set([renderPassFormat._key, renderObjects], caches);
+
+            // 监听变化
+            const onchanged = () =>
+            {
+                map.delete([renderPassFormat._key, renderObjects]);
+                //
+                renderObjects.forEach((v) => { watcher.unwatch(v, "_version", onchanged); });
+            };
+            renderObjects.forEach((v) => { watcher.watch(v, "_version", onchanged); });
         }
 
         // 执行命令
@@ -58,6 +68,15 @@ export class RunWebGPUCommandCache extends RunWebGPU
             caches = { commands, setBindGroupCommands };
 
             map.set([renderPassFormat._key, renderObjects], caches);
+
+            // 监听变化
+            const onchanged = () =>
+            {
+                map.delete([renderPassFormat._key, renderObjects]);
+                //
+                renderObjects.forEach((v) => { watcher.unwatch(v, "_version", onchanged); });
+            };
+            renderObjects.forEach((v) => { watcher.watch(v, "_version", onchanged); });
         }
 
         // 排除在 GPURenderBundleEncoder 中不支持的命令
@@ -85,6 +104,14 @@ export class RunWebGPUCommandCache extends RunWebGPU
         super.runRenderObject(device, passEncoder, renderPassFormat, renderObject);
 
         map.set([renderPassFormat._key, renderObject], _commands.slice(start));
+
+        //
+        const onchanged = () =>
+        {
+            map.delete([renderPassFormat._key, renderObject]);
+            watcher.unwatch(renderObject, "_version", onchanged);
+        };
+        watcher.watch(renderObject, "_version", onchanged);
     }
 }
 

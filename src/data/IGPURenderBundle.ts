@@ -23,6 +23,8 @@ export interface IGPURenderBundle
      * GPU渲染对象列表。
      */
     renderObjects: readonly IRenderObject[];
+
+    _version?: number;
 }
 
 /**
