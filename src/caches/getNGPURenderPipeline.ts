@@ -1,4 +1,4 @@
-import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IIndicesDataTypes, IPrimitiveState, IRenderPipeline, IStencilFaceState, IVertexAttributes, IVertexState, IWriteMask } from "@feng3d/render-api";
+import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IIndicesDataTypes, IPrimitiveState, IRenderPipeline, IStencilFaceState, IVertexAttributes, IVertexState, IWriteMask, vertexFormatMap, WGSLVertexType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -10,7 +10,6 @@ import { NGPUFragmentState } from "../internal/NGPUFragmentState";
 import { NGPURenderPipeline } from "../internal/NGPURenderPipeline";
 import { NGPUVertexBuffer } from "../internal/NGPUVertexBuffer";
 import { NGPUVertexState } from "../internal/NGPUVertexState";
-import { gpuVertexFormatMap, WGSLVertexType } from "../types/VertexFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
@@ -309,11 +308,11 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: IVertexAttributes)
         // const wgslType = getWGSLType(v.type);
         // let possibleFormats = wgslVertexTypeMap[wgslType].possibleFormats;
         // console.assert(possibleFormats.indexOf(format) !== -1, `顶点${attributeName} 提供的数据格式 ${format} 与着色器中类型 ${wgslType} 不匹配！`);
-        console.assert(data.constructor.name === gpuVertexFormatMap[format].typedArrayConstructor.name,
+        console.assert(data.constructor.name === vertexFormatMap[format].typedArrayConstructor.name,
             `顶点${attributeName} 提供的数据类型 ${data.constructor.name} 与格式 ${format} 不匹配！请使用 ${data.constructor.name} 来组织数据或者更改数据格式。`);
 
         // 如果 偏移值大于 单个顶点尺寸，则该值被放入 IGPUVertexBuffer.offset。
-        const vertexByteSize = gpuVertexFormatMap[format].byteSize;
+        const vertexByteSize = vertexFormatMap[format].byteSize;
         //
         if (!arrayStride)
         {
