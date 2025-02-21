@@ -332,7 +332,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                         },
                         indices: box.indices,
                         uniforms: bindingResourcesList[currentSurfaceBindGroup],
-                        drawIndexed: { indexCount: box.indices.length },
+                        draw: { __type: "DrawIndexed", indexCount: box.indices.length },
                     }],
                 }]
             }]

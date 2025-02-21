@@ -261,7 +261,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
                     uniforms: { ...frameBindGroup, ...renderable.bindGroup },
                     vertices: renderable.vertexAttributes,
                     indices: renderable.indices,
-                    drawIndexed: { indexCount: renderable.indexCount },
+                    draw: { __type: "DrawIndexed", indexCount: renderable.indexCount },
                 };
             }
 

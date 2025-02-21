@@ -138,7 +138,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 bufferView: undefined,
             },
         },
-        drawIndexed: { indexCount: indices.length },
+        draw: { __type: "DrawIndexed", indexCount: indices.length },
     };
 
     const renderObjects: IRenderObject[] = objectInfos.map((v) =>

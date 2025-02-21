@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         uniforms: {
             uniforms,
         },
-        drawVertex: { vertexCount: cubeVertexCount },
+        draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
     const uniforms1: IBufferBinding = {

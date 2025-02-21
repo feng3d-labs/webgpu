@@ -24,7 +24,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
-        drawVertex: { vertexCount: 3 },
+        draw: { __type: "DrawVertex", vertexCount: 3 },
     };
 
     function frame()

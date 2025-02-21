@@ -517,7 +517,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 vertices: skinnedGridVertexBuffers.vertices,
                 indices: skinnedGridVertexBuffers.indices,
-                drawIndexed: { indexCount: gridIndices.length },
+                draw: { __type: "DrawIndexed", indexCount: gridIndices.length },
             };
             //
             passEncoders.push({

@@ -68,7 +68,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
         },
-        drawVertex: { vertexCount: cubeVertexCount },
+        draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
     const aspect = canvas.width / canvas.height;

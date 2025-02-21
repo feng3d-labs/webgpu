@@ -145,7 +145,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         renderObjects: [{
             pipeline: fullscreenQuadPipeline1,
             uniforms: showResultBindGroup1,
-            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+            draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
         }],
     };
 

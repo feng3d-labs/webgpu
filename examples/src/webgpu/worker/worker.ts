@@ -157,7 +157,7 @@ async function init(canvas: OffscreenCanvas)
                     pipeline,
                     uniforms: uniformBindGroup,
                     vertices: verticesBuffer,
-                    drawVertex: { vertexCount: cubeVertexCount }
+                    draw: { __type: "DrawVertex", vertexCount: cubeVertexCount }
                 }]
             }]
         }]

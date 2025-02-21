@@ -85,7 +85,7 @@ export default class Rasterizer
                     ...this.common.uniforms.bindGroup,
                     ...this.bindGroup,
                 },
-                drawIndexed: { indexCount: this.scene.indexCount },
+                draw: { __type: "DrawIndexed", indexCount: this.scene.indexCount },
             }],
         };
     }

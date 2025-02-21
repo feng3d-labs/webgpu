@@ -26,7 +26,6 @@ import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
 import { ChainMap } from "../utils/ChainMap";
-import { watcher } from "@feng3d/watcher";
 
 export class RunWebGPU
 {
@@ -300,7 +299,7 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
     {
-        const { viewport, scissorRect, pipeline, vertices, indices, uniforms: bindingResources, drawVertex, drawIndexed } = renderObject;
+        const { viewport, scissorRect, pipeline, vertices, indices, uniforms: bindingResources, draw } = renderObject;
 
         const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
 
@@ -321,9 +320,14 @@ export class RunWebGPU
 
         this.runIndices(device, passEncoder, indices);
 
-        this.runDrawVertex(passEncoder, drawVertex);
-
-        this.runDrawIndexed(passEncoder, drawIndexed);
+        if (draw.__type === 'DrawVertex')
+        {
+            this.runDrawVertex(passEncoder, draw);
+        }
+        else
+        {
+            this.runDrawIndexed(passEncoder, draw);
+        }
     }
 
     protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IIndicesDataTypes)

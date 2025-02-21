@@ -1,8 +1,8 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { IBuffer, IDrawIndexed, IDrawVertex, IFragmentState, IPrimitiveState, IRenderObject, IRenderPipeline, IUniforms, IVertexAttributes, IVertexState } from "@feng3d/render-api";
-import { getIGPUBuffer, gpuVertexFormatMap } from "@feng3d/webgpu";
+import { IBuffer, IDraw, IFragmentState, IPrimitiveState, IRenderObject, IRenderPipeline, IUniforms, IVertexAttributes, IVertexState, vertexFormatMap } from "@feng3d/render-api";
+import { getIGPUBuffer } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -369,7 +369,7 @@ export class GLTFPrimitive
                 const vertexFormat: GPUVertexFormat = this.attributeMap[attr].vertexType;
                 const attrString = attr.toLowerCase().replace(/_0$/, "");
 
-                const Cls = gpuVertexFormatMap[vertexFormat].typedArrayConstructor;
+                const Cls = vertexFormatMap[vertexFormat].typedArrayConstructor;
 
                 const data = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
 
@@ -454,19 +454,18 @@ export class GLTFPrimitive
 
     render(renderObjects: IRenderObject[], bindingResources: IUniforms)
     {
-        let drawIndexed: IDrawIndexed;
-        let drawVertex: IDrawVertex;
+        let draw: IDraw;
         if (this.indices)
         {
-            drawIndexed = { indexCount: this.indices.length };
+            draw = { __type: "DrawIndexed", indexCount: this.indices.length };
         }
         else
         {
             const vertexAttribute = this.vertices[Object.keys(this.vertices)[0]];
 
-            const vertexCount = vertexAttribute.data.byteLength / gpuVertexFormatMap[vertexAttribute.format].byteSize;
+            const vertexCount = vertexAttribute.data.byteLength / vertexFormatMap[vertexAttribute.format].byteSize;
 
-            drawVertex = { vertexCount };
+            draw = { __type: "DrawVertex", vertexCount };
         }
 
         const renderObject: IRenderObject = {
@@ -475,8 +474,7 @@ export class GLTFPrimitive
             //if skin do something with bone bind group
             vertices: this.vertices,
             indices: this.indices,
-            drawVertex,
-            drawIndexed,
+            draw,
         };
         renderObjects.push(renderObject);
     }

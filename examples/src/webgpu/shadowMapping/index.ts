@@ -228,7 +228,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 },
                                 vertices,
                                 indices: indexBuffer,
-                                drawIndexed: { indexCount },
+                                draw: { __type: "DrawIndexed", indexCount },
                             },
                         ]
                     },
@@ -243,7 +243,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 },
                                 vertices,
                                 indices: indexBuffer,
-                                drawIndexed: { indexCount },
+                                draw: { __type: "DrawIndexed", indexCount },
                             }
                         ],
                     }

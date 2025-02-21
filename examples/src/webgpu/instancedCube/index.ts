@@ -117,7 +117,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 modelViewProjectionMatrix: mvpMatricesData
             },
         },
-        drawVertex: { vertexCount: cubeVertexCount, instanceCount: numInstances }
+        draw: { __type: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: numInstances }
     };
 
     const data: ISubmit = {

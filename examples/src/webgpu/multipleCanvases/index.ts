@@ -322,7 +322,7 @@ const init = async () =>
                     vertices: vertexAttributes,
                     indices,
                     uniforms: bindGroup,
-                    drawIndexed: { indexCount: indices.length },
+                    draw: { __type: "DrawIndexed", indexCount: indices.length },
                 }],
             });
         });

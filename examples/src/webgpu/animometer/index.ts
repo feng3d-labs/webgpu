@@ -63,7 +63,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             color: { data: vertexBuffer, format: "float32x4", offset: vec4Size, arrayStride: 2 * vec4Size },
         },
         uniforms: {},
-        drawVertex: { vertexCount: 3, instanceCount: 1 },
+        draw: { __type: "DrawVertex", vertexCount: 3, instanceCount: 1 },
     };
 
     const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;

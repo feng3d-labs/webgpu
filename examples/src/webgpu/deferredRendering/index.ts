@@ -336,7 +336,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 vertices,
                 indices: indexBuffer,
-                drawIndexed: { indexCount },
+                draw: { __type: "DrawIndexed", indexCount },
             },
         ]
     });
@@ -363,7 +363,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 uniforms: {
                     ...gBufferTexturesBindGroup,
                 },
-                drawVertex: { vertexCount: 6 },
+                draw: { __type: "DrawVertex", vertexCount: 6 },
             },
         ]
     });
@@ -377,7 +377,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     ...gBufferTexturesBindGroup,
                     ...lightsBufferBindGroup,
                 },
-                drawVertex: { vertexCount: 6 },
+                draw: { __type: "DrawVertex", vertexCount: 6 },
             },
         ]
     });

@@ -290,7 +290,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 uniforms: bindingResources,
                 vertices,
                 indices,
-                drawIndexed: { indexCount: mesh.triangles.length * 3, instanceCount: 8 },
+                draw: { __type: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
             }]
         };
         passEncoders.push(opaquePassEncoder);
@@ -326,7 +326,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                         },
                         vertices,
                         indices,
-                        drawIndexed: { indexCount: mesh.triangles.length * 3, instanceCount: 8 },
+                        draw: { __type: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
                     }
                 ],
             };
@@ -345,7 +345,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice]
                         },
-                        drawVertex: { vertexCount: 6 },
+                        draw: { __type: "DrawVertex", vertexCount: 6 },
                     }
                 ]
             };

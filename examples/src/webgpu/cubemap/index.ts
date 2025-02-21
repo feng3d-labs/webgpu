@@ -137,7 +137,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             mySampler: sampler,
             myTexture: { texture: cubemapTexture },
         },
-        drawVertex: { vertexCount: cubeVertexCount },
+        draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
     function frame()
