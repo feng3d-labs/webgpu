@@ -59,7 +59,11 @@ export abstract class Base2DRendererClass
             renderObjects: [{
                 pipeline,
                 uniforms: bindingResources,
-                geometry:{
+                geometry: {
+                    primitive: {
+                        topology: "triangle-list",
+                        cullFace: "none",
+                    },
                     draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1 }
                 }
             }],
@@ -79,10 +83,6 @@ export abstract class Base2DRendererClass
             },
             fragment: {
                 code,
-            },
-            primitive: {
-                topology: "triangle-list",
-                cullFace: "none",
             },
         };
 

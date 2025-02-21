@@ -35,10 +35,6 @@ const init = async (canvas: HTMLCanvasElement) =>
         fragment: {
             code: volumeWGSL,
         },
-        primitive: {
-            topology: "triangle-list",
-            cullFace: "back",
-        },
     };
 
     const uniformBuffer = {
@@ -164,6 +160,10 @@ const init = async (canvas: HTMLCanvasElement) =>
                         pipeline,
                         uniforms: uniformBindGroup,
                         geometry: {
+                            primitive: {
+                                topology: "triangle-list",
+                                cullFace: "back",
+                            },
                             draw: { __type: "DrawVertex", vertexCount: 3 },
                         }
                     }],

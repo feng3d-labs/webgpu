@@ -91,9 +91,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         vertex: {
             code: vertexDepthPrePassWGSL,
         },
-        primitive: {
-            cullFace: "back",
-        },
     };
 
     // we need the depthCompare to fit the depth buffer mode we are using.
@@ -123,9 +120,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         fragment: {
             code: fragmentPrecisionErrorPassWGSL,
         },
-        primitive: {
-            cullFace: "back",
-        },
     };
 
     const precisionPassPipelines: IRenderPipeline[] = [];
@@ -151,9 +145,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
         fragment: {
             code: fragmentWGSL,
-        },
-        primitive: {
-            cullFace: "back",
         },
     };
 
@@ -377,7 +368,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: colorPassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
-                    geometry:{
+                    geometry: {
+                        primitive: {
+                            cullFace: "back",
+                        },
                         vertices,
                         draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
@@ -401,7 +395,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
-                    geometry:{
+                    geometry: {
+                        primitive: {
+                            cullFace: "back",
+                        },
                         vertices,
                         draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
@@ -420,7 +417,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: precisionPassPipelines[m],
                     uniforms: { ...uniformBindGroups[m], ...depthTextureBindGroup },
-                    geometry:{
+                    geometry: {
+                        primitive: {
+                            cullFace: "back",
+                        },
                         vertices,
                         draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
@@ -444,7 +444,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
-                    geometry:{
+                    geometry: {
+                        primitive: {
+                            cullFace: "back",
+                        },
                         vertices,
                         draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
@@ -457,7 +460,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: textureQuadPassPipline,
                     uniforms: { ...depthTextureBindGroup },
-                    geometry:{
+                    geometry: {
                         draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
                     }
                 }]

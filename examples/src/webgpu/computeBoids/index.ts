@@ -93,11 +93,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
+        },
+        geometry: {
             primitive: {
                 cullFace: "back",
             },
-        },
-        geometry: {
             vertices: {
                 a_particlePos: { data: particleBuffers[0], format: "float32x2", offset: 0, arrayStride: 4 * 4, stepMode: "instance" },
                 a_particleVel: { data: particleBuffers[0], format: "float32x2", offset: 2 * 4, arrayStride: 4 * 4, stepMode: "instance" },

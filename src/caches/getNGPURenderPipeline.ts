@@ -21,14 +21,14 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, vertices: IVertexAttributes, indices: IIndicesDataTypes)
+export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, primitive: IPrimitiveState, vertices: IVertexAttributes, indices: IIndicesDataTypes)
 {
     const indexFormat = indices ? getIGPUSetIndexBuffer(indices).indexFormat : undefined;
 
-    let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
+    let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
     if (result) return result;
 
-    const { label, primitive } = renderPipeline;
+    const { label } = renderPipeline;
 
     const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
 
@@ -62,14 +62,14 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
     };
 
     result = { _version: 0, pipeline, vertexBuffers: vertexStateResult.vertexBuffers };
-    renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices, indexFormat], result);
+    renderPipelineMap.set([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat], result);
 
     // 监听管线变化
     const onchanged = () =>
     {
         result._version++;
         renderPipeline._version = ~~renderPipeline._version + 1;
-        renderPipelineMap.delete([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
+        renderPipelineMap.delete([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
         watcher.unwatch(vertexStateResult, "_version", onchanged);
         gpuFragmentState && watcher.unwatch(gpuFragmentState, "_version", onchanged);
     }
@@ -80,7 +80,7 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
 }
 
 const renderPipelineMap = new ChainMap<
-    [IRenderPipeline, string, IVertexAttributes, GPUIndexFormat],
+    [IRenderPipeline, string, IPrimitiveState, IVertexAttributes, GPUIndexFormat],
     {
         /**
          * GPU渲染管线描述。

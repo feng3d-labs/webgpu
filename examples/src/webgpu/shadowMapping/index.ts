@@ -62,7 +62,6 @@ const init = async (canvas: HTMLCanvasElement) =>
             depthWriteEnabled: true,
             depthCompare: "less",
         },
-        primitive,
     };
 
     // Create a bind group layout which holds the scene uniforms and
@@ -82,7 +81,6 @@ const init = async (canvas: HTMLCanvasElement) =>
             depthWriteEnabled: true,
             depthCompare: "less",
         },
-        primitive,
     };
 
     const depthTexture: ITexture = {
@@ -227,6 +225,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 geometry: {
+                                    primitive,
                                     vertices,
                                     indices: indexBuffer,
                                     draw: { __type: "DrawIndexed", indexCount },
@@ -244,6 +243,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 geometry: {
+                                    primitive,
                                     vertices,
                                     indices: indexBuffer,
                                     draw: { __type: "DrawIndexed", indexCount },

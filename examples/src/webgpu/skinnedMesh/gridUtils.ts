@@ -32,9 +32,6 @@ export const createSkinnedGridRenderPipeline = (
         fragment: {
             code: fragmentShader,
         },
-        primitive: {
-            topology: "line-list",
-        },
     };
 
 return pipeline;

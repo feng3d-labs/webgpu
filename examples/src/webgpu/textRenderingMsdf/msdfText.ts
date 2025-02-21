@@ -189,9 +189,6 @@ export class MsdfTextRenderer
           },
         ],
       },
-      primitive: {
-        topology: "triangle-strip",
-      },
       depthStencil: {
         depthWriteEnabled: false,
         depthCompare: "less",
@@ -348,6 +345,9 @@ export class MsdfTextRenderer
             ...bindGroup,
           },
           geometry: {
+            primitive: {
+              topology: "triangle-strip",
+            },
             draw: { __type: "DrawVertex", vertexCount: 4, instanceCount: measurements.printedCharCount },
           }
         }

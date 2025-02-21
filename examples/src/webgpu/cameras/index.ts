@@ -54,10 +54,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         fragment: {
             code: cubeWGSL,
         },
-        primitive: {
-            topology: "triangle-list",
-            cullFace: "back",
-        },
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
@@ -100,6 +96,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline,
         uniforms: bindingResources,
         geometry:{
+            primitive: {
+                topology: "triangle-list",
+                cullFace: "back",
+            },
             vertices,
             draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
         }

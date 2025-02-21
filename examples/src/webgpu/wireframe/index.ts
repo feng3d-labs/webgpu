@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { IPrimitiveState, IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IVertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -58,9 +58,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             fragment: {
                 code: solidColorLitWGSL,
             },
-            primitive: {
-                cullFace: "back",
-            },
             depthStencil: {
                 depthWriteEnabled: true,
                 depthCompare: "less",
@@ -84,9 +81,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         fragment: {
             code: wireframeWGSL,
             entryPoint: "fs",
-        },
-        primitive: {
-            topology: "line-list",
         },
         depthStencil: {
             depthWriteEnabled: true,
@@ -117,9 +111,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     },
                 },
             ],
-        },
-        primitive: {
-            topology: "triangle-list",
         },
         depthStencil: {
             depthWriteEnabled: true,
@@ -329,7 +320,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     renderObjects.push({
                         pipeline: litPipeline,
                         uniforms: litBindGroup,
-                        geometry:{
+                        geometry: {
+                            primitive: {
+                                cullFace: "back",
+                            },
                             vertices: vertexAttributes,
                             indices,
                             draw: { __type: "DrawIndexed", indexCount: indices.length },
@@ -344,16 +338,21 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // Note: If we're using the line-list based pipeline then we need to
             // multiply the vertex count by 2 since we need to emit 6 vertices
             // for each triangle (3 edges).
-            const [bindGroupNdx, countMult, pipeline]
+            const [bindGroupNdx, countMult, pipeline, primitive]
                 = settings.barycentricCoordinatesBased
-                    ? [1, 1, barycentricCoordinatesBasedWireframePipeline]
-                    : [0, 2, wireframePipeline];
+                    ? [1, 1, barycentricCoordinatesBasedWireframePipeline, {
+                        topology: "triangle-list",
+                    } as IPrimitiveState]
+                    : [0, 2, wireframePipeline, {
+                        topology: "line-list",
+                    } as IPrimitiveState];
             objectInfos.forEach(({ wireframeBindGroups, model: { indices } }) =>
             {
                 renderObjects.push({
                     pipeline,
                     uniforms: wireframeBindGroups[bindGroupNdx],
-                    geometry:{
+                    geometry: {
+                        primitive,
                         draw: { __type: "DrawVertex", vertexCount: indices.length * countMult },
                     }
                 });

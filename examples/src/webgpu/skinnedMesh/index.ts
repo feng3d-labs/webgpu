@@ -515,7 +515,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     ...generalUniformsBGCLuster,
                     ...skinnedGridBoneBGCluster,
                 },
-                geometry:{
+                geometry: {
+                    primitive: {
+                        topology: "line-list",
+                    },
                     vertices: skinnedGridVertexBuffers.vertices,
                     indices: skinnedGridVertexBuffers.indices,
                     draw: { __type: "DrawIndexed", indexCount: gridIndices.length },

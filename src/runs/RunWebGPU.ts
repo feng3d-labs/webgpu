@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, ICopyBufferToBuffer, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IUniforms, IVertexAttributes, IViewport } from "@feng3d/render-api";
+import { ICommandEncoder, ICopyBufferToBuffer, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IPrimitiveState, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IUniforms, IVertexAttributes, IViewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -312,13 +312,13 @@ export class RunWebGPU
             this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
         }
 
-        const { vertices, indices, draw } = geometry;
+        const { primitive, vertices, indices, draw } = geometry;
 
-        this.runRenderPipeline(device, passEncoder, renderPassFormat, pipeline, vertices, indices);
+        this.runRenderPipeline(device, passEncoder, renderPassFormat, pipeline, primitive, vertices, indices);
 
         this.runBindingResources(device, passEncoder, shader, bindingResources);
 
-        this.runVertices(device, passEncoder, renderPassFormat, pipeline, vertices, indices);
+        this.runVertices(device, passEncoder, renderPassFormat, pipeline, primitive, vertices, indices);
 
         this.runIndices(device, passEncoder, indices);
 
@@ -332,10 +332,10 @@ export class RunWebGPU
         }
     }
 
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IIndicesDataTypes)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, primitive: IPrimitiveState, vertices: IVertexAttributes, indices: IIndicesDataTypes)
     {
         //
-        const renderPipelineResult = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
+        const renderPipelineResult = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
 
         const nPipeline = renderPipelineResult.pipeline;
 
@@ -429,9 +429,9 @@ export class RunWebGPU
         });
     }
 
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, vertices: IVertexAttributes, indices: IIndicesDataTypes)
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, primitive: IPrimitiveState, vertices: IVertexAttributes, indices: IIndicesDataTypes)
     {
-        const renderPipeline = getNGPURenderPipeline(pipeline, renderPassFormat, vertices, indices);
+        const renderPipeline = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
 
         //
         renderPipeline.vertexBuffers?.forEach((vertexBuffer, index) =>

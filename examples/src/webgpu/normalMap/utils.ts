@@ -5,8 +5,6 @@ export const create3DRenderPipeline = (
     vertexShader: string,
     fragmentShader: string,
     depthTest = false,
-    topology: GPUPrimitiveTopology = "triangle-list",
-    cullMode: GPUCullMode = "back"
 ) =>
 {
     let depthStencil: IDepthStencilState;
@@ -25,10 +23,6 @@ export const create3DRenderPipeline = (
         },
         fragment: {
             code: fragmentShader,
-        },
-        primitive: {
-            topology,
-            cullFace: cullMode,
         },
         depthStencil,
     };

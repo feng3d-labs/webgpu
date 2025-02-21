@@ -29,10 +29,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         fragment: {
             code: solidColorLitWGSL,
         },
-        primitive: {
-            topology: "triangle-list",
-            cullFace: "back",
-        },
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
@@ -129,6 +125,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const renderObject: IRenderObject = {
         pipeline,
         geometry: {
+            primitive: {
+                topology: "triangle-list",
+                cullFace: "back",
+            },
             vertices: {
                 position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
                 normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },

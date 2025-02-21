@@ -63,9 +63,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         fragment: {
             code: opaqueWGSL,
         },
-        primitive: {
-            topology: "triangle-list",
-        },
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
@@ -84,9 +81,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     writeMask: [false, false, false, false],
                 },
             ],
-        },
-        primitive: {
-            topology: "triangle-list",
         },
         label: "translucentPipeline",
     };
@@ -120,9 +114,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     },
                 },
             ],
-        },
-        primitive: {
-            topology: "triangle-list",
         },
         label: "compositePipeline",
     };
@@ -289,6 +280,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 pipeline: opaquePipeline,
                 uniforms: bindingResources,
                 geometry: {
+                    primitive: {
+                        topology: "triangle-list",
+                    },
                     vertices,
                     indices,
                     draw: { __type: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
@@ -327,6 +321,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             sliceInfo: sliceInfoBuffer[slice],
                         },
                         geometry: {
+                            primitive: {
+                                topology: "triangle-list",
+                            },
                             vertices,
                             indices,
                             draw: { __type: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
@@ -350,6 +347,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             sliceInfo: sliceInfoBuffer[slice]
                         },
                         geometry: {
+                            primitive: {
+                                topology: "triangle-list",
+                            },
                             draw: { __type: "DrawVertex", vertexCount: 6 },
                         }
                     }

@@ -69,9 +69,6 @@ export default class Rasterizer
             fragment: {
                 code: rasterizerWGSL + common.wgsl,
             },
-            primitive: {
-                cullFace: "back",
-            },
         };
 
         //
@@ -84,6 +81,9 @@ export default class Rasterizer
                     ...this.bindGroup,
                 },
                 geometry: {
+                    primitive: {
+                        cullFace: "back",
+                    },
                     vertices: this.scene.vertexAttributes,
                     indices: this.scene.indices,
                     draw: { __type: "DrawIndexed", indexCount: this.scene.indexCount },

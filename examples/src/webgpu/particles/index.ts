@@ -59,7 +59,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
       ],
     },
-    primitive: {},
 
     depthStencil: {
       depthWriteEnabled: false,

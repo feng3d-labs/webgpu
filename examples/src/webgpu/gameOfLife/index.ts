@@ -74,22 +74,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             cell: { data: buffer1, format: "uint32", stepMode: "instance" }
         };
 
-        const bindGroup0:    IUniforms = {
+        const bindGroup0: IUniforms = {
             size: { bufferView: sizeBuffer },
             current: { bufferView: buffer0 },
             next: { bufferView: buffer1 },
         };
 
-        const bindGroup1:    IUniforms = {
+        const bindGroup1: IUniforms = {
             size: { bufferView: sizeBuffer },
             current: { bufferView: buffer1 },
             next: { bufferView: buffer0 },
         };
 
         const renderPipeline: IRenderPipeline = {
-            primitive: {
-                topology: "triangle-strip",
-            },
             vertex: {
                 code: vertWGSL,
             },
@@ -98,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         };
 
-        const uniformBindGroup:    IUniforms = {
+        const uniformBindGroup: IUniforms = {
             size: {
                 bufferView: sizeBuffer,
                 offset: 0,
@@ -138,7 +135,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                         {
                             pipeline: renderPipeline,
                             uniforms: uniformBindGroup,
-                            geometry:{
+                            geometry: {
+                                primitive: {
+                                    topology: "triangle-strip",
+                                },
                                 vertices: vertices1,
                                 draw: { __type: "DrawVertex", vertexCount: 4, instanceCount: length },
                             }

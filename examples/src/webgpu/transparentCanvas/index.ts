@@ -37,11 +37,6 @@ const init = async (canvas: HTMLCanvasElement) =>
         fragment: {
             code: vertexPositionColorWGSL,
         },
-        primitive: {
-            topology: "triangle-list",
-            cullFace: "back",
-        },
-
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
@@ -109,6 +104,10 @@ const init = async (canvas: HTMLCanvasElement) =>
                         pipeline,
                         uniforms: uniformBindGroup,
                         geometry: {
+                            primitive: {
+                                topology: "triangle-list",
+                                cullFace: "back",
+                            },
                             vertices: verticesBuffer,
                             draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
                         }

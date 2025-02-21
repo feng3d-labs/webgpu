@@ -427,21 +427,10 @@ export class GLTFPrimitive
             // targets: [{ format: colorFormat }],
         };
 
-        // Our loader only supports triangle lists and strips, so by default we set
-        // the primitive topology to triangle list, and check if it's instead a triangle strip
-        let primitive: IPrimitiveState = { topology: "triangle-list" };
-        if (this.topology == GLTFRenderMode.TRIANGLE_STRIP)
-        {
-            primitive = {
-                topology: "triangle-strip",
-            };
-        }
-
         const rpDescript: IRenderPipeline = {
             label: `${label}.pipeline`,
             vertex: vertexState,
             fragment: fragmentState,
-            primitive,
             depthStencil: {
                 // format: depthFormat,
                 depthWriteEnabled: true,
@@ -468,11 +457,22 @@ export class GLTFPrimitive
             draw = { __type: "DrawVertex", vertexCount };
         }
 
+        // Our loader only supports triangle lists and strips, so by default we set
+        // the primitive topology to triangle list, and check if it's instead a triangle strip
+        let primitive: IPrimitiveState = { topology: "triangle-list" };
+        if (this.topology == GLTFRenderMode.TRIANGLE_STRIP)
+        {
+            primitive = {
+                topology: "triangle-strip",
+            };
+        }
+
         const renderObject: IRenderObject = {
             pipeline: this.renderPipeline,
             uniforms: bindingResources,
             //if skin do something with bone bind group
             geometry: {
+                primitive,
                 vertices: this.vertices,
                 indices: this.indices,
                 draw,

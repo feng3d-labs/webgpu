@@ -48,13 +48,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         fragment: {
             code: meshWGSL,
         },
-        primitive: {
-            // Backface culling since the sphere is solid piece of geometry.
-            // Faces pointing away from the camera will be occluded by faces
-            // pointing toward the camera.
-            cullFace: "back",
-        },
-
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
     };
@@ -260,6 +253,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
                     pipeline,
                     uniforms: { ...frameBindGroup, ...renderable.bindGroup },
                     geometry: {
+                        primitive: {
+                            // Backface culling since the sphere is solid piece of geometry.
+                            // Faces pointing away from the camera will be occluded by faces
+                            // pointing toward the camera.
+                            cullFace: "back",
+                        },
                         vertices: renderable.vertexAttributes,
                         indices: renderable.indices,
                         draw: { __type: "DrawIndexed", indexCount: renderable.indexCount },

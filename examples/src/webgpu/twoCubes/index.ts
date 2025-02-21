@@ -45,14 +45,14 @@ const init = async (canvas: HTMLCanvasElement) =>
     const renderObject: IRenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
-            primitive: {
-                cullFace: "back",
-            },
         },
         uniforms: {
             uniforms,
         },
         geometry: {
+            primitive: {
+                cullFace: "back",
+            },
             vertices: {
                 position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
                 uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
