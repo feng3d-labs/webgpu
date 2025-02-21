@@ -4,7 +4,7 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, Material, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -86,7 +86,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             next: { bufferView: buffer0 },
         };
 
-        const renderPipeline: RenderPipeline = {
+        const renderPipeline: Material = {
             vertex: {
                 code: vertWGSL,
             },

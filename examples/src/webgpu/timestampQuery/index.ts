@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, RenderPipeline, Submit, Texture, RenderObject, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, Material, Submit, Texture, RenderObject, VertexAttributes } from "@feng3d/render-api";
 import { IGPUCanvasContext, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
@@ -61,7 +61,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniforms = { modelViewProjectionMatrix: null };
 
-    const pipeline: RenderPipeline = {
+    const pipeline: Material = {
         vertex: {
             code: basicVertWGSL,
         },

@@ -10,7 +10,7 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, Material, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 // Two planes close to each other for depth precision test
@@ -87,7 +87,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // depthPrePass is used to render scene to the depth texture
     // this is not needed if you just want to use reversed z to render a scene
-    const depthPrePassRenderPipelineDescriptorBase: RenderPipeline = {
+    const depthPrePassRenderPipelineDescriptorBase: Material = {
         vertex: {
             code: vertexDepthPrePassWGSL,
         },
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // we need the depthCompare to fit the depth buffer mode we are using.
     // this is the same for other passes
-    const depthPrePassPipelines: RenderPipeline[] = [];
+    const depthPrePassPipelines: Material[] = [];
     depthPrePassPipelines[DepthBufferMode.Default] = {
         ...depthPrePassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -113,7 +113,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // precisionPass is to draw precision error as color of depth value stored in depth buffer
     // compared to that directly calcualated in the shader
-    const precisionPassRenderPipelineDescriptorBase: RenderPipeline = {
+    const precisionPassRenderPipelineDescriptorBase: Material = {
         vertex: {
             code: vertexPrecisionErrorPassWGSL,
         },
@@ -122,7 +122,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const precisionPassPipelines: RenderPipeline[] = [];
+    const precisionPassPipelines: Material[] = [];
     precisionPassPipelines[DepthBufferMode.Default] = {
         ...precisionPassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -139,7 +139,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // colorPass is the regular render pass to render the scene
-    const colorPassRenderPipelineDescriptorBase: RenderPipeline = {
+    const colorPassRenderPipelineDescriptorBase: Material = {
         vertex: {
             code: vertexWGSL,
         },
@@ -149,7 +149,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     //
-    const colorPassPipelines: RenderPipeline[] = [];
+    const colorPassPipelines: Material[] = [];
     colorPassPipelines[DepthBufferMode.Default] = {
         ...colorPassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -168,7 +168,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // textureQuadPass is draw a full screen quad of depth texture
     // to see the difference of depth value using reversed z compared to default depth buffer usage
     // 0.0 will be the furthest and 1.0 will be the closest
-    const textureQuadPassPipline: RenderPipeline = {
+    const textureQuadPassPipline: Material = {
         vertex: {
             code: vertexTextureQuadWGSL,
         },

@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, Material, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
@@ -24,7 +24,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const fullscreenQuadPipeline1: RenderPipeline = {
+    const fullscreenQuadPipeline1: Material = {
         vertex: {
             code: fullscreenTexturedQuadWGSL,
         },

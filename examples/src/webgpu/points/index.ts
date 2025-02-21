@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, Material, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
@@ -93,7 +93,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 depthCompare: "less",
                 format: depthFormat,
             },
-        } as RenderPipeline)
+        } as Material)
         )
     );
 

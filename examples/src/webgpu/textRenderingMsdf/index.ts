@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { RenderPassDescriptor, IRenderPassObject, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, IRenderPassObject, Material, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
@@ -141,7 +141,7 @@ setBlendConstant().`,
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: RenderPipeline = {
+    const pipeline: Material = {
         vertex: {
             code: basicVertWGSL,
         },

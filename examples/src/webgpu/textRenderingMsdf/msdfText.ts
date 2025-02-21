@@ -2,7 +2,7 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { IRenderPassObject, RenderPipeline, Sampler, Texture, Uniforms } from "@feng3d/render-api";
+import { IRenderPassObject, Material, Sampler, Texture, Uniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPURenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
@@ -32,7 +32,7 @@ export class MsdfFont
   charCount: number;
   defaultChar: MsdfChar;
   constructor(
-    public pipeline: RenderPipeline,
+    public pipeline: Material,
     public bindGroup: Uniforms,
     public lineHeight: number,
     public chars: { [x: number]: MsdfChar },
@@ -149,7 +149,7 @@ export interface MsdfTextFormattingOptions
 
 export class MsdfTextRenderer
 {
-  pipelinePromise: RenderPipeline;
+  pipelinePromise: Material;
   sampler: Sampler;
 
   cameraUniformBuffer: Float32Array = new Float32Array(16 * 2);

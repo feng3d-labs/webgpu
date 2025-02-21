@@ -1,4 +1,4 @@
-import { BufferBinding, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, RenderObject } from "@feng3d/render-api";
+import { BufferBinding, RenderPass, RenderPassDescriptor, Material, Submit, RenderObject } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getIGPUBuffer, IGPUOcclusionQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
@@ -22,7 +22,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const pipeline: RenderPipeline = {
+    const pipeline: Material = {
         vertex: {
             code: solidColorLitWGSL,
         },

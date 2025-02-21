@@ -1,7 +1,7 @@
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
-import { RenderPassDescriptor, IRenderPassObject, RenderPipeline, Sampler, Submit, Texture, ITextureSource, Uniforms } from "@feng3d/render-api";
+import { RenderPassDescriptor, IRenderPassObject, Material, Sampler, Submit, Texture, ITextureSource, Uniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import showTextureWGSL from "./showTexture.wgsl";
@@ -270,7 +270,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // "Debug" view of the actual texture contents
     //
 
-    const showTexturePipeline: RenderPipeline = {
+    const showTexturePipeline: Material = {
         vertex: { code: showTextureWGSL }, fragment: { code: showTextureWGSL }
     };
 
@@ -278,7 +278,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Pipeline for drawing the test squares
     //
 
-    const texturedSquarePipeline: RenderPipeline = {
+    const texturedSquarePipeline: Material = {
         vertex: { code: texturedSquareWGSL, constants: { kTextureBaseSize, kViewportSize } }, fragment: { code: texturedSquareWGSL },
     };
 

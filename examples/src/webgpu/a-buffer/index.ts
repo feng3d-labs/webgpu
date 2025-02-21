@@ -1,4 +1,4 @@
-import { BufferBinding, IPassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { BufferBinding, IPassEncoder, RenderPass, RenderPassDescriptor, Material, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         targetWidth: undefined,
     };
 
-    const opaquePipeline: RenderPipeline = {
+    const opaquePipeline: Material = {
         vertex: {
             code: opaqueWGSL,
         },
@@ -70,7 +70,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "opaquePipeline",
     };
 
-    const translucentPipeline: RenderPipeline = {
+    const translucentPipeline: Material = {
         vertex: {
             code: translucentWGSL,
         },
@@ -96,7 +96,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "translucentPassDescriptor",
     };
 
-    const compositePipeline: RenderPipeline = {
+    const compositePipeline: Material = {
         vertex: {
             code: compositeWGSL,
         },

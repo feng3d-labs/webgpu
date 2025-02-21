@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, Material, Submit, Texture, TextureView, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         cullMode: "back",
     };
 
-    const writeGBuffersPipeline: RenderPipeline = {
+    const writeGBuffersPipeline: Material = {
         vertex: {
             code: vertexWriteGBuffers,
         },
@@ -83,7 +83,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const gBuffersDebugViewPipeline: RenderPipeline = {
+    const gBuffersDebugViewPipeline: Material = {
         vertex: {
             code: vertexTextureQuad,
         },
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         },
     };
-    const deferredRenderPipeline: RenderPipeline = {
+    const deferredRenderPipeline: Material = {
         vertex: {
             code: vertexTextureQuad,
         },

@@ -1,4 +1,4 @@
-import { RenderPass, RenderPassDescriptor, IRenderPassObject, RenderPipeline, Sampler, Submit, Texture, Uniforms, RenderObject, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, IRenderPassObject, Material, Sampler, Submit, Texture, Uniforms, RenderObject, VertexAttributes } from "@feng3d/render-api";
 import { IGPUCanvasContext, IGPURenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -41,7 +41,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         canvasId: canvas.id,
     };
 
-    const pipeline: RenderPipeline = {
+    const pipeline: Material = {
         vertex: {
             code: meshWGSL,
         },

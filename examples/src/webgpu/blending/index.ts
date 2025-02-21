@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { BlendComponent, RenderPassDescriptor, IRenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView, Uniforms, RenderObject } from "@feng3d/render-api";
+import { BlendComponent, RenderPassDescriptor, IRenderPassObject, Material, Sampler, Submit, Texture, TextureView, Uniforms, RenderObject } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 declare module "@feng3d/render-api"
@@ -433,7 +433,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     clearFolder.add(clear, "alpha", 0, 1).onChange(render);
     clearFolder.addColor(new GUIColorHelper(clear.color), "value").onChange(render);
 
-    const dstPipeline: RenderPipeline = {
+    const dstPipeline: Material = {
         label: "hardcoded textured quad pipeline",
         vertex: {
             code: texturedQuadWGSL,
@@ -447,7 +447,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         gui.updateDisplay();
 
-        const srcPipeline: RenderPipeline = {
+        const srcPipeline: Material = {
             label: "hardcoded textured quad pipeline",
             vertex: {
                 code: texturedQuadWGSL,

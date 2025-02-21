@@ -1,14 +1,14 @@
 import { GUI } from "dat.gui";
 import checkerWGSL from "./checker.wgsl";
 
-import { RenderPassDescriptor, RenderPipeline, Submit, Uniforms } from "@feng3d/render-api";
+import { RenderPassDescriptor, Material, Submit, Uniforms } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const webgpu = await new WebGPU().init();
 
-    const pipeline: RenderPipeline = {
+    const pipeline: Material = {
         vertex: { code: checkerWGSL },
         fragment: {
             code: checkerWGSL,

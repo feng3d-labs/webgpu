@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { RenderPassDescriptor, RenderPipeline, Texture, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, Material, Texture, VertexAttributes } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -30,7 +30,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: RenderPipeline = {
+    const pipeline: Material = {
         vertex: {
             code: basicVertWGSL,
         },

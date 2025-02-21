@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, RenderPass, IRenderPassObject, RenderPipeline, ScissorRect, Submit, Uniforms, Viewport, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderPassObject, Material, PrimitiveState, RenderObject, RenderPass, ScissorRect, Submit, Uniforms, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -332,7 +332,7 @@ export class RunWebGPU
         }
     }
 
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: Material, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
     {
         //
         const renderPipelineResult = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
@@ -429,7 +429,7 @@ export class RunWebGPU
         });
     }
 
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: Material, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
     {
         const renderPipeline = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
 

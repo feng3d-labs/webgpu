@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, RenderPipeline, Submit, Uniforms, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, Material, Submit, Uniforms, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return model;
     });
 
-    let litPipeline: RenderPipeline;
+    let litPipeline: Material;
     function rebuildLitPipeline()
     {
         litPipeline = {
@@ -72,7 +72,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
     rebuildLitPipeline();
 
-    const wireframePipeline: RenderPipeline = {
+    const wireframePipeline: Material = {
         label: "wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
@@ -88,7 +88,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const barycentricCoordinatesBasedWireframePipeline: RenderPipeline = {
+    const barycentricCoordinatesBasedWireframePipeline: Material = {
         label: "barycentric coordinates based wireframe pipeline",
         vertex: {
             code: wireframeWGSL,

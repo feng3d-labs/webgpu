@@ -1,7 +1,7 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { Buffer, FragmentState, IDraw, PrimitiveState, RenderObject, RenderPipeline, Uniforms, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
+import { Buffer, FragmentState, IDraw, PrimitiveState, RenderObject, Material, Uniforms, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { getIGPUBuffer } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
@@ -342,7 +342,7 @@ interface AttributeMapInterface
 export class GLTFPrimitive
 {
     topology: GLTFRenderMode;
-    renderPipeline: RenderPipeline;
+    renderPipeline: Material;
     private attributeMap: AttributeMapInterface;
     private attributes: string[] = [];
     vertices: VertexAttributes;
@@ -427,7 +427,7 @@ export class GLTFPrimitive
             // targets: [{ format: colorFormat }],
         };
 
-        const rpDescript: RenderPipeline = {
+        const rpDescript: Material = {
             label: `${label}.pipeline`,
             vertex: vertexState,
             fragment: fragmentState,
