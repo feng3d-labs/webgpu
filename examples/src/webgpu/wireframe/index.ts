@@ -1,4 +1,4 @@
-import { IPrimitiveState, IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, PrimitiveState, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -30,7 +30,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     type Model = {
         vertices: Float32Array;
         indices: Uint32Array;
-        vertexAttributes: IVertexAttributes
+        vertexAttributes: VertexAttributes
     };
 
     const models = Object.values(modelData).map((v) =>
@@ -342,10 +342,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 = settings.barycentricCoordinatesBased
                     ? [1, 1, barycentricCoordinatesBasedWireframePipeline, {
                         topology: "triangle-list",
-                    } as IPrimitiveState]
+                    } as PrimitiveState]
                     : [0, 2, wireframePipeline, {
                         topology: "line-list",
-                    } as IPrimitiveState];
+                    } as PrimitiveState];
             objectInfos.forEach(({ wireframeBindGroups, model: { indices } }) =>
             {
                 renderObjects.push({

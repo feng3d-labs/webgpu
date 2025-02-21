@@ -6,7 +6,7 @@ import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 const shadowDepthTextureSize = 1024;
@@ -28,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         vertexBuffer.set(mesh.normals[i], 6 * i + 3);
     }
 
-    const vertices: IVertexAttributes = {
+    const vertices: VertexAttributes = {
         position: { data: vertexBuffer, format: "float32x3", offset: 0, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
         normal: { data: vertexBuffer, format: "float32x3", offset: Float32Array.BYTES_PER_ELEMENT * 3, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
     };

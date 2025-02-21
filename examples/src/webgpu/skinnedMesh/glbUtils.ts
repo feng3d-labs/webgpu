@@ -1,7 +1,7 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { IBuffer, IDraw, IFragmentState, IPrimitiveState, IRenderObject, IRenderPipeline, IUniforms, IVertexAttributes, IVertexState, vertexFormatMap } from "@feng3d/render-api";
+import { IBuffer, IDraw, IFragmentState, PrimitiveState, IRenderObject, IRenderPipeline, IUniforms, VertexAttributes, IVertexState, vertexFormatMap } from "@feng3d/render-api";
 import { getIGPUBuffer } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
@@ -345,7 +345,7 @@ export class GLTFPrimitive
     renderPipeline: IRenderPipeline;
     private attributeMap: AttributeMapInterface;
     private attributes: string[] = [];
-    vertices: IVertexAttributes;
+    vertices: VertexAttributes;
     indices: Uint16Array | Uint32Array;
     constructor(
         topology: GLTFRenderMode,
@@ -459,7 +459,7 @@ export class GLTFPrimitive
 
         // Our loader only supports triangle lists and strips, so by default we set
         // the primitive topology to triangle list, and check if it's instead a triangle strip
-        let primitive: IPrimitiveState = { topology: "triangle-list" };
+        let primitive: PrimitiveState = { topology: "triangle-list" };
         if (this.topology == GLTFRenderMode.TRIANGLE_STRIP)
         {
             primitive = {

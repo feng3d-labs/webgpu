@@ -1,4 +1,4 @@
-import { IBufferBinding, IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
+import { IBufferBinding, IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -35,7 +35,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Create the model vertex buffer
-    const vertices: IVertexAttributes = {
+    const vertices: VertexAttributes = {
         position: { data: new Float32Array(mesh.positions.flat()), format: "float32x3", arrayStride: 12 }
     };
     // Create the model index buffer

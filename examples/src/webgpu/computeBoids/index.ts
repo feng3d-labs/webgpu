@@ -111,6 +111,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ...renderObject,
         geometry: {
             ...renderObject.geometry,
+            draw: renderObject.geometry.draw,
             vertices: {
                 ...renderObject.geometry.vertices,
                 a_particlePos: {

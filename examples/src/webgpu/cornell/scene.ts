@@ -1,4 +1,4 @@
-import { IVertexAttributes } from "@feng3d/render-api";
+import { VertexAttributes } from "@feng3d/render-api";
 import { Vec3, vec3 } from "wgpu-matrix";
 
 function reciprocal(v: Vec3)
@@ -130,7 +130,7 @@ export default class Scene
   readonly vertexCount: number;
   readonly indexCount: number;
   readonly vertices: Float32Array;
-  readonly vertexAttributes: IVertexAttributes;
+  readonly vertexAttributes: VertexAttributes;
   readonly indices: Uint16Array;
   readonly quadBuffer: Float32Array;
   readonly quads = [
@@ -280,7 +280,7 @@ export default class Scene
 
     const vertices = vertexData;
 
-    const vertexAttributes: IVertexAttributes = {
+    const vertexAttributes: VertexAttributes = {
       position: { data: vertices, format: "float32x4", offset: 0 * 4, arrayStride: vertexStride },
       uv: { data: vertices, format: "float32x3", offset: 4 * 4, arrayStride: vertexStride },
       emissive: { data: vertices, format: "float32x3", offset: 7 * 4, arrayStride: vertexStride },

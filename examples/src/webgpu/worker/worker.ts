@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit, IVertexAttributes } from "@feng3d/render-api";
+import { IRenderPassDescriptor, IRenderPipeline, ISubmit, VertexAttributes } from "@feng3d/render-api";
 import { getOffscreenCanvasId, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -73,7 +73,7 @@ async function init(canvas: OffscreenCanvas)
     const context: IGPUCanvasContext = { canvasId: getOffscreenCanvasId(canvas) };
 
     // Create a vertex buffer from the cube data.
-    const verticesBuffer: IVertexAttributes = {
+    const verticesBuffer: VertexAttributes = {
         position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
@@ -156,6 +156,7 @@ async function init(canvas: OffscreenCanvas)
                             // Faces pointing away from the camera will be occluded by faces
                             // pointing toward the camera.
                             cullFace: "back",
+                            frontFace: "ccw",
                         },
                         vertices: verticesBuffer,
                         draw: { __type: "DrawVertex", vertexCount: cubeVertexCount }
