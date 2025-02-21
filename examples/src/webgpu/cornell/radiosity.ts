@@ -1,4 +1,4 @@
-import { ICommandEncoder, IPassEncoder, ITexture, IUniforms } from "@feng3d/render-api";
+import { CommandEncoder, IPassEncoder, ITexture, IUniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
@@ -138,7 +138,7 @@ export default class Radiosity
     }
     private passEncoders: IPassEncoder[];
 
-    encode(commandEncoder: ICommandEncoder)
+    encode(commandEncoder: CommandEncoder)
     {
         this.passEncoders.forEach((v) =>
         {

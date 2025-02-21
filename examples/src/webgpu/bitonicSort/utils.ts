@@ -1,4 +1,4 @@
-import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, IUniforms } from "@feng3d/render-api";
+import { CommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, IUniforms } from "@feng3d/render-api";
 
 const fullscreenTexturedQuad
     = `
@@ -39,7 +39,7 @@ export abstract class Base2DRendererClass
 {
     abstract switchBindGroup(name: string): void;
     abstract startRun(
-        commandEncoder: ICommandEncoder,
+        commandEncoder: CommandEncoder,
         ...args: unknown[]
     ): void;
     renderPassDescriptor: IRenderPassDescriptor;
@@ -48,7 +48,7 @@ export abstract class Base2DRendererClass
     currentBindGroupName: string;
 
     executeRun(
-        commandEncoder: ICommandEncoder,
+        commandEncoder: CommandEncoder,
         renderPassDescriptor: IRenderPassDescriptor,
         pipeline: IRenderPipeline,
         bindingResources?: IUniforms

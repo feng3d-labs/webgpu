@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ICommandEncoder, ICopyBufferToBuffer, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IUniforms, VertexAttributes, IViewport, PrimitiveState } from "@feng3d/render-api";
+import { CommandEncoder, ICopyBufferToBuffer, ICopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IUniforms, VertexAttributes, IViewport, PrimitiveState } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -44,7 +44,7 @@ export class RunWebGPU
         anyEmitter.emit(device.queue, GPUQueue_submit);
     }
 
-    protected runCommandEncoder(device: GPUDevice, commandEncoder: ICommandEncoder)
+    protected runCommandEncoder(device: GPUDevice, commandEncoder: CommandEncoder)
     {
         const gpuCommandEncoder = device.createCommandEncoder();
 

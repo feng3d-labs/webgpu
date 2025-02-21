@@ -1,4 +1,4 @@
-import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ITexture, IUniforms } from "@feng3d/render-api";
+import { CommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ITexture, IUniforms } from "@feng3d/render-api";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -93,7 +93,7 @@ export default class Rasterizer
     }
     private renderPassEncoder: IRenderPass;
 
-    encode(commandEncoder: ICommandEncoder)
+    encode(commandEncoder: CommandEncoder)
     {
         commandEncoder.passEncoders.push(this.renderPassEncoder);
     }

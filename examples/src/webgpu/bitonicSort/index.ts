@@ -1,4 +1,4 @@
-import { Buffer, IBufferBinding, ICommandEncoder, IRenderPassDescriptor, ISubmit, IUniforms } from "@feng3d/render-api";
+import { Buffer, IBufferBinding, CommandEncoder, IRenderPassDescriptor, ISubmit, IUniforms } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
@@ -724,7 +724,7 @@ async function init(
         writeBuffers.push({ bufferOffset: 8, data: stepDetails });
         iGPUBuffer.writeBuffers = writeBuffers;
 
-        const commandEncoder: ICommandEncoder = { passEncoders: [] };
+        const commandEncoder: CommandEncoder = { passEncoders: [] };
         const submit: ISubmit = { commandEncoders: [commandEncoder] };
 
         bitonicDisplayRenderer.startRun(commandEncoder, {
