@@ -71,10 +71,10 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
         renderPipeline._version = ~~renderPipeline._version + 1;
         renderPipelineMap.delete([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
         watcher.unwatch(vertexStateResult, "_version", onchanged);
-        watcher.unwatch(gpuFragmentState, "_version", onchanged);
+        gpuFragmentState && watcher.unwatch(gpuFragmentState, "_version", onchanged);
     }
     watcher.watch(vertexStateResult, "_version", onchanged);
-    watcher.watch(gpuFragmentState, "_version", onchanged);
+    gpuFragmentState && watcher.watch(gpuFragmentState, "_version", onchanged);
 
     return result;
 }
