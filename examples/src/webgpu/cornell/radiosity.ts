@@ -1,4 +1,4 @@
-import { CommandEncoder, IPassEncoder, ITexture, IUniforms } from "@feng3d/render-api";
+import { CommandEncoder, IPassEncoder, Texture, Uniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
@@ -17,7 +17,7 @@ export default class Radiosity
     static readonly lightmapHeight = 256;
 
     // The output lightmap.
-    readonly lightmap: ITexture;
+    readonly lightmap: Texture;
 
     // Number of photons emitted per workgroup.
     // This is equal to the workgroup size (one photon per invocation)
@@ -39,7 +39,7 @@ export default class Radiosity
     private readonly scene: Scene;
     private readonly radiosityPipeline: IGPUComputePipeline;
     private readonly accumulationToLightmapPipeline: IGPUComputePipeline;
-    private readonly bindGroup: IUniforms;
+    private readonly bindGroup: Uniforms;
     private readonly accumulationBuffer: Uint8Array;
     private readonly uniformBuffer: Uint8Array;
 

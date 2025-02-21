@@ -7,7 +7,7 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
@@ -36,7 +36,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     color: { data: particlesBuffer, format: "float32x4", offset: particleColorOffset, arrayStride: particleInstanceByteSize, stepMode: "instance" },
   };
 
-  const renderPipeline: IRenderPipeline = {
+  const renderPipeline: RenderPipeline = {
     vertex: {
       code: particleWGSL,
     },
@@ -74,13 +74,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     + 0;
   const uniformBuffer = new Uint8Array(uniformBufferSize);
 
-  const uniformBindGroup: IUniforms = {
+  const uniformBindGroup: Uniforms = {
     render_params: {
       bufferView: uniformBuffer,
     },
   };
 
-  const renderPassDescriptor: IRenderPassDescriptor = {
+  const renderPassDescriptor: RenderPassDescriptor = {
     colorAttachments: [
       {
         view: { texture: { context: { canvasId: canvas.id } } },
@@ -110,7 +110,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   // ////////////////////////////////////////////////////////////////////////////
   // Texture
   // ////////////////////////////////////////////////////////////////////////////
-  let texture: ITexture;
+  let texture: Texture;
   let textureWidth = 1;
   let textureHeight = 1;
   let numMipLevels = 1;
@@ -167,7 +167,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const passEncoders: IGPUComputePass[] = [];
 
-    const submit: ISubmit = {
+    const submit: Submit = {
       commandEncoders: [
         {
           passEncoders,
@@ -179,7 +179,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       const levelWidth = textureWidth >> level;
       const levelHeight = textureHeight >> level;
-      const probabilityMapBindGroup: IUniforms = {
+      const probabilityMapBindGroup: Uniforms = {
         ubo: { bufferView: probabilityMapUBOBuffer },
         buf_in: { bufferView: level & 1 ? bufferA : bufferB },
         buf_out: { bufferView: level & 1 ? bufferB : bufferA },
@@ -250,7 +250,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       code: simulateWGSL,
     },
   };
-  const computeBindGroup: IUniforms = {
+  const computeBindGroup: Uniforms = {
     sim_params: {
       bufferView: simulationUBOBuffer,
     },
@@ -267,9 +267,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const view = mat4.create();
   const mvp = mat4.create();
 
-  const passEncoders: (IGPUComputePass | IRenderPass)[] = [];
+  const passEncoders: (IGPUComputePass | RenderPass)[] = [];
 
-  const submit: ISubmit = {
+  const submit: Submit = {
     commandEncoders: [
       {
         passEncoders,

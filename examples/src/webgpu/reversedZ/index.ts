@@ -10,7 +10,7 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 // Two planes close to each other for depth precision test
@@ -87,7 +87,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // depthPrePass is used to render scene to the depth texture
     // this is not needed if you just want to use reversed z to render a scene
-    const depthPrePassRenderPipelineDescriptorBase: IRenderPipeline = {
+    const depthPrePassRenderPipelineDescriptorBase: RenderPipeline = {
         vertex: {
             code: vertexDepthPrePassWGSL,
         },
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // we need the depthCompare to fit the depth buffer mode we are using.
     // this is the same for other passes
-    const depthPrePassPipelines: IRenderPipeline[] = [];
+    const depthPrePassPipelines: RenderPipeline[] = [];
     depthPrePassPipelines[DepthBufferMode.Default] = {
         ...depthPrePassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -113,7 +113,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // precisionPass is to draw precision error as color of depth value stored in depth buffer
     // compared to that directly calcualated in the shader
-    const precisionPassRenderPipelineDescriptorBase: IRenderPipeline = {
+    const precisionPassRenderPipelineDescriptorBase: RenderPipeline = {
         vertex: {
             code: vertexPrecisionErrorPassWGSL,
         },
@@ -122,7 +122,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const precisionPassPipelines: IRenderPipeline[] = [];
+    const precisionPassPipelines: RenderPipeline[] = [];
     precisionPassPipelines[DepthBufferMode.Default] = {
         ...precisionPassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -139,7 +139,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // colorPass is the regular render pass to render the scene
-    const colorPassRenderPipelineDescriptorBase: IRenderPipeline = {
+    const colorPassRenderPipelineDescriptorBase: RenderPipeline = {
         vertex: {
             code: vertexWGSL,
         },
@@ -149,7 +149,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     //
-    const colorPassPipelines: IRenderPipeline[] = [];
+    const colorPassPipelines: RenderPipeline[] = [];
     colorPassPipelines[DepthBufferMode.Default] = {
         ...colorPassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -168,7 +168,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // textureQuadPass is draw a full screen quad of depth texture
     // to see the difference of depth value using reversed z compared to default depth buffer usage
     // 0.0 will be the furthest and 1.0 will be the closest
-    const textureQuadPassPipline: IRenderPipeline = {
+    const textureQuadPassPipline: RenderPipeline = {
         vertex: {
             code: vertexTextureQuadWGSL,
         },
@@ -177,17 +177,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: depthBufferFormat,
     };
 
-    const defaultDepthTexture: ITexture = {
+    const defaultDepthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: depthBufferFormat,
     };
 
-    const depthPrePassDescriptor: IRenderPassDescriptor = {
+    const depthPrePassDescriptor: RenderPassDescriptor = {
         colorAttachments: [],
         depthStencilAttachment: {
             view: { texture: depthTexture },
@@ -202,7 +202,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // the scene twice using different depth buffer mode on splitted viewport
     // of the same canvas
     // see the difference of the loadOp of the colorAttachments
-    const drawPassDescriptor: IRenderPassDescriptor = {
+    const drawPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -218,7 +218,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const drawPassLoadDescriptor: IRenderPassDescriptor = {
+    const drawPassLoadDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -235,7 +235,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
     const drawPassDescriptors = [drawPassDescriptor, drawPassLoadDescriptor];
 
-    const textureQuadPassDescriptor: IRenderPassDescriptor = {
+    const textureQuadPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -244,7 +244,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         ],
     };
-    const textureQuadPassLoadDescriptor: IRenderPassDescriptor = {
+    const textureQuadPassLoadDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -259,7 +259,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         textureQuadPassLoadDescriptor,
     ];
 
-    const depthTextureBindGroup: IUniforms = {
+    const depthTextureBindGroup: Uniforms = {
         depthTexture: { texture: depthTexture },
     };
 
@@ -301,7 +301,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         viewProjectionMatrix: cameraMatrixReversedDepthBuffer,
     };
 
-    const uniformBindGroups: IUniforms[] = [
+    const uniformBindGroups: Uniforms[] = [
         {
             uniforms,
             camera: camera0,
@@ -351,7 +351,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
     gui.add(settings, "mode", ["color", "precision-error", "depth-texture"]).onChange(updateSubmit);
 
-    const colorPassEncoders: IRenderPass[] = [];
+    const colorPassEncoders: RenderPass[] = [];
 
     for (const m of depthBufferModes)
     {
@@ -379,7 +379,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    const precisionErrorPassEncoders: IRenderPass[] = [];
+    const precisionErrorPassEncoders: RenderPass[] = [];
     for (const m of depthBufferModes)
     {
         precisionErrorPassEncoders.push({
@@ -428,7 +428,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    const depthBufferPassEncoders: IRenderPass[] = [];
+    const depthBufferPassEncoders: RenderPass[] = [];
     for (const m of depthBufferModes)
     {
         depthBufferPassEncoders.push({
@@ -467,11 +467,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    let submit: ISubmit;
+    let submit: Submit;
 
     function updateSubmit()
     {
-        let passEncoders: IRenderPass[];
+        let passEncoders: RenderPass[];
 
         if (settings.mode === "color")
         {

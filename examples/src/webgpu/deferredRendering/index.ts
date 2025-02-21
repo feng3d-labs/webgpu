@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IUniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
@@ -51,19 +51,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     // GBuffer texture render targets
-    const gBufferTexture2DFloat32: ITexture = {
+    const gBufferTexture2DFloat32: Texture = {
         size: [canvas.width, canvas.height],
         format: "rgba32float",
     };
-    const gBufferTexture2DFloat16: ITexture = {
+    const gBufferTexture2DFloat16: Texture = {
         size: [canvas.width, canvas.height],
         format: "rgba16float",
     };
-    const gBufferTextureAlbedo: ITexture = {
+    const gBufferTextureAlbedo: Texture = {
         size: [canvas.width, canvas.height],
         format: "bgra8unorm",
     };
-    const gBufferTextureViews: ITextureView[] = [
+    const gBufferTextureViews: TextureView[] = [
         { texture: gBufferTexture2DFloat32 },
         { texture: gBufferTexture2DFloat16 },
         { texture: gBufferTextureAlbedo },
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         cullMode: "back",
     };
 
-    const writeGBuffersPipeline: IRenderPipeline = {
+    const writeGBuffersPipeline: RenderPipeline = {
         vertex: {
             code: vertexWriteGBuffers,
         },
@@ -83,7 +83,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const gBuffersDebugViewPipeline: IRenderPipeline = {
+    const gBuffersDebugViewPipeline: RenderPipeline = {
         vertex: {
             code: vertexTextureQuad,
         },
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         },
     };
-    const deferredRenderPipeline: IRenderPipeline = {
+    const deferredRenderPipeline: RenderPipeline = {
         vertex: {
             code: vertexTextureQuad,
         },
@@ -104,12 +104,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
 
-    const writeGBufferPassDescriptor: IRenderPassDescriptor = {
+    const writeGBufferPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: gBufferTextureViews[0],
@@ -141,7 +141,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const textureQuadPassDescriptor: IRenderPassDescriptor = {
+    const textureQuadPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -177,7 +177,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const cameraUniformBuffer = new Uint8Array(4 * 16);
 
-    const sceneUniformBindGroup: IUniforms = {
+    const sceneUniformBindGroup: Uniforms = {
         uniforms: {
             bufferView: modelUniformBuffer,
         },
@@ -186,7 +186,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const gBufferTexturesBindGroup: IUniforms = {
+    const gBufferTexturesBindGroup: Uniforms = {
         gBufferPosition: gBufferTextureViews[0],
         gBufferNormal: gBufferTextureViews[1],
         gBufferAlbedo: gBufferTextureViews[2],
@@ -236,7 +236,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: lightUpdate,
         },
     };
-    const lightsBufferBindGroup: IUniforms = {
+    const lightsBufferBindGroup: Uniforms = {
         lightsBuffer: {
             bufferView: lightsBuffer,
         },
@@ -244,7 +244,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             bufferView: configUniformBuffer,
         },
     };
-    const lightsBufferComputeBindGroup: IUniforms = {
+    const lightsBufferComputeBindGroup: Uniforms = {
         lightsBuffer: {
             bufferView: lightsBuffer,
         },
@@ -322,7 +322,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return viewProjMatrix as Float32Array;
     }
 
-    const passEncoders: (IGPUComputePass | IRenderPass)[] = [];
+    const passEncoders: (IGPUComputePass | RenderPass)[] = [];
     passEncoders.push({
         descriptor: writeGBufferPassDescriptor,
         renderObjects: [
@@ -353,7 +353,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     });
 
-    const gBuffersPassEncoders: (IGPUComputePass | IRenderPass)[] = passEncoders.concat();
+    const gBuffersPassEncoders: (IGPUComputePass | RenderPass)[] = passEncoders.concat();
 
     gBuffersPassEncoders.push({
         descriptor: textureQuadPassDescriptor,
@@ -400,7 +400,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             getIGPUBuffer(cameraUniformBuffer).writeBuffers = [{ data: cameraViewProj }];
         }
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [
                 {
                     passEncoders: settings.mode === "gBuffers view" ? gBuffersPassEncoders : passEncoders,

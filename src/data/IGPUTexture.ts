@@ -1,4 +1,4 @@
-import { ITexture } from "@feng3d/render-api";
+import { Texture } from "@feng3d/render-api";
 
 declare module "@feng3d/render-api"
 {
@@ -48,7 +48,7 @@ declare module "@feng3d/render-api"
      * @see GPUDevice.createTexture
      * @see GPUTextureDescriptor
      */
-    export interface ITexture
+    export interface Texture
     {
         /**
          * Specifies what view {@link GPUTextureViewDescriptor#format} values will be allowed when calling

@@ -2,8 +2,16 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { BlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureView, IUniforms } from "@feng3d/render-api";
+import { BlendComponent, RenderPassDescriptor, IRenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView, Uniforms, RenderObject } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+
+// declare module "@feng3d/render-api"
+// {
+//     interface Uniforms
+//     {
+//         matrix: Float32Array;
+//     }
+// }
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -94,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
     const context: IGPUCanvasContext = { canvasId: canvas.id, configuration: {} };
-    const canvasTexture: ITextureView = { texture: { context } };
+    const canvasTexture: TextureView = { texture: { context } };
 
     // Get a WebGPU context from the canvas and configure it
     const webgpu = await new WebGPU().init();
@@ -108,7 +116,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     )
     {
         const { flipY, premultipliedAlpha } = options;
-        const texture: ITexture = {
+        const texture: Texture = {
             format: "rgba8unorm",
             size: [source.width, source.height],
             sources: [{ image: source, flipY, premultipliedAlpha }]
@@ -135,14 +143,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         { premultipliedAlpha: true }
     );
 
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
         mipmapFilter: "linear",
-    };
-
-    type Uniforms = {
-        matrix: Float32Array;
     };
 
     // function makeUniformBufferAndValues(): Uniforms
@@ -163,25 +167,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const srcUniform = { matrix: new Float32Array(16) };
     const dstUniform = { matrix: new Float32Array(16) };
 
-    const srcBindGroupUnpremultipliedAlpha:          IUniforms = {
+    const srcBindGroupUnpremultipliedAlpha: Uniforms = {
         ourSampler: sampler,
         ourTexture: { texture: srcTextureUnpremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupUnpremultipliedAlpha:          IUniforms = {
+    const dstBindGroupUnpremultipliedAlpha: Uniforms = {
         ourSampler: sampler,
         ourTexture: { texture: dstTextureUnpremultipliedAlpha },
         uni: dstUniform,
     };
 
-    const srcBindGroupPremultipliedAlpha:          IUniforms = {
+    const srcBindGroupPremultipliedAlpha: Uniforms = {
         ourSampler: sampler,
         ourTexture: { texture: srcTexturePremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupPremultipliedAlpha:          IUniforms = {
+    const dstBindGroupPremultipliedAlpha: Uniforms = {
         ourSampler: sampler,
         ourTexture: { texture: dstTexturePremultipliedAlpha },
         uni: dstUniform,
@@ -203,7 +207,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ];
 
     const clearValue: [red: number, green: number, blue: number, alpha: number] = [0, 0, 0, 0];
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         label: "our basic canvas renderPass",
         colorAttachments: [
             {
@@ -429,7 +433,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     clearFolder.add(clear, "alpha", 0, 1).onChange(render);
     clearFolder.addColor(new GUIColorHelper(clear.color), "value").onChange(render);
 
-    const dstPipeline: IRenderPipeline = {
+    const dstPipeline: RenderPipeline = {
         label: "hardcoded textured quad pipeline",
         vertex: {
             code: texturedQuadWGSL,
@@ -443,7 +447,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         gui.updateDisplay();
 
-        const srcPipeline: IRenderPipeline = {
+        const srcPipeline: RenderPipeline = {
             label: "hardcoded textured quad pipeline",
             vertex: {
                 code: texturedQuadWGSL,
@@ -480,7 +484,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         function updateUniforms(
             uniforms: Uniforms,
             canvas: HTMLCanvasElement,
-            texture: ITexture
+            texture: Texture
         )
         {
             const projectionMatrix = mat4.ortho(
@@ -503,18 +507,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         updateUniforms(srcUniform, canvas, srcTexture);
         updateUniforms(dstUniform, canvas, dstTexture);
 
-        const ro: IRenderObject = {
+        const ro: RenderObject = {
             pipeline: dstPipeline,
             uniforms: dstBindGroup,
-            geometry:{
+            geometry: {
                 draw: { __type: "DrawVertex", vertexCount: 6 },
             }
         };
 
-        const ro1: IRenderObject = {
+        const ro1: RenderObject = {
             pipeline: srcPipeline,
             uniforms: srcBindGroup,
-            geometry:{
+            geometry: {
                 draw: { __type: "DrawVertex", vertexCount: 6 },
             }
         };
@@ -524,7 +528,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ro1,
         ];
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

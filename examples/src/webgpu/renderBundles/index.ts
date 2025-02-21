@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, IRenderPassObject, RenderPipeline, Sampler, Submit, Texture, Uniforms, RenderObject, VertexAttributes } from "@feng3d/render-api";
 import { IGPUCanvasContext, IGPURenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -11,11 +11,11 @@ import meshWGSL from "./mesh.wgsl";
 
 interface Renderable
 {
-    renderObject?: IRenderObject;
+    renderObject?: RenderObject;
     vertexAttributes: VertexAttributes;
     indices: Uint16Array;
     indexCount: number;
-    bindGroup?: IUniforms;
+    bindGroup?: Uniforms;
 }
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
@@ -41,7 +41,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         canvasId: canvas.id,
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: meshWGSL,
         },
@@ -52,7 +52,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         // is rendered in front.
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
@@ -61,7 +61,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     const uniformBuffer = new Uint8Array(uniformBufferSize);
 
     // Fetch the images and upload them into a GPUTexture.
-    let planetTexture: ITexture;
+    let planetTexture: Texture;
     {
         const response = await fetch(
             new URL("../../../assets/img/saturn.jpg", import.meta.url).toString()
@@ -75,7 +75,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         };
     }
 
-    let moonTexture: ITexture;
+    let moonTexture: Texture;
     {
         const response = await fetch(
             new URL("../../../assets/img/moon.jpg", import.meta.url).toString()
@@ -89,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         };
     }
 
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -128,13 +128,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     }
 
     function createSphereBindGroup1(
-        texture: ITexture,
+        texture: Texture,
         transform: Float32Array
-    ): IUniforms
+    ): Uniforms
     {
         const uniformBuffer = new Float32Array(transform);
 
-        const bindGroup: IUniforms = {
+        const bindGroup: Uniforms = {
             modelMatrix: {
                 bufferView: uniformBuffer,
             },
@@ -185,7 +185,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     }
     ensureEnoughAsteroids();
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -211,7 +211,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     );
     const modelViewProjectionMatrix = mat4.create();
 
-    const frameBindGroup: IUniforms = {
+    const frameBindGroup: Uniforms = {
         uniforms: {
             bufferView: uniformBuffer,
         },
@@ -237,7 +237,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     // same code both to render the scene normally and to build the render bundle.
     function renderScene()
     {
-        const ros: IRenderObject[] = [];
+        const ros: RenderObject[] = [];
         // Loop through every renderable object and draw them individually.
         // (Because many of these meshes are repeated, with only the transforms
         // differing, instancing would be highly effective here. This sample
@@ -327,12 +327,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             renderObjects = renderBundle.renderObjects as any;
         }
 
-        const renderPass: IRenderPass = {
+        const renderPass: RenderPass = {
             descriptor: renderPassDescriptor,
             renderObjects,
         };
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [renderPass],

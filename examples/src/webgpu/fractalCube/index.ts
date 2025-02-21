@@ -1,4 +1,4 @@
-import { IBufferBinding, CopyTextureToTexture, IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
+import { CopyTextureToTexture, IBufferBinding, RenderPassDescriptor, Sampler, Submit, Texture, RenderObject } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -18,13 +18,13 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // We will copy the frame's rendering results into this texture and
     // sample it on the next frame.
-    const cubeTexture: ITexture = {
+    const cubeTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: presentationFormat,
     };
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -62,7 +62,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         }
     };
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -76,7 +76,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleSelfWGSL },
         },
@@ -112,7 +112,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         (renderObject.uniforms.uniforms as IBufferBinding).modelViewProjectionMatrix = transformationMatrix;
 
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [

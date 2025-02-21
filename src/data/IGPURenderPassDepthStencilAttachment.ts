@@ -1,4 +1,4 @@
-import { IRenderPassDepthStencilAttachment, ITextureView } from "@feng3d/render-api";
+import { RenderPassDepthStencilAttachment, TextureView } from "@feng3d/render-api";
 
 declare module "@feng3d/render-api"
 {
@@ -7,7 +7,7 @@ declare module "@feng3d/render-api"
      *
      * @see GPURenderPassDepthStencilAttachment
      */
-    export interface IRenderPassDepthStencilAttachment
+    export interface RenderPassDepthStencilAttachment
     {
         /**
          * A {@link GPUTextureView} describing the texture subresource that will be output to
@@ -15,7 +15,7 @@ declare module "@feng3d/render-api"
          *
          * 当值为空时，将自动从颜色附件中获取尺寸来创建深度纹理。
          */
-        readonly view?: ITextureView;
+        readonly view?: TextureView;
 
         /**
          * The store operation to perform on {@link GPURenderPassDepthStencilAttachment#view}'s

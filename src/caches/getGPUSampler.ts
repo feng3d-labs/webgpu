@@ -1,9 +1,9 @@
 import { anyEmitter } from "@feng3d/event";
-import { ISampler } from "@feng3d/render-api";
+import { Sampler } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUSampler_changed } from "../eventnames";
 
-export function getGPUSampler(device: GPUDevice, sampler: ISampler)
+export function getGPUSampler(device: GPUDevice, sampler: Sampler)
 {
     let gSampler = samplerMap.get(sampler);
     if (gSampler) return gSampler;
@@ -32,12 +32,12 @@ export function getGPUSampler(device: GPUDevice, sampler: ISampler)
 
     return gSampler;
 }
-const samplerMap = new WeakMap<ISampler, GPUSampler>();
+const samplerMap = new WeakMap<Sampler, GPUSampler>();
 
 /**
  * GPU采样器默认值。
  */
-const defaultSampler: ISampler = {
+const defaultSampler: Sampler = {
     addressModeU: undefined,
     addressModeV: undefined,
     addressModeW: undefined,

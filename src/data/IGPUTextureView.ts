@@ -18,7 +18,7 @@ declare module "@feng3d/render-api"
      * @see GPUTexture.createView
      * @see GPUTextureViewDescriptor
      */
-    export interface ITextureView
+    export interface TextureView
     {
         /**
          * The format of the texture view. Must be either the {@link GPUTextureDescriptor#format} of the

@@ -1,4 +1,4 @@
-import { BlendState, DepthStencilState, FragmentState, getBlendConstantColor, IIndicesDataTypes, IRenderPipeline, IStencilFaceState, IVertexState, IWriteMask, PrimitiveState, VertexAttributes, vertexFormatMap, WGSLVertexType } from "@feng3d/render-api";
+import { BlendState, DepthStencilState, FragmentState, getBlendConstantColor, IIndicesDataTypes, RenderPipeline, StencilFaceState, IVertexState, IWriteMask, PrimitiveState, VertexAttributes, vertexFormatMap, WGSLVertexType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -21,7 +21,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPassFormat: IGPURenderPassFormat, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPassFormat: IGPURenderPassFormat, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
 {
     const indexFormat = indices ? getIGPUSetIndexBuffer(indices).indexFormat : undefined;
 
@@ -80,7 +80,7 @@ export function getNGPURenderPipeline(renderPipeline: IRenderPipeline, renderPas
 }
 
 const renderPipelineMap = new ChainMap<
-    [IRenderPipeline, string, PrimitiveState, VertexAttributes, GPUIndexFormat],
+    [RenderPipeline, string, PrimitiveState, VertexAttributes, GPUIndexFormat],
     {
         /**
          * GPU渲染管线描述。
@@ -196,7 +196,7 @@ function getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFo
     return gpuDepthStencilState;
 }
 
-function getGPUStencilFaceState(stencilFaceState?: IStencilFaceState)
+function getGPUStencilFaceState(stencilFaceState?: StencilFaceState)
 {
     if (!stencilFaceState) return {};
 

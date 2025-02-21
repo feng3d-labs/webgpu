@@ -1,4 +1,4 @@
-import { CopyBufferToBuffer, CopyTextureToTexture, IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPassObject, ISubmit } from "@feng3d/render-api";
+import { CopyBufferToBuffer, CopyTextureToTexture, IRenderPassObject, RenderObject, RenderPass, RenderPassDescriptor, Submit } from "@feng3d/render-api";
 
 import { IGPUComputeObject } from "./data/IGPUComputeObject";
 import { IGPUComputePass } from "./data/IGPUComputePass";
@@ -11,8 +11,8 @@ import { WebGPU } from "./WebGPU";
  */
 export class WebGPUStep
 {
-    private _currentSubmit: ISubmit;
-    private _currentRenderPassEncoder: IRenderPass;
+    private _currentSubmit: Submit;
+    private _currentRenderPassEncoder: RenderPass;
     private _currentComputePassEncoder: IGPUComputePass;
 
     readonly webGPU: WebGPU;
@@ -22,7 +22,7 @@ export class WebGPUStep
         this.webGPU = webGPU;
     }
 
-    renderPass(descriptor: IRenderPassDescriptor)
+    renderPass(descriptor: RenderPassDescriptor)
     {
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
         //
@@ -33,7 +33,7 @@ export class WebGPUStep
         this._currentSubmit.commandEncoders[0].passEncoders.push(this._currentRenderPassEncoder);
     }
 
-    renderObject(renderObject: IRenderObject)
+    renderObject(renderObject: RenderObject)
     {
         (this._currentRenderPassEncoder.renderObjects as IRenderPassObject[]).push(renderObject);
     }
@@ -77,7 +77,7 @@ export class WebGPUStep
      *
      * @see GPUQueue.submit
      */
-    submit(submit?: ISubmit)
+    submit(submit?: Submit)
     {
         if (!submit)
         {

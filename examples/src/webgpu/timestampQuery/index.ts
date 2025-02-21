@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Submit, Texture, RenderObject, VertexAttributes } from "@feng3d/render-api";
 import { IGPUCanvasContext, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
@@ -61,7 +61,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniforms = { modelViewProjectionMatrix: null };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -77,12 +77,12 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } }, // Assigned later
@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline,
         uniforms: {
             uniforms,
@@ -120,7 +120,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         }
     };
 
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [
             {
                 passEncoders: [

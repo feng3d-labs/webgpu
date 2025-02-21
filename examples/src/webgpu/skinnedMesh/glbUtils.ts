@@ -1,7 +1,7 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { Buffer, FragmentState, IDraw, IRenderObject, IRenderPipeline, IUniforms, IVertexState, PrimitiveState, VertexAttributes, vertexFormatMap } from "@feng3d/render-api";
+import { Buffer, FragmentState, IDraw, RenderPipeline, Uniforms, IVertexState, PrimitiveState, RenderObject, VertexAttributes, vertexFormatMap } from "@feng3d/render-api";
 import { getIGPUBuffer } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
@@ -342,7 +342,7 @@ interface AttributeMapInterface
 export class GLTFPrimitive
 {
     topology: GLTFRenderMode;
-    renderPipeline: IRenderPipeline;
+    renderPipeline: RenderPipeline;
     private attributeMap: AttributeMapInterface;
     private attributes: string[] = [];
     vertices: VertexAttributes;
@@ -427,7 +427,7 @@ export class GLTFPrimitive
             // targets: [{ format: colorFormat }],
         };
 
-        const rpDescript: IRenderPipeline = {
+        const rpDescript: RenderPipeline = {
             label: `${label}.pipeline`,
             vertex: vertexState,
             fragment: fragmentState,
@@ -441,7 +441,7 @@ export class GLTFPrimitive
         this.renderPipeline = rpDescript;
     }
 
-    render(renderObjects: IRenderObject[], bindingResources: IUniforms)
+    render(renderObjects: RenderObject[], bindingResources: Uniforms)
     {
         let draw: IDraw;
         if (this.indices)
@@ -467,7 +467,7 @@ export class GLTFPrimitive
             };
         }
 
-        const renderObject: IRenderObject = {
+        const renderObject: RenderObject = {
             pipeline: this.renderPipeline,
             uniforms: bindingResources,
             //if skin do something with bone bind group
@@ -509,7 +509,7 @@ export class GLTFMesh
         }
     }
 
-    render(renderObjects: IRenderObject[], bindingResources: IUniforms)
+    render(renderObjects: RenderObject[], bindingResources: Uniforms)
     {
         // We take a pretty simple approach to start. Just loop through all the primitives and
         // call their individual draw methods
@@ -664,7 +664,7 @@ export class GLTFNode
     }
 
     renderDrawables(
-        renderObjects: IRenderObject[], bindingResources: IUniforms
+        renderObjects: RenderObject[], bindingResources: Uniforms
     )
     {
         if (this.drawables !== undefined)
@@ -733,7 +733,7 @@ export class GLTFSkin
     // [5, 2, 3] means our joint info is at nodes 5, 2, and 3
     joints: number[];
     // Bind Group for this skin's uniform buffer
-    skinBindGroup: IUniforms;
+    skinBindGroup: Uniforms;
     // Static bindGroupLayout shared across all skins
     // In a larger shader with more properties, certain bind groups
     // would likely have to be combined due to device limitations in the number of bind groups

@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { Mat4, mat4, vec3 } from "wgpu-matrix";
 
@@ -87,7 +87,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         }
     }
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: instancedVertWGSL }, fragment: { code: vertexPositionColorWGSL },
         },
@@ -122,7 +122,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const data: ISubmit = {
+    const data: Submit = {
         commandEncoders: [
             {
                 passEncoders: [

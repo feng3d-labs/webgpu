@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { getTexImageSourceSize, getTextureBytesPerPixel, ITexture, ITextureDataSource, ITextureImageSource, ITextureLike, ITextureSize, ITextureSource } from "@feng3d/render-api";
+import { getTexImageSourceSize, getTextureBytesPerPixel, Texture, ITextureDataSource, ITextureImageSource, ITextureLike, ITextureSize, ITextureSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
@@ -29,7 +29,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
         return gpuTexture;
     }
 
-    const texture = textureLike as ITexture;
+    const texture = textureLike as Texture;
 
     const textureMap: Map<ITextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<ITextureLike, GPUTexture>();
     gpuTexture = textureMap.get(texture);

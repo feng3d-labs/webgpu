@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
 import { IGPUComputeObject, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 
@@ -81,7 +81,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -90,7 +90,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
         },
@@ -107,7 +107,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const renderObject1: IRenderObject = {
+    const renderObject1: RenderObject = {
         ...renderObject,
         geometry: {
             ...renderObject.geometry,
@@ -129,7 +129,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let t = 0;
     function frame()
     {
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [

@@ -1,4 +1,4 @@
-import { IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -62,62 +62,62 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Create normal mapping resources and pipeline
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
 
     // Fetch the image and upload it into a GPUTexture.
-    let woodAlbedoTexture: ITexture;
+    let woodAlbedoTexture: Texture;
     {
         const response = await fetch("../../../assets/img/wood_albedo.png");
         const imageBitmap = await createImageBitmap(await response.blob());
         woodAlbedoTexture = createTextureFromImage(imageBitmap);
     }
 
-    let spiralNormalTexture: ITexture;
+    let spiralNormalTexture: Texture;
     {
         const response = await fetch("../../../assets/img/spiral_normal.png");
         const imageBitmap = await createImageBitmap(await response.blob());
         spiralNormalTexture = createTextureFromImage(imageBitmap);
     }
 
-    let spiralHeightTexture: ITexture;
+    let spiralHeightTexture: Texture;
     {
         const response = await fetch("../../../assets/img/spiral_height.png");
         const imageBitmap = await createImageBitmap(await response.blob());
         spiralHeightTexture = createTextureFromImage(imageBitmap);
     }
 
-    let toyboxNormalTexture: ITexture;
+    let toyboxNormalTexture: Texture;
     {
         const response = await fetch("../../../assets/img/toybox_normal.png");
         const imageBitmap = await createImageBitmap(await response.blob());
         toyboxNormalTexture = createTextureFromImage(imageBitmap);
     }
 
-    let toyboxHeightTexture: ITexture;
+    let toyboxHeightTexture: Texture;
     {
         const response = await fetch("../../../assets/img/toybox_height.png");
         const imageBitmap = await createImageBitmap(await response.blob());
         toyboxHeightTexture = createTextureFromImage(imageBitmap);
     }
 
-    let brickwallAlbedoTexture: ITexture;
+    let brickwallAlbedoTexture: Texture;
     {
         const response = await fetch("../../../assets/img/brickwall_albedo.png");
         const imageBitmap = await createImageBitmap(await response.blob());
         brickwallAlbedoTexture = createTextureFromImage(imageBitmap);
     }
 
-    let brickwallNormalTexture: ITexture;
+    let brickwallNormalTexture: Texture;
     {
         const response = await fetch("../../../assets/img/brickwall_normal.png");
         const imageBitmap = await createImageBitmap(await response.blob());
         brickwallNormalTexture = createTextureFromImage(imageBitmap);
     }
 
-    let brickwallHeightTexture: ITexture;
+    let brickwallHeightTexture: Texture;
     {
         const response = await fetch("../../../assets/img/brickwall_height.png");
         const imageBitmap = await createImageBitmap(await response.blob());
@@ -125,12 +125,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -164,7 +164,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         depthLayers: undefined,
     };
 
-    const bindingResources: IUniforms = {
+    const bindingResources: Uniforms = {
         spaceTransform,
         mapInfo,
         // Texture bindGroups and bindGroupLayout
@@ -232,7 +232,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const texturedCubePipeline: IRenderPipeline = create3DRenderPipeline(
+    const texturedCubePipeline: RenderPipeline = create3DRenderPipeline(
         "NormalMappingRender",
         normalMapWGSL,
         // Position,   normal       uv           tangent      bitangent
@@ -312,7 +312,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         mapInfo.depthScale = settings.depthScale;
         mapInfo.depthLayers = settings.depthLayers;
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

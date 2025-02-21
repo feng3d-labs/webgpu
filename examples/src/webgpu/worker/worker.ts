@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
 import { getOffscreenCanvasId, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -78,7 +78,7 @@ async function init(canvas: OffscreenCanvas)
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -98,7 +98,7 @@ async function init(canvas: OffscreenCanvas)
         uniforms: { modelViewProjectionMatrix: undefined },
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } }, // Assigned later
@@ -141,7 +141,7 @@ async function init(canvas: OffscreenCanvas)
         return modelViewProjectionMatrix;
     }
 
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [{
             passEncoders: [{
                 descriptor: renderPassDescriptor,

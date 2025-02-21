@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderObject, IRenderPass, IRenderPassObject, IRenderPipeline, IScissorRect, ISubmit, IUniforms, IViewport, PrimitiveState, VertexAttributes } from "@feng3d/render-api";
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, RenderPass, IRenderPassObject, RenderPipeline, ScissorRect, Submit, Uniforms, IViewport, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -29,7 +29,7 @@ import { ChainMap } from "../utils/ChainMap";
 
 export class RunWebGPU
 {
-    runSubmit(device: GPUDevice, submit: ISubmit)
+    runSubmit(device: GPUDevice, submit: Submit)
     {
         const commandBuffers = submit.commandEncoders.map((v) =>
         {
@@ -52,7 +52,7 @@ export class RunWebGPU
         {
             if (!passEncoder.__type)
             {
-                this.runRenderPass(device, gpuCommandEncoder, passEncoder as IRenderPass);
+                this.runRenderPass(device, gpuCommandEncoder, passEncoder as RenderPass);
             }
             else if (passEncoder.__type === "RenderPass")
             {
@@ -79,7 +79,7 @@ export class RunWebGPU
         return gpuCommandEncoder.finish();
     }
 
-    protected runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IRenderPass)
+    protected runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
     {
         const { descriptor, renderObjects } = renderPass;
 
@@ -115,7 +115,7 @@ export class RunWebGPU
         {
             if (!element.__type)
             {
-                this.runRenderObject(device, passEncoder, renderPassFormat, element as IRenderObject);
+                this.runRenderObject(device, passEncoder, renderPassFormat, element as RenderObject);
             }
             else if (element.__type === "RenderObject")
             {
@@ -240,12 +240,12 @@ export class RunWebGPU
         passEncoder.executeBundles([gpuRenderBundle]);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IRenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly RenderObject[])
     {
         //
         renderObjects.forEach((element) =>
         {
-            this.runRenderObject(device, passEncoder, renderPassFormat, element as IRenderObject);
+            this.runRenderObject(device, passEncoder, renderPassFormat, element as RenderObject);
         });
     }
 
@@ -297,7 +297,7 @@ export class RunWebGPU
      * @param renderObject 渲染对象。
      * @param renderPass 渲染通道。
      */
-    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
+    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: RenderObject)
     {
         const { viewport, scissorRect, pipeline, uniforms: bindingResources, geometry } = renderObject;
 
@@ -332,7 +332,7 @@ export class RunWebGPU
         }
     }
 
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
     {
         //
         const renderPipelineResult = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
@@ -394,7 +394,7 @@ export class RunWebGPU
         }
     }
 
-    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: IScissorRect)
+    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: ScissorRect)
     {
         if (scissorRect)
         {
@@ -417,7 +417,7 @@ export class RunWebGPU
         }
     }
 
-    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: IUniforms)
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: Uniforms)
     {
         // 计算 bindGroups
         const setBindGroups = getIGPUSetBindGroups(shader, bindingResources);
@@ -429,7 +429,7 @@ export class RunWebGPU
         });
     }
 
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: IRenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, pipeline: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
     {
         const renderPipeline = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
 

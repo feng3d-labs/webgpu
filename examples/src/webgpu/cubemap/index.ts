@@ -1,4 +1,4 @@
-import { IBufferBinding, IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture, ITextureImageSource } from "@feng3d/render-api";
+import { IBufferBinding, RenderPassDescriptor, Sampler, Submit, Texture, ITextureImageSource, RenderObject } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -16,7 +16,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Fetch the 6 separate images for negative/positive x, y, z axis of a cubemap
     // and upload it into a GPUTexture.
-    let cubemapTexture: ITexture;
+    let cubemapTexture: Texture;
     {
         // The order of the array layers is [+X, -X, +Y, -Y, +Z, -Z]
         const imgSrcs = [
@@ -70,7 +70,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         };
     }
 
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -106,7 +106,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         );
     }
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -119,7 +119,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
         },
@@ -148,7 +148,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         (renderObject.uniforms.uniforms as IBufferBinding).modelViewProjectionMatrix = modelViewProjectionMatrix;
 
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [

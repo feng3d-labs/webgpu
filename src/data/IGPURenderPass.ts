@@ -1,4 +1,4 @@
-import { IRenderPass, IRenderPassDescriptor } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor } from "@feng3d/render-api";
 import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
 import { IGPUTimestampQuery } from "./IGPUTimestampQuery";
@@ -12,7 +12,7 @@ declare module "@feng3d/render-api"
      *
      * {@link GPURenderPassEncoder}
      */
-    export interface IRenderPass
+    export interface RenderPass
     {
         /**
          * 渲染不被遮挡查询结果。具体数据保存在各子项的"result"属性中。

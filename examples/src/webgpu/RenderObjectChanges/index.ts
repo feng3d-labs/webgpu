@@ -1,4 +1,4 @@
-import { IRenderObject, ISubmit } from "@feng3d/render-api";
+import { Submit, RenderObject } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -9,7 +9,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init(); // 初始化WebGPU
 
-    const renderObject: IRenderObject = { // 渲染对象
+    const renderObject: RenderObject = { // 渲染对象
         pipeline: { // 渲染管线
             vertex: { // 顶点着色器
                 code: `
@@ -39,7 +39,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         uniforms: { color: [1, 0, 0, 0] as any }, // Uniform 颜色值。
     };
 
-    const submit: ISubmit = { // 一次GPU提交
+    const submit: Submit = { // 一次GPU提交
         commandEncoders: [ // 命令编码列表
             {
                 passEncoders: [ // 通道编码列表

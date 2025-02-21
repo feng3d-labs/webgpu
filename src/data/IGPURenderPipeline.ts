@@ -9,7 +9,7 @@ declare module "@feng3d/render-api"
      *
      * @see https://developer.mozilla.org/en-US/docs/Web/API/GPUDevice/createRenderPipeline
      */
-    export interface IRenderPipeline
+    export interface RenderPipeline
     {
         /**
          * 多重采样阶段描述。

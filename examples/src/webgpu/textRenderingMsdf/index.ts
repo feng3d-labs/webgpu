@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, IUniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, IRenderPassObject, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
@@ -141,7 +141,7 @@ setBlendConstant().`,
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -156,18 +156,18 @@ setBlendConstant().`,
         },
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: depthFormat,
     };
 
     const uniformBuffer = new Float32Array(16);
 
-    const uniformBindGroup: IUniforms = {
+    const uniformBindGroup: Uniforms = {
         uniforms: { bufferView: uniformBuffer },
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -269,7 +269,7 @@ setBlendConstant().`,
 
         textRenderer.render(renderObjects, ...text);
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

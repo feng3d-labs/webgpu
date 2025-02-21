@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassObject } from "@feng3d/render-api";
+import { IRenderPassObject, RenderObject } from "@feng3d/render-api";
 
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
@@ -47,9 +47,9 @@ export class RunWebGPUCommandCache extends RunWebGPU
         runCommands(passEncoder, caches);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IRenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: RenderObject[])
     {
-        const map: ChainMap<[string, IRenderObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
+        const map: ChainMap<[string, RenderObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let caches = map.get([renderPassFormat._key, renderObjects]);
         if (!caches)
         {
@@ -86,9 +86,9 @@ export class RunWebGPUCommandCache extends RunWebGPU
         runCommands(bundleEncoder, { ...caches, commands });
     }
 
-    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
+    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: RenderObject)
     {
-        const map: ChainMap<[string, IRenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
+        const map: ChainMap<[string, RenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
         const _commands = passEncoder["_commands"] as any[];
 
         const commands = map.get([renderPassFormat._key, renderObject]);

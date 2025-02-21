@@ -1,4 +1,4 @@
-import { DepthStencilState, IRenderPipeline, ITexture } from "@feng3d/render-api";
+import { DepthStencilState, RenderPipeline, Texture } from "@feng3d/render-api";
 
 export const create3DRenderPipeline = (
     label: string,
@@ -16,7 +16,7 @@ export const create3DRenderPipeline = (
         };
     }
 
-    const pipelineDescriptor: IRenderPipeline = {
+    const pipelineDescriptor: RenderPipeline = {
         label: `${label}.pipeline`,
         vertex: {
             code: vertexShader,
@@ -34,7 +34,7 @@ export const createTextureFromImage = (
     bitmap: ImageBitmap
 ) =>
 {
-    const texture: ITexture = {
+    const texture: Texture = {
         size: [bitmap.width, bitmap.height],
         format: "rgba8unorm",
         sources: [{ image: bitmap }]

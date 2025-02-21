@@ -7,7 +7,7 @@ import gridWGSL from "./grid.wgsl";
 import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
-import { IPassEncoder, IRenderObject, IRenderPass, IRenderPassDescriptor, ITexture, IUniforms } from "@feng3d/render-api";
+import { IPassEncoder, RenderPass, RenderPassDescriptor, Texture, Uniforms, RenderObject } from "@feng3d/render-api";
 import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -186,14 +186,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     animFolder.add(settings, "angle", 0.05, 0.5).step(0.05);
     animFolder.add(settings, "speed", 10, 100).step(10);
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
 
     const cameraBuffer = new Float32Array(48);
 
-    const cameraBGCluster: IUniforms = {
+    const cameraBGCluster: Uniforms = {
         camera_uniforms: {
             bufferView: cameraBuffer,
         }
@@ -201,7 +201,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const generalUniformsBuffer = new Uint32Array(2);
 
-    const generalUniformsBGCLuster: IUniforms = {
+    const generalUniformsBGCLuster: Uniforms = {
         general_uniforms: {
             bufferView: generalUniformsBuffer,
         },
@@ -227,7 +227,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Buffer for our uniforms, joints, and inverse bind matrices
     const skinnedGridJointUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
     const skinnedGridInverseBindUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
-    const skinnedGridBoneBGCluster: IUniforms = {
+    const skinnedGridBoneBGCluster: Uniforms = {
         joint_matrices: { bufferView: skinnedGridJointUniformBuffer },
         inverse_bind_matrices: { bufferView: skinnedGridInverseBindUniformBuffer },
     };
@@ -303,7 +303,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     // Pass Descriptor for GLTFs
-    const gltfRenderPassDescriptor: IRenderPassDescriptor = {
+    const gltfRenderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -322,7 +322,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Pass descriptor for grid with no depth testing
-    const skinnedGridRenderPassDescriptor: IRenderPassDescriptor = {
+    const skinnedGridRenderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -487,8 +487,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         if (settings.object === "Whale")
         {
-            const renderObjects: IRenderObject[] = [];
-            const bindingResources: IUniforms = {
+            const renderObjects: RenderObject[] = [];
+            const bindingResources: Uniforms = {
                 ...cameraBGCluster,
                 ...generalUniformsBGCLuster,
             };
@@ -496,7 +496,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 scene.root.renderDrawables(renderObjects, bindingResources);
             }
-            const passEncoder: IRenderPass = {
+            const passEncoder: RenderPass = {
                 descriptor: gltfRenderPassDescriptor,
                 renderObjects
             };
@@ -508,7 +508,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // a separate render descriptor that does not take in a depth texture
             // Pass in vertex and index buffers generated from our static skinned grid
             // data at ./gridData.ts
-            const renderObject: IRenderObject = {
+            const renderObject: RenderObject = {
                 pipeline: skinnedGridPipeline,
                 uniforms: {
                     ...cameraBGCluster,

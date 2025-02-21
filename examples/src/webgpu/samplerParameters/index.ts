@@ -1,7 +1,7 @@
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureSource, IUniforms } from "@feng3d/render-api";
+import { RenderPassDescriptor, IRenderPassObject, RenderPipeline, Sampler, Submit, Texture, ITextureSource, Uniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import showTextureWGSL from "./showTexture.wgsl";
@@ -176,7 +176,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
      */
     function updateSamplerResources()
     {
-        const sampler: ISampler = {
+        const sampler: Sampler = {
             ...samplerDescriptor,
             maxAnisotropy:
                 samplerDescriptor.minFilter === "linear"
@@ -229,7 +229,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kTextureMipLevels = 4;
     const kTextureBaseSize = 16;
 
-    const checkerboard: ITexture = {
+    const checkerboard: Texture = {
         format: "rgba8unorm",
         size: [kTextureBaseSize, kTextureBaseSize],
         mipLevelCount: 4,
@@ -270,7 +270,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // "Debug" view of the actual texture contents
     //
 
-    const showTexturePipeline: IRenderPipeline = {
+    const showTexturePipeline: RenderPipeline = {
         vertex: { code: showTextureWGSL }, fragment: { code: showTextureWGSL }
     };
 
@@ -278,7 +278,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Pipeline for drawing the test squares
     //
 
-    const texturedSquarePipeline: IRenderPipeline = {
+    const texturedSquarePipeline: RenderPipeline = {
         vertex: { code: texturedSquareWGSL, constants: { kTextureBaseSize, kViewportSize } }, fragment: { code: texturedSquareWGSL },
     };
 
@@ -293,7 +293,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const bufMatrices = kMatrices;
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -304,7 +304,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const renderObjects: IRenderPassObject[] = [];
 
-    const bindingResources0: IUniforms = {
+    const bindingResources0: Uniforms = {
         config: { bufferView: bufConfig },
         matrices: { bufferView: bufMatrices },
         samp: null, // 帧更新中设置
@@ -330,7 +330,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         );
     }
 
-    const bindingResources1: IUniforms = {
+    const bindingResources1: Uniforms = {
         tex: { texture: checkerboard },
     };
     const kLastViewport = (kViewportGridSize - 1) * kViewportGridStride + 1;
@@ -375,7 +375,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     );
 
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [
             {
                 passEncoders: [

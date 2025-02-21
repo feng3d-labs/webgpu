@@ -1,4 +1,4 @@
-import { ITextureView } from "@feng3d/render-api";
+import { TextureView } from "@feng3d/render-api";
 
 declare module "@feng3d/render-api"
 {
@@ -8,13 +8,13 @@ declare module "@feng3d/render-api"
      *
      * {@link GPURenderPassColorAttachment}
      */
-    export interface IRenderPassColorAttachment
+    export interface RenderPassColorAttachment
     {
         /**
          * A {@link GPUTextureView} describing the texture subresource that will be output to for this
          * color attachment.
          */
-        readonly view?: ITextureView;
+        readonly view?: TextureView;
 
         /**
          * The store operation to perform on {@link GPURenderPassColorAttachment#view}

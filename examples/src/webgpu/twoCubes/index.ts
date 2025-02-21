@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IBufferBinding, IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { IBufferBinding, RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -17,7 +17,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -42,7 +42,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
         },
@@ -66,7 +66,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const renderObject1: IRenderObject = {
+    const renderObject1: RenderObject = {
         ...renderObject,
         uniforms: {
             uniforms: uniforms1,
@@ -121,7 +121,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         );
     }
 
-    const data: ISubmit = {
+    const data: Submit = {
         commandEncoders: [
             {
                 passEncoders: [

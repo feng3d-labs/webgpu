@@ -1,4 +1,4 @@
-import { IRenderPipeline, VertexAttributes } from "@feng3d/render-api";
+import { RenderPipeline, VertexAttributes } from "@feng3d/render-api";
 
 import { gridIndices, gridJoints, gridVertices, gridWeights } from "./gridData";
 
@@ -24,7 +24,7 @@ export const createSkinnedGridRenderPipeline = (
     fragmentShader: string,
 ) =>
 {
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         label: "SkinnedGridRenderer",
         vertex: {
             code: vertexShader,

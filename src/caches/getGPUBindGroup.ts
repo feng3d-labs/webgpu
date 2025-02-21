@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { IBufferBinding, ISampler, ITextureView } from "@feng3d/render-api";
+import { IBufferBinding, Sampler, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
@@ -51,16 +51,16 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
                 entry.resource = getGPUBufferBinding(device, v.resource as IBufferBinding);
             };
         }
-        else if ((v.resource as ITextureView).texture)
+        else if ((v.resource as TextureView).texture)
         {
             updateResource = () =>
             {
-                entry.resource = getGPUTextureView(device, v.resource as ITextureView);
+                entry.resource = getGPUTextureView(device, v.resource as TextureView);
 
                 anyEmitter.once(entry.resource, GPUTextureView_destroy, onResourceChanged);
             };
 
-            if (((v.resource as ITextureView).texture as IGPUCanvasTexture).context)
+            if (((v.resource as TextureView).texture as IGPUCanvasTexture).context)
             {
                 awaysUpdateFuncs.push(updateResource);
             }
@@ -78,8 +78,8 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         {
             updateResource = () =>
             {
-                entry.resource = getGPUSampler(device, v.resource as ISampler);
-                anyEmitter.once(v.resource as ISampler, IGPUSampler_changed, onResourceChanged);
+                entry.resource = getGPUSampler(device, v.resource as Sampler);
+                anyEmitter.once(v.resource as Sampler, IGPUSampler_changed, onResourceChanged);
             };
         }
 

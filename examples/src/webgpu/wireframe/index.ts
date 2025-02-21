@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, PrimitiveState, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Submit, Uniforms, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return model;
     });
 
-    let litPipeline: IRenderPipeline;
+    let litPipeline: RenderPipeline;
     function rebuildLitPipeline()
     {
         litPipeline = {
@@ -72,7 +72,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
     rebuildLitPipeline();
 
-    const wireframePipeline: IRenderPipeline = {
+    const wireframePipeline: RenderPipeline = {
         label: "wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
@@ -88,7 +88,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const barycentricCoordinatesBasedWireframePipeline: IRenderPipeline = {
+    const barycentricCoordinatesBasedWireframePipeline: RenderPipeline = {
         label: "barycentric coordinates based wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
@@ -131,8 +131,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             thickness: number;
             alphaThreshold: number;
         };
-        litBindGroup: IUniforms;
-        wireframeBindGroups: IUniforms[];
+        litBindGroup: Uniforms;
+        wireframeBindGroups: Uniforms[];
         model: Model;
     };
 
@@ -155,7 +155,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const model = randElement(models);
 
         // Make a bind group for this uniform
-        const litBindGroup: IUniforms = {
+        const litBindGroup: Uniforms = {
             uni: uniformBuffer,
         };
 
@@ -177,14 +177,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // We're creating 2 bindGroups, one for each pipeline.
         // We could create just one since they are identical. To do
         // so we'd have to manually create a bindGroupLayout.
-        const wireframeBindGroup: IUniforms = {
+        const wireframeBindGroup: Uniforms = {
             uni: uniformBuffer,
             positions: { bufferView: model.vertices },
             indices: { bufferView: model.indices },
             line: lineUniformBuffer,
         };
 
-        const barycentricCoordinatesBasedWireframeBindGroup: IUniforms = {
+        const barycentricCoordinatesBasedWireframeBindGroup: Uniforms = {
             uni: uniformBuffer,
             positions: { bufferView: model.vertices },
             indices: { bufferView: model.indices },
@@ -204,7 +204,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         label: "our basic canvas renderPass",
         colorAttachments: [
             {
@@ -281,7 +281,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const viewProjection = mat4.multiply(projection, view);
 
-        const renderObjects: IRenderObject[] = [];
+        const renderObjects: RenderObject[] = [];
 
         objectInfos.forEach(
             (
@@ -359,7 +359,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             });
         }
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

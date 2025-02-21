@@ -2,7 +2,7 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { IRenderPassObject, IRenderPipeline, ISampler, ITexture, IUniforms } from "@feng3d/render-api";
+import { IRenderPassObject, RenderPipeline, Sampler, Texture, Uniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPURenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
@@ -32,8 +32,8 @@ export class MsdfFont
   charCount: number;
   defaultChar: MsdfChar;
   constructor(
-    public pipeline: IRenderPipeline,
-    public bindGroup: IUniforms,
+    public pipeline: RenderPipeline,
+    public bindGroup: Uniforms,
     public lineHeight: number,
     public chars: { [x: number]: MsdfChar },
     public kernings: KerningMap
@@ -149,8 +149,8 @@ export interface MsdfTextFormattingOptions
 
 export class MsdfTextRenderer
 {
-  pipelinePromise: IRenderPipeline;
-  sampler: ISampler;
+  pipelinePromise: RenderPipeline;
+  sampler: Sampler;
 
   cameraUniformBuffer: Float32Array = new Float32Array(16 * 2);
 
@@ -201,7 +201,7 @@ export class MsdfTextRenderer
     const response = await fetch(url);
     const imageBitmap = await createImageBitmap(await response.blob());
 
-    const texture: ITexture = {
+    const texture: Texture = {
       size: [imageBitmap.width, imageBitmap.height],
       label: `MSDF font texture ${url}`,
       format: "rgba8unorm",
@@ -221,7 +221,7 @@ export class MsdfTextRenderer
     const i = fontJsonUrl.lastIndexOf("/");
     const baseUrl = i !== -1 ? fontJsonUrl.substring(0, i + 1) : undefined;
 
-    const pagePromises: Promise<ITexture>[] = [];
+    const pagePromises: Promise<Texture>[] = [];
     for (const pageUrl of json.pages)
     {
       pagePromises.push(this.loadTexture(baseUrl + pageUrl));
@@ -253,7 +253,7 @@ export class MsdfTextRenderer
 
     const pageTextures = await Promise.all(pagePromises);
 
-    const bindGroup: IUniforms = {
+    const bindGroup: Uniforms = {
       fontTexture: { texture: pageTextures[0] },
       fontSampler: this.sampler,
       chars: { bufferView: charsArray }
@@ -330,7 +330,7 @@ export class MsdfTextRenderer
       );
     }
 
-    const bindGroup: IUniforms = {
+    const bindGroup: Uniforms = {
       camera: { bufferView: this.cameraUniformBuffer },
       text: { bufferView: textBuffer },
     };

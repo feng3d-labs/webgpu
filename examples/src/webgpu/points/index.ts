@@ -1,4 +1,4 @@
-import { IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
@@ -93,7 +93,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 depthCompare: "less",
                 format: depthFormat,
             },
-        } as IRenderPipeline)
+        } as RenderPipeline)
         )
     );
 
@@ -114,8 +114,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ctx.textBaseline = "middle";
     ctx.fillText("🦋", 32, 32);
 
-    const sampler: ISampler = {};
-    const texture: ITexture = {
+    const sampler: Sampler = {};
+    const texture: Texture = {
         size: [ctx.canvas.width, ctx.canvas.height],
         format: "rgba8unorm",
         sources: [
@@ -133,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         t: { texture },
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         label: "our basic canvas renderPass",
         colorAttachments: [
             {
@@ -192,7 +192,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         bindingResources.uni.resolution = [canvas.width, canvas.height];
 
         //
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [
                     {

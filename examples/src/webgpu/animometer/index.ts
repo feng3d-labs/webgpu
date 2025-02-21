@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, RenderObject } from "@feng3d/render-api";
 import { IGPURenderBundle, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -33,7 +33,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const vec4Size = 4 * Float32Array.BYTES_PER_ELEMENT;
 
-    const pipelineDesc: IRenderPipeline = {
+    const pipelineDesc: RenderPipeline = {
         vertex: {
             code: animometerWGSL,
         },
@@ -42,7 +42,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         ...pipelineDesc,
     };
 
@@ -53,7 +53,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         0.1, -0.1, 0, 1, /**/ 0, 0, 1, 1,
     ]);
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline,
         uniforms: {},
         geometry: {
@@ -90,7 +90,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         value: 0,
     };
 
-    const renderObjects0: IRenderObject[] = [];
+    const renderObjects0: RenderObject[] = [];
     for (let i = 0; i < maxTriangles; ++i)
     {
         renderObjects0[i] = {
@@ -104,7 +104,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     }
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -127,8 +127,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects
         };
 
-        const renderPasss: IRenderPass[] = [];
-        const submit: ISubmit = {
+        const renderPasss: RenderPass[] = [];
+        const submit: Submit = {
             commandEncoders: [
                 {
                     passEncoders: renderPasss,

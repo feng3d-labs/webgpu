@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
@@ -24,7 +24,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const fullscreenQuadPipeline1: IRenderPipeline = {
+    const fullscreenQuadPipeline1: RenderPipeline = {
         vertex: {
             code: fullscreenTexturedQuadWGSL,
         },
@@ -33,7 +33,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -47,18 +47,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const imageBitmap = await createImageBitmap(img);
 
     const [srcWidth, srcHeight] = [imageBitmap.width, imageBitmap.height];
-    const cubeTexture1: ITexture = {
+    const cubeTexture1: Texture = {
         size: [imageBitmap.width, imageBitmap.height],
         format: "rgba8unorm",
         sources: [{ image: imageBitmap }],
     };
 
-    const textures: ITexture[] = [0, 1].map(() =>
+    const textures: Texture[] = [0, 1].map(() =>
     ({
         size: [srcWidth, srcHeight],
         format: "rgba8unorm",
         usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
-    } as ITexture));
+    } as Texture));
 
     const buffer0 = new Uint32Array([0]);
 
@@ -66,14 +66,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const blurParamsBuffer = new Uint8Array(8);
 
-    const computeConstants: IUniforms = {
+    const computeConstants: Uniforms = {
         samp: sampler,
         params: {
             bufferView: blurParamsBuffer,
         },
     };
 
-    const computeBindGroup0: IUniforms = {
+    const computeBindGroup0: Uniforms = {
         inputTex: { texture: cubeTexture1 },
         outputTex: { texture: textures[0] },
         flip: {
@@ -81,7 +81,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const computeBindGroup1: IUniforms = {
+    const computeBindGroup1: Uniforms = {
         inputTex: { texture: textures[0] },
         outputTex: { texture: textures[1] },
         flip: {
@@ -89,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const computeBindGroup2: IUniforms = {
+    const computeBindGroup2: Uniforms = {
         inputTex: { texture: textures[1] },
         outputTex: { texture: textures[0] },
         flip: {
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const showResultBindGroup1: IUniforms = {
+    const showResultBindGroup1: Uniforms = {
         mySampler: sampler,
         myTexture: { texture: textures[1] },
     };
@@ -131,7 +131,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     updateSettings();
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -140,7 +140,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    const gpuRenderPassEncoder: IRenderPass = {
+    const gpuRenderPassEncoder: RenderPass = {
         descriptor: renderPassDescriptor,
         renderObjects: [{
             pipeline: fullscreenQuadPipeline1,
@@ -152,7 +152,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const gpuComputePassEncoder: IGPUComputePass = { __type: "ComputePass", computeObjects: [] };
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [
             {
                 passEncoders: [
@@ -163,15 +163,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     };
 
-    const bindingResources0: IUniforms = {
+    const bindingResources0: Uniforms = {
         ...computeConstants,
         ...computeBindGroup0,
     };
-    const bindingResources1: IUniforms = {
+    const bindingResources1: Uniforms = {
         ...computeConstants,
         ...computeBindGroup1,
     };
-    const bindingResources2: IUniforms = {
+    const bindingResources2: Uniforms = {
         ...computeConstants,
         ...computeBindGroup2,
     };

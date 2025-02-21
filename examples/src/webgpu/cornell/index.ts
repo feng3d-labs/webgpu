@@ -7,7 +7,7 @@ import Raytracer from "./raytracer";
 import Scene from "./scene";
 import Tonemapper from "./tonemapper";
 
-import { CommandEncoder, ISubmit, ITexture } from "@feng3d/render-api";
+import { CommandEncoder, Submit, Texture } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -41,7 +41,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init(undefined, { requiredFeatures });
 
-    const framebuffer: ITexture = {
+    const framebuffer: Texture = {
         label: "framebuffer",
         size: [canvas.width, canvas.height],
         format: "rgba16float",
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
         radiosity.run();
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [params.renderer === "rasterizer" ? rasterizerCommandEncoder : raytracerCommandEncoder]
         };
 

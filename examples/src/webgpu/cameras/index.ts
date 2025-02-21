@@ -5,7 +5,7 @@ import { ArcballCamera, WASDCamera } from "./camera";
 import cubeWGSL from "./cube.wgsl";
 import { createInputHandler } from "./input";
 
-import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, RenderObject, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: cubeWGSL,
         },
@@ -60,13 +60,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
 
     // Fetch the image and upload it into a GPUTexture.
-    let cubeTexture: ITexture;
+    let cubeTexture: Texture;
     {
         const response = await fetch("../../../assets/img/Di-3d.png");
         const imageBitmap = await createImageBitmap(await response.blob());
@@ -79,7 +79,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -92,7 +92,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         myTexture: { texture: cubeTexture },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline,
         uniforms: bindingResources,
         geometry:{
@@ -105,7 +105,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -124,7 +124,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const data: ISubmit = {
+    const data: Submit = {
         commandEncoders: [
             {
                 passEncoders: [

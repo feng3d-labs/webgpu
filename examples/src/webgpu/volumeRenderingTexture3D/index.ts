@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import volumeWGSL from "./volume.wgsl";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const gui = new GUI();
@@ -28,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const sampleCount = 4;
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: volumeWGSL,
         },
@@ -42,7 +42,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     // Fetch the image and upload it into a GPUTexture.
-    let volumeTexture: ITexture;
+    let volumeTexture: Texture;
     {
         const width = 180;
         const height = 216;
@@ -84,20 +84,20 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
         mipmapFilter: "linear",
         maxAnisotropy: 16,
     };
 
-    const uniformBindGroup: IUniforms = {
+    const uniformBindGroup: Uniforms = {
         uniforms: uniformBuffer,
         mySampler: sampler,
         myTexture: { texture: volumeTexture },
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -152,7 +152,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         uniformBuffer.inverseModelViewProjectionMatrix = inverseModelViewProjection;
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,

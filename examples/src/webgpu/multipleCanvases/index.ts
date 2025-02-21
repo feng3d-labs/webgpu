@@ -1,4 +1,4 @@
-import { IPassEncoder, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, VertexAttributes } from "@feng3d/render-api";
+import { IPassEncoder, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
@@ -114,7 +114,7 @@ const init = async () =>
   `,
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         label: "our hardcoded red triangle pipeline",
         vertex: {
             ...module,
@@ -169,10 +169,10 @@ const init = async () =>
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
         uniformValues: Float32Array;
-        bindGroup: IUniforms;
+        bindGroup: Uniforms;
         rotation: number;
         model: Model;
-        renderPassDescriptor?: IRenderPassDescriptor
+        renderPassDescriptor?: RenderPassDescriptor
     };
 
     const outerElem = document.querySelector("#outer");
@@ -221,7 +221,7 @@ const init = async () =>
         colorValue.set(randColor());
 
         // Make a bind group for this uniform
-        const bindGroup: IUniforms = {
+        const bindGroup: Uniforms = {
             uni: {
                 bufferView: uniformValues,
                 worldViewProjectionMatrix: undefined,
@@ -269,7 +269,7 @@ const init = async () =>
 
             // Get the current texture from the canvas context and
             // set it as the texture to render to.
-            const renderPassDescriptor: IRenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
+            const renderPassDescriptor: RenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
                 label: "our basic canvas renderPass",
                 colorAttachments: [
                     {
@@ -329,7 +329,7 @@ const init = async () =>
             });
         });
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders,
             }]

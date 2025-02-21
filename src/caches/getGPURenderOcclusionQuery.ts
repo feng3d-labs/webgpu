@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { IRenderPass, IRenderPassObject } from "@feng3d/render-api";
+import { RenderPass, IRenderPassObject } from "@feng3d/render-api";
 
 import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
 import { GPUQueue_submit } from "../eventnames";
@@ -44,7 +44,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly IRenderPassO
      * @param commandEncoder
      * @param renderPass
      */
-    const resolve = (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IRenderPass) =>
+    const resolve = (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass) =>
     {
         resolveBuf = resolveBuf || device.createBuffer({
             label: "resolveBuffer",
@@ -101,7 +101,7 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly IRenderPassO
 interface GPURenderOcclusionQuery
 {
     init: (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) => void
-    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: IRenderPass) => void
+    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass) => void
 }
 
 const defautRenderOcclusionQuery = { init: () => { }, resolve: () => { } };

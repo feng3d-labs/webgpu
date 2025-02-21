@@ -1,4 +1,4 @@
-import { CommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ITexture, IUniforms } from "@feng3d/render-api";
+import { CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Texture, Uniforms } from "@feng3d/render-api";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -12,15 +12,15 @@ export default class Rasterizer
 {
     private readonly common: Common;
     private readonly scene: Scene;
-    private readonly renderPassDescriptor: IRenderPassDescriptor;
-    private readonly pipeline: IRenderPipeline;
-    private readonly bindGroup: IUniforms;
+    private readonly renderPassDescriptor: RenderPassDescriptor;
+    private readonly pipeline: RenderPipeline;
+    private readonly bindGroup: Uniforms;
 
     constructor(
         common: Common,
         scene: Scene,
         radiosity: Radiosity,
-        framebuffer: ITexture,
+        framebuffer: Texture,
     )
     {
         this.common = common;
@@ -28,7 +28,7 @@ export default class Rasterizer
 
         const framebufferSize = framebuffer.size;
 
-        const depthTexture: ITexture = {
+        const depthTexture: Texture = {
             label: "RasterizerRenderer.depthTexture",
             size: [framebufferSize[0], framebufferSize[1]],
             format: "depth24plus",
@@ -91,7 +91,7 @@ export default class Rasterizer
             }],
         };
     }
-    private renderPassEncoder: IRenderPass;
+    private renderPassEncoder: RenderPass;
 
     encode(commandEncoder: CommandEncoder)
     {

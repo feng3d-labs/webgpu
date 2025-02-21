@@ -1,4 +1,4 @@
-import { IUniforms } from "@feng3d/render-api";
+import { Uniforms } from "@feng3d/render-api";
 import { } from "./IGPUBindingResources";
 
 declare module "@feng3d/render-api"

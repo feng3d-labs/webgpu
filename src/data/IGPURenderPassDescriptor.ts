@@ -1,4 +1,4 @@
-import { IRenderPassColorAttachment, IRenderPassDescriptor } from "@feng3d/render-api";
+import { RenderPassColorAttachment, RenderPassDescriptor } from "@feng3d/render-api";
 
 declare module "@feng3d/render-api"
 {
@@ -7,7 +7,7 @@ declare module "@feng3d/render-api"
      *
      * {@link GPURenderPassDescriptor}
      */
-    export interface IRenderPassDescriptor
+    export interface RenderPassDescriptor
     {
         /**
          * 附件尺寸。

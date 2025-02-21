@@ -1,4 +1,4 @@
-import { IBufferBinding, IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, VertexAttributes } from "@feng3d/render-api";
+import { IBufferBinding, IPassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         targetWidth: undefined,
     };
 
-    const opaquePipeline: IRenderPipeline = {
+    const opaquePipeline: RenderPipeline = {
         vertex: {
             code: opaqueWGSL,
         },
@@ -70,7 +70,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "opaquePipeline",
     };
 
-    const translucentPipeline: IRenderPipeline = {
+    const translucentPipeline: RenderPipeline = {
         vertex: {
             code: translucentWGSL,
         },
@@ -85,7 +85,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "translucentPipeline",
     };
 
-    const translucentPassDescriptor: IRenderPassDescriptor = {
+    const translucentPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 loadOp: "load",
@@ -96,7 +96,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "translucentPassDescriptor",
     };
 
-    const compositePipeline: IRenderPipeline = {
+    const compositePipeline: RenderPipeline = {
         vertex: {
             code: compositeWGSL,
         },
@@ -118,7 +118,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "compositePipeline",
     };
 
-    const compositePassDescriptor: IRenderPassDescriptor = {
+    const compositePassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -158,13 +158,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         canvas.width = canvas.clientWidth * devicePixelRatio;
         canvas.height = canvas.clientHeight * devicePixelRatio;
 
-        const depthTexture: ITexture = {
+        const depthTexture: Texture = {
             size: [canvas.width, canvas.height],
             format: "depth24plus",
             label: "depthTexture",
         };
 
-        const depthTextureView: ITextureView = {
+        const depthTextureView: TextureView = {
             label: "depthTextureView",
             texture: depthTexture,
         };
@@ -226,7 +226,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             sliceInfo: { sliceStartY: undefined },
         };
 
-        const opaquePassDescriptor: IRenderPassDescriptor = {
+        const opaquePassDescriptor: RenderPassDescriptor = {
             colorAttachments: [
                 {
                     view: { texture: { context } },
@@ -274,7 +274,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const passEncoders: IPassEncoder[] = [];
 
         // Draw the opaque objects
-        const opaquePassEncoder: IRenderPass = {
+        const opaquePassEncoder: RenderPass = {
             descriptor: opaquePassDescriptor,
             renderObjects: [{
                 pipeline: opaquePipeline,
@@ -309,7 +309,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             // Draw the translucent objects
 
-            const translucentPassEncoder: IRenderPass = {
+            const translucentPassEncoder: RenderPass = {
                 descriptor: translucentPassDescriptor,
                 renderObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
@@ -334,7 +334,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             passEncoders.push(translucentPassEncoder);
 
             // Composite the opaque and translucent objects
-            const compositePassEncoder: IRenderPass
+            const compositePassEncoder: RenderPass
                 = {
                 descriptor: compositePassDescriptor,
                 renderObjects: [
@@ -358,7 +358,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             passEncoders.push(compositePassEncoder);
         }
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders,
             }],

@@ -1,4 +1,4 @@
-import { Buffer, IBufferBinding, CommandEncoder, IRenderPassDescriptor, ISubmit, IUniforms } from "@feng3d/render-api";
+import { Buffer, IBufferBinding, CommandEncoder, RenderPassDescriptor, Submit, Uniforms } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
@@ -283,7 +283,7 @@ async function init(
         bufferView: new Float32Array(4),
     };
 
-    const computeBGCluster: IUniforms = {
+    const computeBGCluster: Uniforms = {
         input_data: elementsInputBuffer,
         data: elementsInputBuffer,
         output_data: elementsOutputBuffer,
@@ -305,7 +305,7 @@ async function init(
     };
 
     // Create bitonic debug renderer
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -375,7 +375,7 @@ async function init(
         nextBlockHeightController.setValue(2);
 
         // Reset Total Swaps by setting atomic value to 0
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
                     __type: "ComputePass",
@@ -725,7 +725,7 @@ async function init(
         iGPUBuffer.writeBuffers = writeBuffers;
 
         const commandEncoder: CommandEncoder = { passEncoders: [] };
-        const submit: ISubmit = { commandEncoders: [commandEncoder] };
+        const submit: Submit = { commandEncoders: [commandEncoder] };
 
         bitonicDisplayRenderer.startRun(commandEncoder, {
             highlight: settings["Display Mode"] === "Elements" ? 0 : 1,

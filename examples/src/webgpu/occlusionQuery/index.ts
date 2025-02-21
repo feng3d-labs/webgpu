@@ -1,4 +1,4 @@
-import { IBufferBinding, IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
+import { IBufferBinding, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, RenderObject } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getIGPUBuffer, IGPUOcclusionQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
@@ -22,7 +22,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: solidColorLitWGSL,
         },
@@ -106,7 +106,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const vertexBuf = vertexData;
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -122,7 +122,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline,
         geometry: {
             primitive: {
@@ -143,9 +143,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const renderObjects: IRenderObject[] = objectInfos.map((v) =>
+    const renderObjects: RenderObject[] = objectInfos.map((v) =>
     {
-        const ro: IRenderObject = {
+        const ro: RenderObject = {
             ...renderObject,
             uniforms: {
                 uni: {
@@ -160,13 +160,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.map((ro) =>
         ({ __type: "OcclusionQuery", renderObjects: [ro] }));
 
-    const renderPass: IRenderPass = {
+    const renderPass: RenderPass = {
         descriptor: renderPassDescriptor,
         // renderObjects: renderObjects,
         renderObjects: occlusionQueryObjects,
     };
 
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [
             {
                 passEncoders: [
