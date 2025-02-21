@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IBufferBinding, RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
+import { BufferBinding, RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -37,7 +37,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniformBuffer = new ArrayBuffer(uniformBufferSize);
 
-    const uniforms: IBufferBinding = {
+    const uniforms: BufferBinding = {
         bufferView: new Uint8Array(uniformBuffer, 0, matrixSize),
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };
@@ -61,7 +61,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         }
     };
 
-    const uniforms1: IBufferBinding = {
+    const uniforms1: BufferBinding = {
         bufferView: new Uint8Array(uniformBuffer, offset, matrixSize),
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };

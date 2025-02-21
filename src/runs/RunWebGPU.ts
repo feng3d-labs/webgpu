@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, RenderPass, IRenderPassObject, RenderPipeline, ScissorRect, Submit, Uniforms, IViewport, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, RenderPass, IRenderPassObject, RenderPipeline, ScissorRect, Submit, Uniforms, Viewport, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -370,7 +370,7 @@ export class RunWebGPU
         }
     }
 
-    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: IViewport)
+    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: Viewport)
     {
         if (viewport)
         {

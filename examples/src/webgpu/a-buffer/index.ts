@@ -1,4 +1,4 @@
-import { IBufferBinding, IPassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { BufferBinding, IPassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -49,7 +49,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         16 * Float32Array.BYTES_PER_ELEMENT + 2 * Uint32Array.BYTES_PER_ELEMENT,
         16
     );
-    const uniforms: IBufferBinding = {
+    const uniforms: BufferBinding = {
         bufferView: new Uint8Array(uniformsSize),
         modelViewProjectionMatrix: undefined,
         maxStorableFragments: undefined,
@@ -190,7 +190,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const sliceHeight = Math.ceil(canvas.height / numSlices);
         const linkedListBufferSize = sliceHeight * bytesPerline;
 
-        const linkedListBuffer: IBufferBinding = {
+        const linkedListBuffer: BufferBinding = {
             bufferView: new Uint8Array(linkedListBufferSize),
             // data: [{ color: undefined, depth: undefined, next: undefined }]
         };
@@ -209,7 +209,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // for a given pixel.
         // * numFragments : u32
         // * data : array<u32>
-        const headsBuffer: IBufferBinding = {
+        const headsBuffer: BufferBinding = {
             bufferView: new Uint32Array(1 + canvas.width * sliceHeight),
             numFragments: undefined,
             data: undefined,

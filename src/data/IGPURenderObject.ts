@@ -10,7 +10,7 @@ declare module "@feng3d/render-api"
      *
      * {@link GPURenderPassEncoder.setViewport}
      */
-    export interface IViewport
+    export interface Viewport
     {
         /**
          * Minimum depth value of the viewport.

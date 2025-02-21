@@ -26,7 +26,7 @@ declare module "@feng3d/render-api"
      *
      * @see GPUVertexState
      */
-    export interface IVertexState
+    export interface VertexState
     {
         /**
          * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to

@@ -1,4 +1,4 @@
-import { Buffer, IBufferBinding, CommandEncoder, RenderPassDescriptor, Submit, Uniforms } from "@feng3d/render-api";
+import { Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit, Uniforms } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
@@ -256,10 +256,10 @@ async function init(
     const elementsBufferSize
         = Float32Array.BYTES_PER_ELEMENT * totalElementOptions[0];
     // Initialize input, output, staging buffers
-    const elementsInputBuffer: IBufferBinding = {
+    const elementsInputBuffer: BufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize)
     };
-    const elementsOutputBuffer: IBufferBinding = {
+    const elementsOutputBuffer: BufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize)
     };
     const elementsStagingBuffer: Buffer = {
@@ -269,7 +269,7 @@ async function init(
 
     // Initialize atomic swap buffer on GPU and CPU. Counts number of swaps actually performed by
     // compute shader (when value at index x is greater than value at index y)
-    const atomicSwapsOutputBuffer: IBufferBinding = {
+    const atomicSwapsOutputBuffer: BufferBinding = {
         bufferView: new Uint32Array(1)
     };
     const atomicSwapsStagingBuffer: Buffer = {
@@ -278,7 +278,7 @@ async function init(
     };
 
     // Create uniform buffer for compute shader
-    const computeUniformsBuffer: IBufferBinding = {
+    const computeUniformsBuffer: BufferBinding = {
         // width, height, blockHeight, algo
         bufferView: new Float32Array(4),
     };

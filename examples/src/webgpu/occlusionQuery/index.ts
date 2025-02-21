@@ -1,4 +1,4 @@
-import { IBufferBinding, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, RenderObject } from "@feng3d/render-api";
+import { BufferBinding, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, RenderObject } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getIGPUBuffer, IGPUOcclusionQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
@@ -224,7 +224,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
-                const buffer = (renderObjects[i].uniforms.uni as IBufferBinding).bufferView;
+                const buffer = (renderObjects[i].uniforms.uni as BufferBinding).bufferView;
                 getIGPUBuffer(buffer).data = uniformValues.slice();
             }
         );

@@ -1,4 +1,4 @@
-import { BlendState, DepthStencilState, FragmentState, getBlendConstantColor, IIndicesDataTypes, RenderPipeline, StencilFaceState, IVertexState, IWriteMask, PrimitiveState, VertexAttributes, vertexFormatMap, WGSLVertexType } from "@feng3d/render-api";
+import { BlendState, DepthStencilState, FragmentState, getBlendConstantColor, IIndicesDataTypes, IWriteMask, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -217,7 +217,7 @@ function getGPUStencilFaceState(stencilFaceState?: StencilFaceState)
  * @param vertices 顶点数据。
  * @returns 完整的顶点阶段描述与顶点缓冲区列表。
  */
-function getNGPUVertexState(vertexState: IVertexState, vertices: VertexAttributes)
+function getNGPUVertexState(vertexState: VertexState, vertices: VertexAttributes)
 {
     let result = vertexStateMap.get([vertexState, vertices]);
     if (result) return result;
@@ -252,7 +252,7 @@ function getNGPUVertexState(vertexState: IVertexState, vertices: VertexAttribute
     vertexStateMap.set([vertexState, vertices], result);
 
     // 监听变化
-    const watchpropertys: gPartial<IVertexState> = { code: "" };
+    const watchpropertys: gPartial<VertexState> = { code: "" };
     const onchanged = () =>
     {
         vertexStateMap.delete([vertexState, vertices]);
@@ -264,7 +264,7 @@ function getNGPUVertexState(vertexState: IVertexState, vertices: VertexAttribute
     return result;
 }
 
-const vertexStateMap = new ChainMap<[IVertexState, VertexAttributes], {
+const vertexStateMap = new ChainMap<[VertexState, VertexAttributes], {
     gpuVertexState: NGPUVertexState;
     vertexBuffers: NGPUVertexBuffer[];
     /**

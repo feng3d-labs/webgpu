@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { IBufferBinding, Sampler, TextureView } from "@feng3d/render-api";
+import { BufferBinding, Sampler, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
@@ -44,11 +44,11 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         };
 
         //
-        if ((v.resource as IBufferBinding).bufferView)
+        if ((v.resource as BufferBinding).bufferView)
         {
             updateResource = () =>
             {
-                entry.resource = getGPUBufferBinding(device, v.resource as IBufferBinding);
+                entry.resource = getGPUBufferBinding(device, v.resource as BufferBinding);
             };
         }
         else if ((v.resource as TextureView).texture)

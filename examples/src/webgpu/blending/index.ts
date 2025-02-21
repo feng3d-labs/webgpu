@@ -5,13 +5,13 @@ import texturedQuadWGSL from "./texturedQuad.wgsl";
 import { BlendComponent, RenderPassDescriptor, IRenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView, Uniforms, RenderObject } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
-// declare module "@feng3d/render-api"
-// {
-//     interface Uniforms
-//     {
-//         matrix: Float32Array;
-//     }
-// }
+declare module "@feng3d/render-api"
+{
+    interface Uniforms
+    {
+        matrix?: Float32Array;
+    }
+}
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

@@ -1,4 +1,4 @@
-import { IBufferBinding, RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
+import { BufferBinding, RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -29,7 +29,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const uniforms: IBufferBinding = {
+    const uniforms: BufferBinding = {
         modelViewProjectionMatrix: new Float32Array(16)
     };
 

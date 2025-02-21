@@ -71,11 +71,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         uniforms: {
             ...computeObject0.uniforms,
             particlesA: {
-                ...computeObject0.uniforms.particlesA,
+                ...computeObject0.uniforms.particlesA as {},
                 bufferView: particleBuffers[1],
             },
             particlesB: {
-                ...computeObject0.uniforms.particlesA,
+                ...computeObject0.uniforms.particlesA as {},
                 bufferView: particleBuffers[0],
             },
         },
