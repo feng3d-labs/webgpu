@@ -1,4 +1,4 @@
-import { getTexImageSourceSize, ITextureImageSource, ITextureLike, ITextureSize } from "@feng3d/render-api";
+import { ITextureLike, ITextureSize, TextureImageSource } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 
 /**
@@ -20,7 +20,7 @@ export function getIGPUTextureLikeSize(texture: ITextureLike)
     return texture.size;
 }
 
-export function getIGPUTextureSourceSize(source?: ITextureImageSource[]): ITextureSize
+export function getIGPUTextureSourceSize(source?: TextureImageSource[]): ITextureSize
 {
     if (!source) return undefined;
 
@@ -34,7 +34,7 @@ export function getIGPUTextureSourceSize(source?: ITextureImageSource[]): ITextu
         // 获取mipLevel为0的资源尺寸。
         if (!element.mipLevel)
         {
-            const copySize = element.size || getTexImageSourceSize(element.image);
+            const copySize = element.size || TextureImageSource.getTexImageSourceSize(element);
             if (width || height)
             {
                 console.assert(width === copySize[0] && height === copySize[1], `纹理资源中提供的尺寸不正确！`);

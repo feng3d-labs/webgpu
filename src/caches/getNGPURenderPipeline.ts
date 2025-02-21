@@ -47,7 +47,7 @@ export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPass
     //
     const stencilReference = getStencilReference(renderPipeline.depthStencil);
     //
-    const blendConstantColor = BlendState.getInstance(renderPipeline.fragment?.targets?.[0]?.blend)?.getBlendConstantColor();
+    const blendConstantColor = BlendState.getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend);
 
     //
     const pipeline: NGPURenderPipeline = {

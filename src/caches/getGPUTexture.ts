@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { getTexImageSourceSize, getTextureBytesPerPixel, Texture, ITextureDataSource, ITextureImageSource, ITextureLike, ITextureSize, ITextureSource } from "@feng3d/render-api";
+import { ITextureDataSource, ITextureLike, ITextureSize, ITextureSource, Texture, TextureImageSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
@@ -102,13 +102,14 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
             texture.writeTextures.forEach((v) =>
             {
                 // 处理图片纹理
-                const imageSource = v as ITextureImageSource;
+                const imageSource = v as TextureImageSource;
                 if (imageSource.image)
                 {
                     const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
 
                     //
-                    const copySize = imageSource.size || getTexImageSourceSize(imageSource.image);
+                    const imageSize = TextureImageSource.getTexImageSourceSize(imageSource);
+                    const copySize = imageSource.size || imageSize;
 
                     let imageOrigin = imageSource.imageOrigin;
 
@@ -118,7 +119,6 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                         const x = imageOrigin?.[0];
                         let y = imageOrigin?.[1];
 
-                        const imageSize = getTexImageSourceSize(image);
                         y = imageSize[1] - y - copySize[1];
 
                         imageOrigin = [x, y];
@@ -147,7 +147,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                         copySize
                     );
 
-return;
+                    return;
                 }
 
                 // 处理数据纹理
@@ -170,7 +170,7 @@ return;
                 const depthOrArrayLayers = dataImageOrigin?.[2] || 0;
 
                 // 获取纹理每个像素对应的字节数量。
-                const bytesPerPixel = getTextureBytesPerPixel(texture.format);
+                const bytesPerPixel = Texture.getTextureBytesPerPixel(texture.format);
 
                 // 计算偏移
                 const gpuOffset

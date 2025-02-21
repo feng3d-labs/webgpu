@@ -7,7 +7,7 @@ declare module "@feng3d/render-api"
      *
      * @see GPUQueue.copyExternalImageToTexture
      */
-    export interface ITextureImageSource
+    export interface TextureImageSource
     {
         /**
          * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.

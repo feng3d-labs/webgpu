@@ -1,4 +1,4 @@
-import { BufferBinding, RenderPassDescriptor, Sampler, Submit, Texture, ITextureImageSource, RenderObject } from "@feng3d/render-api";
+import { BufferBinding, RenderPassDescriptor, Sampler, Submit, Texture, TextureImageSource, RenderObject } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -55,7 +55,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const imageBitmaps = await Promise.all(promises);
         const textureSource = imageBitmaps.map((v, i) =>
         {
-            const item: ITextureImageSource = {
+            const item: TextureImageSource = {
                 image: v, textureOrigin: [0, 0, i]
             };
 
