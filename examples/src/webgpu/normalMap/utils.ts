@@ -1,4 +1,4 @@
-import { IDepthStencilState, IRenderPipeline, ITexture } from "@feng3d/render-api";
+import { DepthStencilState, IRenderPipeline, ITexture } from "@feng3d/render-api";
 
 export const create3DRenderPipeline = (
     label: string,
@@ -7,7 +7,7 @@ export const create3DRenderPipeline = (
     depthTest = false,
 ) =>
 {
-    let depthStencil: IDepthStencilState;
+    let depthStencil: DepthStencilState;
     if (depthTest)
     {
         depthStencil = {

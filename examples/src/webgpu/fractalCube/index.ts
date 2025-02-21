@@ -1,4 +1,4 @@
-import { IBufferBinding, ICopyTextureToTexture, IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
+import { IBufferBinding, CopyTextureToTexture, IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -99,7 +99,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const copyTextureToTexture: ICopyTextureToTexture = {
+    const copyTextureToTexture: CopyTextureToTexture = {
         __type: "CopyTextureToTexture",
         source: { texture: { context } },
         destination: { texture: cubeTexture },

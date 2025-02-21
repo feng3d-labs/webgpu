@@ -1,4 +1,4 @@
-import { getBlendConstantColor, BlendState, IDepthStencilState, IFragmentState, IIndicesDataTypes, IRenderPipeline, IStencilFaceState, VertexAttributes, IVertexState, IWriteMask, PrimitiveState, vertexFormatMap, WGSLVertexType } from "@feng3d/render-api";
+import { BlendState, DepthStencilState, FragmentState, getBlendConstantColor, IIndicesDataTypes, IRenderPipeline, IStencilFaceState, IVertexState, IWriteMask, PrimitiveState, VertexAttributes, vertexFormatMap, WGSLVertexType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -103,7 +103,7 @@ const renderPipelineMap = new ChainMap<
  * @param depthStencil
  * @returns
  */
-function getStencilReference(depthStencil?: IDepthStencilState)
+function getStencilReference(depthStencil?: DepthStencilState)
 {
     if (!depthStencil) return undefined;
 
@@ -176,7 +176,7 @@ function getGPUMultisampleState(multisampleState?: IGPUMultisampleState, sampleC
  * @param depthStencilFormat 深度模板附件纹理格式。
  * @returns 深度模板阶段完整描述。
  */
-function getGPUDepthStencilState(depthStencil: IDepthStencilState, depthStencilFormat?: GPUTextureFormat)
+function getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFormat?: GPUTextureFormat)
 {
     if (!depthStencilFormat) return undefined;
     //
@@ -362,7 +362,7 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: VertexAttributes)
  * @param colorAttachmentTextureFormats 颜色附件格式。
  * @returns 片段阶段完整描述。
  */
-function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: readonly GPUTextureFormat[])
+function getNGPUFragmentState(fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
 {
     if (!fragmentState) return undefined;
 
@@ -419,7 +419,7 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
     fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
 
     // 监听变化
-    const watchpropertys: gPartial<IFragmentState> = { code: "" };
+    const watchpropertys: gPartial<FragmentState> = { code: "" };
     const onchanged = () =>
     {
         fragmentStateMap.delete([fragmentState, colorAttachmentsKey]);
@@ -431,7 +431,7 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
     return gpuFragmentState;
 }
 
-const fragmentStateMap = new ChainMap<[IFragmentState, string], NGPUFragmentState>();
+const fragmentStateMap = new ChainMap<[FragmentState, string], NGPUFragmentState>();
 
 function getGPUBlendState(blend?: BlendState): GPUBlendState
 {

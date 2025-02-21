@@ -1,4 +1,4 @@
-import { BlendState } from "@feng3d/render-api";
+import { BlendState,DepthStencilState } from "@feng3d/render-api";
 
 import { IGPUMultisampleState } from "./IGPUMultisampleState";
 
@@ -63,7 +63,7 @@ declare module "@feng3d/render-api"
      *
      * {@link GPUFragmentState}
      */
-    export interface IFragmentState
+    export interface FragmentState
     {
         /**
          * The name of the function in {@link GPUProgrammableStage#module} that this stage will use to
@@ -115,7 +115,7 @@ declare module "@feng3d/render-api"
      *
      * @see https://www.orillusion.com/zh/webgpu.html#depth-stencil-state
      */
-    export interface IDepthStencilState
+    export interface DepthStencilState
     {
         /**
          * 片元的最大深度偏差。

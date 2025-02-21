@@ -1,7 +1,7 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { Buffer, IDraw, IFragmentState, PrimitiveState, IRenderObject, IRenderPipeline, IUniforms, VertexAttributes, IVertexState, vertexFormatMap } from "@feng3d/render-api";
+import { Buffer, FragmentState, IDraw, IRenderObject, IRenderPipeline, IUniforms, IVertexState, PrimitiveState, VertexAttributes, vertexFormatMap } from "@feng3d/render-api";
 import { getIGPUBuffer } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
@@ -420,7 +420,7 @@ export class GLTFPrimitive
             code: VertexInputShaderString + vertexShader,
         };
 
-        const fragmentState: IFragmentState = {
+        const fragmentState: FragmentState = {
             // Shader info
             code: VertexInputShaderString + fragmentShader,
             // Output render target info
