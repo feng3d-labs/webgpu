@@ -1,4 +1,4 @@
-import { BlendState, DepthStencilState, FragmentState, getBlendConstantColor, IIndicesDataTypes, IWriteMask, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
+import { BlendState, DepthStencilState, FragmentState, IIndicesDataTypes, IWriteMask, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -47,7 +47,7 @@ export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPass
     //
     const stencilReference = getStencilReference(renderPipeline.depthStencil);
     //
-    const blendConstantColor = getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend);
+    const blendConstantColor = BlendState.getInstance(renderPipeline.fragment?.targets?.[0]?.blend)?.getBlendConstantColor();
 
     //
     const pipeline: NGPURenderPipeline = {
