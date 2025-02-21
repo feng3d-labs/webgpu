@@ -1,4 +1,4 @@
-import { IBuffer, IBufferBinding, ICommandEncoder, IRenderPassDescriptor, ISubmit, IUniforms } from "@feng3d/render-api";
+import { Buffer, IBufferBinding, ICommandEncoder, IRenderPassDescriptor, ISubmit, IUniforms } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
@@ -262,7 +262,7 @@ async function init(
     const elementsOutputBuffer: IBufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize)
     };
-    const elementsStagingBuffer: IBuffer = {
+    const elementsStagingBuffer: Buffer = {
         size: elementsBufferSize,
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     };
@@ -272,7 +272,7 @@ async function init(
     const atomicSwapsOutputBuffer: IBufferBinding = {
         bufferView: new Uint32Array(1)
     };
-    const atomicSwapsStagingBuffer: IBuffer = {
+    const atomicSwapsStagingBuffer: Buffer = {
         size: Uint32Array.BYTES_PER_ELEMENT,
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     };

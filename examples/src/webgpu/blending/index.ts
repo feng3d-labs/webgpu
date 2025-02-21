@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IBlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureView, IUniforms } from "@feng3d/render-api";
+import { BlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureView, IUniforms } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -324,13 +324,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kPresets = keysOf(presets);
     type Preset = (typeof kPresets)[number];
 
-    const color: IBlendComponent = {
+    const color: BlendComponent = {
         operation: "add",
         srcFactor: "one",
         dstFactor: "one-minus-src",
     };
 
-    const alpha: IBlendComponent = {
+    const alpha: BlendComponent = {
         operation: "add",
         srcFactor: "one",
         dstFactor: "one-minus-src",

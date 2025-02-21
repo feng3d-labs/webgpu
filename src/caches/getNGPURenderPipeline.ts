@@ -1,4 +1,4 @@
-import { getBlendConstantColor, IBlendState, IDepthStencilState, IFragmentState, IIndicesDataTypes, IRenderPipeline, IStencilFaceState, VertexAttributes, IVertexState, IWriteMask, PrimitiveState, vertexFormatMap, WGSLVertexType } from "@feng3d/render-api";
+import { getBlendConstantColor, BlendState, IDepthStencilState, IFragmentState, IIndicesDataTypes, IRenderPipeline, IStencilFaceState, VertexAttributes, IVertexState, IWriteMask, PrimitiveState, vertexFormatMap, WGSLVertexType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -433,7 +433,7 @@ function getNGPUFragmentState(fragmentState: IFragmentState, colorAttachments: r
 
 const fragmentStateMap = new ChainMap<[IFragmentState, string], NGPUFragmentState>();
 
-function getGPUBlendState(blend?: IBlendState): GPUBlendState
+function getGPUBlendState(blend?: BlendState): GPUBlendState
 {
     if (!blend) undefined;
 

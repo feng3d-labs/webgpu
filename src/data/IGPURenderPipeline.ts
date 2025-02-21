@@ -1,4 +1,4 @@
-import { IBlendState } from "@feng3d/render-api";
+import { BlendState } from "@feng3d/render-api";
 
 import { IGPUMultisampleState } from "./IGPUMultisampleState";
 

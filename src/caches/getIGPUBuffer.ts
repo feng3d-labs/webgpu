@@ -1,4 +1,4 @@
-import { IBuffer, IVertexDataTypes, TypedArray, UnReadonly } from "@feng3d/render-api";
+import { Buffer, IVertexDataTypes, TypedArray, UnReadonly } from "@feng3d/render-api";
 
 export function getIGPUBuffer(bufferSource: TypedArray)
 {
@@ -8,7 +8,7 @@ export function getIGPUBuffer(bufferSource: TypedArray)
         arrayBuffer = (bufferSource as ArrayBufferView).buffer;
     }
 
-    const gpuBuffer: IBuffer = arrayBuffer["_IGPUBuffer"] = arrayBuffer["_IGPUBuffer"] || {
+    const gpuBuffer: Buffer = arrayBuffer["_IGPUBuffer"] = arrayBuffer["_IGPUBuffer"] || {
         size: Math.ceil(arrayBuffer.byteLength / 4) * 4,
         data: arrayBuffer,
     };
@@ -28,7 +28,7 @@ let autoVertexIndex = 0;
 export function getIGPUIndexBuffer(data: Uint16Array | Uint32Array)
 {
     const buffer = getIGPUBuffer(data);
-    (buffer as UnReadonly<IBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
+    (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
     return buffer;
 }

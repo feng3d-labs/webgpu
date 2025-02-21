@@ -1,4 +1,4 @@
-import { IBuffer, IWriteBuffer } from "@feng3d/render-api";
+import { Buffer, IWriteBuffer } from "@feng3d/render-api";
 
 declare module "@feng3d/render-api"
 {
@@ -8,7 +8,7 @@ declare module "@feng3d/render-api"
      * {@link GPUBufferDescriptor}
      * {@link GPUBuffer}
      */
-    export interface IBuffer
+    export interface Buffer
     {
         /**
          * The allowed usages for the buffer.
