@@ -128,17 +128,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const renderObject: IRenderObject = {
         pipeline,
-        vertices: {
-            position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
-            normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
+        geometry: {
+            vertices: {
+                position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
+                normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
+            },
+            indices,
+            draw: { __type: "DrawIndexed", indexCount: indices.length },
         },
-        indices,
         uniforms: {
             uni: {
                 bufferView: undefined,
             },
         },
-        draw: { __type: "DrawIndexed", indexCount: indices.length },
     };
 
     const renderObjects: IRenderObject[] = objectInfos.map((v) =>
@@ -156,7 +158,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     });
 
     const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.map((ro) =>
-    ({ __type: "OcclusionQuery", renderObjects: [ro] }));
+        ({ __type: "OcclusionQuery", renderObjects: [ro] }));
 
     const renderPass: IRenderPass = {
         descriptor: renderPassDescriptor,

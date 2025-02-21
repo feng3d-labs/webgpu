@@ -79,13 +79,15 @@ export default class Rasterizer
             descriptor: this.renderPassDescriptor,
             renderObjects: [{
                 pipeline: this.pipeline,
-                vertices: this.scene.vertexAttributes,
-                indices: this.scene.indices,
                 uniforms: {
                     ...this.common.uniforms.bindGroup,
                     ...this.bindGroup,
                 },
-                draw: { __type: "DrawIndexed", indexCount: this.scene.indexCount },
+                geometry: {
+                    vertices: this.scene.vertexAttributes,
+                    indices: this.scene.indices,
+                    draw: { __type: "DrawIndexed", indexCount: this.scene.indexCount },
+                },
             }],
         };
     }

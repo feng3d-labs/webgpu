@@ -472,9 +472,11 @@ export class GLTFPrimitive
             pipeline: this.renderPipeline,
             uniforms: bindingResources,
             //if skin do something with bone bind group
-            vertices: this.vertices,
-            indices: this.indices,
-            draw,
+            geometry: {
+                vertices: this.vertices,
+                indices: this.indices,
+                draw,
+            }
         };
         renderObjects.push(renderObject);
     }

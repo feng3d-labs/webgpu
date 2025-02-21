@@ -506,13 +506,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const ro: IRenderObject = {
             pipeline: dstPipeline,
             uniforms: dstBindGroup,
-            draw: { __type: "DrawVertex", vertexCount: 6 },
+            geometry:{
+                draw: { __type: "DrawVertex", vertexCount: 6 },
+            }
         };
 
         const ro1: IRenderObject = {
             pipeline: srcPipeline,
             uniforms: srcBindGroup,
-            draw: { __type: "DrawVertex", vertexCount: 6 },
+            geometry:{
+                draw: { __type: "DrawVertex", vertexCount: 6 },
+            }
         };
 
         const renderObjects: IRenderPassObject[] = [

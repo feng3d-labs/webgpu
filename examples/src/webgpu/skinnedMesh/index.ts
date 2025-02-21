@@ -515,9 +515,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     ...generalUniformsBGCLuster,
                     ...skinnedGridBoneBGCluster,
                 },
-                vertices: skinnedGridVertexBuffers.vertices,
-                indices: skinnedGridVertexBuffers.indices,
-                draw: { __type: "DrawIndexed", indexCount: gridIndices.length },
+                geometry:{
+                    vertices: skinnedGridVertexBuffers.vertices,
+                    indices: skinnedGridVertexBuffers.indices,
+                    draw: { __type: "DrawIndexed", indexCount: gridIndices.length },
+                }
             };
             //
             passEncoders.push({

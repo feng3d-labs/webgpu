@@ -15,7 +15,7 @@ interface Renderable
     vertexAttributes: IVertexAttributes;
     indices: Uint16Array;
     indexCount: number;
-    bindGroup?:   IUniforms;
+    bindGroup?: IUniforms;
 }
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
@@ -137,11 +137,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     function createSphereBindGroup1(
         texture: ITexture,
         transform: Float32Array
-    ):   IUniforms
+    ): IUniforms
     {
         const uniformBuffer = new Float32Array(transform);
 
-        const bindGroup:   IUniforms = {
+        const bindGroup: IUniforms = {
             modelMatrix: {
                 bufferView: uniformBuffer,
             },
@@ -218,7 +218,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     );
     const modelViewProjectionMatrix = mat4.create();
 
-    const frameBindGroup:   IUniforms = {
+    const frameBindGroup: IUniforms = {
         uniforms: {
             bufferView: uniformBuffer,
         },
@@ -259,9 +259,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
                 renderable.renderObject = {
                     pipeline,
                     uniforms: { ...frameBindGroup, ...renderable.bindGroup },
-                    vertices: renderable.vertexAttributes,
-                    indices: renderable.indices,
-                    draw: { __type: "DrawIndexed", indexCount: renderable.indexCount },
+                    geometry: {
+                        vertices: renderable.vertexAttributes,
+                        indices: renderable.indices,
+                        draw: { __type: "DrawIndexed", indexCount: renderable.indexCount },
+                    }
                 };
             }
 

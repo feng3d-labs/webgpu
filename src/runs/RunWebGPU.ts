@@ -299,7 +299,7 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: IRenderObject)
     {
-        const { viewport, scissorRect, pipeline, vertices, indices, uniforms: bindingResources, draw } = renderObject;
+        const { viewport, scissorRect, pipeline, uniforms: bindingResources, geometry } = renderObject;
 
         const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
 
@@ -311,6 +311,8 @@ export class RunWebGPU
         {
             this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
         }
+
+        const { vertices, indices, draw } = geometry;
 
         this.runRenderPipeline(device, passEncoder, renderPassFormat, pipeline, vertices, indices);
 

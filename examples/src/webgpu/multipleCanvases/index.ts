@@ -172,7 +172,7 @@ const init = async () =>
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
         uniformValues: Float32Array;
-        bindGroup:  IUniforms;
+        bindGroup: IUniforms;
         rotation: number;
         model: Model;
         renderPassDescriptor?: IRenderPassDescriptor
@@ -224,7 +224,7 @@ const init = async () =>
         colorValue.set(randColor());
 
         // Make a bind group for this uniform
-        const bindGroup:  IUniforms = {
+        const bindGroup: IUniforms = {
             uni: {
                 bufferView: uniformValues,
                 worldViewProjectionMatrix: undefined,
@@ -319,10 +319,12 @@ const init = async () =>
                 descriptor: renderPassDescriptor,
                 renderObjects: [{
                     pipeline,
-                    vertices: vertexAttributes,
-                    indices,
                     uniforms: bindGroup,
-                    draw: { __type: "DrawIndexed", indexCount: indices.length },
+                    geometry: {
+                        vertices: vertexAttributes,
+                        indices,
+                        draw: { __type: "DrawIndexed", indexCount: indices.length },
+                    },
                 }],
             });
         });

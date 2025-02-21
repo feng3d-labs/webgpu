@@ -58,12 +58,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const renderObject: IRenderObject = {
         pipeline,
-        vertices: {
-            position: { data: vertexBuffer, format: "float32x4", offset: 0, arrayStride: 2 * vec4Size },
-            color: { data: vertexBuffer, format: "float32x4", offset: vec4Size, arrayStride: 2 * vec4Size },
-        },
         uniforms: {},
-        draw: { __type: "DrawVertex", vertexCount: 3, instanceCount: 1 },
+        geometry: {
+            vertices: {
+                position: { data: vertexBuffer, format: "float32x4", offset: 0, arrayStride: 2 * vec4Size },
+                color: { data: vertexBuffer, format: "float32x4", offset: vec4Size, arrayStride: 2 * vec4Size },
+            },
+            draw: { __type: "DrawVertex", vertexCount: 3, instanceCount: 1 },
+        },
     };
 
     const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;

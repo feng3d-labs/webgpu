@@ -75,7 +75,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     + 0;
   const uniformBuffer = new Uint8Array(uniformBufferSize);
 
-  const uniformBindGroup:    IUniforms = {
+  const uniformBindGroup: IUniforms = {
     render_params: {
       bufferView: uniformBuffer,
     },
@@ -180,7 +180,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       const levelWidth = textureWidth >> level;
       const levelHeight = textureHeight >> level;
-      const probabilityMapBindGroup:    IUniforms = {
+      const probabilityMapBindGroup: IUniforms = {
         ubo: { bufferView: probabilityMapUBOBuffer },
         buf_in: { bufferView: level & 1 ? bufferA : bufferB },
         buf_out: { bufferView: level & 1 ? bufferB : bufferA },
@@ -251,7 +251,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       code: simulateWGSL,
     },
   };
-  const computeBindGroup:    IUniforms = {
+  const computeBindGroup: IUniforms = {
     sim_params: {
       bufferView: simulationUBOBuffer,
     },
@@ -292,8 +292,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       renderObjects: [{
         pipeline: renderPipeline,
         uniforms: { ...uniformBindGroup },
-        vertices: { ...particlesVertices, ...quadVertices },
-        draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
+        geometry: {
+          vertices: { ...particlesVertices, ...quadVertices },
+          draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
+        },
       }],
     }
   );

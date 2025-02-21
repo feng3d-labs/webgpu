@@ -111,11 +111,13 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const renderObject: IRenderObject = {
         pipeline,
-        vertices,
         uniforms: {
             uniforms,
         },
-        draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
+        geometry: {
+            vertices,
+            draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
+        }
     };
 
     const submit: ISubmit = {

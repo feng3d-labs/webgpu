@@ -83,9 +83,12 @@ const init = async (canvas: HTMLCanvasElement) =>
                 cullFace: "back",
             },
         },
-        vertices: {
-            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+        geometry: {
+            vertices: {
+                position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+                uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+            },
+            draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
         },
         uniforms: {
             uniforms: {
@@ -94,7 +97,6 @@ const init = async (canvas: HTMLCanvasElement) =>
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
         },
-        draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
     const copyTextureToTexture: ICopyTextureToTexture = {

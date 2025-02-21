@@ -347,7 +347,9 @@ export class MsdfTextRenderer
             ...font.bindGroup,
             ...bindGroup,
           },
-          draw: { __type: "DrawVertex", vertexCount: 4, instanceCount: measurements.printedCharCount },
+          geometry: {
+            draw: { __type: "DrawVertex", vertexCount: 4, instanceCount: measurements.printedCharCount },
+          }
         }
       ],
     };

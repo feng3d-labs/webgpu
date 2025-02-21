@@ -377,8 +377,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: colorPassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
-                    vertices,
-                    draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    geometry:{
+                        vertices,
+                        draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    }
                 }]
         });
     }
@@ -399,8 +401,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
-                    vertices,
-                    draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    geometry:{
+                        vertices,
+                        draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    }
                 }]
         });
         precisionErrorPassEncoders.push({
@@ -416,8 +420,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: precisionPassPipelines[m],
                     uniforms: { ...uniformBindGroups[m], ...depthTextureBindGroup },
-                    vertices,
-                    draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    geometry:{
+                        vertices,
+                        draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    }
                 }]
         });
     }
@@ -438,8 +444,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
-                    vertices,
-                    draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    geometry:{
+                        vertices,
+                        draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                    }
                 }]
         });
         depthBufferPassEncoders.push({
@@ -449,7 +457,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: textureQuadPassPipline,
                     uniforms: { ...depthTextureBindGroup },
-                    draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+                    geometry:{
+                        draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+                    }
                 }]
         });
     }

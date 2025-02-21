@@ -49,14 +49,16 @@ const init = async (canvas: HTMLCanvasElement) =>
                 cullFace: "back",
             },
         },
-        vertices: {
-            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
-        },
         uniforms: {
             uniforms,
         },
-        draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
+        geometry: {
+            vertices: {
+                position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+                uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+            },
+            draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
+        }
     };
 
     const uniforms1: IBufferBinding = {

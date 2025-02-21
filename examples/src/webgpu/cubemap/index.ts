@@ -126,10 +126,6 @@ const init = async (canvas: HTMLCanvasElement) =>
                 cullFace: "none",
             },
         },
-        vertices: {
-            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
-        },
         uniforms: {
             uniforms: {
                 modelViewProjectionMatrix: new Float32Array(16)
@@ -137,7 +133,13 @@ const init = async (canvas: HTMLCanvasElement) =>
             mySampler: sampler,
             myTexture: { texture: cubemapTexture },
         },
-        draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
+        geometry: {
+            vertices: {
+                position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+                uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+            },
+            draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
+        }
     };
 
     function frame()

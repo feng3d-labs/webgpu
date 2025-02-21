@@ -97,27 +97,32 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 cullFace: "back",
             },
         },
-        vertices: {
-            a_particlePos: { data: particleBuffers[0], format: "float32x2", offset: 0, arrayStride: 4 * 4, stepMode: "instance" },
-            a_particleVel: { data: particleBuffers[0], format: "float32x2", offset: 2 * 4, arrayStride: 4 * 4, stepMode: "instance" },
-            a_pos: { data: vertexBufferData, format: "float32x2" },
-        },
-        draw: { __type: "DrawVertex", vertexCount: 3, instanceCount: numParticles }
+        geometry: {
+            vertices: {
+                a_particlePos: { data: particleBuffers[0], format: "float32x2", offset: 0, arrayStride: 4 * 4, stepMode: "instance" },
+                a_particleVel: { data: particleBuffers[0], format: "float32x2", offset: 2 * 4, arrayStride: 4 * 4, stepMode: "instance" },
+                a_pos: { data: vertexBufferData, format: "float32x2" },
+            },
+            draw: { __type: "DrawVertex", vertexCount: 3, instanceCount: numParticles }
+        }
     };
 
     const renderObject1: IRenderObject = {
         ...renderObject,
-        vertices: {
-            ...renderObject.vertices,
-            a_particlePos: {
-                ...renderObject.vertices.a_particlePos,
-                data: particleBuffers[1],
+        geometry: {
+            ...renderObject.geometry,
+            vertices: {
+                ...renderObject.geometry.vertices,
+                a_particlePos: {
+                    ...renderObject.geometry.vertices.a_particlePos,
+                    data: particleBuffers[1],
+                },
+                a_particleVel: {
+                    ...renderObject.geometry.vertices.a_particleVel,
+                    data: particleBuffers[1],
+                },
             },
-            a_particleVel: {
-                ...renderObject.vertices.a_particleVel,
-                data: particleBuffers[1],
-            },
-        },
+        }
     };
 
     let t = 0;

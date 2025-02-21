@@ -66,14 +66,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const blurParamsBuffer = new Uint8Array(8);
 
-    const computeConstants:   IUniforms = {
+    const computeConstants: IUniforms = {
         samp: sampler,
         params: {
             bufferView: blurParamsBuffer,
         },
     };
 
-    const computeBindGroup0:   IUniforms = {
+    const computeBindGroup0: IUniforms = {
         inputTex: { texture: cubeTexture1 },
         outputTex: { texture: textures[0] },
         flip: {
@@ -81,7 +81,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const computeBindGroup1:   IUniforms = {
+    const computeBindGroup1: IUniforms = {
         inputTex: { texture: textures[0] },
         outputTex: { texture: textures[1] },
         flip: {
@@ -89,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const computeBindGroup2:   IUniforms = {
+    const computeBindGroup2: IUniforms = {
         inputTex: { texture: textures[1] },
         outputTex: { texture: textures[0] },
         flip: {
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const showResultBindGroup1:   IUniforms = {
+    const showResultBindGroup1: IUniforms = {
         mySampler: sampler,
         myTexture: { texture: textures[1] },
     };
@@ -145,7 +145,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         renderObjects: [{
             pipeline: fullscreenQuadPipeline1,
             uniforms: showResultBindGroup1,
-            draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+            geometry: {
+                draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+            },
         }],
     };
 
@@ -161,15 +163,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     };
 
-    const bindingResources0:   IUniforms = {
+    const bindingResources0: IUniforms = {
         ...computeConstants,
         ...computeBindGroup0,
     };
-    const bindingResources1:   IUniforms = {
+    const bindingResources1: IUniforms = {
         ...computeConstants,
         ...computeBindGroup1,
     };
-    const bindingResources2:   IUniforms = {
+    const bindingResources2: IUniforms = {
         ...computeConstants,
         ...computeBindGroup2,
     };

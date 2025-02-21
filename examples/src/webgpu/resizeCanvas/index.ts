@@ -22,7 +22,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
-        draw: { __type: "DrawVertex", vertexCount: 3 },
+        geometry:{
+            draw: { __type: "DrawVertex", vertexCount: 3 },
+        }
     };
 
     canvas.classList.add(styles.animatedCanvasSize);
