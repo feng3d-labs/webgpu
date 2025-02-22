@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, IDrawIndexed, IDrawVertex, IIndicesDataTypes, IRenderPassObject, Material, PrimitiveState, RenderObject, RenderPass, ScissorRect, Submit, Uniforms, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, Material, PrimitiveState, RenderObject, RenderPass, ScissorRect, Submit, Uniforms, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -456,16 +456,14 @@ export class RunWebGPU
         passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
     }
 
-    protected runDrawVertex(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawVertex: IDrawVertex)
+    protected runDrawVertex(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawVertex: DrawVertex)
     {
-        if (!drawVertex) return;
         //
         passEncoder.draw(drawVertex.vertexCount, drawVertex.instanceCount, drawVertex.firstVertex, drawVertex.firstInstance);
     }
 
-    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed: IDrawIndexed)
+    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed: DrawIndexed)
     {
-        if (!drawIndexed) return;
         //
         passEncoder.drawIndexed(drawIndexed.indexCount, drawIndexed.instanceCount, drawIndexed.firstIndex, drawIndexed.baseVertex, drawIndexed.firstInstance);
     }

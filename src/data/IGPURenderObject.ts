@@ -1,4 +1,4 @@
-import { Uniforms } from "@feng3d/render-api";
+import { DrawIndexed, DrawVertex, Viewport } from "@feng3d/render-api";
 import { } from "./IGPUBindingResources";
 
 declare module "@feng3d/render-api"
@@ -19,7 +19,7 @@ declare module "@feng3d/render-api"
          *
          * 默认为 0 。
          */
-        readonly minDepth: number,
+        minDepth?: number,
 
         /**
          * Maximum depth value of the viewport.
@@ -28,7 +28,7 @@ declare module "@feng3d/render-api"
          *
          * 默认为 1 。
          */
-        readonly maxDepth: number
+        maxDepth?: number
     }
 
     /**
@@ -38,12 +38,14 @@ declare module "@feng3d/render-api"
      *
      * @see GPURenderCommandsMixin.draw
      */
-    export interface IDrawVertex
+    export interface DrawVertex
     {
         /**
          * First instance to draw.
+         * 
+         * 默认为 0 。
          */
-        readonly firstInstance?: number;
+        firstInstance?: number;
     }
 
     /**
@@ -51,20 +53,28 @@ declare module "@feng3d/render-api"
      *
      * {@link GPURenderCommandsMixin.drawIndexed}
      */
-    export interface IDrawIndexed
+    export interface DrawIndexed
     {
         /**
          * Added to each index value before indexing into the vertex buffers.
          *
          * 默认为 0 。
          */
-        readonly baseVertex?: number;
+        baseVertex?: number;
 
         /**
          * First instance to draw.
          *
          * 默认为 0 。
          */
-        readonly firstInstance?: number;
+        firstInstance?: number;
     }
 }
+
+Viewport.prototype.minDepth = 0;
+Viewport.prototype.maxDepth = 1;
+
+DrawVertex.prototype.firstInstance = 0
+
+DrawIndexed.prototype.baseVertex = 0;
+DrawIndexed.prototype.firstInstance = 0;
