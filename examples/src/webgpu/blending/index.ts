@@ -511,7 +511,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             pipeline: dstPipeline,
             uniforms: dstBindGroup,
             geometry: {
-                draw: { __type: "DrawVertex", vertexCount: 6 },
+                draw: { __type__: "DrawVertex", vertexCount: 6 },
             }
         };
 
@@ -519,7 +519,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             pipeline: srcPipeline,
             uniforms: srcBindGroup,
             geometry: {
-                draw: { __type: "DrawVertex", vertexCount: 6 },
+                draw: { __type__: "DrawVertex", vertexCount: 6 },
             }
         };
 

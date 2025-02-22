@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 cullFace: "back",
             },
             vertices,
-            draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
+            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
         }
     };
 

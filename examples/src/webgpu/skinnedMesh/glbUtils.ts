@@ -446,7 +446,7 @@ export class GLTFPrimitive
         let draw: IDraw;
         if (this.indices)
         {
-            draw = { __type: "DrawIndexed", indexCount: this.indices.length };
+            draw = { __type__: "DrawIndexed", indexCount: this.indices.length };
         }
         else
         {
@@ -454,7 +454,7 @@ export class GLTFPrimitive
 
             const vertexCount = vertexAttribute.data.byteLength / vertexFormatMap[vertexAttribute.format].byteSize;
 
-            draw = { __type: "DrawVertex", vertexCount };
+            draw = { __type__: "DrawVertex", vertexCount };
         }
 
         // Our loader only supports triangle lists and strips, so by default we set

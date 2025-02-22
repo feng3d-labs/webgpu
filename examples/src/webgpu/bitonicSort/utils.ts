@@ -64,7 +64,7 @@ export abstract class Base2DRendererClass
                         topology: "triangle-list",
                         cullFace: "none",
                     },
-                    draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1 }
+                    draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1 }
                 }
             }],
         };

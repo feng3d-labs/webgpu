@@ -53,7 +53,7 @@ export default class Raytracer
     const framebufferSize = this.framebuffer.size;
     //
     this.passEncoder = {
-      __type: "ComputePass",
+      __type__: "ComputePass",
       computeObjects: [{
         pipeline: this.pipeline,
         uniforms: {

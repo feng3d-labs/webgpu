@@ -50,23 +50,23 @@ export class RunWebGPU
 
         commandEncoder.passEncoders.forEach((passEncoder) =>
         {
-            if (!passEncoder.__type)
+            if (!passEncoder.__type__)
             {
                 this.runRenderPass(device, gpuCommandEncoder, passEncoder as RenderPass);
             }
-            else if (passEncoder.__type === "RenderPass")
+            else if (passEncoder.__type__ === "RenderPass")
             {
                 this.runRenderPass(device, gpuCommandEncoder, passEncoder);
             }
-            else if (passEncoder.__type === "ComputePass")
+            else if (passEncoder.__type__ === "ComputePass")
             {
                 this.runComputePass(device, gpuCommandEncoder, passEncoder);
             }
-            else if (passEncoder.__type === "CopyTextureToTexture")
+            else if (passEncoder.__type__ === "CopyTextureToTexture")
             {
                 this.runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder);
             }
-            else if (passEncoder.__type === "CopyBufferToBuffer")
+            else if (passEncoder.__type__ === "CopyBufferToBuffer")
             {
                 this.runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder);
             }
@@ -113,25 +113,25 @@ export class RunWebGPU
         //
         renderObjects.forEach((element) =>
         {
-            if (!element.__type)
+            if (!element.__type__)
             {
                 this.runRenderObject(device, passEncoder, renderPassFormat, element as RenderObject);
             }
-            else if (element.__type === "RenderObject")
+            else if (element.__type__ === "RenderObject")
             {
                 this.runRenderObject(device, passEncoder, renderPassFormat, element);
             }
-            else if (element.__type === "RenderBundle")
+            else if (element.__type__ === "RenderBundle")
             {
                 this.runRenderBundle(device, passEncoder, renderPassFormat, element);
             }
-            else if (element.__type === "OcclusionQuery")
+            else if (element.__type__ === "OcclusionQuery")
             {
                 this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
             }
             else
             {
-                throw `未处理 ${(element as IRenderPassObject).__type} 类型的渲染通道对象！`;
+                throw `未处理 ${(element as IRenderPassObject).__type__} 类型的渲染通道对象！`;
             }
         });
     }
@@ -322,7 +322,7 @@ export class RunWebGPU
 
         this.runIndices(device, passEncoder, indices);
 
-        if (draw.__type === 'DrawVertex')
+        if (draw.__type__ === 'DrawVertex')
         {
             this.runDrawVertex(passEncoder, draw);
         }

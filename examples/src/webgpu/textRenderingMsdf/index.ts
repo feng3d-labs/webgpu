@@ -263,7 +263,7 @@ setBlendConstant().`,
                     cullFace: "back",
                 },
                 vertices: verticesBuffer,
-                draw: { __type: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: 1 },
+                draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: 1 },
             }
         });
 

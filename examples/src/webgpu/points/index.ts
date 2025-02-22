@@ -202,7 +202,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             uniforms: bindingResources,
                             geometry: {
                                 vertices,
-                                draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: kNumPoints },
+                                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: kNumPoints },
                             }
                         }]
                     }

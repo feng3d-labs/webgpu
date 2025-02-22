@@ -45,7 +45,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: "float32x2" }, // 顶点坐标数据
                                 },
                                 indices: new Uint16Array([0, 1, 2]), // 顶点索引数据
-                                draw: { __type: "DrawIndexed", indexCount: 3 }, // 绘制命令
+                                draw: { __type__: "DrawIndexed", indexCount: 3 }, // 绘制命令
                             },
                             uniforms: { color: [1, 0, 0, 0] }, // Uniform 颜色值。
                         }]

@@ -86,7 +86,7 @@ export default class Rasterizer
                     },
                     vertices: this.scene.vertexAttributes,
                     indices: this.scene.indices,
-                    draw: { __type: "DrawIndexed", indexCount: this.scene.indexCount },
+                    draw: { __type__: "DrawIndexed", indexCount: this.scene.indexCount },
                 },
             }],
         };

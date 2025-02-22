@@ -336,7 +336,7 @@ export class MsdfTextRenderer
     };
 
     const renderBundle: IGPURenderBundle = {
-      __type: "RenderBundle",
+      __type__: "RenderBundle",
       renderObjects: [
         {
           pipeline: font.pipeline,
@@ -348,7 +348,7 @@ export class MsdfTextRenderer
             primitive: {
               topology: "triangle-strip",
             },
-            draw: { __type: "DrawVertex", vertexCount: 4, instanceCount: measurements.printedCharCount },
+            draw: { __type__: "DrawVertex", vertexCount: 4, instanceCount: measurements.printedCharCount },
           }
         }
       ],

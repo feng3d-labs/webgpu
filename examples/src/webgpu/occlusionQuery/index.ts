@@ -134,7 +134,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
             },
             indices,
-            draw: { __type: "DrawIndexed", indexCount: indices.length },
+            draw: { __type__: "DrawIndexed", indexCount: indices.length },
         },
         uniforms: {
             uni: {
@@ -158,7 +158,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     });
 
     const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.map((ro) =>
-        ({ __type: "OcclusionQuery", renderObjects: [ro] }));
+        ({ __type__: "OcclusionQuery", renderObjects: [ro] }));
 
     const renderPass: RenderPass = {
         descriptor: renderPassDescriptor,

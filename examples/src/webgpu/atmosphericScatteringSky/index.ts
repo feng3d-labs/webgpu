@@ -59,7 +59,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function frame()
     {
         webgpu.submit({
-            commandEncoders: [{ passEncoders: [{ __type: "ComputePass", computeObjects: [computeObject0] }] }]
+            commandEncoders: [{ passEncoders: [{ __type__: "ComputePass", computeObjects: [computeObject0] }] }]
         });
 
         ++t;

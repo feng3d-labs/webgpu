@@ -159,7 +159,7 @@ async function init(canvas: OffscreenCanvas)
                             frontFace: "ccw",
                         },
                         vertices: verticesBuffer,
-                        draw: { __type: "DrawVertex", vertexCount: cubeVertexCount }
+                        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount }
                     }
                 }]
             }]

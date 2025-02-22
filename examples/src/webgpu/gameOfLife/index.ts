@@ -119,7 +119,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             passEncodersArray[i] = [
                 {
-                    __type: "ComputePass",
+                    __type__: "ComputePass",
                     computeObjects: [{
                         pipeline: computePipeline,
                         uniforms: i ? bindGroup1 : bindGroup0,
@@ -140,7 +140,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                                     topology: "triangle-strip",
                                 },
                                 vertices: vertices1,
-                                draw: { __type: "DrawVertex", vertexCount: 4, instanceCount: length },
+                                draw: { __type__: "DrawVertex", vertexCount: 4, instanceCount: length },
                             }
                         }
                     ],

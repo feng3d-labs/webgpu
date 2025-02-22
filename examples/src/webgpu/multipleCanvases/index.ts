@@ -323,7 +323,7 @@ const init = async () =>
                         },
                         vertices: vertexAttributes,
                         indices,
-                        draw: { __type: "DrawIndexed", indexCount: indices.length },
+                        draw: { __type__: "DrawIndexed", indexCount: indices.length },
                     },
                 }],
             });

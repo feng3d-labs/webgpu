@@ -146,12 +146,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             pipeline: fullscreenQuadPipeline1,
             uniforms: showResultBindGroup1,
             geometry: {
-                draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
             },
         }],
     };
 
-    const gpuComputePassEncoder: IGPUComputePass = { __type: "ComputePass", computeObjects: [] };
+    const gpuComputePassEncoder: IGPUComputePass = { __type__: "ComputePass", computeObjects: [] };
     const submit: Submit = {
         commandEncoders: [
             {

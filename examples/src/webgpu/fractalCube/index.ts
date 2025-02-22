@@ -88,7 +88,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
                 uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
             },
-            draw: { __type: "DrawVertex", vertexCount: cubeVertexCount },
+            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
         },
         uniforms: {
             uniforms: {
@@ -100,7 +100,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const copyTextureToTexture: CopyTextureToTexture = {
-        __type: "CopyTextureToTexture",
+        __type__: "CopyTextureToTexture",
         source: { texture: { context } },
         destination: { texture: cubeTexture },
         copySize: [canvas.width, canvas.height],

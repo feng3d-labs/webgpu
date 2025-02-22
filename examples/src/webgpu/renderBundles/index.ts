@@ -261,7 +261,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
                         },
                         vertices: renderable.vertexAttributes,
                         indices: renderable.indices,
-                        draw: { __type: "DrawIndexed", indexCount: renderable.indexCount },
+                        draw: { __type__: "DrawIndexed", indexCount: renderable.indexCount },
                     }
                 };
             }
@@ -289,14 +289,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     // such as when using frustrum or occlusion culling, will not benefit from
     // using render bundles as much.
     let renderBundle: IGPURenderBundle = {
-        __type: "RenderBundle",
+        __type__: "RenderBundle",
         renderObjects: [],
     };
     renderBundle.renderObjects = renderScene();
     function updateRenderBundle()
     {
         const renderBundleEncoder: IGPURenderBundle = {
-            __type: "RenderBundle",
+            __type__: "RenderBundle",
             renderObjects: [],
         };
         renderBundleEncoder.renderObjects = renderScene();

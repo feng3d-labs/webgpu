@@ -201,7 +201,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       if (level === 0)
       {
         passEncoders.push({
-          __type: "ComputePass",
+          __type__: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapImportLevelPipeline,
             uniforms: { ...probabilityMapBindGroup },
@@ -212,7 +212,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       else
       {
         passEncoders.push({
-          __type: "ComputePass",
+          __type__: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapExportLevelPipeline,
             uniforms: { ...probabilityMapBindGroup },
@@ -279,7 +279,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   passEncoders.push(
     {
-      __type: "ComputePass",
+      __type__: "ComputePass",
       computeObjects: [{
         pipeline: computePipeline,
         uniforms: { ...computeBindGroup },
@@ -293,7 +293,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         uniforms: { ...uniformBindGroup },
         geometry: {
           vertices: { ...particlesVertices, ...quadVertices },
-          draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
+          draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
         },
       }],
     }

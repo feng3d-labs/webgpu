@@ -257,7 +257,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
         }
         writeTextures.push({
-            __type: "TextureDataSource",
+            __type__: "TextureDataSource",
             mipLevel,
             data,
             dataLayout: { width: size },
@@ -324,7 +324,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 pipeline: texturedSquarePipeline,
                 uniforms: bindingResources0,
                 geometry:{
-                    draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
+                    draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
                 }
             }
         );
@@ -340,7 +340,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
             geometry:{
-                draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
+                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
             }
         }
     );
@@ -350,7 +350,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
             geometry:{
-                draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
+                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
             }
         }
     );
@@ -360,7 +360,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
             geometry:{
-                draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
+                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
             }
         }
     );
@@ -370,7 +370,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
             geometry:{
-                draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
+                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
             }
         }
     );

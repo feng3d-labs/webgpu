@@ -378,7 +378,7 @@ async function init(
         const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
-                    __type: "ComputePass",
+                    __type__: "ComputePass",
                     computeObjects: [{
                         pipeline: atomicToZeroComputePipeline,
                         uniforms: computeBGCluster,
@@ -736,7 +736,7 @@ async function init(
         )
         {
             const computePassEncoder: IGPUComputePass = {
-                __type: "ComputePass",
+                __type__: "ComputePass",
                 timestampQuery: querySet,
                 computeObjects: [{
                     pipeline: computePipeline,
@@ -795,7 +795,7 @@ async function init(
             // Copy GPU accessible buffers to CPU accessible buffers
             commandEncoder.passEncoders.push(
                 {
-                    __type: "CopyBufferToBuffer",
+                    __type__: "CopyBufferToBuffer",
                     source: getIGPUBuffer(elementsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: elementsStagingBuffer,
@@ -803,7 +803,7 @@ async function init(
                     size: elementsBufferSize
                 },
                 {
-                    __type: "CopyBufferToBuffer",
+                    __type__: "CopyBufferToBuffer",
                     source: getIGPUBuffer(atomicSwapsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: atomicSwapsStagingBuffer,

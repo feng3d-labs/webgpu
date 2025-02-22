@@ -373,7 +373,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             cullFace: "back",
                         },
                         vertices,
-                        draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                        draw: { __type__: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
                 }]
         });
@@ -400,7 +400,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             cullFace: "back",
                         },
                         vertices,
-                        draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                        draw: { __type__: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
                 }]
         });
@@ -422,7 +422,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             cullFace: "back",
                         },
                         vertices,
-                        draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                        draw: { __type__: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
                 }]
         });
@@ -449,7 +449,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             cullFace: "back",
                         },
                         vertices,
-                        draw: { __type: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
+                        draw: { __type__: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
                 }]
         });
@@ -461,7 +461,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     pipeline: textureQuadPassPipline,
                     uniforms: { ...depthTextureBindGroup },
                     geometry: {
-                        draw: { __type: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+                        draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
                     }
                 }]
         });

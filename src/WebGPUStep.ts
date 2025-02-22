@@ -43,7 +43,7 @@ export class WebGPUStep
         this._currentSubmit = this._currentSubmit || { commandEncoders: [{ passEncoders: [] }] };
         //
         this._currentRenderPassEncoder = null;
-        this._currentComputePassEncoder = { __type: "ComputePass", computeObjects: [] };
+        this._currentComputePassEncoder = { __type__: "ComputePass", computeObjects: [] };
         this._currentSubmit.commandEncoders[0].passEncoders.push(this._currentComputePassEncoder);
     }
 

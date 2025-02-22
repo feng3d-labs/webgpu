@@ -25,7 +25,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
         geometry: {
-            draw: { __type: "DrawVertex", vertexCount: 3 },
+            draw: { __type__: "DrawVertex", vertexCount: 3 },
         },
     };
 

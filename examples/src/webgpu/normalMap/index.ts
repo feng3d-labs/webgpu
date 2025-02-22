@@ -337,7 +337,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                                 vert_bitan: { data: box.vertices, offset: 44, format: "float32x3", arrayStride: box.vertexStride },
                             },
                             indices: box.indices,
-                            draw: { __type: "DrawIndexed", indexCount: box.indices.length },
+                            draw: { __type__: "DrawIndexed", indexCount: box.indices.length },
                         }
                     }],
                 }]

@@ -326,7 +326,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             },
                             vertices: vertexAttributes,
                             indices,
-                            draw: { __type: "DrawIndexed", indexCount: indices.length },
+                            draw: { __type__: "DrawIndexed", indexCount: indices.length },
                         }
                     });
                 }
@@ -353,7 +353,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     uniforms: wireframeBindGroups[bindGroupNdx],
                     geometry: {
                         primitive,
-                        draw: { __type: "DrawVertex", vertexCount: indices.length * countMult },
+                        draw: { __type__: "DrawVertex", vertexCount: indices.length * countMult },
                     }
                 });
             });

@@ -335,13 +335,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     primitive,
                     vertices,
                     indices: indexBuffer,
-                    draw: { __type: "DrawIndexed", indexCount },
+                    draw: { __type__: "DrawIndexed", indexCount },
                 }
             },
         ]
     });
     passEncoders.push({
-        __type: "ComputePass",
+        __type__: "ComputePass",
         computeObjects: [
             {
                 pipeline: lightUpdateComputePipeline,
@@ -365,7 +365,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 geometry: {
                     primitive,
-                    draw: { __type: "DrawVertex", vertexCount: 6 },
+                    draw: { __type__: "DrawVertex", vertexCount: 6 },
                 }
             },
         ]
@@ -382,7 +382,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 geometry: {
                     primitive,
-                    draw: { __type: "DrawVertex", vertexCount: 6 },
+                    draw: { __type__: "DrawVertex", vertexCount: 6 },
                 },
             },
         ]

@@ -75,7 +75,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             size: [width, height, depth],
             format,
             sources: [{
-                __type: "TextureDataSource",
+                __type__: "TextureDataSource",
                 data: byteArray,
                 dataLayout: { width, height },
                 size: [width, height, depth],
@@ -164,7 +164,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 topology: "triangle-list",
                                 cullFace: "back",
                             },
-                            draw: { __type: "DrawVertex", vertexCount: 3 },
+                            draw: { __type__: "DrawVertex", vertexCount: 3 },
                         }
                     }],
                 }]

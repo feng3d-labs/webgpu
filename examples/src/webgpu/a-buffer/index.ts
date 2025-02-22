@@ -285,7 +285,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     },
                     vertices,
                     indices,
-                    draw: { __type: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
+                    draw: { __type__: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
                 }
             }]
         };
@@ -295,7 +295,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             // initialize the heads buffer
             passEncoders.push({
-                __type: "CopyBufferToBuffer",
+                __type__: "CopyBufferToBuffer",
                 source: getIGPUBuffer(headsInitBuffer),
                 destination: getIGPUBuffer(headsBuffer.bufferView),
             });
@@ -326,7 +326,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             },
                             vertices,
                             indices,
-                            draw: { __type: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
+                            draw: { __type__: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
                         }
                     }
                 ],
@@ -350,7 +350,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             primitive: {
                                 topology: "triangle-list",
                             },
-                            draw: { __type: "DrawVertex", vertexCount: 6 },
+                            draw: { __type__: "DrawVertex", vertexCount: 6 },
                         }
                     }
                 ]

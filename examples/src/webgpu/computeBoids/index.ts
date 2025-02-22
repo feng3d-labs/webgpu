@@ -103,7 +103,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 a_particleVel: { data: particleBuffers[0], format: "float32x2", offset: 2 * 4, arrayStride: 4 * 4, stepMode: "instance" },
                 a_pos: { data: vertexBufferData, format: "float32x2" },
             },
-            draw: { __type: "DrawVertex", vertexCount: 3, instanceCount: numParticles }
+            draw: { __type__: "DrawVertex", vertexCount: 3, instanceCount: numParticles }
         }
     };
 
@@ -133,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             commandEncoders: [
                 {
                     passEncoders: [
-                        { __type: "ComputePass", computeObjects: [[computeObject0, computeObject1][t % 2]] },
+                        { __type__: "ComputePass", computeObjects: [[computeObject0, computeObject1][t % 2]] },
                         { descriptor: renderPass, renderObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
                     ]
                 }

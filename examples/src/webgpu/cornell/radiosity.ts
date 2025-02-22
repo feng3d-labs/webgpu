@@ -109,7 +109,7 @@ export default class Radiosity
         const lightmapSize = this.lightmap.size;
 
         this.passEncoders = [{
-            __type: "ComputePass",
+            __type__: "ComputePass",
             computeObjects: [
                 // Dispatch the radiosity workgroups
                 {

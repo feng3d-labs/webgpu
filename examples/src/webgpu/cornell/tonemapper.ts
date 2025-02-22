@@ -45,7 +45,7 @@ export default class Tonemapper
 
         //
         this.passEncoder = {
-            __type: "ComputePass",
+            __type__: "ComputePass",
             computeObjects: [{
                 pipeline: this.pipeline,
                 uniforms: {

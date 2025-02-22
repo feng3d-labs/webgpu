@@ -48,7 +48,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             },
         },
         geometry: {
-            draw: { __type: "DrawVertex", vertexCount: 6 },
+            draw: { __type__: "DrawVertex", vertexCount: 6 },
         }
     };
 
