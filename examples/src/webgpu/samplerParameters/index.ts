@@ -1,7 +1,7 @@
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
-import { RenderPassDescriptor, IRenderPassObject, Material, Sampler, Submit, Texture, ITextureSource, Uniforms } from "@feng3d/render-api";
+import { RenderPassDescriptor, IRenderPassObject, Material, Sampler, Submit, Texture, TextureSource, Uniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import showTextureWGSL from "./showTexture.wgsl";
@@ -241,7 +241,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         [255, 193, 7, 255], // yellow
         [216, 27, 96, 255], // pink
     ];
-    const writeTextures: ITextureSource[] = [];
+    const writeTextures: TextureSource[] = [];
     for (let mipLevel = 0; mipLevel < kTextureMipLevels; ++mipLevel)
     {
         const size = 2 ** (kTextureMipLevels - mipLevel); // 16, 8, 4, 2
