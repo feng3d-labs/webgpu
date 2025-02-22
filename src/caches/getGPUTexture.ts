@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ITextureDataSource, ITextureLike, ITextureSize, Texture, TextureImageSource, TextureSource } from "@feng3d/render-api";
+import { ITextureLike, ITextureSize, Texture, TextureDataSource, TextureImageSource, TextureSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
@@ -151,7 +151,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                 }
 
                 // 处理数据纹理
-                const bufferSource = v as ITextureDataSource;
+                const bufferSource = v as TextureDataSource;
                 const { data, dataLayout, dataImageOrigin, size, mipLevel, textureOrigin, aspect } = bufferSource;
 
                 const gpuDestination: GPUImageCopyTexture = {

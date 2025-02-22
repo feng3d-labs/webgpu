@@ -33,7 +33,7 @@ declare module "@feng3d/render-api"
      *
      * @see GPUQueue.writeTexture
      */
-    export interface ITextureDataSource
+    export interface TextureDataSource
     {
         /**
          * Defines which aspects of the {@link GPUImageCopyTexture#texture} to copy to/from.
