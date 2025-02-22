@@ -277,7 +277,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const opaquePassEncoder: RenderPass = {
             descriptor: opaquePassDescriptor,
             renderObjects: [{
-                pipeline: opaquePipeline,
+                material: opaquePipeline,
                 uniforms: bindingResources,
                 geometry: {
                     primitive: {
@@ -315,7 +315,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     // Set the scissor to only process a horizontal slice of the frame
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
-                        pipeline: translucentPipeline,
+                        material: translucentPipeline,
                         uniforms: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice],
@@ -341,7 +341,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     // Set the scissor to only process a horizontal slice of the frame
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
-                        pipeline: compositePipeline,
+                        material: compositePipeline,
                         uniforms: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice]

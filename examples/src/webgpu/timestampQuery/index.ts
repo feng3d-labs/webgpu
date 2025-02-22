@@ -61,7 +61,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniforms = { modelViewProjectionMatrix: null };
 
-    const pipeline: Material = {
+    const material: Material = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -102,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const renderObject: RenderObject = {
-        pipeline,
+        material,
         uniforms: {
             uniforms,
         },

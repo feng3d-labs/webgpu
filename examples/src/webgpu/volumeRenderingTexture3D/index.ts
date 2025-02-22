@@ -28,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const sampleCount = 4;
 
-    const pipeline: Material = {
+    const material: Material = {
         vertex: {
             code: volumeWGSL,
         },
@@ -157,7 +157,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
-                        pipeline,
+                        material,
                         uniforms: uniformBindGroup,
                         geometry: {
                             primitive: {

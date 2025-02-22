@@ -32,7 +32,7 @@ export class MsdfFont
   charCount: number;
   defaultChar: MsdfChar;
   constructor(
-    public pipeline: Material,
+    public material: Material,
     public bindGroup: Uniforms,
     public lineHeight: number,
     public chars: { [x: number]: MsdfChar },
@@ -339,7 +339,7 @@ export class MsdfTextRenderer
       __type__: "RenderBundle",
       renderObjects: [
         {
-          pipeline: font.pipeline,
+          material: font.material,
           uniforms: {
             ...font.bindGroup,
             ...bindGroup,

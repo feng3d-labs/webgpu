@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: Material = {
+    const material: Material = {
         vertex: {
             code: cubeWGSL,
         },
@@ -93,7 +93,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const renderObject: RenderObject = {
-        pipeline,
+        material,
         uniforms: bindingResources,
         geometry:{
             primitive: {

@@ -21,7 +21,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                             }],
                         },
                         renderObjects: [{ // 渲染对象
-                            pipeline: { // 渲染管线
+                            material: { // 渲染管线
                                 vertex: { // 顶点着色器
                                     code: `
                                     @vertex

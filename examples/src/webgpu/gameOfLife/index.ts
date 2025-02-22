@@ -121,7 +121,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     __type__: "ComputePass",
                     computeObjects: [{
-                        pipeline: computePipeline,
+                        material: computePipeline,
                         uniforms: i ? bindGroup1 : bindGroup0,
                         workgroups: {
                             workgroupCountX: GameOptions.width / GameOptions.workgroupSize,
@@ -133,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     descriptor: renderPass,
                     renderObjects: [
                         {
-                            pipeline: renderPipeline,
+                            material: renderPipeline,
                             uniforms: uniformBindGroup,
                             geometry: {
                                 primitive: {

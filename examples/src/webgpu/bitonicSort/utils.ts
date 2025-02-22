@@ -43,21 +43,21 @@ export abstract class Base2DRendererClass
         ...args: unknown[]
     ): void;
     renderPassDescriptor: RenderPassDescriptor;
-    pipeline: Material;
+    material: Material;
     bindGroupMap: Record<string, GPUBindGroup>;
     currentBindGroupName: string;
 
     executeRun(
         commandEncoder: CommandEncoder,
         renderPassDescriptor: RenderPassDescriptor,
-        pipeline: Material,
+        material: Material,
         bindingResources?: Uniforms
     )
     {
         const passEncoder: RenderPass = {
             descriptor: renderPassDescriptor,
             renderObjects: [{
-                pipeline,
+                material,
                 uniforms: bindingResources,
                 geometry: {
                     primitive: {

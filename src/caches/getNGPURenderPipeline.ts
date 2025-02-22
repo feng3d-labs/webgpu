@@ -50,7 +50,7 @@ export function getNGPURenderPipeline(renderPipeline: Material, renderPassFormat
     const blendConstantColor = BlendState.getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend);
 
     //
-    const pipeline: NGPURenderPipeline = {
+    const material: NGPURenderPipeline = {
         label,
         primitive: gpuPrimitive,
         vertex: vertexStateResult.gpuVertexState,
@@ -61,7 +61,7 @@ export function getNGPURenderPipeline(renderPipeline: Material, renderPassFormat
         blendConstantColor,
     };
 
-    result = { _version: 0, pipeline, vertexBuffers: vertexStateResult.vertexBuffers };
+    result = { _version: 0, material, vertexBuffers: vertexStateResult.vertexBuffers };
     renderPipelineMap.set([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat], result);
 
     // 监听管线变化
@@ -85,7 +85,7 @@ const renderPipelineMap = new ChainMap<
         /**
          * GPU渲染管线描述。
          */
-        pipeline: NGPURenderPipeline;
+        material: NGPURenderPipeline;
         /**
          * GPU渲染时使用的顶点缓冲区列表。
          */

@@ -42,7 +42,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const pipeline: Material = {
+    const material: Material = {
         ...pipelineDesc,
     };
 
@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ]);
 
     const renderObject: RenderObject = {
-        pipeline,
+        material,
         uniforms: {},
         geometry: {
             primitive: {

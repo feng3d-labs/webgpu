@@ -114,7 +114,7 @@ const init = async () =>
   `,
     };
 
-    const pipeline: Material = {
+    const material: Material = {
         label: "our hardcoded red triangle pipeline",
         vertex: {
             ...module,
@@ -315,7 +315,7 @@ const init = async () =>
             passEncoders.push({
                 descriptor: renderPassDescriptor,
                 renderObjects: [{
-                    pipeline,
+                    material,
                     uniforms: bindGroup,
                     geometry: {
                         primitive: {

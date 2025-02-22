@@ -318,7 +318,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 if (settings.models)
                 {
                     renderObjects.push({
-                        pipeline: litPipeline,
+                        material: litPipeline,
                         uniforms: litBindGroup,
                         geometry: {
                             primitive: {
@@ -338,7 +338,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // Note: If we're using the line-list based pipeline then we need to
             // multiply the vertex count by 2 since we need to emit 6 vertices
             // for each triangle (3 edges).
-            const [bindGroupNdx, countMult, pipeline, primitive]
+            const [bindGroupNdx, countMult, material, primitive]
                 = settings.barycentricCoordinatesBased
                     ? [1, 1, barycentricCoordinatesBasedWireframePipeline, {
                         topology: "triangle-list",
@@ -349,7 +349,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             objectInfos.forEach(({ wireframeBindGroups, model: { indices } }) =>
             {
                 renderObjects.push({
-                    pipeline,
+                    material,
                     uniforms: wireframeBindGroups[bindGroupNdx],
                     geometry: {
                         primitive,

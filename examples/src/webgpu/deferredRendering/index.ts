@@ -327,7 +327,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         descriptor: writeGBufferPassDescriptor,
         renderObjects: [
             {
-                pipeline: writeGBuffersPipeline,
+                material: writeGBuffersPipeline,
                 uniforms: {
                     ...sceneUniformBindGroup,
                 },
@@ -344,7 +344,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         __type__: "ComputePass",
         computeObjects: [
             {
-                pipeline: lightUpdateComputePipeline,
+                material: lightUpdateComputePipeline,
                 uniforms: {
                     ...lightsBufferComputeBindGroup,
                 },
@@ -359,7 +359,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         descriptor: textureQuadPassDescriptor,
         renderObjects: [
             {
-                pipeline: gBuffersDebugViewPipeline,
+                material: gBuffersDebugViewPipeline,
                 uniforms: {
                     ...gBufferTexturesBindGroup,
                 },
@@ -375,7 +375,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         descriptor: textureQuadPassDescriptor,
         renderObjects: [
             {
-                pipeline: deferredRenderPipeline,
+                material: deferredRenderPipeline,
                 uniforms: {
                     ...gBufferTexturesBindGroup,
                     ...lightsBufferBindGroup,

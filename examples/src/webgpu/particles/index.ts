@@ -203,7 +203,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         passEncoders.push({
           __type__: "ComputePass",
           computeObjects: [{
-            pipeline: probabilityMapImportLevelPipeline,
+            material: probabilityMapImportLevelPipeline,
             uniforms: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
@@ -214,7 +214,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         passEncoders.push({
           __type__: "ComputePass",
           computeObjects: [{
-            pipeline: probabilityMapExportLevelPipeline,
+            material: probabilityMapExportLevelPipeline,
             uniforms: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
@@ -281,7 +281,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       __type__: "ComputePass",
       computeObjects: [{
-        pipeline: computePipeline,
+        material: computePipeline,
         uniforms: { ...computeBindGroup },
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
       }]
@@ -289,7 +289,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       descriptor: renderPassDescriptor,
       renderObjects: [{
-        pipeline: renderPipeline,
+        material: renderPipeline,
         uniforms: { ...uniformBindGroup },
         geometry: {
           vertices: { ...particlesVertices, ...quadVertices },

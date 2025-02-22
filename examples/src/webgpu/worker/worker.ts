@@ -78,7 +78,7 @@ async function init(canvas: OffscreenCanvas)
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: Material = {
+    const material: Material = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -146,7 +146,7 @@ async function init(canvas: OffscreenCanvas)
             passEncoders: [{
                 descriptor: renderPassDescriptor,
                 renderObjects: [{
-                    pipeline,
+                    material,
                     uniforms: uniformBindGroup,
                     geometry: {
                         primitive: {

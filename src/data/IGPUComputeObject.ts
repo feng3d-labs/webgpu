@@ -16,7 +16,7 @@ export interface IGPUComputeObject
     /**
      * 计算管线。
      */
-    readonly pipeline: IGPUComputePipeline;
+    readonly material: IGPUComputePipeline;
 
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。

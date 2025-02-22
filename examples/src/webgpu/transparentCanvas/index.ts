@@ -30,7 +30,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: Material = {
+    const material: Material = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
-                        pipeline,
+                        material,
                         uniforms: uniformBindGroup,
                         geometry: {
                             primitive: {

@@ -468,7 +468,7 @@ export class GLTFPrimitive
         }
 
         const renderObject: RenderObject = {
-            pipeline: this.renderPipeline,
+            material: this.renderPipeline,
             uniforms: bindingResources,
             //if skin do something with bone bind group
             geometry: {

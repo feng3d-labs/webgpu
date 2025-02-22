@@ -366,7 +366,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    pipeline: colorPassPipelines[m],
+                    material: colorPassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
                     geometry: {
                         primitive: {
@@ -393,7 +393,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    pipeline: depthPrePassPipelines[m],
+                    material: depthPrePassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
                     geometry: {
                         primitive: {
@@ -415,7 +415,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    pipeline: precisionPassPipelines[m],
+                    material: precisionPassPipelines[m],
                     uniforms: { ...uniformBindGroups[m], ...depthTextureBindGroup },
                     geometry: {
                         primitive: {
@@ -442,7 +442,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    pipeline: depthPrePassPipelines[m],
+                    material: depthPrePassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
                     geometry: {
                         primitive: {
@@ -458,7 +458,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    pipeline: textureQuadPassPipline,
+                    material: textureQuadPassPipline,
                     uniforms: { ...depthTextureBindGroup },
                     geometry: {
                         draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },

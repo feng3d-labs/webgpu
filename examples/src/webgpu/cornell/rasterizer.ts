@@ -13,7 +13,7 @@ export default class Rasterizer
     private readonly common: Common;
     private readonly scene: Scene;
     private readonly renderPassDescriptor: RenderPassDescriptor;
-    private readonly pipeline: Material;
+    private readonly material: Material;
     private readonly bindGroup: Uniforms;
 
     constructor(
@@ -61,7 +61,7 @@ export default class Rasterizer
             },
         };
 
-        this.pipeline = {
+        this.material = {
             label: "RasterizerRenderer.pipeline",
             vertex: {
                 code: rasterizerWGSL + common.wgsl,
@@ -75,7 +75,7 @@ export default class Rasterizer
         this.renderPassEncoder = {
             descriptor: this.renderPassDescriptor,
             renderObjects: [{
-                pipeline: this.pipeline,
+                material: this.material,
                 uniforms: {
                     ...this.common.uniforms.bindGroup,
                     ...this.bindGroup,

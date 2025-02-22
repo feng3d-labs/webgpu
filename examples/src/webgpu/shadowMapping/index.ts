@@ -67,7 +67,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Create a bind group layout which holds the scene uniforms and
     // the texture+sampler for depth. We create it manually because the WebPU
     // implementation doesn't infer this from the shader (yet).
-    const pipeline: Material = {
+    const material: Material = {
         vertex: {
             code: vertexWGSL,
         },
@@ -219,7 +219,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         descriptor: shadowPassDescriptor,
                         renderObjects: [
                             {
-                                pipeline: shadowPipeline,
+                                material: shadowPipeline,
                                 uniforms: {
                                     ...sceneBindGroupForShadow,
                                     ...modelBindGroup,
@@ -237,7 +237,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         descriptor: renderPassDescriptor,
                         renderObjects: [
                             {
-                                pipeline,
+                                material,
                                 uniforms: {
                                     ...sceneBindGroupForRender,
                                     ...modelBindGroup,

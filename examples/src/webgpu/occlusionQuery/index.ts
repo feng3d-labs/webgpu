@@ -22,7 +22,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const pipeline: Material = {
+    const material: Material = {
         vertex: {
             code: solidColorLitWGSL,
         },
@@ -123,7 +123,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const renderObject: RenderObject = {
-        pipeline,
+        material,
         geometry: {
             primitive: {
                 topology: "triangle-list",

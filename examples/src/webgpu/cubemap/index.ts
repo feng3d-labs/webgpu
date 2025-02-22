@@ -120,7 +120,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const renderObject: RenderObject = {
-        pipeline: {
+        material: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
         },
         uniforms: {

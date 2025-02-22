@@ -143,7 +143,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const gpuRenderPassEncoder: RenderPass = {
         descriptor: renderPassDescriptor,
         renderObjects: [{
-            pipeline: fullscreenQuadPipeline1,
+            material: fullscreenQuadPipeline1,
             uniforms: showResultBindGroup1,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
@@ -182,12 +182,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         gpuComputePassEncoder.computeObjects = [
             {
-                pipeline: blurPipeline,
+                material: blurPipeline,
                 uniforms: bindingResources0,
                 workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
             },
             {
-                pipeline: blurPipeline,
+                material: blurPipeline,
                 uniforms: bindingResources1,
                 workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
             },
@@ -197,7 +197,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             gpuComputePassEncoder.computeObjects.push(
                 {
-                    pipeline: blurPipeline,
+                    material: blurPipeline,
                     uniforms: bindingResources2,
                     workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
                 }
@@ -205,7 +205,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             gpuComputePassEncoder.computeObjects.push(
                 {
-                    pipeline: blurPipeline,
+                    material: blurPipeline,
                     uniforms: bindingResources1,
                     workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
                 }

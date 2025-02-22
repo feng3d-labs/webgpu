@@ -141,7 +141,7 @@ setBlendConstant().`,
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: Material = {
+    const material: Material = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -253,7 +253,7 @@ setBlendConstant().`,
         const renderObjects: IRenderPassObject[] = [];
 
         renderObjects.push({
-            pipeline,
+            material,
             uniforms: uniformBindGroup,
             geometry: {
                 primitive: {

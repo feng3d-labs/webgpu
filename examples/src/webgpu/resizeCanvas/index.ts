@@ -19,7 +19,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const renderObject: RenderObject = {
-        pipeline: {
+        material: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
         geometry:{

@@ -8,7 +8,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 {
     const webgpu = await new WebGPU().init();
 
-    const pipeline: Material = {
+    const material: Material = {
         vertex: { code: checkerWGSL },
         fragment: {
             code: checkerWGSL,
@@ -104,7 +104,7 @@ return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
-                        pipeline,
+                        material,
                         uniforms: bindGroup,
                         geometry:{
                             draw: { __type__: "DrawVertex", vertexCount: 3 },

@@ -45,7 +45,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const computeObject0: IGPUComputeObject = {
-        pipeline: {
+        material: {
             compute: { code: atmosphericScatteringSkyWGSL }
         },
         uniforms: {

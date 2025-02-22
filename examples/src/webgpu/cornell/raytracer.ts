@@ -12,7 +12,7 @@ export default class Raytracer
 {
   private readonly common: Common;
   private readonly framebuffer: Texture;
-  private readonly pipeline: IGPUComputePipeline;
+  private readonly material: IGPUComputePipeline;
   private readonly bindGroup: Uniforms;
 
   private readonly kWorkgroupSizeX = 16;
@@ -39,7 +39,7 @@ export default class Raytracer
       framebuffer: { texture: framebuffer },
     };
 
-    this.pipeline = {
+    this.material = {
       label: "raytracerPipeline",
       compute: {
         code: raytracerWGSL + common.wgsl,
@@ -55,7 +55,7 @@ export default class Raytracer
     this.passEncoder = {
       __type__: "ComputePass",
       computeObjects: [{
-        pipeline: this.pipeline,
+        material: this.material,
         uniforms: {
           ...this.common.uniforms.bindGroup,
           ...this.bindGroup,

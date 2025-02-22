@@ -24,7 +24,7 @@ export const createSkinnedGridRenderPipeline = (
     fragmentShader: string,
 ) =>
 {
-    const pipeline: Material = {
+    const material: Material = {
         label: "SkinnedGridRenderer",
         vertex: {
             code: vertexShader,
@@ -34,5 +34,5 @@ export const createSkinnedGridRenderPipeline = (
         },
     };
 
-return pipeline;
+    return material;
 };

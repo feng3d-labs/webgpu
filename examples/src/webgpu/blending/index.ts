@@ -508,7 +508,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         updateUniforms(dstUniform, canvas, dstTexture);
 
         const ro: RenderObject = {
-            pipeline: dstPipeline,
+            material: dstPipeline,
             uniforms: dstBindGroup,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6 },
@@ -516,7 +516,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         const ro1: RenderObject = {
-            pipeline: srcPipeline,
+            material: srcPipeline,
             uniforms: srcBindGroup,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6 },

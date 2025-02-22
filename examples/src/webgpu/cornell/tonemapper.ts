@@ -11,7 +11,7 @@ import tonemapperWGSL from "./tonemapper.wgsl";
 export default class Tonemapper
 {
     private readonly bindGroup: Uniforms;
-    private readonly pipeline: IGPUComputePipeline;
+    private readonly material: IGPUComputePipeline;
     private readonly width: number;
     private readonly height: number;
     private readonly kWorkgroupSizeX = 16;
@@ -32,7 +32,7 @@ export default class Tonemapper
             output: { texture: output },
         };
 
-        this.pipeline = {
+        this.material = {
             label: "Tonemap.pipeline",
             compute: {
                 code: tonemapperWGSL.replace("{OUTPUT_FORMAT}", output.context.configuration.format),
@@ -47,7 +47,7 @@ export default class Tonemapper
         this.passEncoder = {
             __type__: "ComputePass",
             computeObjects: [{
-                pipeline: this.pipeline,
+                material: this.material,
                 uniforms: {
                     ...this.bindGroup,
                 },

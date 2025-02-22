@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, Material, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { Material, RenderPassDescriptor, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
@@ -168,7 +168,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const { size, fixedSize, textured } = settings;
 
-        const pipeline = pipelines[fixedSize ? 1 : 0][textured ? 1 : 0];
+        const material = pipelines[fixedSize ? 1 : 0][textured ? 1 : 0];
 
         // Set the size in the uniform values
         bindingResources.uni.size = size;
@@ -198,7 +198,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     {
                         descriptor: renderPassDescriptor,
                         renderObjects: [{
-                            pipeline,
+                            material,
                             uniforms: bindingResources,
                             geometry: {
                                 vertices,

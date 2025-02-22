@@ -41,7 +41,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         canvasId: canvas.id,
     };
 
-    const pipeline: Material = {
+    const material: Material = {
         vertex: {
             code: meshWGSL,
         },
@@ -250,7 +250,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             if (!renderable.renderObject)
             {
                 renderable.renderObject = {
-                    pipeline,
+                    material,
                     uniforms: { ...frameBindGroup, ...renderable.bindGroup },
                     geometry: {
                         primitive: {
