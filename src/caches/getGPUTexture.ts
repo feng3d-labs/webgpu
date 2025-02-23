@@ -108,7 +108,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
                     const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
 
                     //
-                    const imageSize = TextureImageSource.getTexImageSourceSize(imageSource);
+                    const imageSize = TextureImageSource.getTexImageSourceSize(imageSource.image);
                     const copySize = imageSource.size || imageSize;
 
                     let imageOrigin = imageSource.imageOrigin;
