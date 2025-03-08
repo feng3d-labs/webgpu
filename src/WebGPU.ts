@@ -78,7 +78,6 @@ export class WebGPU
      */
     submit(submit: Submit)
     {
-        submit = Submit.getInstance(submit);
         this._runWebGPU.runSubmit(this.device, submit);
     }
 
