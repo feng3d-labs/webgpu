@@ -102,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const renderObject: RenderObject = {
-        material: {
+        pipeline: {
             vertex: { code: instancedVertWGSL }, fragment: { code: vertexPositionColorWGSL },
         },
         geometry: {

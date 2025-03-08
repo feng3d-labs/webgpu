@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, Material, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -232,7 +232,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const texturedCubePipeline: Material = create3DRenderPipeline(
+    const texturedCubePipeline: RenderPipeline = create3DRenderPipeline(
         "NormalMappingRender",
         normalMapWGSL,
         // Position,   normal       uv           tangent      bitangent
@@ -317,7 +317,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
-                        material: texturedCubePipeline,
+                        pipeline: texturedCubePipeline,
                         uniforms: bindingResourcesList[currentSurfaceBindGroup],
                         // *   position  : float32x3
                         // *   normal    : float32x3

@@ -509,7 +509,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // Pass in vertex and index buffers generated from our static skinned grid
             // data at ./gridData.ts
             const renderObject: RenderObject = {
-                material: skinnedGridPipeline,
+                pipeline: skinnedGridPipeline,
                 uniforms: {
                     ...cameraBGCluster,
                     ...generalUniformsBGCLuster,

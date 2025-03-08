@@ -1,4 +1,4 @@
-import { IPassEncoder, RenderPassDescriptor, Material, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { IPassEncoder, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
@@ -114,7 +114,7 @@ const init = async () =>
   `,
     };
 
-    const material: Material = {
+    const pipeline: RenderPipeline  = {
         label: "our hardcoded red triangle pipeline",
         vertex: {
             ...module,
@@ -315,7 +315,7 @@ const init = async () =>
             passEncoders.push({
                 descriptor: renderPassDescriptor,
                 renderObjects: [{
-                    material,
+                    pipeline: pipeline,
                     uniforms: bindGroup,
                     geometry: {
                         primitive: {

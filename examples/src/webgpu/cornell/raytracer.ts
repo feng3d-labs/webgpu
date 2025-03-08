@@ -55,7 +55,7 @@ export default class Raytracer
     this.passEncoder = {
       __type__: "ComputePass",
       computeObjects: [{
-        material: this.material,
+        pipeline: this.material,
         uniforms: {
           ...this.common.uniforms.bindGroup,
           ...this.bindGroup,

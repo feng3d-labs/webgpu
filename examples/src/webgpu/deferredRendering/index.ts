@@ -10,7 +10,7 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { RenderPass, RenderPassDescriptor, Material, Submit, Texture, TextureView, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         cullMode: "back",
     };
 
-    const writeGBuffersPipeline: Material = {
+    const writeGBuffersPipeline: RenderPipeline = {
         vertex: {
             code: vertexWriteGBuffers,
         },
@@ -83,7 +83,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const gBuffersDebugViewPipeline: Material = {
+    const gBuffersDebugViewPipeline: RenderPipeline = {
         vertex: {
             code: vertexTextureQuad,
         },
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         },
     };
-    const deferredRenderPipeline: Material = {
+    const deferredRenderPipeline: RenderPipeline = {
         vertex: {
             code: vertexTextureQuad,
         },
@@ -327,7 +327,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         descriptor: writeGBufferPassDescriptor,
         renderObjects: [
             {
-                material: writeGBuffersPipeline,
+                pipeline: writeGBuffersPipeline,
                 uniforms: {
                     ...sceneUniformBindGroup,
                 },
@@ -344,7 +344,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         __type__: "ComputePass",
         computeObjects: [
             {
-                material: lightUpdateComputePipeline,
+                pipeline: lightUpdateComputePipeline,
                 uniforms: {
                     ...lightsBufferComputeBindGroup,
                 },
@@ -359,7 +359,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         descriptor: textureQuadPassDescriptor,
         renderObjects: [
             {
-                material: gBuffersDebugViewPipeline,
+                pipeline: gBuffersDebugViewPipeline,
                 uniforms: {
                     ...gBufferTexturesBindGroup,
                 },
@@ -375,7 +375,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         descriptor: textureQuadPassDescriptor,
         renderObjects: [
             {
-                material: deferredRenderPipeline,
+                pipeline: deferredRenderPipeline,
                 uniforms: {
                     ...gBufferTexturesBindGroup,
                     ...lightsBufferBindGroup,

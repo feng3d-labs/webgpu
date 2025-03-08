@@ -1,3 +1,5 @@
+import { RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { mesh } from "../../meshes/stanfordDragon";
@@ -5,9 +7,6 @@ import { mesh } from "../../meshes/stanfordDragon";
 import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
-
-import { RenderPassDescriptor, Material, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 const shadowDepthTextureSize = 1024;
 
@@ -54,7 +53,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         cullMode: "back",
     };
 
-    const shadowPipeline: Material = {
+    const shadowPipeline: RenderPipeline = {
         vertex: {
             code: vertexShadowWGSL,
         },
@@ -67,7 +66,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Create a bind group layout which holds the scene uniforms and
     // the texture+sampler for depth. We create it manually because the WebPU
     // implementation doesn't infer this from the shader (yet).
-    const material: Material = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: vertexWGSL,
         },
@@ -219,7 +218,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         descriptor: shadowPassDescriptor,
                         renderObjects: [
                             {
-                                material: shadowPipeline,
+                                pipeline: shadowPipeline,
                                 uniforms: {
                                     ...sceneBindGroupForShadow,
                                     ...modelBindGroup,
@@ -237,7 +236,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                         descriptor: renderPassDescriptor,
                         renderObjects: [
                             {
-                                material,
+                                pipeline: pipeline,
                                 uniforms: {
                                     ...sceneBindGroupForRender,
                                     ...modelBindGroup,

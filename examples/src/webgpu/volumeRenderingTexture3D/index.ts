@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import volumeWGSL from "./volume.wgsl";
 
-import { RenderPassDescriptor, Material, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const gui = new GUI();
@@ -28,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const sampleCount = 4;
 
-    const material: Material = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: volumeWGSL,
         },
@@ -157,7 +157,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
-                        material,
+                        pipeline,
                         uniforms: uniformBindGroup,
                         geometry: {
                             primitive: {

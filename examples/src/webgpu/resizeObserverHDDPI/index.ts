@@ -1,14 +1,14 @@
 import { GUI } from "dat.gui";
 import checkerWGSL from "./checker.wgsl";
 
-import { RenderPassDescriptor, Material, Submit, Uniforms } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Submit, Uniforms } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const webgpu = await new WebGPU().init();
 
-    const material: Material = {
+    const pipeline: RenderPipeline = {
         vertex: { code: checkerWGSL },
         fragment: {
             code: checkerWGSL,
@@ -104,7 +104,7 @@ return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
-                        material,
+                        pipeline: pipeline,
                         uniforms: bindGroup,
                         geometry:{
                             draw: { __type__: "DrawVertex", vertexCount: 3 },

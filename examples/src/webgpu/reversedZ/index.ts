@@ -10,7 +10,7 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { RenderPass, RenderPassDescriptor, Material, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 
 // Two planes close to each other for depth precision test
@@ -87,7 +87,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // depthPrePass is used to render scene to the depth texture
     // this is not needed if you just want to use reversed z to render a scene
-    const depthPrePassRenderPipelineDescriptorBase: Material = {
+    const depthPrePassRenderPipelineDescriptorBase: RenderPipeline = {
         vertex: {
             code: vertexDepthPrePassWGSL,
         },
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // we need the depthCompare to fit the depth buffer mode we are using.
     // this is the same for other passes
-    const depthPrePassPipelines: Material[] = [];
+    const depthPrePassPipelines: RenderPipeline[] = [];
     depthPrePassPipelines[DepthBufferMode.Default] = {
         ...depthPrePassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -113,7 +113,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // precisionPass is to draw precision error as color of depth value stored in depth buffer
     // compared to that directly calcualated in the shader
-    const precisionPassRenderPipelineDescriptorBase: Material = {
+    const precisionPassRenderPipelineDescriptorBase: RenderPipeline = {
         vertex: {
             code: vertexPrecisionErrorPassWGSL,
         },
@@ -122,7 +122,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const precisionPassPipelines: Material[] = [];
+    const precisionPassPipelines: RenderPipeline[] = [];
     precisionPassPipelines[DepthBufferMode.Default] = {
         ...precisionPassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -139,7 +139,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // colorPass is the regular render pass to render the scene
-    const colorPassRenderPipelineDescriptorBase: Material = {
+    const colorPassRenderPipelineDescriptorBase: RenderPipeline = {
         vertex: {
             code: vertexWGSL,
         },
@@ -149,7 +149,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     //
-    const colorPassPipelines: Material[] = [];
+    const colorPassPipelines: RenderPipeline[] = [];
     colorPassPipelines[DepthBufferMode.Default] = {
         ...colorPassRenderPipelineDescriptorBase,
         depthStencil: {
@@ -168,7 +168,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // textureQuadPass is draw a full screen quad of depth texture
     // to see the difference of depth value using reversed z compared to default depth buffer usage
     // 0.0 will be the furthest and 1.0 will be the closest
-    const textureQuadPassPipline: Material = {
+    const textureQuadPassPipline: RenderPipeline = {
         vertex: {
             code: vertexTextureQuadWGSL,
         },
@@ -366,7 +366,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    material: colorPassPipelines[m],
+                    pipeline: colorPassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
                     geometry: {
                         primitive: {
@@ -393,7 +393,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    material: depthPrePassPipelines[m],
+                    pipeline: depthPrePassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
                     geometry: {
                         primitive: {
@@ -415,7 +415,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    material: precisionPassPipelines[m],
+                    pipeline: precisionPassPipelines[m],
                     uniforms: { ...uniformBindGroups[m], ...depthTextureBindGroup },
                     geometry: {
                         primitive: {
@@ -442,7 +442,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    material: depthPrePassPipelines[m],
+                    pipeline: depthPrePassPipelines[m],
                     uniforms: { ...uniformBindGroups[m] },
                     geometry: {
                         primitive: {
@@ -458,7 +458,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
-                    material: textureQuadPassPipline,
+                    pipeline: textureQuadPassPipline,
                     uniforms: { ...depthTextureBindGroup },
                     geometry: {
                         draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },

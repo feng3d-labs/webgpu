@@ -7,7 +7,7 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { RenderPass, RenderPassDescriptor, Material, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
@@ -36,7 +36,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     color: { data: particlesBuffer, format: "float32x4", offset: particleColorOffset, arrayStride: particleInstanceByteSize, stepMode: "instance" },
   };
 
-  const renderPipeline: Material = {
+  const renderPipeline: RenderPipeline = {
     vertex: {
       code: particleWGSL,
     },
@@ -203,7 +203,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         passEncoders.push({
           __type__: "ComputePass",
           computeObjects: [{
-            material: probabilityMapImportLevelPipeline,
+            pipeline: probabilityMapImportLevelPipeline,
             uniforms: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
@@ -214,7 +214,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         passEncoders.push({
           __type__: "ComputePass",
           computeObjects: [{
-            material: probabilityMapExportLevelPipeline,
+            pipeline: probabilityMapExportLevelPipeline,
             uniforms: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
@@ -281,7 +281,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       __type__: "ComputePass",
       computeObjects: [{
-        material: computePipeline,
+        pipeline: computePipeline,
         uniforms: { ...computeBindGroup },
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
       }]
@@ -289,7 +289,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       descriptor: renderPassDescriptor,
       renderObjects: [{
-        material: renderPipeline,
+        pipeline: renderPipeline,
         uniforms: { ...uniformBindGroup },
         geometry: {
           vertices: { ...particlesVertices, ...quadVertices },

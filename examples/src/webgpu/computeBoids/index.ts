@@ -51,7 +51,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     const computeObject0: IGPUComputeObject = {
-        material: {
+        pipeline: {
             compute: { code: updateSpritesWGSL }
         },
         uniforms: {
@@ -91,7 +91,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const renderObject: RenderObject = {
-        material: {
+        pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
         },
         geometry: {

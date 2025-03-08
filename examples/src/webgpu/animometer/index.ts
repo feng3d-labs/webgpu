@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { RenderPass, RenderPassDescriptor, Material, Submit, RenderObject } from "@feng3d/render-api";
+import { RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
 import { IGPURenderBundle, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -33,7 +33,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const vec4Size = 4 * Float32Array.BYTES_PER_ELEMENT;
 
-    const pipelineDesc: Material = {
+    const pipelineDesc: RenderPipeline = {
         vertex: {
             code: animometerWGSL,
         },
@@ -42,7 +42,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const material: Material = {
+    const pipeline: RenderPipeline = {
         ...pipelineDesc,
     };
 
@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ]);
 
     const renderObject: RenderObject = {
-        material,
+        pipeline: pipeline,
         uniforms: {},
         geometry: {
             primitive: {

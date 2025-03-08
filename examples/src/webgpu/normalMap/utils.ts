@@ -1,4 +1,4 @@
-import { DepthStencilState, Material, Texture } from "@feng3d/render-api";
+import { DepthStencilState, RenderPipeline, Texture } from "@feng3d/render-api";
 
 export const create3DRenderPipeline = (
     label: string,
@@ -16,7 +16,7 @@ export const create3DRenderPipeline = (
         };
     }
 
-    const pipelineDescriptor: Material = {
+    const pipelineDescriptor: RenderPipeline = {
         label: `${label}.pipeline`,
         vertex: {
             code: vertexShader,

@@ -4,7 +4,7 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { RenderPass, RenderPassDescriptor, Material, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
 import { IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -86,7 +86,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             next: { bufferView: buffer0 },
         };
 
-        const renderPipeline: Material = {
+        const renderPipeline: RenderPipeline = {
             vertex: {
                 code: vertWGSL,
             },
@@ -121,7 +121,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     __type__: "ComputePass",
                     computeObjects: [{
-                        material: computePipeline,
+                        pipeline: computePipeline,
                         uniforms: i ? bindGroup1 : bindGroup0,
                         workgroups: {
                             workgroupCountX: GameOptions.width / GameOptions.workgroupSize,
@@ -133,7 +133,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     descriptor: renderPass,
                     renderObjects: [
                         {
-                            material: renderPipeline,
+                            pipeline: renderPipeline,
                             uniforms: uniformBindGroup,
                             geometry: {
                                 primitive: {

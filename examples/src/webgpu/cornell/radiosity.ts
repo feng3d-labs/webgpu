@@ -113,7 +113,7 @@ export default class Radiosity
             computeObjects: [
                 // Dispatch the radiosity workgroups
                 {
-                    material: this.radiosityPipeline,
+                    pipeline: this.radiosityPipeline,
                     uniforms: {
                         ...this.common.uniforms.bindGroup,
                         ...this.bindGroup,
@@ -122,7 +122,7 @@ export default class Radiosity
                 },
                 // Then copy the 'accumulation' data to 'lightmap'
                 {
-                    material: this.accumulationToLightmapPipeline,
+                    pipeline: this.accumulationToLightmapPipeline,
                     uniforms: {
                         ...this.common.uniforms.bindGroup,
                         ...this.bindGroup,

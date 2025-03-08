@@ -38,7 +38,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const renderObject: RenderObject = {
-        material: {
+        pipeline: {
             vertex: { code: fullscreenTexturedQuadWGSL }, fragment: { code: sampleExternalTextureWGSL },
         },
         uniforms: {

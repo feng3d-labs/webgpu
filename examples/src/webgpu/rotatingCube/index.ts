@@ -1,4 +1,4 @@
-import { BufferBinding, RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
+import { BufferBinding, RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -34,7 +34,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const renderObject: RenderObject = {
-        material: {
+        pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
         },
         geometry:{

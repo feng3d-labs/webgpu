@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, Sampler, Submit, Texture, RenderObject } from "@feng3d/render-api";
+import { RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -53,7 +53,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const renderObject: RenderObject = {
-        material: {
+        pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleTextureMixColorWGSL },
         },
         uniforms: {

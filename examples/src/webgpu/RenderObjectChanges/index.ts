@@ -10,7 +10,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     const webgpu = await new WebGPU().init(); // 初始化WebGPU
 
     const renderObject: RenderObject = { // 渲染对象
-        material: { // 渲染管线
+        pipeline: { // 渲染管线
             vertex: { // 顶点着色器
                 code: `
                 @vertex
@@ -68,7 +68,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     window.onclick = () =>
     {
         // 修改顶点着色器代码
-        renderObject.material.vertex.code = `
+        renderObject.pipeline.vertex.code = `
                 @vertex
                 fn main(
                     @location(0) position: vec2<f32>,
@@ -80,7 +80,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 `;
 
         // 修改片段着色器代码
-        renderObject.material.fragment.code = `
+        renderObject.pipeline.fragment.code = `
                 @binding(0) @group(0) var<uniform> color : vec4<f32>;
                 @fragment
                 fn main() -> @location(0) vec4f {

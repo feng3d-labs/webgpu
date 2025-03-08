@@ -380,7 +380,7 @@ async function init(
                 passEncoders: [{
                     __type__: "ComputePass",
                     computeObjects: [{
-                        material: atomicToZeroComputePipeline,
+                        pipeline: atomicToZeroComputePipeline,
                         uniforms: computeBGCluster,
                         workgroups: { workgroupCountX: 1 },
                     }]
@@ -739,7 +739,7 @@ async function init(
                 __type__: "ComputePass",
                 timestampQuery: querySet,
                 computeObjects: [{
-                    material: computePipeline,
+                    pipeline: computePipeline,
                     uniforms: computeBGCluster,
                     workgroups: { workgroupCountX: settings["Workgroups Per Step"] },
                 }]

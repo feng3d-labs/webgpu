@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, Material, Submit, Uniforms, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Submit, Uniforms, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return model;
     });
 
-    let litPipeline: Material;
+    let litPipeline: RenderPipeline;
     function rebuildLitPipeline()
     {
         litPipeline = {
@@ -72,7 +72,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
     rebuildLitPipeline();
 
-    const wireframePipeline: Material = {
+    const wireframePipeline: RenderPipeline = {
         label: "wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
@@ -88,7 +88,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const barycentricCoordinatesBasedWireframePipeline: Material = {
+    const barycentricCoordinatesBasedWireframePipeline: RenderPipeline = {
         label: "barycentric coordinates based wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
@@ -318,7 +318,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 if (settings.models)
                 {
                     renderObjects.push({
-                        material: litPipeline,
+                        pipeline: litPipeline,
                         uniforms: litBindGroup,
                         geometry: {
                             primitive: {
@@ -338,7 +338,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // Note: If we're using the line-list based pipeline then we need to
             // multiply the vertex count by 2 since we need to emit 6 vertices
             // for each triangle (3 edges).
-            const [bindGroupNdx, countMult, material, primitive]
+            const [bindGroupNdx, countMult, pipeline, primitive]
                 = settings.barycentricCoordinatesBased
                     ? [1, 1, barycentricCoordinatesBasedWireframePipeline, {
                         topology: "triangle-list",
@@ -349,7 +349,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             objectInfos.forEach(({ wireframeBindGroups, model: { indices } }) =>
             {
                 renderObjects.push({
-                    material,
+                    pipeline,
                     uniforms: wireframeBindGroups[bindGroupNdx],
                     geometry: {
                         primitive,

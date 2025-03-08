@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { RenderPass, RenderPassDescriptor, Material, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
+import { RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
@@ -24,7 +24,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const fullscreenQuadPipeline1: Material = {
+    const fullscreenQuadPipeline1: RenderPipeline = {
         vertex: {
             code: fullscreenTexturedQuadWGSL,
         },
@@ -143,7 +143,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const gpuRenderPassEncoder: RenderPass = {
         descriptor: renderPassDescriptor,
         renderObjects: [{
-            material: fullscreenQuadPipeline1,
+            pipeline: fullscreenQuadPipeline1,
             uniforms: showResultBindGroup1,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
@@ -182,12 +182,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         gpuComputePassEncoder.computeObjects = [
             {
-                material: blurPipeline,
+                pipeline: blurPipeline,
                 uniforms: bindingResources0,
                 workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
             },
             {
-                material: blurPipeline,
+                pipeline: blurPipeline,
                 uniforms: bindingResources1,
                 workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
             },
@@ -197,7 +197,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             gpuComputePassEncoder.computeObjects.push(
                 {
-                    material: blurPipeline,
+                    pipeline: blurPipeline,
                     uniforms: bindingResources2,
                     workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
                 }
@@ -205,7 +205,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             gpuComputePassEncoder.computeObjects.push(
                 {
-                    material: blurPipeline,
+                    pipeline: blurPipeline,
                     uniforms: bindingResources1,
                     workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
                 }

@@ -1,4 +1,4 @@
-import { BufferBinding, IPassEncoder, RenderPass, RenderPassDescriptor, Material, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { BufferBinding, IPassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         targetWidth: undefined,
     };
 
-    const opaquePipeline: Material = {
+    const opaquePipeline: RenderPipeline = {
         vertex: {
             code: opaqueWGSL,
         },
@@ -70,7 +70,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "opaquePipeline",
     };
 
-    const translucentPipeline: Material = {
+    const translucentPipeline: RenderPipeline = {
         vertex: {
             code: translucentWGSL,
         },
@@ -96,7 +96,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "translucentPassDescriptor",
     };
 
-    const compositePipeline: Material = {
+    const compositePipeline: RenderPipeline = {
         vertex: {
             code: compositeWGSL,
         },
@@ -277,7 +277,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const opaquePassEncoder: RenderPass = {
             descriptor: opaquePassDescriptor,
             renderObjects: [{
-                material: opaquePipeline,
+                pipeline: opaquePipeline,
                 uniforms: bindingResources,
                 geometry: {
                     primitive: {
@@ -315,7 +315,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     // Set the scissor to only process a horizontal slice of the frame
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
-                        material: translucentPipeline,
+                        pipeline: translucentPipeline,
                         uniforms: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice],
@@ -341,7 +341,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     // Set the scissor to only process a horizontal slice of the frame
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
-                        material: compositePipeline,
+                        pipeline: compositePipeline,
                         uniforms: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice]

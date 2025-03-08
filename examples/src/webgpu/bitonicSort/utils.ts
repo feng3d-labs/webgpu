@@ -1,4 +1,4 @@
-import { CommandEncoder, RenderPass, RenderPassDescriptor, Material, Uniforms } from "@feng3d/render-api";
+import { CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Uniforms } from "@feng3d/render-api";
 
 const fullscreenTexturedQuad
     = `
@@ -43,21 +43,21 @@ export abstract class Base2DRendererClass
         ...args: unknown[]
     ): void;
     renderPassDescriptor: RenderPassDescriptor;
-    material: Material;
+    material: RenderPipeline;
     bindGroupMap: Record<string, GPUBindGroup>;
     currentBindGroupName: string;
 
     executeRun(
         commandEncoder: CommandEncoder,
         renderPassDescriptor: RenderPassDescriptor,
-        material: Material,
+        pipeline: RenderPipeline,
         bindingResources?: Uniforms
     )
     {
         const passEncoder: RenderPass = {
             descriptor: renderPassDescriptor,
             renderObjects: [{
-                material,
+                pipeline: pipeline,
                 uniforms: bindingResources,
                 geometry: {
                     primitive: {
@@ -76,7 +76,7 @@ export abstract class Base2DRendererClass
         code: string,
     )
     {
-        const renderPipeline: Material = {
+        const renderPipeline: RenderPipeline = {
             label: `${label}.pipeline`,
             vertex: {
                 code: fullscreenTexturedQuad,
