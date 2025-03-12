@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, RenderPipeline, PrimitiveState, RenderObject, RenderPass, ScissorRect, Submit, Uniforms, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, RenderPipeline, PrimitiveState, RenderObject, RenderPass, ScissorRect, Submit, Uniforms, VertexAttributes, Viewport, OcclusionQuery } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -19,7 +19,7 @@ import { getRealGPUBindGroup } from "../const";
 import { IGPUComputeObject } from "../data/IGPUComputeObject";
 import { IGPUComputePass } from "../data/IGPUComputePass";
 import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
-import { IGPUOcclusionQuery } from "../data/IGPUOcclusionQuery";
+import {  } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
 import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
@@ -209,7 +209,7 @@ export class RunWebGPU
         );
     }
 
-    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderOcclusionQueryObject: IGPUOcclusionQuery)
+    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
     {
         passEncoder.beginOcclusionQuery(renderOcclusionQueryObject._queryIndex);
         renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>

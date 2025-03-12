@@ -1,6 +1,6 @@
-import { ITextureDimension } from "@feng3d/render-api";
+import { TextureDimension } from "@feng3d/render-api";
 
-export function getGPUTextureDimension(dimension: ITextureDimension)
+export function getGPUTextureDimension(dimension: TextureDimension)
 {
     const textureDimension: GPUTextureDimension = dimensionMap[dimension];
 

@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { TextureLike, ITextureSize, Texture, TextureDataSource, TextureImageSource, TextureSource } from "@feng3d/render-api";
+import { TextureLike, TextureSize, Texture, TextureDataSource, TextureImageSource, TextureSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
@@ -200,7 +200,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
     watcher.watch(texture, "writeTextures", updateWriteTextures);
 
     // 监听纹理尺寸发生变化
-    const resize = (newValue: ITextureSize, oldValue: ITextureSize) =>
+    const resize = (newValue: TextureSize, oldValue: TextureSize) =>
     {
         if (!!newValue && !!oldValue)
         {

@@ -1,6 +1,6 @@
-import { BufferBinding, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
+import { BufferBinding, OcclusionQuery, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUOcclusionQuery, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
@@ -157,7 +157,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return ro;
     });
 
-    const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.map((ro) =>
+    const occlusionQueryObjects: OcclusionQuery[] = renderObjects.map((ro) =>
         ({ __type__: "OcclusionQuery", renderObjects: [ro] }));
 
     const renderPass: RenderPass = {

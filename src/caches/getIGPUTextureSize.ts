@@ -1,4 +1,4 @@
-import { TextureLike, ITextureSize, TextureImageSource } from "@feng3d/render-api";
+import { TextureLike, TextureSize, TextureImageSource } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 
 /**
@@ -14,13 +14,13 @@ export function getIGPUTextureLikeSize(texture: TextureLike)
         const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
         console.assert(!!element, `在 document 上没有找到 canvasId 为 ${(texture as IGPUCanvasTexture).context.canvasId} 的画布。`);
 
-        return [element.width, element.height, 1] as ITextureSize;
+        return [element.width, element.height, 1] as TextureSize;
     }
 
     return texture.size;
 }
 
-export function getIGPUTextureSourceSize(source?: TextureImageSource[]): ITextureSize
+export function getIGPUTextureSourceSize(source?: TextureImageSource[]): TextureSize
 {
     if (!source) return undefined;
 

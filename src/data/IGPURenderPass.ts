@@ -1,5 +1,5 @@
 import { RenderPass, RenderPassDescriptor } from "@feng3d/render-api";
-import { IGPUOcclusionQuery } from "./IGPUOcclusionQuery";
+import {  } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
 import { IGPUTimestampQuery } from "./IGPUTimestampQuery";
 
@@ -19,7 +19,7 @@ declare module "@feng3d/render-api"
          *
          * 当提交WebGPU后自动获取结果后填充该属性。
          */
-        occlusionQueryResults?: IGPUOcclusionQuery[];
+        occlusionQueryResults?: OcclusionQuery[];
 
         /**
          * 查询通道运行消耗时长（单位为纳秒）。
@@ -32,6 +32,5 @@ declare module "@feng3d/render-api"
     export interface IRenderPassObjectMap
     {
         IGPURenderBundle: IGPURenderBundle;
-        IGPUOcclusionQuery: IGPUOcclusionQuery;
     }
 }
