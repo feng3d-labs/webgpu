@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { BlendComponent, IRenderPassObject, RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, TextureView, Uniforms } from "@feng3d/render-api";
-import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { BlendComponent, CanvasContext, IRenderPassObject, RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, TextureView, Uniforms } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 declare module "@feng3d/render-api"
 {
@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const context: IGPUCanvasContext = { canvasId: canvas.id, configuration: {} };
+    const context: CanvasContext = { canvasId: canvas.id, configuration: {} };
     const canvasTexture: TextureView = { texture: { context } };
 
     // Get a WebGPU context from the canvas and configure it

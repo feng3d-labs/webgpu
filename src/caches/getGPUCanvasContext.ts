@@ -1,7 +1,8 @@
 import { watcher } from "@feng3d/watcher";
-import { IGPUCanvasContext } from "../data/IGPUCanvasContext";
+import "../data/IGPUCanvasContext";
+import { CanvasContext } from "@feng3d/render-api";
 
-export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContext)
+export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
 {
     let gpuCanvasContext = canvasContextMap[context.canvasId];
     if (gpuCanvasContext) return gpuCanvasContext;

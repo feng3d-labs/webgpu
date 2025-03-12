@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { RenderPassDescriptor, RenderPipeline, Texture, VertexAttributes } from "@feng3d/render-api";
-import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, RenderPassDescriptor, RenderPipeline, Texture, VertexAttributes } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
@@ -16,7 +16,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const context: IGPUCanvasContext = {
+    const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: {
             // The canvas alphaMode defaults to 'opaque', use 'premultiplied' for transparency.

@@ -1,5 +1,5 @@
-import { IPassEncoder, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, IPassEncoder, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -164,7 +164,7 @@ const init = async () =>
     });
 
     type CanvasInfo = {
-        context: IGPUCanvasContext;
+        context: CanvasContext;
         clearValue: [number, number, number, number];
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
@@ -201,7 +201,7 @@ const init = async () =>
 
         // Get a WebGPU context and configure it.
         canvas.id = canvas.id || `gpuCanvas___${globalThis["gpuCanvasAutoID"] = ~~globalThis["gpuCanvasAutoID"] + 1}`;
-        const context: IGPUCanvasContext = { canvasId: canvas.id };
+        const context: CanvasContext = { canvasId: canvas.id };
 
         // Make a uniform buffer and type array views
         // for our uniforms.

@@ -1,5 +1,5 @@
 import { DrawIndexed, DrawVertex, Viewport } from "@feng3d/render-api";
-import { } from "./IGPUBindingResources";
+import { } from "./polyfills/Uniforms";
 
 declare module "@feng3d/render-api"
 {

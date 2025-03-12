@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
-import { getOffscreenCanvasId, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
+import { getOffscreenCanvasId, WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
@@ -70,7 +70,7 @@ self.addEventListener("message", (ev) =>
 async function init(canvas: OffscreenCanvas)
 {
     const webgpu = await new WebGPU().init();
-    const context: IGPUCanvasContext = { canvasId: getOffscreenCanvasId(canvas) };
+    const context: CanvasContext = { canvasId: getOffscreenCanvasId(canvas) };
 
     // Create a vertex buffer from the cube data.
     const verticesBuffer: VertexAttributes = {

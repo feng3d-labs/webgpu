@@ -1,15 +1,17 @@
 import { CanvasContext } from "@feng3d/render-api";
-import { IGPUCanvasConfiguration } from "./IGPUCanvasConfiguration";
+import { CanvasConfiguration } from "./GPUCanvasConfiguration";
 
-/**
- * @see GPUCanvasContext
- * @see HTMLCanvasElement.getContext
- * @see GPUCanvasContext.configure
- */
-export interface IGPUCanvasContext extends CanvasContext
+declare module "@feng3d/render-api"
 {
     /**
-     * 画布配置。默认有引擎自动设置。
+     * @see GPUCanvasContext
+     * @see GPUCanvasContext.configure
      */
-    configuration?: IGPUCanvasConfiguration;
+    export interface CanvasContext
+    {
+        /**
+         * 画布配置。默认有引擎自动设置。
+         */
+        configuration?: CanvasConfiguration;
+    }
 }

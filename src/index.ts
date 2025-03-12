@@ -1,7 +1,6 @@
 export * from "./WebGPU";
 
-export * from "./data/IGPUBindingResources";
-export * from "./data/IGPUBuffer";
+export * from "./data/polyfills/Buffer";
 export * from "./data/IGPUCanvasContext";
 export * from "./data/IGPUCanvasTexture";
 export * from "./data/IGPUCommandEncoder";
@@ -21,6 +20,7 @@ export * from "./data/IGPURenderPipeline";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IGPUTimestampQuery";
+export * from "./data/polyfills/Uniforms";
 
 export * from "./caches/getIGPUBuffer";
 export * from "./types/VertexFormat";

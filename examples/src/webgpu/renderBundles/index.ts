@@ -1,5 +1,5 @@
-import { IRenderPassObject, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { IGPUCanvasContext, IGPURenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { CanvasContext, IRenderPassObject, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { IGPURenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import Stats from "stats-js";
@@ -37,7 +37,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
     const webgpu = await new WebGPU().init();
-    const context: IGPUCanvasContext = {
+    const context: CanvasContext = {
         canvasId: canvas.id,
     };
 

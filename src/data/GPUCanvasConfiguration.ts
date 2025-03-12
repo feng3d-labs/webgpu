@@ -4,7 +4,7 @@
  * @see GPUCanvasConfiguration
  * @see GPUCanvasContext.configure
  */
-export interface IGPUCanvasConfiguration
+export interface CanvasConfiguration
 {
     /**
      * The usage that textures returned by {@link GPUCanvasContext#getCurrentTexture} will have.

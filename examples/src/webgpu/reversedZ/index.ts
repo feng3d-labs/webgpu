@@ -10,8 +10,8 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const context: IGPUCanvasContext = { canvasId: canvas.id };
+    const context: CanvasContext = { canvasId: canvas.id };
 
     const webgpu = await new WebGPU().init();
 

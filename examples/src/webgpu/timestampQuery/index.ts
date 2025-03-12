@@ -1,5 +1,5 @@
-import { RenderObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { IGPUCanvasContext, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -49,7 +49,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
     //
-    const context: IGPUCanvasContext = { canvasId: canvas.id };
+    const context: CanvasContext = { canvasId: canvas.id };
 
     const perfDisplay = document.querySelector("#info pre");
 

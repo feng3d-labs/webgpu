@@ -1,5 +1,5 @@
-import { BufferBinding, CopyTextureToTexture, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
-import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { BufferBinding, CanvasContext, CopyTextureToTexture, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -55,7 +55,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         return modelViewProjectionMatrix as Float32Array;
     }
 
-    const context: IGPUCanvasContext = {
+    const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: {
             usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT

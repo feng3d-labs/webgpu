@@ -1,5 +1,5 @@
-import { BufferBinding, IPassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { BufferBinding, CanvasContext, IPassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const context: IGPUCanvasContext = {
+    const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: { alphaMode: "opaque" }
     };

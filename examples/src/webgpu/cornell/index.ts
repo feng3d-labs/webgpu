@@ -7,8 +7,8 @@ import Raytracer from "./raytracer";
 import Scene from "./scene";
 import Tonemapper from "./tonemapper";
 
-import { CommandEncoder, Submit, Texture } from "@feng3d/render-api";
-import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, CommandEncoder, Submit, Texture } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -16,7 +16,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const requiredFeatures: GPUFeatureName[]
         = presentationFormat === "bgra8unorm" ? ["bgra8unorm-storage"] : [];
 
-    const context: IGPUCanvasContext = {
+    const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: {
             format: "rgba16float",
