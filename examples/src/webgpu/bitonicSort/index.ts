@@ -1,6 +1,6 @@
 import { Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit, Uniforms } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, GPUComputePass, GPU_ComputePipeline, GPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import Stats from "stats.js";
 
@@ -103,7 +103,7 @@ async function init(
     const maxInvocationsX = webgpu.device.limits.maxComputeWorkgroupSizeX;
 
     // Handle timestamp query stuff
-    const querySet: IGPUTimestampQuery = {};
+    const querySet: GPUTimestampQuery = {};
     watcher.watch(querySet, "elapsedNs", () =>
     {
         // Calculate new step, sort, and average sort times
@@ -291,14 +291,14 @@ async function init(
         uniforms: computeUniformsBuffer,
     };
 
-    let computePipeline: IGPUComputePipeline = {
+    let computePipeline: GPU_ComputePipeline = {
         compute: {
             code: NaiveBitonicCompute(settings["Workgroup Size"]),
         },
     };
 
     // Simple pipeline that zeros out an atomic value at group 0 binding 3
-    const atomicToZeroComputePipeline: IGPUComputePipeline = {
+    const atomicToZeroComputePipeline: GPU_ComputePipeline = {
         compute: {
             code: atomicToZero,
         },
@@ -735,7 +735,7 @@ async function init(
             && highestBlockHeight < settings["Total Elements"] * 2
         )
         {
-            const computePassEncoder: IGPUComputePass = {
+            const computePassEncoder: GPUComputePass = {
                 __type__: "ComputePass",
                 timestampQuery: querySet,
                 computeObjects: [{

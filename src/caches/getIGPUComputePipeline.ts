@@ -1,7 +1,7 @@
 import { FunctionInfo } from "wgsl_reflect";
+import { GPU_ComputePipeline } from "../data/GPU_ComputePipeline";
+import { GPUComputeStage } from "../data/IGPUComputeStage";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
-import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
-import { IGPUComputeStage } from "../data/IGPUComputeStage";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。
@@ -10,7 +10,7 @@ import { IGPUComputeStage } from "../data/IGPUComputeStage";
  * @param computePipeline 计算管线描述。
  * @returns 完整的计算管线描述。
  */
-export function getIGPUComputePipeline(computePipeline: IGPUComputePipeline): IGPUComputePipeline
+export function getIGPUComputePipeline(computePipeline: GPU_ComputePipeline): GPU_ComputePipeline
 {
     let gpuComputePipeline = computePipelineMap.get(computePipeline);
     if (gpuComputePipeline) return gpuComputePipeline;
@@ -27,7 +27,7 @@ export function getIGPUComputePipeline(computePipeline: IGPUComputePipeline): IG
     return gpuComputePipeline;
 }
 
-const computePipelineMap = new Map<IGPUComputePipeline, IGPUComputePipeline>();
+const computePipelineMap = new Map<GPU_ComputePipeline, GPU_ComputePipeline>();
 
 /**
 * 获取计算阶段完整描述。
@@ -35,7 +35,7 @@ const computePipelineMap = new Map<IGPUComputePipeline, IGPUComputePipeline>();
 * @param computeStage 计算阶段描述。
 * @returns 计算阶段完整描述。
 */
-function getIGPUComputeStage(computeStage: IGPUComputeStage)
+function getIGPUComputeStage(computeStage: GPUComputeStage)
 {
     const reflect = getWGSLReflectInfo(computeStage.code);
     let compute: FunctionInfo;

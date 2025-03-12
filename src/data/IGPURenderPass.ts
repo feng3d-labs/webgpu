@@ -1,7 +1,7 @@
 import { RenderPass, RenderPassDescriptor } from "@feng3d/render-api";
 import {  } from "./IGPUOcclusionQuery";
 import { IGPURenderBundle } from "./IGPURenderBundle";
-import { IGPUTimestampQuery } from "./IGPUTimestampQuery";
+import { GPUTimestampQuery } from "./IGPUTimestampQuery";
 
 declare module "@feng3d/render-api"
 {
@@ -26,7 +26,7 @@ declare module "@feng3d/render-api"
          *
          * 如果需要查询通道运行消耗时长，需要为该属性赋值，如 `pass.timestampQuery = {};`。WebGPU渲染完成后引擎自动填充结果到属性`elapsedNs`。
          */
-        timestampQuery?: IGPUTimestampQuery;
+        timestampQuery?: GPUTimestampQuery;
     }
 
     export interface RenderPassObjectMap

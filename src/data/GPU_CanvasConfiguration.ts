@@ -4,7 +4,7 @@
  * @see GPUCanvasConfiguration
  * @see GPUCanvasContext.configure
  */
-export interface CanvasConfiguration
+export interface GPU_CanvasConfiguration
 {
     /**
      * The usage that textures returned by {@link GPUCanvasContext#getCurrentTexture} will have.
@@ -35,7 +35,7 @@ export interface CanvasConfiguration
      * The formats that views created from textures returned by
      * {@link GPUCanvasContext#getCurrentTexture} may use.
      */
-    viewFormats?: Iterable<GPUTextureFormat>;
+    viewFormats?: GPUTextureFormat[];
     /**
      * The color space that values written into textures returned by
      * {@link GPUCanvasContext#getCurrentTexture} should be displayed with.

@@ -1,5 +1,5 @@
 import { CommandEncoder, IPassEncoder, Texture, Uniforms } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUComputePipeline } from "@feng3d/webgpu";
+import { getIGPUBuffer, GPU_ComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
@@ -37,8 +37,8 @@ export default class Radiosity
 
     private readonly common: Common;
     private readonly scene: Scene;
-    private readonly radiosityPipeline: IGPUComputePipeline;
-    private readonly accumulationToLightmapPipeline: IGPUComputePipeline;
+    private readonly radiosityPipeline: GPU_ComputePipeline;
+    private readonly accumulationToLightmapPipeline: GPU_ComputePipeline;
     private readonly bindGroup: Uniforms;
     private readonly accumulationBuffer: Uint8Array;
     private readonly uniformBuffer: Uint8Array;

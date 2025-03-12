@@ -1,12 +1,8 @@
 export * from "./WebGPU";
 
-export * from "./data/polyfills/Buffer";
-export * from "./data/IGPUCanvasContext";
-export * from "./data/IGPUCanvasTexture";
-export * from "./data/IGPUCommandEncoder";
-export * from "./data/IGPUComputeObject";
-export * from "./data/IGPUComputePass";
-export * from "./data/IGPUComputePipeline";
+export * from "./data/GPU_ComputePipeline";
+export * from "./data/GPUComputeObject";
+export * from "./data/GPUComputePass";
 export * from "./data/IGPUOcclusionQuery";
 export * from "./data/IGPUPrimitiveState";
 export * from "./data/IGPUReadPixels";
@@ -20,6 +16,9 @@ export * from "./data/IGPURenderPipeline";
 export * from "./data/IGPUTexture";
 export * from "./data/IGPUTextureView";
 export * from "./data/IGPUTimestampQuery";
+export * from "./data/polyfills/Buffer";
+export * from "./data/polyfills/CanvasContext";
+export * from "./data/polyfills/CommandEncoder";
 export * from "./data/polyfills/Uniforms";
 
 export * from "./caches/getIGPUBuffer";

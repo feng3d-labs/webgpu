@@ -3,7 +3,7 @@ import { GUI } from "dat.gui";
 import atmosphericScatteringSkyWGSL from "./atmosphericScatteringSky.wgsl";
 
 import { CanvasContext, Texture } from "@feng3d/render-api";
-import { IGPUComputeObject, WebGPU } from "@feng3d/webgpu";
+import { GPUComputeObject, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -44,7 +44,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         skyColor: [1, 1, 1, 1],
     };
 
-    const computeObject0: IGPUComputeObject = {
+    const computeObject0: GPUComputeObject = {
         pipeline: {
             compute: { code: atmosphericScatteringSkyWGSL }
         },

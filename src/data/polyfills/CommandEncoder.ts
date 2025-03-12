@@ -1,10 +1,10 @@
 import { } from "@feng3d/render-api";
-import { IGPUComputePass } from "./IGPUComputePass";
+import { GPUComputePass } from "../GPUComputePass";
 
 declare module "@feng3d/render-api"
 {
     export interface PassEncoderMap
     {
-        IGPUComputePass: IGPUComputePass;
+        GPUComputePass: GPUComputePass;
     }
 }

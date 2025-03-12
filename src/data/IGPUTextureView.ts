@@ -1,5 +1,4 @@
-import { TextureLike } from "@feng3d/render-api";
-import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
+import { CanvasTexture, TextureLike } from "@feng3d/render-api";
 
 declare module "@feng3d/render-api"
 {
@@ -8,7 +7,7 @@ declare module "@feng3d/render-api"
         /**
          * 画布纹理。
          */
-        IGPUCanvasTexture: IGPUCanvasTexture;
+        CanvasTexture: CanvasTexture;
     }
 
     /**

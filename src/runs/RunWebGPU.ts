@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, RenderPipeline, PrimitiveState, RenderObject, RenderPass, ScissorRect, Submit, Uniforms, VertexAttributes, Viewport, OcclusionQuery } from "@feng3d/render-api";
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPipeline, ScissorRect, Submit, Uniforms, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -16,12 +16,12 @@ import { IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
-import { IGPUComputeObject } from "../data/IGPUComputeObject";
-import { IGPUComputePass } from "../data/IGPUComputePass";
-import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
-import {  } from "../data/IGPUOcclusionQuery";
+import { GPUComputeObject } from "../data/GPUComputeObject";
+import { GPUComputePass } from "../data/GPUComputePass";
+import { GPU_ComputePipeline } from "../data/GPU_ComputePipeline";
+import { } from "../data/IGPUOcclusionQuery";
 import { IGPURenderBundle } from "../data/IGPURenderBundle";
-import { IGPUWorkgroups } from "../data/IGPUWorkgroups";
+import { GPUWorkgroups } from "../data/IGPUWorkgroups";
 import { GPUQueue_submit } from "../eventnames";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
@@ -143,7 +143,7 @@ export class RunWebGPU
      * @param commandEncoder 命令编码器。
      * @param computePass 计算通道。
      */
-    protected runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: IGPUComputePass)
+    protected runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: GPUComputePass)
     {
         const descriptor: GPUComputePassDescriptor = {};
         // 处理时间戳查询
@@ -160,7 +160,7 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, computePass);
     }
 
-    protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: IGPUComputeObject[])
+    protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: GPUComputeObject[])
     {
         computeObjects.forEach((computeObject) =>
         {
@@ -256,7 +256,7 @@ export class RunWebGPU
      * @param passEncoder 计算通道编码器。
      * @param computeObject 计算对象。
      */
-    protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: IGPUComputeObject)
+    protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: GPUComputeObject)
     {
         const { pipeline: material, uniforms: bindingResources, workgroups } = computeObject;
 
@@ -269,7 +269,7 @@ export class RunWebGPU
         this.runWorkgroups(passEncoder, workgroups);
     }
 
-    protected runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, material: IGPUComputePipeline)
+    protected runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, material: GPU_ComputePipeline)
     {
         const gpuComputePipeline = getIGPUComputePipeline(material);
 
@@ -283,7 +283,7 @@ export class RunWebGPU
      * @param passEncoder 计算通道编码器。
      * @param workgroups 计算工作组。
      */
-    protected runWorkgroups(passEncoder: GPUComputePassEncoder, workgroups?: IGPUWorkgroups)
+    protected runWorkgroups(passEncoder: GPUComputePassEncoder, workgroups?: GPUWorkgroups)
     {
         const { workgroupCountX, workgroupCountY, workgroupCountZ } = workgroups;
         passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);

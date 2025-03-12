@@ -1,8 +1,7 @@
 import { anyEmitter } from "@feng3d/event";
-import { BufferBinding, Sampler, TextureView } from "@feng3d/render-api";
+import { BufferBinding, CanvasTexture, Sampler, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
-import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUExternalTexture } from "../data/IGPUExternalTexture";
 import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
 import { IGPUBindGroupDescriptor } from "../internal/IGPUBindGroupDescriptor";
@@ -60,7 +59,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
                 anyEmitter.once(entry.resource, GPUTextureView_destroy, onResourceChanged);
             };
 
-            if (((v.resource as TextureView).texture as IGPUCanvasTexture).context)
+            if (((v.resource as TextureView).texture as CanvasTexture).context)
             {
                 awaysUpdateFuncs.push(updateResource);
             }

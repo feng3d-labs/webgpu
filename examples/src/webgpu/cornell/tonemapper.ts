@@ -1,5 +1,5 @@
-import { CommandEncoder, IPassEncoder, Texture, Uniforms } from "@feng3d/render-api";
-import { IGPUCanvasTexture, IGPUComputePipeline } from "@feng3d/webgpu";
+import { CanvasTexture, CommandEncoder, IPassEncoder, Texture, Uniforms } from "@feng3d/render-api";
+import { GPU_ComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
 import tonemapperWGSL from "./tonemapper.wgsl";
@@ -11,7 +11,7 @@ import tonemapperWGSL from "./tonemapper.wgsl";
 export default class Tonemapper
 {
     private readonly bindGroup: Uniforms;
-    private readonly material: IGPUComputePipeline;
+    private readonly material: GPU_ComputePipeline;
     private readonly width: number;
     private readonly height: number;
     private readonly kWorkgroupSizeX = 16;
@@ -20,7 +20,7 @@ export default class Tonemapper
     constructor(
         common: Common,
         input: Texture,
-        output: IGPUCanvasTexture,
+        output: CanvasTexture,
     )
     {
         const inputSize = input.size;

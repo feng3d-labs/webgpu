@@ -1,7 +1,7 @@
 /**
  * 查询通道运行消耗时长（单位为纳秒）。
  */
-export interface IGPUTimestampQuery
+export interface GPUTimestampQuery
 {
     /**
      * （单位为纳秒）

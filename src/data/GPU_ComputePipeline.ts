@@ -1,4 +1,4 @@
-import { IGPUComputeStage } from "./IGPUComputeStage";
+import { GPUComputeStage } from "./IGPUComputeStage";
 
 /**
  * GPU计算管线。
@@ -6,7 +6,7 @@ import { IGPUComputeStage } from "./IGPUComputeStage";
  * {@link GPUDevice.createComputePipeline}
  * {@link GPUComputePipelineDescriptor}
  */
-export interface IGPUComputePipeline
+export interface GPU_ComputePipeline
 {
     /**
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
@@ -16,5 +16,5 @@ export interface IGPUComputePipeline
     /**
      * 计算程序。
      */
-    readonly compute: IGPUComputeStage;
+    readonly compute: GPUComputeStage;
 }

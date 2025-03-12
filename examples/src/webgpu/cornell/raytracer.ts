@@ -1,5 +1,5 @@
 import { CommandEncoder, IPassEncoder, Texture, Uniforms } from "@feng3d/render-api";
-import { IGPUComputePipeline } from "@feng3d/webgpu";
+import { GPU_ComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -12,7 +12,7 @@ export default class Raytracer
 {
   private readonly common: Common;
   private readonly framebuffer: Texture;
-  private readonly material: IGPUComputePipeline;
+  private readonly material: GPU_ComputePipeline;
   private readonly bindGroup: Uniforms;
 
   private readonly kWorkgroupSizeX = 16;

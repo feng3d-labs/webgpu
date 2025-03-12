@@ -1,7 +1,6 @@
 import { anyEmitter } from "@feng3d/event";
-import { RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
+import { CanvasTexture, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUTexture_resize } from "../eventnames";
 import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
 import { NGPURenderPassColorAttachment } from "../internal/internal";
@@ -72,7 +71,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: Render
         updateView();
 
         //
-        if ((v.view.texture as IGPUCanvasTexture).context)
+        if ((v.view.texture as CanvasTexture).context)
         {
             _updates.push(updateView);
         }
@@ -87,7 +86,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: Render
             };
             updateResolveTarget();
             //
-            if ((v.resolveTarget?.texture as IGPUCanvasTexture)?.context)
+            if ((v.resolveTarget?.texture as CanvasTexture)?.context)
             {
                 _updates.push(updateResolveTarget);
             }
@@ -174,7 +173,7 @@ function setIGPUTextureSize(texture: TextureLike, attachmentSize: { width: numbe
 {
     if ("context" in texture)
     {
-        texture = texture as IGPUCanvasTexture;
+        texture = texture as CanvasTexture;
         const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
         if (element.width !== attachmentSize.width) element.width = attachmentSize.width;
         if (element.height !== attachmentSize.height) element.height = attachmentSize.height;

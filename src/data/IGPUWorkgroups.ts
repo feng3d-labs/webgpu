@@ -3,7 +3,7 @@
  *
  * {@link GPUComputePassEncoder.dispatchWorkgroups}
  */
-export interface IGPUWorkgroups
+export interface GPUWorkgroups
 {
     /**
      * X的维度工作组数量。

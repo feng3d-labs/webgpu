@@ -1,7 +1,7 @@
 /**
  * GPU计算阶段。
  */
-export interface IGPUComputeStage
+export interface GPUComputeStage
 {
     /**
      * 着色器源码，将由 {@link GPUDevice.createShaderModule} 生成 {@link GPUShaderModule} 。

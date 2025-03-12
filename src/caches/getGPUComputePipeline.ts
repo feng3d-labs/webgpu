@@ -1,11 +1,11 @@
-import { IGPUComputePipeline } from "../data/IGPUComputePipeline";
+import { GPU_ComputePipeline } from "../data/GPU_ComputePipeline";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 
-export function getGPUComputePipeline(device: GPUDevice, computePipeline: IGPUComputePipeline)
+export function getGPUComputePipeline(device: GPUDevice, computePipeline: GPU_ComputePipeline)
 {
-    const computePipelineMap: WeakMap<IGPUComputePipeline, GPUComputePipeline> = device["_computePipelineMap"] = device["_computePipelineMap"] || new WeakMap();
+    const computePipelineMap: WeakMap<GPU_ComputePipeline, GPUComputePipeline> = device["_computePipelineMap"] = device["_computePipelineMap"] || new WeakMap();
 
     let pipeline = computePipelineMap.get(computePipeline);
     if (pipeline) return pipeline;

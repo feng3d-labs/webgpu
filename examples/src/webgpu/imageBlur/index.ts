@@ -4,7 +4,7 @@ import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgs
 import blurWGSL from "./blur.wgsl";
 
 import { RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, GPUComputePass, GPU_ComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -18,7 +18,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const blurPipeline: IGPUComputePipeline = {
+    const blurPipeline: GPU_ComputePipeline = {
         compute: {
             code: blurWGSL,
         },
@@ -151,7 +151,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }],
     };
 
-    const gpuComputePassEncoder: IGPUComputePass = { __type__: "ComputePass", computeObjects: [] };
+    const gpuComputePassEncoder: GPUComputePass = { __type__: "ComputePass", computeObjects: [] };
     const submit: Submit = {
         commandEncoders: [
             {
