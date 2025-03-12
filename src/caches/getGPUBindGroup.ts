@@ -1,10 +1,9 @@
 import { anyEmitter } from "@feng3d/event";
-import { BufferBinding, CanvasTexture, Sampler, TextureView } from "@feng3d/render-api";
+import { BufferBinding, CanvasTexture, Sampler, TextureView, UniformType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
-import { IGPUExternalTexture } from "../data/IGPUExternalTexture";
+import { VideoTexture } from "../data/VideoTexture";
 import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
-import { IGPUBindGroupDescriptor } from "../internal/IGPUBindGroupDescriptor";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 import { getGPUBufferBinding } from "./getGPUBufferBinding";
 import { getGPUSampler } from "./getGPUSampler";
@@ -64,11 +63,11 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
                 awaysUpdateFuncs.push(updateResource);
             }
         }
-        else if ((v.resource as IGPUExternalTexture).source)
+        else if ((v.resource as VideoTexture).source)
         {
             updateResource = () =>
             {
-                entry.resource = device.importExternalTexture(v.resource as IGPUExternalTexture);
+                entry.resource = device.importExternalTexture(v.resource as VideoTexture);
             };
 
             awaysUpdateFuncs.push(updateResource);
@@ -123,3 +122,48 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
 
     return gBindGroup;
 }
+
+/**
+ * GPU 绑定组。
+ *
+ * @see GPUBindGroupDescriptor
+ * @see GPUDevice.createBindGroup
+ */
+export interface IGPUBindGroupDescriptor
+{
+    /**
+     * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
+     */
+    label?: string;
+
+    /**
+     * The {@link IGPUBindGroupLayoutDescriptor} the entries of this bind group will conform to.
+     */
+    layout: GPUBindGroupLayoutDescriptor;
+
+    /**
+     * A list of entries describing the resources to expose to the shader for each binding
+     * described by the {@link GPUBindGroupDescriptor#layout}.
+     *
+     * {@link GPUBindGroupEntry}
+     */
+    entries: IGPUBindGroupEntry[];
+}
+
+/**
+ * 绑定资源入口，指定资源绑定的位置。
+ *
+ * @see GPUBindGroupEntry
+ */
+export interface IGPUBindGroupEntry
+{
+    binding: GPUIndex32;
+
+    /**
+     * The resource to bind, which may be a {@link GPUSampler}, {@link GPUTextureView},
+     * {@link GPUExternalTexture}, or {@link GPUBufferBinding}.
+     */
+    resource: BindingResource;
+}
+
+export type BindingResource = Sampler | TextureView | VideoTexture | UniformType;

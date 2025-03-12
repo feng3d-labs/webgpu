@@ -2,13 +2,12 @@ import { watcher } from "@feng3d/watcher";
 
 import { BufferBinding, Uniforms } from "@feng3d/render-api";
 import { getIGPUPipelineLayout, getIGPUShaderKey, IGPUShader } from "../caches/getIGPUPipelineLayout";
-import { IGPUBindGroupEntry } from "../internal/IGPUBindGroupDescriptor";
 import { IGPUBindGroupLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
-import { IGPUSetBindGroup } from "../internal/IGPUSetBindGroup";
 import { ChainMap } from "../utils/ChainMap";
 import { getBufferBindingInfo, IBufferBindingInfo } from "../utils/getBufferBindingInfo";
 import { updateBufferBinding } from "../utils/updateBufferBinding";
 import { getIGPUBuffer } from "./getIGPUBuffer";
+import { IGPUBindGroupDescriptor, IGPUBindGroupEntry } from "./getGPUBindGroup";
 
 export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: Uniforms)
 {
@@ -84,4 +83,24 @@ function getIGPUSetBindGroup(bindGroupLayout: IGPUBindGroupLayoutDescriptor, bin
     });
 
     return setBindGroup;
+}
+
+/**
+ * GPU渲染时使用的绑定组。
+ *
+ * {@link GPUBindingCommandsMixin.setBindGroup}
+ */
+interface IGPUSetBindGroup
+{
+    /**
+     * GPU绑定组。
+     *
+     * Bind group to use for subsequent render or compute commands.
+     */
+    bindGroup: IGPUBindGroupDescriptor;
+
+    /**
+     * Array containing buffer offsets in bytes for each entry in `bindGroup` marked as {@link GPUBindGroupLayoutEntry#buffer}.{@link GPUBufferBindingLayout#hasDynamicOffset}.-->
+     */
+    dynamicOffsets?: number[];
 }

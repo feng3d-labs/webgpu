@@ -1,6 +1,6 @@
 import { BlendState,DepthStencilState } from "@feng3d/render-api";
 
-import { IGPUMultisampleState } from "./IGPUMultisampleState";
+import { MultisampleState } from "../MultisampleState";
 
 declare module "@feng3d/render-api"
 {
@@ -14,7 +14,7 @@ declare module "@feng3d/render-api"
         /**
          * 多重采样阶段描述。
          */
-        readonly multisample?: IGPUMultisampleState;
+        readonly multisample?: MultisampleState;
     }
 
     /**

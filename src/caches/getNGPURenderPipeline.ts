@@ -3,7 +3,7 @@ import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { gPartial } from "@feng3d/polyfill";
-import { IGPUMultisampleState } from "../data/IGPUMultisampleState";
+import { MultisampleState } from "../data/MultisampleState";
 import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
 import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { NGPUFragmentState } from "../internal/NGPUFragmentState";
@@ -157,7 +157,7 @@ function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndex
     return gpuPrimitive;
 }
 
-function getGPUMultisampleState(multisampleState?: IGPUMultisampleState, sampleCount?: 4)
+function getGPUMultisampleState(multisampleState?: MultisampleState, sampleCount?: 4)
 {
     if (!sampleCount) return undefined;
 

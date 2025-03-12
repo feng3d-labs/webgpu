@@ -1,5 +1,5 @@
 import { Sampler } from "@feng3d/render-api";
-import { IGPUExternalTexture } from "../IGPUExternalTexture";
+import { VideoTexture } from "../VideoTexture";
 
 declare module "@feng3d/render-api"
 {
@@ -7,6 +7,6 @@ declare module "@feng3d/render-api"
     {
         Sampler: Sampler;
         TextureView: TextureView;
-        IGPUExternalTexture: IGPUExternalTexture;
+        VideoTexture: VideoTexture;
     }
 }

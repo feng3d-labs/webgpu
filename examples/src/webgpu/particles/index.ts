@@ -8,7 +8,7 @@ import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
 import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, GPUComputePass, GPU_ComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { ComputePipeline, getIGPUBuffer, ComputePass, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -145,12 +145,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   // probabilities up to the top 1x1 mip level.
   // ////////////////////////////////////////////////////////////////////////////
   {
-    const probabilityMapImportLevelPipeline: GPU_ComputePipeline = {
+    const probabilityMapImportLevelPipeline: ComputePipeline = {
       compute: {
         code: importLevelWGSL,
       },
     };
-    const probabilityMapExportLevelPipeline: GPU_ComputePipeline = {
+    const probabilityMapExportLevelPipeline: ComputePipeline = {
       compute: {
         code: probabilityMapWGSL,
       },
@@ -165,7 +165,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const bufferB = new Uint8Array(textureWidth * textureHeight * 4);
     getIGPUBuffer(probabilityMapUBOBuffer).writeBuffers = [{ data: new Int32Array([textureWidth]) }];
 
-    const passEncoders: GPUComputePass[] = [];
+    const passEncoders: ComputePass[] = [];
 
     const submit: Submit = {
       commandEncoders: [
@@ -245,7 +245,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     gui.add(simulationParams, k as any);
   });
 
-  const computePipeline: GPU_ComputePipeline = {
+  const computePipeline: ComputePipeline = {
     compute: {
       code: simulateWGSL,
     },
@@ -267,7 +267,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
   const view = mat4.create();
   const mvp = mat4.create();
 
-  const passEncoders: (GPUComputePass | RenderPass)[] = [];
+  const passEncoders: (ComputePass | RenderPass)[] = [];
 
   const submit: Submit = {
     commandEncoders: [

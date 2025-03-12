@@ -1,9 +1,9 @@
 import { Uniforms } from "@feng3d/render-api";
-import { GPU_ComputePipeline } from "./GPU_ComputePipeline";
-import { GPUWorkgroups } from "./IGPUWorkgroups";
+import { ComputePipeline } from "./ComputePipeline";
+import { Workgroups } from "./Workgroups";
 
 /**
- * GPU计算对象，包含GPU一次计算所有数据。
+ * WebGPU计算对象，包含GPU一次计算所有数据。
  *
  * {@link GPUComputePassEncoder.setPipeline}
  *
@@ -11,12 +11,12 @@ import { GPUWorkgroups } from "./IGPUWorkgroups";
  *
  * {@link GPUComputePassEncoder.dispatchWorkgroups}
  */
-export interface GPUComputeObject
+export interface ComputeObject
 {
     /**
      * 计算管线。
      */
-    readonly pipeline: GPU_ComputePipeline;
+    readonly pipeline: ComputePipeline;
 
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
@@ -28,5 +28,5 @@ export interface GPUComputeObject
      *
      * 分配的工作组。
      */
-    readonly workgroups?: GPUWorkgroups;
+    readonly workgroups?: Workgroups;
 }

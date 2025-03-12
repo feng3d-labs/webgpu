@@ -1,5 +1,5 @@
 import { CanvasContext } from "@feng3d/render-api";
-import { GPU_CanvasConfiguration } from "../GPU_CanvasConfiguration";
+import { CanvasConfiguration } from "../CanvasConfiguration";
 
 declare module "@feng3d/render-api"
 {
@@ -10,8 +10,8 @@ declare module "@feng3d/render-api"
     export interface CanvasContext
     {
         /**
-         * 画布配置。默认有引擎自动设置。
+         * WebGPU画布配置。默认有引擎自动设置。
          */
-        configuration?: GPU_CanvasConfiguration;
+        configuration?: CanvasConfiguration;
     }
 }

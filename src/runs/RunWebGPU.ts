@@ -16,15 +16,17 @@ import { IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
-import { GPUComputeObject } from "../data/GPUComputeObject";
-import { GPUComputePass } from "../data/GPUComputePass";
-import { GPU_ComputePipeline } from "../data/GPU_ComputePipeline";
-import { } from "../data/IGPUOcclusionQuery";
-import { IGPURenderBundle } from "../data/IGPURenderBundle";
-import { GPUWorkgroups } from "../data/IGPUWorkgroups";
+import { ComputeObject } from "../data/ComputeObject";
+import { ComputePass } from "../data/ComputePass";
+import { ComputePipeline } from "../data/ComputePipeline";
+import { Workgroups } from "../data/Workgroups";
+import { } from "../data/polyfills/OcclusionQuery";
+import "../data/polyfills/RenderObject";
+import "../data/polyfills/RenderPass";
+import { RenderBundle } from "../data/RenderBundle";
 import { GPUQueue_submit } from "../eventnames";
-import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
+import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
 
 export class RunWebGPU
@@ -143,7 +145,7 @@ export class RunWebGPU
      * @param commandEncoder 命令编码器。
      * @param computePass 计算通道。
      */
-    protected runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: GPUComputePass)
+    protected runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: ComputePass)
     {
         const descriptor: GPUComputePassDescriptor = {};
         // 处理时间戳查询
@@ -160,7 +162,7 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, computePass);
     }
 
-    protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: GPUComputeObject[])
+    protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: ComputeObject[])
     {
         computeObjects.forEach((computeObject) =>
         {
@@ -219,9 +221,9 @@ export class RunWebGPU
         passEncoder.endOcclusionQuery();
     }
 
-    protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: IGPURenderBundle)
+    protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: RenderBundle)
     {
-        const renderBundleMap: ChainMap<[IGPURenderBundle, string], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
+        const renderBundleMap: ChainMap<[RenderBundle, string], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
         //
         let gpuRenderBundle: GPURenderBundle = renderBundleMap.get([renderBundleObject, renderPassFormat._key]);
         if (!gpuRenderBundle)
@@ -256,7 +258,7 @@ export class RunWebGPU
      * @param passEncoder 计算通道编码器。
      * @param computeObject 计算对象。
      */
-    protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: GPUComputeObject)
+    protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: ComputeObject)
     {
         const { pipeline: material, uniforms: bindingResources, workgroups } = computeObject;
 
@@ -269,7 +271,7 @@ export class RunWebGPU
         this.runWorkgroups(passEncoder, workgroups);
     }
 
-    protected runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, material: GPU_ComputePipeline)
+    protected runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, material: ComputePipeline)
     {
         const gpuComputePipeline = getIGPUComputePipeline(material);
 
@@ -283,7 +285,7 @@ export class RunWebGPU
      * @param passEncoder 计算通道编码器。
      * @param workgroups 计算工作组。
      */
-    protected runWorkgroups(passEncoder: GPUComputePassEncoder, workgroups?: GPUWorkgroups)
+    protected runWorkgroups(passEncoder: GPUComputePassEncoder, workgroups?: Workgroups)
     {
         const { workgroupCountX, workgroupCountY, workgroupCountZ } = workgroups;
         passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);

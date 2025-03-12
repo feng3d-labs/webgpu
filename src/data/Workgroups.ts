@@ -1,9 +1,9 @@
 /**
- * 分配的工作组。
+ * WebGPU分配的工作组。
  *
  * {@link GPUComputePassEncoder.dispatchWorkgroups}
  */
-export interface GPUWorkgroups
+export interface Workgroups
 {
     /**
      * X的维度工作组数量。

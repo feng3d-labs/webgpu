@@ -7,7 +7,7 @@ import { RenderObject } from "@feng3d/render-api";
  *
  * {@link GPUDevice.createRenderBundleEncoder}
  */
-export interface IGPURenderBundle
+export interface RenderBundle
 {
     /**
      * 数据类型。
@@ -17,7 +17,7 @@ export interface IGPURenderBundle
     /**
      * GPU渲染捆绑编码器描述。
      */
-    readonly descriptor?: IGPURenderBundleEncoderDescriptor
+    readonly descriptor?: RenderBundleDescriptor
 
     /**
      * GPU渲染对象列表。
@@ -34,7 +34,7 @@ export interface IGPURenderBundle
  *
  * 'colorFormats' | 'depthStencilFormat' | 'sampleCount' 都将从GPU渲染通道中自动获取。
  */
-export interface IGPURenderBundleEncoderDescriptor
+export interface RenderBundleDescriptor
 {
     /**
      * If `true`, indicates that the render bundle does not modify the depth component of the

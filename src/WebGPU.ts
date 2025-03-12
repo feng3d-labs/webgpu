@@ -1,8 +1,8 @@
-import { Buffer, TextureLike, Submit } from "@feng3d/render-api";
+import { Buffer, ReadPixels, Submit, TextureLike } from "@feng3d/render-api";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUTextureLikeSize } from "./caches/getIGPUTextureSize";
-import { IGPUReadPixels } from "./data/IGPUReadPixels";
+import "./data/polyfills/ReadPixels";
 import { RunWebGPU } from "./runs/RunWebGPU";
 import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
@@ -127,7 +127,7 @@ export class WebGPU
      *
      * @returns 读取到的数据。
      */
-    async readPixels(gpuReadPixels: IGPUReadPixels)
+    async readPixels(gpuReadPixels: ReadPixels)
     {
         const gpuTexture = getGPUTexture(this.device, gpuReadPixels.texture, false);
 

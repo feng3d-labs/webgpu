@@ -1,10 +1,10 @@
 /**
- * GPU画布配置。
+ * WebGPU画布配置。
  *
  * @see GPUCanvasConfiguration
  * @see GPUCanvasContext.configure
  */
-export interface GPU_CanvasConfiguration
+export interface CanvasConfiguration
 {
     /**
      * The usage that textures returned by {@link GPUCanvasContext#getCurrentTexture} will have.

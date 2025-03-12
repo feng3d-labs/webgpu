@@ -1,12 +1,12 @@
-import { GPUComputeStage } from "./IGPUComputeStage";
+import { ComputeStage as ComputeStage } from "./ComputeStage";
 
 /**
- * GPU计算管线。
+ * WebGPU计算管线。
  *
  * {@link GPUDevice.createComputePipeline}
  * {@link GPUComputePipelineDescriptor}
  */
-export interface GPU_ComputePipeline
+export interface ComputePipeline
 {
     /**
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
@@ -16,5 +16,5 @@ export interface GPU_ComputePipeline
     /**
      * 计算程序。
      */
-    readonly compute: GPUComputeStage;
+    readonly compute: ComputeStage;
 }

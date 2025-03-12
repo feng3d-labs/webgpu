@@ -1,6 +1,6 @@
-import { FunctionInfo } from "wgsl_reflect";
-import { GPU_ComputePipeline } from "../data/GPU_ComputePipeline";
-import { GPUComputeStage } from "../data/IGPUComputeStage";
+import { UnReadonly } from "@feng3d/render-api";
+import { ComputePipeline } from "../data/ComputePipeline";
+import { ComputeStage } from "../data/ComputeStage";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -10,47 +10,10 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param computePipeline 计算管线描述。
  * @returns 完整的计算管线描述。
  */
-export function getIGPUComputePipeline(computePipeline: GPU_ComputePipeline): GPU_ComputePipeline
+export function getIGPUComputePipeline(computePipeline: ComputePipeline): ComputePipeline
 {
-    let gpuComputePipeline = computePipelineMap.get(computePipeline);
-    if (gpuComputePipeline) return gpuComputePipeline;
 
-    const gpuComputeStage = getIGPUComputeStage(computePipeline.compute);
 
-    gpuComputePipeline = {
-        ...computePipeline,
-        compute: gpuComputeStage,
-    };
-
-    computePipelineMap.set(computePipeline, gpuComputePipeline);
-
-    return gpuComputePipeline;
+    return computePipeline;
 }
 
-const computePipelineMap = new Map<GPU_ComputePipeline, GPU_ComputePipeline>();
-
-/**
-* 获取计算阶段完整描述。
-*
-* @param computeStage 计算阶段描述。
-* @returns 计算阶段完整描述。
-*/
-function getIGPUComputeStage(computeStage: GPUComputeStage)
-{
-    const reflect = getWGSLReflectInfo(computeStage.code);
-    let compute: FunctionInfo;
-    if (!computeStage.entryPoint)
-    {
-        compute = reflect.entry.compute[0];
-        console.assert(!!compute, `WGSL着色器 ${computeStage.code} 中不存在计算入口点。`);
-        (computeStage as any).entryPoint = compute.name;
-    }
-    else
-    {
-        // 验证着色器中包含指定片段入口函数。
-        compute = reflect.entry.compute.filter((v) => v.name === computeStage.entryPoint)[0];
-        console.assert(!!compute, `WGSL着色器 ${computeStage.code} 中不存在指定的计算入口点 ${computeStage.entryPoint}`);
-    }
-
-    return computeStage;
-}

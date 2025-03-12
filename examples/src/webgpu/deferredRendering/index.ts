@@ -11,7 +11,7 @@ import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
 import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, GPUComputePass, GPU_ComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { ComputePipeline, getIGPUBuffer, ComputePass, WebGPU } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -231,7 +231,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     lightExtentData.set(lightExtentMax, 4);
     getIGPUBuffer(lightExtentBuffer).writeBuffers = [{ data: lightExtentData }];
 
-    const lightUpdateComputePipeline: GPU_ComputePipeline = {
+    const lightUpdateComputePipeline: ComputePipeline = {
         compute: {
             code: lightUpdate,
         },
@@ -322,7 +322,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return viewProjMatrix as Float32Array;
     }
 
-    const passEncoders: (GPUComputePass | RenderPass)[] = [];
+    const passEncoders: (ComputePass | RenderPass)[] = [];
     passEncoders.push({
         descriptor: writeGBufferPassDescriptor,
         renderObjects: [
@@ -353,7 +353,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     });
 
-    const gBuffersPassEncoders: (GPUComputePass | RenderPass)[] = passEncoders.concat();
+    const gBuffersPassEncoders: (ComputePass | RenderPass)[] = passEncoders.concat();
 
     gBuffersPassEncoders.push({
         descriptor: textureQuadPassDescriptor,

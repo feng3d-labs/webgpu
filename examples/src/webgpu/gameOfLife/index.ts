@@ -5,7 +5,7 @@ import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
 import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { GPUComputePass, GPU_ComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { ComputePipeline, ComputePass, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function resetGameData()
     {
         // compute pipeline
-        const computePipeline: GPU_ComputePipeline = {
+        const computePipeline: ComputePipeline = {
             compute: {
                 code: computeWGSL,
                 constants: {
@@ -111,7 +111,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ],
         };
 
-        const passEncodersArray: (GPUComputePass | RenderPass)[][] = [];
+        const passEncodersArray: (ComputePass | RenderPass)[][] = [];
         for (let i = 0; i < 2; i++)
         {
             const vertices1: VertexAttributes = {};

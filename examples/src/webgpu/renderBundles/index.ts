@@ -1,5 +1,5 @@
 import { CanvasContext, IRenderPassObject, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { IGPURenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { RenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import Stats from "stats-js";
@@ -288,14 +288,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     // textures used. Cases where the executed commands differ from frame-to-frame,
     // such as when using frustrum or occlusion culling, will not benefit from
     // using render bundles as much.
-    let renderBundle: IGPURenderBundle = {
+    let renderBundle: RenderBundle = {
         __type__: "RenderBundle",
         renderObjects: [],
     };
     renderBundle.renderObjects = renderScene();
     function updateRenderBundle()
     {
-        const renderBundleEncoder: IGPURenderBundle = {
+        const renderBundleEncoder: RenderBundle = {
             __type__: "RenderBundle",
             renderObjects: [],
         };

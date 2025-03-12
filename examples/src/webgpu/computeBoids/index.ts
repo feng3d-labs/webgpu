@@ -1,5 +1,5 @@
-import { RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
-import { GPUComputeObject, WebGPU } from "@feng3d/webgpu";
+import { RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
+import { ComputeObject, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 
 import spriteWGSL from "./sprite.wgsl";
@@ -50,7 +50,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         particleBuffers[i] = initialParticleData.slice();
     }
 
-    const computeObject0: GPUComputeObject = {
+    const computeObject0: ComputeObject = {
         pipeline: {
             compute: { code: updateSpritesWGSL }
         },
@@ -66,7 +66,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
     };
 
-    const computeObject1: GPUComputeObject = {
+    const computeObject1: ComputeObject = {
         ...computeObject0,
         uniforms: {
             ...computeObject0.uniforms,
