@@ -1,6 +1,6 @@
 import { RenderPassDescriptor } from "@feng3d/render-api";
 import { getGPUTextureFormat } from "../caches/getGPUTextureFormat";
-import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import { IRenderPassFormat } from "../internal/RenderPassFormat";
 
 /**
  * 获取渲染通道格式。
@@ -8,9 +8,9 @@ import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
  * @param descriptor 渲染通道描述。
  * @returns
  */
-export function getGPURenderPassFormat(descriptor: RenderPassDescriptor): IGPURenderPassFormat
+export function getGPURenderPassFormat(descriptor: RenderPassDescriptor): IRenderPassFormat
 {
-    let gpuRenderPassFormat: IGPURenderPassFormat = descriptor[_RenderPassFormat];
+    let gpuRenderPassFormat: IRenderPassFormat = descriptor[_RenderPassFormat];
     if (gpuRenderPassFormat) return gpuRenderPassFormat;
 
     const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => getGPUTextureFormat(v.view.texture));

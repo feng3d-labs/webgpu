@@ -1,16 +1,16 @@
-import { IColor } from "@feng3d/render-api";
-import { NGPUFragmentState } from "./NGPUFragmentState";
+import { Color } from "@feng3d/render-api";
+import { NFragmentState } from "./NFragmentState";
 import { NGPUVertexState } from "./NGPUVertexState";
 
 /**
  * 内部对象。
  */
-export interface NGPURenderPipeline
+export interface NRenderPipeline
 {
     readonly label: string;
     readonly primitive: GPUPrimitiveState;
     readonly vertex: NGPUVertexState
-    readonly fragment: NGPUFragmentState,
+    readonly fragment: NFragmentState,
     readonly depthStencil: GPUDepthStencilState,
     readonly multisample: GPUMultisampleState,
 
@@ -22,5 +22,5 @@ export interface NGPURenderPipeline
     /**
      * 当混合系数用到了混合常量值时设置混合常量值。
      */
-    readonly blendConstantColor: IColor;
+    readonly blendConstantColor: Color;
 }

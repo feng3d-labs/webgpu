@@ -2,7 +2,7 @@ import { anyEmitter } from "@feng3d/event";
 import { CanvasTexture, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUTexture_resize } from "../eventnames";
-import { IGPUTextureMultisample } from "../internal/IGPUTextureMultisample";
+import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { NGPURenderPassColorAttachment } from "../internal/internal";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { getGPUTextureView } from "./getGPUTextureView";
@@ -241,7 +241,7 @@ function getMultisampleTextureView(texture: TextureLike, sampleCount: 4)
         // 新增用于解决多重采样的纹理
         const size = getIGPUTextureLikeSize(texture);
         const format = getGPUTextureFormat(texture);
-        const multisampleTexture: IGPUTextureMultisample = {
+        const multisampleTexture: MultisampleTexture = {
             label: "自动生成多重采样的纹理",
             size,
             sampleCount,

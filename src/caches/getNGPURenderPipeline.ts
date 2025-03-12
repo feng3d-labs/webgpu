@@ -4,11 +4,10 @@ import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { gPartial } from "@feng3d/polyfill";
 import { MultisampleState } from "../data/MultisampleState";
-import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
-import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
-import { NGPUFragmentState } from "../internal/NGPUFragmentState";
-import { NGPURenderPipeline } from "../internal/NGPURenderPipeline";
-import { NGPUVertexBuffer } from "../internal/NGPUVertexBuffer";
+import { IRenderPassFormat } from "../internal/RenderPassFormat";
+import { NFragmentState } from "../internal/NFragmentState";
+import { NRenderPipeline } from "../internal/NRenderPipeline";
+import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
 import { NGPUVertexState } from "../internal/NGPUVertexState";
 import { ChainMap } from "../utils/ChainMap";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
@@ -21,9 +20,9 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPassFormat: IGPURenderPassFormat, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPassFormat: IRenderPassFormat, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
 {
-    const indexFormat = indices ? getIGPUSetIndexBuffer(indices).indexFormat : undefined;
+    const indexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
 
     let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
     if (result) return result;
@@ -50,7 +49,7 @@ export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPass
     const blendConstantColor = BlendState.getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend);
 
     //
-    const material: NGPURenderPipeline = {
+    const material: NRenderPipeline = {
         label,
         primitive: gpuPrimitive,
         vertex: vertexStateResult.gpuVertexState,
@@ -85,11 +84,11 @@ const renderPipelineMap = new ChainMap<
         /**
          * GPU渲染管线描述。
          */
-        material: NGPURenderPipeline;
+        material: NRenderPipeline;
         /**
          * GPU渲染时使用的顶点缓冲区列表。
          */
-        vertexBuffers: NGPUVertexBuffer[];
+        vertexBuffers: NVertexBuffer[];
         /**
          * 版本号
          */
@@ -266,7 +265,7 @@ function getNGPUVertexState(vertexState: VertexState, vertices: VertexAttributes
 
 const vertexStateMap = new ChainMap<[VertexState, VertexAttributes], {
     gpuVertexState: NGPUVertexState;
-    vertexBuffers: NGPUVertexBuffer[];
+    vertexBuffers: NVertexBuffer[];
     /**
      * 版本号，用于版本控制。
      */
@@ -284,7 +283,7 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: VertexAttributes)
 {
     const vertexBufferLayouts: GPUVertexBufferLayout[] = [];
 
-    const vertexBuffers: NGPUVertexBuffer[] = [];
+    const vertexBuffers: NVertexBuffer[] = [];
 
     const map: WeakMap<any, number> = new WeakMap();
 
@@ -368,7 +367,7 @@ function getNGPUFragmentState(fragmentState: FragmentState, colorAttachments: re
 
     const colorAttachmentsKey = colorAttachments.toString();
 
-    let gpuFragmentState: NGPUFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
+    let gpuFragmentState: NFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
     if (gpuFragmentState) return gpuFragmentState;
 
     const code = fragmentState.code;
@@ -431,7 +430,7 @@ function getNGPUFragmentState(fragmentState: FragmentState, colorAttachments: re
     return gpuFragmentState;
 }
 
-const fragmentStateMap = new ChainMap<[FragmentState, string], NGPUFragmentState>();
+const fragmentStateMap = new ChainMap<[FragmentState, string], NFragmentState>();
 
 function getGPUBlendState(blend?: BlendState): GPUBlendState
 {

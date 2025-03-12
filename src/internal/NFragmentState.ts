@@ -1,7 +1,7 @@
 /**
  * 内部对象。
  */
-export interface NGPUFragmentState
+export interface NFragmentState
 {
     readonly code: string;
     readonly entryPoint: string;

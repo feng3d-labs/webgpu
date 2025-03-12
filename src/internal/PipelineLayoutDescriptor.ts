@@ -9,23 +9,25 @@ import { VariableInfo } from "wgsl_reflect";
  *
  * {@link GPUPipelineLayout}
  */
-export interface IGPUPipelineLayoutDescriptor extends Omit<GPUPipelineLayoutDescriptor, "bindGroupLayouts">
+export interface PipelineLayoutDescriptor
 {
+    label?: string;
     /**
      * A list of {@link GPUBindGroupLayout}s the pipeline will use. Each element corresponds to a
      * @group attribute in the {@link GPUShaderModule}, with the `N`th element corresponding with
      * `@group(N)`.
      */
-    bindGroupLayouts: IGPUBindGroupLayoutDescriptor[];
+    bindGroupLayouts: BindGroupLayoutDescriptor[];
 }
 
-export interface IGPUBindGroupLayoutDescriptor extends GPUBindGroupLayoutDescriptor
+export interface BindGroupLayoutDescriptor
 {
-    entries: IGPUBindGroupLayoutEntry[];
+    label?: string;
+    entries: BindGroupLayoutEntry[];
     entryNames: string[],
 }
 
-export interface IGPUBindGroupLayoutEntry extends GPUBindGroupLayoutEntry
+export interface BindGroupLayoutEntry extends GPUBindGroupLayoutEntry
 {
     variableInfo: VariableInfo;
 }

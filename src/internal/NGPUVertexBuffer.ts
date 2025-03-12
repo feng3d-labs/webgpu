@@ -1,4 +1,4 @@
-import { IVertexDataTypes } from "@feng3d/render-api";
+import { VertexDataTypes } from "@feng3d/render-api";
 
 /**
  * Sets the current vertex buffer for the given slot.
@@ -7,14 +7,14 @@ import { IVertexDataTypes } from "@feng3d/render-api";
  *
  * {@link GPURenderCommandsMixin.setVertexBuffer}
  */
-export interface NGPUVertexBuffer
+export interface NVertexBuffer
 {
     /**
      * Buffer containing vertex data to use for subsequent drawing commands.
      *
      * GPU缓冲区，包含后续绘制命令所包含的顶点数据的
      */
-    data: IVertexDataTypes;
+    data: VertexDataTypes;
 
     /**
      * Offset in bytes into `buffer` where the vertex data begins. Defaults to `0`.

@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPipeline, ScissorRect, Submit, Uniforms, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { Buffer, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPipeline, ScissorRect, Submit, Uniforms, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -10,7 +10,7 @@ import { getGPURenderPassFormat } from "../caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
-import { getIGPUVertexBuffer } from "../caches/getIGPUBuffer";
+import { getIGPUBuffer } from "../caches/getIGPUBuffer";
 import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
@@ -19,14 +19,13 @@ import { getRealGPUBindGroup } from "../const";
 import { ComputeObject } from "../data/ComputeObject";
 import { ComputePass } from "../data/ComputePass";
 import { ComputePipeline } from "../data/ComputePipeline";
-import { Workgroups } from "../data/Workgroups";
 import { } from "../data/polyfills/OcclusionQuery";
 import "../data/polyfills/RenderObject";
 import "../data/polyfills/RenderPass";
 import { RenderBundle } from "../data/RenderBundle";
+import { Workgroups } from "../data/Workgroups";
 import { GPUQueue_submit } from "../eventnames";
-import { getIGPUSetIndexBuffer } from "../internal/getIGPUSetIndexBuffer";
-import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import { IRenderPassFormat } from "../internal/RenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
 
 export class RunWebGPU
@@ -109,7 +108,7 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, renderPass);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly IRenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: readonly IRenderPassObject[])
     {
         if (!renderObjects) return;
         //
@@ -211,7 +210,7 @@ export class RunWebGPU
         );
     }
 
-    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
+    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
     {
         passEncoder.beginOcclusionQuery(renderOcclusionQueryObject._queryIndex);
         renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>
@@ -221,7 +220,7 @@ export class RunWebGPU
         passEncoder.endOcclusionQuery();
     }
 
-    protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderBundleObject: RenderBundle)
+    protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderBundleObject: RenderBundle)
     {
         const renderBundleMap: ChainMap<[RenderBundle, string], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
         //
@@ -242,7 +241,7 @@ export class RunWebGPU
         passEncoder.executeBundles([gpuRenderBundle]);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: readonly RenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: readonly RenderObject[])
     {
         //
         renderObjects.forEach((element) =>
@@ -299,7 +298,7 @@ export class RunWebGPU
      * @param renderObject 渲染对象。
      * @param renderPass 渲染通道。
      */
-    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: RenderObject)
+    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IRenderPassFormat, renderObject: RenderObject)
     {
         const { viewport, scissorRect, pipeline, uniforms: bindingResources, geometry } = renderObject;
 
@@ -334,7 +333,7 @@ export class RunWebGPU
         }
     }
 
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, material: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IRenderPassFormat, material: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
     {
         //
         const renderPipelineResult = getNGPURenderPipeline(material, renderPassFormat, primitive, vertices, indices);
@@ -431,14 +430,16 @@ export class RunWebGPU
         });
     }
 
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, material: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IRenderPassFormat, material: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
     {
         const renderPipeline = getNGPURenderPipeline(material, renderPassFormat, primitive, vertices, indices);
 
         //
         renderPipeline.vertexBuffers?.forEach((vertexBuffer, index) =>
         {
-            const buffer = getIGPUVertexBuffer(vertexBuffer.data);
+            const buffer = getIGPUBuffer(vertexBuffer.data);
+            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
+
             const gBuffer = getGPUBuffer(device, buffer);
 
             passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
@@ -449,13 +450,13 @@ export class RunWebGPU
     {
         if (!indices) return;
 
-        const indexBuffer = getIGPUSetIndexBuffer(indices);
+        const buffer = getIGPUBuffer(indices);
+        (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
-        const { buffer, indexFormat, offset, size } = indexBuffer;
         const gBuffer = getGPUBuffer(device, buffer);
 
         //
-        passEncoder.setIndexBuffer(gBuffer, indexFormat, offset, size);
+        passEncoder.setIndexBuffer(gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength);
     }
 
     protected runDrawVertex(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawVertex: DrawVertex)
@@ -471,3 +472,5 @@ export class RunWebGPU
     }
 }
 
+let autoIndex = 0;
+let autoVertexIndex = 0;

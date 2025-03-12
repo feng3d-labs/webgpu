@@ -1,7 +1,7 @@
-import { IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
+import { PipelineLayoutDescriptor } from "../internal/PipelineLayoutDescriptor";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 
-export function getGPUPipelineLayout(device: GPUDevice, layout: IGPUPipelineLayoutDescriptor)
+export function getGPUPipelineLayout(device: GPUDevice, layout: PipelineLayoutDescriptor)
 {
     const bindGroupLayouts = layout.bindGroupLayouts.map((v) =>
     {

@@ -2,7 +2,7 @@ import { IRenderPassObject, RenderObject } from "@feng3d/render-api";
 
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
-import { IGPURenderPassFormat } from "../internal/IGPURenderPassFormat";
+import { IRenderPassFormat } from "../internal/RenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { RunWebGPU } from "./RunWebGPU";
 
@@ -11,7 +11,7 @@ import { RunWebGPU } from "./RunWebGPU";
  */
 export class RunWebGPUCommandCache extends RunWebGPU
 {
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: IRenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: IRenderPassObject[])
     {
         const map: ChainMap<[string, IRenderPassObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let caches = map.get([renderPassFormat._key, renderObjects]);
@@ -47,7 +47,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
         runCommands(passEncoder, caches);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObjects?: RenderObject[])
+    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: RenderObject[])
     {
         const map: ChainMap<[string, RenderObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let caches = map.get([renderPassFormat._key, renderObjects]);
@@ -86,7 +86,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
         runCommands(bundleEncoder, { ...caches, commands });
     }
 
-    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IGPURenderPassFormat, renderObject: RenderObject)
+    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IRenderPassFormat, renderObject: RenderObject)
     {
         const map: ChainMap<[string, RenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
         const _commands = passEncoder["_commands"] as any[];

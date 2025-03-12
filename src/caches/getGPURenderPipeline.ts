@@ -1,9 +1,9 @@
-import { NGPURenderPipeline } from "../internal/NGPURenderPipeline";
+import { NRenderPipeline } from "../internal/NRenderPipeline";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
 import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 
-export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NGPURenderPipeline)
+export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NRenderPipeline)
 {
     let pipeline = pipelineMap.get(renderPipeline);
     if (pipeline) return pipeline;
@@ -38,4 +38,4 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NGPURend
     return pipeline;
 }
 
-const pipelineMap = new Map<NGPURenderPipeline, GPURenderPipeline>();
+const pipelineMap = new Map<NRenderPipeline, GPURenderPipeline>();

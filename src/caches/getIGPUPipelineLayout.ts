@@ -1,4 +1,4 @@
-import { IGPUBindGroupLayoutDescriptor, IGPUPipelineLayoutDescriptor } from "../internal/IGPUPipelineLayoutDescriptor";
+import { BindGroupLayoutDescriptor, PipelineLayoutDescriptor } from "../internal/PipelineLayoutDescriptor";
 import { getIGPUBindGroupLayoutEntryMap, IGPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 
 export type IGPUShader = { readonly vertex?: string, readonly fragment?: string, readonly compute?: string };
@@ -14,7 +14,7 @@ export function getIGPUShaderKey(shader: IGPUShader)
  * @param shader GPU管线。
  * @returns 管线布局。
  */
-export function getIGPUPipelineLayout(shader: IGPUShader): IGPUPipelineLayoutDescriptor
+export function getIGPUPipelineLayout(shader: IGPUShader): PipelineLayoutDescriptor
 {
     const shaderKey = getIGPUShaderKey(shader);
 
@@ -44,7 +44,7 @@ export function getIGPUPipelineLayout(shader: IGPUShader): IGPUPipelineLayoutDes
     }
 
     //
-    const bindGroupLayouts: IGPUBindGroupLayoutDescriptor[] = [];
+    const bindGroupLayouts: BindGroupLayoutDescriptor[] = [];
     for (const resourceName in entryMap)
     {
         const bindGroupLayoutEntry = entryMap[resourceName];
@@ -108,4 +108,4 @@ function mergeBindGroupLayouts(entryMap: IGPUBindGroupLayoutEntryMap, entryMap1:
     return entryMap;
 }
 
-const gpuPipelineLayoutMap: { [key: string]: IGPUPipelineLayoutDescriptor } = {};
+const gpuPipelineLayoutMap: { [key: string]: PipelineLayoutDescriptor } = {};

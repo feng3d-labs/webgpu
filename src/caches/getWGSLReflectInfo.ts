@@ -1,5 +1,5 @@
 import { ResourceType, TemplateInfo, WgslReflect } from "wgsl_reflect";
-import { IGPUBindGroupLayoutEntry } from "../internal/IGPUPipelineLayoutDescriptor";
+import { BindGroupLayoutEntry } from "../internal/PipelineLayoutDescriptor";
 import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from "../types/TextureType";
 
 /**
@@ -19,7 +19,7 @@ export function getWGSLReflectInfo(code: string): WgslReflect
 }
 const reflectMap: { [code: string]: WgslReflect } = {};
 
-export type IGPUBindGroupLayoutEntryMap = { [name: string]: IGPUBindGroupLayoutEntry; };
+export type IGPUBindGroupLayoutEntryMap = { [name: string]: BindGroupLayoutEntry; };
 
 export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayoutEntryMap
 {
