@@ -3,7 +3,7 @@ import { IGPUExternalTexture } from "./IGPUExternalTexture";
 
 declare module "@feng3d/render-api"
 {
-    export interface IUniformTypeMap
+    export interface UniformTypeMap
     {
         ISampler: Sampler;
         ITextureView: TextureView;

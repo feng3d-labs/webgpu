@@ -3,7 +3,7 @@ import { IGPUComputePass } from "./IGPUComputePass";
 
 declare module "@feng3d/render-api"
 {
-    export interface IPassEncoderMap
+    export interface PassEncoderMap
     {
         IGPUComputePass: IGPUComputePass;
     }

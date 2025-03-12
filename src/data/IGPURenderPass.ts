@@ -29,7 +29,7 @@ declare module "@feng3d/render-api"
         timestampQuery?: IGPUTimestampQuery;
     }
 
-    export interface IRenderPassObjectMap
+    export interface RenderPassObjectMap
     {
         IGPURenderBundle: IGPURenderBundle;
     }
