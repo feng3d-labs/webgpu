@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, ITextureLike, TextureView } from "@feng3d/render-api";
+import { RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { IGPUTexture_resize } from "../eventnames";
@@ -129,7 +129,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: Render
  */
 function getAttachmentTextures(colorAttachments: readonly RenderPassColorAttachment[], depthStencilAttachment?: RenderPassDepthStencilAttachment)
 {
-    const textures: ITextureLike[] = [];
+    const textures: TextureLike[] = [];
 
     for (let i = 0; i < colorAttachments.length; i++)
     {
@@ -170,7 +170,7 @@ function setIGPURenderPassAttachmentSize(colorAttachments: NGPURenderPassColorAt
  * @param texture 纹理描述。
  * @param attachmentSize 附件尺寸。
  */
-function setIGPUTextureSize(texture: ITextureLike, attachmentSize: { width: number, height: number })
+function setIGPUTextureSize(texture: TextureLike, attachmentSize: { width: number, height: number })
 {
     if ("context" in texture)
     {
@@ -201,7 +201,7 @@ function setIGPUTextureSize(texture: ITextureLike, attachmentSize: { width: numb
  */
 function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassColorAttachment[], depthStencilAttachment?: RenderPassDepthStencilAttachment)
 {
-    const textures: ITextureLike[] = [];
+    const textures: TextureLike[] = [];
 
     for (let i = 0; i < colorAttachments.length; i++)
     {
@@ -234,7 +234,7 @@ function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassCol
  * @param sampleCount 多重采样数量。
  * @returns 用于解决多重采样的纹理视图。
  */
-function getMultisampleTextureView(texture: ITextureLike, sampleCount: 4)
+function getMultisampleTextureView(texture: TextureLike, sampleCount: 4)
 {
     let multisampleTextureView = multisampleTextureMap.get(texture);
     if (!multisampleTextureView)
@@ -255,7 +255,7 @@ function getMultisampleTextureView(texture: ITextureLike, sampleCount: 4)
     return multisampleTextureView;
 }
 
-const multisampleTextureMap = new WeakMap<ITextureLike, TextureView>();
+const multisampleTextureMap = new WeakMap<TextureLike, TextureView>();
 
 /**
  * 获取深度模板附件完整描述。

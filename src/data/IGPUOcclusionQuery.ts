@@ -1,20 +1,10 @@
-import { RenderObject } from "@feng3d/render-api";
+import { OcclusionQuery } from "@feng3d/render-api";
 
 /**
  * 被查询的渲染对象列表
  */
-export interface IGPUOcclusionQuery
+export interface IGPUOcclusionQuery extends OcclusionQuery
 {
-    /**
-     * 数据类型。
-     */
-    readonly __type__: "OcclusionQuery";
-
-    /**
-     * GPU渲染对象列表。
-     */
-    renderObjects: RenderObject[];
-
     /**
      * 临时变量, 执行过程中由引擎自动填充
      *
@@ -22,18 +12,5 @@ export interface IGPUOcclusionQuery
      */
     _queryIndex?: GPUSize32;
 
-    /**
-     * 渲染完成后由引擎自动填充。
-     */
-    result?: IGLQueryResult;
-
     _version?: number;
-}
-
-export interface IGLQueryResult
-{
-    /**
-     * 查询结果。
-     */
-    result: number;
 }

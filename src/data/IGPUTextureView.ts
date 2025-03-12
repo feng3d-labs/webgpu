@@ -1,9 +1,9 @@
-import { ITextureLike } from "@feng3d/render-api";
+import { TextureLike } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "./IGPUCanvasTexture";
 
 declare module "@feng3d/render-api"
 {
-    export interface ITextureLikeMap
+    export interface TextureLikeMap
     {
         /**
          * 画布纹理。

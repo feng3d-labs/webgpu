@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { ITextureLike, ITextureSize, Texture, TextureDataSource, TextureImageSource, TextureSource } from "@feng3d/render-api";
+import { TextureLike, ITextureSize, Texture, TextureDataSource, TextureImageSource, TextureSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
@@ -16,7 +16,7 @@ import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
  * @param iGPUTextureBase 纹理描述。
  * @returns GPU纹理。
  */
-export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, autoCreate = true)
+export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
 {
     let gpuTexture: GPUTexture;
     if ("context" in textureLike)
@@ -31,7 +31,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: ITextureLike, auto
 
     const texture = textureLike as Texture;
 
-    const textureMap: Map<ITextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<ITextureLike, GPUTexture>();
+    const textureMap: Map<TextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<TextureLike, GPUTexture>();
     gpuTexture = textureMap.get(texture);
     if (gpuTexture) return gpuTexture;
 

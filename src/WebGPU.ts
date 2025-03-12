@@ -1,4 +1,4 @@
-import { Buffer, ITextureLike, Submit } from "@feng3d/render-api";
+import { Buffer, TextureLike, Submit } from "@feng3d/render-api";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getIGPUTextureLikeSize } from "./caches/getIGPUTextureSize";
@@ -86,7 +86,7 @@ export class WebGPU
      *
      * @param texture 需要被销毁的纹理。
      */
-    destoryTexture(texture: ITextureLike)
+    destoryTexture(texture: TextureLike)
     {
         getGPUTexture(this.device, texture, false)?.destroy();
     }
@@ -98,7 +98,7 @@ export class WebGPU
      * @param invertY 是否Y轴翻转
      * @param premultiplyAlpha 是否预乘Alpha。
      */
-    textureInvertYPremultiplyAlpha(texture: ITextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
+    textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
         const gpuTexture = getGPUTexture(this.device, texture);
 
@@ -112,7 +112,7 @@ export class WebGPU
      * @param sourceTexture 源纹理。
      * @param targetTexture 目标纹理。
      */
-    copyDepthTexture(sourceTexture: ITextureLike, targetTexture: ITextureLike)
+    copyDepthTexture(sourceTexture: TextureLike, targetTexture: TextureLike)
     {
         const gpuSourceTexture = getGPUTexture(this.device, sourceTexture);
         const gpuTargetTexture = getGPUTexture(this.device, targetTexture);
@@ -161,7 +161,7 @@ export class WebGPU
         return result;
     }
 
-    getGPUTextureSize(input: ITextureLike)
+    getGPUTextureSize(input: TextureLike)
     {
         return getIGPUTextureLikeSize(input);
     }

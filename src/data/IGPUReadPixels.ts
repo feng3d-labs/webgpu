@@ -1,14 +1,14 @@
-import { ITextureLike } from "@feng3d/render-api";
+import { TextureLike, ReadPixels } from "@feng3d/render-api";
 
 /**
  * 读取GPU纹理像素
  */
-export interface IGPUReadPixels
+export interface IGPUReadPixels extends ReadPixels
 {
     /**
      * GPU纹理
      */
-    texture: ITextureLike,
+    texture: TextureLike,
 
     /**
      * 读取位置。

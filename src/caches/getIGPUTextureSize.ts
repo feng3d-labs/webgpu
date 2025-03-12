@@ -1,4 +1,4 @@
-import { ITextureLike, ITextureSize, TextureImageSource } from "@feng3d/render-api";
+import { TextureLike, ITextureSize, TextureImageSource } from "@feng3d/render-api";
 import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
 
 /**
@@ -7,7 +7,7 @@ import { IGPUCanvasTexture } from "../data/IGPUCanvasTexture";
  * @param texture 纹理。
  * @returns 纹理尺寸。
  */
-export function getIGPUTextureLikeSize(texture: ITextureLike)
+export function getIGPUTextureLikeSize(texture: TextureLike)
 {
     if ("context" in texture)
     {
