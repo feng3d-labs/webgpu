@@ -70,11 +70,3 @@ declare module "@feng3d/render-api"
         firstInstance?: number;
     }
 }
-
-Viewport.prototype.minDepth = 0;
-Viewport.prototype.maxDepth = 1;
-
-DrawVertex.prototype.firstInstance = 0
-
-DrawIndexed.prototype.baseVertex = 0;
-DrawIndexed.prototype.firstInstance = 0;

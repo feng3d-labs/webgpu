@@ -17,4 +17,3 @@ declare module "@feng3d/render-api"
     }
 
 }
-PrimitiveState.prototype.unclippedDepth = false;
