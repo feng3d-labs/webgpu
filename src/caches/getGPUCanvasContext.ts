@@ -11,10 +11,10 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
 
     const gpuCanvasContext = canvas.getContext("webgpu");
 
+    const ro = reactive(context);
     result = computed(() =>
     {
         // 监听
-        const ro = reactive(context);
         const configuration = ro.configuration;
         if (configuration)
         {
