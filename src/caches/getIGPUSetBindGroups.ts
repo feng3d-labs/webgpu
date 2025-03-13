@@ -7,7 +7,7 @@ import { ChainMap } from "../utils/ChainMap";
 import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
 import { updateBufferBinding } from "../utils/updateBufferBinding";
 import { getIGPUBuffer } from "./getIGPUBuffer";
-import { IGPUBindGroupDescriptor, IGPUBindGroupEntry } from "./getGPUBindGroup";
+import { BindGroupDescriptor, BindGroupEntry } from "./getGPUBindGroup";
 
 export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: Uniforms)
 {
@@ -23,22 +23,22 @@ export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: Unifo
     const layout = getIGPUPipelineLayout(shader);
     layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
     {
-        gpuSetBindGroups[group] = getIGPUSetBindGroup(bindGroupLayout, bindingResources);
+        gpuSetBindGroups[group] = getSetBindGroup(bindGroupLayout, bindingResources);
     });
 
     return gpuSetBindGroups;
 }
 
-const bindGroupsMap = new ChainMap<[string, Uniforms], IGPUSetBindGroup[]>();
+const bindGroupsMap = new ChainMap<[string, Uniforms], SetBindGroup[]>();
 
-function getIGPUSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: Uniforms): IGPUSetBindGroup
+function getSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: Uniforms): SetBindGroup
 {
-    const map: ChainMap<Array<any>, IGPUSetBindGroup> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
+    const map: ChainMap<Array<any>, SetBindGroup> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
     const subBindingResources = bindGroupLayout.entryNames.map((v) => bindingResources[v]);
-    let setBindGroup: IGPUSetBindGroup = map.get(subBindingResources);
+    let setBindGroup: SetBindGroup = map.get(subBindingResources);
     if (setBindGroup) return setBindGroup;
 
-    const entries: IGPUBindGroupEntry[] = [];
+    const entries: BindGroupEntry[] = [];
     setBindGroup = { bindGroup: { layout: bindGroupLayout, entries } };
     map.set(subBindingResources, setBindGroup);
 
@@ -47,7 +47,7 @@ function getIGPUSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, binding
     {
         const { variableInfo, binding } = entry1;
         //
-        const entry: IGPUBindGroupEntry = { binding, resource: null };
+        const entry: BindGroupEntry = { binding, resource: null };
 
         entries.push(entry);
 
@@ -90,14 +90,14 @@ function getIGPUSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, binding
  *
  * {@link GPUBindingCommandsMixin.setBindGroup}
  */
-interface IGPUSetBindGroup
+interface SetBindGroup
 {
     /**
      * GPU绑定组。
      *
      * Bind group to use for subsequent render or compute commands.
      */
-    bindGroup: IGPUBindGroupDescriptor;
+    bindGroup: BindGroupDescriptor;
 
     /**
      * Array containing buffer offsets in bytes for each entry in `bindGroup` marked as {@link GPUBindGroupLayoutEntry#buffer}.{@link GPUBufferBindingLayout#hasDynamicOffset}.-->

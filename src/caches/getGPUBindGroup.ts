@@ -5,13 +5,14 @@ import { getRealGPUBindGroup } from "../const";
 import { VideoTexture } from "../data/VideoTexture";
 import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
-import { getGPUBufferBinding } from "./getGPUBufferBinding";
+import { getGPUBuffer } from "./getGPUBuffer";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
+import { getIGPUBuffer } from "./getIGPUBuffer";
 
-export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescriptor)
+export function getGPUBindGroup(device: GPUDevice, bindGroup: BindGroupDescriptor)
 {
-    const bindGroupMap: WeakMap<IGPUBindGroupDescriptor, GPUBindGroup> = device["_bindGroupMap"] = device["_bindGroupMap"] || new WeakMap();
+    const bindGroupMap: WeakMap<BindGroupDescriptor, GPUBindGroup> = device["_bindGroupMap"] = device["_bindGroupMap"] || new WeakMap();
 
     let gBindGroup = bindGroupMap.get(bindGroup);
     if (gBindGroup) return gBindGroup;
@@ -46,7 +47,19 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
         {
             updateResource = () =>
             {
-                entry.resource = getGPUBufferBinding(device, v.resource as BufferBinding);
+                const resource = v.resource as BufferBinding;
+                //
+                const b = getIGPUBuffer(resource.bufferView);
+                const buffer = getGPUBuffer(device, b);
+
+                const offset = resource.bufferView.byteOffset;
+                const size = resource.bufferView.byteLength;
+
+                entry.resource = {
+                    buffer,
+                    offset,
+                    size,
+                };
             };
         }
         else if ((v.resource as TextureView).texture)
@@ -129,7 +142,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: IGPUBindGroupDescr
  * @see GPUBindGroupDescriptor
  * @see GPUDevice.createBindGroup
  */
-export interface IGPUBindGroupDescriptor
+export interface BindGroupDescriptor
 {
     /**
      * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
@@ -147,7 +160,7 @@ export interface IGPUBindGroupDescriptor
      *
      * {@link GPUBindGroupEntry}
      */
-    entries: IGPUBindGroupEntry[];
+    entries: BindGroupEntry[];
 }
 
 /**
@@ -155,7 +168,7 @@ export interface IGPUBindGroupDescriptor
  *
  * @see GPUBindGroupEntry
  */
-export interface IGPUBindGroupEntry
+export interface BindGroupEntry
 {
     binding: GPUIndex32;
 
