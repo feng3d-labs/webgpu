@@ -21,7 +21,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
     if ("context" in textureLike)
     {
         const canvasTexture = textureLike;
-        const context = getGPUCanvasContext(device, canvasTexture.context).value;
+        const context = getGPUCanvasContext(device, canvasTexture.context);
 
         gpuTexture = context.getCurrentTexture();
 

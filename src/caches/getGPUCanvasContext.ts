@@ -1,12 +1,11 @@
 import { CanvasContext } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
-import "../data/polyfills/CanvasContext";
 import { computed, ComputedRef, reactive } from "@vue/reactivity";
+import "../data/polyfills/CanvasContext";
 
 export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
 {
     let result = canvasContextMap[context.canvasId];
-    if (result) return result;
+    if (result) return result.value;
 
     const canvas = document.getElementById(context.canvasId) as HTMLCanvasElement;
 
@@ -38,29 +37,28 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
     const updateConfigure = () =>
     {
         //
-        context.configuration = context.configuration || {};
-        const format = (context.configuration as any).format = context.configuration.format || navigator.gpu.getPreferredCanvasFormat();
+        const configuration = context.configuration || {};
 
-        let usage = 0;
-
-        if (context.configuration.usage)
-        {
-            usage = context.configuration.usage;
-        }
+        const format = configuration.format || navigator.gpu.getPreferredCanvasFormat();
 
         // 附加上 GPUTextureUsage.RENDER_ATTACHMENT
-        usage = usage | GPUTextureUsage.RENDER_ATTACHMENT;
+        const usage = (configuration.usage ?? 0)
+            | GPUTextureUsage.COPY_SRC
+            | GPUTextureUsage.COPY_DST
+            | GPUTextureUsage.TEXTURE_BINDING
+            | GPUTextureUsage.STORAGE_BINDING
+            | GPUTextureUsage.RENDER_ATTACHMENT;
 
         //
         gpuCanvasContext.configure({
-            ...context.configuration,
+            ...configuration,
             device,
             usage,
             format,
         });
     };
 
-    return result;
+    return result.value;
 }
 
 const canvasContextMap: { [canvasId: string]: ComputedRef<GPUCanvasContext> } = {};

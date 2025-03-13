@@ -29,7 +29,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                     }
                 ` },
         },
-        geometry:{
+        geometry: {
             vertices: {
                 position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: "float32x2" }, // 顶点坐标数据
             },

@@ -3,7 +3,7 @@ import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
 import { BlendComponent, CanvasContext, IRenderPassObject, RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, TextureView, Uniforms } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
+import { reactive, WebGPU } from "@feng3d/webgpu";
 
 declare module "@feng3d/render-api"
 {
@@ -469,7 +469,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const { srcTexture, dstTexture, srcBindGroup, dstBindGroup }
             = textureSets[settings.textureSet === "premultiplied alpha" ? 0 : 1];
 
-        context.configuration.alphaMode = settings.alphaMode;
+        reactive(context.configuration).alphaMode = settings.alphaMode;
 
         // Apply the clearValue, pre-multiplying or not it based on the settings.
         {

@@ -13,7 +13,7 @@ export interface CanvasConfiguration
      * when setting a custom usage if you wish to use textures returned by
      * {@link GPUCanvasContext#getCurrentTexture} as color targets for a render pass.
      */
-    usage?: GPUTextureUsageFlags;
+    readonly usage?: GPUTextureUsageFlags;
 
     /**
      * The format that textures returned by {@link GPUCanvasContext#getCurrentTexture} will have.
@@ -21,7 +21,7 @@ export interface CanvasConfiguration
      *
      * 默认 `navigator.gpu.getPreferredCanvasFormat()` 。
      */
-    format?: GPUTextureFormat;
+    readonly format?: GPUTextureFormat;
 
     /**
      * Determines the effect that alpha values will have on the content of textures returned by
@@ -29,21 +29,23 @@ export interface CanvasConfiguration
      *
      * 默认 'premultiplied' 。
      */
-    alphaMode?: GPUCanvasAlphaMode;
+    readonly alphaMode?: GPUCanvasAlphaMode;
 
     /**
      * The formats that views created from textures returned by
      * {@link GPUCanvasContext#getCurrentTexture} may use.
      */
-    viewFormats?: GPUTextureFormat[];
+    readonly viewFormats?: GPUTextureFormat[];
+
     /**
      * The color space that values written into textures returned by
      * {@link GPUCanvasContext#getCurrentTexture} should be displayed with.
      */
-    colorSpace?: PredefinedColorSpace;
+    readonly colorSpace?: PredefinedColorSpace;
+
     /**
      * The tone mapping determines how the content of textures returned by
      * {@link GPUCanvasContext#getCurrentTexture} are to be displayed.
      */
-    toneMapping?: GPUCanvasToneMapping;
+    readonly toneMapping?: GPUCanvasToneMapping;
 }

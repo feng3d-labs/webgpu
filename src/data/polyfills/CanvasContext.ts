@@ -12,6 +12,6 @@ declare module "@feng3d/render-api"
         /**
          * WebGPU画布配置。默认有引擎自动设置。
          */
-        configuration?: CanvasConfiguration;
+        readonly configuration?: CanvasConfiguration;
     }
 }
