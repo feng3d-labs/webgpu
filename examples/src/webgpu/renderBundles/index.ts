@@ -1,5 +1,5 @@
 import { CanvasContext, IRenderPassObject, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { RenderBundle, WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
+import { RenderBundle, WebGPU, getIGPUBuffer, reactive } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
 import Stats from "stats-js";
@@ -310,7 +310,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
         const transformationMatrix = getTransformationMatrix();
 
-        getIGPUBuffer(uniformBuffer).writeBuffers = [{ data: transformationMatrix }];
+        reactive(getIGPUBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
 
         let renderObjects: IRenderPassObject[] = [];
         if (settings.useRenderBundles)

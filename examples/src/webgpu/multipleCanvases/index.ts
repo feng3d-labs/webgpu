@@ -1,5 +1,5 @@
 import { CanvasContext, IPassEncoder, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, reactive, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -114,7 +114,7 @@ const init = async () =>
   `,
     };
 
-    const pipeline: RenderPipeline  = {
+    const pipeline: RenderPipeline = {
         label: "our hardcoded red triangle pipeline",
         vertex: {
             ...module,
@@ -309,7 +309,7 @@ const init = async () =>
             writeBuffers.push({
                 data: uniformValues,
             });
-            buffer.writeBuffers = writeBuffers;
+            reactive(buffer).writeBuffers = writeBuffers;
 
             // make a render pass encoder to encode render specific commands
             passEncoders.push({

@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
 import { IRenderPassObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, TextureSource, Uniforms } from "@feng3d/render-api";
-import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, reactive, WebGPU } from "@feng3d/webgpu";
 
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
@@ -57,7 +57,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
         else
         {
-            getIGPUBuffer(bufConfig).writeBuffers = [{ bufferOffset: 64, data }];
+            reactive(getIGPUBuffer(bufConfig)).writeBuffers = [{ bufferOffset: 64, data }];
         }
     };
 
@@ -289,7 +289,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         [0, 0, -kCameraDist]
     );
     const bufConfig = new Uint8Array(128);
-    getIGPUBuffer(bufConfig).writeBuffers = [{ data: viewProj }];
+    reactive(getIGPUBuffer(bufConfig)).writeBuffers = [{ data: viewProj }];
 
     const bufMatrices = kMatrices;
 
@@ -320,10 +320,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         renderObjects.push(
             {
-                viewport: {isYup: false, x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
+                viewport: { isYup: false, x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
                 pipeline: texturedSquarePipeline,
                 uniforms: bindingResources0,
-                geometry:{
+                geometry: {
                     draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
                 }
             }
@@ -336,40 +336,40 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kLastViewport = (kViewportGridSize - 1) * kViewportGridStride + 1;
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
-            geometry:{
+            geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
             }
         }
     );
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
-            geometry:{
+            geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
             }
         }
     );
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
-            geometry:{
+            geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
             }
         }
     );
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
-            geometry:{
+            geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
             }
         }

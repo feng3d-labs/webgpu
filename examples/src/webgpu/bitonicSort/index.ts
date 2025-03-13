@@ -1,6 +1,6 @@
 import { Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit, Uniforms } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { ComputePipeline, getIGPUBuffer, ComputePass, TimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { ComputePipeline, getIGPUBuffer, ComputePass, TimestampQuery, WebGPU, reactive } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import Stats from "stats.js";
 
@@ -707,7 +707,7 @@ async function init(
         let iGPUBuffer = getIGPUBuffer(elementsInputBuffer.bufferView);
         let writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: elements });
-        iGPUBuffer.writeBuffers = writeBuffers;
+        reactive(iGPUBuffer).writeBuffers = writeBuffers;
 
         const dims = new Float32Array([
             settings["Grid Width"],
@@ -722,7 +722,7 @@ async function init(
         writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: dims });
         writeBuffers.push({ bufferOffset: 8, data: stepDetails });
-        iGPUBuffer.writeBuffers = writeBuffers;
+        reactive(iGPUBuffer).writeBuffers = writeBuffers;
 
         const commandEncoder: CommandEncoder = { passEncoders: [] };
         const submit: Submit = { commandEncoders: [commandEncoder] };

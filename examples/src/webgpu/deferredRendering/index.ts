@@ -11,7 +11,7 @@ import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
 import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { ComputePipeline, getIGPUBuffer, ComputePass, WebGPU } from "@feng3d/webgpu";
+import { ComputePipeline, getIGPUBuffer, ComputePass, WebGPU, reactive } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -169,7 +169,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
             else
             {
-                getIGPUBuffer(configUniformBuffer).writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
+                reactive(getIGPUBuffer(configUniformBuffer)).writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
             }
         });
 
@@ -229,7 +229,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const lightExtentData = new Float32Array(8);
     lightExtentData.set(lightExtentMin, 0);
     lightExtentData.set(lightExtentMax, 4);
-    getIGPUBuffer(lightExtentBuffer).writeBuffers = [{ data: lightExtentData }];
+    reactive(getIGPUBuffer(lightExtentBuffer)).writeBuffers = [{ data: lightExtentData }];
 
     const lightUpdateComputePipeline: ComputePipeline = {
         compute: {
@@ -283,7 +283,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
     else
     {
-        getIGPUBuffer(cameraUniformBuffer).writeBuffers = [{ data: cameraMatrixData }];
+        reactive(getIGPUBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraMatrixData }];
     }
     const modelData = modelMatrix as Float32Array;
     if (getIGPUBuffer(modelUniformBuffer).writeBuffers)
@@ -292,7 +292,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
     else
     {
-        getIGPUBuffer(modelUniformBuffer).writeBuffers = [{ data: modelData }];
+        reactive(getIGPUBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
     }
     const invertTransposeModelMatrix = mat4.invert(modelMatrix);
     mat4.transpose(invertTransposeModelMatrix, invertTransposeModelMatrix);
@@ -303,7 +303,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
     else
     {
-        getIGPUBuffer(modelUniformBuffer).writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
+        reactive(getIGPUBuffer(modelUniformBuffer)).writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
     }
 
     // Rotates the camera around the origin based on time.
@@ -397,7 +397,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
         else
         {
-            getIGPUBuffer(cameraUniformBuffer).writeBuffers = [{ data: cameraViewProj }];
+            reactive(getIGPUBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraViewProj }];
         }
 
         const submit: Submit = {
