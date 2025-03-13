@@ -8,7 +8,7 @@ import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
 import { IPassEncoder, RenderPass, RenderPassDescriptor, Texture, Uniforms, RenderObject } from "@feng3d/render-api";
-import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, reactive, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -154,7 +154,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 data: new Uint32Array([RenderMode[settings.renderMode]]),
             });
 
-            buffer.writeBuffers = writeBuffers;
+            reactive(buffer).writeBuffers = writeBuffers;
         });
     // Determine whether the mesh is static or whether skinning is activated
     gui.add(settings, "skinMode", ["ON", "OFF"]).onChange(() =>
@@ -180,7 +180,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             bufferOffset: 4,
             data: new Uint32Array([SkinMode[settings.skinMode]]),
         });
-        buffer.writeBuffers = writeBuffers;
+        reactive(buffer).writeBuffers = writeBuffers;
     });
     const animFolder = gui.addFolder("Animation Settings");
     animFolder.add(settings, "angle", 0.05, 0.5).step(0.05);
@@ -384,7 +384,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             data: gridBoneCollection.bindPosesInv[i]
         });
     }
-    buffer.writeBuffers = writeBuffers;
+    reactive(buffer).writeBuffers = writeBuffers;
 
     // A map that maps a joint index to the original matrix transformation of a bone
     const origMatrices = new Map<number, Mat4>();
@@ -458,7 +458,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             dataOffset: modelMatrix.byteOffset,
             size: modelMatrix.byteLength
         });
-        buffer.writeBuffers = writeBuffers;
+        reactive(buffer).writeBuffers = writeBuffers;
 
         // Write to skinned grid bone uniform buffer
         const buffer0 = getIGPUBuffer(skinnedGridJointUniformBuffer);
@@ -470,7 +470,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 data: gridBoneCollection.transforms[i]
             });
         }
-        buffer0.writeBuffers = writeBuffers0;
+        reactive(buffer0).writeBuffers = writeBuffers0;
 
         // Update node matrixes
         for (const scene of whaleScene.scenes)
