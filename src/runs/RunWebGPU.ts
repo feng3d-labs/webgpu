@@ -11,7 +11,6 @@ import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUBuffer } from "../caches/getIGPUBuffer";
-import { getIGPUComputePipeline } from "../caches/getIGPUComputePipeline";
 import { IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
 import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
@@ -270,11 +269,9 @@ export class RunWebGPU
         this.runWorkgroups(passEncoder, workgroups);
     }
 
-    protected runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, material: ComputePipeline)
+    protected runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, pipeline: ComputePipeline)
     {
-        const gpuComputePipeline = getIGPUComputePipeline(material);
-
-        const computePipeline = getGPUComputePipeline(device, gpuComputePipeline);
+        const computePipeline = getGPUComputePipeline(device, pipeline);
         passEncoder.setPipeline(computePipeline);
     }
 

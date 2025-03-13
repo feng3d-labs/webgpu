@@ -1,17 +1,39 @@
 import { CanvasContext } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import "../data/polyfills/CanvasContext";
+import { computed, ComputedRef, reactive } from "@vue/reactivity";
 
 export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
 {
-    let gpuCanvasContext = canvasContextMap[context.canvasId];
-    if (gpuCanvasContext) return gpuCanvasContext;
+    let result = canvasContextMap[context.canvasId];
+    if (result) return result;
 
     const canvas = document.getElementById(context.canvasId) as HTMLCanvasElement;
 
-    gpuCanvasContext = canvas.getContext("webgpu");
+    const gpuCanvasContext = canvas.getContext("webgpu");
 
-    canvasContextMap[context.canvasId] = gpuCanvasContext;
+    result = computed(() =>
+    {
+        // 监听
+        const ro = reactive(context);
+        const configuration = ro.configuration;
+        if (configuration)
+        {
+            configuration.format;
+            configuration.usage;
+            configuration.viewFormats?.forEach(() => { });
+            configuration.colorSpace;
+            configuration.toneMapping?.mode;
+            configuration.alphaMode;
+        }
+
+        // 执行
+        updateConfigure();
+
+        return gpuCanvasContext;
+    });
+
+    canvasContextMap[context.canvasId] = result;
 
     const updateConfigure = () =>
     {
@@ -38,11 +60,7 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
         });
     };
 
-    updateConfigure();
-
-    watcher.watchobject(context, { configuration: { usage: undefined, format: undefined, colorSpace: undefined, toneMapping: { mode: undefined }, alphaMode: undefined } }, updateConfigure);
-
-    return gpuCanvasContext;
+    return result;
 }
 
-const canvasContextMap: { [canvasId: string]: GPUCanvasContext } = {};
+const canvasContextMap: { [canvasId: string]: ComputedRef<GPUCanvasContext> } = {};

@@ -30,15 +30,15 @@ export function getGPUComputePipeline(device: GPUDevice, computePipeline: Comput
     }
 
     // 从GPU管线中获取管线布局。
-    const gpuPipelineLayout = getIGPUPipelineLayout({ compute: computePipeline.compute.code });
+    const gpuPipelineLayout = getIGPUPipelineLayout({ compute: computeStage.code });
 
     const layout = getGPUPipelineLayout(device, gpuPipelineLayout);
 
     pipeline = device.createComputePipeline({
         layout,
         compute: {
-            ...computePipeline.compute,
-            module: getGPUShaderModule(device, computePipeline.compute.code),
+            ...computeStage,
+            module: getGPUShaderModule(device, computeStage.code),
         },
     });
     computePipelineMap.set(computePipeline, pipeline);
