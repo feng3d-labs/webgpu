@@ -1,14 +1,13 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { IRenderPassObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
+import { getIGPUBuffer, reactive, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 import { MsdfTextRenderer } from "./msdfText";
-
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -248,7 +247,7 @@ setBlendConstant().`,
             dataOffset: transformationMatrix.byteOffset,
             size: transformationMatrix.byteLength
         });
-        buffer.writeBuffers = writeBuffers;
+        reactive(buffer).writeBuffers = writeBuffers;
 
         const renderObjects: IRenderPassObject[] = [];
 

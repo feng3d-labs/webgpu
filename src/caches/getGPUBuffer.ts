@@ -1,5 +1,6 @@
 import { Buffer, UnReadonly } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
+import { computed, ComputedRef, effect, reactive } from "../reactivity";
 
 /**
  * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。
@@ -26,10 +27,10 @@ const defaultGPUBufferUsage = 0
  */
 export function getGPUBuffer(device: GPUDevice, buffer: Buffer)
 {
-    const gBufferMap: WeakMap<Buffer, GPUBuffer> = device["_gBufferMap"] = device["_gBufferMap"] || new WeakMap<Buffer, GPUBuffer>();
+    const gBufferMap: WeakMap<Buffer, ComputedRef<GPUBuffer>> = device["_gBufferMap"] = device["_gBufferMap"] || new WeakMap<Buffer, ComputedRef<GPUBuffer>>();
 
-    let gBuffer: GPUBuffer = gBufferMap.get(buffer);
-    if (gBuffer) return gBuffer;
+    let result = gBufferMap.get(buffer);
+    if (result) return result.value;
 
     const size = buffer.size;
     console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
@@ -42,7 +43,7 @@ export function getGPUBuffer(device: GPUDevice, buffer: Buffer)
     // 初始化时存在数据，则使用map方式上传第一次数据。
     const mappedAtCreation = buffer.data !== undefined;
 
-    gBuffer = device.createBuffer({ label, size, usage, mappedAtCreation });
+    const gBuffer = device.createBuffer({ label, size, usage, mappedAtCreation });
 
     if (mappedAtCreation)
     {
@@ -62,63 +63,72 @@ export function getGPUBuffer(device: GPUDevice, buffer: Buffer)
     const writeBuffer = () =>
     {
         // 处理数据写入GPU缓冲
-        if (buffer.writeBuffers)
+        if (!buffer.writeBuffers) return;
+        buffer.writeBuffers.forEach((writeBuffer) =>
         {
-            buffer.writeBuffers.forEach((v) =>
+            const bufferOffset = writeBuffer.bufferOffset ?? 0;
+            const data = writeBuffer.data;
+            const dataOffset = writeBuffer.dataOffset ?? 0;
+            const size = writeBuffer.size;
+
+            let arrayBuffer: ArrayBuffer;
+            let dataOffsetByte: number;
+            let sizeByte: number;
+            if (ArrayBuffer.isView(data))
             {
-                const bufferData = v;
+                const bytesPerElement = (data as Uint8Array).BYTES_PER_ELEMENT;
 
-                let bufferOffset = 0;
-                let dataOffset = 0;
-                bufferOffset = bufferData.bufferOffset ?? bufferOffset;
-                const data = bufferData.data;
-                dataOffset = bufferData.dataOffset ?? dataOffset;
-                const size = bufferData.size;
+                arrayBuffer = data.buffer;
+                dataOffsetByte = data.byteOffset + bytesPerElement * dataOffset;
+                sizeByte = size ? (bytesPerElement * size) : data.byteLength;
+            }
+            else
+            {
+                arrayBuffer = data;
+                dataOffsetByte = dataOffset ?? 0;
+                sizeByte = size ?? (data.byteLength - dataOffsetByte);
+            }
 
-                let arrayBuffer: ArrayBuffer;
-                let dataOffsetByte: number;
-                let sizeByte: number;
-                if (ArrayBuffer.isView(data))
-                {
-                    const bytesPerElement = (data as Uint8Array).BYTES_PER_ELEMENT;
+            // 防止给出数据不够的情况
+            console.assert(sizeByte <= arrayBuffer.byteLength - dataOffsetByte, `上传的尺寸超出数据范围！`);
 
-                    arrayBuffer = data.buffer;
-                    dataOffsetByte = data.byteOffset + bytesPerElement * dataOffset;
-                    sizeByte = size ? (bytesPerElement * size) : data.byteLength;
-                }
-                else
-                {
-                    arrayBuffer = data;
-                    dataOffsetByte = dataOffset ?? 0;
-                    sizeByte = size ?? (data.byteLength - dataOffsetByte);
-                }
+            console.assert(sizeByte % 4 === 0, `写入数据长度不是4的倍数！`);
 
-                // 防止给出数据不够的情况
-                console.assert(sizeByte <= arrayBuffer.byteLength - dataOffsetByte, `上传的尺寸超出数据范围！`);
-
-                console.assert(sizeByte % 4 === 0, `写入数据长度不是4的倍数！`);
-
-                //
-                device.queue.writeBuffer(
-                    gBuffer,
-                    bufferOffset,
-                    arrayBuffer,
-                    dataOffsetByte,
-                    sizeByte,
-                );
-            });
-            buffer.writeBuffers = null;
-        }
+            //
+            device.queue.writeBuffer(
+                gBuffer,
+                bufferOffset,
+                arrayBuffer,
+                dataOffsetByte,
+                sizeByte,
+            );
+        });
+        rb.writeBuffers = null;
     };
-    writeBuffer();
 
-    watcher.watch(buffer, "writeBuffers", writeBuffer);
+    const rb = reactive(buffer);
+    // 处理数据写入GPU缓冲
+    result = computed(() =>
+    {
+        // 监听
+        rb.writeBuffers?.forEach(() => { });
+
+        // 执行
+        writeBuffer();
+
+        return gBuffer;
+    });
+
+    // 这行是不是可以删掉？
+    effect(() =>{
+        result.value;
+    })
 
     const dataChange = () =>
     {
         const writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({ data: buffer.data });
-        buffer.writeBuffers = writeBuffers;
+        rb.writeBuffers = writeBuffers;
     };
 
     watcher.watch(buffer, "data", dataChange);
@@ -133,12 +143,11 @@ export function getGPUBuffer(device: GPUDevice, buffer: Buffer)
             gBufferMap.delete(buffer);
 
             //
-            watcher.unwatch(buffer, "writeBuffers", writeBuffer);
             watcher.unwatch(buffer, "data", dataChange);
         };
     })(gBuffer.destroy);
 
-    gBufferMap.set(buffer, gBuffer);
+    gBufferMap.set(buffer, result);
 
-    return gBuffer;
+    return result.value;
 }

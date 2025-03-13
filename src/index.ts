@@ -32,5 +32,6 @@ export * as internal from "./internal";
 export * from "./utils/ChainMap";
 export * from "./utils/getOffscreenCanvasId";
 
-// 导出
-export * from "./export";
+// 导出反应式相关功能
+export * from "./reactivity";
+

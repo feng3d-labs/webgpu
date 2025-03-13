@@ -3,6 +3,7 @@ import { watcher } from "@feng3d/watcher";
 import { VariableInfo } from "wgsl_reflect";
 
 import { getIGPUBuffer } from "../caches/getIGPUBuffer";
+import { reactive } from "../reactivity";
 
 /**
  * 初始化缓冲区绑定。
@@ -52,7 +53,7 @@ export function updateBufferBinding(resourceName: string, bufferBindingInfo: Buf
                         console.warn(`没有找到 统一块变量属性 ${paths.join(".")} 的值！`);
                     }
 
-return;
+                    return;
                 }
             }
 
@@ -72,7 +73,7 @@ return;
 
             const writeBuffers = buffer.writeBuffers ?? [];
             writeBuffers.push({ bufferOffset: offset + itemInfoOffset, data: data.buffer, dataOffset: data.byteOffset, size: Math.min(itemInfoSize, data.byteLength) });
-            buffer.writeBuffers = writeBuffers;
+            reactive(buffer).writeBuffers = writeBuffers;
         };
 
         update();
