@@ -1,3 +1,4 @@
+import { BufferBindingInfo } from "@feng3d/render-api";
 import { ArrayInfo, StructInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 /**
@@ -9,7 +10,7 @@ import { ArrayInfo, StructInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
  * @param bufferBindingInfo 缓冲区绑定信息。
  * @returns
  */
-export function getBufferBindingInfo(type: TypeInfo, paths: string[] = [], offset = 0, bufferBindingInfo: IBufferBindingInfo = { size: type.size, items: [] })
+export function getBufferBindingInfo(type: TypeInfo, paths: string[] = [], offset = 0, bufferBindingInfo: BufferBindingInfo = { size: type.size, items: [] })
 {
     if (type.isStruct)
     {
@@ -118,16 +119,3 @@ const templateFormatDataCls: { [key: string]: DataCls } = {
 
 type DataCls = Float32ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Int16ArrayConstructor;
 
-/**
- * 缓冲区绑定信息。
- */
-export interface IBufferBindingInfo
-{
-    size: number;
-    items: {
-        paths: string[];
-        offset: number;
-        size: number;
-        Cls: DataCls;
-    }[]
-}

@@ -1,10 +1,10 @@
 import { watcher } from "@feng3d/watcher";
 
-import { BufferBinding, Uniforms } from "@feng3d/render-api";
+import { BufferBinding, BufferBindingInfo, Uniforms } from "@feng3d/render-api";
 import { getIGPUPipelineLayout, getIGPUShaderKey, IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { BindGroupLayoutDescriptor } from "../internal/PipelineLayoutDescriptor";
 import { ChainMap } from "../utils/ChainMap";
-import { getBufferBindingInfo, IBufferBindingInfo } from "../utils/getBufferBindingInfo";
+import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
 import { updateBufferBinding } from "../utils/updateBufferBinding";
 import { getIGPUBuffer } from "./getIGPUBuffer";
 import { IGPUBindGroupDescriptor, IGPUBindGroupEntry } from "./getGPUBindGroup";
@@ -62,7 +62,7 @@ function getIGPUSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, binding
             if (entry1.buffer)
             {
                 const bufferBinding = ((typeof bindingResource === "number") ? [bindingResource] : bindingResource) as BufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
-                const bufferBindingInfo: IBufferBindingInfo = variableInfo["_bufferBindingInfo"] ||= getBufferBindingInfo(variableInfo.type);
+                const bufferBindingInfo: BufferBindingInfo = variableInfo["_bufferBindingInfo"] ||= getBufferBindingInfo(variableInfo.type);
                 // 更新缓冲区绑定的数据。
                 updateBufferBinding(resourceName, bufferBindingInfo, bufferBinding);
                 //

@@ -1,9 +1,8 @@
-import { BufferBinding, UnReadonly } from "@feng3d/render-api";
+import { BufferBinding, BufferBindingInfo, UnReadonly } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { VariableInfo } from "wgsl_reflect";
 
 import { getIGPUBuffer } from "../caches/getIGPUBuffer";
-import { IBufferBindingInfo } from "./getBufferBindingInfo";
 
 /**
  * 初始化缓冲区绑定。
@@ -12,7 +11,7 @@ import { IBufferBindingInfo } from "./getBufferBindingInfo";
  * @param uniformData
  * @returns
  */
-export function updateBufferBinding(resourceName: string, bufferBindingInfo: IBufferBindingInfo, uniformData: BufferBinding)
+export function updateBufferBinding(resourceName: string, bufferBindingInfo: BufferBindingInfo, uniformData: BufferBinding)
 {
     if (uniformData["_variableInfo"] !== undefined)
     {
