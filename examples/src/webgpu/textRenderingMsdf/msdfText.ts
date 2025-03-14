@@ -3,7 +3,7 @@ import { mat4, Mat4 } from "wgpu-matrix";
 import msdfTextWGSL from "./msdfText.wgsl";
 
 import { BindingResources, RenderPassObject, RenderPipeline, Sampler, Texture } from "@feng3d/render-api";
-import { getIGPUBuffer, reactive, RenderBundle } from "@feng3d/webgpu";
+import { getGBuffer, reactive, RenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -104,7 +104,7 @@ export class MsdfText
     if (this.bufferArrayDirty)
     {
       this.bufferArrayDirty = false;
-      const buffer = getIGPUBuffer(this.textBuffer);
+      const buffer = getGBuffer(this.textBuffer);
       const writeBuffers = buffer.writeBuffers || [];
       writeBuffers.push({
         bufferOffset: 0,
@@ -438,7 +438,7 @@ export class MsdfTextRenderer
     this.cameraUniformBuffer.set(projection, 0);
     this.cameraUniformBuffer.set(view, 16);
 
-    const buffer = getIGPUBuffer(this.cameraUniformBuffer);
+    const buffer = getGBuffer(this.cameraUniformBuffer);
     const writeBuffers = buffer.writeBuffers || [];
     writeBuffers.push({
       data: this.cameraUniformBuffer,

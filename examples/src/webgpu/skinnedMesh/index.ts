@@ -8,7 +8,7 @@ import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
 import { BindingResources, IPassEncoder, RenderObject, RenderPass, RenderPassDescriptor, Texture } from "@feng3d/render-api";
-import { getIGPUBuffer, reactive, WebGPU } from "@feng3d/webgpu";
+import { getGBuffer, reactive, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -147,7 +147,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         .add(settings, "renderMode", ["NORMAL", "JOINTS", "WEIGHTS"])
         .onChange(() =>
         {
-            const buffer = getIGPUBuffer(generalUniformsBuffer);
+            const buffer = getGBuffer(generalUniformsBuffer);
             const writeBuffers = buffer.writeBuffers || [];
 
             writeBuffers.push({
@@ -174,7 +174,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.cameraZ = -14.6;
             }
         }
-        const buffer = getIGPUBuffer(generalUniformsBuffer);
+        const buffer = getGBuffer(generalUniformsBuffer);
         const writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({
             bufferOffset: 4,
@@ -374,7 +374,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // Create bones of the skinned grid and write the inverse bind positions to
     // the skinned grid's inverse bind matrix array
-    const buffer = getIGPUBuffer(skinnedGridInverseBindUniformBuffer);
+    const buffer = getGBuffer(skinnedGridInverseBindUniformBuffer);
     const writeBuffers = buffer.writeBuffers || [];
     const gridBoneCollection = createBoneCollection(5);
     for (let i = 0; i < gridBoneCollection.bindPosesInv.length; i++)
@@ -438,7 +438,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         animSkinnedGrid(gridBoneCollection.transforms, angle);
 
         // Write to mvp to camera buffer
-        const buffer = getIGPUBuffer(cameraBuffer);
+        const buffer = getGBuffer(cameraBuffer);
         const writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({
             bufferOffset: 0,
@@ -461,7 +461,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         reactive(buffer).writeBuffers = writeBuffers;
 
         // Write to skinned grid bone uniform buffer
-        const buffer0 = getIGPUBuffer(skinnedGridJointUniformBuffer);
+        const buffer0 = getGBuffer(skinnedGridJointUniformBuffer);
         const writeBuffers0 = buffer0.writeBuffers || [];
         for (let i = 0; i < gridBoneCollection.transforms.length; i++)
         {

@@ -1,5 +1,5 @@
 import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { WebGPU, getIGPUBuffer, reactive } from "@feng3d/webgpu";
+import { WebGPU, getGBuffer, reactive } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { mesh } from "../../meshes/stanfordDragon";
@@ -173,14 +173,14 @@ const init = async (canvas: HTMLCanvasElement) =>
         const lightMatrixData = lightViewProjMatrix as Float32Array;
         const cameraMatrixData = viewProjMatrix as Float32Array;
         const lightData = lightPosition as Float32Array;
-        reactive(getIGPUBuffer(sceneUniformBuffer)).writeBuffers = [
+        reactive(getGBuffer(sceneUniformBuffer)).writeBuffers = [
             { bufferOffset: 0, data: lightMatrixData },
             { bufferOffset: 64, data: cameraMatrixData },
             { bufferOffset: 128, data: lightData },
         ];
 
         const modelData = modelMatrix as Float32Array;
-        reactive(getIGPUBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
+        reactive(getGBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
     }
 
     // Rotates the camera around the origin based on time.
@@ -258,9 +258,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     function frame()
     {
         const cameraViewProj = getCameraViewProjMatrix();
-        const writeBuffers = getIGPUBuffer(sceneUniformBuffer).writeBuffers || [];
+        const writeBuffers = getGBuffer(sceneUniformBuffer).writeBuffers || [];
         writeBuffers.push({ bufferOffset: 64, data: cameraViewProj });
-        reactive(getIGPUBuffer(sceneUniformBuffer)).writeBuffers = writeBuffers;
+        reactive(getGBuffer(sceneUniformBuffer)).writeBuffers = writeBuffers;
 
         webgpu.submit(submit);
 

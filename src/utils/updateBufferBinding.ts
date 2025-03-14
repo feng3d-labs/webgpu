@@ -2,7 +2,7 @@ import { BufferBinding, BufferBindingInfo, UnReadonly } from "@feng3d/render-api
 import { watcher } from "@feng3d/watcher";
 import { VariableInfo } from "wgsl_reflect";
 
-import { getIGPUBuffer } from "../caches/getIGPUBuffer";
+import { getGBuffer } from "../caches/getIGPUBuffer";
 import { reactive } from "../reactivity";
 
 /**
@@ -34,7 +34,7 @@ export function updateBufferBinding(resourceName: string, bufferBindingInfo: Buf
         (uniformData as UnReadonly<BufferBinding>).bufferView = new Uint8Array(size);
     }
 
-    const buffer = getIGPUBuffer(uniformData.bufferView);
+    const buffer = getGBuffer(uniformData.bufferView);
     const offset = uniformData.bufferView.byteOffset;
 
     for (let i = 0; i < bufferBindingInfo.items.length; i++)

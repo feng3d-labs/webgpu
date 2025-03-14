@@ -1,6 +1,6 @@
 import { BindingResources, BufferBinding, CommandEncoder, GBuffer, RenderPassDescriptor, Submit } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { ComputePass, ComputePipeline, TimestampQuery, WebGPU, getIGPUBuffer, reactive } from "@feng3d/webgpu";
+import { ComputePass, ComputePipeline, TimestampQuery, WebGPU, getGBuffer, reactive } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import Stats from "stats.js";
 
@@ -704,7 +704,7 @@ async function init(
     {
         // Write elements buffer
 
-        let iGPUBuffer = getIGPUBuffer(elementsInputBuffer.bufferView);
+        let iGPUBuffer = getGBuffer(elementsInputBuffer.bufferView);
         let writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: elements });
         reactive(iGPUBuffer).writeBuffers = writeBuffers;
@@ -718,7 +718,7 @@ async function init(
             settings["Next Swap Span"],
         ]);
 
-        iGPUBuffer = getIGPUBuffer(computeUniformsBuffer.bufferView);
+        iGPUBuffer = getGBuffer(computeUniformsBuffer.bufferView);
         writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: dims });
         writeBuffers.push({ bufferOffset: 8, data: stepDetails });
@@ -796,7 +796,7 @@ async function init(
             commandEncoder.passEncoders.push(
                 {
                     __type__: "CopyBufferToBuffer",
-                    source: getIGPUBuffer(elementsOutputBuffer.bufferView),
+                    source: getGBuffer(elementsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: elementsStagingBuffer,
                     destinationOffset: 0,
@@ -804,7 +804,7 @@ async function init(
                 },
                 {
                     __type__: "CopyBufferToBuffer",
-                    source: getIGPUBuffer(atomicSwapsOutputBuffer.bufferView),
+                    source: getGBuffer(atomicSwapsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: atomicSwapsStagingBuffer,
                     destinationOffset: 0,

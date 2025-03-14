@@ -11,7 +11,7 @@ import { getGPURenderPassFormat } from "../caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
-import { getIGPUBuffer } from "../caches/getIGPUBuffer";
+import { getGBuffer } from "../caches/getIGPUBuffer";
 import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
 import { ComputeObject } from "../data/ComputeObject";
@@ -432,7 +432,7 @@ export class RunWebGPU
         //
         renderPipeline.vertexBuffers?.forEach((vertexBuffer, index) =>
         {
-            const buffer = getIGPUBuffer(vertexBuffer.data);
+            const buffer = getGBuffer(vertexBuffer.data);
             (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
             const gBuffer = getGPUBuffer(device, buffer);
@@ -445,7 +445,7 @@ export class RunWebGPU
     {
         if (!indices) return;
 
-        const buffer = getIGPUBuffer(indices);
+        const buffer = getGBuffer(indices);
         (buffer as UnReadonly<GBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
         const gBuffer = getGPUBuffer(device, buffer);

@@ -1,5 +1,5 @@
 import { BufferBinding, CanvasContext, IPassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
+import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -296,8 +296,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // initialize the heads buffer
             passEncoders.push({
                 __type__: "CopyBufferToBuffer",
-                source: getIGPUBuffer(headsInitBuffer),
-                destination: getIGPUBuffer(headsBuffer.bufferView),
+                source: getGBuffer(headsInitBuffer),
+                destination: getGBuffer(headsBuffer.bufferView),
             });
 
             const scissorX = 0;

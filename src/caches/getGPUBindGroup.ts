@@ -10,7 +10,7 @@ import { updateBufferBinding } from "../utils/updateBufferBinding";
 import { getGPUBuffer } from "./getGPUBuffer";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
-import { getIGPUBuffer } from "./getIGPUBuffer";
+import { getGBuffer } from "./getIGPUBuffer";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources)
 {
@@ -51,7 +51,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
             {
                 const resource = v.resource as BufferBinding;
                 //
-                const b = getIGPUBuffer(resource.bufferView);
+                const b = getGBuffer(resource.bufferView);
                 const buffer = getGPUBuffer(device, b);
 
                 const offset = resource.bufferView.byteOffset;
@@ -216,7 +216,7 @@ function getSetBindGroup(bindGroupLayout: GPUBindGroupLayout, bindingResources: 
                 // 更新缓冲区绑定的数据。
                 updateBufferBinding(resourceName, bufferBindingInfo, bufferBinding);
                 //
-                const buffer = getIGPUBuffer(bufferBinding.bufferView);
+                const buffer = getGBuffer(bufferBinding.bufferView);
                 (buffer as any).label = buffer.label || (`BufferBinding ${variableInfo.name}`);
                 //
                 entry.resource = bufferBinding;

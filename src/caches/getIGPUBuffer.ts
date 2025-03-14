@@ -1,6 +1,6 @@
 import { GBuffer, TypedArray } from "@feng3d/render-api";
 
-export function getIGPUBuffer(bufferSource: TypedArray)
+export function getGBuffer(bufferSource: TypedArray)
 {
     let arrayBuffer = bufferSource as ArrayBuffer;
     if ((bufferSource as ArrayBufferView).buffer)

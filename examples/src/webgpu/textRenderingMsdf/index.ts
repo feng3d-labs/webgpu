@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { BindingResources, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, reactive, WebGPU } from "@feng3d/webgpu";
+import { getGBuffer, reactive, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
@@ -240,7 +240,7 @@ setBlendConstant().`,
     {
         const transformationMatrix = getTransformationMatrix();
 
-        const buffer = getIGPUBuffer(uniformBuffer);
+        const buffer = getGBuffer(uniformBuffer);
         const writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({
             data: transformationMatrix.buffer,
