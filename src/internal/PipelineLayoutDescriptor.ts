@@ -20,6 +20,9 @@ export interface PipelineLayoutDescriptor
     bindGroupLayouts: BindGroupLayoutDescriptor[];
 }
 
+/**
+ * {@link GPUBindGroupLayoutDescriptor}
+ */
 export interface BindGroupLayoutDescriptor
 {
     label?: string;

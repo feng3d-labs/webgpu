@@ -3,11 +3,6 @@ import { getIGPUBindGroupLayoutEntryMap, IGPUBindGroupLayoutEntryMap } from "./g
 
 export type IGPUShader = { readonly vertex?: string, readonly fragment?: string, readonly compute?: string };
 
-export function getIGPUShaderKey(shader: IGPUShader)
-{
-    return shader.vertex + shader.fragment + shader.compute;
-}
-
 /**
  * 从GPU管线中获取管线布局。
  *
@@ -16,7 +11,7 @@ export function getIGPUShaderKey(shader: IGPUShader)
  */
 export function getIGPUPipelineLayout(shader: IGPUShader): PipelineLayoutDescriptor
 {
-    const shaderKey = getIGPUShaderKey(shader);
+    const shaderKey = shader.vertex + shader.fragment + shader.compute;
 
     //
     let gpuPipelineLayout = gpuPipelineLayoutMap[shaderKey];

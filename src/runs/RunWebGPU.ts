@@ -1,7 +1,8 @@
 import { anyEmitter } from "@feng3d/event";
-import { Buffer, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPipeline, ScissorRect, Submit, Uniforms, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { Buffer, BufferBinding, BufferBindingInfo, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPipeline, ScissorRect, Submit, Uniforms, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
-import { getGPUBindGroup } from "../caches/getGPUBindGroup";
+import { watcher } from "@feng3d/watcher";
+import { BindGroupDescriptor, BindGroupEntry, getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
 import { getGPUComputePipeline } from "../caches/getGPUComputePipeline";
 import { getGPURenderOcclusionQuery } from "../caches/getGPURenderOcclusionQuery";
@@ -11,8 +12,7 @@ import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUBuffer } from "../caches/getIGPUBuffer";
-import { IGPUShader } from "../caches/getIGPUPipelineLayout";
-import { getIGPUSetBindGroups } from "../caches/getIGPUSetBindGroups";
+import { getIGPUPipelineLayout, IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
 import { ComputeObject } from "../data/ComputeObject";
@@ -24,8 +24,11 @@ import "../data/polyfills/RenderPass";
 import { RenderBundle } from "../data/RenderBundle";
 import { Workgroups } from "../data/Workgroups";
 import { GPUQueue_submit } from "../eventnames";
+import { BindGroupLayoutDescriptor } from "../internal/PipelineLayoutDescriptor";
 import { IRenderPassFormat } from "../internal/RenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
+import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
+import { updateBufferBinding } from "../utils/updateBufferBinding";
 
 export class RunWebGPU
 {
@@ -418,12 +421,11 @@ export class RunWebGPU
     protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: Uniforms)
     {
         // 计算 bindGroups
-        const setBindGroups = getIGPUSetBindGroups(shader, bindingResources);
-
-        setBindGroups?.forEach((setBindGroup, index) =>
+        const layout = getIGPUPipelineLayout(shader);
+        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
-            const gpuBindGroup = getGPUBindGroup(device, setBindGroup.bindGroup)[getRealGPUBindGroup]();
-            passEncoder.setBindGroup(index, gpuBindGroup, setBindGroup.dynamicOffsets);
+            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
+            passEncoder.setBindGroup(group, gpuBindGroup);
         });
     }
 
@@ -471,3 +473,4 @@ export class RunWebGPU
 
 let autoIndex = 0;
 let autoVertexIndex = 0;
+

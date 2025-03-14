@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BufferBinding, CanvasTexture, Sampler, TextureView, UniformType } from "@feng3d/render-api";
+import { BufferBinding, BufferBindingInfo, CanvasTexture, Sampler, TextureView, Uniforms, UniformType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
 import { VideoTexture } from "../data/VideoTexture";
@@ -9,12 +9,18 @@ import { getGPUBuffer } from "./getGPUBuffer";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getIGPUBuffer } from "./getIGPUBuffer";
+import { BindGroupLayoutDescriptor } from "../internal/PipelineLayoutDescriptor";
+import { ChainMap } from "../utils/ChainMap";
+import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
+import { updateBufferBinding } from "../utils/updateBufferBinding";
 
-export function getGPUBindGroup(device: GPUDevice, bindGroup: BindGroupDescriptor)
+export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: Uniforms)
 {
+    const bindGroupDescriptor = getSetBindGroup(bindGroupLayout, bindingResources);
+
     const bindGroupMap: WeakMap<BindGroupDescriptor, GPUBindGroup> = device["_bindGroupMap"] = device["_bindGroupMap"] || new WeakMap();
 
-    let gBindGroup = bindGroupMap.get(bindGroup);
+    let gBindGroup = bindGroupMap.get(bindGroupDescriptor);
     if (gBindGroup) return gBindGroup;
 
     // 总是更新函数列表。
@@ -22,9 +28,9 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: BindGroupDescripto
     // 执行一次函数列表
     const onceUpdateFuncs: (() => void)[] = [];
 
-    const layout = getGPUBindGroupLayout(device, bindGroup.layout);
+    const layout = getGPUBindGroupLayout(device, bindGroupDescriptor.layout);
 
-    const entries = bindGroup.entries.map((v) =>
+    const entries = bindGroupDescriptor.entries.map((v) =>
     {
         const entry: GPUBindGroupEntry = { binding: v.binding, resource: null };
 
@@ -116,7 +122,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroup: BindGroupDescripto
 
         gBindGroup = device.createBindGroup({ layout, entries });
 
-        bindGroupMap.set(bindGroup, gBindGroup);
+        bindGroupMap.set(bindGroupDescriptor, gBindGroup);
 
         // 设置更新外部纹理/画布纹理视图
         if (awaysUpdateFuncs.length > 0)
@@ -180,3 +186,59 @@ export interface BindGroupEntry
 }
 
 export type BindingResource = Sampler | TextureView | VideoTexture | UniformType;
+
+
+function getSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: Uniforms)
+{
+    const map: ChainMap<Array<any>, BindGroupDescriptor> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
+    const subBindingResources = bindGroupLayout.entryNames.map((v) => bindingResources[v]);
+    let bindGroupDescriptor = map.get(subBindingResources);
+    if (bindGroupDescriptor) return bindGroupDescriptor;
+
+    const entries: BindGroupEntry[] = [];
+    bindGroupDescriptor = { layout: bindGroupLayout, entries };
+    map.set(subBindingResources, bindGroupDescriptor);
+
+    //
+    bindGroupLayout.entries.forEach((entry1) =>
+    {
+        const { variableInfo, binding } = entry1;
+        //
+        const entry: BindGroupEntry = { binding, resource: null };
+
+        entries.push(entry);
+
+        const resourceName = variableInfo.name;
+
+        const updateResource = () =>
+        {
+            const bindingResource = bindingResources[resourceName];
+            console.assert(!!bindingResource, `在绑定资源中没有找到 ${resourceName} 。`);
+
+            //
+            if (entry1.buffer)
+            {
+                const bufferBinding = ((typeof bindingResource === "number") ? [bindingResource] : bindingResource) as BufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
+                const bufferBindingInfo: BufferBindingInfo = variableInfo["_bufferBindingInfo"] ||= getBufferBindingInfo(variableInfo.type);
+                // 更新缓冲区绑定的数据。
+                updateBufferBinding(resourceName, bufferBindingInfo, bufferBinding);
+                //
+                const buffer = getIGPUBuffer(bufferBinding.bufferView);
+                (buffer as any).label = buffer.label || (`BufferBinding ${variableInfo.name}`);
+                //
+                entry.resource = bufferBinding;
+            }
+            else
+            {
+                entry.resource = bindingResource;
+            }
+        };
+
+        //
+        updateResource();
+        watcher.watch(bindingResources, resourceName, updateResource);
+    });
+
+    return bindGroupDescriptor;
+}
+
