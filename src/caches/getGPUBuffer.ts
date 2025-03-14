@@ -1,4 +1,4 @@
-import { Buffer, UnReadonly } from "@feng3d/render-api";
+import { GBuffer, UnReadonly } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { computed, ComputedRef, effect, reactive } from "../reactivity";
 
@@ -25,9 +25,9 @@ const defaultGPUBufferUsage = 0
  * @param buffer
  * @returns
  */
-export function getGPUBuffer(device: GPUDevice, buffer: Buffer)
+export function getGPUBuffer(device: GPUDevice, buffer: GBuffer)
 {
-    const gBufferMap: WeakMap<Buffer, ComputedRef<GPUBuffer>> = device["_gBufferMap"] = device["_gBufferMap"] || new WeakMap<Buffer, ComputedRef<GPUBuffer>>();
+    const gBufferMap: WeakMap<GBuffer, ComputedRef<GPUBuffer>> = device["_gBufferMap"] = device["_gBufferMap"] || new WeakMap<GBuffer, ComputedRef<GPUBuffer>>();
 
     let result = gBufferMap.get(buffer);
     if (result) return result.value;
@@ -35,7 +35,7 @@ export function getGPUBuffer(device: GPUDevice, buffer: Buffer)
     const size = buffer.size;
     console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
 
-    (buffer as UnReadonly<Buffer>).usage = buffer.usage ?? defaultGPUBufferUsage;
+    (buffer as UnReadonly<GBuffer>).usage = buffer.usage ?? defaultGPUBufferUsage;
 
     const label = buffer.label;
     const usage = buffer.usage;

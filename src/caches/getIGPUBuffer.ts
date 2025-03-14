@@ -1,4 +1,4 @@
-import { Buffer, TypedArray } from "@feng3d/render-api";
+import { GBuffer, TypedArray } from "@feng3d/render-api";
 
 export function getIGPUBuffer(bufferSource: TypedArray)
 {
@@ -8,7 +8,7 @@ export function getIGPUBuffer(bufferSource: TypedArray)
         arrayBuffer = (bufferSource as ArrayBufferView).buffer;
     }
 
-    const gpuBuffer: Buffer = arrayBuffer["_IGPUBuffer"] = arrayBuffer["_IGPUBuffer"] || {
+    const gpuBuffer: GBuffer = arrayBuffer["_IGPUBuffer"] = arrayBuffer["_IGPUBuffer"] || {
         size: Math.ceil(arrayBuffer.byteLength / 4) * 4,
         data: arrayBuffer,
     };

@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { Buffer, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, RenderPassObject, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPipeline, ScissorRect, Submit, BindingResources, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -446,7 +446,7 @@ export class RunWebGPU
         if (!indices) return;
 
         const buffer = getIGPUBuffer(indices);
-        (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
+        (buffer as UnReadonly<GBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
         const gBuffer = getGPUBuffer(device, buffer);
 

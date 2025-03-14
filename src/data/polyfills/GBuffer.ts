@@ -8,7 +8,7 @@ declare module "@feng3d/render-api"
      * {@link GPUBufferDescriptor}
      * {@link GPUBuffer}
      */
-    export interface Buffer
+    export interface GBuffer
     {
         /**
          * The allowed usages for the buffer.

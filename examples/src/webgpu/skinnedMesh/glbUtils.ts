@@ -1,7 +1,7 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { BindingResources, Buffer, FragmentState, IDraw, PrimitiveState, RenderObject, RenderPipeline, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
+import { BindingResources, FragmentState, GBuffer, IDraw, PrimitiveState, RenderObject, RenderPipeline, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { getIGPUBuffer, reactive } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
@@ -245,7 +245,7 @@ export class GLTFBufferView
     byteStride: number;
     view: Uint8Array;
     needsUpload: boolean;
-    gpuBuffer: Buffer;
+    gpuBuffer: GBuffer;
     usage: number;
     constructor(buffer: GLTFBuffer, view: BufferView)
     {
@@ -285,7 +285,7 @@ export class GLTFBufferView
     upload()
     {
         // Note: must align to 4 byte size when mapped at creation is true
-        const buf: Buffer = {
+        const buf: GBuffer = {
             size: alignTo(this.view.byteLength, 4),
             usage: this.usage,
             data: this.view,

@@ -8,7 +8,7 @@ export * from "./data/polyfills/TextureView";
 export * from "./data/RenderBundle";
 export * from "./data/TimestampQuery";
 
-export * from "./data/polyfills/Buffer";
+export * from "./data/polyfills/GBuffer";
 export * from "./data/polyfills/CanvasContext";
 export * from "./data/polyfills/CommandEncoder";
 export * from "./data/polyfills/OcclusionQuery";
