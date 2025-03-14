@@ -76,9 +76,9 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
                 {
                     const bigUint64Array = new BigUint64Array(resultBuf.getMappedRange());
 
-                    const results = bigUint64Array.reduce((pv: boolean[], cv) =>
+                    const results = bigUint64Array.reduce((pv: number[], cv) =>
                     {
-                        pv.push(!!cv);
+                        pv.push(Number(cv));
                         return pv;
                     }, []);
                     resultBuf.unmap();
