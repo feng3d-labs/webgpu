@@ -36,7 +36,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             indices: new Uint16Array([0, 1, 2]), // 顶点索引数据
             draw: { __type__: "DrawIndexed", indexCount: 3 }, // 绘制命令
         },
-        uniforms: { color: [1, 0, 0, 0] as any }, // Uniform 颜色值。
+        bindingResources: { color: [1, 0, 0, 0] as any }, // Uniform 颜色值。
     };
 
     const submit: Submit = { // 一次GPU提交

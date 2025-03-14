@@ -102,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
                         pipeline: pipeline,
-                        uniforms: uniformBindGroup,
+                        bindingResources: uniformBindGroup,
                         geometry: {
                             primitive: {
                                 topology: "triangle-list",

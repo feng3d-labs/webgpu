@@ -322,7 +322,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 viewport: { isYup: false, x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
                 pipeline: texturedSquarePipeline,
-                uniforms: bindingResources0,
+                bindingResources: bindingResources0,
                 geometry: {
                     draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
                 }
@@ -338,7 +338,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             viewport: { isYup: false, x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            uniforms: bindingResources1,
+            bindingResources: bindingResources1,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
             }
@@ -348,7 +348,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            uniforms: bindingResources1,
+            bindingResources: bindingResources1,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
             }
@@ -358,7 +358,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            uniforms: bindingResources1,
+            bindingResources: bindingResources1,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
             }
@@ -368,7 +368,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            uniforms: bindingResources1,
+            bindingResources: bindingResources1,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
             }

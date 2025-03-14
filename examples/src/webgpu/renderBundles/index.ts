@@ -251,7 +251,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             {
                 renderable.renderObject = {
                     pipeline: pipeline,
-                    uniforms: { ...frameBindGroup, ...renderable.bindGroup },
+                    bindingResources: { ...frameBindGroup, ...renderable.bindGroup },
                     geometry: {
                         primitive: {
                             // Backface culling since the sphere is solid piece of geometry.

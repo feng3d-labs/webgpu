@@ -123,7 +123,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
         },
-        uniforms: {
+        bindingResources: {
             uniforms: {
                 modelViewProjectionMatrix: new Float32Array(16)
             },
@@ -146,7 +146,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         updateTransformationMatrix();
 
-        (renderObject.uniforms.uniforms as BufferBinding).modelViewProjectionMatrix = modelViewProjectionMatrix;
+        (renderObject.bindingResources.uniforms as BufferBinding).modelViewProjectionMatrix = modelViewProjectionMatrix;
 
         const data: Submit = {
             commandEncoders: [

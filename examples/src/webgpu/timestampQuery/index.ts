@@ -103,7 +103,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const renderObject: RenderObject = {
         pipeline: pipeline,
-        uniforms: {
+        bindingResources: {
             uniforms,
         },
         geometry: {

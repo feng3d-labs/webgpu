@@ -58,7 +58,7 @@ export abstract class Base2DRendererClass
             descriptor: renderPassDescriptor,
             renderObjects: [{
                 pipeline: pipeline,
-                uniforms: bindingResources,
+                bindingResources: bindingResources,
                 geometry: {
                     primitive: {
                         topology: "triangle-list",

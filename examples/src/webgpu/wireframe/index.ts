@@ -319,7 +319,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     renderObjects.push({
                         pipeline: litPipeline,
-                        uniforms: litBindGroup,
+                        bindingResources: litBindGroup,
                         geometry: {
                             primitive: {
                                 cullFace: "back",
@@ -350,7 +350,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 renderObjects.push({
                     pipeline,
-                    uniforms: wireframeBindGroups[bindGroupNdx],
+                    bindingResources: wireframeBindGroups[bindGroupNdx],
                     geometry: {
                         primitive,
                         draw: { __type__: "DrawVertex", vertexCount: indices.length * countMult },

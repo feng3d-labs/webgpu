@@ -199,7 +199,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                         descriptor: renderPassDescriptor,
                         renderObjects: [{
                             pipeline: pipeline,
-                            uniforms: bindingResources,
+                            bindingResources: bindingResources,
                             geometry: {
                                 vertices,
                                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: kNumPoints },

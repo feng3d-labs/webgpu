@@ -46,7 +46,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
         },
-        uniforms: {
+        bindingResources: {
             uniforms,
         },
         geometry: {
@@ -68,7 +68,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const renderObject1: RenderObject = {
         ...renderObject,
-        uniforms: {
+        bindingResources: {
             uniforms: uniforms1,
         },
     };

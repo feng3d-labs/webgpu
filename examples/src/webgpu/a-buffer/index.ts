@@ -278,7 +278,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             descriptor: opaquePassDescriptor,
             renderObjects: [{
                 pipeline: opaquePipeline,
-                uniforms: bindingResources,
+                bindingResources: bindingResources,
                 geometry: {
                     primitive: {
                         topology: "triangle-list",
@@ -316,7 +316,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
                         pipeline: translucentPipeline,
-                        uniforms: {
+                        bindingResources: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice],
                         },
@@ -342,7 +342,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
                         pipeline: compositePipeline,
-                        uniforms: {
+                        bindingResources: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice]
                         },

@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             },
             draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
         },
-        uniforms: {
+        bindingResources: {
             uniforms,
         },
     };

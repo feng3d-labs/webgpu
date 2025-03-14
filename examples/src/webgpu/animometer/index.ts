@@ -55,7 +55,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const renderObject: RenderObject = {
         pipeline: pipeline,
-        uniforms: {},
+        bindingResources: {},
         geometry: {
             primitive: {
                 frontFace: "ccw",
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         renderObjects0[i] = {
             ...renderObject,
-            uniforms: {
+            bindingResources: {
                 time,
                 uniforms: {
                     bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),

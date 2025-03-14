@@ -94,7 +94,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const renderObject: RenderObject = {
         pipeline: pipeline,
-        uniforms: bindingResources,
+        bindingResources: bindingResources,
         geometry:{
             primitive: {
                 topology: "triangle-list",

@@ -56,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleTextureMixColorWGSL },
         },
-        uniforms: {
+        bindingResources: {
             uniforms,
             mySampler: sampler,
             myTexture: { texture: cubeTexture },

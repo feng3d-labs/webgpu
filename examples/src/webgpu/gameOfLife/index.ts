@@ -134,7 +134,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     renderObjects: [
                         {
                             pipeline: renderPipeline,
-                            uniforms: uniformBindGroup,
+                            bindingResources: uniformBindGroup,
                             geometry: {
                                 primitive: {
                                     topology: "triangle-strip",

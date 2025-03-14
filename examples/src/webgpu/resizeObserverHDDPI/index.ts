@@ -105,7 +105,7 @@ return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
                         pipeline: pipeline,
-                        uniforms: bindGroup,
+                        bindingResources: bindGroup,
                         geometry:{
                             draw: { __type__: "DrawVertex", vertexCount: 3 },
                         }

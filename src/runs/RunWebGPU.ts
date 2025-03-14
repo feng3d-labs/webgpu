@@ -296,7 +296,7 @@ export class RunWebGPU
      */
     protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IRenderPassFormat, renderObject: RenderObject)
     {
-        const { viewport, scissorRect, pipeline, uniforms: bindingResources, geometry } = renderObject;
+        const { viewport, scissorRect, pipeline, bindingResources: bindingResources, geometry } = renderObject;
 
         const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
 

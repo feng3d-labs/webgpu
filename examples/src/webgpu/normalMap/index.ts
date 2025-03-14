@@ -318,7 +318,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     descriptor: renderPassDescriptor,
                     renderObjects: [{
                         pipeline: texturedCubePipeline,
-                        uniforms: bindingResourcesList[currentSurfaceBindGroup],
+                        bindingResources: bindingResourcesList[currentSurfaceBindGroup],
                         // *   position  : float32x3
                         // *   normal    : float32x3
                         // *   uv        : float32x2

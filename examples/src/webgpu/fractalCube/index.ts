@@ -90,7 +90,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             },
             draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
         },
-        uniforms: {
+        bindingResources: {
             uniforms: {
                 modelViewProjectionMatrix: new Float32Array(16)
             },
@@ -110,7 +110,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        (renderObject.uniforms.uniforms as BufferBinding).modelViewProjectionMatrix = transformationMatrix;
+        (renderObject.bindingResources.uniforms as BufferBinding).modelViewProjectionMatrix = transformationMatrix;
 
         const data: Submit = {
             commandEncoders: [

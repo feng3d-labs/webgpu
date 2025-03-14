@@ -253,7 +253,7 @@ setBlendConstant().`,
 
         renderObjects.push({
             pipeline: pipeline,
-            uniforms: uniformBindGroup,
+            bindingResources: uniformBindGroup,
             geometry: {
                 primitive: {
                     // Backface culling since the cube is solid piece of geometry.

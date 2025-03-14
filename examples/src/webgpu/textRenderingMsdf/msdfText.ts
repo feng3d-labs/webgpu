@@ -340,7 +340,7 @@ export class MsdfTextRenderer
       renderObjects: [
         {
           pipeline: font.material,
-          uniforms: {
+          bindingResources: {
             ...font.bindGroup,
             ...bindGroup,
           },

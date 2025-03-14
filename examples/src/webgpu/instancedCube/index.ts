@@ -115,7 +115,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             },
             draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: numInstances }
         },
-        uniforms: {
+        bindingResources: {
             uniforms: {
                 modelViewProjectionMatrix: mvpMatricesData
             },

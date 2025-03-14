@@ -469,7 +469,7 @@ export class GLTFPrimitive
 
         const renderObject: RenderObject = {
             pipeline: this.renderPipeline,
-            uniforms: bindingResources,
+            bindingResources: bindingResources,
             //if skin do something with bone bind group
             geometry: {
                 primitive,

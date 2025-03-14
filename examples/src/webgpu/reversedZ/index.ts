@@ -367,7 +367,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: colorPassPipelines[m],
-                    uniforms: { ...uniformBindGroups[m] },
+                    bindingResources: { ...uniformBindGroups[m] },
                     geometry: {
                         primitive: {
                             cullFace: "back",
@@ -394,7 +394,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
-                    uniforms: { ...uniformBindGroups[m] },
+                    bindingResources: { ...uniformBindGroups[m] },
                     geometry: {
                         primitive: {
                             cullFace: "back",
@@ -416,7 +416,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: precisionPassPipelines[m],
-                    uniforms: { ...uniformBindGroups[m], ...depthTextureBindGroup },
+                    bindingResources: { ...uniformBindGroups[m], ...depthTextureBindGroup },
                     geometry: {
                         primitive: {
                             cullFace: "back",
@@ -443,7 +443,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
-                    uniforms: { ...uniformBindGroups[m] },
+                    bindingResources: { ...uniformBindGroups[m] },
                     geometry: {
                         primitive: {
                             cullFace: "back",
@@ -459,7 +459,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: textureQuadPassPipline,
-                    uniforms: { ...depthTextureBindGroup },
+                    bindingResources: { ...depthTextureBindGroup },
                     geometry: {
                         draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
                     }

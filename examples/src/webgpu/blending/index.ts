@@ -511,7 +511,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const ro: RenderObject = {
             pipeline: dstPipeline,
-            uniforms: dstBindGroup,
+            bindingResources: dstBindGroup,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6 },
             }
@@ -519,7 +519,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const ro1: RenderObject = {
             pipeline: srcPipeline,
-            uniforms: srcBindGroup,
+            bindingResources: srcBindGroup,
             geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6 },
             }

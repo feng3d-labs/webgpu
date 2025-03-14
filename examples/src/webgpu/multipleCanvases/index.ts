@@ -316,7 +316,7 @@ const init = async () =>
                 descriptor: renderPassDescriptor,
                 renderObjects: [{
                     pipeline: pipeline,
-                    uniforms: bindGroup,
+                    bindingResources: bindGroup,
                     geometry: {
                         primitive: {
                             cullFace: "back",
