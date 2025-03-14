@@ -18,6 +18,8 @@ export interface PipelineLayoutDescriptor
      * `@group(N)`.
      */
     bindGroupLayouts: BindGroupLayoutDescriptor[];
+
+    key: string;
 }
 
 /**
@@ -28,9 +30,11 @@ export interface BindGroupLayoutDescriptor
     label?: string;
     entries: BindGroupLayoutEntry[];
     entryNames: string[],
+    key: string,
 }
 
 export interface BindGroupLayoutEntry extends GPUBindGroupLayoutEntry
 {
     variableInfo: VariableInfo;
+    key: string;
 }

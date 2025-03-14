@@ -9,6 +9,9 @@ const external = pkg.standalone ? [] : Object.keys(pkg.dependencies || []);
 const globals = () => namespace;
 
 export default defineConfig({
+    define: {
+        __DEV__: process.env.NODE_ENV === 'development' ? true : false
+    },
     publicDir: false,
     build: {
         lib: {

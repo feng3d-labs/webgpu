@@ -41,6 +41,7 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
         entryMap[name] = {
             variableInfo: uniform,
             visibility: Visibility_ALL, binding, buffer: layout,
+            key: `[${binding}, buffer, ${layout.type} , ${layout.minBindingSize}]`,
         };
     }
 
@@ -60,7 +61,8 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
 
             entryMap[name] = {
                 variableInfo: storage,
-                visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout
+                visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout,
+                key: `[${binding}, buffer, ${layout.type}]`,
             };
         }
         else if (storage.resourceType === ResourceType.StorageTexture)
@@ -82,7 +84,8 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
 
             entryMap[name] = {
                 variableInfo: storage,
-                visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout
+                visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout,
+                key: `[${binding}, storageTexture, ${layout.access}, ${layout.format}, ${layout.viewDimension}]`,
             };
         }
         else
@@ -103,7 +106,8 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
         {
             entryMap[name] = {
                 variableInfo: texture,
-                visibility: Visibility_ALL, binding, externalTexture: {}
+                visibility: Visibility_ALL, binding, externalTexture: {},
+                key: `[${binding}, externalTexture]`,
             };
         }
         else
@@ -151,7 +155,8 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
 
             entryMap[name] = {
                 variableInfo: texture,
-                visibility: Visibility_ALL, binding, texture: layout
+                visibility: Visibility_ALL, binding, texture: layout,
+                key: `[${binding}, texture, ${layout.sampleType}, ${layout.viewDimension}, ${layout.multisampled}]`,
             };
         }
     }
@@ -169,7 +174,8 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
 
         entryMap[name] = {
             variableInfo: sampler,
-            visibility: Visibility_ALL, binding, sampler: layout
+            visibility: Visibility_ALL, binding, sampler: layout,
+            key: `[${binding}, sampler, ${layout.type}]`,
         };
     }
 

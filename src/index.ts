@@ -35,3 +35,5 @@ export * from "./utils/getOffscreenCanvasId";
 // 导出反应式相关功能
 export * from "./reactivity";
 
+import "./global"
+
