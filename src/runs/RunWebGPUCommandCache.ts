@@ -39,9 +39,9 @@ export class RunWebGPUCommandCache extends RunWebGPU
             {
                 map.delete([renderPassFormat._key, renderObjects]);
                 //
-                renderObjects.forEach((v) => { watcher.unwatch(v, "_version", onchanged); });
+                renderObjects.forEach((v) => { watcher.unwatch(v, "_version" as any, onchanged); });
             };
-            renderObjects.forEach((v) => { watcher.watch(v, "_version", onchanged); });
+            renderObjects.forEach((v) => { watcher.watch(v, "_version" as any, onchanged); });
         }
 
         // 执行命令
@@ -116,27 +116,6 @@ export class RunWebGPUCommandCache extends RunWebGPU
         }
         watcher.watch(renderObject.pipeline, '_version', onchanged);
     }
-}
-
-class GPURenderBundleRecord implements GPURenderBundleEncoder
-{
-    __brand: "GPURenderBundleEncoder";
-    label: string;
-    //
-    setPipeline(...args: any): undefined { this["_commands"].push(["setPipeline", args]); }
-    setVertexBuffer(...args: any): undefined { this["_commands"].push(["setVertexBuffer", args]); }
-    setIndexBuffer(...args: any): undefined { this["_commands"].push(["setIndexBuffer", args]); }
-    setBindGroup(...args: any): undefined { this["_commands"].push(["setBindGroup", args]); }
-    draw(...args: any): undefined { this["_commands"].push(["draw", args]); }
-    drawIndexed(...args: any): undefined { this["_commands"].push(["drawIndexed", args]); }
-    drawIndirect(...args: any): undefined { this["_commands"].push(["drawIndirect", args]); }
-    drawIndexedIndirect(...args: any): undefined { this["_commands"].push(["drawIndexedIndirect", args]); }
-    //
-    finish(...args: any): undefined { this["_commands"].push(["finish", args]); }
-    //
-    pushDebugGroup(...args: any): undefined { this["_commands"].push(["pushDebugGroup", args]); }
-    popDebugGroup(...args: any): undefined { this["_commands"].push(["popDebugGroup", args]); }
-    insertDebugMarker(...args: any): undefined { this["_commands"].push(["insertDebugMarker", args]); }
 }
 
 class GPURenderPassRecord implements GPURenderPassEncoder

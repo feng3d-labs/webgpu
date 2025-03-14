@@ -17,7 +17,6 @@ import { getRealGPUBindGroup } from "../const";
 import { ComputeObject } from "../data/ComputeObject";
 import { ComputePass } from "../data/ComputePass";
 import { ComputePipeline } from "../data/ComputePipeline";
-import { } from "../data/polyfills/OcclusionQuery";
 import "../data/polyfills/RenderObject";
 import "../data/polyfills/RenderPass";
 import { RenderBundle } from "../data/RenderBundle";

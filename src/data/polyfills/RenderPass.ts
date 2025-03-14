@@ -1,5 +1,4 @@
-import { RenderPass, RenderPassDescriptor } from "@feng3d/render-api";
-import { } from "./OcclusionQuery";
+import { OcclusionQuery } from "@feng3d/render-api";
 import { RenderBundle } from "../RenderBundle";
 import { TimestampQuery } from "../TimestampQuery";
 

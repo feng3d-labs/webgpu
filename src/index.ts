@@ -11,7 +11,6 @@ export * from "./data/TimestampQuery";
 export * from "./data/polyfills/GBuffer";
 export * from "./data/polyfills/CanvasContext";
 export * from "./data/polyfills/CommandEncoder";
-export * from "./data/polyfills/OcclusionQuery";
 export * from "./data/polyfills/PrimitiveState";
 export * from "./data/polyfills/ReadPixels";
 export * from "./data/polyfills/RenderObject";
