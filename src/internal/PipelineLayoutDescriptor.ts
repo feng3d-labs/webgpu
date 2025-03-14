@@ -35,15 +35,36 @@ export interface BindGroupLayoutDescriptor
 
 declare global
 {
+    interface GPUBindGroupLayoutDescriptor
+    {
+        /**
+         * 绑定组变量名称列表。
+         * 
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        entryNames?: string[],
+
+        /**
+         * 用于判断布局信息是否相同的标识。
+         *
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        key?: string,
+    }
+
     interface GPUBindGroupLayoutEntry
     {
         /**
          * 绑定资源变量信息。
+         * 
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
          */
         variableInfo: VariableInfo;
 
         /**
          * 用于判断布局信息是否相同的标识。
+         * 
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
          */
         key: string;
     }

@@ -26,6 +26,7 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: IGPUShader): GPU
 
         return gBindGroupLayout;
     });
+
     const gPipelineLayout = device.createPipelineLayout({
         bindGroupLayouts,
     });
@@ -46,12 +47,6 @@ export type IGPUShader = { readonly vertex?: string, readonly fragment?: string,
  */
 function getIGPUPipelineLayout(shader: IGPUShader): PipelineLayoutDescriptor
 {
-    const shaderKey = shader.vertex + shader.fragment + shader.compute;
-
-    //
-    let gpuPipelineLayout = gpuPipelineLayoutMap[shaderKey];
-    if (gpuPipelineLayout) return gpuPipelineLayout;
-
     const vertexCode = shader.vertex;
     const fragmentCode = shader.fragment;
     const computeCode = shader.compute;
@@ -128,7 +123,7 @@ function getIGPUPipelineLayout(shader: IGPUShader): PipelineLayoutDescriptor
             console.log(`命中相同的布局 ${pipelineLayoutKey}，公用管线布局对象。`);
         }
     }
-    gpuPipelineLayout = gpuPipelineLayoutMap[shaderKey] = pipelineLayoutDescriptorMap[pipelineLayoutKey]
+    const gpuPipelineLayout: PipelineLayoutDescriptor = pipelineLayoutDescriptorMap[pipelineLayoutKey]
         = pipelineLayoutDescriptorMap[pipelineLayoutKey] || { bindGroupLayouts, key: pipelineLayoutKey };
 
     return gpuPipelineLayout;
@@ -160,5 +155,3 @@ function mergeBindGroupLayouts(entryMap: GPUBindGroupLayoutEntryMap, entryMap1: 
 
     return entryMap;
 }
-
-const gpuPipelineLayoutMap: { [key: string]: PipelineLayoutDescriptor } = {};
