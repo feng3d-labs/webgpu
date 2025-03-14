@@ -9,10 +9,14 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: T
     if (!timestampQuery) return defautGPURenderTimestampQuery;
     let renderTimestampQuery: GPURenderTimestampQuery = timestampQuery["_GPURenderTimestampQuery"];
     if (renderTimestampQuery) return renderTimestampQuery;
-
+    
     // 判断是否支持 `timestamp-query`
-    timestampQuery.isSupports = device.features.has(`timestamp-query`);
-    if (!timestampQuery.isSupports)
+    if (timestampQuery["isSupports"] === undefined)
+    {
+        timestampQuery["isSupports"] = device.features.has(`timestamp-query`);
+        timestampQuery.onSupports?.(timestampQuery["isSupports"]);
+    }
+    if (!timestampQuery["isSupports"])
     {
         console.warn(`WebGPU未开启或者不支持 timestamp-query 特性，请确认 WebGPU.init 初始化参数是否正确！`);
 
@@ -98,7 +102,7 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: T
                     // (see spec https://gpuweb.github.io/gpuweb/#timestamp)
                     if (elapsedNs >= 0)
                     {
-                        timestampQuery.elapsedNs = elapsedNs;
+                        timestampQuery.onQuery(elapsedNs);
                     }
 
                     resultBuf.unmap();

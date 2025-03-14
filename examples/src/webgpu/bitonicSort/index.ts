@@ -1,5 +1,4 @@
 import { BindingResources, BufferBinding, CommandEncoder, GBuffer, RenderPassDescriptor, Submit, reactive } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
 import { ComputePass, ComputePipeline, TimestampQuery, WebGPU, getGBuffer } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import Stats from "stats.js";
@@ -103,32 +102,33 @@ async function init(
     const maxInvocationsX = webgpu.device.limits.maxComputeWorkgroupSizeX;
 
     // Handle timestamp query stuff
-    const querySet: TimestampQuery = {};
-    watcher.watch(querySet, "elapsedNs", () =>
-    {
-        // Calculate new step, sort, and average sort times
-        const newStepTime = querySet.elapsedNs / 1000000;
-        const newSortTime = settings.sortTime + newStepTime;
-        // Apply calculated times to settings object as both number and 'ms' appended string
-        settings.stepTime = newStepTime;
-        settings.sortTime = newSortTime;
-        stepTimeController.setValue(`${newStepTime.toFixed(5)}ms`);
-        sortTimeController.setValue(`${newSortTime.toFixed(5)}ms`);
-        // Calculate new average sort upon end of final execution step of a full bitonic sort.
-        if (highestBlockHeight === settings["Total Elements"] * 2)
+    const querySet: TimestampQuery = {
+        onQuery: (elapsedNs) =>
         {
-            // Lock off access to this larger if block..not best architected solution but eh
-            highestBlockHeight *= 2;
-            settings.configToCompleteSwapsMap[settings.configKey].time
-                += newSortTime;
-            const averageSortTime
-                = settings.configToCompleteSwapsMap[settings.configKey].time
-                / settings.configToCompleteSwapsMap[settings.configKey].sorts;
-            averageSortTimeController.setValue(
-                `${averageSortTime.toFixed(5)}ms`
-            );
-        }
-    }, undefined, false);
+            // Calculate new step, sort, and average sort times
+            const newStepTime = elapsedNs / 1000000;
+            const newSortTime = settings.sortTime + newStepTime;
+            // Apply calculated times to settings object as both number and 'ms' appended string
+            settings.stepTime = newStepTime;
+            settings.sortTime = newSortTime;
+            stepTimeController.setValue(`${newStepTime.toFixed(5)}ms`);
+            sortTimeController.setValue(`${newSortTime.toFixed(5)}ms`);
+            // Calculate new average sort upon end of final execution step of a full bitonic sort.
+            if (highestBlockHeight === settings["Total Elements"] * 2)
+            {
+                // Lock off access to this larger if block..not best architected solution but eh
+                highestBlockHeight *= 2;
+                settings.configToCompleteSwapsMap[settings.configKey].time
+                    += newSortTime;
+                const averageSortTime
+                    = settings.configToCompleteSwapsMap[settings.configKey].time
+                    / settings.configToCompleteSwapsMap[settings.configKey].sorts;
+                averageSortTimeController.setValue(
+                    `${averageSortTime.toFixed(5)}ms`
+                );
+            }
+        },
+    };
 
     const totalElementOptions = [];
     const maxElements = maxInvocationsX * 32;

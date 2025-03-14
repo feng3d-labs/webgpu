@@ -4,12 +4,16 @@
 export interface TimestampQuery
 {
     /**
-     * （单位为纳秒）
+     * 是否支持该特性时将调用此回调函数。
+     * 
+     * @param isSupports 当前WebGPU是否支持该特性。
      */
-    elapsedNs?: number;
+    onSupports?(isSupports: boolean): void;
 
     /**
-     * 当前WebGPU是否支持该特性。
+     * 获得结果时将调用此回调函数。
+     * 
+     * @param elapsedNs 通道运行消耗时长（单位为纳秒）
      */
-    isSupports?: boolean;
+    onQuery?(elapsedNs: number): void;
 }

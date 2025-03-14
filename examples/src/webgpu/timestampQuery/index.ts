@@ -8,39 +8,34 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import fragmentWGSL from "../../shaders/black.frag.wgsl";
 
-import { watcher } from "@feng3d/watcher";
 import PerfCounter from "./PerfCounter";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
+    const renderPassDurationCounter = new PerfCounter();
     // GPU-side timer and the CPU-side counter where we accumulate statistics:
     // NB: Look for 'timestampQueryManager' in this file to locate parts of this
     // snippets that are related to timestamps. Most of the logic is in
     // TimestampQueryManager.ts.
-    const timestampQuery: TimestampQuery = {};
-    // const timestampQueryManager = new TimestampQueryManager(device);
-    const renderPassDurationCounter = new PerfCounter();
-
-    watcher.watch(timestampQuery, "isSupports", () =>
-    {
-        if (!timestampQuery.isSupports)
+    const timestampQuery: TimestampQuery = {
+        onSupports: (isSupports: boolean) =>
         {
-            perfDisplay.innerHTML = "Timestamp queries are not supported";
+            if (!isSupports)
+            {
+                perfDisplay.innerHTML = "Timestamp queries are not supported";
+            }
+        },
+        onQuery: (elapsedNs: number) =>
+        {
+            // Show the last successfully downloaded elapsed time.
+            // Convert from nanoseconds to milliseconds:
+            const elapsedMs = Number(elapsedNs) * 1e-6;
+            renderPassDurationCounter.addSample(elapsedMs);
+            perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
+                .getAverage()
+                .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
         }
-    });
-
-    // 监听结果。
-    watcher.watch(timestampQuery, "elapsedNs", () =>
-    {
-        // Show the last successfully downloaded elapsed time.
-        const elapsedNs = timestampQuery.elapsedNs;
-        // Convert from nanoseconds to milliseconds:
-        const elapsedMs = Number(elapsedNs) * 1e-6;
-        renderPassDurationCounter.addSample(elapsedMs);
-        perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
-            .getAverage()
-            .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
-    });
+    };
 
     //
     const devicePixelRatio = window.devicePixelRatio || 1;
