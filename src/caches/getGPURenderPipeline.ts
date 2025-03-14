@@ -1,7 +1,6 @@
 import { NRenderPipeline } from "../internal/NRenderPipeline";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
-import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 
 export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NRenderPipeline)
 {
@@ -9,8 +8,7 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NRenderP
     if (pipeline) return pipeline;
 
     // 从GPU管线中获取管线布局。
-    const gpuPipelineLayout = getIGPUPipelineLayout({ vertex: renderPipeline.vertex.code, fragment: renderPipeline.fragment?.code });
-    const layout = getGPUPipelineLayout(device, gpuPipelineLayout);
+    const layout = getGPUPipelineLayout(device, { vertex: renderPipeline.vertex.code, fragment: renderPipeline.fragment?.code });
 
     const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
         layout,

@@ -1,10 +1,9 @@
 import { UnReadonly } from "@feng3d/render-api";
 import { ComputePipeline } from "../data/ComputePipeline";
+import { ComputeStage } from "../data/ComputeStage";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
-import { getIGPUPipelineLayout } from "./getIGPUPipelineLayout";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
-import { ComputeStage } from "../data/ComputeStage";
 
 export function getGPUComputePipeline(device: GPUDevice, computePipeline: ComputePipeline)
 {
@@ -30,9 +29,7 @@ export function getGPUComputePipeline(device: GPUDevice, computePipeline: Comput
     }
 
     // 从GPU管线中获取管线布局。
-    const gpuPipelineLayout = getIGPUPipelineLayout({ compute: computeStage.code });
-
-    const layout = getGPUPipelineLayout(device, gpuPipelineLayout);
+    const layout = getGPUPipelineLayout(device, { compute: computeStage.code });
 
     pipeline = device.createComputePipeline({
         layout,

@@ -12,7 +12,6 @@ import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "../caches/getGPUTexture";
 import { getIGPUBuffer } from "../caches/getIGPUBuffer";
-import { getIGPUPipelineLayout, IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
 import { ComputeObject } from "../data/ComputeObject";
@@ -29,6 +28,7 @@ import { IRenderPassFormat } from "../internal/RenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
 import { updateBufferBinding } from "../utils/updateBufferBinding";
+import { IGPUShader, getIGPUPipelineLayout } from "../caches/getGPUPipelineLayout";
 
 export class RunWebGPU
 {
