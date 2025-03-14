@@ -1,5 +1,4 @@
 import { ResourceType, TemplateInfo, WgslReflect } from "wgsl_reflect";
-import { BindGroupLayoutEntry } from "../internal/PipelineLayoutDescriptor";
 import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from "../types/TextureType";
 
 /**
@@ -19,16 +18,15 @@ export function getWGSLReflectInfo(code: string): WgslReflect
 }
 const reflectMap: { [code: string]: WgslReflect } = {};
 
-export type IGPUBindGroupLayoutEntryMap = { [name: string]: BindGroupLayoutEntry; };
+export type GPUBindGroupLayoutEntryMap = { [name: string]: GPUBindGroupLayoutEntry; };
 
-export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayoutEntryMap
+export function getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayoutEntryMap
 {
     if (shaderLayoutMap[code]) return shaderLayoutMap[code];
 
+    const entryMap: GPUBindGroupLayoutEntryMap = shaderLayoutMap[code] = {};
+
     const reflect = getWGSLReflectInfo(code);
-
-    const entryMap: IGPUBindGroupLayoutEntryMap = shaderLayoutMap[code] = {};
-
     for (const uniform of reflect.uniforms)
     {
         const { binding, name } = uniform;
@@ -182,7 +180,7 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
     return entryMap;
 }
 
-const shaderLayoutMap: { [code: string]: IGPUBindGroupLayoutEntryMap } = {};
+const shaderLayoutMap: { [code: string]: GPUBindGroupLayoutEntryMap } = {};
 
 /**
  * 片段与计算着色器可见。

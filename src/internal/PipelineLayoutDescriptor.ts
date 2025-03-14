@@ -28,13 +28,23 @@ export interface PipelineLayoutDescriptor
 export interface BindGroupLayoutDescriptor
 {
     label?: string;
-    entries: BindGroupLayoutEntry[];
+    entries: GPUBindGroupLayoutEntry[];
     entryNames: string[],
     key: string,
 }
 
-export interface BindGroupLayoutEntry extends GPUBindGroupLayoutEntry
+declare global
 {
-    variableInfo: VariableInfo;
-    key: string;
+    interface GPUBindGroupLayoutEntry
+    {
+        /**
+         * 绑定资源变量信息。
+         */
+        variableInfo: VariableInfo;
+
+        /**
+         * 用于判断布局信息是否相同的标识。
+         */
+        key: string;
+    }
 }

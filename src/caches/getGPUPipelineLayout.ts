@@ -1,6 +1,6 @@
 import { BindGroupLayoutDescriptor, PipelineLayoutDescriptor } from "../internal/PipelineLayoutDescriptor";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
-import { getIGPUBindGroupLayoutEntryMap, IGPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
+import { getIGPUBindGroupLayoutEntryMap, GPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 
 declare global
 {
@@ -56,7 +56,7 @@ function getIGPUPipelineLayout(shader: IGPUShader): PipelineLayoutDescriptor
     const fragmentCode = shader.fragment;
     const computeCode = shader.compute;
 
-    let entryMap: IGPUBindGroupLayoutEntryMap = {};
+    let entryMap: GPUBindGroupLayoutEntryMap = {};
     if (vertexCode)
     {
         const vertexEntryMap = getIGPUBindGroupLayoutEntryMap(vertexCode);
@@ -137,7 +137,7 @@ function getIGPUPipelineLayout(shader: IGPUShader): PipelineLayoutDescriptor
 const bindGroupLayoutMap: { [key: string]: BindGroupLayoutDescriptor } = {};
 const pipelineLayoutDescriptorMap: { [key: string]: PipelineLayoutDescriptor } = {};
 
-function mergeBindGroupLayouts(entryMap: IGPUBindGroupLayoutEntryMap, entryMap1: IGPUBindGroupLayoutEntryMap): IGPUBindGroupLayoutEntryMap
+function mergeBindGroupLayouts(entryMap: GPUBindGroupLayoutEntryMap, entryMap1: GPUBindGroupLayoutEntryMap): GPUBindGroupLayoutEntryMap
 {
     for (const resourceName in entryMap1)
     {
