@@ -1,6 +1,7 @@
-import { RenderPassObject, RenderObject } from "@feng3d/render-api";
+import { RenderObject, RenderPassObject } from "@feng3d/render-api";
 
 import { watcher } from "@feng3d/watcher";
+import { GPURenderOcclusionQuery } from "../caches/getGPURenderOcclusionQuery";
 import { getRealGPUBindGroup } from "../const";
 import { IRenderPassFormat } from "../internal/RenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
@@ -11,7 +12,7 @@ import { RunWebGPU } from "./RunWebGPU";
  */
 export class RunWebGPUCommandCache extends RunWebGPU
 {
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: RenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects: RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
     {
         const map: ChainMap<[string, RenderPassObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let caches = map.get([renderPassFormat._key, renderObjects]);
@@ -21,7 +22,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
             const renderPassRecord = new GPURenderPassRecord();
             const commands = renderPassRecord["_commands"] = [];
 
-            super.runRenderPassObjects(device, renderPassRecord, renderPassFormat, renderObjects);
+            super.runRenderPassObjects(device, renderPassRecord, renderPassFormat, renderObjects, occlusionQuery);
 
             // 排除无效命令
             paichuWuxiaoCommands(renderPassFormat.attachmentSize, commands);

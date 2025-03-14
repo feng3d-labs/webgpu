@@ -18,8 +18,6 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
         return defautRenderOcclusionQuery;
     }
 
-    occlusionQueryObjects.forEach((v, i) => { v._queryIndex = i; });
-
     let occlusionQuerySet: GPUQuerySet;
     let resolveBuf: GPUBuffer;
     let resultBuf: GPUBuffer;
@@ -35,6 +33,11 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
     const init = (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) =>
     {
         occlusionQuerySet = renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: occlusionQueryObjects.length });
+    };
+
+    const getQueryIndex = (occlusionQuery: OcclusionQuery) =>
+    {
+        return occlusionQueryObjects.indexOf(occlusionQuery);
     };
 
     /**
@@ -93,15 +96,16 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
         anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
     };
 
-    renderObjects["_GPURenderOcclusionQuery"] = renderOcclusionQuery = { init, resolve };
+    renderObjects["_GPURenderOcclusionQuery"] = renderOcclusionQuery = { init, resolve, getQueryIndex };
 
     return renderOcclusionQuery;
 }
 
-interface GPURenderOcclusionQuery
+export interface GPURenderOcclusionQuery
 {
     init: (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) => void
+    getQueryIndex: (occlusionQuery: OcclusionQuery) => number;
     resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass) => void
 }
 
-const defautRenderOcclusionQuery = { init: () => { }, resolve: () => { } };
+const defautRenderOcclusionQuery = { init: () => { }, getQueryIndex: () => 0, resolve: () => { } };

@@ -5,7 +5,7 @@ import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
 import { getGPUComputePipeline } from "../caches/getGPUComputePipeline";
 import { getGPUPipelineLayout, IGPUShader } from "../caches/getGPUPipelineLayout";
-import { getGPURenderOcclusionQuery } from "../caches/getGPURenderOcclusionQuery";
+import { getGPURenderOcclusionQuery, GPURenderOcclusionQuery } from "../caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "../caches/getGPURenderPassDescriptor";
 import { getGPURenderPassFormat } from "../caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
@@ -95,7 +95,7 @@ export class RunWebGPU
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
-        this.runRenderPassObjects(device, passEncoder, renderPassFormat, renderObjects);
+        this.runRenderPassObjects(device, passEncoder, renderPassFormat, renderObjects, occlusionQuery);
 
         passEncoder.end();
 
@@ -106,7 +106,7 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, renderPass);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: readonly RenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects: readonly RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
     {
         if (!renderObjects) return;
         //
@@ -126,7 +126,7 @@ export class RunWebGPU
             }
             else if (element.__type__ === "OcclusionQuery")
             {
-                this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element);
+                this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element, occlusionQuery);
             }
             else
             {
@@ -208,13 +208,15 @@ export class RunWebGPU
         );
     }
 
-    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
+    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderOcclusionQueryObject: OcclusionQuery, occlusionQuery: GPURenderOcclusionQuery)
     {
-        passEncoder.beginOcclusionQuery(renderOcclusionQueryObject._queryIndex);
+        passEncoder.beginOcclusionQuery(occlusionQuery.getQueryIndex(renderOcclusionQueryObject));
+
         renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>
         {
             this.runRenderObject(device, passEncoder, renderPassFormat, renderObject);
         });
+
         passEncoder.endOcclusionQuery();
     }
 
