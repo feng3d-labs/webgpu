@@ -9,8 +9,8 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
     let renderOcclusionQuery: GPURenderOcclusionQuery = renderObjects["_GPURenderOcclusionQuery"];
     if (renderOcclusionQuery) return renderOcclusionQuery;
 
-    const occlusionQueryObjects: OcclusionQuery[] = renderObjects.filter((cv) => cv.__type__ === "OcclusionQuery") as any;
-    if (occlusionQueryObjects.length === 0)
+    const occlusionQuerys: OcclusionQuery[] = renderObjects.filter((cv) => cv.__type__ === "OcclusionQuery") as any;
+    if (occlusionQuerys.length === 0)
     {
         renderObjects["_GPURenderOcclusionQuery"] = defautRenderOcclusionQuery;
 
@@ -31,12 +31,12 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
      */
     const init = (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) =>
     {
-        occlusionQuerySet = renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: occlusionQueryObjects.length });
+        occlusionQuerySet = renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: occlusionQuerys.length });
     };
 
     const getQueryIndex = (occlusionQuery: OcclusionQuery) =>
     {
-        return occlusionQueryObjects.indexOf(occlusionQuery);
+        return occlusionQuerys.indexOf(occlusionQuery);
     };
 
     /**
@@ -51,11 +51,11 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
         resolveBuf = resolveBuf || device.createBuffer({
             label: "resolveBuffer",
             // Query results are 64bit unsigned integers.
-            size: occlusionQueryObjects.length * BigUint64Array.BYTES_PER_ELEMENT,
+            size: occlusionQuerys.length * BigUint64Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
         });
 
-        commandEncoder.resolveQuerySet(occlusionQuerySet, 0, occlusionQueryObjects.length, resolveBuf, 0);
+        commandEncoder.resolveQuerySet(occlusionQuerySet, 0, occlusionQuerys.length, resolveBuf, 0);
 
         resultBuf = resultBuf || device.createBuffer({
             label: "resultBuffer",
@@ -74,16 +74,21 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
             {
                 resultBuf.mapAsync(GPUMapMode.READ).then(() =>
                 {
-                    const results = new BigUint64Array(resultBuf.getMappedRange());
+                    const bigUint64Array = new BigUint64Array(resultBuf.getMappedRange());
 
-                    occlusionQueryObjects.forEach((v, i) =>
+                    const results = bigUint64Array.reduce((pv: boolean[], cv) =>
                     {
-                        v.result = { result: Number(results[i]) };
-                    });
-
+                        pv.push(!!cv);
+                        return pv;
+                    }, []);
                     resultBuf.unmap();
 
-                    renderPass.occlusionQueryResults = occlusionQueryObjects.concat();
+                    occlusionQuerys.forEach((v, i) =>
+                    {
+                        v.onQuery?.(results[i]);
+                    });
+
+                    renderPass.onOcclusionQuery?.(occlusionQuerys, results);
 
                     //
                     anyEmitter.off(device.queue, GPUQueue_submit, getOcclusionQueryResult);

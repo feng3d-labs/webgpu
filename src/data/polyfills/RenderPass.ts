@@ -17,8 +17,10 @@ declare module "@feng3d/render-api"
          * 渲染不被遮挡查询结果。具体数据保存在各子项的"result"属性中。
          *
          * 当提交WebGPU后自动获取结果后填充该属性。
+         * 
+         * @param results 是否被渲染。true表示被渲染，false表示未被渲染。
          */
-        occlusionQueryResults?: OcclusionQuery[];
+        onOcclusionQuery?(occlusionQuerys: OcclusionQuery[], results: boolean[]): void;
 
         /**
          * 查询通道运行消耗时长（单位为纳秒）。
