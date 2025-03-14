@@ -333,12 +333,12 @@ export class RunWebGPU
         }
     }
 
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IRenderPassFormat, material: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: IRenderPassFormat, pipeline: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
     {
         //
-        const renderPipelineResult = getNGPURenderPipeline(material, renderPassFormat, primitive, vertices, indices);
+        const renderPipelineResult = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
 
-        const nPipeline = renderPipelineResult.material;
+        const nPipeline = renderPipelineResult.pipeline;
 
         const gpuRenderPipeline = getGPURenderPipeline(device, nPipeline);
 

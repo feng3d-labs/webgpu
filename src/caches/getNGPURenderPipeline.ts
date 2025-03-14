@@ -60,7 +60,7 @@ export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPass
         blendConstantColor,
     };
 
-    result = { _version: 0, material, vertexBuffers: vertexStateResult.vertexBuffers };
+    result = { _version: 0, pipeline: material, vertexBuffers: vertexStateResult.vertexBuffers };
     renderPipelineMap.set([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat], result);
 
     // 监听管线变化
@@ -84,7 +84,7 @@ const renderPipelineMap = new ChainMap<
         /**
          * GPU渲染管线描述。
          */
-        material: NRenderPipeline;
+        pipeline: NRenderPipeline;
         /**
          * GPU渲染时使用的顶点缓冲区列表。
          */
