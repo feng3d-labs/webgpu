@@ -9,12 +9,11 @@ import { getGPUBuffer } from "./getGPUBuffer";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getIGPUBuffer } from "./getIGPUBuffer";
-import { BindGroupLayoutDescriptor } from "../internal/PipelineLayoutDescriptor";
 import { ChainMap } from "../utils/ChainMap";
 import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
 import { updateBufferBinding } from "../utils/updateBufferBinding";
 
-export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: Uniforms)
+export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayoutDescriptor, bindingResources: Uniforms)
 {
     const bindGroupDescriptor = getSetBindGroup(bindGroupLayout, bindingResources);
 
@@ -188,10 +187,10 @@ export interface BindGroupEntry
 export type BindingResource = Sampler | TextureView | VideoTexture | UniformType;
 
 
-function getSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: Uniforms)
+function getSetBindGroup(bindGroupLayout: GPUBindGroupLayoutDescriptor, bindingResources: Uniforms)
 {
     const map: ChainMap<Array<any>, BindGroupDescriptor> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
-    const subBindingResources = bindGroupLayout.entryNames.map((v) => bindingResources[v]);
+    const subBindingResources = (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).map(v=>v.variableInfo.name).map((v) => bindingResources[v]);
     let bindGroupDescriptor = map.get(subBindingResources);
     if (bindGroupDescriptor) return bindGroupDescriptor;
 
@@ -200,7 +199,7 @@ function getSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, bindingReso
     map.set(subBindingResources, bindGroupDescriptor);
 
     //
-    bindGroupLayout.entries.forEach((entry1) =>
+    (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).forEach((entry1) =>
     {
         const { variableInfo, binding } = entry1;
         //

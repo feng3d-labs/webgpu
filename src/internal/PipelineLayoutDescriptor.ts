@@ -17,33 +17,15 @@ export interface PipelineLayoutDescriptor
      * @group attribute in the {@link GPUShaderModule}, with the `N`th element corresponding with
      * `@group(N)`.
      */
-    bindGroupLayouts: BindGroupLayoutDescriptor[];
+    bindGroupLayouts: GPUBindGroupLayoutDescriptor[];
 
     key: string;
-}
-
-/**
- * {@link GPUBindGroupLayoutDescriptor}
- */
-export interface BindGroupLayoutDescriptor
-{
-    label?: string;
-    entries: GPUBindGroupLayoutEntry[];
-    entryNames: string[],
-    key: string,
 }
 
 declare global
 {
     interface GPUBindGroupLayoutDescriptor
     {
-        /**
-         * 绑定组变量名称列表。
-         * 
-         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
-         */
-        entryNames?: string[],
-
         /**
          * 用于判断布局信息是否相同的标识。
          *
