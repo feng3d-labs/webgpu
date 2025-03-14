@@ -4,14 +4,13 @@ import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
 import { VideoTexture } from "../data/VideoTexture";
 import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
-import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
+import { ChainMap } from "../utils/ChainMap";
+import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
+import { updateBufferBinding } from "../utils/updateBufferBinding";
 import { getGPUBuffer } from "./getGPUBuffer";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getIGPUBuffer } from "./getIGPUBuffer";
-import { ChainMap } from "../utils/ChainMap";
-import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
-import { updateBufferBinding } from "../utils/updateBufferBinding";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: Uniforms)
 {
@@ -26,8 +25,6 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
     const awaysUpdateFuncs: (() => void)[] = [];
     // 执行一次函数列表
     const onceUpdateFuncs: (() => void)[] = [];
-
-    const layout = getGPUBindGroupLayout(device, bindGroupDescriptor.layout);
 
     const entries = bindGroupDescriptor.entries.map((v) =>
     {
@@ -119,7 +116,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
     {
         onceUpdateFuncs.forEach((v) => v());
 
-        gBindGroup = device.createBindGroup({ layout, entries });
+        gBindGroup = device.createBindGroup({ layout: bindGroupLayout, entries });
 
         bindGroupMap.set(bindGroupDescriptor, gBindGroup);
 
@@ -190,7 +187,7 @@ export type BindingResource = Sampler | TextureView | VideoTexture | UniformType
 function getSetBindGroup(bindGroupLayout: GPUBindGroupLayout, bindingResources: Uniforms)
 {
     const map: ChainMap<Array<any>, BindGroupDescriptor> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
-    const subBindingResources = (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).map(v=>v.variableInfo.name).map((v) => bindingResources[v]);
+    const subBindingResources = (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).map(v => v.variableInfo.name).map((v) => bindingResources[v]);
     let bindGroupDescriptor = map.get(subBindingResources);
     if (bindGroupDescriptor) return bindGroupDescriptor;
 

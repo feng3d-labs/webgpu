@@ -1,34 +1,5 @@
 import { ResourceType, TemplateInfo, VariableInfo, WgslReflect } from "wgsl_reflect";
 import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from "../types/TextureType";
-declare global
-{
-    interface GPUBindGroupLayoutDescriptor
-    {
-        /**
-         * 用于判断布局信息是否相同的标识。
-         *
-         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
-         */
-        key?: string,
-    }
-
-    interface GPUBindGroupLayoutEntry
-    {
-        /**
-         * 绑定资源变量信息。
-         * 
-         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
-         */
-        variableInfo: VariableInfo;
-
-        /**
-         * 用于判断布局信息是否相同的标识。
-         * 
-         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
-         */
-        key: string;
-    }
-}
 
 /**
  * 从WebGPU着色器代码中获取反射信息。
@@ -68,7 +39,7 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayout
         entryMap[name] = {
             variableInfo: uniform,
             visibility: Visibility_ALL, binding, buffer: layout,
-            key: `[${binding}, buffer, ${layout.type} , ${layout.minBindingSize}]`,
+            key: `[${binding}, ${name}, buffer, ${layout.type} , ${layout.minBindingSize}]`,
         };
     }
 
@@ -89,7 +60,7 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayout
             entryMap[name] = {
                 variableInfo: storage,
                 visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout,
-                key: `[${binding}, buffer, ${layout.type}]`,
+                key: `[${binding}, ${name}, buffer, ${layout.type}]`,
             };
         }
         else if (storage.resourceType === ResourceType.StorageTexture)
@@ -112,7 +83,7 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayout
             entryMap[name] = {
                 variableInfo: storage,
                 visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout,
-                key: `[${binding}, storageTexture, ${layout.access}, ${layout.format}, ${layout.viewDimension}]`,
+                key: `[${binding}, ${name}, storageTexture, ${layout.access}, ${layout.format}, ${layout.viewDimension}]`,
             };
         }
         else
@@ -134,7 +105,7 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayout
             entryMap[name] = {
                 variableInfo: texture,
                 visibility: Visibility_ALL, binding, externalTexture: {},
-                key: `[${binding}, externalTexture]`,
+                key: `[${binding}, ${name}, externalTexture]`,
             };
         }
         else
@@ -183,7 +154,7 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayout
             entryMap[name] = {
                 variableInfo: texture,
                 visibility: Visibility_ALL, binding, texture: layout,
-                key: `[${binding}, texture, ${layout.sampleType}, ${layout.viewDimension}, ${layout.multisampled}]`,
+                key: `[${binding}, ${name}, texture, ${layout.sampleType}, ${layout.viewDimension}, ${layout.multisampled}]`,
             };
         }
     }
@@ -202,7 +173,7 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayout
         entryMap[name] = {
             variableInfo: sampler,
             visibility: Visibility_ALL, binding, sampler: layout,
-            key: `[${binding}, sampler, ${layout.type}]`,
+            key: `[${binding}, ${name}, sampler, ${layout.type}]`,
         };
     }
 

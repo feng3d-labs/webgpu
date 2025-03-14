@@ -1,5 +1,4 @@
 import { VariableInfo } from "wgsl_reflect";
-import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 import { getIGPUBindGroupLayoutEntryMap, GPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 
 declare global
@@ -22,16 +21,13 @@ declare global
          * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
          */
         entries: GPUBindGroupLayoutEntry[];
-    }
 
-    interface GPUBindGroupLayoutDescriptor
-    {
         /**
          * 用于判断布局信息是否相同的标识。
          *
          * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
          */
-        key?: string,
+        key: string,
     }
 
     interface GPUBindGroupLayoutEntry
@@ -106,7 +102,7 @@ function getIGPUPipelineLayout(device: GPUDevice, shader: IGPUShader)
         const bindGroupLayoutEntry = entryMap[resourceName];
         const { group, binding } = bindGroupLayoutEntry.variableInfo;
         //
-        const bindGroupLayoutDescriptor = bindGroupLayoutDescriptors[group] = bindGroupLayoutDescriptors[group] || { entries: [], key: "" };
+        const bindGroupLayoutDescriptor = bindGroupLayoutDescriptors[group] = bindGroupLayoutDescriptors[group] || { entries: [] };
 
         // 检测相同位置是否存在多个定义
         if (bindGroupLayoutDescriptor.entries[binding])
@@ -120,7 +116,7 @@ function getIGPUPipelineLayout(device: GPUDevice, shader: IGPUShader)
         bindGroupLayoutDescriptor.entries[binding] = bindGroupLayoutEntry;
     }
 
-    // 
+    // 绑定组布局列表。
     const bindGroupLayouts = bindGroupLayoutDescriptors.map((descriptor) =>
     {
         // 排除 undefined 元素。
@@ -134,13 +130,14 @@ function getIGPUPipelineLayout(device: GPUDevice, shader: IGPUShader)
                 console.log(`命中相同的布局 ${key}，公用绑定组布局对象。`);
             }
         }
-        const bindGroupLayout: GPUBindGroupLayout = bindGroupLayoutMap[key] = bindGroupLayoutMap[key] || getGPUBindGroupLayout(device, { entries });
+        const bindGroupLayout: GPUBindGroupLayout = bindGroupLayoutMap[key] = bindGroupLayoutMap[key] || device.createBindGroupLayout({ entries, label: key });
         bindGroupLayout.entries = entries;
+        bindGroupLayout.key = key;
         return bindGroupLayout;
     });
 
-    const pipelineLayoutKey = bindGroupLayoutDescriptors.map((v, i) => `[${i} ,${v.key}]`).join(",");
-    // 相同的布局只保留一个。
+    // 管线布局描述标识符。
+    const pipelineLayoutKey = bindGroupLayouts.map((v, i) => `[${i}: ${v.key}]`).join(",");
     if (__DEV__)
     {
         if (pipelineLayoutDescriptorMap[pipelineLayoutKey]) 
