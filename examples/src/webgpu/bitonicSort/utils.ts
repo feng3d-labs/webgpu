@@ -1,4 +1,4 @@
-import { CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Uniforms } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline } from "@feng3d/render-api";
 
 const fullscreenTexturedQuad
     = `
@@ -51,7 +51,7 @@ export abstract class Base2DRendererClass
         commandEncoder: CommandEncoder,
         renderPassDescriptor: RenderPassDescriptor,
         pipeline: RenderPipeline,
-        bindingResources?: Uniforms
+        bindingResources?: BindingResources
     )
     {
         const passEncoder: RenderPass = {

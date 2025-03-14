@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU, getIGPUBuffer, reactive } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -114,13 +114,13 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Rounded to the nearest multiple of 16.
     const sceneUniformBuffer = new Uint8Array(2 * 4 * 16 + 4 * 4);
 
-    const sceneBindGroupForShadow: Uniforms = {
+    const sceneBindGroupForShadow: BindingResources = {
         scene: {
             bufferView: sceneUniformBuffer,
         },
     };
 
-    const sceneBindGroupForRender: Uniforms = {
+    const sceneBindGroupForRender: BindingResources = {
         scene: {
             bufferView: sceneUniformBuffer,
         },
@@ -130,7 +130,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const modelBindGroup: Uniforms = {
+    const modelBindGroup: BindingResources = {
         model: {
             bufferView: modelUniformBuffer,
         },

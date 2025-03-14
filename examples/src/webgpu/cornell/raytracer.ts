@@ -1,4 +1,4 @@
-import { CommandEncoder, IPassEncoder, Texture, Uniforms } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, IPassEncoder, Texture } from "@feng3d/render-api";
 import { ComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
@@ -13,7 +13,7 @@ export default class Raytracer
   private readonly common: Common;
   private readonly framebuffer: Texture;
   private readonly material: ComputePipeline;
-  private readonly bindGroup: Uniforms;
+  private readonly bindGroup: BindingResources;
 
   private readonly kWorkgroupSizeX = 16;
   private readonly kWorkgroupSizeY = 16;

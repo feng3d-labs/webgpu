@@ -1,4 +1,4 @@
-import { CopyBufferToBuffer, CopyTextureToTexture, IRenderPassObject, RenderObject, RenderPass, RenderPassDescriptor, Submit } from "@feng3d/render-api";
+import { CopyBufferToBuffer, CopyTextureToTexture, RenderPassObject, RenderObject, RenderPass, RenderPassDescriptor, Submit } from "@feng3d/render-api";
 
 import { GPUComputeObject } from "./data/IGPUComputeObject";
 import { GPUComputePass } from "./data/IGPUComputePass";
@@ -35,7 +35,7 @@ export class WebGPUStep
 
     renderObject(renderObject: RenderObject)
     {
-        (this._currentRenderPassEncoder.renderObjects as IRenderPassObject[]).push(renderObject);
+        (this._currentRenderPassEncoder.renderObjects as RenderPassObject[]).push(renderObject);
     }
 
     computePass()

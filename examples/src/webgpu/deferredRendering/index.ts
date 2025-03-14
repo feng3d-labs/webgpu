@@ -10,8 +10,8 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { ComputePipeline, getIGPUBuffer, ComputePass, WebGPU, reactive } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { ComputePass, ComputePipeline, WebGPU, getIGPUBuffer, reactive } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -177,7 +177,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const cameraUniformBuffer = new Uint8Array(4 * 16);
 
-    const sceneUniformBindGroup: Uniforms = {
+    const sceneUniformBindGroup: BindingResources = {
         uniforms: {
             bufferView: modelUniformBuffer,
         },
@@ -186,7 +186,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const gBufferTexturesBindGroup: Uniforms = {
+    const gBufferTexturesBindGroup: BindingResources = {
         gBufferPosition: gBufferTextureViews[0],
         gBufferNormal: gBufferTextureViews[1],
         gBufferAlbedo: gBufferTextureViews[2],
@@ -236,7 +236,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: lightUpdate,
         },
     };
-    const lightsBufferBindGroup: Uniforms = {
+    const lightsBufferBindGroup: BindingResources = {
         lightsBuffer: {
             bufferView: lightsBuffer,
         },
@@ -244,7 +244,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             bufferView: configUniformBuffer,
         },
     };
-    const lightsBufferComputeBindGroup: Uniforms = {
+    const lightsBufferComputeBindGroup: BindingResources = {
         lightsBuffer: {
             bufferView: lightsBuffer,
         },

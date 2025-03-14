@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { Buffer, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, IRenderPassObject, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPipeline, ScissorRect, Submit, Uniforms, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { Buffer, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, IIndicesDataTypes, RenderPassObject, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPipeline, ScissorRect, Submit, BindingResources, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -106,7 +106,7 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, renderPass);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: readonly IRenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: readonly RenderPassObject[])
     {
         if (!renderObjects) return;
         //
@@ -130,7 +130,7 @@ export class RunWebGPU
             }
             else
             {
-                throw `未处理 ${(element as IRenderPassObject).__type__} 类型的渲染通道对象！`;
+                throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
             }
         });
     }
@@ -414,7 +414,7 @@ export class RunWebGPU
         }
     }
 
-    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: Uniforms)
+    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: BindingResources)
     {
         // 计算 bindGroups
         const layout = getGPUPipelineLayout(device, shader);

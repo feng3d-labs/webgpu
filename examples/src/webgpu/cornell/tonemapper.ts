@@ -1,4 +1,4 @@
-import { CanvasTexture, CommandEncoder, IPassEncoder, Texture, Uniforms } from "@feng3d/render-api";
+import { BindingResources, CanvasTexture, CommandEncoder, IPassEncoder, Texture } from "@feng3d/render-api";
 import { ComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
@@ -10,7 +10,7 @@ import tonemapperWGSL from "./tonemapper.wgsl";
  */
 export default class Tonemapper
 {
-    private readonly bindGroup: Uniforms;
+    private readonly bindGroup: BindingResources;
     private readonly material: ComputePipeline;
     private readonly width: number;
     private readonly height: number;

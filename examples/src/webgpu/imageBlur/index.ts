@@ -3,8 +3,8 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
-import { ComputePipeline, getIGPUBuffer, ComputePass, WebGPU, reactive } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
+import { ComputePass, ComputePipeline, WebGPU, getIGPUBuffer, reactive } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -66,14 +66,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const blurParamsBuffer = new Uint8Array(8);
 
-    const computeConstants: Uniforms = {
+    const computeConstants: BindingResources = {
         samp: sampler,
         params: {
             bufferView: blurParamsBuffer,
         },
     };
 
-    const computeBindGroup0: Uniforms = {
+    const computeBindGroup0: BindingResources = {
         inputTex: { texture: cubeTexture1 },
         outputTex: { texture: textures[0] },
         flip: {
@@ -81,7 +81,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
-    const computeBindGroup1: Uniforms = {
+    const computeBindGroup1: BindingResources = {
         inputTex: { texture: textures[0] },
         outputTex: { texture: textures[1] },
         flip: {
@@ -89,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const computeBindGroup2: Uniforms = {
+    const computeBindGroup2: BindingResources = {
         inputTex: { texture: textures[1] },
         outputTex: { texture: textures[0] },
         flip: {
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const showResultBindGroup1: Uniforms = {
+    const showResultBindGroup1: BindingResources = {
         mySampler: sampler,
         myTexture: { texture: textures[1] },
     };
@@ -163,15 +163,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     };
 
-    const bindingResources0: Uniforms = {
+    const bindingResources0: BindingResources = {
         ...computeConstants,
         ...computeBindGroup0,
     };
-    const bindingResources1: Uniforms = {
+    const bindingResources1: BindingResources = {
         ...computeConstants,
         ...computeBindGroup1,
     };
-    const bindingResources2: Uniforms = {
+    const bindingResources2: BindingResources = {
         ...computeConstants,
         ...computeBindGroup2,
     };

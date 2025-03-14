@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, RenderPipeline, Submit, Uniforms, PrimitiveState, RenderObject, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, PrimitiveState, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -131,8 +131,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             thickness: number;
             alphaThreshold: number;
         };
-        litBindGroup: Uniforms;
-        wireframeBindGroups: Uniforms[];
+        litBindGroup: BindingResources;
+        wireframeBindGroups: BindingResources[];
         model: Model;
     };
 
@@ -155,7 +155,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const model = randElement(models);
 
         // Make a bind group for this uniform
-        const litBindGroup: Uniforms = {
+        const litBindGroup: BindingResources = {
             uni: uniformBuffer,
         };
 
@@ -177,14 +177,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // We're creating 2 bindGroups, one for each pipeline.
         // We could create just one since they are identical. To do
         // so we'd have to manually create a bindGroupLayout.
-        const wireframeBindGroup: Uniforms = {
+        const wireframeBindGroup: BindingResources = {
             uni: uniformBuffer,
             positions: { bufferView: model.vertices },
             indices: { bufferView: model.indices },
             line: lineUniformBuffer,
         };
 
-        const barycentricCoordinatesBasedWireframeBindGroup: Uniforms = {
+        const barycentricCoordinatesBasedWireframeBindGroup: BindingResources = {
             uni: uniformBuffer,
             positions: { bufferView: model.vertices },
             indices: { bufferView: model.indices },

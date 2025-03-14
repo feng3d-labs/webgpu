@@ -2,7 +2,7 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { IRenderPassObject, RenderPipeline, Sampler, Texture, Uniforms } from "@feng3d/render-api";
+import { BindingResources, RenderPassObject, RenderPipeline, Sampler, Texture } from "@feng3d/render-api";
 import { getIGPUBuffer, reactive, RenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
@@ -33,7 +33,7 @@ export class MsdfFont
   defaultChar: MsdfChar;
   constructor(
     public material: RenderPipeline,
-    public bindGroup: Uniforms,
+    public bindGroup: BindingResources,
     public lineHeight: number,
     public chars: { [x: number]: MsdfChar },
     public kernings: KerningMap
@@ -253,7 +253,7 @@ export class MsdfTextRenderer
 
     const pageTextures = await Promise.all(pagePromises);
 
-    const bindGroup: Uniforms = {
+    const bindGroup: BindingResources = {
       fontTexture: { texture: pageTextures[0] },
       fontSampler: this.sampler,
       chars: { bufferView: charsArray }
@@ -330,7 +330,7 @@ export class MsdfTextRenderer
       );
     }
 
-    const bindGroup: Uniforms = {
+    const bindGroup: BindingResources = {
       camera: { bufferView: this.cameraUniformBuffer },
       text: { bufferView: textBuffer },
     };
@@ -446,7 +446,7 @@ export class MsdfTextRenderer
     reactive(buffer).writeBuffers = writeBuffers;
   }
 
-  render(renderObjects: IRenderPassObject[], ...text: MsdfText[])
+  render(renderObjects: RenderPassObject[], ...text: MsdfText[])
   {
     const renderBundles = text.map((t) => t.getRenderBundle());
 

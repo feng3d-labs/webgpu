@@ -4,8 +4,8 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { ComputePipeline, ComputePass, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
+import { ComputePass, ComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -74,13 +74,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             cell: { data: buffer1, format: "uint32", stepMode: "instance" }
         };
 
-        const bindGroup0: Uniforms = {
+        const bindGroup0: BindingResources = {
             size: { bufferView: sizeBuffer },
             current: { bufferView: buffer0 },
             next: { bufferView: buffer1 },
         };
 
-        const bindGroup1: Uniforms = {
+        const bindGroup1: BindingResources = {
             size: { bufferView: sizeBuffer },
             current: { bufferView: buffer1 },
             next: { bufferView: buffer0 },
@@ -95,7 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         };
 
-        const uniformBindGroup: Uniforms = {
+        const uniformBindGroup: BindingResources = {
             size: {
                 bufferView: sizeBuffer,
                 offset: 0,

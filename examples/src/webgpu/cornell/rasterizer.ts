@@ -1,4 +1,4 @@
-import { CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Texture, Uniforms } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Texture } from "@feng3d/render-api";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -14,7 +14,7 @@ export default class Rasterizer
     private readonly scene: Scene;
     private readonly renderPassDescriptor: RenderPassDescriptor;
     private readonly pipeline: RenderPipeline;
-    private readonly bindGroup: Uniforms;
+    private readonly bindGroup: BindingResources;
 
     constructor(
         common: Common,

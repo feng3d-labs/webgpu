@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BufferBinding, BufferBindingInfo, CanvasTexture, Sampler, TextureView, Uniforms, UniformType } from "@feng3d/render-api";
+import { BufferBinding, BufferBindingInfo, CanvasTexture, Sampler, TextureView, BindingResources, BindingResource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
 import { VideoTexture } from "../data/VideoTexture";
@@ -12,7 +12,7 @@ import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getIGPUBuffer } from "./getIGPUBuffer";
 
-export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: Uniforms)
+export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources)
 {
     const bindGroupDescriptor = getSetBindGroup(bindGroupLayout, bindingResources);
 
@@ -178,13 +178,10 @@ export interface BindGroupEntry
      * The resource to bind, which may be a {@link GPUSampler}, {@link GPUTextureView},
      * {@link GPUExternalTexture}, or {@link GPUBufferBinding}.
      */
-    resource: BindingResource;
+    resource: Sampler | TextureView | VideoTexture | BindingResource;
 }
 
-export type BindingResource = Sampler | TextureView | VideoTexture | UniformType;
-
-
-function getSetBindGroup(bindGroupLayout: GPUBindGroupLayout, bindingResources: Uniforms)
+function getSetBindGroup(bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources)
 {
     const map: ChainMap<Array<any>, BindGroupDescriptor> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
     const subBindingResources = (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).map(v => v.variableInfo.name).map((v) => bindingResources[v]);

@@ -1,4 +1,4 @@
-import { IRenderPassObject, RenderObject } from "@feng3d/render-api";
+import { RenderPassObject, RenderObject } from "@feng3d/render-api";
 
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
@@ -11,9 +11,9 @@ import { RunWebGPU } from "./RunWebGPU";
  */
 export class RunWebGPUCommandCache extends RunWebGPU
 {
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: IRenderPassObject[])
+    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: IRenderPassFormat, renderObjects?: RenderPassObject[])
     {
-        const map: ChainMap<[string, IRenderPassObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
+        const map: ChainMap<[string, RenderPassObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let caches = map.get([renderPassFormat._key, renderObjects]);
         if (!caches)
         {
