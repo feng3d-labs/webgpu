@@ -1,5 +1,5 @@
-import { BindingResources } from "@feng3d/render-api";
-import { getGBuffer, reactive } from "@feng3d/webgpu";
+import { BindingResources, reactive } from "@feng3d/render-api";
+import { getGBuffer } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
 import commonWGSL from "./common.wgsl";

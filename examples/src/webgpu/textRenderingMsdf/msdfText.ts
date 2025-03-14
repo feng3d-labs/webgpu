@@ -2,8 +2,8 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { BindingResources, RenderPassObject, RenderPipeline, Sampler, Texture } from "@feng3d/render-api";
-import { getGBuffer, reactive, RenderBundle } from "@feng3d/webgpu";
+import { BindingResources, reactive, RenderPassObject, RenderPipeline, Sampler, Texture } from "@feng3d/render-api";
+import { getGBuffer, RenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second

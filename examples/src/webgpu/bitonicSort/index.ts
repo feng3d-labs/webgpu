@@ -1,6 +1,6 @@
-import { BindingResources, BufferBinding, CommandEncoder, GBuffer, RenderPassDescriptor, Submit } from "@feng3d/render-api";
+import { BindingResources, BufferBinding, CommandEncoder, GBuffer, RenderPassDescriptor, Submit, reactive } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { ComputePass, ComputePipeline, TimestampQuery, WebGPU, getGBuffer, reactive } from "@feng3d/webgpu";
+import { ComputePass, ComputePipeline, TimestampQuery, WebGPU, getGBuffer } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import Stats from "stats.js";
 

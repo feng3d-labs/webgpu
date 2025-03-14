@@ -1,5 +1,5 @@
-import { BindingResources, CommandEncoder, IPassEncoder, Texture } from "@feng3d/render-api";
-import { ComputePipeline, getGBuffer, reactive } from "@feng3d/webgpu";
+import { BindingResources, CommandEncoder, IPassEncoder, reactive, Texture } from "@feng3d/render-api";
+import { ComputePipeline, getGBuffer } from "@feng3d/webgpu";
 
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";

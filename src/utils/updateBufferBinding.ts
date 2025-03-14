@@ -1,9 +1,8 @@
-import { BufferBinding, BufferBindingInfo, UnReadonly } from "@feng3d/render-api";
+import { BufferBinding, BufferBindingInfo, reactive, UnReadonly } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { VariableInfo } from "wgsl_reflect";
 
 import { getGBuffer } from "../caches/getIGPUBuffer";
-import { reactive } from "../reactivity";
 
 /**
  * 初始化缓冲区绑定。

@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { BindingResources, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { getGBuffer, reactive, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, reactive, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";

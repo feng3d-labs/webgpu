@@ -7,8 +7,8 @@ import gridWGSL from "./grid.wgsl";
 import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
-import { BindingResources, IPassEncoder, RenderObject, RenderPass, RenderPassDescriptor, Texture } from "@feng3d/render-api";
-import { getGBuffer, reactive, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, IPassEncoder, reactive, RenderObject, RenderPass, RenderPassDescriptor, Texture } from "@feng3d/render-api";
+import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

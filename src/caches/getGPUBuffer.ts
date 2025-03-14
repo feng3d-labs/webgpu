@@ -1,6 +1,5 @@
-import { GBuffer, UnReadonly } from "@feng3d/render-api";
+import { computed, ComputedRef, effect, GBuffer, reactive, UnReadonly } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { computed, ComputedRef, effect, reactive } from "../reactivity";
 
 /**
  * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。
