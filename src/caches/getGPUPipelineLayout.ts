@@ -1,4 +1,4 @@
-import { PipelineLayoutDescriptor } from "../internal/PipelineLayoutDescriptor";
+import { VariableInfo } from "wgsl_reflect";
 import { getGPUBindGroupLayout } from "./getGPUBindGroupLayout";
 import { getIGPUBindGroupLayoutEntryMap, GPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 
@@ -6,7 +6,49 @@ declare global
 {
     interface GPUPipelineLayout
     {
-        bindGroupLayouts: GPUBindGroupLayoutDescriptor[];
+        /**
+         * 绑定组布局列表。
+         *
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        bindGroupLayouts: GPUBindGroupLayout[];
+    }
+
+    interface GPUBindGroupLayout
+    {
+        /**
+         * 绑定组布局的入口列表。
+         *
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        entries: GPUBindGroupLayoutEntry[];
+    }
+
+    interface GPUBindGroupLayoutDescriptor
+    {
+        /**
+         * 用于判断布局信息是否相同的标识。
+         *
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        key?: string,
+    }
+
+    interface GPUBindGroupLayoutEntry
+    {
+        /**
+         * 绑定资源变量信息。
+         * 
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        variableInfo: VariableInfo;
+
+        /**
+         * 用于判断布局信息是否相同的标识。
+         * 
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        key: string;
     }
 }
 
@@ -18,22 +60,11 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: IGPUShader): GPU
     let gpuPipelineLayout = gpuPipelineLayoutMap0[shaderKey];
     if (gpuPipelineLayout) return gpuPipelineLayout;
 
-    const layout = getIGPUPipelineLayout(shader);
+    const layout = getIGPUPipelineLayout(device, shader);
 
-    const bindGroupLayouts = layout.bindGroupLayouts.map((v) =>
-    {
-        const gBindGroupLayout = getGPUBindGroupLayout(device, v);
+    gpuPipelineLayoutMap0[shaderKey] = layout;
 
-        return gBindGroupLayout;
-    });
-
-    const gPipelineLayout = device.createPipelineLayout({
-        bindGroupLayouts,
-    });
-    gPipelineLayout.bindGroupLayouts = layout.bindGroupLayouts;
-    gpuPipelineLayoutMap0[shaderKey] = gPipelineLayout;
-
-    return gPipelineLayout;
+    return layout;
 }
 const gpuPipelineLayoutMap0: { [key: string]: GPUPipelineLayout } = {};
 
@@ -45,7 +76,7 @@ export type IGPUShader = { readonly vertex?: string, readonly fragment?: string,
  * @param shader GPU管线。
  * @returns 管线布局。
  */
-function getIGPUPipelineLayout(shader: IGPUShader): PipelineLayoutDescriptor
+function getIGPUPipelineLayout(device: GPUDevice, shader: IGPUShader)
 {
     const vertexCode = shader.vertex;
     const fragmentCode = shader.fragment;
@@ -68,52 +99,47 @@ function getIGPUPipelineLayout(shader: IGPUShader): PipelineLayoutDescriptor
         entryMap = mergeBindGroupLayouts(entryMap, computeEntryMap);
     }
 
-    //
-    const bindGroupLayouts: GPUBindGroupLayoutDescriptor[] = [];
+    // 绑定组布局描述列表。
+    const bindGroupLayoutDescriptors: GPUBindGroupLayoutDescriptor[] = [];
     for (const resourceName in entryMap)
     {
         const bindGroupLayoutEntry = entryMap[resourceName];
         const { group, binding } = bindGroupLayoutEntry.variableInfo;
         //
-        const bindGroupLayout = bindGroupLayouts[group] = bindGroupLayouts[group] || { entries: [], key: "" };
+        const bindGroupLayoutDescriptor = bindGroupLayoutDescriptors[group] = bindGroupLayoutDescriptors[group] || { entries: [], key: "" };
 
         // 检测相同位置是否存在多个定义
-        if (bindGroupLayout.entries[binding])
+        if (bindGroupLayoutDescriptor.entries[binding])
         {
             // 存在重复定义时，判断是否兼容
-            const preEntry = bindGroupLayout.entries[binding];
+            const preEntry = bindGroupLayoutDescriptor.entries[binding];
             console.error(`在管线中 @group(${group}) @binding(${binding}) 处存在多个定义 ${preEntry.variableInfo.name} ${resourceName} ！`);
         }
 
         //
-        bindGroupLayout.entries[binding] = bindGroupLayoutEntry;
+        bindGroupLayoutDescriptor.entries[binding] = bindGroupLayoutEntry;
     }
 
-    // 排除 undefined 元素。
-    for (let i = 0; i < bindGroupLayouts.length; i++)
+    // 
+    const bindGroupLayouts = bindGroupLayoutDescriptors.map((descriptor) =>
     {
-        const bindGroupLayout = bindGroupLayouts[i];
-        const entries = bindGroupLayout.entries as GPUBindGroupLayoutEntry[];
-        for (let i = entries.length - 1; i >= 0; i--)
-        {
-            if (!entries[i])
-            {
-                entries.splice(i, 1);
-            }
-        }
-        bindGroupLayout.key = (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).map((v) => v.key).join(",");
+        // 排除 undefined 元素。
+        const entries = (descriptor.entries as GPUBindGroupLayoutEntry[]).filter((v) => !!v);
+        const key = entries.map((v) => v.key).join(",");
         // 相同的布局只保留一个。
         if (__DEV__)
         {
-            if (bindGroupLayoutMap[bindGroupLayout.key])
+            if (bindGroupLayoutMap[key])
             {
-                console.log(`命中相同的布局 ${bindGroupLayout.key}，公用绑定组布局对象。`);
+                console.log(`命中相同的布局 ${key}，公用绑定组布局对象。`);
             }
         }
-        bindGroupLayouts[i] = bindGroupLayoutMap[bindGroupLayout.key] = bindGroupLayoutMap[bindGroupLayout.key] || bindGroupLayout;
-    }
+        const bindGroupLayout: GPUBindGroupLayout = bindGroupLayoutMap[key] = bindGroupLayoutMap[key] || getGPUBindGroupLayout(device, { entries });
+        bindGroupLayout.entries = entries;
+        return bindGroupLayout;
+    });
 
-    const pipelineLayoutKey = bindGroupLayouts.map((v, i) => `[${i} ,${v.key}]`).join(",");
+    const pipelineLayoutKey = bindGroupLayoutDescriptors.map((v, i) => `[${i} ,${v.key}]`).join(",");
     // 相同的布局只保留一个。
     if (__DEV__)
     {
@@ -122,14 +148,16 @@ function getIGPUPipelineLayout(shader: IGPUShader): PipelineLayoutDescriptor
             console.log(`命中相同的布局 ${pipelineLayoutKey}，公用管线布局对象。`);
         }
     }
-    const gpuPipelineLayout: PipelineLayoutDescriptor = pipelineLayoutDescriptorMap[pipelineLayoutKey]
-        = pipelineLayoutDescriptorMap[pipelineLayoutKey] || { bindGroupLayouts, key: pipelineLayoutKey };
+    const gpuPipelineLayout: GPUPipelineLayout = pipelineLayoutDescriptorMap[pipelineLayoutKey] = pipelineLayoutDescriptorMap[pipelineLayoutKey] || device.createPipelineLayout({
+        bindGroupLayouts,
+    });
+    gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
 
     return gpuPipelineLayout;
 }
 
-const bindGroupLayoutMap: { [key: string]: GPUBindGroupLayoutDescriptor } = {};
-const pipelineLayoutDescriptorMap: { [key: string]: PipelineLayoutDescriptor } = {};
+const bindGroupLayoutMap: { [key: string]: GPUBindGroupLayout } = {};
+const pipelineLayoutDescriptorMap: { [key: string]: GPUPipelineLayout } = {};
 
 function mergeBindGroupLayouts(entryMap: GPUBindGroupLayoutEntryMap, entryMap1: GPUBindGroupLayoutEntryMap): GPUBindGroupLayoutEntryMap
 {
