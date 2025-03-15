@@ -1,11 +1,9 @@
 import { BufferBinding, OcclusionQuery, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
 import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
 import solidColorLitWGSL from "./solidColorLit.wgsl";
-
 
 const info = document.querySelector("#info");
 
