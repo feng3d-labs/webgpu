@@ -6,12 +6,12 @@ import { getRealGPUBindGroup } from "../const";
 import { VideoTexture } from "../data/VideoTexture";
 import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
 import { ExternalSampledTextureType } from "../types/TextureType";
+import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
+import { updateBufferBinding } from "../utils/updateBufferBinding";
 import { getGPUBuffer } from "./getGPUBuffer";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getGBuffer } from "./getIGPUBuffer";
-import { updateBufferBinding } from "../utils/updateBufferBinding";
-import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources)
 {
@@ -72,7 +72,16 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
                 };
             };
         }
-        else if (resourceType === ResourceType.Texture)
+        else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
+        {
+            updateResource = () =>
+            {
+                entry.resource = device.importExternalTexture(bindingResources[name] as VideoTexture);
+            };
+
+            awaysUpdateFuncs.push(updateResource);
+        }
+        else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)
         {
             updateResource = () =>
             {
@@ -85,15 +94,6 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
             {
                 awaysUpdateFuncs.push(updateResource);
             }
-        }
-        else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
-        {
-            updateResource = () =>
-            {
-                entry.resource = device.importExternalTexture(bindingResources[name] as VideoTexture);
-            };
-
-            awaysUpdateFuncs.push(updateResource);
         }
         else
         {
