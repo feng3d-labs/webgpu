@@ -1,7 +1,6 @@
 import { BindingResources, BufferBinding, CommandEncoder, GBuffer, RenderPassDescriptor, Submit, reactive } from "@feng3d/render-api";
 import { ComputePass, ComputePipeline, TimestampQuery, WebGPU, getGBuffer } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
-import Stats from "stats.js";
 
 import atomicToZero from "./atomicToZero.wgsl";
 import { NaiveBitonicCompute } from "./bitonicCompute";
@@ -838,10 +837,7 @@ async function init(
 }
 
 const canvas = document.getElementById("webgpu") as HTMLCanvasElement;
-const stats = new Stats();
 const gui = new GUI();
-
-document.body.appendChild(stats.dom);
 
 init(gui, canvas);
 
