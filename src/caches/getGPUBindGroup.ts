@@ -60,7 +60,6 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
                 const gbuffer = getGBuffer(bufferBinding.bufferView);
                 (gbuffer as any).label = gbuffer.label || (`BufferBinding ${name}`);
                 //
-                const b = getGBuffer(resource.bufferView);
                 const buffer = getGPUBuffer(device, gbuffer);
 
                 const offset = resource.bufferView.byteOffset;
