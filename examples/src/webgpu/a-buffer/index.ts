@@ -1,4 +1,4 @@
-import { BufferBinding, CanvasContext, IPassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { BufferBinding, CanvasContext, PassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
 import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -271,7 +271,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             return viewProjMatrix;
         }
 
-        const passEncoders: IPassEncoder[] = [];
+        const passEncoders: PassEncoder[] = [];
 
         // Draw the opaque objects
         const opaquePassEncoder: RenderPass = {

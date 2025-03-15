@@ -1,4 +1,4 @@
-import { BindingResources, CommandEncoder, IPassEncoder, reactive, Texture } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, PassEncoder, reactive, Texture } from "@feng3d/render-api";
 import { ComputePipeline, getGBuffer } from "@feng3d/webgpu";
 
 import Common from "./common";
@@ -136,7 +136,7 @@ export default class Radiosity
             ],
         }];
     }
-    private passEncoders: IPassEncoder[];
+    private passEncoders: PassEncoder[];
 
     encode(commandEncoder: CommandEncoder)
     {

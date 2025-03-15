@@ -14,6 +14,9 @@ export function getGPUTextureView(device: GPUDevice, view: TextureView)
         const textureView = texture.createView(view);
 
         return textureView;
+        // texture["view"] = texture["view"] || texture.createView();
+
+        // return texture["view"];
     }
 
     //

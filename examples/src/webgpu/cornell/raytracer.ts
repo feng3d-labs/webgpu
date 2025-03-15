@@ -1,4 +1,4 @@
-import { BindingResources, CommandEncoder, IPassEncoder, Texture } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, PassEncoder, Texture } from "@feng3d/render-api";
 import { ComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
@@ -67,7 +67,7 @@ export default class Raytracer
       }],
     };
   }
-  private passEncoder: IPassEncoder;
+  private passEncoder: PassEncoder;
 
   encode(commandEncoder: CommandEncoder)
   {

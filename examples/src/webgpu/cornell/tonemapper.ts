@@ -1,4 +1,4 @@
-import { BindingResources, CanvasTexture, CommandEncoder, IPassEncoder, Texture } from "@feng3d/render-api";
+import { BindingResources, CanvasTexture, CommandEncoder, PassEncoder, Texture } from "@feng3d/render-api";
 import { ComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
@@ -58,7 +58,7 @@ export default class Tonemapper
             }],
         };
     }
-    private passEncoder: IPassEncoder;
+    private passEncoder: PassEncoder;
 
     encode(commandEncoder: CommandEncoder)
     {

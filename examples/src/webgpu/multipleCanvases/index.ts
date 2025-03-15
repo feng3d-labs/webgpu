@@ -1,4 +1,4 @@
-import { BindingResources, CanvasContext, IPassEncoder, reactive, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, CanvasContext, PassEncoder, reactive, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
 import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
@@ -251,7 +251,7 @@ const init = async () =>
         time *= 0.001; // convert to seconds;
 
         // make a command encoder to start encoding commands
-        const passEncoders: IPassEncoder[] = [];
+        const passEncoders: PassEncoder[] = [];
 
         visibleCanvasSet.forEach((canvas) =>
         {
