@@ -7,9 +7,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 export function getGPUComputePipeline(device: GPUDevice, computePipeline: ComputePipeline)
 {
-    const computePipelineMap: WeakMap<ComputePipeline, GPUComputePipeline> = device["_computePipelineMap"] = device["_computePipelineMap"] || new WeakMap();
-
-    let pipeline = computePipelineMap.get(computePipeline);
+    let pipeline = device._computePipelineMap.get(computePipeline);
     if (pipeline) return pipeline;
 
     const computeStage = computePipeline.compute;
@@ -38,7 +36,7 @@ export function getGPUComputePipeline(device: GPUDevice, computePipeline: Comput
             module: getGPUShaderModule(device, computeStage.code),
         },
     });
-    computePipelineMap.set(computePipeline, pipeline);
+    device._computePipelineMap.set(computePipeline, pipeline);
 
     return pipeline;
 }

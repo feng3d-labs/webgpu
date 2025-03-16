@@ -1,10 +1,10 @@
 import { CanvasContext } from "@feng3d/render-api";
-import { computed, ComputedRef, reactive } from "@vue/reactivity";
+import { computed, reactive } from "@vue/reactivity";
 import "../data/polyfills/CanvasContext";
 
 export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
 {
-    let result = canvasContextMap.get(context);
+    let result = device._contextMap.get(context);
     if (result) return result.value;
 
     const canvas = typeof context.canvasId === "string" ? document.getElementById(context.canvasId) as HTMLCanvasElement : context.canvasId;
@@ -31,7 +31,7 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
         return gpuCanvasContext;
     });
 
-    canvasContextMap.set(context, result);
+    device._contextMap.set(context, result);
 
     const updateConfigure = () =>
     {
@@ -59,5 +59,3 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
 
     return result.value;
 }
-
-const canvasContextMap = new WeakMap<CanvasContext, ComputedRef<GPUCanvasContext>>();;
