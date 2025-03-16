@@ -1,11 +1,10 @@
 import { anyEmitter } from "@feng3d/event";
-import { CanvasTexture, Texture, TextureDataSource, TextureImageSource, TextureLike, TextureSize, TextureSource } from "@feng3d/render-api";
+import { Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSize, TextureSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
-import { getGPUTextureDimension } from "./getGPUTextureDimension";
 import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
 
 /**
@@ -249,3 +248,20 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
 let autoIndex = 0;
 
 const _GPUTextureMap = "_GPUTextureMap";
+
+
+function getGPUTextureDimension(dimension: TextureDimension)
+{
+    const textureDimension = dimensionMap[dimension];
+
+    return textureDimension;
+}
+
+const dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
+    "1d": "1d",
+    "2d": "2d",
+    "2d-array": "2d",
+    cube: "2d",
+    "cube-array": "3d",
+    "3d": "3d",
+};

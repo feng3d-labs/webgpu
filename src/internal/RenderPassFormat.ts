@@ -1,4 +1,4 @@
-export interface IRenderPassFormat
+export interface RenderPassFormat
 {
     readonly attachmentSize: { readonly width: number, readonly height: number }
     readonly colorFormats: readonly GPUTextureFormat[],

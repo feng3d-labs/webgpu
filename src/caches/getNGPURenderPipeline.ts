@@ -4,7 +4,7 @@ import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { gPartial } from "@feng3d/polyfill";
 import { MultisampleState } from "../data/MultisampleState";
-import { IRenderPassFormat } from "../internal/RenderPassFormat";
+import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { NFragmentState } from "../internal/NFragmentState";
 import { NRenderPipeline } from "../internal/NRenderPipeline";
 import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
@@ -20,7 +20,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPassFormat: IRenderPassFormat, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
 {
     const indexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
 

@@ -1,5 +1,4 @@
 import { Texture } from "@feng3d/render-api";
-import { getGPUTextureFormat } from "../caches/getGPUTextureFormat";
 
 /**
  * 从 GPU纹理 上读取数据。
