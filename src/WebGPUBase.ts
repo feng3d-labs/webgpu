@@ -40,7 +40,7 @@ declare global
         _textureMap: WeakMap<Texture, GPUTexture>;
         _renderPassDescriptorMap: WeakMap<RenderPassDescriptor, GPURenderPassDescriptor>;
         _shaderMap: Map<string, GPUShaderModule>;
-        _pipelineLayoutMap: WeakMap<RenderPipeline | ComputePipeline, GPUPipelineLayout>;
+        _pipelineLayoutMap: Map<string, GPUPipelineLayout>;
         _renderPassObjectsCommandMap: ChainMap<[string, RenderPassObject[]], {
             commands: Array<any>;
             setBindGroupCommands: Array<any>;
@@ -102,7 +102,7 @@ export class WebGPUBase
             this._device._textureMap ??= new WeakMap();
             this._device._textureViewMap ??= new WeakMap();
             this._device._renderPassDescriptorMap ??= new WeakMap();
-            this._device._pipelineLayoutMap ??= new WeakMap();
+            this._device._pipelineLayoutMap ??= new Map();
             this._device._shaderMap ??= new Map();
         }
     }

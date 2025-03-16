@@ -50,7 +50,13 @@ declare global
     }
 }
 
-export function getGPUPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | ComputePipeline): GPUPipelineLayout
+/**
+ * 从GPU管线中获取管线布局。
+ *
+ * @param pipeline GPU管线。
+ * @returns 管线布局。
+ */
+export function getGPUPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | ComputePipeline)
 {
     let shaderKey = "";
     if ("compute" in pipeline)
@@ -60,30 +66,10 @@ export function getGPUPipelineLayout(device: GPUDevice, pipeline: RenderPipeline
     else
     {
         shaderKey += pipeline.vertex.code;
-        if (pipeline.fragment) shaderKey += pipeline.fragment.code;
+        if (pipeline.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n` + pipeline.fragment.code;
     }
 
-    //
-    let gpuPipelineLayout = gpuPipelineLayoutMap0[shaderKey];
-    if (gpuPipelineLayout) return gpuPipelineLayout;
-
-    const layout = getPipelineLayout(device, pipeline);
-
-    gpuPipelineLayoutMap0[shaderKey] = layout;
-
-    return layout;
-}
-const gpuPipelineLayoutMap0: { [key: string]: GPUPipelineLayout } = {};
-
-/**
- * 从GPU管线中获取管线布局。
- *
- * @param pipeline GPU管线。
- * @returns 管线布局。
- */
-function getPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | ComputePipeline)
-{
-    let gpuPipelineLayout = device._pipelineLayoutMap.get(pipeline);
+    let gpuPipelineLayout = device._pipelineLayoutMap.get(shaderKey);
     if (gpuPipelineLayout) return gpuPipelineLayout;
 
     let entryMap: GPUBindGroupLayoutEntryMap;
@@ -97,7 +83,24 @@ function getPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | Compute
         if ("fragment" in pipeline)
         {
             const fragmentEntryMap = getIGPUBindGroupLayoutEntryMap(pipeline.fragment.code);
-            entryMap = mergeBindGroupLayouts(entryMap, fragmentEntryMap);
+            for (const resourceName in fragmentEntryMap)
+            {
+                // 检测相同名称是否被定义在多个地方
+                if (entryMap[resourceName])
+                {
+                    const preEntry = entryMap[resourceName].variableInfo;
+                    const currentEntry = fragmentEntryMap[resourceName].variableInfo;
+
+                    if (preEntry.group !== currentEntry.group
+                        || preEntry.binding !== currentEntry.binding
+                        || preEntry.resourceType !== currentEntry.resourceType
+                    )
+                    {
+                        console.warn(`分别在 着色器 @group(${preEntry.group}) @binding(${preEntry.binding}) 与 @group(${currentEntry.group}) @binding(${currentEntry.binding}) 处存在相同名称的变量 ${currentEntry.name} 。`);
+                    }
+                }
+                entryMap[resourceName] = fragmentEntryMap[resourceName];
+            }
         }
     }
 
@@ -164,34 +167,10 @@ function getPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | Compute
         gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
     }
 
-    device._pipelineLayoutMap.set(pipeline, gpuPipelineLayout);
+    device._pipelineLayoutMap.set(shaderKey, gpuPipelineLayout);
 
     return gpuPipelineLayout;
 }
 
 const bindGroupLayoutMap: { [key: string]: GPUBindGroupLayout } = {};
 const pipelineLayoutDescriptorMap: { [key: string]: GPUPipelineLayout } = {};
-
-function mergeBindGroupLayouts(entryMap: GPUBindGroupLayoutEntryMap, entryMap1: GPUBindGroupLayoutEntryMap): GPUBindGroupLayoutEntryMap
-{
-    for (const resourceName in entryMap1)
-    {
-        // 检测相同名称是否被定义在多个地方
-        if (entryMap[resourceName])
-        {
-            const preEntry = entryMap[resourceName].variableInfo;
-            const currentEntry = entryMap1[resourceName].variableInfo;
-
-            if (preEntry.group !== currentEntry.group
-                || preEntry.binding !== currentEntry.binding
-                || preEntry.resourceType !== currentEntry.resourceType
-            )
-            {
-                console.warn(`分别在 着色器 @group(${preEntry.group}) @binding(${preEntry.binding}) 与 @group(${currentEntry.group}) @binding(${currentEntry.binding}) 处存在相同名称的变量 ${currentEntry.name} 。`);
-            }
-        }
-        entryMap[resourceName] = entryMap1[resourceName];
-    }
-
-    return entryMap;
-}
