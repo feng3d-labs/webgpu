@@ -4,11 +4,11 @@ import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { gPartial } from "@feng3d/polyfill";
 import { MultisampleState } from "../data/MultisampleState";
-import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { NFragmentState } from "../internal/NFragmentState";
-import { NRenderPipeline } from "../internal/NRenderPipeline";
 import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
 import { NGPUVertexState } from "../internal/NGPUVertexState";
+import { NRenderPipeline } from "../internal/NRenderPipeline";
+import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -44,11 +44,12 @@ export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPass
 
     //
     const stencilReference = getStencilReference(renderPipeline.depthStencil);
+
     //
     const blendConstantColor = BlendState.getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend);
 
     //
-    const material: NRenderPipeline = {
+    const pipeline: NRenderPipeline = {
         label,
         primitive: gpuPrimitive,
         vertex: vertexStateResult.gpuVertexState,
@@ -59,7 +60,7 @@ export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPass
         blendConstantColor,
     };
 
-    result = { _version: 0, pipeline: material, vertexBuffers: vertexStateResult.vertexBuffers };
+    result = { _version: 0, pipeline: pipeline, vertexBuffers: vertexStateResult.vertexBuffers };
     renderPipelineMap.set([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat], result);
 
     // 监听管线变化

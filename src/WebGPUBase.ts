@@ -431,71 +431,60 @@ export class WebGPUBase
     {
         const device = this._device;
         const { viewport, scissorRect, pipeline, bindingResources: bindingResources, geometry } = renderObject;
+        const attachmentSize = renderPassFormat.attachmentSize;
 
         const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
 
         if ("setViewport" in passEncoder)
         {
-            this.runViewport(passEncoder, renderPassFormat.attachmentSize, viewport);
+            if (viewport)
+            {
+                const isYup = viewport.isYup ?? true;
+                const x = viewport.x ?? 0;
+                let y = viewport.y ?? 0;
+                const width = viewport.width ?? attachmentSize.width;
+                const height = viewport.height ?? attachmentSize.height;
+                const minDepth = viewport.minDepth ?? 0;
+                const maxDepth = viewport.maxDepth ?? 0;
+
+                if (isYup)
+                {
+                    y = attachmentSize.height - y - height;
+                }
+                passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
+            }
+            else
+            {
+                passEncoder.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
+            }
         }
         if ("setScissorRect" in passEncoder)
         {
-            this.runScissorRect(passEncoder as GPURenderPassEncoder, renderPassFormat.attachmentSize, scissorRect);
+            if (scissorRect)
+            {
+                const isYup = scissorRect.isYup ?? true;
+                const x = scissorRect.x ?? 0;
+                let y = scissorRect.y ?? 0;
+                const width = scissorRect.width ?? attachmentSize.width;
+                const height = scissorRect.height ?? attachmentSize.height;
+
+                if (isYup)
+                {
+                    y = attachmentSize.height - y - height;
+                }
+
+                passEncoder.setScissorRect(x, y, width, height);
+            }
+            else
+            {
+                passEncoder.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
+            }
         }
 
         const { primitive, vertices, indices, draw } = geometry;
 
-        this.runRenderPipeline(passEncoder, renderPassFormat, pipeline, primitive, vertices, indices);
-
-        // 计算 bindGroups
-        const layout = getGPUPipelineLayout(device, shader);
-        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
-        {
-            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
-            passEncoder.setBindGroup(group, gpuBindGroup);
-        });
-
-        const renderPipeline = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
-
         //
-        renderPipeline.vertexBuffers?.forEach((vertexBuffer, index) =>
-        {
-            const buffer = getGBuffer(vertexBuffer.data);
-            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
-
-            const gBuffer = getGPUBuffer(device, buffer);
-
-            passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
-        });
-
-        if (indices)
-        {
-            const buffer = getGBuffer(indices);
-            (buffer as UnReadonly<GBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
-
-            const gBuffer = getGPUBuffer(device, buffer);
-
-            //
-            passEncoder.setIndexBuffer(gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength);
-        }
-
-        if (draw.__type__ === 'DrawVertex')
-        {
-            passEncoder.draw(draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance);
-        }
-        else
-        {
-            passEncoder.drawIndexed(draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance);
-        }
-    }
-
-    protected runRenderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, pipeline: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
-    {
-        const device = this._device;
-        //
-        const renderPipelineResult = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
-
-        const nPipeline = renderPipelineResult.pipeline;
+        const { pipeline: nPipeline, vertexBuffers } = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
 
         const gpuRenderPipeline = getGPURenderPipeline(device, nPipeline);
 
@@ -526,52 +515,44 @@ export class WebGPUBase
                 console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 setBlendConstant 值！`);
             }
         }
-    }
 
-    protected runViewport(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, viewport: Viewport)
-    {
-        if (viewport)
+        // 计算 bindGroups
+        const layout = getGPUPipelineLayout(device, shader);
+        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
-            const isYup = viewport.isYup ?? true;
-            const x = viewport.x ?? 0;
-            let y = viewport.y ?? 0;
-            const width = viewport.width ?? attachmentSize.width;
-            const height = viewport.height ?? attachmentSize.height;
-            const minDepth = viewport.minDepth ?? 0;
-            const maxDepth = viewport.maxDepth ?? 0;
+            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
+            passEncoder.setBindGroup(group, gpuBindGroup);
+        });
 
-            if (isYup)
-            {
-                y = attachmentSize.height - y - height;
-            }
-            passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
+        //
+        vertexBuffers?.forEach((vertexBuffer, index) =>
+        {
+            const buffer = getGBuffer(vertexBuffer.data);
+            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
+
+            const gBuffer = getGPUBuffer(device, buffer);
+
+            passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
+        });
+
+        if (indices)
+        {
+            const buffer = getGBuffer(indices);
+            (buffer as UnReadonly<GBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
+
+            const gBuffer = getGPUBuffer(device, buffer);
+
+            //
+            passEncoder.setIndexBuffer(gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength);
+        }
+
+        if (draw.__type__ === 'DrawVertex')
+        {
+            passEncoder.draw(draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance);
         }
         else
         {
-            passEncoder.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
-        }
-    }
-
-    protected runScissorRect(passEncoder: GPURenderPassEncoder, attachmentSize: { width: number, height: number }, scissorRect: ScissorRect)
-    {
-        if (scissorRect)
-        {
-            const isYup = scissorRect.isYup ?? true;
-            const x = scissorRect.x ?? 0;
-            let y = scissorRect.y ?? 0;
-            const width = scissorRect.width ?? attachmentSize.width;
-            const height = scissorRect.height ?? attachmentSize.height;
-
-            if (isYup)
-            {
-                y = attachmentSize.height - y - height;
-            }
-
-            passEncoder.setScissorRect(x, y, width, height);
-        }
-        else
-        {
-            passEncoder.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
+            passEncoder.drawIndexed(draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance);
         }
     }
 }
