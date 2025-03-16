@@ -1,4 +1,4 @@
-import { TextureLike, TextureSize, TextureImageSource, CanvasTexture } from "@feng3d/render-api";
+import { CanvasTexture, TextureLike, TextureSize } from "@feng3d/render-api";
 
 /**
  * 获取纹理尺寸。

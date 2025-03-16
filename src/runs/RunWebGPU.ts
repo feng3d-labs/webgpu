@@ -28,8 +28,15 @@ import { textureInvertYPremultiplyAlpha } from "../utils/textureInvertYPremultip
 
 export class RunWebGPU
 {
-    runSubmit(device: GPUDevice, submit: Submit)
+    constructor(private readonly _device: GPUDevice)
     {
+
+    }
+
+    runSubmit(submit: Submit)
+    {
+        const device = this._device;
+
         const commandBuffers = submit.commandEncoders.map((v) =>
         {
             const commandBuffer = this.runCommandEncoder(device, v);
@@ -43,28 +50,31 @@ export class RunWebGPU
         anyEmitter.emit(device.queue, GPUQueue_submit);
     }
 
-    destoryTexture(device: GPUDevice, texture: TextureLike)
+    destoryTexture(texture: TextureLike)
     {
-        getGPUTexture(device, texture, false)?.destroy();
+        getGPUTexture(this._device, texture, false)?.destroy();
     }
 
-    textureInvertYPremultiplyAlpha(device: GPUDevice, texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
+    textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
+        const device = this._device;
         const gpuTexture = getGPUTexture(device, texture);
 
         textureInvertYPremultiplyAlpha(device, gpuTexture, options);
     }
 
-    copyDepthTexture(device: GPUDevice, sourceTexture: TextureLike, targetTexture: TextureLike)
+    copyDepthTexture(sourceTexture: TextureLike, targetTexture: TextureLike)
     {
+        const device = this._device;
         const gpuSourceTexture = getGPUTexture(device, sourceTexture);
         const gpuTargetTexture = getGPUTexture(device, targetTexture);
 
         copyDepthTexture(device, gpuSourceTexture, gpuTargetTexture);
     }
 
-    async readPixels(device: GPUDevice, gpuReadPixels: ReadPixels)
+    async readPixels(gpuReadPixels: ReadPixels)
     {
+        const device = this._device;
         const gpuTexture = getGPUTexture(device, gpuReadPixels.texture, false);
 
         const result = await readPixels(device, {
@@ -77,8 +87,9 @@ export class RunWebGPU
         return result;
     }
 
-    async readBuffer(device: GPUDevice, buffer: GBuffer, offset?: GPUSize64, size?: GPUSize64)
+    async readBuffer(buffer: GBuffer, offset?: GPUSize64, size?: GPUSize64)
     {
+        const device = this._device;
         const gpuBuffer = getGPUBuffer(device, buffer);
         await gpuBuffer.mapAsync(GPUMapMode.READ);
 

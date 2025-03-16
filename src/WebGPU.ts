@@ -42,7 +42,7 @@ export class WebGPU
     set device(v)
     {
         this._device = v;
-        this._runWebGPU = new RunWebGPUCommandCache();
+        this._runWebGPU = new RunWebGPUCommandCache(this._device);
     }
 
     public _device: GPUDevice;
@@ -56,7 +56,7 @@ export class WebGPU
      */
     submit(submit: Submit)
     {
-        this._runWebGPU.runSubmit(this.device, submit);
+        this._runWebGPU.runSubmit(submit);
     }
 
     /**
@@ -66,7 +66,7 @@ export class WebGPU
      */
     destoryTexture(texture: TextureLike)
     {
-        this._runWebGPU.destoryTexture(this.device, texture);
+        this._runWebGPU.destoryTexture(texture);
     }
 
     /**
@@ -78,7 +78,7 @@ export class WebGPU
      */
     textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
-        this._runWebGPU.textureInvertYPremultiplyAlpha(this.device, texture, options);
+        this._runWebGPU.textureInvertYPremultiplyAlpha(texture, options);
     }
 
     /**
@@ -90,7 +90,7 @@ export class WebGPU
      */
     copyDepthTexture(sourceTexture: TextureLike, targetTexture: TextureLike)
     {
-        this._runWebGPU.copyDepthTexture(this.device, sourceTexture, targetTexture);
+        this._runWebGPU.copyDepthTexture(sourceTexture, targetTexture);
     }
 
     /**
@@ -102,7 +102,7 @@ export class WebGPU
      */
     async readPixels(gpuReadPixels: ReadPixels)
     {
-        const result = await this._runWebGPU.readPixels(this.device, gpuReadPixels);
+        const result = await this._runWebGPU.readPixels(gpuReadPixels);
         return result;
     }
 
@@ -116,7 +116,7 @@ export class WebGPU
      */
     async readBuffer(buffer: GBuffer, offset?: GPUSize64, size?: GPUSize64)
     {
-        const result = await this._runWebGPU.readBuffer(this.device, buffer, offset, size);
+        const result = await this._runWebGPU.readBuffer(buffer, offset, size);
         return result;
     }
 
