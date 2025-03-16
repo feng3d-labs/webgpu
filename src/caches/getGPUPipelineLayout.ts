@@ -1,4 +1,6 @@
+import { RenderPipeline } from "@feng3d/render-api";
 import { VariableInfo } from "wgsl_reflect";
+import { ComputePipeline } from "../data/ComputePipeline";
 import { getIGPUBindGroupLayoutEntryMap, GPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 
 declare global
@@ -48,15 +50,24 @@ declare global
     }
 }
 
-export function getGPUPipelineLayout(device: GPUDevice, shader: IGPUShader): GPUPipelineLayout
+export function getGPUPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | ComputePipeline): GPUPipelineLayout
 {
-    const shaderKey = shader.vertex + shader.fragment + shader.compute;
+    let shaderKey = "";
+    if ("compute" in pipeline)
+    {
+        shaderKey += pipeline.compute;
+    }
+    else
+    {
+        shaderKey += pipeline.vertex.code;
+        if (pipeline.fragment) shaderKey += pipeline.fragment.code;
+    }
 
     //
     let gpuPipelineLayout = gpuPipelineLayoutMap0[shaderKey];
     if (gpuPipelineLayout) return gpuPipelineLayout;
 
-    const layout = getIGPUPipelineLayout(device, shader);
+    const layout = getPipelineLayout(device, pipeline);
 
     gpuPipelineLayoutMap0[shaderKey] = layout;
 
@@ -64,35 +75,27 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: IGPUShader): GPU
 }
 const gpuPipelineLayoutMap0: { [key: string]: GPUPipelineLayout } = {};
 
-export type IGPUShader = { readonly vertex?: string, readonly fragment?: string, readonly compute?: string };
-
 /**
  * 从GPU管线中获取管线布局。
  *
- * @param shader GPU管线。
+ * @param pipeline GPU管线。
  * @returns 管线布局。
  */
-function getIGPUPipelineLayout(device: GPUDevice, shader: IGPUShader)
+function getPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | ComputePipeline)
 {
-    const vertexCode = shader.vertex;
-    const fragmentCode = shader.fragment;
-    const computeCode = shader.compute;
-
-    let entryMap: GPUBindGroupLayoutEntryMap = {};
-    if (vertexCode)
+    let entryMap: GPUBindGroupLayoutEntryMap;
+    if ("compute" in pipeline)
     {
-        const vertexEntryMap = getIGPUBindGroupLayoutEntryMap(vertexCode);
-        entryMap = mergeBindGroupLayouts(entryMap, vertexEntryMap);
+        entryMap = getIGPUBindGroupLayoutEntryMap(pipeline.compute.code);
     }
-    if (fragmentCode && fragmentCode !== vertexCode)
+    else
     {
-        const fragmentEntryMap = getIGPUBindGroupLayoutEntryMap(fragmentCode);
-        entryMap = mergeBindGroupLayouts(entryMap, fragmentEntryMap);
-    }
-    if (computeCode && computeCode !== vertexCode && computeCode !== fragmentCode)
-    {
-        const computeEntryMap = getIGPUBindGroupLayoutEntryMap(computeCode);
-        entryMap = mergeBindGroupLayouts(entryMap, computeEntryMap);
+        entryMap = getIGPUBindGroupLayoutEntryMap(pipeline.vertex.code);
+        if ("fragment" in pipeline)
+        {
+            const fragmentEntryMap = getIGPUBindGroupLayoutEntryMap(pipeline.fragment.code);
+            entryMap = mergeBindGroupLayouts(entryMap, fragmentEntryMap);
+        }
     }
 
     // 绑定组布局描述列表。

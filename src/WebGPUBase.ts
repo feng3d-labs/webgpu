@@ -1,10 +1,10 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, ScissorRect, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { BindingResources, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
-import { getGPUPipelineLayout, IGPUShader } from "./caches/getGPUPipelineLayout";
+import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
 import { getGPURenderOcclusionQuery, GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
@@ -21,12 +21,12 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit } from "./eventnames";
+import { NRenderPipeline } from "./internal/NRenderPipeline";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
-import { NRenderPipeline } from "./internal/NRenderPipeline";
 
 declare global
 {
@@ -401,15 +401,13 @@ export class WebGPUBase
     protected runComputeObject(passEncoder: GPUComputePassEncoder, computeObject: ComputeObject)
     {
         const device = this._device;
-        const { pipeline: pipeline, uniforms: bindingResources, workgroups } = computeObject;
-
-        const shader: IGPUShader = { compute: pipeline.compute.code };
+        const { pipeline, uniforms: bindingResources, workgroups } = computeObject;
 
         const computePipeline = getGPUComputePipeline(device, pipeline);
         passEncoder.setPipeline(computePipeline);
 
         // 计算 bindGroups
-        const layout = getGPUPipelineLayout(device, shader);
+        const layout = getGPUPipelineLayout(device, pipeline);
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
             const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
@@ -432,8 +430,6 @@ export class WebGPUBase
         const device = this._device;
         const { viewport, scissorRect, pipeline, bindingResources: bindingResources, geometry } = renderObject;
         const attachmentSize = renderPassFormat.attachmentSize;
-
-        const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
 
         if ("setViewport" in passEncoder)
         {
@@ -517,7 +513,7 @@ export class WebGPUBase
         }
 
         // 计算 bindGroups
-        const layout = getGPUPipelineLayout(device, shader);
+        const layout = getGPUPipelineLayout(device, pipeline);
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
             const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();

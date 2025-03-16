@@ -8,7 +8,7 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NRenderP
     if (pipeline) return pipeline;
 
     // 从GPU管线中获取管线布局。
-    const layout = getGPUPipelineLayout(device, { vertex: renderPipeline.vertex.code, fragment: renderPipeline.fragment?.code });
+    const layout = getGPUPipelineLayout(device, renderPipeline);
 
     const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
         layout,
