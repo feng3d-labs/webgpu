@@ -28,7 +28,7 @@ import { textureInvertYPremultiplyAlpha } from "../utils/textureInvertYPremultip
 
 export class RunWebGPU
 {
-    constructor(private readonly _device: GPUDevice)
+    constructor(protected readonly _device: GPUDevice)
     {
 
     }
@@ -39,7 +39,7 @@ export class RunWebGPU
 
         const commandBuffers = submit.commandEncoders.map((v) =>
         {
-            const commandBuffer = this.runCommandEncoder(device, v);
+            const commandBuffer = this.runCommandEncoder(v);
 
             return commandBuffer;
         });
@@ -100,31 +100,32 @@ export class RunWebGPU
         return result;
     }
 
-    protected runCommandEncoder(device: GPUDevice, commandEncoder: CommandEncoder)
+    protected runCommandEncoder(commandEncoder: CommandEncoder)
     {
+        const device = this._device;
         const gpuCommandEncoder = device.createCommandEncoder();
 
         commandEncoder.passEncoders.forEach((passEncoder) =>
         {
             if (!passEncoder.__type__)
             {
-                this.runRenderPass(device, gpuCommandEncoder, passEncoder as RenderPass);
+                this.runRenderPass(gpuCommandEncoder, passEncoder as RenderPass);
             }
             else if (passEncoder.__type__ === "RenderPass")
             {
-                this.runRenderPass(device, gpuCommandEncoder, passEncoder);
+                this.runRenderPass(gpuCommandEncoder, passEncoder);
             }
             else if (passEncoder.__type__ === "ComputePass")
             {
-                this.runComputePass(device, gpuCommandEncoder, passEncoder);
+                this.runComputePass(gpuCommandEncoder, passEncoder);
             }
             else if (passEncoder.__type__ === "CopyTextureToTexture")
             {
-                this.runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder);
+                this.runCopyTextureToTexture(gpuCommandEncoder, passEncoder);
             }
             else if (passEncoder.__type__ === "CopyBufferToBuffer")
             {
-                this.runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder);
+                this.runCopyBufferToBuffer(gpuCommandEncoder, passEncoder);
             }
             else
             {
@@ -135,8 +136,9 @@ export class RunWebGPU
         return gpuCommandEncoder.finish();
     }
 
-    protected runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
+    protected runRenderPass(commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
     {
+        const device = this._device;
         const { descriptor, renderObjects } = renderPass;
 
         const renderPassDescriptor = getGPURenderPassDescriptor(device, descriptor);
@@ -152,7 +154,7 @@ export class RunWebGPU
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
-        this.runRenderPassObjects(device, passEncoder, renderPassFormat, renderObjects, occlusionQuery);
+        this.runRenderPassObjects(passEncoder, renderPassFormat, renderObjects, occlusionQuery);
 
         passEncoder.end();
 
@@ -163,27 +165,27 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, renderPass);
     }
 
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderObjects: readonly RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
+    protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderPassObjects: readonly RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
     {
-        if (!renderObjects) return;
+        if (!renderPassObjects) return;
         //
-        renderObjects.forEach((element) =>
+        renderPassObjects.forEach((element) =>
         {
             if (!element.__type__)
             {
-                this.runRenderObject(device, passEncoder, renderPassFormat, element as RenderObject);
+                this.runRenderObject(passEncoder, renderPassFormat, element as RenderObject);
             }
             else if (element.__type__ === "RenderObject")
             {
-                this.runRenderObject(device, passEncoder, renderPassFormat, element);
+                this.runRenderObject(passEncoder, renderPassFormat, element);
             }
             else if (element.__type__ === "RenderBundle")
             {
-                this.runRenderBundle(device, passEncoder, renderPassFormat, element);
+                this.runRenderBundle(passEncoder, renderPassFormat, element);
             }
             else if (element.__type__ === "OcclusionQuery")
             {
-                this.runRenderOcclusionQueryObject(device, passEncoder, renderPassFormat, element, occlusionQuery);
+                this.runRenderOcclusionQueryObject(passEncoder, renderPassFormat, element, occlusionQuery);
             }
             else
             {
@@ -199,8 +201,10 @@ export class RunWebGPU
      * @param commandEncoder 命令编码器。
      * @param computePass 计算通道。
      */
-    protected runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: ComputePass)
+    protected runComputePass(commandEncoder: GPUCommandEncoder, computePass: ComputePass)
     {
+        const device = this._device;
+
         const descriptor: GPUComputePassDescriptor = {};
         // 处理时间戳查询
         const timestampQuery = getGPURenderTimestampQuery(device, computePass?.timestampQuery);
@@ -208,7 +212,7 @@ export class RunWebGPU
 
         const passEncoder = commandEncoder.beginComputePass(descriptor);
 
-        this.runComputeObjects(device, passEncoder, computePass.computeObjects);
+        this.runComputeObjects(passEncoder, computePass.computeObjects);
 
         passEncoder.end();
 
@@ -216,16 +220,18 @@ export class RunWebGPU
         timestampQuery.resolve(device, commandEncoder, computePass);
     }
 
-    protected runComputeObjects(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObjects: ComputeObject[])
+    protected runComputeObjects(passEncoder: GPUComputePassEncoder, computeObjects: ComputeObject[])
     {
         computeObjects.forEach((computeObject) =>
         {
-            this.runComputeObject(device, passEncoder, computeObject);
+            this.runComputeObject(passEncoder, computeObject);
         });
     }
 
-    protected runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: CopyTextureToTexture)
+    protected runCopyTextureToTexture(commandEncoder: GPUCommandEncoder, copyTextureToTexture: CopyTextureToTexture)
     {
+        const device = this._device;
+
         const sourceTexture = getGPUTexture(device, copyTextureToTexture.source.texture);
         const destinationTexture = getGPUTexture(device, copyTextureToTexture.destination.texture);
 
@@ -246,8 +252,10 @@ export class RunWebGPU
         );
     }
 
-    protected runCopyBufferToBuffer(device: GPUDevice, commandEncoder: GPUCommandEncoder, v: CopyBufferToBuffer)
+    protected runCopyBufferToBuffer(commandEncoder: GPUCommandEncoder, v: CopyBufferToBuffer)
     {
+        const device = this._device;
+
         v.sourceOffset ||= 0;
         v.destinationOffset ||= 0;
         v.size ||= v.source.size;
@@ -265,20 +273,21 @@ export class RunWebGPU
         );
     }
 
-    protected runRenderOcclusionQueryObject(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery, occlusionQuery: GPURenderOcclusionQuery)
+    protected runRenderOcclusionQueryObject(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery, occlusionQuery: GPURenderOcclusionQuery)
     {
         passEncoder.beginOcclusionQuery(occlusionQuery.getQueryIndex(renderOcclusionQueryObject));
 
         renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>
         {
-            this.runRenderObject(device, passEncoder, renderPassFormat, renderObject);
+            this.runRenderObject(passEncoder, renderPassFormat, renderObject);
         });
 
         passEncoder.endOcclusionQuery();
     }
 
-    protected runRenderBundle(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
+    protected runRenderBundle(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
     {
+        const device = this._device;
         const renderBundleMap: ChainMap<[RenderBundle, string], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
         //
         let gpuRenderBundle: GPURenderBundle = renderBundleMap.get([renderBundleObject, renderPassFormat._key]);
@@ -289,7 +298,7 @@ export class RunWebGPU
             //
             const renderBundleEncoder = device.createRenderBundleEncoder(descriptor);
 
-            this.runRenderBundleObjects(device, renderBundleEncoder, renderPassFormat, renderBundleObject.renderObjects);
+            this.runRenderBundleObjects(renderBundleEncoder, renderPassFormat, renderBundleObject.renderObjects);
 
             gpuRenderBundle = renderBundleEncoder.finish();
             renderBundleMap.set([renderBundleObject, renderPassFormat._key], gpuRenderBundle);
@@ -298,12 +307,12 @@ export class RunWebGPU
         passEncoder.executeBundles([gpuRenderBundle]);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, passEncoder: GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObjects?: readonly RenderObject[])
+    protected runRenderBundleObjects(passEncoder: GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObjects?: readonly RenderObject[])
     {
         //
         renderObjects.forEach((element) =>
         {
-            this.runRenderObject(device, passEncoder, renderPassFormat, element as RenderObject);
+            this.runRenderObject(passEncoder, renderPassFormat, element as RenderObject);
         });
     }
 
@@ -314,8 +323,9 @@ export class RunWebGPU
      * @param passEncoder 计算通道编码器。
      * @param computeObject 计算对象。
      */
-    protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: ComputeObject)
+    protected runComputeObject(passEncoder: GPUComputePassEncoder, computeObject: ComputeObject)
     {
+        const device = this._device;
         const { pipeline: pipeline, uniforms: bindingResources, workgroups } = computeObject;
 
         const shader: IGPUShader = { compute: pipeline.compute.code };
@@ -342,8 +352,9 @@ export class RunWebGPU
      * @param renderObject 渲染对象。
      * @param renderPass 渲染通道。
      */
-    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
+    protected runRenderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
+        const device = this._device;
         const { viewport, scissorRect, pipeline, bindingResources: bindingResources, geometry } = renderObject;
 
         const shader: IGPUShader = { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code };
@@ -359,7 +370,7 @@ export class RunWebGPU
 
         const { primitive, vertices, indices, draw } = geometry;
 
-        this.runRenderPipeline(device, passEncoder, renderPassFormat, pipeline, primitive, vertices, indices);
+        this.runRenderPipeline(passEncoder, renderPassFormat, pipeline, primitive, vertices, indices);
 
         // 计算 bindGroups
         const layout = getGPUPipelineLayout(device, shader);
@@ -403,8 +414,9 @@ export class RunWebGPU
         }
     }
 
-    protected runRenderPipeline(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, pipeline: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+    protected runRenderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, pipeline: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
     {
+        const device = this._device;
         //
         const renderPipelineResult = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
 

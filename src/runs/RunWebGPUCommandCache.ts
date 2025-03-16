@@ -12,8 +12,9 @@ import { RunWebGPU } from "./RunWebGPU";
  */
 export class RunWebGPUCommandCache extends RunWebGPU
 {
-    protected runRenderPassObjects(device: GPUDevice, passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderObjects: RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
+    protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderObjects: RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
     {
+        const device = this._device;
         const map: ChainMap<[string, RenderPassObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let caches = map.get([renderPassFormat._key, renderObjects]);
         if (!caches)
@@ -22,7 +23,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
             const renderPassRecord = new GPURenderPassRecord();
             const commands = renderPassRecord["_commands"] = [];
 
-            super.runRenderPassObjects(device, renderPassRecord, renderPassFormat, renderObjects, occlusionQuery);
+            super.runRenderPassObjects(renderPassRecord, renderPassFormat, renderObjects, occlusionQuery);
 
             // 排除无效命令
             paichuWuxiaoCommands(renderPassFormat.attachmentSize, commands);
@@ -48,8 +49,9 @@ export class RunWebGPUCommandCache extends RunWebGPU
         runCommands(passEncoder, caches);
     }
 
-    protected runRenderBundleObjects(device: GPUDevice, bundleEncoder: GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObjects?: RenderObject[])
+    protected runRenderBundleObjects(bundleEncoder: GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObjects?: RenderObject[])
     {
+        const device = this._device;
         const map: ChainMap<[string, RenderObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
         let caches = map.get([renderPassFormat._key, renderObjects]);
         if (!caches)
@@ -59,7 +61,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
             const renderBundleRecord = new GPURenderPassRecord();
             const commands = renderBundleRecord["_commands"] = [];
 
-            super.runRenderBundleObjects(device, renderBundleRecord as any, renderPassFormat, renderObjects);
+            super.runRenderBundleObjects(renderBundleRecord as any, renderPassFormat, renderObjects);
 
             // 排除无效命令
             paichuWuxiaoCommands(renderPassFormat.attachmentSize, commands);
@@ -87,8 +89,9 @@ export class RunWebGPUCommandCache extends RunWebGPU
         runCommands(bundleEncoder, { ...caches, commands });
     }
 
-    protected runRenderObject(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
+    protected runRenderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
+        const device = this._device;
         const map: ChainMap<[string, RenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
         const _commands = passEncoder["_commands"] as any[];
 
@@ -102,7 +105,7 @@ export class RunWebGPUCommandCache extends RunWebGPU
 
         const start = _commands.length;
 
-        super.runRenderObject(device, passEncoder, renderPassFormat, renderObject);
+        super.runRenderObject(passEncoder, renderPassFormat, renderObject);
 
         map.set([renderPassFormat._key, renderObject], _commands.slice(start));
 
@@ -167,6 +170,11 @@ function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder 
     });
 }
 
+/**
+ * 排除无效命令
+ *
+ * @param attachmentSize
+ */ 
 function paichuWuxiaoCommands(attachmentSize: { readonly width: number; readonly height: number; }, commands: any[])
 {
     const _obj = {
