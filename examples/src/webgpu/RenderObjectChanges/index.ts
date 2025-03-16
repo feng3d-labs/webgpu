@@ -1,4 +1,4 @@
-import { Submit, RenderObject } from "@feng3d/render-api";
+import { Submit, RenderObject, reactive } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -80,7 +80,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 `;
 
         // 修改片段着色器代码
-        renderObject.pipeline.fragment.code = `
+        reactive(renderObject.pipeline.fragment).code = `
                 @binding(0) @group(0) var<uniform> color : vec4<f32>;
                 @fragment
                 fn main() -> @location(0) vec4f {

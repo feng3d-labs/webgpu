@@ -1,4 +1,4 @@
-import { BlendState, ChainMap, DepthStencilState, FragmentState, IIndicesDataTypes, IWriteMask, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
+import { BlendState, ChainMap, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, IWriteMask, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -87,7 +87,6 @@ function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndex
 
     //
     const gpuPrimitive: GPUPrimitiveState = {
-        ...primitive,
         topology,
         stripIndexFormat,
         frontFace,
@@ -310,24 +309,7 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
     const colorAttachmentsKey = colorAttachments.toString();
 
     let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
-    if (gpuFragmentState) return gpuFragmentState;
-
-    const code = fragmentState.code;
-    let entryPoint = fragmentState.entryPoint;
-    let fragment: FunctionInfo;
-    const reflect = getWGSLReflectInfo(code);
-    if (!entryPoint)
-    {
-        fragment = reflect.entry.fragment[0];
-        console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
-        entryPoint = fragment.name;
-    }
-    else
-    {
-        // 验证着色器中包含指定片段入口函数。
-        fragment = reflect.entry.fragment.filter((v) => v.name === entryPoint)[0];
-        console.assert(!!fragment, `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
-    }
+    if (gpuFragmentState) return gpuFragmentState.value;
 
     const targets = colorAttachments.map((format, i) =>
     {
@@ -350,29 +332,58 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
         return gpuColorTargetState;
     });
 
-    gpuFragmentState = {
-        module: getGPUShaderModule(device, fragmentState.code),
-        entryPoint,
-        targets,
-        constants: fragmentState.constants
-    };
+    const entryPoint = computed(() => 
+    {
+        // 监听着色器入口点变化
+        reactive(fragmentState).entryPoint;
+
+        // 
+        let entryPoint = fragmentState.entryPoint;
+        if (entryPoint) return entryPoint;
+
+        // 监听着色器代码变化
+        reactive(fragmentState).code;
+
+        // 计算片元着色器入口点
+        const code = fragmentState.code;
+        let fragment: FunctionInfo;
+        if (!entryPoint)
+        {
+            const reflect = getWGSLReflectInfo(code);
+            fragment = reflect.entry.fragment[0];
+            console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
+            entryPoint = fragment.name;
+        }
+        else
+        {
+            // 验证着色器中包含指定片段入口函数。
+            const reflect = getWGSLReflectInfo(code);
+            fragment = reflect.entry.fragment.filter((v) => v.name === entryPoint)[0];
+            console.assert(!!fragment, `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
+        }
+        return entryPoint;
+    });
+
+    gpuFragmentState = computed(() =>
+    {
+        // 监听着色器代码变化
+        reactive(fragmentState).code;
+
+        return {
+            module: getGPUShaderModule(device, fragmentState.code),
+            entryPoint: entryPoint.value,
+            targets,
+            constants: fragmentState.constants
+        } as GPUFragmentState;
+    });
 
     fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
 
-    // 监听变化
-    const watchpropertys: gPartial<FragmentState> = { code: "" };
-    const onchanged = () =>
-    {
-        fragmentStateMap.delete([fragmentState, colorAttachmentsKey]);
-        gpuFragmentState._version = ~~gpuFragmentState._version + 1;
-        watcher.unwatchobject(fragmentState, watchpropertys, onchanged);
-    };
-    watcher.watchobject(fragmentState, watchpropertys, onchanged);
-
-    return gpuFragmentState;
+    return gpuFragmentState.value;
 }
 
-const fragmentStateMap = new ChainMap<[FragmentState, string], GPUFragmentState>();
+const fragmentStateMap = new ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>();
+
 
 function getGPUBlendState(blend?: BlendState): GPUBlendState
 {
