@@ -10,6 +10,7 @@ import { NGPUVertexState } from "../internal/NGPUVertexState";
 import { NRenderPipeline } from "../internal/NRenderPipeline";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
+import { getGPURenderPipeline } from "./getGPURenderPipeline";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。
@@ -19,7 +20,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
 {
     const indexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
 
@@ -43,12 +44,6 @@ export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPass
     const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
 
     //
-    const stencilReference = getStencilReference(renderPipeline.depthStencil);
-
-    //
-    const blendConstantColor = BlendState.getBlendConstantColor(renderPipeline.fragment?.targets?.[0]?.blend);
-
-    //
     const pipeline: NRenderPipeline = {
         label,
         primitive: gpuPrimitive,
@@ -56,11 +51,11 @@ export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPass
         fragment: gpuFragmentState,
         depthStencil: gpuDepthStencilState,
         multisample: gpuMultisampleState,
-        stencilReference,
-        blendConstantColor,
     };
 
-    result = { _version: 0, pipeline: pipeline, vertexBuffers: vertexStateResult.vertexBuffers };
+    const gpuRenderPipeline = getGPURenderPipeline(device, pipeline);
+
+    result = { _version: 0, pipeline: gpuRenderPipeline, vertexBuffers: vertexStateResult.vertexBuffers };
     renderPipelineMap.set([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat], result);
 
     // 监听管线变化
@@ -84,7 +79,7 @@ const renderPipelineMap = new ChainMap<
         /**
          * GPU渲染管线描述。
          */
-        pipeline: NRenderPipeline;
+        pipeline: GPURenderPipeline;
         /**
          * GPU渲染时使用的顶点缓冲区列表。
          */
@@ -95,40 +90,6 @@ const renderPipelineMap = new ChainMap<
         _version: number;
     }
 >();
-
-/**
- * 如果任意模板测试结果使用了 "replace" 运算，则需要再渲染前设置 `stencilReference` 值。
- *
- * @param depthStencil
- * @returns
- */
-function getStencilReference(depthStencil?: DepthStencilState)
-{
-    if (!depthStencil) return undefined;
-
-    const { stencilFront, stencilBack } = depthStencil;
-
-    // 如果开启了模板测试，则需要设置模板索引值
-    let stencilReference: number;
-    if (stencilFront)
-    {
-        const { failOp, depthFailOp, passOp } = stencilFront;
-        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
-        {
-            stencilReference = depthStencil?.stencilReference ?? 0;
-        }
-    }
-    if (stencilBack)
-    {
-        const { failOp, depthFailOp, passOp } = stencilBack;
-        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
-        {
-            stencilReference = depthStencil?.stencilReference ?? 0;
-        }
-    }
-
-    return stencilReference;
-}
 
 function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndexFormat)
 {

@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly } from "@feng3d/render-api";
+import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -8,7 +8,6 @@ import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
 import { getGPURenderOcclusionQuery, GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
-import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "./caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGBuffer } from "./caches/getIGPUBuffer";
@@ -480,19 +479,23 @@ export class WebGPUBase
         const { primitive, vertices, indices, draw } = geometry;
 
         //
-        const { pipeline: nPipeline, vertexBuffers } = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
-
-        const gpuRenderPipeline = getGPURenderPipeline(device, nPipeline);
+        const { pipeline: nPipeline, vertexBuffers } = getNGPURenderPipeline(device, pipeline, renderPassFormat, primitive, vertices, indices);
 
         //
-        passEncoder.setPipeline(gpuRenderPipeline);
+        passEncoder.setPipeline(nPipeline);
+
+        //
+        const stencilReference = getStencilReference(pipeline.depthStencil);
+
+        //
+        const blendConstantColor = BlendState.getBlendConstantColor(pipeline.fragment?.targets?.[0]?.blend);
 
         // 设置模板测试替换值
-        if (nPipeline.stencilReference !== undefined)
+        if (stencilReference !== undefined)
         {
             if ("setStencilReference" in passEncoder)
             {
-                passEncoder.setStencilReference(nPipeline.stencilReference);
+                passEncoder.setStencilReference(stencilReference);
             }
             else
             {
@@ -500,11 +503,11 @@ export class WebGPUBase
             }
         }
 
-        if (nPipeline.blendConstantColor !== undefined)
+        if (blendConstantColor !== undefined)
         {
             if ("setBlendConstant" in passEncoder)
             {
-                passEncoder.setBlendConstant(nPipeline.blendConstantColor);
+                passEncoder.setBlendConstant(blendConstantColor);
             }
             else
             {
@@ -556,3 +559,36 @@ export class WebGPUBase
 let autoIndex = 0;
 let autoVertexIndex = 0;
 
+/**
+ * 如果任意模板测试结果使用了 "replace" 运算，则需要再渲染前设置 `stencilReference` 值。
+ *
+ * @param depthStencil
+ * @returns
+ */
+function getStencilReference(depthStencil?: DepthStencilState)
+{
+    if (!depthStencil) return undefined;
+
+    const { stencilFront, stencilBack } = depthStencil;
+
+    // 如果开启了模板测试，则需要设置模板索引值
+    let stencilReference: number;
+    if (stencilFront)
+    {
+        const { failOp, depthFailOp, passOp } = stencilFront;
+        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
+        {
+            stencilReference = depthStencil?.stencilReference ?? 0;
+        }
+    }
+    if (stencilBack)
+    {
+        const { failOp, depthFailOp, passOp } = stencilBack;
+        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
+        {
+            stencilReference = depthStencil?.stencilReference ?? 0;
+        }
+    }
+
+    return stencilReference;
+}
