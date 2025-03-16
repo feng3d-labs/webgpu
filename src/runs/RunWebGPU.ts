@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DrawIndexed, DrawVertex, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -16,66 +16,15 @@ import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "../const";
 import { ComputeObject } from "../data/ComputeObject";
 import { ComputePass } from "../data/ComputePass";
-import { ComputePipeline } from "../data/ComputePipeline";
 import "../data/polyfills/RenderObject";
 import "../data/polyfills/RenderPass";
 import { RenderBundle } from "../data/RenderBundle";
-import { Workgroups } from "../data/Workgroups";
 import { GPUQueue_submit } from "../eventnames";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
-import { quitIfWebGPUNotAvailable } from "../utils/quitIfWebGPUNotAvailable";
 
 export class RunWebGPU
 {
-    /**
- * 初始化 WebGPU 获取 GPUDevice 。
- */
-    async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
-    {
-        const adapter = await navigator.gpu?.requestAdapter(options);
-        // 获取支持的特性
-        const features: GPUFeatureName[] = [];
-        adapter?.features.forEach((v) => { features.push(v as any); });
-        // 判断请求的特性是否被支持
-        const requiredFeatures = Array.from(descriptor?.requiredFeatures || []);
-        if (requiredFeatures.length > 0)
-        {
-            for (let i = requiredFeatures.length - 1; i >= 0; i--)
-            {
-                if (features.indexOf(requiredFeatures[i]) === -1)
-                {
-                    console.error(`当前 GPUAdapter 不支持特性 ${requiredFeatures[i]}！`);
-                    requiredFeatures.splice(i, 1);
-                }
-            }
-            descriptor.requiredFeatures = requiredFeatures;
-        }
-        // 默认开启当前本机支持的所有WebGPU特性。
-        descriptor = descriptor || {};
-        descriptor.requiredFeatures = (descriptor.requiredFeatures || features) as any;
-        //
-        const device = await adapter?.requestDevice(descriptor);
-        quitIfWebGPUNotAvailable(adapter, device);
-
-        device?.lost.then(async (info) =>
-        {
-            console.error(`WebGPU device was lost: ${info.message}`);
-
-            // 'reason' will be 'destroyed' if we intentionally destroy the device.
-            if (info.reason !== "destroyed")
-            {
-                // try again
-                await this.init(options, descriptor);
-            }
-        });
-
-        this.device = device;
-
-        return this;
-    }
-
-    public device: GPUDevice;
 
     runSubmit(device: GPUDevice, submit: Submit)
     {
@@ -308,33 +257,22 @@ export class RunWebGPU
      */
     protected runComputeObject(device: GPUDevice, passEncoder: GPUComputePassEncoder, computeObject: ComputeObject)
     {
-        const { pipeline: material, uniforms: bindingResources, workgroups } = computeObject;
+        const { pipeline: pipeline, uniforms: bindingResources, workgroups } = computeObject;
 
-        const shader: IGPUShader = { compute: material.compute.code };
+        const shader: IGPUShader = { compute: pipeline.compute.code };
 
-        this.runComputePipeline(device, passEncoder, material);
-
-        this.runBindingResources(device, passEncoder, shader, bindingResources);
-
-        this.runWorkgroups(passEncoder, workgroups);
-    }
-
-    protected runComputePipeline(device: GPUDevice, passEncoder: GPUComputePassEncoder, pipeline: ComputePipeline)
-    {
         const computePipeline = getGPUComputePipeline(device, pipeline);
         passEncoder.setPipeline(computePipeline);
-    }
 
-    /**
-     * 执行计算工作组。
-     *
-     * @param passEncoder 计算通道编码器。
-     * @param workgroups 计算工作组。
-     */
-    protected runWorkgroups(passEncoder: GPUComputePassEncoder, workgroups?: Workgroups)
-    {
-        const { workgroupCountX, workgroupCountY, workgroupCountZ } = workgroups;
-        passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
+        // 计算 bindGroups
+        const layout = getGPUPipelineLayout(device, shader);
+        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+        {
+            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
+            passEncoder.setBindGroup(group, gpuBindGroup);
+        });
+
+        passEncoder.dispatchWorkgroups(workgroups.workgroupCountX, workgroups.workgroupCountY, workgroups.workgroupCountZ);
     }
 
     /**
@@ -364,19 +302,45 @@ export class RunWebGPU
 
         this.runRenderPipeline(device, passEncoder, renderPassFormat, pipeline, primitive, vertices, indices);
 
-        this.runBindingResources(device, passEncoder, shader, bindingResources);
+        // 计算 bindGroups
+        const layout = getGPUPipelineLayout(device, shader);
+        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+        {
+            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
+            passEncoder.setBindGroup(group, gpuBindGroup);
+        });
 
-        this.runVertices(device, passEncoder, renderPassFormat, pipeline, primitive, vertices, indices);
+        const renderPipeline = getNGPURenderPipeline(pipeline, renderPassFormat, primitive, vertices, indices);
 
-        this.runIndices(device, passEncoder, indices);
+        //
+        renderPipeline.vertexBuffers?.forEach((vertexBuffer, index) =>
+        {
+            const buffer = getGBuffer(vertexBuffer.data);
+            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
+
+            const gBuffer = getGPUBuffer(device, buffer);
+
+            passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
+        });
+
+        if (indices)
+        {
+            const buffer = getGBuffer(indices);
+            (buffer as UnReadonly<GBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
+
+            const gBuffer = getGPUBuffer(device, buffer);
+
+            //
+            passEncoder.setIndexBuffer(gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength);
+        }
 
         if (draw.__type__ === 'DrawVertex')
         {
-            this.runDrawVertex(passEncoder, draw);
+            passEncoder.draw(draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance);
         }
         else
         {
-            this.runDrawIndexed(passEncoder, draw);
+            passEncoder.drawIndexed(draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance);
         }
     }
 
@@ -463,58 +427,6 @@ export class RunWebGPU
         {
             passEncoder.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
         }
-    }
-
-    protected runBindingResources(device: GPUDevice, passEncoder: GPUBindingCommandsMixin, shader: IGPUShader, bindingResources: BindingResources)
-    {
-        // 计算 bindGroups
-        const layout = getGPUPipelineLayout(device, shader);
-        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
-        {
-            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
-            passEncoder.setBindGroup(group, gpuBindGroup);
-        });
-    }
-
-    protected runVertices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, material: RenderPipeline, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
-    {
-        const renderPipeline = getNGPURenderPipeline(material, renderPassFormat, primitive, vertices, indices);
-
-        //
-        renderPipeline.vertexBuffers?.forEach((vertexBuffer, index) =>
-        {
-            const buffer = getGBuffer(vertexBuffer.data);
-            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
-
-            const gBuffer = getGPUBuffer(device, buffer);
-
-            passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
-        });
-    }
-
-    protected runIndices(device: GPUDevice, passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, indices: IIndicesDataTypes)
-    {
-        if (!indices) return;
-
-        const buffer = getGBuffer(indices);
-        (buffer as UnReadonly<GBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
-
-        const gBuffer = getGPUBuffer(device, buffer);
-
-        //
-        passEncoder.setIndexBuffer(gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength);
-    }
-
-    protected runDrawVertex(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawVertex: DrawVertex)
-    {
-        //
-        passEncoder.draw(drawVertex.vertexCount, drawVertex.instanceCount, drawVertex.firstVertex, drawVertex.firstInstance);
-    }
-
-    protected runDrawIndexed(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, drawIndexed: DrawIndexed)
-    {
-        //
-        passEncoder.drawIndexed(drawIndexed.indexCount, drawIndexed.instanceCount, drawIndexed.firstIndex, drawIndexed.baseVertex, drawIndexed.firstInstance);
     }
 }
 
