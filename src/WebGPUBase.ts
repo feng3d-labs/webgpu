@@ -1,39 +1,74 @@
 import { anyEmitter } from "@feng3d/event";
 import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, TextureLike, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
-import { getGPUBindGroup } from "../caches/getGPUBindGroup";
-import { getGPUBuffer } from "../caches/getGPUBuffer";
-import { getGPUComputePipeline } from "../caches/getGPUComputePipeline";
-import { getGPUPipelineLayout, IGPUShader } from "../caches/getGPUPipelineLayout";
-import { getGPURenderOcclusionQuery, GPURenderOcclusionQuery } from "../caches/getGPURenderOcclusionQuery";
-import { getGPURenderPassDescriptor } from "../caches/getGPURenderPassDescriptor";
-import { getGPURenderPassFormat } from "../caches/getGPURenderPassFormat";
-import { getGPURenderPipeline } from "../caches/getGPURenderPipeline";
-import { getGPURenderTimestampQuery } from "../caches/getGPURenderTimestampQuery";
-import { getGPUTexture } from "../caches/getGPUTexture";
-import { getGBuffer } from "../caches/getIGPUBuffer";
-import { getNGPURenderPipeline } from "../caches/getNGPURenderPipeline";
-import { getRealGPUBindGroup } from "../const";
-import { ComputeObject } from "../data/ComputeObject";
-import { ComputePass } from "../data/ComputePass";
-import "../data/polyfills/RenderObject";
-import "../data/polyfills/RenderPass";
-import { RenderBundle } from "../data/RenderBundle";
-import { GPUQueue_submit } from "../eventnames";
-import { RenderPassFormat } from "../internal/RenderPassFormat";
-import { ChainMap } from "../utils/ChainMap";
-import { copyDepthTexture } from "../utils/copyDepthTexture";
-import { readPixels } from "../utils/readPixels";
-import { textureInvertYPremultiplyAlpha } from "../utils/textureInvertYPremultiplyAlpha";
+import { getGPUBindGroup } from "./caches/getGPUBindGroup";
+import { getGPUBuffer } from "./caches/getGPUBuffer";
+import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
+import { getGPUPipelineLayout, IGPUShader } from "./caches/getGPUPipelineLayout";
+import { getGPURenderOcclusionQuery, GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
+import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
+import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
+import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
+import { getGPURenderTimestampQuery } from "./caches/getGPURenderTimestampQuery";
+import { getGPUTexture } from "./caches/getGPUTexture";
+import { getGBuffer } from "./caches/getIGPUBuffer";
+import { getNGPURenderPipeline } from "./caches/getNGPURenderPipeline";
+import { getRealGPUBindGroup } from "./const";
+import { ComputeObject } from "./data/ComputeObject";
+import { ComputePass } from "./data/ComputePass";
+import "./data/polyfills/RenderObject";
+import "./data/polyfills/RenderPass";
+import { RenderBundle } from "./data/RenderBundle";
+import { GPUQueue_submit } from "./eventnames";
+import { RenderPassFormat } from "./internal/RenderPassFormat";
+import { ChainMap } from "./utils/ChainMap";
+import { copyDepthTexture } from "./utils/copyDepthTexture";
+import { getGPUDevice } from "./utils/getGPUDevice";
+import { readPixels } from "./utils/readPixels";
+import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
 
-export class RunWebGPU
+/**
+ * WebGPU 基础类
+ */
+export class WebGPUBase
 {
-    constructor(protected readonly _device: GPUDevice)
+    /**
+     * 初始化 WebGPU 获取 GPUDevice 。
+     */
+    async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
+    {
+        this.device = await getGPUDevice(options, descriptor);
+        //
+        this.device?.lost.then(async (info) =>
+        {
+            console.error(`WebGPU device was lost: ${info.message}`);
+
+            // 'reason' will be 'destroyed' if we intentionally destroy the device.
+            if (info.reason !== "destroyed")
+            {
+                // try again
+                this.device = await getGPUDevice(options, descriptor);
+            }
+        });
+
+        return this;
+    }
+
+    get device()
+    {
+        return this._device;
+    }
+    set device(v)
+    {
+        this._device = v;
+    }
+
+    constructor(protected _device?: GPUDevice)
     {
 
     }
 
-    runSubmit(submit: Submit)
+    submit(submit: Submit)
     {
         const device = this._device;
 

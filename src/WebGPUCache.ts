@@ -1,16 +1,16 @@
 import { RenderObject, RenderPassObject } from "@feng3d/render-api";
 
 import { watcher } from "@feng3d/watcher";
-import { GPURenderOcclusionQuery } from "../caches/getGPURenderOcclusionQuery";
-import { getRealGPUBindGroup } from "../const";
-import { RenderPassFormat } from "../internal/RenderPassFormat";
-import { ChainMap } from "../utils/ChainMap";
-import { RunWebGPU } from "./RunWebGPU";
+import { GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
+import { getRealGPUBindGroup } from "./const";
+import { RenderPassFormat } from "./internal/RenderPassFormat";
+import { ChainMap } from "./utils/ChainMap";
+import { WebGPUBase } from "./WebGPUBase";
 
 /**
- * 套壳模式（RunWebGPUCommandCache）优于覆盖函数(RunWebGPUCommandCache1)的形式。
+ * 缓存命令，优化性能。
  */
-export class RunWebGPUCommandCache extends RunWebGPU
+export class WebGPUCache extends WebGPUBase
 {
     protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderObjects: RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
     {
@@ -174,7 +174,7 @@ function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder 
  * 排除无效命令
  *
  * @param attachmentSize
- */ 
+ */
 function paichuWuxiaoCommands(attachmentSize: { readonly width: number; readonly height: number; }, commands: any[])
 {
     const _obj = {
