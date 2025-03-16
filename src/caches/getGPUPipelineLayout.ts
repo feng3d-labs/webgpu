@@ -83,6 +83,9 @@ const gpuPipelineLayoutMap0: { [key: string]: GPUPipelineLayout } = {};
  */
 function getPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | ComputePipeline)
 {
+    let gpuPipelineLayout = device._pipelineLayoutMap.get(pipeline);
+    if (gpuPipelineLayout) return gpuPipelineLayout;
+
     let entryMap: GPUBindGroupLayoutEntryMap;
     if ("compute" in pipeline)
     {
@@ -133,9 +136,13 @@ function getPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | Compute
                 console.log(`命中相同的布局 ${key}，公用绑定组布局对象。`);
             }
         }
-        const bindGroupLayout: GPUBindGroupLayout = bindGroupLayoutMap[key] = bindGroupLayoutMap[key] || device.createBindGroupLayout({ entries, label: key });
-        bindGroupLayout.entries = entries;
-        bindGroupLayout.key = key;
+        let bindGroupLayout = bindGroupLayoutMap[key];
+        if (!bindGroupLayout)
+        {
+            bindGroupLayout = bindGroupLayoutMap[key] = device.createBindGroupLayout({ entries, label: key });
+            bindGroupLayout.entries = entries;
+            bindGroupLayout.key = key;
+        }
         return bindGroupLayout;
     });
 
@@ -148,10 +155,16 @@ function getPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | Compute
             console.log(`命中相同的布局 ${pipelineLayoutKey}，公用管线布局对象。`);
         }
     }
-    const gpuPipelineLayout: GPUPipelineLayout = pipelineLayoutDescriptorMap[pipelineLayoutKey] = pipelineLayoutDescriptorMap[pipelineLayoutKey] || device.createPipelineLayout({
-        bindGroupLayouts,
-    });
-    gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
+    gpuPipelineLayout = pipelineLayoutDescriptorMap[pipelineLayoutKey];
+    if (!gpuPipelineLayout)
+    {
+        gpuPipelineLayout = pipelineLayoutDescriptorMap[pipelineLayoutKey] = device.createPipelineLayout({
+            bindGroupLayouts,
+        });
+        gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
+    }
+
+    device._pipelineLayoutMap.set(pipeline, gpuPipelineLayout);
 
     return gpuPipelineLayout;
 }

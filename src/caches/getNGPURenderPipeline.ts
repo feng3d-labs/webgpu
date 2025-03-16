@@ -4,9 +4,7 @@ import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { gPartial } from "@feng3d/polyfill";
 import { MultisampleState } from "../data/MultisampleState";
-import { NFragmentState } from "../internal/NFragmentState";
 import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
-import { NGPUVertexState } from "../internal/NGPUVertexState";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
@@ -30,10 +28,10 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
 
     // 获取完整的顶点阶段描述与顶点缓冲区列表。
-    const vertexStateResult = getNGPUVertexState(renderPipeline.vertex, vertices);
+    const vertexStateResult = getNGPUVertexState(device, renderPipeline.vertex, vertices);
 
     // 获取片段阶段完整描述。
-    const gpuFragmentState = getNGPUFragmentState(renderPipeline.fragment, renderPassFormat.colorFormats);
+    const gpuFragmentState = getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
 
     // 获取深度模板阶段完整描述。
     const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
@@ -47,22 +45,12 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
         label: renderPipeline.label,
         layout,
-        vertex: {
-            ...vertexStateResult.gpuVertexState,
-            module: getGPUShaderModule(device, renderPipeline.vertex.code),
-        },
+        vertex: vertexStateResult.gpuVertexState,
+        fragment: gpuFragmentState,
         primitive: gpuPrimitive,
         depthStencil: gpuDepthStencilState,
         multisample: gpuMultisampleState,
     };
-
-    if (gpuFragmentState)
-    {
-        gpuRenderPipelineDescriptor.fragment = {
-            ...gpuFragmentState,
-            module: getGPUShaderModule(device, renderPipeline.fragment.code),
-        };
-    }
 
     const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
 
@@ -170,7 +158,7 @@ function getGPUStencilFaceState(stencilFaceState?: StencilFaceState)
  * @param vertices 顶点数据。
  * @returns 完整的顶点阶段描述与顶点缓冲区列表。
  */
-function getNGPUVertexState(vertexState: VertexState, vertices: VertexAttributes)
+function getNGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
 {
     let result = vertexStateMap.get([vertexState, vertices]);
     if (result) return result;
@@ -193,8 +181,8 @@ function getNGPUVertexState(vertexState: VertexState, vertices: VertexAttributes
 
     const { vertexBufferLayouts, vertexBuffers } = getNGPUVertexBuffers(vertex, vertices);
 
-    const gpuVertexState: NGPUVertexState = {
-        code,
+    const gpuVertexState: GPUVertexState = {
+        module: getGPUShaderModule(device, vertexState.code),
         entryPoint,
         buffers: vertexBufferLayouts,
         constants: vertexState.constants,
@@ -218,7 +206,7 @@ function getNGPUVertexState(vertexState: VertexState, vertices: VertexAttributes
 }
 
 const vertexStateMap = new ChainMap<[VertexState, VertexAttributes], {
-    gpuVertexState: NGPUVertexState;
+    gpuVertexState: GPUVertexState;
     vertexBuffers: NVertexBuffer[];
     /**
      * 版本号，用于版本控制。
@@ -315,13 +303,13 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: VertexAttributes)
  * @param colorAttachmentTextureFormats 颜色附件格式。
  * @returns 片段阶段完整描述。
  */
-function getNGPUFragmentState(fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
+function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
 {
     if (!fragmentState) return undefined;
 
     const colorAttachmentsKey = colorAttachments.toString();
 
-    let gpuFragmentState: NFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
+    let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
     if (gpuFragmentState) return gpuFragmentState;
 
     const code = fragmentState.code;
@@ -363,7 +351,7 @@ function getNGPUFragmentState(fragmentState: FragmentState, colorAttachments: re
     });
 
     gpuFragmentState = {
-        code,
+        module: getGPUShaderModule(device, fragmentState.code),
         entryPoint,
         targets,
         constants: fragmentState.constants
@@ -384,7 +372,7 @@ function getNGPUFragmentState(fragmentState: FragmentState, colorAttachments: re
     return gpuFragmentState;
 }
 
-const fragmentStateMap = new ChainMap<[FragmentState, string], NFragmentState>();
+const fragmentStateMap = new ChainMap<[FragmentState, string], GPUFragmentState>();
 
 function getGPUBlendState(blend?: BlendState): GPUBlendState
 {
