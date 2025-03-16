@@ -17,8 +17,7 @@ import { getTextureSize } from "./getTextureSize";
  */
 export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: RenderPassDescriptor): GPURenderPassDescriptor
 {
-    const renderPassDescriptorMap: Map<RenderPassDescriptor, GPURenderPassDescriptor> = device["_RenderPassDescriptorMap"] = device["_RenderPassDescriptorMap"] || new Map();
-    let renderPassDescriptor = renderPassDescriptorMap.get(descriptor);
+    let renderPassDescriptor = device._renderPassDescriptorMap.get(descriptor);
     if (renderPassDescriptor)
     {
         // 执行更新函数。
@@ -28,7 +27,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: Render
     }
 
     renderPassDescriptor = { colorAttachments: [] };
-    renderPassDescriptorMap.set(descriptor, renderPassDescriptor);
+    device._renderPassDescriptorMap.set(descriptor, renderPassDescriptor);
 
     const _updates: Function[] = renderPassDescriptor["_updates"] = [];
 

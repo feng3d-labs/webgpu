@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Sampler, ScissorRect, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { BindingResources, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, ScissorRect, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -26,6 +26,7 @@ import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+import { NRenderPipeline } from "./internal/NRenderPipeline";
 
 declare global
 {
@@ -38,6 +39,9 @@ declare global
         _samplerMap: WeakMap<Sampler, GPUSampler>;
         _textureViewMap: WeakMap<TextureView, GPUTextureView>;
         _textureMap: WeakMap<Texture, GPUTexture>;
+        _renderPassDescriptorMap: WeakMap<RenderPassDescriptor, GPURenderPassDescriptor>;
+        _pipelineMap: WeakMap<NRenderPipeline, GPURenderPipeline>;
+        _shaderMap: Map<string, GPUShaderModule>;
     }
 }
 
@@ -85,6 +89,9 @@ export class WebGPUBase
             this._device._samplerMap ??= new WeakMap();
             this._device._textureMap ??= new WeakMap();
             this._device._textureViewMap ??= new WeakMap();
+            this._device._renderPassDescriptorMap ??= new WeakMap();
+            this._device._pipelineMap ??= new WeakMap();
+            this._device._shaderMap ??= new Map();
         }
     }
     protected _device: GPUDevice;

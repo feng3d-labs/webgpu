@@ -4,7 +4,7 @@ import { getGPUShaderModule } from "./getGPUShaderModule";
 
 export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NRenderPipeline)
 {
-    let pipeline = pipelineMap.get(renderPipeline);
+    let pipeline = device._pipelineMap.get(renderPipeline);
     if (pipeline) return pipeline;
 
     // 从GPU管线中获取管线布局。
@@ -31,9 +31,8 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: NRenderP
 
     pipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
 
-    pipelineMap.set(renderPipeline, pipeline);
+    device._pipelineMap.set(renderPipeline, pipeline);
 
     return pipeline;
 }
 
-const pipelineMap = new Map<NRenderPipeline, GPURenderPipeline>();

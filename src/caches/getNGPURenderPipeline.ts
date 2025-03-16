@@ -284,7 +284,7 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: VertexAttributes)
 
     const vertexBuffers: NVertexBuffer[] = [];
 
-    const map: Map<any, number> = new Map();
+    const map = new Map<any, number>();
 
     vertex.inputs.forEach((v) =>
     {
