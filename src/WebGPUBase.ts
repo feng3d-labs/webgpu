@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly } from "@feng3d/render-api";
+import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -20,12 +20,12 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit } from "./eventnames";
-import { NRenderPipeline } from "./internal/NRenderPipeline";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+import { NVertexBuffer } from "./internal/NGPUVertexBuffer";
 
 declare global
 {
@@ -39,13 +39,17 @@ declare global
         _textureViewMap: WeakMap<TextureView, GPUTextureView>;
         _textureMap: WeakMap<Texture, GPUTexture>;
         _renderPassDescriptorMap: WeakMap<RenderPassDescriptor, GPURenderPassDescriptor>;
-        _pipelineMap: WeakMap<NRenderPipeline, GPURenderPipeline>;
         _shaderMap: Map<string, GPUShaderModule>;
         _renderPassObjectsCommandMap: ChainMap<[string, RenderPassObject[]], {
             commands: Array<any>;
             setBindGroupCommands: Array<any>;
         }>;
         _renderObjectCommandMap: ChainMap<[string, RenderObject], Array<any>>;
+        _renderPipelineMap: ChainMap<[RenderPipeline, string, PrimitiveState, VertexAttributes, GPUIndexFormat], {
+            pipeline: GPURenderPipeline;
+            vertexBuffers: NVertexBuffer[];
+            _version: number;
+        }>
     }
 }
 
@@ -88,6 +92,7 @@ export class WebGPUBase
         {
             this._device._bindGroupMap ??= new ChainMap();
             this._device._renderPassObjectsCommandMap ??= new ChainMap();
+            this._device._renderPipelineMap ??= new ChainMap();
             this._device._renderObjectCommandMap ??= new ChainMap();
             this._device._bufferMap ??= new WeakMap();
             this._device._contextMap ??= new WeakMap();
@@ -96,7 +101,6 @@ export class WebGPUBase
             this._device._textureMap ??= new WeakMap();
             this._device._textureViewMap ??= new WeakMap();
             this._device._renderPassDescriptorMap ??= new WeakMap();
-            this._device._pipelineMap ??= new WeakMap();
             this._device._shaderMap ??= new Map();
         }
     }

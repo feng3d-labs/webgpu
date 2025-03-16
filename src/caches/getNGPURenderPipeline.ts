@@ -7,10 +7,10 @@ import { MultisampleState } from "../data/MultisampleState";
 import { NFragmentState } from "../internal/NFragmentState";
 import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
 import { NGPUVertexState } from "../internal/NGPUVertexState";
-import { NRenderPipeline } from "../internal/NRenderPipeline";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
+import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
+import { getGPUShaderModule } from "./getGPUShaderModule";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
-import { getGPURenderPipeline } from "./getGPURenderPipeline";
 
 /**
  * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。
@@ -24,10 +24,8 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
 {
     const indexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
 
-    let result = renderPipelineMap.get([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
+    let result = device._renderPipelineMap.get([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
     if (result) return result;
-
-    const { label } = renderPipeline;
 
     const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
 
@@ -43,27 +41,40 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     // 从渲染通道上获取多重采样数量
     const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
 
-    //
-    const pipeline: NRenderPipeline = {
-        label,
+    // 从GPU管线中获取管线布局。
+    const layout = getGPUPipelineLayout(device, renderPipeline);
+
+    const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
+        label: renderPipeline.label,
+        layout,
+        vertex: {
+            ...vertexStateResult.gpuVertexState,
+            module: getGPUShaderModule(device, renderPipeline.vertex.code),
+        },
         primitive: gpuPrimitive,
-        vertex: vertexStateResult.gpuVertexState,
-        fragment: gpuFragmentState,
         depthStencil: gpuDepthStencilState,
         multisample: gpuMultisampleState,
     };
 
-    const gpuRenderPipeline = getGPURenderPipeline(device, pipeline);
+    if (gpuFragmentState)
+    {
+        gpuRenderPipelineDescriptor.fragment = {
+            ...gpuFragmentState,
+            module: getGPUShaderModule(device, renderPipeline.fragment.code),
+        };
+    }
+
+    const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
 
     result = { _version: 0, pipeline: gpuRenderPipeline, vertexBuffers: vertexStateResult.vertexBuffers };
-    renderPipelineMap.set([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat], result);
+    device._renderPipelineMap.set([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat], result);
 
     // 监听管线变化
     const onchanged = () =>
     {
         result._version++;
         renderPipeline._version = ~~renderPipeline._version + 1;
-        renderPipelineMap.delete([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
+        device._renderPipelineMap.delete([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
         watcher.unwatch(vertexStateResult, "_version", onchanged);
         gpuFragmentState && watcher.unwatch(gpuFragmentState, "_version", onchanged);
     }
@@ -72,24 +83,6 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
 
     return result;
 }
-
-const renderPipelineMap = new ChainMap<
-    [RenderPipeline, string, PrimitiveState, VertexAttributes, GPUIndexFormat],
-    {
-        /**
-         * GPU渲染管线描述。
-         */
-        pipeline: GPURenderPipeline;
-        /**
-         * GPU渲染时使用的顶点缓冲区列表。
-         */
-        vertexBuffers: NVertexBuffer[];
-        /**
-         * 版本号
-         */
-        _version: number;
-    }
->();
 
 function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndexFormat)
 {
