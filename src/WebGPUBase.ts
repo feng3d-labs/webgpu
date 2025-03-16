@@ -42,6 +42,11 @@ declare global
         _renderPassDescriptorMap: WeakMap<RenderPassDescriptor, GPURenderPassDescriptor>;
         _pipelineMap: WeakMap<NRenderPipeline, GPURenderPipeline>;
         _shaderMap: Map<string, GPUShaderModule>;
+        _renderPassObjectsCommandMap: ChainMap<[string, RenderPassObject[]], {
+            commands: Array<any>;
+            setBindGroupCommands: Array<any>;
+        }>;
+        _renderObjectCommandMap: ChainMap<[string, RenderObject], Array<any>>;
     }
 }
 
@@ -83,6 +88,8 @@ export class WebGPUBase
         if (this._device)
         {
             this._device._bindGroupMap ??= new ChainMap();
+            this._device._renderPassObjectsCommandMap ??= new ChainMap();
+            this._device._renderObjectCommandMap ??= new ChainMap();
             this._device._bufferMap ??= new WeakMap();
             this._device._contextMap ??= new WeakMap();
             this._device._computePipelineMap ??= new WeakMap();

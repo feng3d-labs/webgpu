@@ -14,8 +14,7 @@ export class WebGPUCache extends WebGPUBase
     protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderObjects: RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
     {
         const device = this._device;
-        const map: ChainMap<[string, RenderPassObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
-        let caches = map.get([renderPassFormat._key, renderObjects]);
+        let caches = device._renderPassObjectsCommandMap.get([renderPassFormat._key, renderObjects]);
         if (!caches)
         {
             // 收集命令
@@ -32,12 +31,12 @@ export class WebGPUCache extends WebGPUBase
 
             caches = { commands, setBindGroupCommands };
 
-            map.set([renderPassFormat._key, renderObjects], caches);
+            device._renderPassObjectsCommandMap.set([renderPassFormat._key, renderObjects], caches);
 
             // 监听变化
             const onchanged = () =>
             {
-                map.delete([renderPassFormat._key, renderObjects]);
+                device._renderPassObjectsCommandMap.delete([renderPassFormat._key, renderObjects]);
                 //
                 renderObjects.forEach((v) => { watcher.unwatch(v, "_version" as any, onchanged); });
             };
@@ -51,8 +50,7 @@ export class WebGPUCache extends WebGPUBase
     protected runRenderBundleObjects(bundleEncoder: GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObjects?: RenderObject[])
     {
         const device = this._device;
-        const map: ChainMap<[string, RenderObject[]], { commands: Array<any>, setBindGroupCommands: Array<any> }> = device["_IGPURenderPassObjectsCommandMap"] = device["_IGPURenderPassObjectsCommandMap"] || new ChainMap();
-        let caches = map.get([renderPassFormat._key, renderObjects]);
+        let caches = device._renderPassObjectsCommandMap.get([renderPassFormat._key, renderObjects]);
         if (!caches)
         {
             // 收集命令
@@ -69,12 +67,12 @@ export class WebGPUCache extends WebGPUBase
 
             caches = { commands, setBindGroupCommands };
 
-            map.set([renderPassFormat._key, renderObjects], caches);
+            device._renderPassObjectsCommandMap.set([renderPassFormat._key, renderObjects], caches);
 
             // 监听变化
             const onchanged = () =>
             {
-                map.delete([renderPassFormat._key, renderObjects]);
+                device._renderPassObjectsCommandMap.delete([renderPassFormat._key, renderObjects]);
                 //
                 renderObjects.forEach((v) => { watcher.unwatch(v, "_version", onchanged); });
             };
@@ -91,10 +89,9 @@ export class WebGPUCache extends WebGPUBase
     protected runRenderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
         const device = this._device;
-        const map: ChainMap<[string, RenderObject], Array<any>> = device["_IGPURenderObjectCommandMap"] = device["_IGPURenderObjectCommandMap"] || new ChainMap();
         const _commands = passEncoder["_commands"] as any[];
 
-        const commands = map.get([renderPassFormat._key, renderObject]);
+        const commands = device._renderObjectCommandMap.get([renderPassFormat._key, renderObject]);
         if (commands)
         {
             commands.forEach((v) => _commands.push(v));
@@ -106,12 +103,12 @@ export class WebGPUCache extends WebGPUBase
 
         super.runRenderObject(passEncoder, renderPassFormat, renderObject);
 
-        map.set([renderPassFormat._key, renderObject], _commands.slice(start));
+        device._renderObjectCommandMap.set([renderPassFormat._key, renderObject], _commands.slice(start));
 
         // 
         const onchanged = () =>
         {
-            map.delete([renderPassFormat._key, renderObject]);
+            device._renderObjectCommandMap.delete([renderPassFormat._key, renderObject]);
             //
             renderObject._version = ~~renderObject._version + 1;
             watcher.unwatch(renderObject.pipeline, '_version', onchanged);
