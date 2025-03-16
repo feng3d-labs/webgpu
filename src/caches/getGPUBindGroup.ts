@@ -15,9 +15,7 @@ import { getGBuffer } from "./getIGPUBuffer";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources)
 {
-    const bindGroupMap: WeakMap<BindingResources, GPUBindGroup> = bindGroupLayout["_bindGroupMap"] = bindGroupLayout["_bindGroupMap"] || new WeakMap();
-
-    let gBindGroup = bindGroupMap.get(bindingResources);
+    let gBindGroup = device._bindGroupMap.get([bindGroupLayout, bindingResources]);
     if (gBindGroup) return gBindGroup;
 
     // 总是更新函数列表。
@@ -126,7 +124,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
 
         gBindGroup = device.createBindGroup({ layout: bindGroupLayout, entries });
 
-        bindGroupMap.set(bindingResources, gBindGroup);
+        device._bindGroupMap.set([bindGroupLayout, bindingResources], gBindGroup);
 
         // 设置更新外部纹理/画布纹理视图
         if (awaysUpdateFuncs.length > 0)

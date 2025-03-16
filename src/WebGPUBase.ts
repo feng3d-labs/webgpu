@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, TextureLike, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, TextureLike, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -26,6 +26,15 @@ import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+
+declare global
+{
+    interface GPUDevice
+    {
+        _bindGroupMap: ChainMap<[GPUBindGroupLayout, BindingResources], GPUBindGroup>;
+        _bufferMap: WeakMap<GBuffer, ComputedRef<GPUBuffer>>;
+    }
+}
 
 /**
  * WebGPU 基础类
@@ -61,11 +70,18 @@ export class WebGPUBase
     set device(v)
     {
         this._device = v;
+        //
+        if (this._device)
+        {
+            this._device._bindGroupMap ??= new ChainMap();
+            this._device._bufferMap ??= new WeakMap();
+        }
     }
+    protected _device: GPUDevice;
 
-    constructor(protected _device?: GPUDevice)
+    constructor(device?: GPUDevice)
     {
-
+        this.device = device;
     }
 
     submit(submit: Submit)

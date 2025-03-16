@@ -1,4 +1,4 @@
-import { computed, ComputedRef, effect, GBuffer, reactive, UnReadonly } from "@feng3d/render-api";
+import { computed, effect, GBuffer, reactive, UnReadonly } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 
 /**
@@ -26,9 +26,7 @@ const defaultGPUBufferUsage = 0
  */
 export function getGPUBuffer(device: GPUDevice, buffer: GBuffer)
 {
-    const gBufferMap: WeakMap<GBuffer, ComputedRef<GPUBuffer>> = device["_gBufferMap"] = device["_gBufferMap"] || new WeakMap<GBuffer, ComputedRef<GPUBuffer>>();
-
-    let result = gBufferMap.get(buffer);
+    let result = device._bufferMap.get(buffer);
     if (result) return result.value;
 
     const size = buffer.size;
@@ -119,7 +117,8 @@ export function getGPUBuffer(device: GPUDevice, buffer: GBuffer)
     });
 
     // 这行是不是可以删掉？
-    effect(() =>{
+    effect(() =>
+    {
         result.value;
     })
 
@@ -139,14 +138,14 @@ export function getGPUBuffer(device: GPUDevice, buffer: GBuffer)
         {
             oldDestroy.apply(gBuffer);
 
-            gBufferMap.delete(buffer);
+            device._bufferMap.delete(buffer);
 
             //
             watcher.unwatch(buffer, "data", dataChange);
         };
     })(gBuffer.destroy);
 
-    gBufferMap.set(buffer, result);
+    device._bufferMap.set(buffer, result);
 
     return result.value;
 }
