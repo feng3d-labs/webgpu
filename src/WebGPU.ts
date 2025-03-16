@@ -1,13 +1,8 @@
 import { GBuffer, ReadPixels, Submit, TextureLike } from "@feng3d/render-api";
-import { getGPUBuffer } from "./caches/getGPUBuffer";
-import { getGPUTexture } from "./caches/getGPUTexture";
 import { getTextureSize } from "./caches/getTextureSize";
 import "./data/polyfills/ReadPixels";
 import { RunWebGPUCommandCache } from "./runs/RunWebGPUCommandCache";
-import { copyDepthTexture } from "./utils/copyDepthTexture";
-import { quitIfWebGPUNotAvailable } from "./utils/quitIfWebGPUNotAvailable";
-import { readPixels } from "./utils/readPixels";
-import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+import { getGPUDevice } from "./utils/getGPUDevice";
 
 /**
  * WebGPU 对象。
@@ -17,37 +12,15 @@ import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultipl
 export class WebGPU
 {
     private _runWebGPU: RunWebGPUCommandCache;
+
     /**
      * 初始化 WebGPU 获取 GPUDevice 。
      */
     async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
     {
-        const adapter = await navigator.gpu?.requestAdapter(options);
-        // 获取支持的特性
-        const features: GPUFeatureName[] = [];
-        adapter?.features.forEach((v) => { features.push(v as any); });
-        // 判断请求的特性是否被支持
-        const requiredFeatures = Array.from(descriptor?.requiredFeatures || []);
-        if (requiredFeatures.length > 0)
-        {
-            for (let i = requiredFeatures.length - 1; i >= 0; i--)
-            {
-                if (features.indexOf(requiredFeatures[i]) === -1)
-                {
-                    console.error(`当前 GPUAdapter 不支持特性 ${requiredFeatures[i]}！`);
-                    requiredFeatures.splice(i, 1);
-                }
-            }
-            descriptor.requiredFeatures = requiredFeatures;
-        }
-        // 默认开启当前本机支持的所有WebGPU特性。
-        descriptor = descriptor || {};
-        descriptor.requiredFeatures = (descriptor.requiredFeatures || features) as any;
+        this.device = await getGPUDevice(options, descriptor);
         //
-        const device = await adapter?.requestDevice(descriptor);
-        quitIfWebGPUNotAvailable(adapter, device);
-
-        device?.lost.then(async (info) =>
+        this.device?.lost.then(async (info) =>
         {
             console.error(`WebGPU device was lost: ${info.message}`);
 
@@ -55,17 +28,24 @@ export class WebGPU
             if (info.reason !== "destroyed")
             {
                 // try again
-                await this.init(options, descriptor);
+                this.device = await getGPUDevice(options, descriptor);
             }
         });
-
-        this.device = device;
-        this._runWebGPU = new RunWebGPUCommandCache();
 
         return this;
     }
 
-    public device: GPUDevice;
+    get device()
+    {
+        return this._device;
+    }
+    set device(v)
+    {
+        this._device = v;
+        this._runWebGPU = new RunWebGPUCommandCache();
+    }
+
+    public _device: GPUDevice;
 
     /**
      * 提交 GPU 。
@@ -86,7 +66,7 @@ export class WebGPU
      */
     destoryTexture(texture: TextureLike)
     {
-        getGPUTexture(this.device, texture, false)?.destroy();
+        this._runWebGPU.destoryTexture(this.device, texture);
     }
 
     /**
@@ -98,9 +78,7 @@ export class WebGPU
      */
     textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
-        const gpuTexture = getGPUTexture(this.device, texture);
-
-        textureInvertYPremultiplyAlpha(this.device, gpuTexture, options);
+        this._runWebGPU.textureInvertYPremultiplyAlpha(this.device, texture, options);
     }
 
     /**
@@ -112,10 +90,7 @@ export class WebGPU
      */
     copyDepthTexture(sourceTexture: TextureLike, targetTexture: TextureLike)
     {
-        const gpuSourceTexture = getGPUTexture(this.device, sourceTexture);
-        const gpuTargetTexture = getGPUTexture(this.device, targetTexture);
-
-        copyDepthTexture(this.device, gpuSourceTexture, gpuTargetTexture);
+        this._runWebGPU.copyDepthTexture(this.device, sourceTexture, targetTexture);
     }
 
     /**
@@ -127,15 +102,7 @@ export class WebGPU
      */
     async readPixels(gpuReadPixels: ReadPixels)
     {
-        const gpuTexture = getGPUTexture(this.device, gpuReadPixels.texture, false);
-
-        const result = await readPixels(this.device, {
-            ...gpuReadPixels,
-            texture: gpuTexture,
-        });
-
-        gpuReadPixels.result = result;
-
+        const result = await this._runWebGPU.readPixels(this.device, gpuReadPixels);
         return result;
     }
 
@@ -149,13 +116,7 @@ export class WebGPU
      */
     async readBuffer(buffer: GBuffer, offset?: GPUSize64, size?: GPUSize64)
     {
-        const gpuBuffer = getGPUBuffer(this.device, buffer);
-        await gpuBuffer.mapAsync(GPUMapMode.READ);
-
-        const result = gpuBuffer.getMappedRange(offset, size).slice(0);
-
-        gpuBuffer.unmap();
-
+        const result = await this._runWebGPU.readBuffer(this.device, buffer, offset, size);
         return result;
     }
 

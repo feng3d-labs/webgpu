@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, TextureLike, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "../caches/getGPUBindGroup";
 import { getGPUBuffer } from "../caches/getGPUBuffer";
@@ -22,10 +22,12 @@ import { RenderBundle } from "../data/RenderBundle";
 import { GPUQueue_submit } from "../eventnames";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
+import { copyDepthTexture } from "../utils/copyDepthTexture";
+import { readPixels } from "../utils/readPixels";
+import { textureInvertYPremultiplyAlpha } from "../utils/textureInvertYPremultiplyAlpha";
 
 export class RunWebGPU
 {
-
     runSubmit(device: GPUDevice, submit: Submit)
     {
         const commandBuffers = submit.commandEncoders.map((v) =>
@@ -39,6 +41,52 @@ export class RunWebGPU
 
         // 派发提交WebGPU事件
         anyEmitter.emit(device.queue, GPUQueue_submit);
+    }
+
+    destoryTexture(device: GPUDevice, texture: TextureLike)
+    {
+        getGPUTexture(device, texture, false)?.destroy();
+    }
+
+    textureInvertYPremultiplyAlpha(device: GPUDevice, texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
+    {
+        const gpuTexture = getGPUTexture(device, texture);
+
+        textureInvertYPremultiplyAlpha(device, gpuTexture, options);
+    }
+
+    copyDepthTexture(device: GPUDevice, sourceTexture: TextureLike, targetTexture: TextureLike)
+    {
+        const gpuSourceTexture = getGPUTexture(device, sourceTexture);
+        const gpuTargetTexture = getGPUTexture(device, targetTexture);
+
+        copyDepthTexture(device, gpuSourceTexture, gpuTargetTexture);
+    }
+
+    async readPixels(device: GPUDevice, gpuReadPixels: ReadPixels)
+    {
+        const gpuTexture = getGPUTexture(device, gpuReadPixels.texture, false);
+
+        const result = await readPixels(device, {
+            ...gpuReadPixels,
+            texture: gpuTexture,
+        });
+
+        gpuReadPixels.result = result;
+
+        return result;
+    }
+
+    async readBuffer(device: GPUDevice, buffer: GBuffer, offset?: GPUSize64, size?: GPUSize64)
+    {
+        const gpuBuffer = getGPUBuffer(device, buffer);
+        await gpuBuffer.mapAsync(GPUMapMode.READ);
+
+        const result = gpuBuffer.getMappedRange(offset, size).slice(0);
+
+        gpuBuffer.unmap();
+
+        return result;
     }
 
     protected runCommandEncoder(device: GPUDevice, commandEncoder: CommandEncoder)
