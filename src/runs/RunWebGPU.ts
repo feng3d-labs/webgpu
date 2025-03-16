@@ -24,9 +24,59 @@ import { Workgroups } from "../data/Workgroups";
 import { GPUQueue_submit } from "../eventnames";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
+import { quitIfWebGPUNotAvailable } from "../utils/quitIfWebGPUNotAvailable";
 
 export class RunWebGPU
 {
+    /**
+ * 初始化 WebGPU 获取 GPUDevice 。
+ */
+    async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
+    {
+        const adapter = await navigator.gpu?.requestAdapter(options);
+        // 获取支持的特性
+        const features: GPUFeatureName[] = [];
+        adapter?.features.forEach((v) => { features.push(v as any); });
+        // 判断请求的特性是否被支持
+        const requiredFeatures = Array.from(descriptor?.requiredFeatures || []);
+        if (requiredFeatures.length > 0)
+        {
+            for (let i = requiredFeatures.length - 1; i >= 0; i--)
+            {
+                if (features.indexOf(requiredFeatures[i]) === -1)
+                {
+                    console.error(`当前 GPUAdapter 不支持特性 ${requiredFeatures[i]}！`);
+                    requiredFeatures.splice(i, 1);
+                }
+            }
+            descriptor.requiredFeatures = requiredFeatures;
+        }
+        // 默认开启当前本机支持的所有WebGPU特性。
+        descriptor = descriptor || {};
+        descriptor.requiredFeatures = (descriptor.requiredFeatures || features) as any;
+        //
+        const device = await adapter?.requestDevice(descriptor);
+        quitIfWebGPUNotAvailable(adapter, device);
+
+        device?.lost.then(async (info) =>
+        {
+            console.error(`WebGPU device was lost: ${info.message}`);
+
+            // 'reason' will be 'destroyed' if we intentionally destroy the device.
+            if (info.reason !== "destroyed")
+            {
+                // try again
+                await this.init(options, descriptor);
+            }
+        });
+
+        this.device = device;
+
+        return this;
+    }
+
+    public device: GPUDevice;
+
     runSubmit(device: GPUDevice, submit: Submit)
     {
         const commandBuffers = submit.commandEncoders.map((v) =>

@@ -1,4 +1,4 @@
-export { getIGPUTextureLikeSize as getGPUTextureSize } from "./caches/getIGPUTextureSize";
+export { getTextureSize as getGPUTextureSize } from "./caches/getTextureSize";
 
 export * from "./caches/getWGSLReflectInfo";
 

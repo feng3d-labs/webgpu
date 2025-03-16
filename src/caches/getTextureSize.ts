@@ -6,7 +6,7 @@ import { TextureLike, TextureSize, TextureImageSource, CanvasTexture } from "@fe
  * @param texture 纹理。
  * @returns 纹理尺寸。
  */
-export function getIGPUTextureLikeSize(texture: TextureLike)
+export function getTextureSize(texture: TextureLike)
 {
     if ("context" in texture)
     {
