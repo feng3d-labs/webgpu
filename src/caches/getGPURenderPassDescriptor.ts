@@ -160,7 +160,7 @@ function getAttachmentTextures(colorAttachments: readonly RenderPassColorAttachm
 function setIGPURenderPassAttachmentSize(colorAttachments: NGPURenderPassColorAttachment[], depthStencilAttachment: RenderPassDepthStencilAttachment, attachmentSize: { width: number; height: number; })
 {
     const attachmentTextures = getIGPURenderPassAttachmentTextures(colorAttachments, depthStencilAttachment);
-    attachmentTextures.forEach((v) => setIGPUTextureSize(v, attachmentSize));
+    attachmentTextures.forEach((v) => setTextureSize(v, attachmentSize));
 }
 
 /**
@@ -169,12 +169,12 @@ function setIGPURenderPassAttachmentSize(colorAttachments: NGPURenderPassColorAt
  * @param texture 纹理描述。
  * @param attachmentSize 附件尺寸。
  */
-function setIGPUTextureSize(texture: TextureLike, attachmentSize: { width: number, height: number })
+function setTextureSize(texture: TextureLike, attachmentSize: { width: number, height: number })
 {
     if ("context" in texture)
     {
         texture = texture as CanvasTexture;
-        const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
+        const element = typeof texture.context.canvasId === "string" ? document.getElementById(texture.context.canvasId) as HTMLCanvasElement : texture.context.canvasId;
         if (element.width !== attachmentSize.width) element.width = attachmentSize.width;
         if (element.height !== attachmentSize.height) element.height = attachmentSize.height;
     }
@@ -343,6 +343,6 @@ function updateAttachmentSize(renderPass: RenderPassDescriptor)
         const textureSize = getTextureSize(attachmentTextures[0]);
         renderPass.attachmentSize = { width: textureSize[0], height: textureSize[1] };
     }
-    attachmentTextures.forEach((v) => setIGPUTextureSize(v, renderPass.attachmentSize));
+    attachmentTextures.forEach((v) => setTextureSize(v, renderPass.attachmentSize));
 }
 

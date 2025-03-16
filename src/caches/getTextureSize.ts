@@ -10,7 +10,7 @@ export function getTextureSize(texture: TextureLike)
 {
     if ("context" in texture)
     {
-        const element = document.getElementById(texture.context.canvasId) as HTMLCanvasElement;
+        const element = typeof texture.context.canvasId === "string"? document.getElementById(texture.context.canvasId) as HTMLCanvasElement  : texture.context.canvasId;
         console.assert(!!element, `在 document 上没有找到 canvasId 为 ${(texture as CanvasTexture).context.canvasId} 的画布。`);
 
         return [element.width, element.height, 1] as TextureSize;

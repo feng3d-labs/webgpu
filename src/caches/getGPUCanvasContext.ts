@@ -4,13 +4,12 @@ import "../data/polyfills/CanvasContext";
 
 export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
 {
-    let result = canvasContextMap[context.canvasId];
+    let result = canvasContextMap.get(context);
     if (result) return result.value;
 
-    const canvas = document.getElementById(context.canvasId) as HTMLCanvasElement;
+    const canvas = typeof context.canvasId === "string" ? document.getElementById(context.canvasId) as HTMLCanvasElement : context.canvasId;
 
-    const gpuCanvasContext = canvas.getContext("webgpu");
-
+    const gpuCanvasContext = canvas.getContext("webgpu") as GPUCanvasContext;
     const ro = reactive(context);
     result = computed(() =>
     {
@@ -32,7 +31,7 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
         return gpuCanvasContext;
     });
 
-    canvasContextMap[context.canvasId] = result;
+    canvasContextMap.set(context, result);
 
     const updateConfigure = () =>
     {
@@ -61,4 +60,4 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
     return result.value;
 }
 
-const canvasContextMap: { [canvasId: string]: ComputedRef<GPUCanvasContext> } = {};
+const canvasContextMap = new WeakMap<CanvasContext, ComputedRef<GPUCanvasContext>>();;

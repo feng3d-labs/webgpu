@@ -28,4 +28,3 @@ export * from "./types/VertexFormat";
  * 内部
  */
 export * from "./utils/ChainMap";
-export * from "./utils/getOffscreenCanvasId";
