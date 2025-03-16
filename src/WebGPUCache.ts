@@ -1,10 +1,9 @@
-import { RenderObject, RenderPassObject } from "@feng3d/render-api";
+import { ChainMap, RenderObject, RenderPassObject } from "@feng3d/render-api";
 
 import { watcher } from "@feng3d/watcher";
 import { GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 import { getRealGPUBindGroup } from "./const";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
-import { ChainMap } from "./utils/ChainMap";
 import { WebGPUBase } from "./WebGPUBase";
 
 /**

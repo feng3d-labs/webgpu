@@ -29,8 +29,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
 
     const texture = textureLike as Texture;
 
-    const textureMap: Map<TextureLike, GPUTexture> = device[_GPUTextureMap] = device[_GPUTextureMap] || new Map<TextureLike, GPUTexture>();
-    gpuTexture = textureMap.get(texture);
+    gpuTexture = device._textureMap.get(texture);
     if (gpuTexture) return gpuTexture;
 
     if (!autoCreate) return null;
@@ -73,7 +72,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
             viewFormats,
         });
 
-        textureMap.set(texture, gpuTexture);
+        device._textureMap.set(texture, gpuTexture);
     };
     createTexture();
 
@@ -230,7 +229,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
         {
             oldDestroy.apply(gpuTexture);
             //
-            textureMap.delete(texture);
+            device._textureMap.delete(texture);
             //
             watcher.unwatch(texture, "size", resize);
             watcher.unwatch(texture, "sources", updateSources);
@@ -246,9 +245,6 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
     return gpuTexture;
 }
 let autoIndex = 0;
-
-const _GPUTextureMap = "_GPUTextureMap";
-
 
 function getGPUTextureDimension(dimension: TextureDimension)
 {

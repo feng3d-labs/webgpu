@@ -235,26 +235,22 @@ function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassCol
  */
 function getMultisampleTextureView(texture: TextureLike, sampleCount: 4)
 {
-    let multisampleTextureView = multisampleTextureMap.get(texture);
-    if (!multisampleTextureView)
-    {
-        // 新增用于解决多重采样的纹理
-        const size = getTextureSize(texture);
-        const format = getGPUTextureFormat(texture);
-        const multisampleTexture: MultisampleTexture = {
-            label: "自动生成多重采样的纹理",
-            size,
-            sampleCount,
-            format,
-        };
-        multisampleTextureView = { texture: multisampleTexture };
-        multisampleTextureMap.set(texture, multisampleTextureView);
-    }
+    let multisampleTextureView: TextureView = texture["_multisampleTextureView"];
+    if (multisampleTextureView) return multisampleTextureView;
+
+    // 新增用于解决多重采样的纹理
+    const size = getTextureSize(texture);
+    const format = getGPUTextureFormat(texture);
+    const multisampleTexture: MultisampleTexture = {
+        label: "自动生成多重采样的纹理",
+        size,
+        sampleCount,
+        format,
+    };
+    multisampleTextureView = texture["_multisampleTextureView"] = { texture: multisampleTexture };
 
     return multisampleTextureView;
 }
-
-const multisampleTextureMap = new WeakMap<TextureLike, TextureView>();
 
 /**
  * 获取深度模板附件完整描述。

@@ -1,4 +1,4 @@
-import { BlendState, DepthStencilState, FragmentState, IIndicesDataTypes, IWriteMask, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
+import { BlendState, ChainMap, DepthStencilState, FragmentState, IIndicesDataTypes, IWriteMask, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -9,7 +9,6 @@ import { NFragmentState } from "../internal/NFragmentState";
 import { NRenderPipeline } from "../internal/NRenderPipeline";
 import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
 import { NGPUVertexState } from "../internal/NGPUVertexState";
-import { ChainMap } from "../utils/ChainMap";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -285,7 +284,7 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: VertexAttributes)
 
     const vertexBuffers: NVertexBuffer[] = [];
 
-    const map: WeakMap<any, number> = new WeakMap();
+    const map: Map<any, number> = new Map();
 
     vertex.inputs.forEach((v) =>
     {

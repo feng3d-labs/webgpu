@@ -23,8 +23,3 @@ export * from "./data/polyfills/Uniforms";
 
 export * from "./caches/getIGPUBuffer";
 export * from "./types/VertexFormat";
-
-/**
- * 内部
- */
-export * from "./utils/ChainMap";

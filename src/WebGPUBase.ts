@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, CanvasContext, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, TextureLike, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
+import { BindingResources, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, GBuffer, IIndicesDataTypes, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Sampler, ScissorRect, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -16,17 +16,16 @@ import { getNGPURenderPipeline } from "./caches/getNGPURenderPipeline";
 import { getRealGPUBindGroup } from "./const";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
+import { ComputePipeline } from "./data/ComputePipeline";
 import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit } from "./eventnames";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
-import { ChainMap } from "./utils/ChainMap";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
-import { ComputePipeline } from "./data/ComputePipeline";
 
 declare global
 {
@@ -35,7 +34,10 @@ declare global
         _bindGroupMap: ChainMap<[GPUBindGroupLayout, BindingResources], GPUBindGroup>;
         _bufferMap: WeakMap<GBuffer, ComputedRef<GPUBuffer>>;
         _contextMap: WeakMap<CanvasContext, ComputedRef<GPUCanvasContext>>;
-        _computePipelineMap: WeakMap<ComputePipeline, GPUComputePipeline>
+        _computePipelineMap: WeakMap<ComputePipeline, GPUComputePipeline>;
+        _samplerMap: WeakMap<Sampler, GPUSampler>;
+        _textureViewMap: WeakMap<TextureView, GPUTextureView>;
+        _textureMap: WeakMap<Texture, GPUTexture>;
     }
 }
 
@@ -80,6 +82,9 @@ export class WebGPUBase
             this._device._bufferMap ??= new WeakMap();
             this._device._contextMap ??= new WeakMap();
             this._device._computePipelineMap ??= new WeakMap();
+            this._device._samplerMap ??= new WeakMap();
+            this._device._textureMap ??= new WeakMap();
+            this._device._textureViewMap ??= new WeakMap();
         }
     }
     protected _device: GPUDevice;
