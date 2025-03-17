@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { BindingResources, BlendComponent, CanvasContext, reactive, RenderObject, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView } from "@feng3d/render-api";
+import { BindingResources, BlendComponent, CanvasContext, Color, computed, reactive, RenderObject, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 declare module "@feng3d/render-api"
@@ -328,22 +328,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kPresets = keysOf(presets);
     type Preset = (typeof kPresets)[number];
 
-    const color: BlendComponent = {
-        operation: "add",
-        srcFactor: "one",
-        dstFactor: "one-minus-src",
-    };
-
-    const alpha: BlendComponent = {
-        operation: "add",
-        srcFactor: "one",
-        dstFactor: "one-minus-src",
-    };
-
-    const constant = {
+    const constant = reactive({
         color: [1, 0.5, 0.25],
         alpha: 1,
-    };
+    });
 
     const clear = {
         color: [0, 0, 0],
@@ -383,11 +371,41 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     }
 
+    const srcPipeline: RenderPipeline = {
+        label: "hardcoded textured quad pipeline",
+        vertex: {
+            code: texturedQuadWGSL,
+        },
+        fragment: {
+            code: texturedQuadWGSL,
+            targets: [
+                {
+                    blend: {
+                        constantColor: [0, 0, 0, 0],
+                        color: {
+                            operation: "add",
+                            srcFactor: "one",
+                            dstFactor: "one-minus-src",
+                        },
+                        alpha: {
+                            operation: "add",
+                            srcFactor: "one",
+                            dstFactor: "one-minus-src",
+                        },
+                    },
+                },
+            ],
+        },
+    };
+
+    const r_color = reactive(srcPipeline.fragment.targets[0].blend.color);
+    const r_alpha = reactive(srcPipeline.fragment.targets[0].blend.alpha);
+
     function applyPreset()
     {
         const preset = presets[settings.preset];
-        Object.assign(color, preset.color);
-        Object.assign(alpha, preset.alpha || preset.color);
+        Object.assign(r_color, preset.color);
+        Object.assign(r_alpha, preset.alpha || preset.color);
     }
 
     gui
@@ -409,15 +427,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const colorFolder = gui.addFolder("color");
     colorFolder.open();
-    colorFolder.add(color, "operation", operations).onChange(render);
-    colorFolder.add(color, "srcFactor", factors).onChange(render);
-    colorFolder.add(color, "dstFactor", factors).onChange(render);
+    colorFolder.add(r_color, "operation", operations).onChange(render);
+    colorFolder.add(r_color, "srcFactor", factors).onChange(render);
+    colorFolder.add(r_color, "dstFactor", factors).onChange(render);
 
     const alphaFolder = gui.addFolder("alpha");
     alphaFolder.open();
-    alphaFolder.add(alpha, "operation", operations).onChange(render);
-    alphaFolder.add(alpha, "srcFactor", factors).onChange(render);
-    alphaFolder.add(alpha, "dstFactor", factors).onChange(render);
+    alphaFolder.add(r_alpha, "operation", operations).onChange(render);
+    alphaFolder.add(r_alpha, "srcFactor", factors).onChange(render);
+    alphaFolder.add(r_alpha, "dstFactor", factors).onChange(render);
 
     const constantFolder = gui.addFolder("constant");
     constantFolder.open();
@@ -443,31 +461,68 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
+    function updateUniforms(
+        uniforms: { matrix: Float32Array; },
+        canvas: HTMLCanvasElement,
+        texture: Texture
+    )
+    {
+        const projectionMatrix = mat4.ortho(
+            0,
+            canvas.width / devicePixelRatio,
+            canvas.height / devicePixelRatio,
+            0,
+            -1,
+            1
+        );
+
+        mat4.scale(
+            projectionMatrix,
+            [texture.size[0], texture.size[1], 1],
+            uniforms.matrix
+        );
+
+        uniforms.matrix = new Float32Array(uniforms.matrix);
+    }
+
+
+    const ro: RenderObject = {
+        pipeline: dstPipeline,
+        geometry: {
+            draw: { __type__: "DrawVertex", vertexCount: 6 },
+        }
+    };
+
+    const ro1: RenderObject = {
+        pipeline: srcPipeline,
+        geometry: {
+            draw: { __type__: "DrawVertex", vertexCount: 6 },
+        }
+    };
+
+    const renderObjects: RenderPassObject[] = [
+        ro,
+        ro1,
+    ];
+
+    const submit: Submit = {
+        commandEncoders: [{
+            passEncoders: [{
+                descriptor: renderPassDescriptor,
+                renderObjects: renderObjects
+            }]
+        }],
+    };
+
     function render()
     {
         gui.updateDisplay();
 
-        const srcPipeline: RenderPipeline = {
-            label: "hardcoded textured quad pipeline",
-            vertex: {
-                code: texturedQuadWGSL,
-            },
-            fragment: {
-                code: texturedQuadWGSL,
-                targets: [
-                    {
-                        blend: {
-                            constantColor: [...constant.color, constant.alpha] as any,
-                            color,
-                            alpha,
-                        },
-                    },
-                ],
-            },
-        };
-
         const { srcTexture, dstTexture, srcBindGroup, dstBindGroup }
             = textureSets[settings.textureSet === "premultiplied alpha" ? 0 : 1];
+
+        ro.bindingResources = dstBindGroup;
+        ro1.bindingResources = srcBindGroup;
 
         reactive(context.configuration).alphaMode = settings.alphaMode;
 
@@ -481,65 +536,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             clearValue[3] = alpha;
         }
 
-        function updateUniforms(
-            uniforms: {
-                matrix: Float32Array;
-            },
-            canvas: HTMLCanvasElement,
-            texture: Texture
-        )
-        {
-            const projectionMatrix = mat4.ortho(
-                0,
-                canvas.width / devicePixelRatio,
-                canvas.height / devicePixelRatio,
-                0,
-                -1,
-                1
-            );
-
-            mat4.scale(
-                projectionMatrix,
-                [texture.size[0], texture.size[1], 1],
-                uniforms.matrix
-            );
-
-            uniforms.matrix = new Float32Array(uniforms.matrix);
-        }
         updateUniforms(srcUniform, canvas, srcTexture);
         updateUniforms(dstUniform, canvas, dstTexture);
 
-        const ro: RenderObject = {
-            pipeline: dstPipeline,
-            bindingResources: dstBindGroup,
-            geometry: {
-                draw: { __type__: "DrawVertex", vertexCount: 6 },
-            }
-        };
-
-        const ro1: RenderObject = {
-            pipeline: srcPipeline,
-            bindingResources: srcBindGroup,
-            geometry: {
-                draw: { __type__: "DrawVertex", vertexCount: 6 },
-            }
-        };
-
-        const renderObjects: RenderPassObject[] = [
-            ro,
-            ro1,
-        ];
-
-        const submit: Submit = {
-            commandEncoders: [{
-                passEncoders: [{
-                    descriptor: renderPassDescriptor,
-                    renderObjects: renderObjects
-                }]
-            }],
-        };
-
         webgpu.submit(submit);
+
+        requestAnimationFrame(render);
     }
 
     applyPreset();

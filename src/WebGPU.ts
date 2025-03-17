@@ -1,3 +1,4 @@
+import { WebGPUBase } from "./WebGPUBase";
 import { WebGPUCache } from "./WebGPUCache";
 
 /**
@@ -5,7 +6,8 @@ import { WebGPUCache } from "./WebGPUCache";
  *
  * 提供 `WebGPU` 操作入口 {@link WebGPU.submit}。
  */
-export class WebGPU extends WebGPUCache
+// export class WebGPU extends WebGPUCache
+export class WebGPU extends WebGPUBase
 {
 
 }

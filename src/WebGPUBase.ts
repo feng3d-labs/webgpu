@@ -47,7 +47,7 @@ declare global
         }>;
         _renderObjectCommandMap: ChainMap<[string, RenderObject], Array<any>>;
         _renderPipelineMap: ChainMap<[RenderPipeline, string, PrimitiveState, VertexAttributes, GPUIndexFormat], {
-            pipeline: GPURenderPipeline;
+            pipeline: ComputedRef<GPURenderPipeline>;
             vertexBuffers: NVertexBuffer[];
             _version: number;
         }>
@@ -488,7 +488,7 @@ export class WebGPUBase
         const { pipeline: nPipeline, vertexBuffers } = getNGPURenderPipeline(device, pipeline, renderPassFormat, primitive, vertices, indices);
 
         //
-        passEncoder.setPipeline(nPipeline);
+        passEncoder.setPipeline(nPipeline.value);
 
         //
         const stencilReference = getStencilReference(pipeline.depthStencil);

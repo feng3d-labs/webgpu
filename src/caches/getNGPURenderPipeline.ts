@@ -30,9 +30,6 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     // 获取完整的顶点阶段描述与顶点缓冲区列表。
     const vertexStateResult = getNGPUVertexState(device, renderPipeline.vertex, vertices);
 
-    // 获取片段阶段完整描述。
-    const gpuFragmentState = getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
-
     // 获取深度模板阶段完整描述。
     const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
 
@@ -42,17 +39,26 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     // 从GPU管线中获取管线布局。
     const layout = getGPUPipelineLayout(device, renderPipeline);
 
-    const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
-        label: renderPipeline.label,
-        layout,
-        vertex: vertexStateResult.gpuVertexState,
-        fragment: gpuFragmentState,
-        primitive: gpuPrimitive,
-        depthStencil: gpuDepthStencilState,
-        multisample: gpuMultisampleState,
-    };
+    const gpuRenderPipeline = computed(() =>
+    {
+        // 获取片段阶段完整描述。
+        const gpuFragmentState = getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
 
-    const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
+        //
+        const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
+            label: renderPipeline.label,
+            layout,
+            vertex: vertexStateResult.gpuVertexState,
+            fragment: gpuFragmentState,
+            primitive: gpuPrimitive,
+            depthStencil: gpuDepthStencilState,
+            multisample: gpuMultisampleState,
+        };
+
+        const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
+
+        return gpuRenderPipeline;
+    });
 
     result = { _version: 0, pipeline: gpuRenderPipeline, vertexBuffers: vertexStateResult.vertexBuffers };
     device._renderPipelineMap.set([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat], result);
@@ -64,10 +70,8 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
         renderPipeline._version = ~~renderPipeline._version + 1;
         device._renderPipelineMap.delete([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
         watcher.unwatch(vertexStateResult, "_version", onchanged);
-        gpuFragmentState && watcher.unwatch(gpuFragmentState, "_version", onchanged);
     }
     watcher.watch(vertexStateResult, "_version", onchanged);
-    gpuFragmentState && watcher.watch(gpuFragmentState, "_version", onchanged);
 
     return result;
 }
@@ -311,25 +315,34 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
     let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
     if (gpuFragmentState) return gpuFragmentState.value;
 
-    const targets = colorAttachments.map((format, i) =>
+    const targets = computed(() =>
     {
-        if (!format) return undefined;
+        reactive(fragmentState).targets;
 
-        const colorTargetState = fragmentState.targets?.[i];
+        return colorAttachments.map((format, i) =>
+        {
+            if (!format) return undefined;
 
-        //
-        const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
+            //
+            reactive(fragmentState).targets?.[i];
 
-        const blend: GPUBlendState = getGPUBlendState(colorTargetState?.blend);
+            //
+            const colorTargetState = fragmentState.targets?.[i];
 
-        //
-        const gpuColorTargetState: GPUColorTargetState = {
-            format,
-            blend,
-            writeMask,
-        };
+            //
+            const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
 
-        return gpuColorTargetState;
+            const blend = getGPUBlendState(colorTargetState?.blend);
+
+            //
+            const gpuColorTargetState: GPUColorTargetState = {
+                format,
+                blend,
+                writeMask,
+            };
+
+            return gpuColorTargetState;
+        });
     });
 
     const entryPoint = computed(() => 
@@ -372,7 +385,7 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
         return {
             module: getGPUShaderModule(device, fragmentState.code),
             entryPoint: entryPoint.value,
-            targets,
+            targets: targets.value,
             constants: fragmentState.constants
         } as GPUFragmentState;
     });
@@ -387,39 +400,44 @@ const fragmentStateMap = new ChainMap<[FragmentState, string], ComputedRef<GPUFr
 
 function getGPUBlendState(blend?: BlendState): GPUBlendState
 {
-    if (!blend) undefined;
+    if (!blend) return undefined;
 
-    //
-    const colorOperation: GPUBlendOperation = blend?.color?.operation || "add";
-    let colorSrcFactor: GPUBlendFactor = blend?.color?.srcFactor || "one";
-    let colorDstFactor: GPUBlendFactor = blend?.color?.dstFactor || "zero";
-    if (colorOperation === "max" || colorOperation === "min")
+    const result = computed(() =>
     {
-        colorSrcFactor = colorDstFactor = "one";
-    }
-    //
-    const alphaOperation: GPUBlendOperation = blend?.alpha?.operation || colorOperation;
-    let alphaSrcFactor: GPUBlendFactor = blend?.alpha?.srcFactor || colorSrcFactor;
-    let alphaDstFactor: GPUBlendFactor = blend?.alpha?.dstFactor || colorDstFactor;
-    if (alphaOperation === "max" || alphaOperation === "min")
-    {
-        alphaSrcFactor = alphaDstFactor = "one";
-    }
+        const r_blend = reactive(blend);
+        //
+        const colorOperation: GPUBlendOperation = r_blend?.color?.operation || "add";
+        let colorSrcFactor: GPUBlendFactor = r_blend?.color?.srcFactor || "one";
+        let colorDstFactor: GPUBlendFactor = r_blend?.color?.dstFactor || "zero";
+        if (colorOperation === "max" || colorOperation === "min")
+        {
+            colorSrcFactor = colorDstFactor = "one";
+        }
+        //
+        const alphaOperation: GPUBlendOperation = r_blend?.alpha?.operation || colorOperation;
+        let alphaSrcFactor: GPUBlendFactor = r_blend?.alpha?.srcFactor || colorSrcFactor;
+        let alphaDstFactor: GPUBlendFactor = r_blend?.alpha?.dstFactor || colorDstFactor;
+        if (alphaOperation === "max" || alphaOperation === "min")
+        {
+            alphaSrcFactor = alphaDstFactor = "one";
+        }
 
-    const gpuBlend: GPUBlendState = {
-        color: {
-            operation: colorOperation,
-            srcFactor: colorSrcFactor,
-            dstFactor: colorDstFactor,
-        },
-        alpha: {
-            operation: alphaOperation,
-            srcFactor: alphaSrcFactor,
-            dstFactor: alphaDstFactor,
-        },
-    };
+        const gpuBlend: GPUBlendState = {
+            color: {
+                operation: colorOperation,
+                srcFactor: colorSrcFactor,
+                dstFactor: colorDstFactor,
+            },
+            alpha: {
+                operation: alphaOperation,
+                srcFactor: alphaSrcFactor,
+                dstFactor: alphaDstFactor,
+            },
+        };
+        return gpuBlend;
+    })
 
-    return gpuBlend;
+    return result.value;
 }
 
 function getGPUColorWriteFlags(writeMask?: IWriteMask)
