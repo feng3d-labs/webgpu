@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, FragmentState, GBuffer, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -50,7 +50,8 @@ declare global
             pipeline: ComputedRef<GPURenderPipeline>;
             vertexBuffers: NVertexBuffer[];
             _version: number;
-        }>
+        }>;
+        _fragmentStateMap: ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>
     }
 }
 
@@ -95,6 +96,7 @@ export class WebGPUBase
             this._device._renderPassObjectsCommandMap ??= new ChainMap();
             this._device._renderPipelineMap ??= new ChainMap();
             this._device._renderObjectCommandMap ??= new ChainMap();
+            this._device._fragmentStateMap ??= new ChainMap();
             this._device._bufferMap ??= new WeakMap();
             this._device._contextMap ??= new WeakMap();
             this._device._computePipelineMap ??= new WeakMap();

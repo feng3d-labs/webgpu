@@ -356,7 +356,7 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
 
     const colorAttachmentsKey = colorAttachments.toLocaleString();
 
-    let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
+    let gpuFragmentState = device._fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
     if (gpuFragmentState) return gpuFragmentState.value;
 
     gpuFragmentState = computed(() =>
@@ -365,12 +365,18 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
         reactive(fragmentState).code;
         const module = getGPUShaderModule(device, fragmentState.code);
 
-        //
+        // 监听着色器入口点变化
         const entryPoint = getEntryPoint(fragmentState);
 
+        // 监听渲染目标变化
         reactive(fragmentState).targets;
         const targets = getGPUColorTargetStates(fragmentState.targets, colorAttachments);
 
+        // 监听常量变化
+        const r_constants = reactive(fragmentState).constants;
+        for (const key in r_constants) { r_constants[key]; }
+
+        //
         return {
             module,
             entryPoint,
@@ -379,12 +385,10 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
         } as GPUFragmentState;
     });
 
-    fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
+    device._fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
 
     return gpuFragmentState.value;
 }
-
-const fragmentStateMap = new ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>();
 
 function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]): GPUColorTargetState[]
 {
