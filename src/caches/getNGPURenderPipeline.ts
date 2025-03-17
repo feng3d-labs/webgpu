@@ -36,17 +36,25 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     // 从渲染通道上获取多重采样数量
     const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
 
-    // 从GPU管线中获取管线布局。
-    const layout = getGPUPipelineLayout(device, { vertex: renderPipeline.vertex.code, fragment: renderPipeline.fragment.code });
-
     const gpuRenderPipeline = computed(() =>
     {
-        // 获取片段阶段完整描述。
+        // 
+        reactive(renderPipeline).label;
+
+        // 更新管线布局
+        reactive(renderPipeline).vertex.code;
+        reactive(renderPipeline).fragment?.code
+        const layout = getGPUPipelineLayout(device, { vertex: renderPipeline.vertex.code, fragment: renderPipeline.fragment?.code });
+
+        // 
         reactive(renderPipeline).fragment;
         const fragment = getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
+
+        
+
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
-            label: reactive(renderPipeline).label,
+            label: renderPipeline.label,
             layout,
             vertex: vertexStateResult.gpuVertexState,
             fragment,
@@ -380,7 +388,7 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
         return {
             module,
             entryPoint,
-            targets: targets,
+            targets,
             constants: fragmentState.constants
         } as GPUFragmentState;
     });
