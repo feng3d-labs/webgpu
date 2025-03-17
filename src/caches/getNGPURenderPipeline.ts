@@ -321,7 +321,7 @@ function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUT
 {
     if (!colorTargetState) return { format, blend: getGPUBlendState(undefined), writeMask: getGPUColorWriteFlags(undefined) };
 
-    const result = colorTargetState["_GPUColorTargetState_" + format] ??= computed(() =>
+    const result: ComputedRef<GPUColorTargetState> = colorTargetState["_GPUColorTargetState_" + format] ??= computed(() =>
     {
         //
         reactive(colorTargetState)?.writeMask;
@@ -386,16 +386,24 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
 
 const fragmentStateMap = new ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>();
 
-function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[])
+function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]): GPUColorTargetState[]
 {
-    const result = computed(() =>
+    if (!targets)
+    {
+        return undefinedMap["_GPUColorTargetStates_" + colorAttachments.toString()] ??= colorAttachments.map((format) =>
+        {
+            return getGPUColorTargetState(undefined, format);
+        });
+    };
+
+    const result: ComputedRef<GPUColorTargetState[]> = targets["_GPUColorTargetStates_" + colorAttachments.toString()] ??= computed(() =>
     {
         return colorAttachments.map((format, i) =>
         {
             if (!format) return undefined;
 
             //
-            targets && reactive(targets)[i];
+            reactive(targets)[i];
             const gpuColorTargetState = getGPUColorTargetState(targets?.[i], format);
 
             return gpuColorTargetState;
@@ -404,6 +412,7 @@ function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAtta
 
     return result.value;
 }
+const undefinedMap: { [key: string]: GPUColorTargetState[] } = {};
 
 function getEntryPoint(fragmentState: FragmentState)
 {
