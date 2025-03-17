@@ -1,5 +1,4 @@
 import { RenderPipeline } from "@feng3d/render-api";
-import { VariableInfo } from "wgsl_reflect";
 import { ComputePipeline } from "../data/ComputePipeline";
 import { getIGPUBindGroupLayoutEntryMap, GPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 

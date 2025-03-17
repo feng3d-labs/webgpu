@@ -1,4 +1,4 @@
-import { BlendState, ChainMap, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, IWriteMask, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
+import { BlendState, ChainMap, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, IWriteMask, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -42,6 +42,7 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     const gpuRenderPipeline = computed(() =>
     {
         // 获取片段阶段完整描述。
+        reactive(renderPipeline).fragment;
         const gpuFragmentState = getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
 
         //
@@ -299,6 +300,25 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: VertexAttributes)
     return { vertexBufferLayouts, vertexBuffers };
 }
 
+function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUTextureFormat)
+{
+    if (!colorTargetState) return undefined;
+
+    //
+    const writeMask = getGPUColorWriteFlags(colorTargetState.writeMask);
+
+    const blend = getGPUBlendState(colorTargetState.blend);
+
+    //
+    const gpuColorTargetState: GPUColorTargetState = {
+        format,
+        blend,
+        writeMask,
+    };
+
+    return gpuColorTargetState;
+}
+
 /**
  * 获取片段阶段完整描述。
  *
@@ -325,21 +345,7 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
 
             //
             reactive(fragmentState).targets?.[i];
-
-            //
-            const colorTargetState = fragmentState.targets?.[i];
-
-            //
-            const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
-
-            const blend = getGPUBlendState(colorTargetState?.blend);
-
-            //
-            const gpuColorTargetState: GPUColorTargetState = {
-                format,
-                blend,
-                writeMask,
-            };
+            const gpuColorTargetState = getGPUColorTargetState(fragmentState.targets?.[i], format);
 
             return gpuColorTargetState;
         });
@@ -402,7 +408,10 @@ function getGPUBlendState(blend?: BlendState): GPUBlendState
 {
     if (!blend) return undefined;
 
-    const result = computed(() =>
+    let result: ComputedRef<GPUBlendState> = blend["_GPUBlendState"];
+    if (result) return result.value;
+
+    result = blend["_GPUBlendState"] = computed(() =>
     {
         const r_blend = reactive(blend);
         //
