@@ -37,7 +37,7 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
 
     // 从GPU管线中获取管线布局。
-    const layout = getGPUPipelineLayout(device, renderPipeline);
+    const layout = getGPUPipelineLayout(device, { vertex: renderPipeline.vertex.code, fragment: renderPipeline.fragment.code });
 
     const gpuFragmentState = computed(() =>
     {
@@ -54,7 +54,7 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     {
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
-            label: renderPipeline.label,
+            label: reactive(renderPipeline).label,
             layout,
             vertex: vertexStateResult.gpuVertexState,
             fragment: gpuFragmentState.value,
@@ -174,27 +174,13 @@ function getNGPUVertexState(device: GPUDevice, vertexState: VertexState, vertice
     let result = vertexStateMap.get([vertexState, vertices]);
     if (result) return result;
 
-    const code = vertexState.code;
+    const vertexEntryFunctionInfo = getVertexEntryFunctionInfo(vertexState);
 
-    // 解析顶点着色器
-    const reflect = getWGSLReflectInfo(code);
-    let vertex: FunctionInfo;
-    //
-    let entryPoint = vertexState.entryPoint;
-    if (!entryPoint)
-    {
-        console.assert(!!reflect.entry.vertex[0], `WGSL着色器 ${code} 中不存在顶点入口点。`);
-        entryPoint = reflect.entry.vertex[0].name;
-    }
-
-    vertex = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
-    console.assert(!!vertex, `WGSL着色器 ${code} 中不存在顶点入口点 ${entryPoint} 。`);
-
-    const { vertexBufferLayouts, vertexBuffers } = getNGPUVertexBuffers(vertex, vertices);
+    const { vertexBufferLayouts, vertexBuffers } = getNGPUVertexBuffers(vertexEntryFunctionInfo, vertices);
 
     const gpuVertexState: GPUVertexState = {
         module: getGPUShaderModule(device, vertexState.code),
-        entryPoint,
+        entryPoint: vertexEntryFunctionInfo.name,
         buffers: vertexBufferLayouts,
         constants: vertexState.constants,
     };
@@ -214,6 +200,38 @@ function getNGPUVertexState(device: GPUDevice, vertexState: VertexState, vertice
     watcher.watchobject(vertexState, watchpropertys, onchanged);
 
     return result;
+}
+
+/**
+ * 获取顶点入口函数信息。
+ * 
+ * @param vertexState 顶点阶段信息。
+ * @returns 
+ */
+function getVertexEntryFunctionInfo(vertexState: VertexState)
+{
+    let vertexEntryFunctionInfo: FunctionInfo = vertexState["_vertexEntry"];
+    if (!vertexEntryFunctionInfo) return vertexEntryFunctionInfo;
+
+    const code = vertexState.code;
+
+    // 解析顶点着色器
+    const reflect = getWGSLReflectInfo(code);
+    //
+    if (vertexState.entryPoint)
+    {
+        vertexEntryFunctionInfo = reflect.entry.vertex.filter((v) => v.name === vertexState.entryPoint)[0];
+        console.assert(!!vertexEntryFunctionInfo, `WGSL着色器 ${code} 中不存在顶点入口点 ${vertexState.entryPoint} 。`);
+    }
+    else
+    {
+        vertexEntryFunctionInfo = reflect.entry.vertex[0];
+        console.assert(!!reflect.entry.vertex[0], `WGSL着色器 ${code} 中不存在顶点入口点。`);
+    }
+
+    vertexState["_vertexEntry"] = vertexEntryFunctionInfo;
+
+    return vertexEntryFunctionInfo;
 }
 
 const vertexStateMap = new ChainMap<[VertexState, VertexAttributes], {

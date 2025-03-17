@@ -27,7 +27,7 @@ export function getGPUComputePipeline(device: GPUDevice, computePipeline: Comput
     }
 
     // 从GPU管线中获取管线布局。
-    const layout = getGPUPipelineLayout(device, computePipeline);
+    const layout = getGPUPipelineLayout(device, { compute: computePipeline.compute.code });
 
     pipeline = device.createComputePipeline({
         layout,

@@ -1,5 +1,3 @@
-import { RenderPipeline } from "@feng3d/render-api";
-import { ComputePipeline } from "../data/ComputePipeline";
 import { getIGPUBindGroupLayoutEntryMap, GPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 
 declare global
@@ -35,36 +33,36 @@ declare global
 /**
  * 从GPU管线中获取管线布局。
  *
- * @param pipeline GPU管线。
+ * @param shader GPU管线。
  * @returns 管线布局。
  */
-export function getGPUPipelineLayout(device: GPUDevice, pipeline: RenderPipeline | ComputePipeline)
+export function getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
 {
     let shaderKey = "";
-    if ("compute" in pipeline)
+    if ("compute" in shader)
     {
-        shaderKey += pipeline.compute;
+        shaderKey += shader.compute;
     }
     else
     {
-        shaderKey += pipeline.vertex.code;
-        if (pipeline.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n` + pipeline.fragment.code;
+        shaderKey += shader.vertex;
+        if (shader.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n` + shader.fragment;
     }
 
     let gpuPipelineLayout = device._pipelineLayoutMap.get(shaderKey);
     if (gpuPipelineLayout) return gpuPipelineLayout;
 
     let entryMap: GPUBindGroupLayoutEntryMap;
-    if ("compute" in pipeline)
+    if ("compute" in shader)
     {
-        entryMap = getIGPUBindGroupLayoutEntryMap(pipeline.compute.code);
+        entryMap = getIGPUBindGroupLayoutEntryMap(shader.compute);
     }
     else
     {
-        entryMap = getIGPUBindGroupLayoutEntryMap(pipeline.vertex.code);
-        if ("fragment" in pipeline)
+        entryMap = getIGPUBindGroupLayoutEntryMap(shader.vertex);
+        if ("fragment" in shader)
         {
-            const fragmentEntryMap = getIGPUBindGroupLayoutEntryMap(pipeline.fragment.code);
+            const fragmentEntryMap = getIGPUBindGroupLayoutEntryMap(shader.fragment);
             for (const resourceName in fragmentEntryMap)
             {
                 // 检测相同名称是否被定义在多个地方

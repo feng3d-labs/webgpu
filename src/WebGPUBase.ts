@@ -20,12 +20,12 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit } from "./eventnames";
+import { NVertexBuffer } from "./internal/NGPUVertexBuffer";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
-import { NVertexBuffer } from "./internal/NGPUVertexBuffer";
 
 declare global
 {
@@ -412,7 +412,7 @@ export class WebGPUBase
         passEncoder.setPipeline(computePipeline);
 
         // 计算 bindGroups
-        const layout = getGPUPipelineLayout(device, pipeline);
+        const layout = getGPUPipelineLayout(device, { compute: pipeline.compute.code });
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
             const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
@@ -522,7 +522,7 @@ export class WebGPUBase
         }
 
         // 计算 bindGroups
-        const layout = getGPUPipelineLayout(device, pipeline);
+        const layout = getGPUPipelineLayout(device, { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code });
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
             const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
