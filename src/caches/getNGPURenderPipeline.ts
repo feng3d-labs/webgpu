@@ -1,4 +1,4 @@
-import { BlendState, ChainMap, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, IWriteMask, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType } from "@feng3d/render-api";
+import { BlendComponent, BlendState, ChainMap, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -211,7 +211,7 @@ function getNGPUVertexState(device: GPUDevice, vertexState: VertexState, vertice
 function getVertexEntryFunctionInfo(vertexState: VertexState)
 {
     let vertexEntryFunctionInfo: FunctionInfo = vertexState["_vertexEntry"];
-    if (!vertexEntryFunctionInfo) return vertexEntryFunctionInfo;
+    if (vertexEntryFunctionInfo) return vertexEntryFunctionInfo;
 
     const code = vertexState.code;
 
@@ -327,19 +327,28 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: VertexAttributes)
 
 function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUTextureFormat)
 {
-    //
-    const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
+    if (!colorTargetState) return { format, blend: getGPUBlendState(undefined), writeMask: getGPUColorWriteFlags(undefined) };
 
-    const blend = getGPUBlendState(colorTargetState?.blend);
+    const result = colorTargetState["_GPUColorTargetState_" + format] ??= computed(() =>
+    {
+        //
+        reactive(colorTargetState)?.writeMask;
+        const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
 
-    //
-    const gpuColorTargetState: GPUColorTargetState = {
-        format,
-        blend,
-        writeMask,
-    };
+        reactive(colorTargetState)?.blend;
+        const blend = getGPUBlendState(colorTargetState?.blend);
 
-    return gpuColorTargetState;
+        //
+        const gpuColorTargetState: GPUColorTargetState = {
+            format,
+            blend,
+            writeMask,
+        };
+
+        return gpuColorTargetState;
+    });
+
+    return result.value;
 }
 
 /**
@@ -351,13 +360,13 @@ function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUT
  */
 function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
 {
-    let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachments]);
+    const colorAttachmentsKey = colorAttachments.toLocaleString();
+
+    let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
     if (gpuFragmentState) return gpuFragmentState.value;
 
     const targets = computed(() =>
     {
-        reactive(fragmentState).targets;
-
         return colorAttachments.map((format, i) =>
         {
             if (!format) return undefined;
@@ -420,12 +429,12 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
         } as GPUFragmentState;
     });
 
-    fragmentStateMap.set([fragmentState, colorAttachments], gpuFragmentState);
+    fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
 
     return gpuFragmentState.value;
 }
 
-const fragmentStateMap = new ChainMap<[FragmentState, readonly GPUTextureFormat[]], ComputedRef<GPUFragmentState>>();
+const fragmentStateMap = new ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>();
 
 
 function getGPUBlendState(blend?: BlendState): GPUBlendState
@@ -437,35 +446,12 @@ function getGPUBlendState(blend?: BlendState): GPUBlendState
 
     result = blend["_GPUBlendState"] = computed(() =>
     {
-        const r_blend = reactive(blend);
+        reactive(blend)?.color;
+        reactive(blend)?.alpha;
         //
-        const colorOperation: GPUBlendOperation = r_blend?.color?.operation || "add";
-        let colorSrcFactor: GPUBlendFactor = r_blend?.color?.srcFactor || "one";
-        let colorDstFactor: GPUBlendFactor = r_blend?.color?.dstFactor || "zero";
-        if (colorOperation === "max" || colorOperation === "min")
-        {
-            colorSrcFactor = colorDstFactor = "one";
-        }
-        //
-        const alphaOperation: GPUBlendOperation = r_blend?.alpha?.operation || colorOperation;
-        let alphaSrcFactor: GPUBlendFactor = r_blend?.alpha?.srcFactor || colorSrcFactor;
-        let alphaDstFactor: GPUBlendFactor = r_blend?.alpha?.dstFactor || colorDstFactor;
-        if (alphaOperation === "max" || alphaOperation === "min")
-        {
-            alphaSrcFactor = alphaDstFactor = "one";
-        }
-
         const gpuBlend: GPUBlendState = {
-            color: {
-                operation: colorOperation,
-                srcFactor: colorSrcFactor,
-                dstFactor: colorDstFactor,
-            },
-            alpha: {
-                operation: alphaOperation,
-                srcFactor: alphaSrcFactor,
-                dstFactor: alphaDstFactor,
-            },
+            color: getGPUBlendComponent(blend?.color),
+            alpha: getGPUBlendComponent(blend?.alpha),
         };
         return gpuBlend;
     })
@@ -473,29 +459,63 @@ function getGPUBlendState(blend?: BlendState): GPUBlendState
     return result.value;
 }
 
-function getGPUColorWriteFlags(writeMask?: IWriteMask)
+function getGPUBlendComponent(blendComponent?: BlendComponent): GPUBlendComponent
+{
+    if (!blendComponent) return { operation: "add", srcFactor: "one", dstFactor: "zero" };
+
+    const result: ComputedRef<GPUBlendComponent> = blendComponent["_GPUBlendComponent"] ??= computed(() =>
+    {
+        const r_blendComponent = reactive(blendComponent);
+        //
+        const operation: GPUBlendOperation = r_blendComponent?.operation ?? "add";
+        let srcFactor: GPUBlendFactor = r_blendComponent?.srcFactor ?? "one";
+        let dstFactor: GPUBlendFactor = r_blendComponent?.dstFactor ?? "zero";
+        if (operation === "max" || operation === "min")
+        {
+            srcFactor = dstFactor = "one";
+        }
+
+        const gpuBlendComponent: GPUBlendComponent = {
+            operation,
+            srcFactor,
+            dstFactor,
+        };
+        return gpuBlendComponent;
+    });
+
+    return result.value;
+}
+
+function getGPUColorWriteFlags(writeMask?: WriteMask)
 {
     if (!writeMask) return 15;
 
-    let gpuWriteMask: GPUColorWriteFlags = 0;
-    if (writeMask[0])
+    const result: ComputedRef<GPUColorWriteFlags> = writeMask["_GPUColorWriteFlags"] ??= computed(() =>
     {
-        gpuWriteMask += 1;
-    }
-    if (writeMask[1])
-    {
-        gpuWriteMask += 2;
-    }
-    if (writeMask[2])
-    {
-        gpuWriteMask += 4;
-    }
-    if (writeMask[3])
-    {
-        gpuWriteMask += 8;
-    }
+        const r_writeMask = reactive(writeMask);
+        //
+        let gpuWriteMask: GPUColorWriteFlags = 0;
+        if (r_writeMask[0])
+        {
+            gpuWriteMask += 1;
+        }
+        if (r_writeMask[1])
+        {
+            gpuWriteMask += 2;
+        }
+        if (r_writeMask[2])
+        {
+            gpuWriteMask += 4;
+        }
+        if (r_writeMask[3])
+        {
+            gpuWriteMask += 8;
+        }
 
-    return gpuWriteMask;
+        return gpuWriteMask;
+    });
+
+    return result.value;
 }
 
 function getWGSLType(type: TypeInfo)
