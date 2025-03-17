@@ -39,18 +39,25 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     // 从GPU管线中获取管线布局。
     const layout = getGPUPipelineLayout(device, renderPipeline);
 
-    const gpuRenderPipeline = computed(() =>
+    const gpuFragmentState = computed(() =>
     {
         // 获取片段阶段完整描述。
         reactive(renderPipeline).fragment;
-        const gpuFragmentState = getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
 
+        const fragment = renderPipeline.fragment;
+        if (!fragment) return undefined;
+
+        return getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
+    });
+
+    const gpuRenderPipeline = computed(() =>
+    {
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
             label: renderPipeline.label,
             layout,
             vertex: vertexStateResult.gpuVertexState,
-            fragment: gpuFragmentState,
+            fragment: gpuFragmentState.value,
             primitive: gpuPrimitive,
             depthStencil: gpuDepthStencilState,
             multisample: gpuMultisampleState,
@@ -302,12 +309,10 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: VertexAttributes)
 
 function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUTextureFormat)
 {
-    if (!colorTargetState) return undefined;
-
     //
-    const writeMask = getGPUColorWriteFlags(colorTargetState.writeMask);
+    const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
 
-    const blend = getGPUBlendState(colorTargetState.blend);
+    const blend = getGPUBlendState(colorTargetState?.blend);
 
     //
     const gpuColorTargetState: GPUColorTargetState = {
@@ -328,11 +333,7 @@ function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUT
  */
 function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
 {
-    if (!fragmentState) return undefined;
-
-    const colorAttachmentsKey = colorAttachments.toString();
-
-    let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
+    let gpuFragmentState = fragmentStateMap.get([fragmentState, colorAttachments]);
     if (gpuFragmentState) return gpuFragmentState.value;
 
     const targets = computed(() =>
@@ -383,25 +384,30 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
         return entryPoint;
     });
 
-    gpuFragmentState = computed(() =>
+    const module = computed(() =>
     {
         // 监听着色器代码变化
         reactive(fragmentState).code;
 
+        return getGPUShaderModule(device, fragmentState.code);
+    });
+
+    gpuFragmentState = computed(() =>
+    {
         return {
-            module: getGPUShaderModule(device, fragmentState.code),
+            module: module.value,
             entryPoint: entryPoint.value,
             targets: targets.value,
             constants: fragmentState.constants
         } as GPUFragmentState;
     });
 
-    fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
+    fragmentStateMap.set([fragmentState, colorAttachments], gpuFragmentState);
 
     return gpuFragmentState.value;
 }
 
-const fragmentStateMap = new ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>();
+const fragmentStateMap = new ChainMap<[FragmentState, readonly GPUTextureFormat[]], ComputedRef<GPUFragmentState>>();
 
 
 function getGPUBlendState(blend?: BlendState): GPUBlendState
