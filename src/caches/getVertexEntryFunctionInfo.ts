@@ -10,7 +10,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  */
 export function getVertexEntryFunctionInfo(vertexState: VertexState)
 {
-    let result: ComputedRef<FunctionInfo> = vertexState["_vertexEntry"];
+    let result: ComputedRef<FunctionInfo> = _vertexEntryFunctionInfoMap.get(vertexState);
     if (result) return result.value;
 
     result = computed(() =>
@@ -39,8 +39,8 @@ export function getVertexEntryFunctionInfo(vertexState: VertexState)
 
         return vertexEntryFunctionInfo;
     });
-
-    vertexState["_vertexEntry"] = result;
+    _vertexEntryFunctionInfoMap.set(vertexState, result);
 
     return result.value;
 }
+const _vertexEntryFunctionInfoMap = new WeakMap<VertexState, ComputedRef<FunctionInfo>>();
