@@ -362,7 +362,7 @@ function getNGPUVertexBuffers(vertex: FunctionInfo, vertices: VertexAttributes)
 
 function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUTextureFormat)
 {
-    if (!colorTargetState) return { format, blend: getGPUBlendState(undefined), writeMask: getGPUColorWriteFlags(undefined) };
+    if (!colorTargetState) return defaultGPUColorTargetState(format);
 
     const result: ComputedRef<GPUColorTargetState> = colorTargetState["_GPUColorTargetState_" + format] ??= computed(() =>
     {
@@ -385,6 +385,12 @@ function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUT
     return result.value;
 }
 
+const _defaultGPUColorTargetState = {};
+const defaultGPUColorTargetState = (format: GPUTextureFormat) =>
+{
+    return _defaultGPUColorTargetState[format] ??= { format, blend: getGPUBlendState(undefined), writeMask: getGPUColorWriteFlags(undefined) }
+};
+
 /**
  * 获取片段阶段完整描述。
  *
@@ -406,26 +412,16 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
         // 监听
         const r_fragmentState = reactive(fragmentState);
         r_fragmentState.code;
+        r_fragmentState.targets;
+        for (const key in r_fragmentState.constants) { r_fragmentState.constants[key]; }
 
-        const module = getGPUShaderModule(device, fragmentState.code);
-
-        // 监听着色器入口点变化
-        const entryPoint = getEntryPoint(fragmentState);
-
-        // 监听渲染目标变化
-        reactive(fragmentState).targets;
-        const targets = getGPUColorTargetStates(fragmentState.targets, colorAttachments);
-
-        // 监听常量变化
-        const r_constants = reactive(fragmentState).constants;
-        for (const key in r_constants) { r_constants[key]; }
-
-        //
+        // 计算
+        const { code, targets, constants } = fragmentState;
         return {
-            module,
-            entryPoint,
-            targets,
-            constants: fragmentState.constants
+            module: getGPUShaderModule(device, code),
+            entryPoint: getEntryPoint(fragmentState),
+            targets: getGPUColorTargetStates(targets, colorAttachments),
+            constants: constants
         } as GPUFragmentState;
     });
 
@@ -436,13 +432,7 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
 
 function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]): GPUColorTargetState[]
 {
-    if (!targets)
-    {
-        return undefinedMap["_GPUColorTargetStates_" + colorAttachments.toString()] ??= colorAttachments.map((format) =>
-        {
-            return getGPUColorTargetState(undefined, format);
-        });
-    };
+    if (!targets) return defaultGPUColorTargetStates(colorAttachments);
 
     const result: ComputedRef<GPUColorTargetState[]> = targets["_GPUColorTargetStates_" + colorAttachments.toString()] ??= computed(() =>
     {
@@ -450,9 +440,11 @@ function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAtta
         {
             if (!format) return undefined;
 
-            //
+            // 监听
             reactive(targets)[i];
-            const gpuColorTargetState = getGPUColorTargetState(targets?.[i], format);
+
+            // 计算
+            const gpuColorTargetState = getGPUColorTargetState(targets[i], format);
 
             return gpuColorTargetState;
         });
@@ -460,40 +452,33 @@ function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAtta
 
     return result.value;
 }
-const undefinedMap: { [key: string]: GPUColorTargetState[] } = {};
+const _defaultGPUColorTargetStates: { [key: string]: GPUColorTargetState[] } = {};
+const defaultGPUColorTargetStates = (colorAttachments: readonly GPUTextureFormat[]) =>
+{
+    return _defaultGPUColorTargetStates[colorAttachments.toString()] ??= colorAttachments.map((format) =>
+    {
+        return getGPUColorTargetState(undefined, format);
+    });
+};
 
 function getEntryPoint(fragmentState: FragmentState)
 {
     const result: ComputedRef<string> = fragmentState["_entryPoint"] ??= computed(() =>
     {
-        // 监听着色器入口点变化
-        reactive(fragmentState).entryPoint;
+        // 监听
+        const r_fragmentState = reactive(fragmentState);
+        r_fragmentState.entryPoint;
+        r_fragmentState.code;
 
-        // 
-        let entryPoint = fragmentState.entryPoint;
+        // 计算
+        const { entryPoint, code } = fragmentState;
+        //
         if (entryPoint) return entryPoint;
+        const reflect = getWGSLReflectInfo(code);
+        const fragment = reflect.entry.fragment[0];
+        console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
 
-        // 监听着色器代码变化
-        reactive(fragmentState).code;
-
-        // 计算片元着色器入口点
-        const code = fragmentState.code;
-        let fragment: FunctionInfo;
-        if (!entryPoint)
-        {
-            const reflect = getWGSLReflectInfo(code);
-            fragment = reflect.entry.fragment[0];
-            console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
-            entryPoint = fragment.name;
-        }
-        else
-        {
-            // 验证着色器中包含指定片段入口函数。
-            const reflect = getWGSLReflectInfo(code);
-            fragment = reflect.entry.fragment.filter((v) => v.name === entryPoint)[0];
-            console.assert(!!fragment, `WGSL着色器 ${code} 中不存在指定的片元入口点 ${entryPoint} 。`);
-        }
-        return entryPoint;
+        return fragment.name;
     });
 
     return result.value;
@@ -514,9 +499,10 @@ function getGPUBlendState(blend?: BlendState): GPUBlendState
         r_blend.color;
         r_blend.alpha;
         // 计算
+        const { color, alpha } = blend;
         const gpuBlend: GPUBlendState = {
-            color: getGPUBlendComponent(blend.color),
-            alpha: getGPUBlendComponent(blend.alpha),
+            color: getGPUBlendComponent(color),
+            alpha: getGPUBlendComponent(alpha),
         };
         return gpuBlend;
     })
@@ -530,20 +516,19 @@ function getGPUBlendComponent(blendComponent?: BlendComponent): GPUBlendComponen
 
     const result: ComputedRef<GPUBlendComponent> = blendComponent["_GPUBlendComponent"] ??= computed(() =>
     {
+        // 监听
         const r_blendComponent = reactive(blendComponent);
-        //
-        const operation: GPUBlendOperation = r_blendComponent?.operation ?? "add";
-        let srcFactor: GPUBlendFactor = r_blendComponent?.srcFactor ?? "one";
-        let dstFactor: GPUBlendFactor = r_blendComponent?.dstFactor ?? "zero";
-        if (operation === "max" || operation === "min")
-        {
-            srcFactor = dstFactor = "one";
-        }
+        r_blendComponent.operation;
+        r_blendComponent.srcFactor;
+        r_blendComponent.dstFactor;
 
+        // 计算
+        const { operation, srcFactor, dstFactor } = blendComponent;
+        // 当 operation 为 max 或 min 时，srcFactor 和 dstFactor 必须为 one。
         const gpuBlendComponent: GPUBlendComponent = {
-            operation,
-            srcFactor,
-            dstFactor,
+            operation: operation ?? "add",
+            srcFactor: (operation === "max" || operation === "min") ? "one" : (srcFactor ?? "one"),
+            dstFactor: (operation === "max" || operation === "min") ? "one" : (dstFactor ?? "zero"),
         };
         return gpuBlendComponent;
     });
@@ -557,22 +542,29 @@ function getGPUColorWriteFlags(writeMask?: WriteMask)
 
     const result: ComputedRef<GPUColorWriteFlags> = writeMask["_GPUColorWriteFlags"] ??= computed(() =>
     {
+        // 监听
         const r_writeMask = reactive(writeMask);
-        //
+        r_writeMask[0];
+        r_writeMask[1];
+        r_writeMask[2];
+        r_writeMask[3];
+
+        // 计算
+        const [red, green, blue, alpha] = writeMask;
         let gpuWriteMask: GPUColorWriteFlags = 0;
-        if (r_writeMask[0])
+        if (red)
         {
             gpuWriteMask += 1;
         }
-        if (r_writeMask[1])
+        if (green)
         {
             gpuWriteMask += 2;
         }
-        if (r_writeMask[2])
+        if (blue)
         {
             gpuWriteMask += 4;
         }
-        if (r_writeMask[3])
+        if (alpha)
         {
             gpuWriteMask += 8;
         }
