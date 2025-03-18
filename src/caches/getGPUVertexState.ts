@@ -10,7 +10,7 @@ import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
  * @param vertices 顶点数据。
  * @returns 完整的顶点阶段描述与顶点缓冲区列表。
  */
-export function getNGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
+export function getGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
 {
     let result = vertexStateMap.get([vertexState, vertices]);
     if (result) return result.value;

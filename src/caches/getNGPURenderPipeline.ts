@@ -5,7 +5,7 @@ import { MultisampleState } from "../data/MultisampleState";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
 import { getGPUShaderModule } from "./getGPUShaderModule";
-import { getNGPUVertexState } from "./getNGPUVertexState";
+import { getGPUVertexState } from "./getGPUVertexState";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
@@ -41,7 +41,7 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
         const { label, vertex, fragment, primitive, depthStencil, multisample } = renderPipeline;
         const shader = { vertex: vertex.code, fragment: fragment?.code };
         const { colorFormats, depthStencilFormat, sampleCount } = renderPassFormat;
-        const gpuVertexState = getNGPUVertexState(device, vertex, vertices);
+        const gpuVertexState = getGPUVertexState(device, vertex, vertices);
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
             label: label,
