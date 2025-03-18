@@ -1,4 +1,4 @@
-import { ChainMap, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
+import { ChainMap, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
@@ -23,7 +23,7 @@ export function getNVertexBuffers(vertexState: VertexState, vertices: VertexAttr
  */
 function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttributes)
 {
-    let result = _map.get([vertexState, vertices]);
+    let result = _getVertexBuffersBuffersMap.get([vertexState, vertices]);
     if (result) return result;
 
     const vertexEntryFunctionInfo = getVertexEntryFunctionInfo(vertexState);
@@ -32,15 +32,15 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
 
     const vertexBuffers: NVertexBuffer[] = [];
 
-    const map = new Map<any, number>();
+    const bufferIndexMap = new Map<VertexDataTypes, number>();
 
-    vertexEntryFunctionInfo.inputs.forEach((v) =>
+    vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
     {
         // 跳过内置属性。
-        if (v.locationType === "builtin") return;
+        if (inputInfo.locationType === "builtin") return;
 
-        const shaderLocation = v.location as number;
-        const attributeName = v.name;
+        const shaderLocation = inputInfo.location as number;
+        const attributeName = inputInfo.name;
 
         const vertexAttribute = vertices[attributeName];
         console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
@@ -68,7 +68,7 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
 
         watcher.watch(vertexAttribute, "data", () =>
         {
-            const index = map.get(data);
+            const index = bufferIndexMap.get(data);
             const attributeData = vertexAttribute.data;
 
             vertexBuffers[index].data = attributeData;
@@ -76,11 +76,11 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
             vertexBuffers[index].size = attributeData.byteLength;
         });
 
-        let index = map.get(data);
+        let index = bufferIndexMap.get(data);
         if (index === undefined)
         {
             index = vertexBufferLayouts.length;
-            map.set(data, index);
+            bufferIndexMap.set(data, index);
 
             vertexBuffers[index] = { data, offset: data.byteOffset, size: data.byteLength };
 
@@ -99,9 +99,9 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
     });
 
     result = { vertexBufferLayouts, vertexBuffers };
-    _map.set([vertexState, vertices], result);
+    _getVertexBuffersBuffersMap.set([vertexState, vertices], result);
 
     return result;
 }
 
-const _map = new ChainMap<[VertexState, VertexAttributes], { vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: NVertexBuffer[] }>();
+const _getVertexBuffersBuffersMap = new ChainMap<[VertexState, VertexAttributes], { vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: NVertexBuffer[] }>();
