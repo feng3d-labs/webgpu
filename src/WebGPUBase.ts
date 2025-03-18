@@ -46,7 +46,7 @@ declare global
             setBindGroupCommands: Array<any>;
         }>;
         _renderObjectCommandMap: ChainMap<[string, RenderObject], Array<any>>;
-        _renderPipelineMap: ChainMap<[RenderPipeline, string, PrimitiveState, VertexAttributes, GPUIndexFormat], {
+        _renderPipelineMap: ChainMap<[RenderPipeline, string, VertexAttributes, GPUIndexFormat], {
             pipeline: ComputedRef<GPURenderPipeline>;
             vertexBuffers: NVertexBuffer[];
             _version: number;
@@ -484,10 +484,10 @@ export class WebGPUBase
             }
         }
 
-        const { primitive, vertices, indices, draw } = geometry;
+        const { vertices, indices, draw } = geometry;
 
         //
-        const { pipeline: nPipeline, vertexBuffers } = getNGPURenderPipeline(device, pipeline, renderPassFormat, primitive, vertices, indices);
+        const { pipeline: nPipeline, vertexBuffers } = getNGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indices);
 
         //
         passEncoder.setPipeline(nPipeline.value);

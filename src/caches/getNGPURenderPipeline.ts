@@ -1,4 +1,4 @@
-import { BlendComponent, BlendState, ChainMap, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
+import { BlendComponent, BlendState, ChainMap, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, PrimitiveState, reactive, RenderPipeline, StencilFaceState, toRaw, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -18,18 +18,15 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, primitive: PrimitiveState, vertices: VertexAttributes, indices: IIndicesDataTypes)
+export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indices: IIndicesDataTypes)
 {
     const indexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
 
-    let result = device._renderPipelineMap.get([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
+    let result = device._renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
     if (result) return result;
 
     // 获取完整的顶点阶段描述与顶点缓冲区列表。
     const vertexStateResult = getNGPUVertexState(device, renderPipeline.vertex, vertices);
-
-    // 获取深度模板阶段完整描述。
-    const gpuDepthStencilState = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
 
     // 从渲染通道上获取多重采样数量
     const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
@@ -50,7 +47,12 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
         const fragment = getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
 
         // 
-        const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
+        reactive(renderPipeline).primitive;
+        const primitive = getGPUPrimitiveState(renderPipeline.primitive, indexFormat);
+
+        // 获取深度模板阶段完整描述。
+        reactive(renderPipeline).depthStencil;
+        const depthStencil = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
 
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
@@ -58,8 +60,8 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
             layout,
             vertex: vertexStateResult.gpuVertexState,
             fragment,
-            primitive: gpuPrimitive,
-            depthStencil: gpuDepthStencilState,
+            primitive,
+            depthStencil,
             multisample: gpuMultisampleState,
         };
 
@@ -69,14 +71,14 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     });
 
     result = { _version: 0, pipeline: gpuRenderPipeline, vertexBuffers: vertexStateResult.vertexBuffers };
-    device._renderPipelineMap.set([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat], result);
+    device._renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices, indexFormat], result);
 
     // 监听管线变化
     const onchanged = () =>
     {
         result._version++;
         renderPipeline._version = ~~renderPipeline._version + 1;
-        device._renderPipelineMap.delete([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
+        device._renderPipelineMap.delete([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
         watcher.unwatch(vertexStateResult, "_version", onchanged);
     }
     watcher.watch(vertexStateResult, "_version", onchanged);
@@ -130,35 +132,52 @@ function getGPUMultisampleState(multisampleState?: MultisampleState, sampleCount
 function getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFormat?: GPUTextureFormat)
 {
     if (!depthStencilFormat) return undefined;
-    //
-    const gpuDepthStencilState: GPUDepthStencilState = {
-        format: depthStencilFormat,
-        depthWriteEnabled: depthStencil?.depthWriteEnabled ?? true,
-        depthCompare: depthStencil?.depthCompare ?? "less",
-        stencilFront: getGPUStencilFaceState(depthStencil?.stencilFront),
-        stencilBack: getGPUStencilFaceState(depthStencil?.stencilBack),
-        stencilReadMask: depthStencil?.stencilReadMask ?? 0xFFFFFFFF,
-        stencilWriteMask: depthStencil?.stencilWriteMask ?? 0xFFFFFFFF,
-        depthBias: depthStencil?.depthBias ?? 0,
-        depthBiasSlopeScale: depthStencil?.depthBiasSlopeScale ?? 0,
-        depthBiasClamp: depthStencil?.depthBiasClamp ?? 0,
-    };
 
-    return gpuDepthStencilState;
+    if (!depthStencil) return { format: depthStencilFormat };
+
+    const result: ComputedRef<GPUDepthStencilState> = depthStencil["_cache_GPUDepthStencilState_" + depthStencilFormat] = computed(() =>
+    {
+        const { depthWriteEnabled, depthCompare, stencilFront, stencilBack, stencilReadMask, stencilWriteMask, depthBias, depthBiasSlopeScale, depthBiasClamp } = reactive(depthStencil);
+
+        //
+        const gpuDepthStencilState: GPUDepthStencilState = {
+            format: depthStencilFormat,
+            depthWriteEnabled: depthWriteEnabled ?? true,
+            depthCompare: depthCompare ?? "less",
+            stencilFront: getGPUStencilFaceState(toRaw(stencilFront)),
+            stencilBack: getGPUStencilFaceState(toRaw(stencilBack)),
+            stencilReadMask: stencilReadMask ?? 0xFFFFFFFF,
+            stencilWriteMask: stencilWriteMask ?? 0xFFFFFFFF,
+            depthBias: depthBias ?? 0,
+            depthBiasSlopeScale: depthBiasSlopeScale ?? 0,
+            depthBiasClamp: depthBiasClamp ?? 0,
+        };
+
+        return gpuDepthStencilState;
+    });
+
+    return result.value;
 }
 
 function getGPUStencilFaceState(stencilFaceState?: StencilFaceState)
 {
     if (!stencilFaceState) return {};
 
-    const gpuStencilFaceState: GPUStencilFaceState = {
-        compare: stencilFaceState.compare ?? "always",
-        failOp: stencilFaceState.failOp ?? "keep",
-        depthFailOp: stencilFaceState.depthFailOp ?? "keep",
-        passOp: stencilFaceState.passOp ?? "keep",
-    };
+    const result: ComputedRef<GPUStencilFaceState> = stencilFaceState["_cache_GPUStencilFaceState"] = computed(() =>
+    {
+        const { compare, failOp, depthFailOp, passOp } = reactive(stencilFaceState);
 
-    return gpuStencilFaceState;
+        const gpuStencilFaceState: GPUStencilFaceState = {
+            compare: compare ?? "always",
+            failOp: failOp ?? "keep",
+            depthFailOp: depthFailOp ?? "keep",
+            passOp: passOp ?? "keep",
+        };
+
+        return gpuStencilFaceState;
+    })
+
+    return result.value;
 }
 
 /**
