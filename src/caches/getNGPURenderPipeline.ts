@@ -41,12 +41,12 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
         const { label, vertex, fragment, primitive, depthStencil, multisample } = renderPipeline;
         const shader = { vertex: vertex.code, fragment: fragment?.code };
         const { colorFormats, depthStencilFormat, sampleCount } = renderPassFormat;
-        const vertexStateResult = getNGPUVertexState(device, vertex, vertices);
+        const gpuVertexState = getNGPUVertexState(device, vertex, vertices);
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
             label: label,
             layout: getGPUPipelineLayout(device, shader),
-            vertex: vertexStateResult.gpuVertexState,
+            vertex: gpuVertexState,
             fragment: getGPUFragmentState(device, fragment, colorFormats),
             primitive: getGPUPrimitiveState(primitive, indexFormat),
             depthStencil: getGPUDepthStencilState(depthStencil, depthStencilFormat),

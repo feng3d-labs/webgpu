@@ -12,7 +12,7 @@ import { getGPURenderTimestampQuery } from "./caches/getGPURenderTimestampQuery"
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGBuffer } from "./caches/getIGPUBuffer";
 import { getNGPURenderPipeline } from "./caches/getNGPURenderPipeline";
-import { getNGPUVertexState } from "./caches/getNGPUVertexState";
+import { getNGPUVertexBuffers } from "./caches/getNGPUVertexBuffers";
 import { getRealGPUBindGroup } from "./const";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
@@ -528,7 +528,7 @@ export class WebGPUBase
         });
 
         //
-        const { vertexBuffers } = getNGPUVertexState(device, pipeline.vertex, vertices);
+        const { vertexBuffers } = getNGPUVertexBuffers(pipeline.vertex, vertices)
         vertexBuffers?.forEach((vertexBuffer, index) =>
         {
             const buffer = getGBuffer(vertexBuffer.data);
