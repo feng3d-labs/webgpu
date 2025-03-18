@@ -1,4 +1,4 @@
-import { VertexState } from "@feng3d/render-api";
+import { computed, ComputedRef, reactive, VertexState } from "@feng3d/render-api";
 import { FunctionInfo } from "wgsl_reflect";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
@@ -10,26 +10,37 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  */
 export function getVertexEntryFunctionInfo(vertexState: VertexState)
 {
-    let vertexEntryFunctionInfo: FunctionInfo = vertexState["_vertexEntry"];
-    if (vertexEntryFunctionInfo) return vertexEntryFunctionInfo;
+    let result: ComputedRef<FunctionInfo> = vertexState["_vertexEntry"];
+    if (result) return result.value;
 
-    const code = vertexState.code;
-
-    // 解析顶点着色器
-    const reflect = getWGSLReflectInfo(code);
-    //
-    if (vertexState.entryPoint)
+    result = computed(() =>
     {
-        vertexEntryFunctionInfo = reflect.entry.vertex.filter((v) => v.name === vertexState.entryPoint)[0];
-        console.assert(!!vertexEntryFunctionInfo, `WGSL着色器 ${code} 中不存在顶点入口点 ${vertexState.entryPoint} 。`);
-    }
-    else
-    {
-        vertexEntryFunctionInfo = reflect.entry.vertex[0];
-        console.assert(!!reflect.entry.vertex[0], `WGSL着色器 ${code} 中不存在顶点入口点。`);
-    }
+        // 监听
+        const r_vertexState = reactive(vertexState);
+        r_vertexState.code;
+        r_vertexState.entryPoint;
 
-    vertexState["_vertexEntry"] = vertexEntryFunctionInfo;
+        // 计算
+        const { code, entryPoint } = vertexState;
+        // 解析顶点着色器
+        const reflect = getWGSLReflectInfo(code);
+        //
+        let vertexEntryFunctionInfo: FunctionInfo;
+        if (entryPoint)
+        {
+            vertexEntryFunctionInfo = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
+            console.assert(!!vertexEntryFunctionInfo, `WGSL着色器 ${code} 中不存在顶点入口点 ${entryPoint} 。`);
+        }
+        else
+        {
+            vertexEntryFunctionInfo = reflect.entry.vertex[0];
+            console.assert(!!reflect.entry.vertex[0], `WGSL着色器 ${code} 中不存在顶点入口点。`);
+        }
 
-    return vertexEntryFunctionInfo;
+        return vertexEntryFunctionInfo;
+    });
+
+    vertexState["_vertexEntry"] = result;
+
+    return result.value;
 }

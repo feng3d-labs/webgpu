@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, FragmentState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, FragmentState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes, VertexState } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -47,7 +47,8 @@ declare global
         }>;
         _renderObjectCommandMap: ChainMap<[string, RenderObject], Array<any>>;
         _renderPipelineMap: ChainMap<[RenderPipeline, string, VertexAttributes, GPUIndexFormat], ComputedRef<GPURenderPipeline>>;
-        _fragmentStateMap: ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>
+        _fragmentStateMap: ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>;
+         _GPUVertexStateMap: ChainMap<[VertexState, VertexAttributes], ComputedRef<GPUVertexState>>
     }
 }
 
@@ -102,6 +103,7 @@ export class WebGPUBase
             this._device._renderPassDescriptorMap ??= new WeakMap();
             this._device._pipelineLayoutMap ??= new Map();
             this._device._shaderMap ??= new Map();
+            this._device._GPUVertexStateMap ??= new ChainMap();
         }
     }
     protected _device: GPUDevice;

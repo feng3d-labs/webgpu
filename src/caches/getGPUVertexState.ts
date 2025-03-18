@@ -1,4 +1,4 @@
-import { ChainMap, ComputedRef, VertexAttributes, VertexState, computed } from "@feng3d/render-api";
+import { VertexAttributes, VertexState, computed, reactive } from "@feng3d/render-api";
 import { getGPUShaderModule } from "./getGPUShaderModule";
 import { getGPUVertexBufferLayouts } from "./getNGPUVertexBuffers";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
@@ -12,16 +12,23 @@ import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
  */
 export function getGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
 {
-    let result = vertexStateMap.get([vertexState, vertices]);
+    let result = device._GPUVertexStateMap.get([vertexState, vertices]);
     if (result) return result.value;
 
     result = computed(() =>
     {
+        // 监听
+        const r_vertexState = reactive(vertexState);
+        r_vertexState.code;
+
+        // 计算
+        const { code } = vertexState;
+
         const vertexEntryFunctionInfo = getVertexEntryFunctionInfo(vertexState);
         const vertexBufferLayouts = getGPUVertexBufferLayouts(vertexState, vertices);
 
         const gpuVertexState: GPUVertexState = {
-            module: getGPUShaderModule(device, vertexState.code),
+            module: getGPUShaderModule(device, code),
             entryPoint: vertexEntryFunctionInfo.name,
             buffers: vertexBufferLayouts,
             constants: vertexState.constants,
@@ -29,9 +36,7 @@ export function getGPUVertexState(device: GPUDevice, vertexState: VertexState, v
 
         return gpuVertexState;
     });
-    vertexStateMap.set([vertexState, vertices], result);
+    device._GPUVertexStateMap.set([vertexState, vertices], result);
 
     return result.value;
 }
-
-const vertexStateMap = new ChainMap<[VertexState, VertexAttributes], ComputedRef<GPUVertexState>>();
