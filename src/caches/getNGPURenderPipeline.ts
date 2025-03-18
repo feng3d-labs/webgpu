@@ -28,9 +28,6 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     // 获取完整的顶点阶段描述与顶点缓冲区列表。
     const vertexStateResult = getNGPUVertexState(device, renderPipeline.vertex, vertices);
 
-    // 从渲染通道上获取多重采样数量
-    const gpuMultisampleState = getGPUMultisampleState(renderPipeline.multisample, renderPassFormat.sampleCount);
-
     const gpuRenderPipeline = computed(() =>
     {
         // 监听
@@ -43,19 +40,21 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
         r_renderPipeline.vertex.code;
         // r_renderPipeline.fragment
         r_renderPipeline.fragment?.code
+        r_renderPipeline.multisample
 
         // 计算
-        const { label, vertex, fragment, primitive, depthStencil } = renderPipeline;
+        const { label, vertex, fragment, primitive, depthStencil, multisample } = renderPipeline;
         const shader = { vertex: vertex.code, fragment: fragment?.code };
+        const { colorFormats, depthStencilFormat, sampleCount } = renderPassFormat;
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
             label: label,
             layout: getGPUPipelineLayout(device, shader),
             vertex: vertexStateResult.gpuVertexState,
-            fragment: getGPUFragmentState(device, fragment, renderPassFormat.colorFormats),
+            fragment: getGPUFragmentState(device, fragment, colorFormats),
             primitive: getGPUPrimitiveState(primitive, indexFormat),
-            depthStencil: getGPUDepthStencilState(depthStencil, renderPassFormat.depthStencilFormat),
-            multisample: gpuMultisampleState,
+            depthStencil: getGPUDepthStencilState(depthStencil, depthStencilFormat),
+            multisample: getGPUMultisampleState(multisample, sampleCount),
         };
 
         const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
@@ -113,12 +112,25 @@ function getGPUMultisampleState(multisampleState?: MultisampleState, sampleCount
 {
     if (!sampleCount) return undefined;
 
-    const gpuMultisampleState: GPUMultisampleState = {
-        ...multisampleState,
-        count: sampleCount,
-    };
+    const result: ComputedRef<GPUMultisampleState> = multisampleState["_cache_GPUMultisampleState_" + sampleCount] ??= computed(() =>
+    {
+        // 监听
+        const r_multisampleState = reactive(multisampleState);
+        r_multisampleState.mask;
+        r_multisampleState.alphaToCoverageEnabled;
 
-    return gpuMultisampleState;
+        // 计算
+        const { mask, alphaToCoverageEnabled } = multisampleState;
+        const gpuMultisampleState: GPUMultisampleState = {
+            count: sampleCount,
+            mask: mask ?? 0xFFFFFFFF,
+            alphaToCoverageEnabled: alphaToCoverageEnabled ?? false,
+        };
+
+        return gpuMultisampleState;
+    });
+
+    return result.value;
 }
 
 /**
