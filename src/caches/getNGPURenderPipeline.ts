@@ -1,4 +1,4 @@
-import { BlendComponent, BlendState, ChainMap, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, PrimitiveState, reactive, RenderPipeline, StencilFaceState, toRaw, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
+import { BlendComponent, BlendState, ChainMap, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, vertexFormatMap, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
@@ -33,35 +33,28 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
 
     const gpuRenderPipeline = computed(() =>
     {
-        // 
-        reactive(renderPipeline).label;
-        const label = renderPipeline.label;
+        // 监听
+        const r_renderPipeline = reactive(renderPipeline);
+        r_renderPipeline.label;
+        r_renderPipeline.fragment;
+        r_renderPipeline.primitive;
+        r_renderPipeline.depthStencil;
+        // r_renderPipeline.vertex
+        r_renderPipeline.vertex.code;
+        // r_renderPipeline.fragment
+        r_renderPipeline.fragment?.code
 
-        // 更新管线布局
-        reactive(renderPipeline).vertex.code;
-        reactive(renderPipeline).fragment?.code
-        const layout = getGPUPipelineLayout(device, { vertex: renderPipeline.vertex.code, fragment: renderPipeline.fragment?.code });
-
-        // 
-        reactive(renderPipeline).fragment;
-        const fragment = getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
-
-        // 
-        reactive(renderPipeline).primitive;
-        const primitive = getGPUPrimitiveState(renderPipeline.primitive, indexFormat);
-
-        // 获取深度模板阶段完整描述。
-        reactive(renderPipeline).depthStencil;
-        const depthStencil = getGPUDepthStencilState(renderPipeline.depthStencil, renderPassFormat.depthStencilFormat);
-
+        // 计算
+        const { label, vertex, fragment, primitive, depthStencil } = renderPipeline;
+        const shader = { vertex: vertex.code, fragment: fragment?.code };
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
-            label,
-            layout,
+            label: label,
+            layout: getGPUPipelineLayout(device, shader),
             vertex: vertexStateResult.gpuVertexState,
-            fragment,
-            primitive,
-            depthStencil,
+            fragment: getGPUFragmentState(device, fragment, renderPassFormat.colorFormats),
+            primitive: getGPUPrimitiveState(primitive, indexFormat),
+            depthStencil: getGPUDepthStencilState(depthStencil, renderPassFormat.depthStencilFormat),
             multisample: gpuMultisampleState,
         };
 
@@ -92,9 +85,15 @@ function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndex
 
     const result: ComputedRef<GPUPrimitiveState> = primitive["_cache_GPUPrimitiveState_" + indexFormat] ??= computed(() =>
     {
-        let { topology, cullFace, frontFace, unclippedDepth } = reactive(primitive);
+        // 监听
+        const r_primitive = reactive(primitive);
+        r_primitive.topology;
+        r_primitive.cullFace;
+        r_primitive.frontFace;
+        r_primitive.unclippedDepth;
 
-        //
+        // 计算
+        const { topology, cullFace, frontFace, unclippedDepth } = primitive;
         const gpuPrimitive: GPUPrimitiveState = {
             topology: topology ?? "triangle-list",
             stripIndexFormat: (topology === "triangle-strip" || topology === "line-strip") ? indexFormat : undefined,
@@ -137,15 +136,26 @@ function getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFo
 
     const result: ComputedRef<GPUDepthStencilState> = depthStencil["_cache_GPUDepthStencilState_" + depthStencilFormat] = computed(() =>
     {
-        const { depthWriteEnabled, depthCompare, stencilFront, stencilBack, stencilReadMask, stencilWriteMask, depthBias, depthBiasSlopeScale, depthBiasClamp } = reactive(depthStencil);
+        // 监听
+        const r_depthStencil = reactive(depthStencil);
+        r_depthStencil.depthWriteEnabled;
+        r_depthStencil.depthCompare;
+        r_depthStencil.stencilFront;
+        r_depthStencil.stencilBack;
+        r_depthStencil.stencilReadMask;
+        r_depthStencil.stencilWriteMask;
+        r_depthStencil.depthBias;
+        r_depthStencil.depthBiasSlopeScale;
+        r_depthStencil.depthBiasClamp;
 
-        //
+        // 计算
+        const { depthWriteEnabled, depthCompare, stencilFront, stencilBack, stencilReadMask, stencilWriteMask, depthBias, depthBiasSlopeScale, depthBiasClamp } = depthStencil;
         const gpuDepthStencilState: GPUDepthStencilState = {
             format: depthStencilFormat,
             depthWriteEnabled: depthWriteEnabled ?? true,
             depthCompare: depthCompare ?? "less",
-            stencilFront: getGPUStencilFaceState(toRaw(stencilFront)),
-            stencilBack: getGPUStencilFaceState(toRaw(stencilBack)),
+            stencilFront: getGPUStencilFaceState(stencilFront),
+            stencilBack: getGPUStencilFaceState(stencilBack),
             stencilReadMask: stencilReadMask ?? 0xFFFFFFFF,
             stencilWriteMask: stencilWriteMask ?? 0xFFFFFFFF,
             depthBias: depthBias ?? 0,
@@ -165,8 +175,15 @@ function getGPUStencilFaceState(stencilFaceState?: StencilFaceState)
 
     const result: ComputedRef<GPUStencilFaceState> = stencilFaceState["_cache_GPUStencilFaceState"] = computed(() =>
     {
-        const { compare, failOp, depthFailOp, passOp } = reactive(stencilFaceState);
+        // 监听
+        const r_stencilFaceState = reactive(stencilFaceState);
+        r_stencilFaceState.compare;
+        r_stencilFaceState.failOp;
+        r_stencilFaceState.depthFailOp;
+        r_stencilFaceState.passOp;
 
+        // 计算
+        const { compare, failOp, depthFailOp, passOp } = stencilFaceState;
         const gpuStencilFaceState: GPUStencilFaceState = {
             compare: compare ?? "always",
             failOp: failOp ?? "keep",
@@ -349,18 +366,17 @@ function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUT
 
     const result: ComputedRef<GPUColorTargetState> = colorTargetState["_GPUColorTargetState_" + format] ??= computed(() =>
     {
-        //
-        reactive(colorTargetState)?.writeMask;
-        const writeMask = getGPUColorWriteFlags(colorTargetState?.writeMask);
+        // 监听
+        const r_colorTargetState = reactive(colorTargetState);
+        r_colorTargetState.writeMask;
+        r_colorTargetState.blend;
 
-        reactive(colorTargetState)?.blend;
-        const blend = getGPUBlendState(colorTargetState?.blend);
-
-        //
+        // 计算
+        const { writeMask, blend } = colorTargetState;
         const gpuColorTargetState: GPUColorTargetState = {
             format,
-            blend,
-            writeMask,
+            blend: getGPUBlendState(blend),
+            writeMask: getGPUColorWriteFlags(writeMask),
         };
 
         return gpuColorTargetState;
@@ -387,8 +403,10 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
 
     gpuFragmentState = computed(() =>
     {
-        // 监听着色器代码变化
-        reactive(fragmentState).code;
+        // 监听
+        const r_fragmentState = reactive(fragmentState);
+        r_fragmentState.code;
+
         const module = getGPUShaderModule(device, fragmentState.code);
 
         // 监听着色器入口点变化
@@ -491,12 +509,14 @@ function getGPUBlendState(blend?: BlendState): GPUBlendState
 
     result = blend["_GPUBlendState"] = computed(() =>
     {
-        reactive(blend)?.color;
-        reactive(blend)?.alpha;
-        //
+        // 监听
+        const r_blend = reactive(blend);
+        r_blend.color;
+        r_blend.alpha;
+        // 计算
         const gpuBlend: GPUBlendState = {
-            color: getGPUBlendComponent(blend?.color),
-            alpha: getGPUBlendComponent(blend?.alpha),
+            color: getGPUBlendComponent(blend.color),
+            alpha: getGPUBlendComponent(blend.alpha),
         };
         return gpuBlend;
     })

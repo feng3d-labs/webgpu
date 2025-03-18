@@ -13,7 +13,7 @@ declare module "@feng3d/render-api"
          * If true, indicates that depth clipping is disabled.
          * Requires the {@link GPUFeatureName#"depth-clip-control"} feature to be enabled.
          */
-        unclippedDepth?: boolean;
+        readonly unclippedDepth?: boolean;
     }
 
 }
