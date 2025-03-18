@@ -81,6 +81,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         fragment: {
             code: fragmentWriteGBuffers,
         },
+        primitive,
     };
 
     const gBuffersDebugViewPipeline: RenderPipeline = {
@@ -94,6 +95,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 canvasSizeHeight: canvas.height,
             },
         },
+        primitive,
     };
     const deferredRenderPipeline: RenderPipeline = {
         vertex: {
@@ -102,6 +104,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         fragment: {
             code: fragmentDeferredRendering,
         },
+        primitive,
     };
 
     const depthTexture: Texture = {
@@ -332,7 +335,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     ...sceneUniformBindGroup,
                 },
                 geometry: {
-                    primitive,
                     vertices,
                     indices: indexBuffer,
                     draw: { __type__: "DrawIndexed", indexCount },
@@ -364,7 +366,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     ...gBufferTexturesBindGroup,
                 },
                 geometry: {
-                    primitive,
                     draw: { __type__: "DrawVertex", vertexCount: 6 },
                 }
             },
@@ -381,7 +382,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     ...lightsBufferBindGroup,
                 },
                 geometry: {
-                    primitive,
                     draw: { __type__: "DrawVertex", vertexCount: 6 },
                 },
             },

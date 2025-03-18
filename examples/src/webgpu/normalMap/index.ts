@@ -325,10 +325,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                         // *   tangent   : float32x3
                         // *   bitangent : float32x3
                         geometry: {
-                            primitive: {
-                                topology: "triangle-list",
-                                cullFace: "back",
-                            },
                             vertices: {
                                 position: { data: box.vertices, offset: 0, format: "float32x3", arrayStride: box.vertexStride },
                                 normal: { data: box.vertices, offset: 12, format: "float32x3", arrayStride: box.vertexStride },

@@ -24,6 +24,10 @@ export const create3DRenderPipeline = (
         fragment: {
             code: fragmentShader,
         },
+        primitive: {
+            topology: "triangle-list",
+            cullFace: "back",
+        },
         depthStencil,
     };
 

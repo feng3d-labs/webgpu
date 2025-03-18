@@ -466,13 +466,13 @@ export class GLTFPrimitive
                 topology: "triangle-strip",
             };
         }
+        reactive(this.renderPipeline).primitive = primitive;
 
         const renderObject: RenderObject = {
             pipeline: this.renderPipeline,
             bindingResources: bindingResources,
             //if skin do something with bone bind group
             geometry: {
-                primitive,
                 vertices: this.vertices,
                 indices: this.indices,
                 draw,

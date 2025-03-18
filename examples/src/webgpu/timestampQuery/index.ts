@@ -63,7 +63,14 @@ const init = async (canvas: HTMLCanvasElement) =>
         fragment: {
             code: fragmentWGSL,
         },
+        primitive: {
+            topology: "triangle-list",
 
+            // Backface culling since the cube is solid piece of geometry.
+            // Faces pointing away from the camera will be occluded by faces
+            // pointing toward the camera.
+            cullFace: "back",
+        },
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
@@ -102,14 +109,6 @@ const init = async (canvas: HTMLCanvasElement) =>
             uniforms,
         },
         geometry: {
-            primitive: {
-                topology: "triangle-list",
-
-                // Backface culling since the cube is solid piece of geometry.
-                // Faces pointing away from the camera will be occluded by faces
-                // pointing toward the camera.
-                cullFace: "back",
-            },
             vertices,
             draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
         }

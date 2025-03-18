@@ -30,7 +30,7 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
 
         computeBGDescript.fragment_uniforms = fragment_uniforms;
 
-        this.material = super.create2DRenderPipeline(
+        this.pipeline = super.create2DRenderPipeline(
             label,
             bitonicDisplay,
         );
@@ -44,6 +44,6 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
     startRun(commandEncoder: CommandEncoder, args: BitonicDisplayRenderArgs)
     {
         this.setArguments(args);
-        super.executeRun(commandEncoder, this.renderPassDescriptor, this.material, this.computeBGDescript);
+        super.executeRun(commandEncoder, this.renderPassDescriptor, this.pipeline, this.computeBGDescript);
     }
 }

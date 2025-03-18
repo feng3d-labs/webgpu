@@ -43,7 +43,7 @@ export abstract class Base2DRendererClass
         ...args: unknown[]
     ): void;
     renderPassDescriptor: RenderPassDescriptor;
-    material: RenderPipeline;
+    pipeline: RenderPipeline;
     bindGroupMap: Record<string, GPUBindGroup>;
     currentBindGroupName: string;
 
@@ -60,10 +60,6 @@ export abstract class Base2DRendererClass
                 pipeline: pipeline,
                 bindingResources: bindingResources,
                 geometry: {
-                    primitive: {
-                        topology: "triangle-list",
-                        cullFace: "none",
-                    },
                     draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1 }
                 }
             }],
@@ -83,6 +79,10 @@ export abstract class Base2DRendererClass
             },
             fragment: {
                 code,
+            },
+            primitive: {
+                topology: "triangle-list",
+                cullFace: "none",
             },
         };
 

@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { BufferBinding, RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
+import { BufferBinding, RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -45,14 +45,14 @@ const init = async (canvas: HTMLCanvasElement) =>
     const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
+            primitive: {
+                cullFace: "back",
+            },
         },
         bindingResources: {
             uniforms,
         },
         geometry: {
-            primitive: {
-                cullFace: "back",
-            },
             vertices: {
                 position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
                 uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },

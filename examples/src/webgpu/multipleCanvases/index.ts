@@ -122,6 +122,9 @@ const init = async () =>
         fragment: {
             ...module,
         },
+        primitive: {
+            cullFace: "back",
+        },
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
@@ -318,9 +321,6 @@ const init = async () =>
                     pipeline: pipeline,
                     bindingResources: bindGroup,
                     geometry: {
-                        primitive: {
-                            cullFace: "back",
-                        },
                         vertices: vertexAttributes,
                         indices,
                         draw: { __type__: "DrawIndexed", indexCount: indices.length },

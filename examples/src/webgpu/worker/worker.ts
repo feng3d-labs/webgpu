@@ -85,7 +85,15 @@ async function init(canvas: OffscreenCanvas)
         fragment: {
             code: vertexPositionColorWGSL,
         },
+        primitive: {
+            topology: "triangle-list",
 
+            // Backface culling since the cube is solid piece of geometry.
+            // Faces pointing away from the camera will be occluded by faces
+            // pointing toward the camera.
+            cullFace: "back",
+            frontFace: "ccw",
+        },
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
@@ -149,15 +157,6 @@ async function init(canvas: OffscreenCanvas)
                     pipeline,
                     bindingResources: uniformBindGroup,
                     geometry: {
-                        primitive: {
-                            topology: "triangle-list",
-
-                            // Backface culling since the cube is solid piece of geometry.
-                            // Faces pointing away from the camera will be occluded by faces
-                            // pointing toward the camera.
-                            cullFace: "back",
-                            frontFace: "ccw",
-                        },
                         vertices: verticesBuffer,
                         draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount }
                     }

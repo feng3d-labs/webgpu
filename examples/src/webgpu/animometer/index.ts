@@ -40,6 +40,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         fragment: {
             code: animometerWGSL,
         },
+        primitive: {
+            frontFace: "ccw",
+        },
     };
 
     const pipeline: RenderPipeline = {
@@ -57,9 +60,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: pipeline,
         bindingResources: {},
         geometry: {
-            primitive: {
-                frontFace: "ccw",
-            },
             vertices: {
                 position: { data: vertexBuffer, format: "float32x4", offset: 0, arrayStride: 2 * vec4Size },
                 color: { data: vertexBuffer, format: "float32x4", offset: vec4Size, arrayStride: 2 * vec4Size },

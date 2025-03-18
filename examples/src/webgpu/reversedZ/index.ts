@@ -91,6 +91,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         vertex: {
             code: vertexDepthPrePassWGSL,
         },
+        primitive: {
+            cullFace: "back",
+        },
     };
 
     // we need the depthCompare to fit the depth buffer mode we are using.
@@ -120,6 +123,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         fragment: {
             code: fragmentPrecisionErrorPassWGSL,
         },
+        primitive: {
+            cullFace: "back",
+        },
     };
 
     const precisionPassPipelines: RenderPipeline[] = [];
@@ -145,6 +151,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
         fragment: {
             code: fragmentWGSL,
+        },
+        primitive: {
+            cullFace: "back",
         },
     };
 
@@ -369,9 +378,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     pipeline: colorPassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
                     geometry: {
-                        primitive: {
-                            cullFace: "back",
-                        },
                         vertices,
                         draw: { __type__: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
@@ -396,9 +402,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     pipeline: depthPrePassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
                     geometry: {
-                        primitive: {
-                            cullFace: "back",
-                        },
                         vertices,
                         draw: { __type__: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
@@ -418,9 +421,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     pipeline: precisionPassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m], ...depthTextureBindGroup },
                     geometry: {
-                        primitive: {
-                            cullFace: "back",
-                        },
                         vertices,
                         draw: { __type__: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }
@@ -445,9 +445,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     pipeline: depthPrePassPipelines[m],
                     bindingResources: { ...uniformBindGroups[m] },
                     geometry: {
-                        primitive: {
-                            cullFace: "back",
-                        },
                         vertices,
                         draw: { __type__: "DrawVertex", vertexCount: geometryDrawCount, instanceCount: numInstances, firstVertex: 0, firstInstance: 0 },
                     }

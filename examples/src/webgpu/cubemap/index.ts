@@ -122,6 +122,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
+            primitive: {
+                cullFace: "none",
+            },
         },
         bindingResources: {
             uniforms: {
@@ -131,9 +134,6 @@ const init = async (canvas: HTMLCanvasElement) =>
             myTexture: { texture: cubemapTexture },
         },
         geometry: {
-            primitive: {
-                cullFace: "none",
-            },
             vertices: {
                 position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
                 uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },

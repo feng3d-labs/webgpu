@@ -57,6 +57,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         vertex: {
             code: vertexShadowWGSL,
         },
+        primitive,
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
@@ -76,6 +77,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 shadowDepthTextureSize,
             },
         },
+        primitive,
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
@@ -224,7 +226,6 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 geometry: {
-                                    primitive,
                                     vertices,
                                     indices: indexBuffer,
                                     draw: { __type__: "DrawIndexed", indexCount },
@@ -242,7 +243,6 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...modelBindGroup,
                                 },
                                 geometry: {
-                                    primitive,
                                     vertices,
                                     indices: indexBuffer,
                                     draw: { __type__: "DrawIndexed", indexCount },

@@ -147,6 +147,12 @@ setBlendConstant().`,
         fragment: {
             code: vertexPositionColorWGSL,
         },
+        primitive: {
+            // Backface culling since the cube is solid piece of geometry.
+            // Faces pointing away from the camera will be occluded by faces
+            // pointing toward the camera.
+            cullFace: "back",
+        },
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
@@ -255,12 +261,6 @@ setBlendConstant().`,
             pipeline: pipeline,
             bindingResources: uniformBindGroup,
             geometry: {
-                primitive: {
-                    // Backface culling since the cube is solid piece of geometry.
-                    // Faces pointing away from the camera will be occluded by faces
-                    // pointing toward the camera.
-                    cullFace: "back",
-                },
                 vertices: verticesBuffer,
                 draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: 1 },
             }

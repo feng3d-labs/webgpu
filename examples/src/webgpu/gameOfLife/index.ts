@@ -93,6 +93,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             fragment: {
                 code: fragWGSL,
             },
+            primitive: {
+                topology: "triangle-strip",
+            },
         };
 
         const uniformBindGroup: BindingResources = {
@@ -136,9 +139,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             pipeline: renderPipeline,
                             bindingResources: uniformBindGroup,
                             geometry: {
-                                primitive: {
-                                    topology: "triangle-strip",
-                                },
                                 vertices: vertices1,
                                 draw: { __type__: "DrawVertex", vertexCount: 4, instanceCount: length },
                             }
