@@ -25,8 +25,6 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     let result = device._renderPipelineMap.get([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
     if (result) return result;
 
-    const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
-
     // 获取完整的顶点阶段描述与顶点缓冲区列表。
     const vertexStateResult = getNGPUVertexState(device, renderPipeline.vertex, vertices);
 
@@ -40,6 +38,7 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     {
         // 
         reactive(renderPipeline).label;
+        const label = renderPipeline.label;
 
         // 更新管线布局
         reactive(renderPipeline).vertex.code;
@@ -50,11 +49,12 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
         reactive(renderPipeline).fragment;
         const fragment = getGPUFragmentState(device, renderPipeline.fragment, renderPassFormat.colorFormats);
 
-        
+        // 
+        const gpuPrimitive = getGPUPrimitiveState(primitive, indexFormat);
 
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
-            label: renderPipeline.label,
+            label,
             layout,
             vertex: vertexStateResult.gpuVertexState,
             fragment,
@@ -84,30 +84,29 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
     return result;
 }
 
-function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndexFormat)
+function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndexFormat): GPUPrimitiveState
 {
-    let stripIndexFormat: GPUIndexFormat;
-    if (primitive?.topology === "triangle-strip" || primitive?.topology === "line-strip")
+    if (!primitive) return defaultGPUPrimitiveState;
+
+    const result: ComputedRef<GPUPrimitiveState> = primitive["_cache_GPUPrimitiveState_" + indexFormat] ??= computed(() =>
     {
-        stripIndexFormat = indexFormat;
-    }
+        let { topology, cullFace, frontFace, unclippedDepth } = reactive(primitive);
 
-    const topology: GPUPrimitiveTopology = primitive?.topology || "triangle-list";
-    const cullMode: GPUCullMode = primitive?.cullFace || "none";
-    const frontFace: GPUFrontFace = primitive?.frontFace || "ccw";
-    const unclippedDepth: boolean = primitive?.unclippedDepth || false;
+        //
+        const gpuPrimitive: GPUPrimitiveState = {
+            topology: topology ?? "triangle-list",
+            stripIndexFormat: (topology === "triangle-strip" || topology === "line-strip") ? indexFormat : undefined,
+            frontFace: frontFace ?? "ccw",
+            cullMode: cullFace ?? "none",
+            unclippedDepth: unclippedDepth ?? false,
+        };
 
-    //
-    const gpuPrimitive: GPUPrimitiveState = {
-        topology,
-        stripIndexFormat,
-        frontFace,
-        cullMode,
-        unclippedDepth,
-    };
+        return gpuPrimitive;
+    });
 
-    return gpuPrimitive;
+    return result.value;
 }
+const defaultGPUPrimitiveState: GPUPrimitiveState = { topology: "triangle-list", cullMode: "none", frontFace: "ccw", }
 
 function getGPUMultisampleState(multisampleState?: MultisampleState, sampleCount?: 4)
 {
