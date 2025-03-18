@@ -1,6 +1,6 @@
 import { ChainMap, ComputedRef, VertexAttributes, VertexState, computed } from "@feng3d/render-api";
 import { getGPUShaderModule } from "./getGPUShaderModule";
-import { getNGPUVertexBuffers } from "./getNGPUVertexBuffers";
+import { getGPUVertexBufferLayouts } from "./getNGPUVertexBuffers";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
 
 /**
@@ -18,7 +18,7 @@ export function getNGPUVertexState(device: GPUDevice, vertexState: VertexState, 
     result = computed(() =>
     {
         const vertexEntryFunctionInfo = getVertexEntryFunctionInfo(vertexState);
-        const { vertexBufferLayouts } = getNGPUVertexBuffers(vertexState, vertices);
+        const vertexBufferLayouts = getGPUVertexBufferLayouts(vertexState, vertices);
 
         const gpuVertexState: GPUVertexState = {
             module: getGPUShaderModule(device, vertexState.code),

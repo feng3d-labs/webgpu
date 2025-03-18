@@ -12,7 +12,6 @@ import { getGPURenderTimestampQuery } from "./caches/getGPURenderTimestampQuery"
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGBuffer } from "./caches/getIGPUBuffer";
 import { getNGPURenderPipeline } from "./caches/getNGPURenderPipeline";
-import { getNGPUVertexBuffers } from "./caches/getNGPUVertexBuffers";
 import { getRealGPUBindGroup } from "./const";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
@@ -26,6 +25,7 @@ import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
 
 declare global
 {
@@ -528,7 +528,7 @@ export class WebGPUBase
         });
 
         //
-        const { vertexBuffers } = getNGPUVertexBuffers(pipeline.vertex, vertices)
+        const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
         vertexBuffers?.forEach((vertexBuffer, index) =>
         {
             const buffer = getGBuffer(vertexBuffer.data);

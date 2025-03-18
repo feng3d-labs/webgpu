@@ -1,7 +1,19 @@
-import { VertexState, VertexAttributes, vertexFormatMap } from "@feng3d/render-api";
+import { ChainMap, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
+
+export function getGPUVertexBufferLayouts(vertexState: VertexState, vertices: VertexAttributes)
+{
+    const { vertexBufferLayouts } = getVertexBuffersBuffers(vertexState, vertices);
+    return vertexBufferLayouts;
+}
+
+export function getNVertexBuffers(vertexState: VertexState, vertices: VertexAttributes)
+{
+    const { vertexBuffers } = getVertexBuffersBuffers(vertexState, vertices);
+    return vertexBuffers;
+}
 
 /**
  * 从顶点属性信息与顶点数据中获取顶点缓冲区布局数组以及顶点缓冲区数组。
@@ -9,8 +21,11 @@ import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
  * @param vertices 顶点数据。
  * @returns 顶点缓冲区布局数组以及顶点缓冲区数组。
  */
-export function getNGPUVertexBuffers(vertexState: VertexState, vertices: VertexAttributes)
+function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttributes)
 {
+    let result = _map.get([vertexState, vertices]);
+    if (result) return result;
+
     const vertexEntryFunctionInfo = getVertexEntryFunctionInfo(vertexState);
 
     const vertexBufferLayouts: GPUVertexBufferLayout[] = [];
@@ -83,5 +98,10 @@ export function getNGPUVertexBuffers(vertexState: VertexState, vertices: VertexA
         (vertexBufferLayouts[index].attributes as Array<GPUVertexAttribute>).push({ shaderLocation, offset: attributeOffset, format });
     });
 
-    return { vertexBufferLayouts, vertexBuffers };
+    result = { vertexBufferLayouts, vertexBuffers };
+    _map.set([vertexState, vertices], result);
+
+    return result;
 }
+
+const _map = new ChainMap<[VertexState, VertexAttributes], { vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: NVertexBuffer[] }>();
