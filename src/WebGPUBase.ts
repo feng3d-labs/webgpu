@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, FragmentState, GBuffer, OcclusionQuery, PrimitiveState, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, FragmentState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -12,6 +12,7 @@ import { getGPURenderTimestampQuery } from "./caches/getGPURenderTimestampQuery"
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGBuffer } from "./caches/getIGPUBuffer";
 import { getNGPURenderPipeline } from "./caches/getNGPURenderPipeline";
+import { getNGPUVertexState } from "./caches/getNGPUVertexState";
 import { getRealGPUBindGroup } from "./const";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
@@ -20,7 +21,6 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit } from "./eventnames";
-import { NVertexBuffer } from "./internal/NGPUVertexBuffer";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
@@ -46,11 +46,7 @@ declare global
             setBindGroupCommands: Array<any>;
         }>;
         _renderObjectCommandMap: ChainMap<[string, RenderObject], Array<any>>;
-        _renderPipelineMap: ChainMap<[RenderPipeline, string, VertexAttributes, GPUIndexFormat], {
-            pipeline: ComputedRef<GPURenderPipeline>;
-            vertexBuffers: NVertexBuffer[];
-            _version: number;
-        }>;
+        _renderPipelineMap: ChainMap<[RenderPipeline, string, VertexAttributes, GPUIndexFormat], ComputedRef<GPURenderPipeline>>;
         _fragmentStateMap: ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>
     }
 }
@@ -487,10 +483,10 @@ export class WebGPUBase
         const { vertices, indices, draw } = geometry;
 
         //
-        const { pipeline: nPipeline, vertexBuffers } = getNGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indices);
+        const nPipeline = getNGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indices);
 
         //
-        passEncoder.setPipeline(nPipeline.value);
+        passEncoder.setPipeline(nPipeline);
 
         //
         const stencilReference = getStencilReference(pipeline.depthStencil);
@@ -532,6 +528,7 @@ export class WebGPUBase
         });
 
         //
+        const { vertexBuffers } = getNGPUVertexState(device, pipeline.vertex, vertices);
         vertexBuffers?.forEach((vertexBuffer, index) =>
         {
             const buffer = getGBuffer(vertexBuffer.data);
