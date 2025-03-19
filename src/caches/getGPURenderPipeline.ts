@@ -300,7 +300,18 @@ function getDefaultGPUDepthStencilState(depthStencilFormat: GPUTextureFormat)
     let result = defaultGPUDepthStencilStates[depthStencilFormat];
     if (result) return result;
 
-    result = defaultGPUDepthStencilStates[depthStencilFormat] = { format: depthStencilFormat };
+    result = defaultGPUDepthStencilStates[depthStencilFormat] = {
+        format: depthStencilFormat,
+        depthWriteEnabled: true,
+        depthCompare: "less",
+        stencilFront: {},
+        stencilBack: {},
+        stencilReadMask: 0xFFFFFFFF,
+        stencilWriteMask: 0xFFFFFFFF,
+        depthBias: 0,
+        depthBiasSlopeScale: 0,
+        depthBiasClamp: 0,
+    };
 
     return result;
 }

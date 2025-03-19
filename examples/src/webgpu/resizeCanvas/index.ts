@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
+import { RenderPassDescriptor, Submit, RenderObject, reactive } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import redFragWGSL from "../../shaders/red.frag.wgsl";
@@ -22,7 +22,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
-        geometry:{
+        geometry: {
             draw: { __type__: "DrawVertex", vertexCount: 3 },
         }
     };
@@ -34,7 +34,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         // 画布尺寸发生变化时更改渲染通道附件尺寸。
         const currentWidth = canvas.clientWidth * devicePixelRatio;
         const currentHeight = canvas.clientHeight * devicePixelRatio;
-        renderPassDescriptor.attachmentSize = { width: currentWidth, height: currentHeight };
+        reactive(renderPassDescriptor).attachmentSize = { width: currentWidth, height: currentHeight };
 
         const data: Submit = {
             commandEncoders: [

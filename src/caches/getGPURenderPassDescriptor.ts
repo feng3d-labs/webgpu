@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CanvasTexture, ChainMap, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
+import { CanvasTexture, ChainMap, reactive, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUTexture_resize } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
@@ -340,7 +340,7 @@ function updateAttachmentSize(renderPass: RenderPassDescriptor)
     if (!renderPass.attachmentSize)
     {
         const textureSize = getTextureSize(attachmentTextures[0]);
-        renderPass.attachmentSize = { width: textureSize[0], height: textureSize[1] };
+        reactive(renderPass).attachmentSize = { width: textureSize[0], height: textureSize[1] };
     }
     attachmentTextures.forEach((v) => setTextureSize(v, renderPass.attachmentSize));
 }
