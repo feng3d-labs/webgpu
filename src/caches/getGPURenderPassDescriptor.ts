@@ -1,4 +1,4 @@
-import { CanvasTexture, ChainMap, computed, ComputedRef, reactive, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
+import { CanvasTexture, ChainMap, computed, ComputedRef, reactive, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { NGPURenderPassColorAttachment } from "../internal/internal";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
@@ -317,14 +317,6 @@ function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttac
             view = getMultisampleTextureView(view.texture, sampleCount);
         }
 
-        //
-        attachment.view = getGPUTextureView(device, view);
-        attachment.resolveTarget = getGPUTextureView(device, resolveTarget);
-        attachment.depthSlice = depthSlice;
-        attachment.clearValue = clearValue;
-        attachment.loadOp = loadOp ?? "clear";
-        attachment.storeOp = storeOp ?? "store";
-
         // 更新纹理尺寸
         computed(() =>
         {
@@ -336,7 +328,17 @@ function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttac
             // 执行
             setTextureSize(view.texture, descriptor.attachmentSize);
             resolveTarget && setTextureSize(resolveTarget.texture, descriptor.attachmentSize);
+
+            // 更改纹理尺寸将会销毁重新创建纹理，需要重新获取view。
+            attachment.view = getGPUTextureView(device, view);
+            attachment.resolveTarget = getGPUTextureView(device, resolveTarget);
         }).value;
+
+        //
+        attachment.depthSlice = depthSlice;
+        attachment.clearValue = clearValue;
+        attachment.loadOp = loadOp ?? "clear";
+        attachment.storeOp = storeOp ?? "store";
 
         return attachment;
     });
