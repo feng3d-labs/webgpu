@@ -229,12 +229,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kTextureMipLevels = 4;
     const kTextureBaseSize = 16;
 
-    const checkerboard: Texture = {
-        format: "rgba8unorm",
-        size: [kTextureBaseSize, kTextureBaseSize],
-        mipLevelCount: 4,
-    };
-
     const kColorForLevel = [
         [255, 255, 255, 255],
         [30, 136, 229, 255], // blue
@@ -264,7 +258,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             size: [size, size]
         });
     }
-    checkerboard.sources = writeTextures;
+    const checkerboard: Texture = {
+        format: "rgba8unorm",
+        size: [kTextureBaseSize, kTextureBaseSize],
+        mipLevelCount: 4,
+        sources: writeTextures
+    };
 
     //
     // "Debug" view of the actual texture contents
