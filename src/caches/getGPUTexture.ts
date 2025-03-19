@@ -1,7 +1,5 @@
-import { anyEmitter } from "@feng3d/event";
-import { ChainMap, computed, ComputedRef, reactive, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSize, TextureSource } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
-import { GPUTexture_destroy, IGPUTexture_resize, webgpuEvents } from "../eventnames";
+import { ChainMap, computed, ComputedRef, reactive, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from "@feng3d/render-api";
+import { webgpuEvents } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
@@ -38,6 +36,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
         }
 
         const texture = textureLike as MultisampleTexture;
+
         // 监听
         const r_texture = reactive(texture);
         r_texture.format;
@@ -86,7 +85,8 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
             usage,
             viewFormats,
         });
-        textureMap.set(texture, gpuTexture);
+        textureMap.get([device, textureLike])?.destroy(); // 销毁旧的纹理
+        textureMap.set([device, textureLike], gpuTexture);
 
         // 初始化纹理内容
         updateSources(texture);
@@ -98,44 +98,6 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
             generateMipmap(device, gpuTexture);
         }
 
-        // 监听纹理尺寸发生变化
-        const resize = (newValue: TextureSize, oldValue: TextureSize) =>
-        {
-            if (!!newValue && !!oldValue)
-            {
-                if (newValue[0] === oldValue[0]
-                    && newValue[1] === oldValue[1]
-                    && (newValue[2] || 1) === (oldValue[2] || 1)
-                )
-                {
-                    return;
-                }
-            }
-
-            gpuTexture.destroy();
-            //
-            anyEmitter.emit(texture, IGPUTexture_resize);
-        };
-        watcher.watch(texture, "size", resize);
-
-        //
-        ((oldDestroy) =>
-        {
-            gpuTexture.destroy = () =>
-            {
-                oldDestroy.apply(gpuTexture);
-                //
-                getGPUTextureMap.delete(getGPUTextureKey);
-                //
-                watcher.unwatch(texture, "size", resize);
-
-                // 派发销毁事件
-                anyEmitter.emit(gpuTexture, GPUTexture_destroy);
-
-                return undefined;
-            };
-        })(gpuTexture.destroy);
-
         return gpuTexture;
     });
     getGPUTextureMap.set(getGPUTextureKey, result);
@@ -146,7 +108,7 @@ let autoIndex = 0;
 type GetGPUTextureMap = [device: GPUDevice, texture: TextureLike];
 const getGPUTextureMap = new ChainMap<GetGPUTextureMap, ComputedRef<GPUTexture>>;
 
-const textureMap = new WeakMap<Texture, GPUTexture>();
+const textureMap = new ChainMap<[device: GPUDevice, texture: Texture], GPUTexture>();
 
 /**
  * 更新纹理

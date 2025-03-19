@@ -1,7 +1,4 @@
-import { anyEmitter } from "@feng3d/event";
-import { CanvasTexture, ChainMap, reactive, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
-import { IGPUTexture_resize } from "../eventnames";
+import { CanvasTexture, ChainMap, computed, ComputedRef, reactive, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { NGPURenderPassColorAttachment } from "../internal/internal";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
@@ -18,108 +15,53 @@ import { getTextureSize } from "./getTextureSize";
 export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: RenderPassDescriptor): GPURenderPassDescriptor
 {
     const getGPURenderPassDescriptorKey: GetGPURenderPassDescriptorKey = [device, descriptor];
-    let renderPassDescriptor = getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptorKey);
-    if (renderPassDescriptor)
+    let result = getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptorKey);
+    if (result) return result.value;
+
+    const renderPassDescriptor: GPURenderPassDescriptor = {} as any;
+
+    result = computed(() =>
     {
-        // 执行更新函数。
-        (renderPassDescriptor["_updates"] as Function[]).forEach((v) => v());
+        // // 更新渲染通道附件尺寸，使得附件上纹理尺寸一致。
+        // updateAttachmentSize(descriptor);
+
+        // 获取颜色附件完整描述列表。
+        renderPassDescriptor.colorAttachments = getIGPURenderPassColorAttachments(device, descriptor);
+
+        // 获取深度模板附件
+        const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(descriptor.depthStencilAttachment, descriptor.attachmentSize, descriptor.sampleCount);
+
+        // // 更新尺寸
+        // computed(() =>
+        // {
+        //     // 监听
+        //     const r_descriptor = reactive(descriptor);
+        //     r_descriptor.attachmentSize.width;
+        //     r_descriptor.attachmentSize.height;
+
+        //     // 执行
+        //     setIGPURenderPassAttachmentSize(colorAttachments, depthStencilAttachment, descriptor.attachmentSize);
+        // }).value;
+
+        if (depthStencilAttachment)
+        {
+            const v = depthStencilAttachment;
+
+            renderPassDescriptor.depthStencilAttachment = {
+                ...v,
+                view: getGPUTextureView(device, v.view),
+            };
+        }
 
         return renderPassDescriptor;
-    }
-
-    renderPassDescriptor = { colorAttachments: [] };
-    getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptorKey, renderPassDescriptor);
-
-    const _updates: Function[] = renderPassDescriptor["_updates"] = [];
-
-    // 更新渲染通道附件尺寸，使得附件上纹理尺寸一致。
-    updateAttachmentSize(descriptor);
-
-    // 获取颜色附件完整描述列表。
-    const colorAttachments = getIGPURenderPassColorAttachments(descriptor.colorAttachments, descriptor.sampleCount);
-
-    // 获取深度模板附件
-    const depthStencilAttachment = getIGPURenderPassDepthStencilAttachment(descriptor.depthStencilAttachment, descriptor.attachmentSize, descriptor.sampleCount);
-
-    // 附件尺寸变化时，渲染通道描述失效。
-    const watchProperty = { attachmentSize: { width: 0, height: 0 } }; // 被监听的属性
-    watcher.watchobject(descriptor, watchProperty, () =>
-    {
-        // 由于深度纹理与多重采样纹理可能是引擎自动生成的，这部分纹理需要更新。
-        setIGPURenderPassAttachmentSize(colorAttachments, depthStencilAttachment, descriptor.attachmentSize);
     });
+    getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptorKey, result);
 
-    colorAttachments?.forEach((v, i) =>
-    {
-        if (!v) return;
-
-        const { clearValue, loadOp, storeOp } = v;
-
-        const attachment: GPURenderPassColorAttachment = {
-            ...v,
-            view: undefined,
-            resolveTarget: undefined,
-            clearValue,
-            loadOp,
-            storeOp,
-        };
-
-        const updateView = () =>
-        {
-            attachment.view = getGPUTextureView(device, v.view);
-        };
-        updateView();
-
-        //
-        if ((v.view.texture as CanvasTexture).context)
-        {
-            _updates.push(updateView);
-        }
-        anyEmitter.on(v.view.texture, IGPUTexture_resize, updateView);
-
-        //
-        if (v.resolveTarget)
-        {
-            const updateResolveTarget = () =>
-            {
-                attachment.resolveTarget = getGPUTextureView(device, v.resolveTarget);
-            };
-            updateResolveTarget();
-            //
-            if ((v.resolveTarget?.texture as CanvasTexture)?.context)
-            {
-                _updates.push(updateResolveTarget);
-            }
-            anyEmitter.on(v.resolveTarget.texture, IGPUTexture_resize, updateResolveTarget);
-        }
-
-        //
-        renderPassDescriptor.colorAttachments[i] = attachment;
-    });
-
-    if (depthStencilAttachment)
-    {
-        const v = depthStencilAttachment;
-
-        renderPassDescriptor.depthStencilAttachment = {
-            ...v,
-            view: undefined,
-        };
-
-        const updateView = () =>
-        {
-            renderPassDescriptor.depthStencilAttachment.view = getGPUTextureView(device, v.view);
-        };
-        updateView();
-
-        anyEmitter.on(v.view.texture, IGPUTexture_resize, updateView);
-    }
-
-    return renderPassDescriptor;
+    return result.value;
 }
 
 type GetGPURenderPassDescriptorKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
-const getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, GPURenderPassDescriptor>;
+const getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, ComputedRef<GPURenderPassDescriptor>>;
 
 /**
  * 获取渲染通道附件上的纹理描述列表。
@@ -185,11 +127,11 @@ function setTextureSize(texture: TextureLike, attachmentSize: { width: number, h
     {
         if (texture.size?.[2])
         {
-            texture.size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
+            reactive(texture).size = [attachmentSize.width, attachmentSize.height, texture.size[2]];
         }
         else
         {
-            texture.size = [attachmentSize.width, attachmentSize.height];
+            reactive(texture).size = [attachmentSize.width, attachmentSize.height];
         }
     }
 }
@@ -302,32 +244,108 @@ function getIGPURenderPassDepthStencilAttachment(depthStencilAttachment: RenderP
  * @param sampleCount 多重采样次数。
  * @returns 颜色附件完整描述列表。
  */
-function getIGPURenderPassColorAttachments(colorAttachments: readonly RenderPassColorAttachment[], sampleCount: 4)
+function getIGPURenderPassColorAttachments(device: GPUDevice, descriptor: RenderPassDescriptor)
 {
-    const gpuColorAttachments: NGPURenderPassColorAttachment[] = colorAttachments.map((v) =>
+    const getIGPURenderPassColorAttachmentsKey: GetIGPURenderPassColorAttachmentsKey = [device, descriptor];
+    let result = getIGPURenderPassColorAttachmentsMap.get(getIGPURenderPassColorAttachmentsKey);
+    if (result) return result.value;
+
+    const gpuColorAttachments: GPURenderPassColorAttachment[] = [];
+    result = computed(() =>
     {
-        if (!v) return undefined;
+        // 监听
+        const r_descriptor = reactive(descriptor);
+        r_descriptor.colorAttachments.forEach((v) => v);
 
-        let view = v.view;
+        // 执行
+        const { colorAttachments } = descriptor;
+        gpuColorAttachments.length = 0;
+        colorAttachments.forEach((v) =>
+        {
+            if (!v) return;
+
+            const attachment = getGPURenderPassColorAttachment(device, v, descriptor);
+
+            gpuColorAttachments.push(attachment);
+        });
+
+        return gpuColorAttachments;
+    });
+    getIGPURenderPassColorAttachmentsMap.set(getIGPURenderPassColorAttachmentsKey, result);
+
+    return result.value;
+}
+type GetIGPURenderPassColorAttachmentsKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
+const getIGPURenderPassColorAttachmentsMap = new ChainMap<GetIGPURenderPassColorAttachmentsKey, ComputedRef<GPURenderPassColorAttachment[]>>;
+
+/**
+ * 获取颜色附件完整描述。
+ */
+function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor)
+{
+    const getGPURenderPassColorAttachmentKey: GetGPURenderPassColorAttachmentKey = [device, renderPassColorAttachment, descriptor];
+    let result = getGPURenderPassColorAttachmentMap.get(getGPURenderPassColorAttachmentKey);
+    if (result) return result.value;
+
+    const attachment: GPURenderPassColorAttachment = {} as any;
+    result = computed(() =>
+    {
+        // 监听
+        const r_renderPassColorAttachment = reactive(renderPassColorAttachment);
+        r_renderPassColorAttachment.view;
+        r_renderPassColorAttachment.depthSlice;
+        r_renderPassColorAttachment.clearValue;
+        r_renderPassColorAttachment.loadOp;
+        r_renderPassColorAttachment.storeOp;
+
+        //
+        const { depthSlice, clearValue, loadOp, storeOp } = renderPassColorAttachment;
+        let view = renderPassColorAttachment.view;
+
+        // 初始化附件尺寸。
+        if (!descriptor.attachmentSize)
+        {
+            const textureSize = getTextureSize(view.texture);
+            reactive(descriptor).attachmentSize = { width: textureSize[0], height: textureSize[1] };
+        }
+
+        const { sampleCount } = descriptor;
         let resolveTarget: TextureView;
-
         if (sampleCount)
         {
             resolveTarget = view;
             view = getMultisampleTextureView(view.texture, sampleCount);
         }
 
-        return {
-            view,
-            resolveTarget,
-            clearValue: v.clearValue,
-            loadOp: v.loadOp ?? "clear",
-            storeOp: v.storeOp ?? "store",
-        };
-    });
+        //
+        attachment.view = getGPUTextureView(device, view);
+        attachment.resolveTarget = getGPUTextureView(device, resolveTarget);
+        attachment.depthSlice = depthSlice;
+        attachment.clearValue = clearValue;
+        attachment.loadOp = loadOp ?? "clear";
+        attachment.storeOp = storeOp ?? "store";
 
-    return gpuColorAttachments;
+        // 更新纹理尺寸
+        computed(() =>
+        {
+            // 监听
+            const r_descriptor = reactive(descriptor);
+            r_descriptor.attachmentSize.width;
+            r_descriptor.attachmentSize.height;
+
+            // 执行
+            setTextureSize(view.texture, descriptor.attachmentSize);
+            resolveTarget && setTextureSize(resolveTarget.texture, descriptor.attachmentSize);
+        }).value;
+
+        return attachment;
+    });
+    getGPURenderPassColorAttachmentMap.set(getGPURenderPassColorAttachmentKey, result);
+
+    return result.value;
 }
+type GetGPURenderPassColorAttachmentKey = [device: GPUDevice, renderPassColorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor];
+const getGPURenderPassColorAttachmentMap = new ChainMap<GetGPURenderPassColorAttachmentKey, ComputedRef<GPURenderPassColorAttachment>>;
 
 /**
  * 更新渲染通道附件尺寸，使得附件上纹理尺寸一致。

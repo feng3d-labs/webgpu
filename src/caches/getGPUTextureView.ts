@@ -1,10 +1,10 @@
-import { anyEmitter } from "@feng3d/event";
 import { ChainMap, computed, ComputedRef, reactive, Texture, TextureView } from "@feng3d/render-api";
-import { GPUTexture_destroy, GPUTextureView_destroy } from "../eventnames";
 import { getGPUTexture } from "./getGPUTexture";
 
 export function getGPUTextureView(device: GPUDevice, view: TextureView)
 {
+    if (!view) return undefined;
+
     const getGPUTextureViewKey: GetGPUTextureViewKey = [device, view];
     let result = getGPUTextureViewMap.get(getGPUTextureViewKey);
     if (result) return result.value;
@@ -21,12 +21,6 @@ export function getGPUTextureView(device: GPUDevice, view: TextureView)
         const textureView = gpuTexture.createView({
             ...r_view,
             dimension: r_view.dimension ?? (texture as Texture).dimension,
-        });
-        // 销毁纹理时清除对应的纹理视图。
-        anyEmitter.once(gpuTexture, GPUTexture_destroy, () =>
-        {
-            getGPUTextureViewMap.delete(getGPUTextureViewKey);
-            anyEmitter.emit(textureView, GPUTextureView_destroy);
         });
 
         return textureView;

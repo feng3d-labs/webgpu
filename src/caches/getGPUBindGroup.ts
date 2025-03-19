@@ -1,10 +1,8 @@
-import { anyEmitter } from "@feng3d/event";
 import { BindingResource, BindingResources, BufferBinding, BufferBindingInfo, CanvasTexture, ChainMap, Sampler, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { ResourceType } from "wgsl_reflect";
 import { getRealGPUBindGroup } from "../const";
 import { VideoTexture } from "../data/VideoTexture";
-import { GPUTextureView_destroy, IGPUSampler_changed } from "../eventnames";
 import { ExternalSampledTextureType } from "../types/TextureType";
 import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
 import { updateBufferBinding } from "../utils/updateBufferBinding";
@@ -85,8 +83,6 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
             updateResource = () =>
             {
                 entry.resource = getGPUTextureView(device, bindingResources[name] as TextureView);
-
-                anyEmitter.once(entry.resource, GPUTextureView_destroy, onResourceChanged);
             };
 
             if (((bindingResources[name] as TextureView).texture as CanvasTexture).context)
@@ -99,7 +95,6 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
             updateResource = () =>
             {
                 entry.resource = getGPUSampler(device, bindingResources[name] as Sampler);
-                anyEmitter.once(bindingResources[name] as Sampler, IGPUSampler_changed, onResourceChanged);
             };
         }
 
