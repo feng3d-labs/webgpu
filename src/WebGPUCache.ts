@@ -93,7 +93,8 @@ export class WebGPUCache extends WebGPUBase
         const device = this._device;
         const _commands = passEncoder["_commands"] as any[];
 
-        const commands = device._renderObjectCommandMap.get([renderPassFormat._key, renderObject]);
+        const renderObjectCommandKey: RenderObjectCommandKey = [device, renderPassFormat._key, renderObject];
+        const commands = renderObjectCommandMap.get(renderObjectCommandKey);
         if (commands)
         {
             commands.forEach((v) => _commands.push(v));
@@ -105,12 +106,12 @@ export class WebGPUCache extends WebGPUBase
 
         super.runRenderObject(passEncoder, renderPassFormat, renderObject);
 
-        device._renderObjectCommandMap.set([renderPassFormat._key, renderObject], _commands.slice(start));
+        renderObjectCommandMap.set(renderObjectCommandKey, _commands.slice(start));
 
         // 
         const onchanged = () =>
         {
-            device._renderObjectCommandMap.delete([renderPassFormat._key, renderObject]);
+            renderObjectCommandMap.delete(renderObjectCommandKey);
             //
             renderObject._version = ~~renderObject._version + 1;
             watcher.unwatch(renderObject.pipeline, '_version', onchanged);
@@ -118,6 +119,8 @@ export class WebGPUCache extends WebGPUBase
         watcher.watch(renderObject.pipeline, '_version', onchanged);
     }
 }
+type RenderObjectCommandKey = [device: GPUDevice, renderPassFormatKey: string, renderObject: RenderObject];
+const renderObjectCommandMap = new ChainMap<RenderObjectCommandKey, Array<any>>();
 
 class GPURenderPassRecord implements GPURenderPassEncoder
 {

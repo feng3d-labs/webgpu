@@ -1,4 +1,4 @@
-import { UnReadonly } from "@feng3d/render-api";
+import { ChainMap, UnReadonly } from "@feng3d/render-api";
 import { ComputePipeline } from "../data/ComputePipeline";
 import { ComputeStage } from "../data/ComputeStage";
 import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
@@ -7,7 +7,8 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 export function getGPUComputePipeline(device: GPUDevice, computePipeline: ComputePipeline)
 {
-    let pipeline = device._computePipelineMap.get(computePipeline);
+    const getGPUComputePipelineKey: GetGPUComputePipeline = [device, computePipeline];
+    let pipeline = _computePipelineMap.get(getGPUComputePipelineKey);
     if (pipeline) return pipeline;
 
     const computeStage = computePipeline.compute;
@@ -36,8 +37,10 @@ export function getGPUComputePipeline(device: GPUDevice, computePipeline: Comput
             module: getGPUShaderModule(device, computeStage.code),
         },
     });
-    device._computePipelineMap.set(computePipeline, pipeline);
+    _computePipelineMap.set(getGPUComputePipelineKey, pipeline);
 
     return pipeline;
 }
 
+type GetGPUComputePipeline = [device: GPUDevice, computePipeline: ComputePipeline];
+const _computePipelineMap = new ChainMap<GetGPUComputePipeline, GPUComputePipeline>;

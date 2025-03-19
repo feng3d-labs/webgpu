@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BlendState, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, FragmentState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly } from "@feng3d/render-api";
+import { BlendState, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -16,7 +16,6 @@ import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
 import { getRealGPUBindGroup } from "./const";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
-import { ComputePipeline } from "./data/ComputePipeline";
 import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
@@ -26,22 +25,6 @@ import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
-
-declare global
-{
-    interface GPUDevice
-    {
-        _computePipelineMap: WeakMap<ComputePipeline, GPUComputePipeline>;
-        _samplerMap: WeakMap<Sampler, GPUSampler>;
-        _textureViewMap: WeakMap<TextureView, GPUTextureView>;
-        _textureMap: WeakMap<Texture, GPUTexture>;
-        _renderPassDescriptorMap: WeakMap<RenderPassDescriptor, GPURenderPassDescriptor>;
-        _shaderMap: Map<string, GPUShaderModule>;
-        _pipelineLayoutMap: Map<string, GPUPipelineLayout>;
-        _renderObjectCommandMap: ChainMap<[string, RenderObject], Array<any>>;
-        _fragmentStateMap: ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>;
-    }
-}
 
 /**
  * WebGPU 基础类
@@ -77,19 +60,6 @@ export class WebGPUBase
     set device(v)
     {
         this._device = v;
-        //
-        if (this._device)
-        {
-            this._device._renderObjectCommandMap ??= new ChainMap();
-            this._device._fragmentStateMap ??= new ChainMap();
-            this._device._computePipelineMap ??= new WeakMap();
-            this._device._samplerMap ??= new WeakMap();
-            this._device._textureMap ??= new WeakMap();
-            this._device._textureViewMap ??= new WeakMap();
-            this._device._renderPassDescriptorMap ??= new WeakMap();
-            this._device._pipelineLayoutMap ??= new Map();
-            this._device._shaderMap ??= new Map();
-        }
     }
     protected _device: GPUDevice;
 

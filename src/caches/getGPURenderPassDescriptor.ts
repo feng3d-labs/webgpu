@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CanvasTexture, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
+import { CanvasTexture, ChainMap, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUTexture_resize } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
@@ -17,7 +17,8 @@ import { getTextureSize } from "./getTextureSize";
  */
 export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: RenderPassDescriptor): GPURenderPassDescriptor
 {
-    let renderPassDescriptor = device._renderPassDescriptorMap.get(descriptor);
+    const getGPURenderPassDescriptor: GetGPURenderPassDescriptor = [device, descriptor];
+    let renderPassDescriptor = getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptor);
     if (renderPassDescriptor)
     {
         // 执行更新函数。
@@ -27,7 +28,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: Render
     }
 
     renderPassDescriptor = { colorAttachments: [] };
-    device._renderPassDescriptorMap.set(descriptor, renderPassDescriptor);
+    getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptor, renderPassDescriptor);
 
     const _updates: Function[] = renderPassDescriptor["_updates"] = [];
 
@@ -116,6 +117,9 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: Render
 
     return renderPassDescriptor;
 }
+
+type GetGPURenderPassDescriptor = [device: GPUDevice, descriptor: RenderPassDescriptor];
+const getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptor, GPURenderPassDescriptor>;
 
 /**
  * 获取渲染通道附件上的纹理描述列表。

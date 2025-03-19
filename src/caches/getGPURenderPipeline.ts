@@ -238,7 +238,8 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
 
     const colorAttachmentsKey = colorAttachments.toLocaleString();
 
-    let gpuFragmentState = device._fragmentStateMap.get([fragmentState, colorAttachmentsKey]);
+    const getGPUFragmentStateKey: GetGPUFragmentStateKey = [device, fragmentState, colorAttachmentsKey];
+    let gpuFragmentState = getGPUFragmentStateMap.get(getGPUFragmentStateKey);
     if (gpuFragmentState) return gpuFragmentState.value;
 
     gpuFragmentState = computed(() =>
@@ -259,10 +260,12 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
         } as GPUFragmentState;
     });
 
-    device._fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
+    getGPUFragmentStateMap.set(getGPUFragmentStateKey, gpuFragmentState);
 
     return gpuFragmentState.value;
 }
+type GetGPUFragmentStateKey = [device: GPUDevice, fragmentState: FragmentState, colorAttachmentsKey: string];
+const getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, ComputedRef<GPUFragmentState>>;
 
 function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]): GPUColorTargetState[]
 {

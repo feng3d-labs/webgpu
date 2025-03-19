@@ -1,3 +1,4 @@
+import { ChainMap } from "@feng3d/render-api";
 import { getIGPUBindGroupLayoutEntryMap, GPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
 
 declare global
@@ -49,7 +50,8 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string
         if (shader.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n` + shader.fragment;
     }
 
-    let gpuPipelineLayout = device._pipelineLayoutMap.get(shaderKey);
+    const getGPUPipelineLayoutKey: GetGPUPipelineLayoutKey = [device, shaderKey];
+    let gpuPipelineLayout = getGPUPipelineLayoutMap.get(getGPUPipelineLayoutKey);
     if (gpuPipelineLayout) return gpuPipelineLayout;
 
     let entryMap: GPUBindGroupLayoutEntryMap;
@@ -147,10 +149,12 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string
         gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
     }
 
-    device._pipelineLayoutMap.set(shaderKey, gpuPipelineLayout);
+    getGPUPipelineLayoutMap.set(getGPUPipelineLayoutKey, gpuPipelineLayout);
 
     return gpuPipelineLayout;
 }
+type GetGPUPipelineLayoutKey = [device: GPUDevice, shaderKey: string];
+const getGPUPipelineLayoutMap = new ChainMap<GetGPUPipelineLayoutKey, GPUPipelineLayout>;
 
 const bindGroupLayoutMap: { [key: string]: GPUBindGroupLayout } = {};
 const pipelineLayoutDescriptorMap: { [key: string]: GPUPipelineLayout } = {};

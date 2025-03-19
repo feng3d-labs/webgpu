@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSize, TextureSource } from "@feng3d/render-api";
+import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSize, TextureSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
@@ -29,7 +29,8 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
 
     const texture = textureLike as Texture;
 
-    gpuTexture = device._textureMap.get(texture);
+    const getGPUTextureKey: GetGPUTextureMap = [device, texture];
+    gpuTexture = getGPUTextureMap.get(getGPUTextureKey);
     if (gpuTexture) return gpuTexture;
 
     if (!autoCreate) return null;
@@ -72,7 +73,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
             viewFormats,
         });
 
-        device._textureMap.set(texture, gpuTexture);
+        getGPUTextureMap.set(getGPUTextureKey, gpuTexture);
     };
     createTexture();
 
@@ -229,7 +230,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
         {
             oldDestroy.apply(gpuTexture);
             //
-            device._textureMap.delete(texture);
+            getGPUTextureMap.delete(getGPUTextureKey);
             //
             watcher.unwatch(texture, "size", resize);
             watcher.unwatch(texture, "sources", updateSources);
@@ -245,6 +246,8 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
     return gpuTexture;
 }
 let autoIndex = 0;
+type GetGPUTextureMap = [device: GPUDevice, texture: Texture];
+const getGPUTextureMap = new ChainMap<GetGPUTextureMap, GPUTexture>;
 
 function getGPUTextureDimension(dimension: TextureDimension)
 {

@@ -1,11 +1,12 @@
 import { anyEmitter } from "@feng3d/event";
-import { Sampler } from "@feng3d/render-api";
+import { ChainMap, Sampler } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { IGPUSampler_changed } from "../eventnames";
 
 export function getGPUSampler(device: GPUDevice, sampler: Sampler)
 {
-    let gSampler = device._samplerMap.get(sampler);
+    const getGPUSamplerKey: GetGPUSamplerKey = [device, sampler];
+    let gSampler = getGPUSamplerMap.get(getGPUSamplerKey);
     if (gSampler) return gSampler;
 
     // 处理默认值
@@ -18,20 +19,22 @@ export function getGPUSampler(device: GPUDevice, sampler: Sampler)
 
     //
     gSampler = device.createSampler(sampler);
-    device._samplerMap.set(sampler, gSampler);
+    getGPUSamplerMap.set(getGPUSamplerKey, gSampler);
 
     //
     watcher.watchobject(sampler, defaultSampler, () =>
     {
         // 移除监听，删除缓存
         watcher.unwatchobject(sampler, defaultSampler);
-        device._samplerMap.delete(sampler);
+        getGPUSamplerMap.delete(getGPUSamplerKey);
         //
         anyEmitter.emit(sampler, IGPUSampler_changed);
     });
 
     return gSampler;
 }
+type GetGPUSamplerKey = [device: GPUDevice, sampler: Sampler];
+const getGPUSamplerMap = new ChainMap<GetGPUSamplerKey, GPUSampler>;
 
 /**
  * GPU采样器默认值。

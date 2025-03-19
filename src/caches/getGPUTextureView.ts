@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CanvasTexture, Texture, TextureView } from "@feng3d/render-api";
+import { CanvasTexture, ChainMap, Texture, TextureView } from "@feng3d/render-api";
 import { GPUTexture_destroy, GPUTextureView_destroy } from "../eventnames";
 import { getGPUTexture } from "./getGPUTexture";
 
@@ -18,7 +18,8 @@ export function getGPUTextureView(device: GPUDevice, view: TextureView)
     }
 
     //
-    let textureView = device._textureViewMap.get(view);
+    const getGPUTextureViewKey: GetGPUTextureViewKey = [device, view];
+    let textureView = getGPUTextureViewMap.get(getGPUTextureViewKey);
     if (textureView) return textureView;
 
     //
@@ -27,14 +28,16 @@ export function getGPUTextureView(device: GPUDevice, view: TextureView)
     const dimension = view.dimension ?? texture.dimension;
 
     textureView = gpuTexture.createView({ ...view, dimension });
-    device._textureViewMap.set(view, textureView);
+    getGPUTextureViewMap.set(getGPUTextureViewKey, textureView);
     // 销毁纹理时清除对应的纹理视图。
     anyEmitter.once(gpuTexture, GPUTexture_destroy, () =>
     {
-        device._textureViewMap.delete(view);
+        getGPUTextureViewMap.delete(getGPUTextureViewKey);
         anyEmitter.emit(textureView, GPUTextureView_destroy);
     });
 
     return textureView;
 }
 
+type GetGPUTextureViewKey = [device: GPUDevice, view: TextureView];
+const getGPUTextureViewMap = new ChainMap<GetGPUTextureViewKey, GPUTextureView>;
