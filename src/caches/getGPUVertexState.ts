@@ -12,7 +12,8 @@ import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
  */
 export function getGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
 {
-    let result = device._GPUVertexStateMap.get([vertexState, vertices]);
+    const _GPUVertexStateMap_key: [vertexState: VertexState, vertices: VertexAttributes] = [vertexState, vertices];
+    let result = device._GPUVertexStateMap.get(_GPUVertexStateMap_key);
     if (result) return result.value;
 
     result = computed(() =>
@@ -42,7 +43,7 @@ export function getGPUVertexState(device: GPUDevice, vertexState: VertexState, v
 
         return gpuVertexState;
     });
-    device._GPUVertexStateMap.set([vertexState, vertices], result);
+    device._GPUVertexStateMap.set(_GPUVertexStateMap_key, result);
 
     return result.value;
 }
