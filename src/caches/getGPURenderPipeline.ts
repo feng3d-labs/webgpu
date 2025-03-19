@@ -177,6 +177,7 @@ const defaultGPUPrimitiveState: GPUPrimitiveState = { topology: "triangle-list",
 function getGPUMultisampleState(multisampleState?: MultisampleState, sampleCount?: 4)
 {
     if (!sampleCount) return undefined;
+    if (!multisampleState) return defaultGPUMultisampleState;
 
     const result: ComputedRef<GPUMultisampleState> = multisampleState["_cache_GPUMultisampleState_" + sampleCount] ??= computed(() =>
     {
@@ -198,6 +199,7 @@ function getGPUMultisampleState(multisampleState?: MultisampleState, sampleCount
 
     return result.value;
 }
+const defaultGPUMultisampleState: GPUMultisampleState = { count: 4, mask: 0xFFFFFFFF, alphaToCoverageEnabled: false };
 
 /**
  * 获取深度模板阶段完整描述。

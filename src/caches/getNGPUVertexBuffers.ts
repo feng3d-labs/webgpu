@@ -41,7 +41,7 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
     {
         const vertexEntryFunctionInfo = getVertexEntryFunctionInfo(vertexState);
         // 监听
-        const r_vertices = reactive(vertices);
+        const r_vertices = vertices && reactive(vertices);
         vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
         {
             // 跳过内置属性。
