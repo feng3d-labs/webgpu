@@ -1,4 +1,4 @@
-import { TextureLike } from "@feng3d/render-api";
+import { computed, ComputedRef, reactive, TextureLike } from "@feng3d/render-api";
 
 /**
  * 获取纹理格式。
@@ -6,16 +6,31 @@ import { TextureLike } from "@feng3d/render-api";
  * @param texture 纹理。
  * @returns 纹理格式。
  */
-export function getGPUTextureFormat(texture: TextureLike)
+export function getGPUTextureFormat(texture: TextureLike): GPUTextureFormat
 {
     if (!texture) return undefined;
 
-    if ("context" in texture)
+    let result = getGPUTextureFormatMap.get(texture);
+    if (result) return result.value;
+
+    result = computed(() =>
     {
-        const format = texture.context?.configuration?.format || navigator.gpu.getPreferredCanvasFormat();
+        // 监听
+        const r_texture = reactive(texture);
 
-        return format;
-    }
+        // 计算
+        if ("context" in r_texture)
+        {
+            const format = r_texture.context?.configuration?.format || navigator.gpu.getPreferredCanvasFormat();
 
-    return texture.format;
+            return format;
+        }
+
+        return r_texture.format;
+    });
+    getGPUTextureFormatMap.set(texture, result);
+
+    return result.value;
 }
+
+const getGPUTextureFormatMap = new WeakMap<TextureLike, ComputedRef<GPUTextureFormat>>();

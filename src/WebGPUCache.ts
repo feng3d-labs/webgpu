@@ -14,7 +14,7 @@ export class WebGPUCache extends WebGPUBase
     protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderObjects: RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
     {
         const device = this._device;
-        const renderPassObjectsCommandKey: RenderPassObjectsCommandKey = [device, renderPassFormat._key, renderObjects];
+        const renderPassObjectsCommandKey: RenderPassObjectsCommandKey = [device, renderPassFormat, renderObjects];
         let caches = _renderPassObjectsCommandMap.get(renderPassObjectsCommandKey);
         if (!caches)
         {
@@ -51,7 +51,7 @@ export class WebGPUCache extends WebGPUBase
     protected runRenderBundleObjects(bundleEncoder: GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObjects?: RenderObject[])
     {
         const device = this._device;
-        const renderPassObjectsCommandKey: RenderPassObjectsCommandKey = [device, renderPassFormat._key, renderObjects];
+        const renderPassObjectsCommandKey: RenderPassObjectsCommandKey = [device, renderPassFormat, renderObjects];
         let caches = _renderPassObjectsCommandMap.get(renderPassObjectsCommandKey);
         if (!caches)
         {
@@ -93,7 +93,7 @@ export class WebGPUCache extends WebGPUBase
         const device = this._device;
         const _commands = passEncoder["_commands"] as any[];
 
-        const renderObjectCommandKey: RenderObjectCommandKey = [device, renderPassFormat._key, renderObject];
+        const renderObjectCommandKey: RenderObjectCommandKey = [device, renderPassFormat, renderObject];
         const commands = renderObjectCommandMap.get(renderObjectCommandKey);
         if (commands)
         {
@@ -119,7 +119,7 @@ export class WebGPUCache extends WebGPUBase
         watcher.watch(renderObject.pipeline, '_version', onchanged);
     }
 }
-type RenderObjectCommandKey = [device: GPUDevice, renderPassFormatKey: string, renderObject: RenderObject];
+type RenderObjectCommandKey = [device: GPUDevice, renderPassFormat: RenderPassFormat, renderObject: RenderObject];
 const renderObjectCommandMap = new ChainMap<RenderObjectCommandKey, Array<any>>();
 
 class GPURenderPassRecord implements GPURenderPassEncoder
@@ -265,7 +265,7 @@ function arrayEq1(_obj: any, name: string, index: number, args: any[])
     return true;
 }
 
-type RenderPassObjectsCommandKey = [device: GPUDevice, RenderPassFormatKey: string, renderObjects: RenderPassObject[]];
+type RenderPassObjectsCommandKey = [device: GPUDevice, renderPassFormat: RenderPassFormat, renderObjects: RenderPassObject[]];
 const _renderPassObjectsCommandMap = new ChainMap<RenderPassObjectsCommandKey, {
     commands: Array<any>;
     setBindGroupCommands: Array<any>;

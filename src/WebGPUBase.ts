@@ -323,9 +323,9 @@ export class WebGPUBase
     protected runRenderBundle(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
     {
         const device = this._device;
-        const renderBundleMap: ChainMap<[RenderBundle, string], GPURenderBundle> = device["_renderBundleMap"] = device["_renderBundleMap"] || new ChainMap();
         //
-        let gpuRenderBundle: GPURenderBundle = renderBundleMap.get([renderBundleObject, renderPassFormat._key]);
+        const gpuRenderBundleKey: GPURenderBundleKey = [renderBundleObject, renderPassFormat];
+        let gpuRenderBundle = gpuRenderBundleMap.get(gpuRenderBundleKey);
         if (!gpuRenderBundle)
         {
             const descriptor: GPURenderBundleEncoderDescriptor = { ...renderBundleObject.descriptor, ...renderPassFormat };
@@ -336,7 +336,7 @@ export class WebGPUBase
             this.runRenderBundleObjects(renderBundleEncoder, renderPassFormat, renderBundleObject.renderObjects);
 
             gpuRenderBundle = renderBundleEncoder.finish();
-            renderBundleMap.set([renderBundleObject, renderPassFormat._key], gpuRenderBundle);
+            gpuRenderBundleMap.set(gpuRenderBundleKey, gpuRenderBundle);
         }
 
         passEncoder.executeBundles([gpuRenderBundle]);
@@ -555,3 +555,6 @@ function getStencilReference(depthStencil?: DepthStencilState)
 
     return stencilReference;
 }
+
+type GPURenderBundleKey = [renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
+const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, GPURenderBundle>();

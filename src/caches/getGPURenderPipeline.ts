@@ -19,7 +19,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  */
 export function getGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
 {
-    const getGPURenderPipelineKey: GetGPURenderPipelineKey = [device, renderPipeline, renderPassFormat._key, vertices, indexFormat];
+    const getGPURenderPipelineKey: GetGPURenderPipelineKey = [device, renderPipeline, renderPassFormat, vertices, indexFormat];
     let result = getGPURenderPipelineMap.get(getGPURenderPipelineKey);
     if (result) return result.value;
 
@@ -61,7 +61,7 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPi
 
     return result.value;
 }
-type GetGPURenderPipelineKey = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormatKey: string, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
+type GetGPURenderPipelineKey = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
 const getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, ComputedRef<GPURenderPipeline>>;
 
 /**
@@ -231,7 +231,16 @@ function getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFo
         r_depthStencil.depthBiasClamp;
 
         // 计算
-        const { depthWriteEnabled, depthCompare, stencilFront, stencilBack, stencilReadMask, stencilWriteMask, depthBias, depthBiasSlopeScale, depthBiasClamp } = depthStencil;
+        const { depthWriteEnabled,
+            depthCompare,
+            stencilFront,
+            stencilBack,
+            stencilReadMask,
+            stencilWriteMask,
+            depthBias,
+            depthBiasSlopeScale,
+            depthBiasClamp,
+        } = depthStencil;
         const gpuDepthStencilState: GPUDepthStencilState = {
             format: depthStencilFormat,
             depthWriteEnabled: depthWriteEnabled ?? true,
