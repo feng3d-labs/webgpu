@@ -1,4 +1,4 @@
-import { computed, effect, GBuffer, reactive, UnReadonly } from "@feng3d/render-api";
+import { ChainMap, computed, ComputedRef, effect, GBuffer, reactive, UnReadonly } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 
 /**
@@ -26,7 +26,8 @@ const defaultGPUBufferUsage = 0
  */
 export function getGPUBuffer(device: GPUDevice, buffer: GBuffer)
 {
-    let result = device._bufferMap.get(buffer);
+    const getGPUBufferKey: GetGPUBufferKey = [device, buffer];
+    let result = getGPUBufferMap.get(getGPUBufferKey);
     if (result) return result.value;
 
     const size = buffer.size;
@@ -138,14 +139,16 @@ export function getGPUBuffer(device: GPUDevice, buffer: GBuffer)
         {
             oldDestroy.apply(gBuffer);
 
-            device._bufferMap.delete(buffer);
+            getGPUBufferMap.delete(getGPUBufferKey);
 
             //
             watcher.unwatch(buffer, "data", dataChange);
         };
     })(gBuffer.destroy);
 
-    device._bufferMap.set(buffer, result);
+    getGPUBufferMap.set(getGPUBufferKey, result);
 
     return result.value;
 }
+type GetGPUBufferKey = [device: GPUDevice, buffer: GBuffer];
+const getGPUBufferMap = new ChainMap<GetGPUBufferKey, ComputedRef<GPUBuffer>>;

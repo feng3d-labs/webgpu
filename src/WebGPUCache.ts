@@ -14,7 +14,8 @@ export class WebGPUCache extends WebGPUBase
     protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderObjects: RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
     {
         const device = this._device;
-        let caches = device._renderPassObjectsCommandMap.get([renderPassFormat._key, renderObjects]);
+        const renderPassObjectsCommandKey: RenderPassObjectsCommandKey = [device, renderPassFormat._key, renderObjects];
+        let caches = _renderPassObjectsCommandMap.get(renderPassObjectsCommandKey);
         if (!caches)
         {
             // 收集命令
@@ -31,12 +32,12 @@ export class WebGPUCache extends WebGPUBase
 
             caches = { commands, setBindGroupCommands };
 
-            device._renderPassObjectsCommandMap.set([renderPassFormat._key, renderObjects], caches);
+            _renderPassObjectsCommandMap.set(renderPassObjectsCommandKey, caches);
 
             // 监听变化
             const onchanged = () =>
             {
-                device._renderPassObjectsCommandMap.delete([renderPassFormat._key, renderObjects]);
+                _renderPassObjectsCommandMap.delete(renderPassObjectsCommandKey);
                 //
                 renderObjects.forEach((v) => { watcher.unwatch(v, "_version" as any, onchanged); });
             };
@@ -50,7 +51,8 @@ export class WebGPUCache extends WebGPUBase
     protected runRenderBundleObjects(bundleEncoder: GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObjects?: RenderObject[])
     {
         const device = this._device;
-        let caches = device._renderPassObjectsCommandMap.get([renderPassFormat._key, renderObjects]);
+        const renderPassObjectsCommandKey: RenderPassObjectsCommandKey = [device, renderPassFormat._key, renderObjects];
+        let caches = _renderPassObjectsCommandMap.get(renderPassObjectsCommandKey);
         if (!caches)
         {
             // 收集命令
@@ -67,12 +69,12 @@ export class WebGPUCache extends WebGPUBase
 
             caches = { commands, setBindGroupCommands };
 
-            device._renderPassObjectsCommandMap.set([renderPassFormat._key, renderObjects], caches);
+            _renderPassObjectsCommandMap.set(renderPassObjectsCommandKey, caches);
 
             // 监听变化
             const onchanged = () =>
             {
-                device._renderPassObjectsCommandMap.delete([renderPassFormat._key, renderObjects]);
+                _renderPassObjectsCommandMap.delete(renderPassObjectsCommandKey);
                 //
                 renderObjects.forEach((v) => { watcher.unwatch(v, "_version", onchanged); });
             };
@@ -259,3 +261,9 @@ function arrayEq1(_obj: any, name: string, index: number, args: any[])
 
     return true;
 }
+
+type RenderPassObjectsCommandKey = [device: GPUDevice, RenderPassFormatKey: string, renderObjects: RenderPassObject[]];
+const _renderPassObjectsCommandMap = new ChainMap<RenderPassObjectsCommandKey, {
+    commands: Array<any>;
+    setBindGroupCommands: Array<any>;
+}>;

@@ -1,4 +1,4 @@
-import { BlendComponent, BlendState, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, IIndicesDataTypes, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, WGSLVertexType, WriteMask } from "@feng3d/render-api";
+import { BlendComponent, BlendState, ChainMap, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, WGSLVertexType, WriteMask } from "@feng3d/render-api";
 import { TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { MultisampleState } from "../data/MultisampleState";
@@ -16,11 +16,10 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  * @param vertices 顶点属性数据映射。
  * @returns 完整的渲染管线描述以及顶点缓冲区数组。
  */
-export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indices: IIndicesDataTypes)
+export function getGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
 {
-    const indexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
-
-    let result = device._renderPipelineMap.get([renderPipeline, renderPassFormat._key, vertices, indexFormat]);
+    const getNGPURenderPipeline: GetNGPURenderPipeline = [device, renderPipeline, renderPassFormat._key, vertices, indexFormat];
+    let result = _renderPipelineMap.get(getNGPURenderPipeline);
     if (result) return result.value;
 
     result = computed(() =>
@@ -57,10 +56,12 @@ export function getNGPURenderPipeline(device: GPUDevice, renderPipeline: RenderP
 
         return gpuRenderPipeline;
     });
-    device._renderPipelineMap.set([renderPipeline, renderPassFormat._key, vertices, indexFormat], result);
+    _renderPipelineMap.set(getNGPURenderPipeline, result);
 
     return result.value;
 }
+type GetNGPURenderPipeline = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormatKey: string, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
+const _renderPipelineMap = new ChainMap<GetNGPURenderPipeline, ComputedRef<GPURenderPipeline>>;
 
 function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndexFormat): GPUPrimitiveState
 {

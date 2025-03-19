@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, BlendState, CanvasContext, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, FragmentState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly, VertexAttributes, VertexState } from "@feng3d/render-api";
+import { BlendState, ChainMap, CommandEncoder, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, FragmentState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, Sampler, Submit, Texture, TextureLike, TextureView, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -8,10 +8,11 @@ import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
 import { getGPURenderOcclusionQuery, GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
+import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPURenderTimestampQuery } from "./caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGBuffer } from "./caches/getIGPUBuffer";
-import { getNGPURenderPipeline } from "./caches/getNGPURenderPipeline";
+import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
 import { getRealGPUBindGroup } from "./const";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
@@ -25,14 +26,11 @@ import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
-import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
 
 declare global
 {
     interface GPUDevice
     {
-        _bufferMap: WeakMap<GBuffer, ComputedRef<GPUBuffer>>;
-        _contextMap: WeakMap<CanvasContext, ComputedRef<GPUCanvasContext>>;
         _computePipelineMap: WeakMap<ComputePipeline, GPUComputePipeline>;
         _samplerMap: WeakMap<Sampler, GPUSampler>;
         _textureViewMap: WeakMap<TextureView, GPUTextureView>;
@@ -40,12 +38,7 @@ declare global
         _renderPassDescriptorMap: WeakMap<RenderPassDescriptor, GPURenderPassDescriptor>;
         _shaderMap: Map<string, GPUShaderModule>;
         _pipelineLayoutMap: Map<string, GPUPipelineLayout>;
-        _renderPassObjectsCommandMap: ChainMap<[string, RenderPassObject[]], {
-            commands: Array<any>;
-            setBindGroupCommands: Array<any>;
-        }>;
         _renderObjectCommandMap: ChainMap<[string, RenderObject], Array<any>>;
-        _renderPipelineMap: ChainMap<[RenderPipeline, string, VertexAttributes, GPUIndexFormat], ComputedRef<GPURenderPipeline>>;
         _fragmentStateMap: ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>;
     }
 }
@@ -87,12 +80,8 @@ export class WebGPUBase
         //
         if (this._device)
         {
-            this._device._renderPassObjectsCommandMap ??= new ChainMap();
-            this._device._renderPipelineMap ??= new ChainMap();
             this._device._renderObjectCommandMap ??= new ChainMap();
             this._device._fragmentStateMap ??= new ChainMap();
-            this._device._bufferMap ??= new WeakMap();
-            this._device._contextMap ??= new WeakMap();
             this._device._computePipelineMap ??= new WeakMap();
             this._device._samplerMap ??= new WeakMap();
             this._device._textureMap ??= new WeakMap();
@@ -481,7 +470,8 @@ export class WebGPUBase
         const { vertices, indices, draw } = geometry;
 
         //
-        const nPipeline = getNGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indices);
+        const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
+        const nPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
 
         //
         passEncoder.setPipeline(nPipeline);
