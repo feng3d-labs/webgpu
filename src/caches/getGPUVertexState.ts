@@ -13,10 +13,10 @@ import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
 export function getGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
 {
     const _GPUVertexStateMap_key: [vertexState: VertexState, vertices: VertexAttributes] = [vertexState, vertices];
-    let result = device._GPUVertexStateMap.get(_GPUVertexStateMap_key);
+    const result = device._GPUVertexStateMap.get(_GPUVertexStateMap_key);
     if (result) return result.value;
 
-    result = computed(() =>
+    return device._GPUVertexStateMap.set(_GPUVertexStateMap_key, computed(() =>
     {
         // 监听
         const r_vertexState = reactive(vertexState);
@@ -42,10 +42,7 @@ export function getGPUVertexState(device: GPUDevice, vertexState: VertexState, v
         _GPUVertexStateMap.set(key, gpuVertexState);
 
         return gpuVertexState;
-    });
-    device._GPUVertexStateMap.set(_GPUVertexStateMap_key, result);
-
-    return result.value;
+    })).value;
 }
 type _GPUVertexStateMapKey = [module: GPUShaderModule, entryPoint?: string, buffers?: Iterable<GPUVertexBufferLayout>, constants?: Record<string, number>]
 const _GPUVertexStateMap = new ChainMap<_GPUVertexStateMapKey, GPUVertexState>();
