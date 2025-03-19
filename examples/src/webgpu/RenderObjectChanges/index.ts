@@ -67,30 +67,35 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     window.onclick = () =>
     {
+        reactive(renderObject.geometry.vertices.position).stepMode = "instance";
+        reactive(renderObject.geometry.vertices.position).stepMode = "vertex";
+        reactive(renderObject.geometry.vertices.position).data = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -1]);
+        // reactive(renderObject.geometry.vertices.position).format = "float32x3";
+        // reactive(renderObject.geometry.vertices.position).data = new Float32Array([0.0, 0.5,1.0, -0.5, -0.5,1.0, 0.5, -1,1.0]);
         // 修改顶点着色器代码
-        renderObject.pipeline.vertex.code = `
-                @vertex
-                fn main(
-                    @location(0) position: vec2<f32>,
-                ) -> @builtin(position) vec4<f32> {
-                    var pos = position;
-                    pos.x = pos.x + 0.5;
-                    return vec4<f32>(pos, 0.0, 1.0);
-                }
-                `;
+        // reactive(renderObject.pipeline.vertex).code = `
+        //         @vertex
+        //         fn main(
+        //             @location(0) position: vec2<f32>,
+        //         ) -> @builtin(position) vec4<f32> {
+        //             var pos = position;
+        //             pos.x = pos.x + 0.5;
+        //             return vec4<f32>(pos, 0.0, 1.0);
+        //         }
+        //         `;
 
-        // 修改片段着色器代码
-        reactive(renderObject.pipeline.fragment).code = `
-                @binding(0) @group(0) var<uniform> color : vec4<f32>;
-                @fragment
-                fn main() -> @location(0) vec4f {
-                    var col = color;
-                    col.x = 0.5;
-                    col.y = 0.6;
-                    col.z = 0.7;
-                    return col;
-                }
-                `;
+        // // 修改片段着色器代码
+        // reactive(renderObject.pipeline.fragment).code = `
+        //         @binding(0) @group(0) var<uniform> color : vec4<f32>;
+        //         @fragment
+        //         fn main() -> @location(0) vec4f {
+        //             var col = color;
+        //             col.x = 0.5;
+        //             col.y = 0.6;
+        //             col.z = 0.7;
+        //             return col;
+        //         }
+        //         `;
         //
         // renderObject.uniforms.color = [0, 1, 0, 1];
     };

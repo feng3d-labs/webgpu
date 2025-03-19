@@ -14,6 +14,17 @@ export function getNVertexBuffers(vertexState: VertexState, vertices: VertexAttr
     return vertexBuffers;
 }
 
+declare global
+{
+    interface GPUVertexBufferLayout
+    {
+        /**
+         * 用于判断是否为相同的顶点缓冲区布局。
+         */
+        key: string;
+    }
+}
+
 /**
  * 从顶点属性信息与顶点数据中获取顶点缓冲区布局数组以及顶点缓冲区数组。
  *
@@ -64,7 +75,7 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
             const data = vertexAttribute.data;
             const attributeOffset = vertexAttribute.offset || 0;
             let arrayStride = vertexAttribute.arrayStride;
-            const stepMode = vertexAttribute.stepMode;
+            const stepMode = vertexAttribute.stepMode ?? "vertex";
             const format = vertexAttribute.format;
             // 检查提供的顶点数据格式是否与着色器匹配
             // const wgslType = getWGSLType(v.type);
@@ -83,6 +94,7 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
             console.assert(attributeOffset + vertexByteSize <= arrayStride, `offset(${attributeOffset}) + vertexByteSize(${vertexByteSize}) 必须不超出 arrayStride(${arrayStride})。`);
 
             let index = bufferIndexMap.get(data);
+            let gpuVertexBufferLayout: GPUVertexBufferLayout;
             if (index === undefined)
             {
                 index = vertexBufferLayouts.length;
@@ -91,26 +103,34 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
                 vertexBuffers[index] = getVertexBuffers(vertexAttribute);
 
                 //
-                vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [] };
+                gpuVertexBufferLayout = vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [], key: `${stepMode}-${arrayStride}` };
             }
             else
             {
-                // 要求同一顶点缓冲区中 arrayStride 与 stepMode 必须相同。
-                const gpuVertexBufferLayout = vertexBufferLayouts[index];
-                console.assert(gpuVertexBufferLayout.arrayStride === arrayStride);
-                console.assert(gpuVertexBufferLayout.stepMode === stepMode);
+                gpuVertexBufferLayout = vertexBufferLayouts[index];
+                if (__DEV__)
+                {
+                    console.assert(vertexBufferLayouts[index].arrayStride === arrayStride && vertexBufferLayouts[index].stepMode === stepMode, "要求同一顶点缓冲区中 arrayStride 与 stepMode 必须相同。");
+                }
             }
 
-            (vertexBufferLayouts[index].attributes as Array<GPUVertexAttribute>).push({ shaderLocation, offset: attributeOffset, format });
+            (gpuVertexBufferLayout.attributes as Array<GPUVertexAttribute>).push({ shaderLocation, offset: attributeOffset, format });
+            gpuVertexBufferLayout.key += `-[${shaderLocation}, ${attributeOffset}, ${format}]`;
         });
 
-        return { vertexBufferLayouts, vertexBuffers };
+        // 相同的顶点缓冲区布局合并为一个。
+        const vertexBufferLayoutsKey = vertexBufferLayouts.reduce((prev, cur) => { return prev + cur.key }, "");
+        vertexBufferLayoutsMap[vertexBufferLayoutsKey] ??= vertexBufferLayouts;
+
+        return { vertexBufferLayouts: vertexBufferLayoutsMap[vertexBufferLayoutsKey], vertexBuffers };
     });
 
     _getVertexBuffersBuffersMap.set([vertexState, vertices], result);
 
     return result.value;
 }
+
+const vertexBufferLayoutsMap: Record<string, GPUVertexBufferLayout[]> = {};
 
 function getVertexBuffers(vertexAttribute: VertexAttribute)
 {
