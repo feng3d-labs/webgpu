@@ -48,7 +48,6 @@ declare global
         _renderObjectCommandMap: ChainMap<[string, RenderObject], Array<any>>;
         _renderPipelineMap: ChainMap<[RenderPipeline, string, VertexAttributes, GPUIndexFormat], ComputedRef<GPURenderPipeline>>;
         _fragmentStateMap: ChainMap<[FragmentState, string], ComputedRef<GPUFragmentState>>;
-         _GPUVertexStateMap: ChainMap<[VertexState, VertexAttributes], ComputedRef<GPUVertexState>>
     }
 }
 
@@ -103,7 +102,6 @@ export class WebGPUBase
             this._device._renderPassDescriptorMap ??= new WeakMap();
             this._device._pipelineLayoutMap ??= new Map();
             this._device._shaderMap ??= new Map();
-            this._device._GPUVertexStateMap ??= new ChainMap();
         }
     }
     protected _device: GPUDevice;
