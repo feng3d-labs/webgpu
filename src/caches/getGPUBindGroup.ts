@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResource, BindingResources, BufferBinding, BufferBindingInfo, CanvasTexture, Sampler, TextureView } from "@feng3d/render-api";
+import { BindingResource, BindingResources, BufferBinding, BufferBindingInfo, CanvasTexture, ChainMap, Sampler, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { ResourceType } from "wgsl_reflect";
 import { getRealGPUBindGroup } from "../const";
@@ -15,7 +15,8 @@ import { getGBuffer } from "./getIGPUBuffer";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources)
 {
-    let gBindGroup = device._bindGroupMap.get([bindGroupLayout, bindingResources]);
+    const getGPUBindGroupMapKey: GetGPUBindGroupMapKey = [device, bindGroupLayout, bindingResources];
+    let gBindGroup = _getGPUBindGroupMap.get(getGPUBindGroupMapKey);
     if (gBindGroup) return gBindGroup;
 
     // 总是更新函数列表。
@@ -124,7 +125,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
 
         gBindGroup = device.createBindGroup({ layout: bindGroupLayout, entries });
 
-        device._bindGroupMap.set([bindGroupLayout, bindingResources], gBindGroup);
+        _getGPUBindGroupMap.set(getGPUBindGroupMapKey, gBindGroup);
 
         // 设置更新外部纹理/画布纹理视图
         if (awaysUpdateFuncs.length > 0)
@@ -143,7 +144,8 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
 
     return gBindGroup;
 }
-
+type GetGPUBindGroupMapKey = [device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources];
+const _getGPUBindGroupMap = new ChainMap<GetGPUBindGroupMapKey, GPUBindGroup>();
 /**
  * GPU 绑定组。
  *

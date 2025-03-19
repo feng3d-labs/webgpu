@@ -31,7 +31,6 @@ declare global
 {
     interface GPUDevice
     {
-        _bindGroupMap: ChainMap<[GPUBindGroupLayout, BindingResources], GPUBindGroup>;
         _bufferMap: WeakMap<GBuffer, ComputedRef<GPUBuffer>>;
         _contextMap: WeakMap<CanvasContext, ComputedRef<GPUCanvasContext>>;
         _computePipelineMap: WeakMap<ComputePipeline, GPUComputePipeline>;
@@ -88,7 +87,6 @@ export class WebGPUBase
         //
         if (this._device)
         {
-            this._device._bindGroupMap ??= new ChainMap();
             this._device._renderPassObjectsCommandMap ??= new ChainMap();
             this._device._renderPipelineMap ??= new ChainMap();
             this._device._renderObjectCommandMap ??= new ChainMap();
