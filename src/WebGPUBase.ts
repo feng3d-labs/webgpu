@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BlendState, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
+import { BlendState, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -25,6 +25,25 @@ import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+
+declare global
+{
+    interface GPUDevice
+    {
+        /**
+         * 提交WebGPU前数值加一。
+         * 
+         * 用于处理提交前需要执行的操作。
+         * 
+         * 例如 {@link GPUCanvasContext.getCurrentTexture} 与 {@linkGPUDevice.importExternalTexture } 需要在提交前执行，检查结果是否变化。
+         * 
+         * 注：引擎内部处理，外部无需关心。
+         * 
+         * @private
+         */
+        readonly preSubmit: number;
+    }
+}
 
 /**
  * WebGPU 基础类
@@ -60,6 +79,8 @@ export class WebGPUBase
     set device(v)
     {
         this._device = v;
+
+        this._device && (reactive(this._device).preSubmit ??= 0);
     }
     protected _device: GPUDevice;
 
@@ -71,6 +92,8 @@ export class WebGPUBase
     submit(submit: Submit)
     {
         const device = this._device;
+        // 提交前数值加一，用于处理提交前需要执行的操作。
+        reactive(device).preSubmit++;
 
         const commandBuffers = submit.commandEncoders.map((v) =>
         {
