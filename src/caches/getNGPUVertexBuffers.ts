@@ -33,7 +33,8 @@ declare global
  */
 function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttributes)
 {
-    let result = _getVertexBuffersBuffersMap.get([vertexState, vertices]);
+    const getVertexBuffersBuffersKey: GetVertexBuffersBuffersKey = [vertexState, vertices];
+    let result = getVertexBuffersBuffersMap.get(getVertexBuffersBuffersKey);
     if (result) return result.value;
 
     result = computed(() =>
@@ -125,7 +126,7 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
         return { vertexBufferLayouts: vertexBufferLayoutsMap[vertexBufferLayoutsKey], vertexBuffers };
     });
 
-    _getVertexBuffersBuffersMap.set([vertexState, vertices], result);
+    getVertexBuffersBuffersMap.set(getVertexBuffersBuffersKey, result);
 
     return result.value;
 }
@@ -134,7 +135,7 @@ const vertexBufferLayoutsMap: Record<string, GPUVertexBufferLayout[]> = {};
 
 function getVertexBuffers(vertexAttribute: VertexAttribute)
 {
-    let result = _NVertexBufferMap.get(vertexAttribute);
+    let result = getVertexBuffersMap.get(vertexAttribute);
     if (result) return result.value;
     const NVertexBuffer: NVertexBuffer = {} as any;
     result = computed(() =>
@@ -148,9 +149,10 @@ function getVertexBuffers(vertexAttribute: VertexAttribute)
         NVertexBuffer.size = data.byteLength;
         return NVertexBuffer;
     });
-    _NVertexBufferMap.set(vertexAttribute, result);
+    getVertexBuffersMap.set(vertexAttribute, result);
     return result.value;
 }
-const _NVertexBufferMap = new WeakMap<VertexAttribute, ComputedRef<NVertexBuffer>>();
+const getVertexBuffersMap = new WeakMap<VertexAttribute, ComputedRef<NVertexBuffer>>();
 
-const _getVertexBuffersBuffersMap = new ChainMap<[VertexState, VertexAttributes], ComputedRef<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: NVertexBuffer[] }>>();
+type GetVertexBuffersBuffersKey = [vertexState: VertexState, vertices: VertexAttributes];
+const getVertexBuffersBuffersMap = new ChainMap<GetVertexBuffersBuffersKey, ComputedRef<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: NVertexBuffer[] }>>();

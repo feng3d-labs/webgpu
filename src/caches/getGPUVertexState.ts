@@ -12,11 +12,11 @@ import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
  */
 export function getGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
 {
-    const _getGPUVertexStateMapKey = [device, vertexState, vertices];
-    const result = _getGPUVertexStateMap.get(_getGPUVertexStateMapKey);
+    const getGPUVertexStateKey: GetGPUVertexStateKey = [device, vertexState, vertices];
+    const result = getGPUVertexStateMap.get(getGPUVertexStateKey);
     if (result) return result.value;
 
-    return _getGPUVertexStateMap.set(_getGPUVertexStateMapKey, computed(() =>
+    return getGPUVertexStateMap.set(getGPUVertexStateKey, computed(() =>
     {
         // 监听
         const r_vertexState = reactive(vertexState);
@@ -36,13 +36,15 @@ export function getGPUVertexState(device: GPUDevice, vertexState: VertexState, v
         };
 
         // 缓存
-        const key = [gpuVertexState.module, gpuVertexState.entryPoint, gpuVertexState.buffers, gpuVertexState.constants];
-        const cache = _GPUVertexStateMap.get(key);
+        const gpuVertexStateKey: GPUVertexStateKey = [gpuVertexState.module, gpuVertexState.entryPoint, gpuVertexState.buffers, gpuVertexState.constants];
+        const cache = gpuVertexStateMap.get(gpuVertexStateKey);
         if (cache) return cache;
-        _GPUVertexStateMap.set(key, gpuVertexState);
+        gpuVertexStateMap.set(gpuVertexStateKey, gpuVertexState);
 
         return gpuVertexState;
     })).value;
 }
-const _getGPUVertexStateMap = new ChainMap<any[], ComputedRef<GPUVertexState>>();
-const _GPUVertexStateMap = new ChainMap<any[], GPUVertexState>();
+type GetGPUVertexStateKey = [device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes];
+const getGPUVertexStateMap = new ChainMap<GetGPUVertexStateKey, ComputedRef<GPUVertexState>>();
+type GPUVertexStateKey = [module: GPUShaderModule, entryPoint: string, buffers: Iterable<GPUVertexBufferLayout>, constants: Record<string, number>];
+const gpuVertexStateMap = new ChainMap<any[], GPUVertexState>();
