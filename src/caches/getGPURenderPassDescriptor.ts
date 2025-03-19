@@ -17,8 +17,8 @@ import { getTextureSize } from "./getTextureSize";
  */
 export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: RenderPassDescriptor): GPURenderPassDescriptor
 {
-    const getGPURenderPassDescriptor: GetGPURenderPassDescriptor = [device, descriptor];
-    let renderPassDescriptor = getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptor);
+    const getGPURenderPassDescriptorKey: GetGPURenderPassDescriptorKey = [device, descriptor];
+    let renderPassDescriptor = getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptorKey);
     if (renderPassDescriptor)
     {
         // 执行更新函数。
@@ -28,7 +28,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: Render
     }
 
     renderPassDescriptor = { colorAttachments: [] };
-    getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptor, renderPassDescriptor);
+    getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptorKey, renderPassDescriptor);
 
     const _updates: Function[] = renderPassDescriptor["_updates"] = [];
 
@@ -118,8 +118,8 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: Render
     return renderPassDescriptor;
 }
 
-type GetGPURenderPassDescriptor = [device: GPUDevice, descriptor: RenderPassDescriptor];
-const getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptor, GPURenderPassDescriptor>;
+type GetGPURenderPassDescriptorKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
+const getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, GPURenderPassDescriptor>;
 
 /**
  * 获取渲染通道附件上的纹理描述列表。
