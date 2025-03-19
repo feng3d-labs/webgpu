@@ -35,7 +35,7 @@ export interface CanvasConfiguration
      * The formats that views created from textures returned by
      * {@link GPUCanvasContext#getCurrentTexture} may use.
      */
-    readonly viewFormats?: GPUTextureFormat[];
+    readonly viewFormats?: readonly GPUTextureFormat[];
 
     /**
      * The color space that values written into textures returned by

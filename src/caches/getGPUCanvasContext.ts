@@ -8,35 +8,29 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
     let result = getGPUCanvasContextMap.get(getGPUCanvasContextKey);
     if (result) return result.value;
 
-    const canvas = typeof context.canvasId === "string" ? document.getElementById(context.canvasId) as HTMLCanvasElement : context.canvasId;
-
-    const gpuCanvasContext = canvas.getContext("webgpu") as GPUCanvasContext;
-    const ro = reactive(context);
     result = computed(() =>
     {
         // 监听
-        const configuration = ro.configuration;
-        if (configuration)
+        const ro = reactive(context);
+        ro.canvasId;
+
+        const canvas = typeof context.canvasId === "string" ? document.getElementById(context.canvasId) as HTMLCanvasElement : context.canvasId;
+
+        const gpuCanvasContext = canvas.getContext("webgpu") as GPUCanvasContext;
+
+        // 监听
+        const r_configuration = ro.configuration;
+        if (r_configuration)
         {
-            configuration.format;
-            configuration.usage;
-            configuration.viewFormats?.forEach(() => { });
-            configuration.colorSpace;
-            configuration.toneMapping?.mode;
-            configuration.alphaMode;
+            r_configuration.format;
+            r_configuration.usage;
+            r_configuration.viewFormats?.forEach(() => { });
+            r_configuration.colorSpace;
+            r_configuration.toneMapping?.mode;
+            r_configuration.alphaMode;
         }
 
         // 执行
-        updateConfigure();
-
-        return gpuCanvasContext;
-    });
-
-    getGPUCanvasContextMap.set(getGPUCanvasContextKey, result);
-
-    const updateConfigure = () =>
-    {
-        //
         const configuration = context.configuration || {};
 
         const format = configuration.format || navigator.gpu.getPreferredCanvasFormat();
@@ -56,7 +50,11 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
             usage,
             format,
         });
-    };
+
+        return gpuCanvasContext;
+    });
+
+    getGPUCanvasContextMap.set(getGPUCanvasContextKey, result);
 
     return result.value;
 }
