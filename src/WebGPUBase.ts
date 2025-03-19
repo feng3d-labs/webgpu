@@ -19,31 +19,12 @@ import { ComputePass } from "./data/ComputePass";
 import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
-import { GPUQueue_submit } from "./eventnames";
+import { GPUQueue_submit, webgpuEvents } from "./eventnames";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
-
-declare global
-{
-    interface GPUDevice
-    {
-        /**
-         * 提交WebGPU前数值加一。
-         * 
-         * 用于处理提交前需要执行的操作。
-         * 
-         * 例如 {@link GPUCanvasContext.getCurrentTexture} 与 {@linkGPUDevice.importExternalTexture } 需要在提交前执行，检查结果是否变化。
-         * 
-         * 注：引擎内部处理，外部无需关心。
-         * 
-         * @private
-         */
-        readonly preSubmit: number;
-    }
-}
 
 /**
  * WebGPU 基础类
@@ -79,8 +60,6 @@ export class WebGPUBase
     set device(v)
     {
         this._device = v;
-
-        this._device && (reactive(this._device).preSubmit ??= 0);
     }
     protected _device: GPUDevice;
 
@@ -92,9 +71,11 @@ export class WebGPUBase
     submit(submit: Submit)
     {
         const device = this._device;
-        // 提交前数值加一，用于处理提交前需要执行的操作。
-        reactive(device).preSubmit++;
 
+        // 提交前数值加一，用于处理提交前需要执行的操作。
+        reactive(webgpuEvents).preSubmit = ~~reactive(webgpuEvents).preSubmit + 1;
+
+        //
         const commandBuffers = submit.commandEncoders.map((v) =>
         {
             const commandBuffer = this.runCommandEncoder(v);

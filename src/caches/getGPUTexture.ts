@@ -1,7 +1,7 @@
 import { anyEmitter } from "@feng3d/event";
-import { ChainMap, computed, ComputedRef, reactive, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSize, TextureSource } from "@feng3d/render-api";
+import { ChainMap, computed, ComputedRef, effect, reactive, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSize, TextureSource } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
+import { webgpuEvents, GPUTexture_destroy, IGPUTexture_resize } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { getGPUCanvasContext } from "./getGPUCanvasContext";
@@ -16,22 +16,7 @@ import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
  */
 export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
 {
-    if ("context" in textureLike)
-    {
-        // 
-        reactive(device).preSubmit;
-
-        const canvasTexture = textureLike;
-        const context = getGPUCanvasContext(device, canvasTexture.context);
-
-        const gpuTexture = context.getCurrentTexture();
-
-        return gpuTexture;
-    }
-
-    const texture = textureLike as Texture;
-
-    const getGPUTextureKey: GetGPUTextureMap = [device, texture];
+    const getGPUTextureKey: GetGPUTextureMap = [device, textureLike];
     let result: ComputedRef<GPUTexture> = getGPUTextureMap.get(getGPUTextureKey);
     if (result) return result.value;
 
@@ -39,6 +24,21 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
 
     result = computed(() =>
     {
+        if ("context" in textureLike)
+        {
+            // 
+            reactive(webgpuEvents).preSubmit;
+
+            const canvasTexture = textureLike;
+            const context = getGPUCanvasContext(device, canvasTexture.context);
+
+            const gpuTexture = context.getCurrentTexture();
+
+            return gpuTexture;
+        }
+
+        const texture = textureLike as Texture;
+
         let gpuTexture: GPUTexture;
         // 创建纹理
         const createTexture = () =>
@@ -253,7 +253,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
     return result.value;
 }
 let autoIndex = 0;
-type GetGPUTextureMap = [device: GPUDevice, texture: Texture];
+type GetGPUTextureMap = [device: GPUDevice, texture: TextureLike];
 const getGPUTextureMap = new ChainMap<GetGPUTextureMap, ComputedRef<GPUTexture>>;
 
 function getGPUTextureDimension(dimension: TextureDimension)
