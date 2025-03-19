@@ -246,8 +246,23 @@ function getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFo
         };
 
         // 缓存
+        const gpuDepthStencilStateKey: GPUDepthStencilStateKey = [
+            gpuDepthStencilState.format,
+            gpuDepthStencilState.depthWriteEnabled,
+            gpuDepthStencilState.depthCompare,
+            gpuDepthStencilState.stencilFront,
+            gpuDepthStencilState.stencilBack,
+            gpuDepthStencilState.stencilReadMask,
+            gpuDepthStencilState.stencilWriteMask,
+            gpuDepthStencilState.depthBias,
+            gpuDepthStencilState.depthBiasSlopeScale,
+            gpuDepthStencilState.depthBiasClamp,
+        ];
+        const cache = gpuDepthStencilStateMap.get(gpuDepthStencilStateKey);
+        if (cache) return cache;
+        gpuDepthStencilStateMap.set(gpuDepthStencilStateKey, gpuDepthStencilState);
 
-
+        //
         return gpuDepthStencilState;
     });
     getGPUDepthStencilStateMap.set(getGPUDepthStencilStateKey, result);
@@ -256,6 +271,13 @@ function getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFo
 }
 type GetGPUDepthStencilStateKey = [depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat];
 const getGPUDepthStencilStateMap = new ChainMap<GetGPUDepthStencilStateKey, ComputedRef<GPUDepthStencilState>>();
+type GPUDepthStencilStateKey = [format: GPUTextureFormat, depthWriteEnabled: boolean, depthCompare: GPUCompareFunction, stencilFront: GPUStencilFaceState, stencilBack: GPUStencilFaceState, stencilReadMask: number, stencilWriteMask: number, depthBias: number, depthBiasSlopeScale: number, depthBiasClamp: number]
+const gpuDepthStencilStateMap = new ChainMap<GPUDepthStencilStateKey, GPUDepthStencilState>();
+
+/**
+ * 获取片段阶段完整描述。
+ *
+ * @param fragment 片段阶段描述。
 
 /**
  * 获取片段阶段完整描述。
