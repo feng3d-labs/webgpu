@@ -334,11 +334,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 bindingResources: {
                     ...sceneUniformBindGroup,
                 },
-                geometry: {
-                    vertices,
-                    indices: indexBuffer,
-                    draw: { __type__: "DrawIndexed", indexCount },
-                }
+                vertices,
+                indices: indexBuffer,
+                draw: { __type__: "DrawIndexed", indexCount },
             },
         ]
     });
@@ -365,9 +363,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 bindingResources: {
                     ...gBufferTexturesBindGroup,
                 },
-                geometry: {
-                    draw: { __type__: "DrawVertex", vertexCount: 6 },
-                }
+                draw: { __type__: "DrawVertex", vertexCount: 6 },
             },
         ]
     });
@@ -381,9 +377,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     ...gBufferTexturesBindGroup,
                     ...lightsBufferBindGroup,
                 },
-                geometry: {
-                    draw: { __type__: "DrawVertex", vertexCount: 6 },
-                },
+                draw: { __type__: "DrawVertex", vertexCount: 6 },
             },
         ]
     });

@@ -108,10 +108,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         bindingResources: {
             uniforms,
         },
-        geometry: {
-            vertices,
-            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
-        }
+        vertices,
+        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
     const submit: Submit = {

@@ -47,9 +47,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 source: video,
             },
         },
-        geometry: {
-            draw: { __type__: "DrawVertex", vertexCount: 6 },
-        }
+        draw: { __type__: "DrawVertex", vertexCount: 6 },
     };
 
     function frame()

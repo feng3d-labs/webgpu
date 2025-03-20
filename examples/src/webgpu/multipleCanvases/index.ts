@@ -320,11 +320,9 @@ const init = async () =>
                 renderObjects: [{
                     pipeline: pipeline,
                     bindingResources: bindGroup,
-                    geometry: {
-                        vertices: vertexAttributes,
-                        indices,
-                        draw: { __type__: "DrawIndexed", indexCount: indices.length },
-                    },
+                    vertices: vertexAttributes,
+                    indices,
+                    draw: { __type__: "DrawIndexed", indexCount: indices.length },
                 }],
             });
         });

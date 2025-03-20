@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, Submit, RenderObject, reactive } from "@feng3d/render-api";
+import { RenderObject, RenderPassDescriptor, Submit, reactive } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import redFragWGSL from "../../shaders/red.frag.wgsl";
@@ -22,9 +22,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
-        geometry: {
-            draw: { __type__: "DrawVertex", vertexCount: 3 },
-        }
+        draw: { __type__: "DrawVertex", vertexCount: 3 },
     };
 
     canvas.classList.add(styles.animatedCanvasSize);

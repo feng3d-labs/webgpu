@@ -156,10 +156,8 @@ async function init(canvas: OffscreenCanvas)
                 renderObjects: [{
                     pipeline,
                     bindingResources: uniformBindGroup,
-                    geometry: {
-                        vertices: verticesBuffer,
-                        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount }
-                    }
+                    vertices: verticesBuffer,
+                    draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount }
                 }]
             }]
         }]

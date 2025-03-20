@@ -138,10 +138,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                         {
                             pipeline: renderPipeline,
                             bindingResources: uniformBindGroup,
-                            geometry: {
-                                vertices: vertices1,
-                                draw: { __type__: "DrawVertex", vertexCount: 4, instanceCount: length },
-                            }
+                            vertices: vertices1,
+                            draw: { __type__: "DrawVertex", vertexCount: 4, instanceCount: length },
                         }
                     ],
                 }

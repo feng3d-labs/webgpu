@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BindingResources, BlendState, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, Geometry, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, TextureLike, UnReadonly, Viewport } from "@feng3d/render-api";
+import { BlendState, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -390,21 +390,20 @@ export class WebGPUBase
      */
     protected runRenderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
-        const { viewport, scissorRect, pipeline, bindingResources, geometry } = renderObject;
-
-        this.runviewport(passEncoder, viewport, renderPassFormat);
-        this.runScissorRect(passEncoder, scissorRect, renderPassFormat);
-        this.runRenderPipeline(passEncoder, pipeline, renderPassFormat, geometry);
-        this.runBindingResources(passEncoder, pipeline, bindingResources);
-        this.runVertexAttributes(passEncoder, pipeline, geometry);
-        this.runIndices(passEncoder, geometry);
-        this.runDraw(passEncoder, geometry);
+        this.runviewport(passEncoder, renderObject, renderPassFormat);
+        this.runScissorRect(passEncoder, renderObject, renderPassFormat);
+        this.runRenderPipeline(passEncoder, renderPassFormat, renderObject);
+        this.runBindingResources(passEncoder, renderObject);
+        this.runVertexAttributes(passEncoder, renderObject);
+        this.runIndices(passEncoder, renderObject);
+        this.runDraw(passEncoder, renderObject);
     }
 
-    protected runviewport(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, viewport: Viewport, renderPassFormat: RenderPassFormat)
+    protected runviewport(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
     {
         if (!("setViewport" in passEncoder)) return;
         const attachmentSize = renderPassFormat.attachmentSize;
+        const viewport = renderObject.viewport;
         if (viewport)
         {
             const isYup = viewport.isYup ?? true;
@@ -427,10 +426,11 @@ export class WebGPUBase
         }
     }
 
-    protected runScissorRect(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, scissorRect: ScissorRect, renderPassFormat: RenderPassFormat)
+    protected runScissorRect(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
     {
         if (!("setScissorRect" in passEncoder)) return;
         const attachmentSize = renderPassFormat.attachmentSize;
+        const scissorRect = renderObject.scissorRect;
         if (scissorRect)
         {
             const isYup = scissorRect.isYup ?? true;
@@ -452,10 +452,10 @@ export class WebGPUBase
         }
     }
 
-    protected runRenderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline, renderPassFormat: RenderPassFormat, geometry: Geometry)
+    protected runRenderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, geometry: RenderObject)
     {
         const device = this._device;
-        const { vertices, indices } = geometry;
+        const { pipeline, vertices, indices } = geometry;
         //
         const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
         const nPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
@@ -488,9 +488,10 @@ export class WebGPUBase
         passEncoder.setBlendConstant(blendConstantColor);
     }
 
-    protected runBindingResources(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline, bindingResources: BindingResources)
+    protected runBindingResources(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject)
     {
         const device = this._device;
+        const { pipeline, bindingResources } = renderObject;
         // 计算 bindGroups
         const layout = getGPUPipelineLayout(device, { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code });
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
@@ -500,10 +501,10 @@ export class WebGPUBase
         });
     }
 
-    protected runVertexAttributes(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline, geometry: Geometry)
+    protected runVertexAttributes(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: RenderObject)
     {
         const device = this._device;
-        const { vertices } = geometry;
+        const { vertices, pipeline } = geometry;
         //
         const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
         vertexBuffers?.forEach((vertexBuffer, index) =>
@@ -517,7 +518,7 @@ export class WebGPUBase
         });
     }
 
-    protected runIndices(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: Geometry)
+    protected runIndices(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: RenderObject)
     {
         const { indices } = geometry;
         if (!indices) return;
@@ -533,7 +534,7 @@ export class WebGPUBase
         passEncoder.setIndexBuffer(gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength);
     }
 
-    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: Geometry)
+    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: RenderObject)
     {
         const { draw } = geometry;
 

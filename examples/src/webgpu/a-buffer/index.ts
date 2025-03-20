@@ -288,11 +288,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             renderObjects: [{
                 pipeline: opaquePipeline,
                 bindingResources: bindingResources,
-                geometry: {
-                    vertices,
-                    indices,
-                    draw: { __type__: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
-                }
+                vertices,
+                indices,
+                draw: { __type__: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
             }]
         };
         passEncoders.push(opaquePassEncoder);
@@ -326,11 +324,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice],
                         },
-                        geometry: {
-                            vertices,
-                            indices,
-                            draw: { __type__: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
-                        }
+                        vertices,
+                        indices,
+                        draw: { __type__: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
                     }
                 ],
             };
@@ -349,9 +345,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice]
                         },
-                        geometry: {
-                            draw: { __type__: "DrawVertex", vertexCount: 6 },
-                        }
+                        draw: { __type__: "DrawVertex", vertexCount: 6 },
                     }
                 ]
             };

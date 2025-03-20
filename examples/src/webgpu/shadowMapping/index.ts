@@ -225,11 +225,9 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...sceneBindGroupForShadow,
                                     ...modelBindGroup,
                                 },
-                                geometry: {
-                                    vertices,
-                                    indices: indexBuffer,
-                                    draw: { __type__: "DrawIndexed", indexCount },
-                                }
+                                vertices,
+                                indices: indexBuffer,
+                                draw: { __type__: "DrawIndexed", indexCount },
                             },
                         ]
                     },
@@ -242,11 +240,9 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ...sceneBindGroupForRender,
                                     ...modelBindGroup,
                                 },
-                                geometry: {
-                                    vertices,
-                                    indices: indexBuffer,
-                                    draw: { __type__: "DrawIndexed", indexCount },
-                                }
+                                vertices,
+                                indices: indexBuffer,
+                                draw: { __type__: "DrawIndexed", indexCount },
                             }
                         ],
                     }

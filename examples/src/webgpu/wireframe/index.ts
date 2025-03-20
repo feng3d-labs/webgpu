@@ -329,11 +329,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     renderObjects.push({
                         pipeline: litPipeline,
                         bindingResources: litBindGroup,
-                        geometry: {
-                            vertices: vertexAttributes,
-                            indices,
-                            draw: { __type__: "DrawIndexed", indexCount: indices.length },
-                        }
+                        vertices: vertexAttributes,
+                        indices,
+                        draw: { __type__: "DrawIndexed", indexCount: indices.length },
                     });
                 }
             }
@@ -353,9 +351,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 renderObjects.push({
                     pipeline,
                     bindingResources: wireframeBindGroups[bindGroupNdx],
-                    geometry: {
-                        draw: { __type__: "DrawVertex", vertexCount: indices.length * countMult },
-                    }
+                    draw: { __type__: "DrawVertex", vertexCount: indices.length * countMult },
                 });
             });
         }

@@ -260,10 +260,8 @@ setBlendConstant().`,
         renderObjects.push({
             pipeline: pipeline,
             bindingResources: uniformBindGroup,
-            geometry: {
-                vertices: verticesBuffer,
-                draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: 1 },
-            }
+            vertices: verticesBuffer,
+            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: 1 },
         });
 
         textRenderer.render(renderObjects, ...text);

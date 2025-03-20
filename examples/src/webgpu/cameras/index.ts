@@ -99,10 +99,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const renderObject: RenderObject = {
         pipeline: pipeline,
         bindingResources: bindingResources,
-        geometry: {
-            vertices,
-            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
-        }
+        vertices,
+        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
     const renderPassDescriptor: RenderPassDescriptor = {

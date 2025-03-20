@@ -59,9 +59,7 @@ export abstract class Base2DRendererClass
             renderObjects: [{
                 pipeline: pipeline,
                 bindingResources: bindingResources,
-                geometry: {
-                    draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1 }
-                }
+                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1 },
             }],
         };
         commandEncoder.passEncoders.push(passEncoder);

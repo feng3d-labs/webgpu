@@ -152,9 +152,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 renderObjects: [{
                     pipeline,
                     bindingResources: uniformBindGroup,
-                    geometry: {
-                        draw: { __type__: "DrawVertex", vertexCount: 3 },
-                    }
+                    draw: { __type__: "DrawVertex", vertexCount: 3 },
                 }],
             }]
         }]

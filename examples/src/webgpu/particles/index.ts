@@ -291,10 +291,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       renderObjects: [{
         pipeline: renderPipeline,
         bindingResources: { ...uniformBindGroup },
-        geometry: {
-          vertices: { ...particlesVertices, ...quadVertices },
-          draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
-        },
+        vertices: { ...particlesVertices, ...quadVertices },
+        draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: numParticles, firstVertex: 0, firstInstance: 0 },
       }],
     }
   );

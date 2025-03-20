@@ -164,10 +164,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const ro: RenderObject = {
         pipeline: undefined,
         bindingResources: bindingResources,
-        geometry: {
-            vertices,
-            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: kNumPoints },
-        }
+        vertices,
+        draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: kNumPoints },
     };
     //
     const submit: Submit = {

@@ -324,17 +324,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                         // *   uv        : float32x2
                         // *   tangent   : float32x3
                         // *   bitangent : float32x3
-                        geometry: {
-                            vertices: {
-                                position: { data: box.vertices, offset: 0, format: "float32x3", arrayStride: box.vertexStride },
-                                normal: { data: box.vertices, offset: 12, format: "float32x3", arrayStride: box.vertexStride },
-                                uv: { data: box.vertices, offset: 24, format: "float32x2", arrayStride: box.vertexStride },
-                                vert_tan: { data: box.vertices, offset: 32, format: "float32x3", arrayStride: box.vertexStride },
-                                vert_bitan: { data: box.vertices, offset: 44, format: "float32x3", arrayStride: box.vertexStride },
-                            },
-                            indices: box.indices,
-                            draw: { __type__: "DrawIndexed", indexCount: box.indices.length },
-                        }
+                        vertices: {
+                            position: { data: box.vertices, offset: 0, format: "float32x3", arrayStride: box.vertexStride },
+                            normal: { data: box.vertices, offset: 12, format: "float32x3", arrayStride: box.vertexStride },
+                            uv: { data: box.vertices, offset: 24, format: "float32x2", arrayStride: box.vertexStride },
+                            vert_tan: { data: box.vertices, offset: 32, format: "float32x3", arrayStride: box.vertexStride },
+                            vert_bitan: { data: box.vertices, offset: 44, format: "float32x3", arrayStride: box.vertexStride },
+                        },
+                        indices: box.indices,
+                        draw: { __type__: "DrawIndexed", indexCount: box.indices.length },
                     }],
                 }]
             }]

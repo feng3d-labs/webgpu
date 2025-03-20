@@ -109,13 +109,11 @@ const init = async (canvas: HTMLCanvasElement) =>
                 cullFace: "back",
             },
         },
-        geometry: {
-            vertices: {
-                position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-                uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
-            },
-            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: numInstances }
+        vertices: {
+            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
+        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: numInstances },
         bindingResources: {
             uniforms: {
                 modelViewProjectionMatrix: mvpMatricesData

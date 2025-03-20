@@ -126,14 +126,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const renderObject: RenderObject = {
         pipeline: pipeline,
-        geometry: {
-            vertices: {
-                position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
-                normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
-            },
-            indices,
-            draw: { __type__: "DrawIndexed", indexCount: indices.length },
+        vertices: {
+            position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
+            normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
         },
+        indices,
+        draw: { __type__: "DrawIndexed", indexCount: indices.length },
         bindingResources: {
             uni: {
                 bufferView: undefined,

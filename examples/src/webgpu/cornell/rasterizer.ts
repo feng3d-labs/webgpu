@@ -83,11 +83,9 @@ export default class Rasterizer
                     ...this.common.uniforms.bindGroup,
                     ...this.bindGroup,
                 },
-                geometry: {
-                    vertices: this.scene.vertexAttributes,
-                    indices: this.scene.indices,
-                    draw: { __type__: "DrawIndexed", indexCount: this.scene.indexCount },
-                },
+                vertices: this.scene.vertexAttributes,
+                indices: this.scene.indices,
+                draw: { __type__: "DrawIndexed", indexCount: this.scene.indexCount },
             }],
         };
     }

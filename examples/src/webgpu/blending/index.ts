@@ -485,16 +485,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const ro: RenderObject = {
         pipeline: dstPipeline,
-        geometry: {
-            draw: { __type__: "DrawVertex", vertexCount: 6 },
-        }
+        draw: { __type__: "DrawVertex", vertexCount: 6 },
     };
 
     const ro1: RenderObject = {
         pipeline: srcPipeline,
-        geometry: {
-            draw: { __type__: "DrawVertex", vertexCount: 6 },
-        }
+        draw: { __type__: "DrawVertex", vertexCount: 6 },
     };
 
     const renderObjects: RenderPassObject[] = [
