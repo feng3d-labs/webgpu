@@ -1,6 +1,5 @@
-import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, computed, ComputedRef, reactive, Sampler, TextureView, UnReadonly } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
-import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo, VariableInfo } from "wgsl_reflect";
+import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, computed, ComputedRef, reactive, Sampler, TextureView, TypedArray, UnReadonly } from "@feng3d/render-api";
+import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { VideoTexture } from "../data/VideoTexture";
 import { webgpuEvents } from "../eventnames";
 import { ExternalSampledTextureType } from "../types/TextureType";
@@ -45,7 +44,15 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
             return entry;
         });
 
+        // 
+        const resources = entries.map((v) => v.resource);
+        const gpuBindGroupKey: GPUBindGroupKey = [bindGroupLayout, ...resources];
+        const cache = gpuBindGroupMap.get(gpuBindGroupKey);
+        if (cache) return cache;
+
         gBindGroup = device.createBindGroup({ layout: bindGroupLayout, entries });
+
+        gpuBindGroupMap.set(gpuBindGroupKey, gBindGroup);
 
         return gBindGroup;
     });
@@ -53,6 +60,10 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
 
     return result.value;
 }
+
+type GPUBindGroupKey = [bindGroupLayout: GPUBindGroupLayout, ...resources: GPUBindingResource[]];
+const gpuBindGroupMap = new ChainMap<GPUBindGroupKey, GPUBindGroup>();
+
 type GetGPUBindGroupKey = [device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources];
 const getGPUBindGroupMap = new ChainMap<GetGPUBindGroupKey, ComputedRef<GPUBindGroup>>();
 
@@ -82,20 +93,7 @@ function getGPUBindingResource(device: GPUDevice, bindingResources: BindingResou
         // 更新缓冲区绑定的数据。
         updateBufferBinding(bufferBinding, type);
         //
-        const gbuffer = getGBuffer(bufferBinding.bufferView);
-        (gbuffer as any).label = gbuffer.label || (`BufferBinding ${name}`);
-        //
-        const buffer = getGPUBuffer(device, gbuffer);
-
-        const offset = bufferBinding.bufferView.byteOffset;
-        const size = bufferBinding.bufferView.byteLength;
-
-        const gpuBindingResource: GPUBindingResource = {
-            buffer,
-            offset,
-            size,
-        };
-
+        const gpuBindingResource = _getGPUBindingResource(device, bufferBinding.bufferView);
         return gpuBindingResource;
     });
 
@@ -106,9 +104,37 @@ function getGPUBindingResource(device: GPUDevice, bindingResources: BindingResou
 type GetGPUBindingResourceKey = [device: GPUDevice, bindingResources: BindingResources, name: string, type: TypeInfo];
 const getGPUBindingResourceMap = new ChainMap<GetGPUBindingResourceKey, ComputedRef<GPUBindingResource>>();
 
+function _getGPUBindingResource(device: GPUDevice, bufferView: TypedArray)
+{
+    //
+    const gpuBindingResourceKey: GPUBindingResourceKey = [device, bufferView];
+    const cache = gpuBindingResourceMap.get(gpuBindingResourceKey);
+    if (cache) return cache;
+
+    const gbuffer = getGBuffer(bufferView);
+    (gbuffer as any).label = gbuffer.label || (`BufferBinding ${name}`);
+    //
+    const buffer = getGPUBuffer(device, gbuffer);
+
+    const offset = bufferView.byteOffset;
+    const size = bufferView.byteLength;
+
+    const gpuBindingResource: GPUBindingResource = {
+        buffer,
+        offset,
+        size,
+    };
+    gpuBindingResourceMap.set(gpuBindingResourceKey, gpuBindingResource);
+
+    return gpuBindingResource;
+}
+type GPUBindingResourceKey = [device: GPUDevice, bufferView: TypedArray];
+const gpuBindingResourceMap = new ChainMap<GPUBindingResourceKey, GPUBindingResource>();
+
 function getGPUExternalTexture(device: GPUDevice, videoTexture: VideoTexture)
 {
-    let result = getGPUExternalTextureMap.get(videoTexture);
+    const getGPUExternalTextureKey: GetGPUExternalTextureKey = [device, videoTexture];
+    let result = getGPUExternalTextureMap.get(getGPUExternalTextureKey);
     if (result) return result.value;
 
     result = computed(() =>
@@ -121,12 +147,12 @@ function getGPUExternalTexture(device: GPUDevice, videoTexture: VideoTexture)
 
         return resource;
     });
-    getGPUExternalTextureMap.set(videoTexture, result);
+    getGPUExternalTextureMap.set(getGPUExternalTextureKey, result);
 
     return result.value;
 }
-const getGPUExternalTextureMap = new WeakMap<VideoTexture, ComputedRef<GPUExternalTexture>>();
-
+type GetGPUExternalTextureKey = [device: GPUDevice, videoTexture: VideoTexture];
+const getGPUExternalTextureMap = new ChainMap<GetGPUExternalTextureKey, ComputedRef<GPUExternalTexture>>();
 
 /**
  * 初始化缓冲区绑定。
