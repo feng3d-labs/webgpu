@@ -1,4 +1,4 @@
-import { BindingResource, BindingResources, BufferBinding, BufferBindingInfo, ChainMap, computed, ComputedRef, Sampler, TextureView } from "@feng3d/render-api";
+import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, computed, ComputedRef, Sampler, TextureView } from "@feng3d/render-api";
 import { ResourceType } from "wgsl_reflect";
 import { VideoTexture } from "../data/VideoTexture";
 import { ExternalSampledTextureType } from "../types/TextureType";
@@ -18,7 +18,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
     let gBindGroup: GPUBindGroup;
     result = computed(() =>
     {
-        const entries = (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).map((v) =>
+        const entries = bindGroupLayout.entries.map((v) =>
         {
             const { name, type, resourceType, binding } = v.variableInfo;
 
@@ -74,45 +74,3 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
 }
 type GetGPUBindGroupKey = [device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources];
 const getGPUBindGroupMap = new ChainMap<GetGPUBindGroupKey, ComputedRef<GPUBindGroup>>();
-/**
- * GPU 绑定组。
- *
- * @see GPUBindGroupDescriptor
- * @see GPUDevice.createBindGroup
- */
-export interface BindGroupDescriptor
-{
-    /**
-     * The initial value of {@link GPUObjectBase#label|GPUObjectBase.label}.
-     */
-    label?: string;
-
-    /**
-     * The {@link IGPUBindGroupLayoutDescriptor} the entries of this bind group will conform to.
-     */
-    layout: GPUBindGroupLayoutDescriptor;
-
-    /**
-     * A list of entries describing the resources to expose to the shader for each binding
-     * described by the {@link GPUBindGroupDescriptor#layout}.
-     *
-     * {@link GPUBindGroupEntry}
-     */
-    entries: BindGroupEntry[];
-}
-
-/**
- * 绑定资源入口，指定资源绑定的位置。
- *
- * @see GPUBindGroupEntry
- */
-export interface BindGroupEntry
-{
-    binding: GPUIndex32;
-
-    /**
-     * The resource to bind, which may be a {@link GPUSampler}, {@link GPUTextureView},
-     * {@link GPUExternalTexture}, or {@link GPUBufferBinding}.
-     */
-    resource: Sampler | TextureView | VideoTexture | BindingResource;
-}
