@@ -72,7 +72,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
             label = `GPUTexture ${autoIndex++}`;
         }
 
-        const textureDimension = getGPUTextureDimension(dimension);
+        const textureDimension = dimensionMap[dimension];
 
         // 创建纹理
         const gpuTexture = device.createTexture({
@@ -241,13 +241,6 @@ function updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, texture:
         });
     }).value;
 };
-
-function getGPUTextureDimension(dimension: TextureDimension)
-{
-    const textureDimension = dimensionMap[dimension];
-
-    return textureDimension;
-}
 
 const dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
     "1d": "1d",
