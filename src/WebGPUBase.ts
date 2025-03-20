@@ -390,7 +390,6 @@ export class WebGPUBase
      */
     protected runRenderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
-        const device = this._device;
         const { viewport, scissorRect, pipeline, bindingResources, geometry } = renderObject;
 
         this.runviewport(passEncoder, viewport, renderPassFormat);
@@ -398,29 +397,8 @@ export class WebGPUBase
         this.runRenderPipeline(passEncoder, pipeline, renderPassFormat, geometry);
         this.runBindingResources(passEncoder, pipeline, bindingResources);
         this.runVertexAttributes(passEncoder, pipeline, geometry);
-
-        // this.run
-        const { indices, draw } = geometry;
-
-        if (indices)
-        {
-            const buffer = getGBuffer(indices);
-            (buffer as UnReadonly<GBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
-
-            const gBuffer = getGPUBuffer(device, buffer);
-
-            //
-            passEncoder.setIndexBuffer(gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength);
-        }
-
-        if (draw.__type__ === 'DrawVertex')
-        {
-            passEncoder.draw(draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance);
-        }
-        else
-        {
-            passEncoder.drawIndexed(draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance);
-        }
+        this.runIndices(passEncoder, geometry);
+        this.runDraw(passEncoder, geometry);
     }
 
     protected runviewport(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, viewport: Viewport, renderPassFormat: RenderPassFormat)
@@ -537,6 +515,36 @@ export class WebGPUBase
 
             passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
         });
+    }
+
+    protected runIndices(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: Geometry)
+    {
+        const { indices } = geometry;
+        if (!indices) return;
+
+        const device = this._device;
+
+        const buffer = getGBuffer(indices);
+        (buffer as UnReadonly<GBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
+
+        const gBuffer = getGPUBuffer(device, buffer);
+
+        //
+        passEncoder.setIndexBuffer(gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength);
+    }
+
+    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: Geometry)
+    {
+        const { draw } = geometry;
+
+        if (draw.__type__ === 'DrawVertex')
+        {
+            passEncoder.draw(draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance);
+        }
+        else
+        {
+            passEncoder.drawIndexed(draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance);
+        }
     }
 }
 
