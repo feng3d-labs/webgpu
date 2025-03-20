@@ -71,50 +71,44 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         lodMaxClamp: 4,
         maxAnisotropy: 1,
     } as const;
-    const samplerDescriptor: GPUSamplerDescriptor = { ...kInitSamplerDescriptor };
+
+    const samplerDescriptor: Sampler = { ...kInitSamplerDescriptor };
+    const r_samplerDescriptor: Sampler = reactive(samplerDescriptor);
 
     {
         const buttons = {
             initial()
             {
                 Object.assign(config, kInitConfig);
-                Object.assign(samplerDescriptor, kInitSamplerDescriptor);
+                Object.assign(r_samplerDescriptor, kInitSamplerDescriptor);
                 gui.updateDisplay();
-
-                updateSamplerResources();
             },
             checkerboard()
             {
                 Object.assign(config, { flangeLogSize: 10 });
-                Object.assign(samplerDescriptor, {
+                Object.assign(r_samplerDescriptor, {
                     addressModeU: "repeat",
                     addressModeV: "repeat",
                 });
                 gui.updateDisplay();
-
-                updateSamplerResources();
             },
             smooth()
             {
-                Object.assign(samplerDescriptor, {
+                Object.assign(r_samplerDescriptor, {
                     magFilter: "linear",
                     minFilter: "linear",
                     mipmapFilter: "linear",
                 });
                 gui.updateDisplay();
-
-                updateSamplerResources();
             },
             crunchy()
             {
-                Object.assign(samplerDescriptor, {
+                Object.assign(r_samplerDescriptor, {
                     magFilter: "nearest",
                     minFilter: "nearest",
                     mipmapFilter: "nearest",
                 });
                 gui.updateDisplay();
-
-                updateSamplerResources();
             },
         };
         const presets = gui.addFolder("Presets");
@@ -136,28 +130,24 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             folder.open();
 
             const kAddressModes = ["clamp-to-edge", "repeat", "mirror-repeat"];
-            folder.add(samplerDescriptor, "addressModeU", kAddressModes).onChange(updateSamplerResources);
-            folder.add(samplerDescriptor, "addressModeV", kAddressModes).onChange(updateSamplerResources);
+            folder.add(r_samplerDescriptor, "addressModeU", kAddressModes);
+            folder.add(r_samplerDescriptor, "addressModeV", kAddressModes);
 
             const kFilterModes = ["nearest", "linear"];
-            folder.add(samplerDescriptor, "magFilter", kFilterModes).onChange(updateSamplerResources);
-            folder.add(samplerDescriptor, "minFilter", kFilterModes).onChange(updateSamplerResources);
+            folder.add(r_samplerDescriptor, "magFilter", kFilterModes);
+            folder.add(r_samplerDescriptor, "minFilter", kFilterModes);
             const kMipmapFilterModes = ["nearest", "linear"] as const;
-            folder.add(samplerDescriptor, "mipmapFilter", kMipmapFilterModes).onChange(updateSamplerResources);
+            folder.add(r_samplerDescriptor, "mipmapFilter", kMipmapFilterModes);
 
-            const ctlMin = folder.add(samplerDescriptor, "lodMinClamp", 0, 4, 0.1);
-            const ctlMax = folder.add(samplerDescriptor, "lodMaxClamp", 0, 4, 0.1);
+            const ctlMin = folder.add(r_samplerDescriptor, "lodMinClamp", 0, 4, 0.1);
+            const ctlMax = folder.add(r_samplerDescriptor, "lodMaxClamp", 0, 4, 0.1);
             ctlMin.onChange((value: number) =>
             {
-                if (samplerDescriptor.lodMaxClamp < value) ctlMax.setValue(value);
-
-                updateSamplerResources();
+                if (r_samplerDescriptor.lodMaxClamp < value) ctlMax.setValue(value);
             });
             ctlMax.onChange((value: number) =>
             {
-                if (samplerDescriptor.lodMinClamp > value) ctlMin.setValue(value);
-
-                updateSamplerResources();
+                if (r_samplerDescriptor.lodMinClamp > value) ctlMin.setValue(value);
             });
 
             {
@@ -166,27 +156,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 );
                 folder2.open();
                 const kMaxAnisotropy = 16;
-                folder2.add(samplerDescriptor, "maxAnisotropy", 1, kMaxAnisotropy, 1).onChange(updateSamplerResources);
+                folder2.add(r_samplerDescriptor, "maxAnisotropy", 1, kMaxAnisotropy, 1);
             }
         }
-    }
-
-    /**
-     * 更新采样资源
-     */
-    function updateSamplerResources()
-    {
-        const sampler: Sampler = {
-            ...samplerDescriptor,
-            maxAnisotropy:
-                samplerDescriptor.minFilter === "linear"
-                    && samplerDescriptor.magFilter === "linear"
-                    && samplerDescriptor.mipmapFilter === "linear"
-                    ? samplerDescriptor.maxAnisotropy
-                    : 1,
-        };
-
-        bindingResources0.samp = sampler;
     }
 
     //
@@ -306,11 +278,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const bindingResources0: BindingResources = {
         config: { bufferView: bufConfig },
         matrices: { bufferView: bufMatrices },
-        samp: null, // 帧更新中设置
+        samp: samplerDescriptor, // 帧更新中设置
         tex: { texture: checkerboard },
     };
-
-    updateSamplerResources();
 
     for (let i = 0; i < kViewportGridSize ** 2 - 1; ++i)
     {
