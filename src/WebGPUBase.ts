@@ -485,7 +485,7 @@ export class WebGPUBase
         const layout = getGPUPipelineLayout(device, { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code });
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
-            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
+            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
             passEncoder.setBindGroup(group, gpuBindGroup);
         });
 

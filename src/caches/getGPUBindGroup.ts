@@ -20,123 +20,53 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
     let gBindGroup: GPUBindGroup;
     result = computed(() =>
     {
-        // 总是更新函数列表。
-        const awaysUpdateFuncs: (() => void)[] = [];
-        // 执行一次函数列表
-        const onceUpdateFuncs: (() => void)[] = [];
-
         const entries = (bindGroupLayout.entries as GPUBindGroupLayoutEntry[]).map((v) =>
         {
             const { name, type, resourceType, binding } = v.variableInfo;
 
             const entry: GPUBindGroupEntry = { binding, resource: null };
 
-            // 更新资源函数。
-            let updateResource: () => void;
-
-            // 资源变化后更新函数。
-            const onResourceChanged = () =>
-            {
-                onceUpdateFuncs.push(updateResource);
-
-                if (gBindGroup[getRealGPUBindGroup] !== getReal)
-                {
-                    gBindGroup[getRealGPUBindGroup] = createBindGroup;
-                }
-            };
-
             //
             if (resourceType === ResourceType.Uniform || resourceType === ResourceType.Storage)
             {
-                updateResource = () =>
-                {
-                    const resource = bindingResources[name] as BufferBinding;
+                const resource = bindingResources[name] as BufferBinding;
 
-                    const bufferBinding = ((typeof resource === "number") ? [resource] : resource) as BufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
-                    const bufferBindingInfo: BufferBindingInfo = type["_bufferBindingInfo"] = type["_bufferBindingInfo"] || getBufferBindingInfo(type);
-                    // 更新缓冲区绑定的数据。
-                    updateBufferBinding(name, bufferBindingInfo, bufferBinding);
-                    //
-                    const gbuffer = getGBuffer(bufferBinding.bufferView);
-                    (gbuffer as any).label = gbuffer.label || (`BufferBinding ${name}`);
-                    //
-                    const buffer = getGPUBuffer(device, gbuffer);
+                const bufferBinding = ((typeof resource === "number") ? [resource] : resource) as BufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
+                const bufferBindingInfo: BufferBindingInfo = type["_bufferBindingInfo"] = type["_bufferBindingInfo"] || getBufferBindingInfo(type);
+                // 更新缓冲区绑定的数据。
+                updateBufferBinding(name, bufferBindingInfo, bufferBinding);
+                //
+                const gbuffer = getGBuffer(bufferBinding.bufferView);
+                (gbuffer as any).label = gbuffer.label || (`BufferBinding ${name}`);
+                //
+                const buffer = getGPUBuffer(device, gbuffer);
 
-                    const offset = resource.bufferView.byteOffset;
-                    const size = resource.bufferView.byteLength;
+                const offset = resource.bufferView.byteOffset;
+                const size = resource.bufferView.byteLength;
 
-                    entry.resource = {
-                        buffer,
-                        offset,
-                        size,
-                    };
+                entry.resource = {
+                    buffer,
+                    offset,
+                    size,
                 };
             }
             else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
             {
-                updateResource = () =>
-                {
-                    entry.resource = device.importExternalTexture(bindingResources[name] as VideoTexture);
-                };
-
-                awaysUpdateFuncs.push(updateResource);
+                entry.resource = device.importExternalTexture(bindingResources[name] as VideoTexture);
             }
             else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)
             {
-                updateResource = () =>
-                {
-                    entry.resource = getGPUTextureView(device, bindingResources[name] as TextureView);
-                };
-
-                if (((bindingResources[name] as TextureView).texture as CanvasTexture).context)
-                {
-                    awaysUpdateFuncs.push(updateResource);
-                }
+                entry.resource = getGPUTextureView(device, bindingResources[name] as TextureView);
             }
             else
             {
-                updateResource = () =>
-                {
-                    entry.resource = getGPUSampler(device, bindingResources[name] as Sampler);
-                };
+                entry.resource = getGPUSampler(device, bindingResources[name] as Sampler);
             }
-
-            updateResource();
-
-            // 监听绑定资源发生改变
-            watcher.watch(bindingResources, name, onResourceChanged);
 
             return entry;
         });
 
-        const getReal = () =>
-        {
-            awaysUpdateFuncs.forEach((v) => v());
-            createBindGroup();
-
-            return gBindGroup;
-        };
-
-        const createBindGroup = () =>
-        {
-            onceUpdateFuncs.forEach((v) => v());
-
-            gBindGroup = device.createBindGroup({ layout: bindGroupLayout, entries });
-
-            // 设置更新外部纹理/画布纹理视图
-            if (awaysUpdateFuncs.length > 0)
-            {
-                gBindGroup[getRealGPUBindGroup] = getReal;
-            }
-            else
-            {
-                gBindGroup[getRealGPUBindGroup] = () => gBindGroup;
-            }
-
-            return gBindGroup;
-        };
-
-        createBindGroup();
+        gBindGroup = device.createBindGroup({ layout: bindGroupLayout, entries });
 
         return gBindGroup;
     });
