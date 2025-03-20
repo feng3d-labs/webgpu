@@ -5,12 +5,29 @@ import { ArrayInfo, StructInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
  * 获取缓冲区绑定信息。
  *
  * @param type 类型信息。
+ * @returns
+ */
+export function getBufferBindingInfo(type: TypeInfo)
+{
+    let result = bufferBindingInfoMap.get(type);
+    if (result) return result;
+    result = _getBufferBindingInfo(type);
+
+    bufferBindingInfoMap.set(type, result);
+    return result;
+}
+const bufferBindingInfoMap = new Map<TypeInfo, BufferBindingInfo>();
+
+/**
+ * 获取缓冲区绑定信息。
+ *
+ * @param type 类型信息。
  * @param paths 当前路径。
  * @param offset 当前编译。
  * @param bufferBindingInfo 缓冲区绑定信息。
  * @returns
  */
-export function getBufferBindingInfo(type: TypeInfo, paths: string[] = [], offset = 0, bufferBindingInfo: BufferBindingInfo = { size: type.size, items: [] })
+function _getBufferBindingInfo(type: TypeInfo, paths: string[] = [], offset = 0, bufferBindingInfo: BufferBindingInfo = { size: type.size, items: [] })
 {
     if (type.isStruct)
     {
@@ -18,7 +35,7 @@ export function getBufferBindingInfo(type: TypeInfo, paths: string[] = [], offse
         for (let i = 0; i < structInfo.members.length; i++)
         {
             const memberInfo = structInfo.members[i];
-            getBufferBindingInfo(memberInfo.type, paths.concat(memberInfo.name), offset + memberInfo.offset, bufferBindingInfo);
+            _getBufferBindingInfo(memberInfo.type, paths.concat(memberInfo.name), offset + memberInfo.offset, bufferBindingInfo);
         }
     }
     else if (type.isArray)
@@ -26,7 +43,7 @@ export function getBufferBindingInfo(type: TypeInfo, paths: string[] = [], offse
         const arrayInfo = type as ArrayInfo;
         for (let i = 0; i < arrayInfo.count; i++)
         {
-            getBufferBindingInfo(arrayInfo.format, paths.concat(`${i}`), offset + i * arrayInfo.format.size, bufferBindingInfo);
+            _getBufferBindingInfo(arrayInfo.format, paths.concat(`${i}`), offset + i * arrayInfo.format.size, bufferBindingInfo);
         }
     }
     else if (type.isTemplate)

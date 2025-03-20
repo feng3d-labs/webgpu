@@ -11,14 +11,14 @@ import { getGBuffer } from "../caches/getIGPUBuffer";
  * @param uniformData
  * @returns
  */
-export function updateBufferBinding(resourceName: string, bufferBindingInfo: BufferBindingInfo, uniformData: BufferBinding)
+export function updateBufferBinding(bufferBindingInfo: BufferBindingInfo, uniformData: BufferBinding)
 {
     if (uniformData["_variableInfo"] !== undefined)
     {
         const preVariableInfo = uniformData["_variableInfo"] as any as VariableInfo;
         if (preVariableInfo.size !== bufferBindingInfo.size)
         {
-            console.warn(`updateBufferBinding ${resourceName} 出现一份数据对应多个 variableInfo`, { uniformData, bufferBindingInfo, preVariableInfo });
+            console.warn(`updateBufferBinding ${preVariableInfo.name} 出现一份数据对应多个 variableInfo`, { uniformData, bufferBindingInfo, preVariableInfo });
         }
 
         return;
