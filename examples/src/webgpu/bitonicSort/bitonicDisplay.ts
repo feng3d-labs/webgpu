@@ -1,4 +1,4 @@
-import { BindingResources, BufferBinding, CommandEncoder, RenderPassDescriptor } from "@feng3d/render-api";
+import { BindingResources, BufferBinding, CommandEncoder, reactive, RenderPassDescriptor } from "@feng3d/render-api";
 
 import bitonicDisplay from "./bitonicDisplay.frag.wgsl";
 import { Base2DRendererClass } from "./utils";
@@ -28,7 +28,7 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
             highlight: undefined,
         };
 
-        computeBGDescript.fragment_uniforms = fragment_uniforms;
+        reactive(computeBGDescript).fragment_uniforms = fragment_uniforms;
 
         this.pipeline = super.create2DRenderPipeline(
             label,

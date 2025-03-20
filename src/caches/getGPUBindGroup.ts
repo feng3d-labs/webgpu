@@ -145,10 +145,11 @@ export function updateBufferBinding(type: TypeInfo, uniformData: BufferBinding)
         {
             console.warn(`updateBufferBinding ${preVariableInfo.name} 出现一份数据对应多个 variableInfo`, { uniformData, bufferBindingInfo, preVariableInfo });
         }
-
-        return;
     }
-    uniformData["_variableInfo"] = bufferBindingInfo as any;
+    else
+    {
+        uniformData["_variableInfo"] = bufferBindingInfo as any;
+    }
 
     const size = bufferBindingInfo.size;
     // 是否存在默认值。
@@ -164,9 +165,11 @@ export function updateBufferBinding(type: TypeInfo, uniformData: BufferBinding)
     for (let i = 0; i < bufferBindingInfo.items.length; i++)
     {
         const { paths, offset: itemInfoOffset, size: itemInfoSize, Cls } = bufferBindingInfo.items[i];
-        const update = () =>
+        // 更新数据
+        computed(() =>
         {
-            let value: any = uniformData;
+            // 监听
+            let value: any = reactive(uniformData);
             for (let i = 0; i < paths.length; i++)
             {
                 value = value[paths[i]];
@@ -181,6 +184,7 @@ export function updateBufferBinding(type: TypeInfo, uniformData: BufferBinding)
                 }
             }
 
+            // 更新数据
             let data: Float32Array | Int32Array | Uint32Array | Int16Array;
             if (typeof value === "number")
             {
@@ -198,10 +202,7 @@ export function updateBufferBinding(type: TypeInfo, uniformData: BufferBinding)
             const writeBuffers = buffer.writeBuffers ?? [];
             writeBuffers.push({ bufferOffset: offset + itemInfoOffset, data: data.buffer, dataOffset: data.byteOffset, size: Math.min(itemInfoSize, data.byteLength) });
             reactive(buffer).writeBuffers = writeBuffers;
-        };
-
-        update();
-        watcher.watchchain(uniformData, paths.join("."), update, undefined, false);
+        }).value;
     }
 }
 
