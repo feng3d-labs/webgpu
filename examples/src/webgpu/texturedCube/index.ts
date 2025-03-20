@@ -1,4 +1,4 @@
-import { RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
+import { reactive, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -103,7 +103,8 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        uniforms.modelViewProjectionMatrix = transformationMatrix.slice(); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        // 重新设置uniforms
+        reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
 
         const data: Submit = {
             commandEncoders: [

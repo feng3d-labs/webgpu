@@ -5,7 +5,7 @@ import { ArcballCamera, WASDCamera } from "./camera";
 import cubeWGSL from "./cube.wgsl";
 import { createInputHandler } from "./input";
 
-import { RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { reactive, RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -99,7 +99,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const renderObject: RenderObject = {
         pipeline: pipeline,
         bindingResources: bindingResources,
-        geometry:{
+        geometry: {
             vertices,
             draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
         }
@@ -156,7 +156,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         lastFrameMS = now;
 
         const modelViewProjection = getModelViewProjectionMatrix(deltaTime);
-        bindingResources.uniforms.modelViewProjectionMatrix = new Float32Array(modelViewProjection); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        reactive(bindingResources.uniforms).modelViewProjectionMatrix = new Float32Array(modelViewProjection); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
         webgpu.submit(data);
 

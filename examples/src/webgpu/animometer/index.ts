@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
+import { reactive, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
 import { RenderBundle, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
@@ -154,7 +154,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
             uniformTime[0] = (timestamp - startTime) / 1000;
 
-            time.value = uniformTime[0];
+            reactive(time).value = uniformTime[0];
 
             if (settings.renderBundles)
             {

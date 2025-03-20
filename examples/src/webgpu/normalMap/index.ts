@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, BindingResources } from "@feng3d/render-api";
+import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, BindingResources, reactive } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -288,8 +288,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const worldViewMatrix = mat4.mul(viewMatrix, getModelMatrix());
         const worldViewProjMatrix = mat4.mul(projectionMatrix, worldViewMatrix);
 
-        spaceTransform.worldViewMatrix = worldViewMatrix;
-        spaceTransform.worldViewProjMatrix = worldViewProjMatrix;
+        reactive(spaceTransform).worldViewMatrix = worldViewMatrix;
+        reactive(spaceTransform).worldViewProjMatrix = worldViewProjMatrix;
 
         // Update mapInfoBuffer
         const lightPosWS = vec3.create(
@@ -343,7 +343,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         requestAnimationFrame(frame);
     }
-    requestAnimationFrame(frame);
+    frame();
 };
 
 const panel = new GUI();

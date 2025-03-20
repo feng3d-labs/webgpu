@@ -1,7 +1,7 @@
 import { GUI } from "dat.gui";
 import checkerWGSL from "./checker.wgsl";
 
-import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
+import { BindingResources, reactive, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -21,7 +21,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         size: undefined,
     };
 
-    const bindGroup:  BindingResources = {
+    const bindGroup: BindingResources = {
         uni,
     };
 
@@ -36,7 +36,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             {
                 document.exitFullscreen();
             }
- else
+            else
             {
                 document.body.requestFullscreen();
             }
@@ -72,47 +72,47 @@ const init = async (canvas: HTMLCanvasElement) =>
             willReadFrequently: true,
         });
 
-return function (color: string)
+        return function (color: string)
         {
             ctx.clearRect(0, 0, 1, 1);
             ctx.fillStyle = color;
             ctx.fillRect(0, 0, 1, 1);
 
-return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
+            return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
         };
     })();
 
-    function frame()
-    {
-        uni.color0 = cssColorToRGBA(settings.color0);
-        uni.color1 = cssColorToRGBA(settings.color1);
-        uni.size = settings.size;
+    const renderPassDescriptor: RenderPassDescriptor = {
+        colorAttachments: [
+            {
+                view: { texture: { context: { canvasId: canvas.id } } },
+                clearValue: [0.2, 0.2, 0.2, 1.0],
+                loadOp: "clear",
+                storeOp: "store",
+            },
+        ],
+    };
 
-        const renderPassDescriptor: RenderPassDescriptor = {
-            colorAttachments: [
-                {
-                    view: { texture: { context: { canvasId: canvas.id } } },
-                    clearValue: [0.2, 0.2, 0.2, 1.0],
-                    loadOp: "clear",
-                    storeOp: "store",
-                },
-            ],
-        };
-
-        const submit: Submit = {
-            commandEncoders: [{
-                passEncoders: [{
-                    descriptor: renderPassDescriptor,
-                    renderObjects: [{
-                        pipeline: pipeline,
-                        bindingResources: bindGroup,
-                        geometry:{
-                            draw: { __type__: "DrawVertex", vertexCount: 3 },
-                        }
-                    }]
+    const submit: Submit = {
+        commandEncoders: [{
+            passEncoders: [{
+                descriptor: renderPassDescriptor,
+                renderObjects: [{
+                    pipeline: pipeline,
+                    bindingResources: bindGroup,
+                    geometry: {
+                        draw: { __type__: "DrawVertex", vertexCount: 3 },
+                    }
                 }]
             }]
-        };
+        }]
+    };
+    function frame()
+    {
+        reactive(uni).color0 = cssColorToRGBA(settings.color0);
+        reactive(uni).color1 = cssColorToRGBA(settings.color1);
+        reactive(uni).size = settings.size;
+
         webgpu.submit(submit);
     }
 
@@ -126,11 +126,11 @@ return [...ctx.getImageData(0, 0, 1, 1).data].map((v) => v / 255);
                 height: entry.devicePixelContentBoxSize[0].blockSize,
             };
         }
-            // These values not correct but they're as close as you can get in Safari
-            return {
-                width: entry.contentBoxSize[0].inlineSize * devicePixelRatio,
-                height: entry.contentBoxSize[0].blockSize * devicePixelRatio,
-            };
+        // These values not correct but they're as close as you can get in Safari
+        return {
+            width: entry.contentBoxSize[0].inlineSize * devicePixelRatio,
+            height: entry.contentBoxSize[0].blockSize * devicePixelRatio,
+        };
     }
 
     const { maxTextureDimension2D } = webgpu.device.limits;

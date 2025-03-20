@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
+import { RenderPassDescriptor, Submit, RenderObject, reactive } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { Mat4, mat4, vec3 } from "wgpu-matrix";
 
@@ -79,7 +79,8 @@ const init = async (canvas: HTMLCanvasElement) =>
                 mat4.multiply(viewMatrix, tmpMat4, tmpMat4);
                 mat4.multiply(projectionMatrix, tmpMat4, tmpMat4);
 
-                mvpMatricesData[i] = tmpMat4.slice();
+                // Update the matrix data.
+                reactive(mvpMatricesData)[i] = tmpMat4.slice();
 
                 i++;
                 m += matrixFloatCount;

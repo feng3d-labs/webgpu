@@ -10,7 +10,7 @@ import vertexDepthPrePassWGSL from "./vertexDepthPrePass.wgsl";
 import vertexPrecisionErrorPassWGSL from "./vertexPrecisionErrorPass.wgsl";
 import vertexTextureQuadWGSL from "./vertexTextureQuad.wgsl";
 
-import { BindingResources, CanvasContext, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, CanvasContext, reactive, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 // Two planes close to each other for depth precision test
@@ -351,7 +351,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 (Math.PI / 180) * 30,
                 tmpMat4
             );
-            mvpMatricesData[i] = tmpMat4.slice();
+            reactive(mvpMatricesData)[i] = tmpMat4.slice();
         }
     }
 

@@ -1,4 +1,4 @@
-import { CanvasContext, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { CanvasContext, reactive, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { TimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
@@ -152,7 +152,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
-        uniforms.modelViewProjectionMatrix = new Float32Array(transformationMatrix);
+        reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
 
         webgpu.submit(submit);
 

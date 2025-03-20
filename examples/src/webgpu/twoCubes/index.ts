@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { BufferBinding, RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
+import { BufferBinding, reactive, RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -135,8 +135,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         updateTransformationMatrix();
 
-        uniforms.modelViewProjectionMatrix = modelViewProjectionMatrix1;
-        uniforms1.modelViewProjectionMatrix = modelViewProjectionMatrix2;
+        // 使用 subarray 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        reactive(uniforms).modelViewProjectionMatrix = modelViewProjectionMatrix1.subarray();
+        reactive(uniforms1).modelViewProjectionMatrix = modelViewProjectionMatrix2.subarray();
 
         webgpu.submit(data);
 

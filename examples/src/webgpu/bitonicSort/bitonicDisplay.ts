@@ -37,7 +37,7 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
 
         this.setArguments = (args: BitonicDisplayRenderArgs) =>
         {
-            fragment_uniforms.highlight = args.highlight;
+            reactive(fragment_uniforms).highlight = args.highlight;
         };
     }
 

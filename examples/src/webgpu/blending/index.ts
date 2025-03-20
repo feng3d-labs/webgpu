@@ -370,7 +370,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             );
         }
     }
-
+    const constantColor: Color = [0, 0, 0, 0];
     const srcPipeline: RenderPipeline = {
         label: "hardcoded textured quad pipeline",
         vertex: {
@@ -381,7 +381,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             targets: [
                 {
                     blend: {
-                        constantColor: [0, 0, 0, 0],
+                        constantColor: constantColor,
                         color: {
                             operation: "add",
                             srcFactor: "one",
@@ -410,46 +410,43 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     gui
         .add(settings, "alphaMode", ["opaque", "premultiplied"])
-        .name("canvas alphaMode")
-        .onChange(render);
+        .name("canvas alphaMode");
     gui
         .add(settings, "textureSet", [
             "premultiplied alpha",
             "un-premultiplied alpha",
         ])
-        .name("texture data")
-        .onChange(render);
+        .name("texture data");
     gui.add(settings, "preset", [...Object.keys(presets)]).onChange(() =>
     {
         applyPreset();
-        render();
     });
 
     const colorFolder = gui.addFolder("color");
     colorFolder.open();
-    colorFolder.add(r_color, "operation", operations).onChange(render);
-    colorFolder.add(r_color, "srcFactor", factors).onChange(render);
-    colorFolder.add(r_color, "dstFactor", factors).onChange(render);
+    colorFolder.add(r_color, "operation", operations);
+    colorFolder.add(r_color, "srcFactor", factors);
+    colorFolder.add(r_color, "dstFactor", factors);
 
     const alphaFolder = gui.addFolder("alpha");
     alphaFolder.open();
-    alphaFolder.add(r_alpha, "operation", operations).onChange(render);
-    alphaFolder.add(r_alpha, "srcFactor", factors).onChange(render);
-    alphaFolder.add(r_alpha, "dstFactor", factors).onChange(render);
+    alphaFolder.add(r_alpha, "operation", operations);
+    alphaFolder.add(r_alpha, "srcFactor", factors);
+    alphaFolder.add(r_alpha, "dstFactor", factors);
 
     const constantFolder = gui.addFolder("constant");
     constantFolder.open();
     constantFolder
         .addColor(new GUIColorHelper(constant.color), "value")
         .name("color")
-        .onChange(render);
-    constantFolder.add(constant, "alpha", 0, 1).onChange(render);
+        ;
+    constantFolder.add(constant, "alpha", 0, 1);
 
     const clearFolder = gui.addFolder("clear color");
     clearFolder.open();
-    clearFolder.add(clear, "premultiply").onChange(render);
-    clearFolder.add(clear, "alpha", 0, 1).onChange(render);
-    clearFolder.addColor(new GUIColorHelper(clear.color), "value").onChange(render);
+    clearFolder.add(clear, "premultiply");
+    clearFolder.add(clear, "alpha", 0, 1);
+    clearFolder.addColor(new GUIColorHelper(clear.color), "value");
 
     const dstPipeline: RenderPipeline = {
         label: "hardcoded textured quad pipeline",
@@ -535,6 +532,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             clearValue[2] = color[2] * mult;
             clearValue[3] = alpha;
         }
+
+        constantColor[0] = constant.color[0];
+        constantColor[1] = constant.color[1];
+        constantColor[2] = constant.color[2];
+        constantColor[3] = constant.alpha;
 
         updateUniforms(srcUniform, canvas, srcTexture);
         updateUniforms(dstUniform, canvas, dstTexture);

@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { reactive, RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
@@ -161,6 +161,26 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     gui.add(settings, "textured");
     gui.add(settings, "size", 0, 80);
 
+    const ro: RenderObject = {
+        pipeline: undefined,
+        bindingResources: bindingResources,
+        geometry: {
+            vertices,
+            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: kNumPoints },
+        }
+    };
+    //
+    const submit: Submit = {
+        commandEncoders: [{
+            passEncoders: [
+                {
+                    descriptor: renderPassDescriptor,
+                    renderObjects: [ro]
+                }
+            ]
+        }]
+    };
+
     function render(time: number)
     {
         // Convert to seconds.
@@ -168,10 +188,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const { size, fixedSize, textured } = settings;
 
-        const pipeline = pipelines[fixedSize ? 1 : 0][textured ? 1 : 0];
+        ro.pipeline = pipelines[fixedSize ? 1 : 0][textured ? 1 : 0];
 
         // Set the size in the uniform values
-        bindingResources.uni.size = size;
+        reactive(bindingResources.uni).size = size;
 
         const fov = (90 * Math.PI) / 180;
         const aspect = canvas.clientWidth / canvas.clientHeight;
@@ -186,29 +206,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         mat4.rotateY(viewProjection, time, matrixValue);
         mat4.rotateX(matrixValue, time * 0.1, matrixValue);
         // Copy the uniform values to the GPU
-        bindingResources.uni.matrix = matrixValue;
+        reactive(bindingResources.uni).matrix = matrixValue;
 
         // Update the resolution in the uniform values
-        bindingResources.uni.resolution = [canvas.width, canvas.height];
-
-        //
-        const submit: Submit = {
-            commandEncoders: [{
-                passEncoders: [
-                    {
-                        descriptor: renderPassDescriptor,
-                        renderObjects: [{
-                            pipeline: pipeline,
-                            bindingResources: bindingResources,
-                            geometry: {
-                                vertices,
-                                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: kNumPoints },
-                            }
-                        }]
-                    }
-                ]
-            }]
-        };
+        reactive(bindingResources.uni).resolution = [canvas.width, canvas.height];
 
         webgpu.submit(submit);
 

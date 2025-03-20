@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import volumeWGSL from "./volume.wgsl";
 
-import { BindingResources, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
+import { BindingResources, reactive, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const gui = new GUI();
@@ -145,6 +145,21 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     let lastFrameMS = Date.now();
 
+    const submit: Submit = {
+        commandEncoders: [{
+            passEncoders: [{
+                descriptor: renderPassDescriptor,
+                renderObjects: [{
+                    pipeline,
+                    bindingResources: uniformBindGroup,
+                    geometry: {
+                        draw: { __type__: "DrawVertex", vertexCount: 3 },
+                    }
+                }],
+            }]
+        }]
+    };
+
     function frame()
     {
         const now = Date.now();
@@ -154,22 +169,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         const inverseModelViewProjection
             = getInverseModelViewProjectionMatrix(deltaTime);
 
-        uniformBuffer.inverseModelViewProjectionMatrix = inverseModelViewProjection;
+        reactive(uniformBuffer).inverseModelViewProjectionMatrix = inverseModelViewProjection;
 
-        const submit: Submit = {
-            commandEncoders: [{
-                passEncoders: [{
-                    descriptor: renderPassDescriptor,
-                    renderObjects: [{
-                        pipeline,
-                        bindingResources: uniformBindGroup,
-                        geometry: {
-                            draw: { __type__: "DrawVertex", vertexCount: 3 },
-                        }
-                    }],
-                }]
-            }]
-        };
         webgpu.submit(submit);
 
         requestAnimationFrame(frame);

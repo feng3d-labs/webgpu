@@ -1,4 +1,4 @@
-import { BindingResources, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, reactive, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -321,8 +321,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.multiply(viewProjection, world, worldViewProjectionMatrixValue);
 
                 // Upload our uniform values.
-                uniformBuffer.worldViewProjectionMatrix = worldViewProjectionMatrixValue;
-                uniformBuffer.worldMatrix = world;
+                reactive(uniformBuffer).worldViewProjectionMatrix = worldViewProjectionMatrixValue.subarray();
+                reactive(uniformBuffer).worldMatrix = world;
 
                 if (settings.models)
                 {

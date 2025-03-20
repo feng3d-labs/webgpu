@@ -163,8 +163,8 @@ function updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, texture:
                 // 转换为WebGPU翻转模式
                 if (flipY)
                 {
-                    const x = imageOrigin?.[0];
-                    let y = imageOrigin?.[1];
+                    const x = imageOrigin?.[0] ?? 0;
+                    let y = imageOrigin?.[1] ?? 0;
 
                     y = imageSize[1] - y - copySize[1];
 

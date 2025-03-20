@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { CanvasContext, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
+import { CanvasContext, reactive, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -168,7 +168,7 @@ async function init(canvas: OffscreenCanvas)
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
-        uniformBindGroup.uniforms.modelViewProjectionMatrix = transformationMatrix.slice();
+        reactive(uniformBindGroup.uniforms).modelViewProjectionMatrix = transformationMatrix.slice();
 
         webgpu.submit(submit);
 

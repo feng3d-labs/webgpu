@@ -1,4 +1,4 @@
-import { BufferBinding, CanvasContext, PassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { BufferBinding, CanvasContext, PassEncoder, reactive, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
 import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -365,14 +365,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         // update the uniform buffer
-        uniforms.maxStorableFragments = averageLayersPerFragment * canvas.width * sliceHeight;
-        uniforms.targetWidth = canvas.width;
+        reactive(uniforms).maxStorableFragments = averageLayersPerFragment * canvas.width * sliceHeight;
+        reactive(uniforms).targetWidth = canvas.width;
 
         return function doDraw()
         {
             // update the uniform buffer
             {
-                uniforms.modelViewProjectionMatrix = getCameraViewProjMatrix();
+                reactive(uniforms).modelViewProjectionMatrix = getCameraViewProjMatrix();
             }
 
             webgpu.submit(submit);

@@ -1,4 +1,4 @@
-import { BufferBinding, CanvasContext, CopyTextureToTexture, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
+import { BufferBinding, CanvasContext, CopyTextureToTexture, reactive, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -110,7 +110,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        (renderObject.bindingResources.uniforms as BufferBinding).modelViewProjectionMatrix = transformationMatrix;
+        reactive(renderObject.bindingResources.uniforms as BufferBinding).modelViewProjectionMatrix = transformationMatrix.subarray();
 
         const data: Submit = {
             commandEncoders: [
