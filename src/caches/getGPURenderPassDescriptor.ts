@@ -180,22 +180,27 @@ function getIGPURenderPassAttachmentTextures(colorAttachments: NGPURenderPassCol
  */
 function getMultisampleTextureView(texture: TextureLike, sampleCount: 4)
 {
-    let multisampleTextureView: TextureView = texture["_multisampleTextureView"];
-    if (multisampleTextureView) return multisampleTextureView;
+    if (sampleCount !== 4) return undefined;
+    if (!texture) return undefined;
+
+    let result = getMultisampleTextureViewMap.get(texture);
+    if (result) return result.value;
 
     // 新增用于解决多重采样的纹理
-    const size = getTextureSize(texture);
-    const format = getGPUTextureFormat(texture);
-    const multisampleTexture: MultisampleTexture = {
-        label: "自动生成多重采样的纹理",
-        size,
-        sampleCount,
-        format,
-    };
-    multisampleTextureView = texture["_multisampleTextureView"] = { texture: multisampleTexture };
+    const multisampleTexture: MultisampleTexture = { label: "自动生成多重采样的纹理", sampleCount } as any;
+    const multisampleTextureView: TextureView = { texture: multisampleTexture };
+    result = computed(() =>
+    {
+        // 新建的多重采样纹理尺寸与格式与原始纹理同步。
+        reactive(multisampleTexture).size = getTextureSize(texture);
+        reactive(multisampleTexture).format = getGPUTextureFormat(texture);
 
-    return multisampleTextureView;
+        return multisampleTextureView;
+    });
+    getMultisampleTextureViewMap.set(texture, result);
+    return result.value;
 }
+const getMultisampleTextureViewMap = new WeakMap<TextureLike, ComputedRef<TextureView>>;
 
 /**
  * 获取深度模板附件完整描述。
@@ -297,6 +302,8 @@ function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttac
         r_renderPassColorAttachment.clearValue;
         r_renderPassColorAttachment.loadOp;
         r_renderPassColorAttachment.storeOp;
+        const r_descriptor = reactive(descriptor);
+        r_descriptor.sampleCount;
 
         //
         const { depthSlice, clearValue, loadOp, storeOp } = renderPassColorAttachment;

@@ -1,4 +1,4 @@
-import { CanvasTexture, TextureLike, TextureSize } from "@feng3d/render-api";
+import { CanvasTexture, computed, ComputedRef, reactive, TextureLike, TextureSize } from "@feng3d/render-api";
 
 /**
  * 获取纹理尺寸。
@@ -8,13 +8,33 @@ import { CanvasTexture, TextureLike, TextureSize } from "@feng3d/render-api";
  */
 export function getTextureSize(texture: TextureLike)
 {
-    if ("context" in texture)
+    let result = getTextureSizeMap.get(texture);
+    if (result) return result.value;
+
+    result = computed(() =>
     {
-        const element = typeof texture.context.canvasId === "string"? document.getElementById(texture.context.canvasId) as HTMLCanvasElement  : texture.context.canvasId;
-        console.assert(!!element, `在 document 上没有找到 canvasId 为 ${(texture as CanvasTexture).context.canvasId} 的画布。`);
+        if ("context" in texture)
+        {
+            // 监听
+            const r_texture = reactive(texture);
+            r_texture.context.canvasId;
 
-        return [element.width, element.height, 1] as TextureSize;
-    }
+            // 计算
+            const element = typeof texture.context.canvasId === "string" ? document.getElementById(texture.context.canvasId) as HTMLCanvasElement : texture.context.canvasId;
+            console.assert(!!element, `在 document 上没有找到 canvasId 为 ${(texture as CanvasTexture).context.canvasId} 的画布。`);
 
-    return texture.size;
+            return [element.width, element.height, 1] as TextureSize;
+        }
+        // 监听
+        const r_texture = reactive(texture);
+        r_texture.size[0];
+        r_texture.size[1];
+        r_texture.size[2];
+
+        return texture.size;
+    });
+    getTextureSizeMap.set(texture, result);
+
+    return result.value;
 }
+const getTextureSizeMap = new WeakMap<TextureLike, ComputedRef<TextureSize>>();
