@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BlendState, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
+import { BindingResources, BlendState, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, Geometry, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, ScissorRect, Submit, TextureLike, UnReadonly, Viewport } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -391,114 +391,16 @@ export class WebGPUBase
     protected runRenderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
         const device = this._device;
-        const { viewport, scissorRect, pipeline, bindingResources: bindingResources, geometry } = renderObject;
-        const attachmentSize = renderPassFormat.attachmentSize;
+        const { viewport, scissorRect, pipeline, bindingResources, geometry } = renderObject;
 
-        if ("setViewport" in passEncoder)
-        {
-            if (viewport)
-            {
-                const isYup = viewport.isYup ?? true;
-                const x = viewport.x ?? 0;
-                let y = viewport.y ?? 0;
-                const width = viewport.width ?? attachmentSize.width;
-                const height = viewport.height ?? attachmentSize.height;
-                const minDepth = viewport.minDepth ?? 0;
-                const maxDepth = viewport.maxDepth ?? 0;
+        this.runviewport(passEncoder, viewport, renderPassFormat);
+        this.runScissorRect(passEncoder, scissorRect, renderPassFormat);
+        this.runRenderPipeline(passEncoder, pipeline, renderPassFormat, geometry);
+        this.runBindingResources(passEncoder, pipeline, bindingResources);
+        this.runVertexAttributes(passEncoder, pipeline, geometry);
 
-                if (isYup)
-                {
-                    y = attachmentSize.height - y - height;
-                }
-                passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
-            }
-            else
-            {
-                passEncoder.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
-            }
-        }
-        if ("setScissorRect" in passEncoder)
-        {
-            if (scissorRect)
-            {
-                const isYup = scissorRect.isYup ?? true;
-                const x = scissorRect.x ?? 0;
-                let y = scissorRect.y ?? 0;
-                const width = scissorRect.width ?? attachmentSize.width;
-                const height = scissorRect.height ?? attachmentSize.height;
-
-                if (isYup)
-                {
-                    y = attachmentSize.height - y - height;
-                }
-
-                passEncoder.setScissorRect(x, y, width, height);
-            }
-            else
-            {
-                passEncoder.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
-            }
-        }
-
-        const { vertices, indices, draw } = geometry;
-
-        //
-        const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
-        const nPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
-
-        //
-        passEncoder.setPipeline(nPipeline);
-
-        //
-        const stencilReference = getStencilReference(pipeline.depthStencil);
-
-        //
-        const blendConstantColor = BlendState.getBlendConstantColor(pipeline.fragment?.targets?.[0]?.blend);
-
-        // 设置模板测试替换值
-        if (stencilReference !== undefined)
-        {
-            if ("setStencilReference" in passEncoder)
-            {
-                passEncoder.setStencilReference(stencilReference);
-            }
-            else
-            {
-                console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 stencilReference 值！`);
-            }
-        }
-
-        if (blendConstantColor !== undefined)
-        {
-            if ("setBlendConstant" in passEncoder)
-            {
-                passEncoder.setBlendConstant(blendConstantColor);
-            }
-            else
-            {
-                console.warn(`不支持在 ${passEncoder.constructor.name} 中设置 setBlendConstant 值！`);
-            }
-        }
-
-        // 计算 bindGroups
-        const layout = getGPUPipelineLayout(device, { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code });
-        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
-        {
-            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
-            passEncoder.setBindGroup(group, gpuBindGroup);
-        });
-
-        //
-        const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
-        vertexBuffers?.forEach((vertexBuffer, index) =>
-        {
-            const buffer = getGBuffer(vertexBuffer.data);
-            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
-
-            const gBuffer = getGPUBuffer(device, buffer);
-
-            passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
-        });
+        // this.run
+        const { indices, draw } = geometry;
 
         if (indices)
         {
@@ -519,6 +421,122 @@ export class WebGPUBase
         {
             passEncoder.drawIndexed(draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance);
         }
+    }
+
+    protected runviewport(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, viewport: Viewport, renderPassFormat: RenderPassFormat)
+    {
+        if (!("setViewport" in passEncoder)) return;
+        const attachmentSize = renderPassFormat.attachmentSize;
+        if (viewport)
+        {
+            const isYup = viewport.isYup ?? true;
+            const x = viewport.x ?? 0;
+            let y = viewport.y ?? 0;
+            const width = viewport.width ?? attachmentSize.width;
+            const height = viewport.height ?? attachmentSize.height;
+            const minDepth = viewport.minDepth ?? 0;
+            const maxDepth = viewport.maxDepth ?? 0;
+
+            if (isYup)
+            {
+                y = attachmentSize.height - y - height;
+            }
+            passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
+        }
+        else
+        {
+            passEncoder.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
+        }
+    }
+
+    protected runScissorRect(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, scissorRect: ScissorRect, renderPassFormat: RenderPassFormat)
+    {
+        if (!("setScissorRect" in passEncoder)) return;
+        const attachmentSize = renderPassFormat.attachmentSize;
+        if (scissorRect)
+        {
+            const isYup = scissorRect.isYup ?? true;
+            const x = scissorRect.x ?? 0;
+            let y = scissorRect.y ?? 0;
+            const width = scissorRect.width ?? attachmentSize.width;
+            const height = scissorRect.height ?? attachmentSize.height;
+
+            if (isYup)
+            {
+                y = attachmentSize.height - y - height;
+            }
+
+            passEncoder.setScissorRect(x, y, width, height);
+        }
+        else
+        {
+            passEncoder.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
+        }
+    }
+
+    protected runRenderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline, renderPassFormat: RenderPassFormat, geometry: Geometry)
+    {
+        const device = this._device;
+        const { vertices, indices } = geometry;
+        //
+        const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
+        const nPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
+
+        //
+        passEncoder.setPipeline(nPipeline);
+
+        //
+        this.runStencilReference(passEncoder, pipeline);
+        this.runBlendConstant(passEncoder, pipeline);
+    }
+
+    protected runStencilReference(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline)
+    {
+        if (!("setStencilReference" in passEncoder)) return;
+        //
+        const stencilReference = getStencilReference(pipeline.depthStencil);
+        if (stencilReference === undefined) return;
+
+        passEncoder.setStencilReference(stencilReference);
+    }
+
+    protected runBlendConstant(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline)
+    {
+        if (!("setBlendConstant" in passEncoder)) return;
+        //
+        const blendConstantColor = BlendState.getBlendConstantColor(pipeline.fragment?.targets?.[0]?.blend);
+        if (blendConstantColor === undefined) return;
+
+        passEncoder.setBlendConstant(blendConstantColor);
+    }
+
+    protected runBindingResources(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline, bindingResources: BindingResources)
+    {
+        const device = this._device;
+        // 计算 bindGroups
+        const layout = getGPUPipelineLayout(device, { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code });
+        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+        {
+            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
+            passEncoder.setBindGroup(group, gpuBindGroup);
+        });
+    }
+
+    protected runVertexAttributes(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline, geometry: Geometry)
+    {
+        const device = this._device;
+        const { vertices } = geometry;
+        //
+        const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
+        vertexBuffers?.forEach((vertexBuffer, index) =>
+        {
+            const buffer = getGBuffer(vertexBuffer.data);
+            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
+
+            const gBuffer = getGPUBuffer(device, buffer);
+
+            passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
+        });
     }
 }
 
