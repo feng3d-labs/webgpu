@@ -13,7 +13,6 @@ import { getGPURenderTimestampQuery } from "./caches/getGPURenderTimestampQuery"
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGBuffer } from "./caches/getIGPUBuffer";
 import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
-import { getRealGPUBindGroup } from "./const";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
 import "./data/polyfills/RenderObject";
@@ -374,7 +373,7 @@ export class WebGPUBase
         const layout = getGPUPipelineLayout(device, { compute: pipeline.compute.code });
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
-            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources)[getRealGPUBindGroup]();
+            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
             passEncoder.setBindGroup(group, gpuBindGroup);
         });
 

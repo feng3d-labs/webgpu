@@ -2,7 +2,6 @@ import { ChainMap, RenderObject, RenderPassObject } from "@feng3d/render-api";
 
 import { watcher } from "@feng3d/watcher";
 import { GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
-import { getRealGPUBindGroup } from "./const";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { WebGPUBase } from "./WebGPUBase";
 
@@ -162,7 +161,7 @@ function runCommands(_passEncoder: GPURenderPassEncoder | GPUComputePassEncoder 
 
     setBindGroupCommands.forEach((v) =>
     {
-        v[1][1] = v[1][1][getRealGPUBindGroup]();
+        v[1][1] = v[1][1]();
     });
 
     commands.forEach((v) =>

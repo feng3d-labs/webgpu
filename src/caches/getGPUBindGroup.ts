@@ -1,7 +1,5 @@
-import { BindingResource, BindingResources, BufferBinding, BufferBindingInfo, CanvasTexture, ChainMap, computed, ComputedRef, Sampler, TextureView } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
+import { BindingResource, BindingResources, BufferBinding, BufferBindingInfo, ChainMap, computed, ComputedRef, Sampler, TextureView } from "@feng3d/render-api";
 import { ResourceType } from "wgsl_reflect";
-import { getRealGPUBindGroup } from "../const";
 import { VideoTexture } from "../data/VideoTexture";
 import { ExternalSampledTextureType } from "../types/TextureType";
 import { getBufferBindingInfo } from "../utils/getBufferBindingInfo";
