@@ -48,7 +48,7 @@ export default class Tonemapper
             __type__: "ComputePass",
             computeObjects: [{
                 pipeline: this.material,
-                uniforms: {
+                bindingResources: {
                     ...this.bindGroup,
                 },
                 workgroups: {

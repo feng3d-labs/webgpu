@@ -400,7 +400,7 @@ export class WebGPUBase
     protected runComputeObject(passEncoder: GPUComputePassEncoder, computeObject: ComputeObject)
     {
         const device = this._device;
-        const { pipeline, uniforms: bindingResources, workgroups } = computeObject;
+        const { pipeline, bindingResources: bindingResources, workgroups } = computeObject;
 
         const computePipeline = getGPUComputePipeline(device, pipeline);
         passEncoder.setPipeline(computePipeline);

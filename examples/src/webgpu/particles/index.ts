@@ -204,7 +204,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           __type__: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapImportLevelPipeline,
-            uniforms: { ...probabilityMapBindGroup },
+            bindingResources: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
         });
@@ -215,7 +215,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
           __type__: "ComputePass",
           computeObjects: [{
             pipeline: probabilityMapExportLevelPipeline,
-            uniforms: { ...probabilityMapBindGroup },
+            bindingResources: { ...probabilityMapBindGroup },
             workgroups: { workgroupCountX: Math.ceil(levelWidth / 64), workgroupCountY: levelHeight },
           }],
         });
@@ -282,7 +282,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       __type__: "ComputePass",
       computeObjects: [{
         pipeline: computePipeline,
-        uniforms: { ...computeBindGroup },
+        bindingResources: { ...computeBindGroup },
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
       }]
     },

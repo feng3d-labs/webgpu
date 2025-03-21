@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: {
             compute: { code: updateSpritesWGSL }
         },
-        uniforms: {
+        bindingResources: {
             params: simParams,
             particlesA: {
                 bufferView: particleBuffers[0],
@@ -68,14 +68,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const computeObject1: ComputeObject = {
         ...computeObject0,
-        uniforms: {
-            ...computeObject0.uniforms,
+        bindingResources: {
+            ...computeObject0.bindingResources,
             particlesA: {
-                ...computeObject0.uniforms.particlesA as {},
+                ...computeObject0.bindingResources.particlesA as {},
                 bufferView: particleBuffers[1],
             },
             particlesB: {
-                ...computeObject0.uniforms.particlesA as {},
+                ...computeObject0.bindingResources.particlesA as {},
                 bufferView: particleBuffers[0],
             },
         },

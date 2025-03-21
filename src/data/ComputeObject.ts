@@ -21,7 +21,7 @@ export interface ComputeObject
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
      */
-    readonly uniforms?: BindingResources;
+    readonly bindingResources?: BindingResources;
 
     /**
      * {@link GPUComputePassEncoder.dispatchWorkgroups}

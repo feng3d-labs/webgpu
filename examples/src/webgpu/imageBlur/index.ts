@@ -181,12 +181,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         gpuComputePassEncoder.computeObjects = [
             {
                 pipeline: blurPipeline,
-                uniforms: bindingResources0,
+                bindingResources: bindingResources0,
                 workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
             },
             {
                 pipeline: blurPipeline,
-                uniforms: bindingResources1,
+                bindingResources: bindingResources1,
                 workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
             },
         ];
@@ -196,7 +196,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             gpuComputePassEncoder.computeObjects.push(
                 {
                     pipeline: blurPipeline,
-                    uniforms: bindingResources2,
+                    bindingResources: bindingResources2,
                     workgroups: { workgroupCountX: Math.ceil(srcWidth / blockDim), workgroupCountY: Math.ceil(srcHeight / batch[1]) }
                 }
             );
@@ -204,7 +204,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             gpuComputePassEncoder.computeObjects.push(
                 {
                     pipeline: blurPipeline,
-                    uniforms: bindingResources1,
+                    bindingResources: bindingResources1,
                     workgroups: { workgroupCountX: Math.ceil(srcHeight / blockDim), workgroupCountY: Math.ceil(srcWidth / batch[1]) }
                 }
             );

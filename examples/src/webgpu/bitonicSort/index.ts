@@ -380,7 +380,7 @@ async function init(
                     __type__: "ComputePass",
                     computeObjects: [{
                         pipeline: atomicToZeroComputePipeline,
-                        uniforms: computeBGCluster,
+                        bindingResources: computeBGCluster,
                         workgroups: { workgroupCountX: 1 },
                     }]
                 }]
@@ -739,7 +739,7 @@ async function init(
                 timestampQuery: querySet,
                 computeObjects: [{
                     pipeline: computePipeline,
-                    uniforms: computeBGCluster,
+                    bindingResources: computeBGCluster,
                     workgroups: { workgroupCountX: settings["Workgroups Per Step"] },
                 }]
             };

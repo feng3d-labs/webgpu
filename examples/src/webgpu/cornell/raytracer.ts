@@ -56,7 +56,7 @@ export default class Raytracer
       __type__: "ComputePass",
       computeObjects: [{
         pipeline: this.material,
-        uniforms: {
+        bindingResources: {
           ...this.common.uniforms.bindGroup,
           ...this.bindGroup,
         },

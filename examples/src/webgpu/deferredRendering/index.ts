@@ -342,7 +342,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         computeObjects: [
             {
                 pipeline: lightUpdateComputePipeline,
-                uniforms: {
+                bindingResources: {
                     ...lightsBufferComputeBindGroup,
                 },
                 workgroups: { workgroupCountX: Math.ceil(kMaxNumLights / 64) },

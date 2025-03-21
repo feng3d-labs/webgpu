@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     __type__: "ComputePass",
                     computeObjects: [{
                         pipeline: computePipeline,
-                        uniforms: i ? bindGroup1 : bindGroup0,
+                        bindingResources: i ? bindGroup1 : bindGroup0,
                         workgroups: {
                             workgroupCountX: GameOptions.width / GameOptions.workgroupSize,
                             workgroupCountY: GameOptions.height / GameOptions.workgroupSize
