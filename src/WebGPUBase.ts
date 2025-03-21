@@ -207,8 +207,7 @@ export class WebGPUBase
         const renderPassFormat = getGPURenderPassFormat(descriptor);
 
         // 处理时间戳查询
-        renderPassDescriptor.commandEncoder = commandEncoder;
-        getGPURenderTimestampQuery(device, renderPassDescriptor, renderPass.timestampQuery);
+        getGPURenderTimestampQuery(device, descriptor.timestampQuery);
 
         // 处理不被遮挡查询。
         const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
@@ -226,7 +225,7 @@ export class WebGPUBase
         // 处理不被遮挡查询。
         occlusionQuery.resolve(device, commandEncoder, renderPass);
 
-        renderPassDescriptor.timestampWrites?.resolve();
+        renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
 
         return renderPassCommand;
     }
@@ -286,7 +285,7 @@ export class WebGPUBase
         passEncoder.end();
 
         // 处理时间戳查询
-        descriptor.timestampWrites?.resolve();
+        descriptor.timestampWrites?.resolve(commandEncoder);
     }
 
     protected runComputeObjects(computeObjects: ComputeObject[])

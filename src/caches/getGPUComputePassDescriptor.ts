@@ -4,12 +4,13 @@ import { getGPURenderTimestampQuery } from "./getGPURenderTimestampQuery";
 export function getGPUComputePassDescriptor(commandEncoder: GPUCommandEncoder, computePass: ComputePass)
 {
     const descriptor: GPUComputePassDescriptor = {};
-    descriptor.commandEncoder = commandEncoder;
 
     const device = commandEncoder.device;
 
-    if (computePass.timestampQuery)
-        getGPURenderTimestampQuery(device, descriptor, computePass?.timestampQuery);
+    if (computePass.descriptor?.timestampQuery)
+    {
+        descriptor.timestampWrites = getGPURenderTimestampQuery(device, computePass.descriptor.timestampQuery);
+    }
 
     return descriptor;
 }

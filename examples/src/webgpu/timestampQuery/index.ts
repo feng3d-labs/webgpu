@@ -101,6 +101,8 @@ const init = async (canvas: HTMLCanvasElement) =>
             depthLoadOp: "clear",
             depthStoreOp: "store",
         },
+        // 开启时间戳查询
+        timestampQuery,
     };
 
     const renderObject: RenderObject = {
@@ -118,8 +120,6 @@ const init = async (canvas: HTMLCanvasElement) =>
                 passEncoders: [
                     {
                         descriptor: renderPassDescriptor, renderObjects: [renderObject],
-                        // 开启时间戳查询
-                        timestampQuery,
                     },
                 ]
             }

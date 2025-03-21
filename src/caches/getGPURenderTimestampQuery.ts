@@ -6,33 +6,21 @@ import { GPUQueue_submit } from "../eventnames";
 
 declare global
 {
-    interface GPURenderPassDescriptor
-    {
-        commandEncoder?: GPUCommandEncoder;
-    }
-
-    interface GPUComputePassDescriptor
-    {
-        commandEncoder?: GPUCommandEncoder;
-    }
-
     interface GPURenderPassTimestampWrites 
     {
-        resolve?: () => void;
+        resolve?: (commandEncoder: GPUCommandEncoder) => void;
     }
     interface GPUComputePassTimestampWrites 
     {
-        resolve?: () => void;
+        resolve?: (commandEncoder: GPUCommandEncoder) => void;
     }
 }
 
-export function getGPURenderTimestampQuery(device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor, timestampQuery?: TimestampQuery)
+export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: TimestampQuery)
 {
     if (!timestampQuery) return;
-    let renderTimestampQuery: GPURenderPassTimestampWrites | GPUComputePassTimestampWrites = timestampQuery["_GPURenderTimestampQuery"];
-    if (renderTimestampQuery) return renderTimestampQuery;
-
-    const commandEncoder = passDescriptor.commandEncoder;
+    let timestampWrites: GPURenderPassTimestampWrites | GPUComputePassTimestampWrites = timestampQuery["_GPURenderTimestampQuery"];
+    if (timestampWrites) return timestampWrites;
 
     // 判断是否支持 `timestamp-query`
     if (timestampQuery["isSupports"] === undefined)
@@ -56,13 +44,13 @@ export function getGPURenderTimestampQuery(device: GPUDevice, passDescriptor: GP
     // Create a buffer to map the result back to the CPU
     let resultBuf: GPUBuffer;
 
-    renderTimestampQuery = passDescriptor.timestampWrites = {
+    timestampWrites = {
         querySet,
         beginningOfPassWriteIndex: 0,
         endOfPassWriteIndex: 1,
     };
 
-    passDescriptor.timestampWrites.resolve = () =>
+    timestampWrites.resolve = (commandEncoder: GPUCommandEncoder) =>
     {
         resolveBuf = resolveBuf || device.createBuffer({
             size: 2 * timestampByteSize,
@@ -128,7 +116,7 @@ export function getGPURenderTimestampQuery(device: GPUDevice, passDescriptor: GP
         anyEmitter.on(device.queue, GPUQueue_submit, getQueryResult);
     };
 
-    timestampQuery["_GPURenderTimestampQuery"] = renderTimestampQuery;
+    timestampQuery["_GPURenderTimestampQuery"] = timestampWrites;
 
-    return renderTimestampQuery;
+    return timestampWrites;
 }

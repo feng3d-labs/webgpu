@@ -736,7 +736,9 @@ async function init(
         {
             const computePassEncoder: ComputePass = {
                 __type__: "ComputePass",
-                timestampQuery: querySet,
+                // descriptor: {
+                //     timestampQuery: querySet,
+                // },
                 computeObjects: [{
                     pipeline: computePipeline,
                     bindingResources: computeBGCluster,

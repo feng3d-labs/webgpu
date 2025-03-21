@@ -4,14 +4,7 @@ import { TimestampQuery } from "../TimestampQuery";
 
 declare module "@feng3d/render-api"
 {
-    /**
-     * GPU渲染通道编码器。
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/GPURenderPassEncoder
-     *
-     * {@link GPURenderPassEncoder}
-     */
-    export interface RenderPass
+    export interface RenderPassDescriptor
     {
         /**
          * 查询通道运行消耗时长（单位为纳秒）。
