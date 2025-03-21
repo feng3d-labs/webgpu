@@ -429,7 +429,7 @@ export class WebGPUBase
             const width = viewport.width ?? attachmentSize.width;
             const height = viewport.height ?? attachmentSize.height;
             const minDepth = viewport.minDepth ?? 0;
-            const maxDepth = viewport.maxDepth ?? 0;
+            const maxDepth = viewport.maxDepth ?? 1;
 
             if (isYup)
             {
