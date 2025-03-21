@@ -19,6 +19,7 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit, webgpuEvents } from "./eventnames";
+import { RenderObjectCache } from "./internal/RenderObjectCache";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
@@ -407,16 +408,35 @@ export class WebGPUBase
      */
     protected runRenderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
-        this.runviewport(passEncoder, renderObject, renderPassFormat);
-        this.runScissorRect(passEncoder, renderObject, renderPassFormat);
-        this.runRenderPipeline(passEncoder, renderPassFormat, renderObject);
-        this.runBindingResources(passEncoder, renderObject);
-        this.runVertexAttributes(passEncoder, renderObject);
-        this.runIndices(passEncoder, renderObject);
-        this.runDraw(passEncoder, renderObject);
+        const device = this._device;
+        const renderObjectCacheKey: RenderObjectCacheKey = [device, renderObject, renderPassFormat];
+        let result = renderObjectCacheMap.get(renderObjectCacheKey);
+        if (result)
+        {
+            RenderObjectCache.run(result.value, passEncoder);
+
+            return result.value;
+        }
+
+        const renderObjectCache: RenderObjectCache = {} as any;
+        result = computed(() =>
+        {
+            this.runviewport(passEncoder, renderObject, renderPassFormat, renderObjectCache);
+            this.runScissorRect(passEncoder, renderObject, renderPassFormat, renderObjectCache);
+            this.runRenderPipeline(passEncoder, renderPassFormat, renderObject, renderObjectCache);
+            this.runBindingResources(passEncoder, renderObject, renderObjectCache);
+            this.runVertexAttributes(passEncoder, renderObject, renderObjectCache);
+            this.runIndices(passEncoder, renderObject, renderObjectCache);
+            this.runDraw(passEncoder, renderObject, renderObjectCache);
+
+            return renderObjectCache;
+        });
+        renderObjectCacheMap.set(renderObjectCacheKey, result);
+
+        return result.value;
     }
 
-    protected runviewport(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
+    protected runviewport(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: RenderObjectCache)
     {
         if (!("setViewport" in passEncoder)) return;
         const attachmentSize = renderPassFormat.attachmentSize;
@@ -436,14 +456,18 @@ export class WebGPUBase
                 y = attachmentSize.height - y - height;
             }
             passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
+            //
+            renderObjectCache.setViewport = [x, y, width, height, minDepth, maxDepth];
         }
         else
         {
             passEncoder.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
+            //
+            renderObjectCache.setViewport = [0, 0, attachmentSize.width, attachmentSize.height, 0, 1];
         }
     }
 
-    protected runScissorRect(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
+    protected runScissorRect(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: RenderObjectCache)
     {
         if (!("setScissorRect" in passEncoder)) return;
         const attachmentSize = renderPassFormat.attachmentSize;
@@ -462,30 +486,33 @@ export class WebGPUBase
             }
 
             passEncoder.setScissorRect(x, y, width, height);
+            renderObjectCache.setScissorRect = [x, y, width, height];
         }
         else
         {
             passEncoder.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
+            renderObjectCache.setScissorRect = [0, 0, attachmentSize.width, attachmentSize.height];
         }
     }
 
-    protected runRenderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, geometry: RenderObject)
+    protected runRenderPipeline(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
         const device = this._device;
-        const { pipeline, vertices, indices } = geometry;
+        const { pipeline, vertices, indices } = renderObject;
         //
         const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
-        const nPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
+        const gpuRenderPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
 
         //
-        passEncoder.setPipeline(nPipeline);
+        passEncoder.setPipeline(gpuRenderPipeline);
+        renderObjectCache.setPipeline = [gpuRenderPipeline];
 
         //
-        this.runStencilReference(passEncoder, pipeline);
-        this.runBlendConstant(passEncoder, pipeline);
+        this.runStencilReference(passEncoder, pipeline, renderObjectCache);
+        this.runBlendConstant(passEncoder, pipeline, renderObjectCache);
     }
 
-    protected runStencilReference(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline)
+    protected runStencilReference(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline, renderObjectCache: RenderObjectCache)
     {
         if (!("setStencilReference" in passEncoder)) return;
         //
@@ -493,9 +520,10 @@ export class WebGPUBase
         if (stencilReference === undefined) return;
 
         passEncoder.setStencilReference(stencilReference);
+        renderObjectCache.setStencilReference = [stencilReference];
     }
 
-    protected runBlendConstant(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline)
+    protected runBlendConstant(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, pipeline: RenderPipeline, renderObjectCache: RenderObjectCache)
     {
         if (!("setBlendConstant" in passEncoder)) return;
         //
@@ -503,9 +531,10 @@ export class WebGPUBase
         if (blendConstantColor === undefined) return;
 
         passEncoder.setBlendConstant(blendConstantColor);
+        renderObjectCache.setBlendConstant = [blendConstantColor];
     }
 
-    protected runBindingResources(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject)
+    protected runBindingResources(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
         const device = this._device;
         const { pipeline, bindingResources } = renderObject;
@@ -515,13 +544,15 @@ export class WebGPUBase
         {
             const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
             passEncoder.setBindGroup(group, gpuBindGroup);
+            renderObjectCache.setBindGroup ??= []
+            renderObjectCache.setBindGroup[group] = [group, gpuBindGroup];
         });
     }
 
-    protected runVertexAttributes(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: RenderObject)
+    protected runVertexAttributes(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
         const device = this._device;
-        const { vertices, pipeline } = geometry;
+        const { vertices, pipeline } = renderObject;
         //
         const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
         vertexBuffers?.forEach((vertexBuffer, index) =>
@@ -532,10 +563,12 @@ export class WebGPUBase
             const gBuffer = getGPUBuffer(device, buffer);
 
             passEncoder.setVertexBuffer(index, gBuffer, vertexBuffer.offset, vertexBuffer.size);
+            renderObjectCache.setVertexBuffer ??= [];
+            renderObjectCache.setVertexBuffer[index] = [index, gBuffer, vertexBuffer.offset, vertexBuffer.size];
         });
     }
 
-    protected runIndices(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: RenderObject)
+    protected runIndices(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: RenderObject, renderObjectCache: RenderObjectCache)
     {
         const { indices } = geometry;
         if (!indices) return;
@@ -549,19 +582,22 @@ export class WebGPUBase
 
         //
         passEncoder.setIndexBuffer(gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength);
+        renderObjectCache.setIndexBuffer = [gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength];
     }
 
-    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: RenderObject)
+    protected runDraw(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, geometry: RenderObject, renderObjectCache: RenderObjectCache)
     {
         const { draw } = geometry;
 
         if (draw.__type__ === 'DrawVertex')
         {
             passEncoder.draw(draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance);
+            renderObjectCache.draw = [draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance];
         }
         else
         {
             passEncoder.drawIndexed(draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance);
+            renderObjectCache.drawIndexed = [draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance];
         }
     }
 }
@@ -605,3 +641,6 @@ function getStencilReference(depthStencil?: DepthStencilState)
 
 type GPURenderBundleKey = [device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
 const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, ComputedRef<GPURenderBundle>>();
+
+type RenderObjectCacheKey = [device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat];
+const renderObjectCacheMap = new ChainMap<RenderObjectCacheKey, ComputedRef<RenderObjectCache>>();
