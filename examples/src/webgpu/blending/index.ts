@@ -514,8 +514,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const { srcTexture, dstTexture, srcBindGroup, dstBindGroup }
             = textureSets[settings.textureSet === "premultiplied alpha" ? 0 : 1];
 
-        ro.bindingResources = dstBindGroup;
-        ro1.bindingResources = srcBindGroup;
+        reactive(ro).bindingResources = dstBindGroup;
+        reactive(ro1).bindingResources = srcBindGroup;
 
         reactive(context.configuration).alphaMode = settings.alphaMode;
 

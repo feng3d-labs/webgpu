@@ -114,13 +114,6 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string
         const entries = (descriptor.entries as GPUBindGroupLayoutEntry[]).filter((v) => !!v);
         const key = entries.map((v) => v.key).join(",");
         // 相同的布局只保留一个。
-        if (__DEV__)
-        {
-            if (bindGroupLayoutMap[key])
-            {
-                console.log(`命中相同的布局 ${key}，公用绑定组布局对象。`);
-            }
-        }
         let bindGroupLayout = bindGroupLayoutMap[key];
         if (!bindGroupLayout)
         {
@@ -133,13 +126,6 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string
 
     // 管线布局描述标识符。
     const pipelineLayoutKey = bindGroupLayouts.map((v, i) => `[${i}: ${v.key}]`).join(",");
-    if (__DEV__)
-    {
-        if (pipelineLayoutDescriptorMap[pipelineLayoutKey]) 
-        {
-            console.log(`命中相同的布局 ${pipelineLayoutKey}，公用管线布局对象。`);
-        }
-    }
     gpuPipelineLayout = pipelineLayoutDescriptorMap[pipelineLayoutKey];
     if (!gpuPipelineLayout)
     {

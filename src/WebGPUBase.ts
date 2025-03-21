@@ -494,67 +494,107 @@ export class WebGPUBase
     protected runRenderPipeline(renderPassFormat: RenderPassFormat, renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
         const device = this._device;
-        const { pipeline, vertices, indices } = renderObject;
-        //
-        const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
-        const gpuRenderPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
+        const r_renderObject = reactive(renderObject);
+        computed(() =>
+        {
+            // 监听
+            r_renderObject.pipeline;
+            r_renderObject.vertices;
+            r_renderObject.indices;
 
-        //
-        renderObjectCache.setPipeline = [gpuRenderPipeline];
+            //
+            const { pipeline, vertices, indices } = renderObject;
+            //
+            const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
+            const gpuRenderPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
 
-        //
-        this.runStencilReference(pipeline, renderObjectCache);
-        this.runBlendConstant(pipeline, renderObjectCache);
+            //
+            renderObjectCache.setPipeline = [gpuRenderPipeline];
+
+            //
+            this.runStencilReference(pipeline, renderObjectCache);
+            this.runBlendConstant(pipeline, renderObjectCache);
+        }).value;
     }
 
     protected runStencilReference(pipeline: RenderPipeline, renderObjectCache: RenderObjectCache)
     {
-        //
-        const stencilReference = getStencilReference(pipeline.depthStencil);
-        if (stencilReference === undefined) return;
+        const r_pipeline = reactive(pipeline);
+        computed(() =>
+        {
+            const stencilReference = getStencilReference(r_pipeline.depthStencil);
+            if (stencilReference === undefined)
+            {
+                renderObjectCache.setStencilReference = undefined;
+                return;
+            }
 
-        renderObjectCache.setStencilReference = [stencilReference];
+            renderObjectCache.setStencilReference = [stencilReference];
+        }).value;
     }
 
     protected runBlendConstant(pipeline: RenderPipeline, renderObjectCache: RenderObjectCache)
     {
-        //
-        const blendConstantColor = BlendState.getBlendConstantColor(pipeline.fragment?.targets?.[0]?.blend);
-        if (blendConstantColor === undefined) return;
+        const r_pipeline = reactive(pipeline);
+        computed(() =>
+        {
+            //
+            const blendConstantColor = BlendState.getBlendConstantColor(r_pipeline.fragment?.targets?.[0]?.blend);
+            if (blendConstantColor === undefined)
+            {
+                renderObjectCache.setBlendConstant = undefined;
+                return;
+            }
 
-        renderObjectCache.setBlendConstant = [blendConstantColor];
+            renderObjectCache.setBlendConstant = [blendConstantColor];
+        }).value;
     }
 
     protected runBindingResources(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
         const device = this._device;
-        const { pipeline, bindingResources } = renderObject;
-        // 计算 bindGroups
-        renderObjectCache.setBindGroup = []
-        const layout = getGPUPipelineLayout(device, { vertex: pipeline.vertex.code, fragment: pipeline.fragment?.code });
-        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+        const r_renderObject = reactive(renderObject);
+        computed(() =>
         {
-            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
-            renderObjectCache.setBindGroup[group] = [group, gpuBindGroup];
-        });
+            // 监听
+            r_renderObject.bindingResources;
+
+            // 执行
+            renderObjectCache.setBindGroup = []
+            const { bindingResources } = renderObject;
+            const layout = getGPUPipelineLayout(device, { vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
+            layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+            {
+                const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
+                renderObjectCache.setBindGroup[group] = [group, gpuBindGroup];
+            });
+        }).value;
     }
 
     protected runVertexAttributes(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
         const device = this._device;
-        const { vertices, pipeline } = renderObject;
-        //
-        renderObjectCache.setVertexBuffer = [];
-        const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
-        vertexBuffers?.forEach((vertexBuffer, index) =>
+        const r_renderObject = reactive(renderObject);
+        computed(() =>
         {
-            const buffer = getGBuffer(vertexBuffer.data);
-            (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
+            // 监听
+            r_renderObject.vertices;
+            r_renderObject.pipeline.vertex;
 
-            const gBuffer = getGPUBuffer(device, buffer);
+            const { vertices, pipeline } = renderObject;
+            //
+            renderObjectCache.setVertexBuffer = [];
+            const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
+            vertexBuffers?.forEach((vertexBuffer, index) =>
+            {
+                const buffer = getGBuffer(vertexBuffer.data);
+                (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
-            renderObjectCache.setVertexBuffer[index] = [index, gBuffer, vertexBuffer.offset, vertexBuffer.size];
-        });
+                const gBuffer = getGPUBuffer(device, buffer);
+
+                renderObjectCache.setVertexBuffer[index] = [index, gBuffer, vertexBuffer.offset, vertexBuffer.size];
+            });
+        }).value;
     }
 
     protected runIndices(geometry: RenderObject, renderObjectCache: RenderObjectCache)

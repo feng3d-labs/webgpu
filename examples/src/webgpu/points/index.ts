@@ -186,7 +186,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const { size, fixedSize, textured } = settings;
 
-        ro.pipeline = pipelines[fixedSize ? 1 : 0][textured ? 1 : 0];
+        reactive(ro).pipeline = pipelines[fixedSize ? 1 : 0][textured ? 1 : 0];
 
         // Set the size in the uniform values
         reactive(bindingResources.uni).size = size;

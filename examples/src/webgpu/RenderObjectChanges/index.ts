@@ -65,11 +65,11 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     window.onclick = () =>
     {
-        reactive(renderObject.vertices.position).stepMode = "instance";
-        reactive(renderObject.vertices.position).stepMode = "vertex";
-        reactive(renderObject.vertices.position).data = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -1]);
-        reactive(renderObject.vertices.position).format = "float32x3";
-        reactive(renderObject.vertices.position).data = new Float32Array([1.0, 0.5, 1.0, -0.5, -0.5, 1.0, 0.5, -1, 1.0]);
+        // reactive(renderObject.vertices.position).stepMode = "instance";
+        // reactive(renderObject.vertices.position).stepMode = "vertex";
+        // reactive(renderObject.vertices.position).data = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -1]);
+        // reactive(renderObject.vertices.position).format = "float32x3";
+        // reactive(renderObject.vertices.position).data = new Float32Array([1.0, 0.5, 1.0, -0.5, -0.5, 1.0, 0.5, -1, 1.0]);
         // 修改顶点着色器代码
         reactive(renderObject.pipeline.vertex).code = `
                 @vertex

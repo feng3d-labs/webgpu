@@ -4,14 +4,30 @@ import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
 
 export function getGPUVertexBufferLayouts(vertexState: VertexState, vertices: VertexAttributes)
 {
-    const { vertexBufferLayouts } = getVertexBuffersBuffers(vertexState, vertices);
-    return vertexBufferLayouts;
+    const result = computed(() =>
+    {
+        const { vertexBufferLayouts } = getVertexBuffersBuffers(vertexState, vertices);
+        return vertexBufferLayouts;
+    });
+    return result.value;
 }
 
 export function getNVertexBuffers(vertexState: VertexState, vertices: VertexAttributes)
 {
-    const { vertexBuffers } = getVertexBuffersBuffers(vertexState, vertices);
-    return vertexBuffers;
+    let _vertexBuffers: NVertexBuffer[];
+    const result = computed(() =>
+    {
+        const { vertexBuffers } = getVertexBuffersBuffers(vertexState, vertices);
+
+        if (_vertexBuffers && _vertexBuffers.length === vertexBuffers.length && _vertexBuffers.every((v, i) => v === vertexBuffers[i]))
+        {
+            return _vertexBuffers;
+        }
+        _vertexBuffers = vertexBuffers;
+
+        return vertexBuffers;
+    });
+    return result.value;
 }
 
 declare global
