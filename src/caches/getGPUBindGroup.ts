@@ -138,7 +138,7 @@ function getGPUExternalTexture(device: GPUDevice, videoTexture: VideoTexture)
 
     result = computed(() =>
     {
-        // 监听 
+        // 在提交前确保收集到正确的外部纹理。
         reactive(webgpuEvents).preSubmit;
 
         //

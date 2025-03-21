@@ -24,7 +24,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
     {
         if ("context" in textureLike)
         {
-            // 
+            // 确保在提交之前使用正确的画布纹理。
             reactive(webgpuEvents).preSubmit;
 
             const canvasTexture = textureLike;
