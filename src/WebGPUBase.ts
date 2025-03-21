@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BlendState, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, GBuffer, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
+import { BlendState, Buffer, ChainMap, CommandEncoder, computed, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -125,7 +125,7 @@ export class WebGPUBase
         return result;
     }
 
-    async readBuffer(buffer: GBuffer, offset?: GPUSize64, size?: GPUSize64)
+    async readBuffer(buffer: Buffer, offset?: GPUSize64, size?: GPUSize64)
     {
         const device = this._device;
         const gpuBuffer = getGPUBuffer(device, buffer);
@@ -326,11 +326,27 @@ export class WebGPUBase
     protected runRenderBundle(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
     {
         const device = this._device;
-        //
-        const gpuRenderBundleKey: GPURenderBundleKey = [renderBundleObject, renderPassFormat];
-        let gpuRenderBundle = gpuRenderBundleMap.get(gpuRenderBundleKey);
-        if (!gpuRenderBundle)
+
+        const gpuRenderBundle = this.getGPURenderBundle(device, renderBundleObject, renderPassFormat);
+
+        passEncoder.executeBundles([gpuRenderBundle]);
+    }
+
+    private getGPURenderBundle(device: GPUDevice, renderBundleObject: RenderBundle, renderPassFormat: RenderPassFormat)
+    {
+        const gpuRenderBundleKey: GPURenderBundleKey = [device, renderBundleObject, renderPassFormat];
+        let result = gpuRenderBundleMap.get(gpuRenderBundleKey);
+        if (result) return result.value;
+
+        result = computed(() =>
         {
+            // 监听
+            const r_renderBundleObject = reactive(renderBundleObject);
+            r_renderBundleObject.renderObjects;
+            r_renderBundleObject.descriptor?.depthReadOnly;
+            r_renderBundleObject.descriptor?.stencilReadOnly;
+
+            // 执行
             const descriptor: GPURenderBundleEncoderDescriptor = { ...renderBundleObject.descriptor, ...renderPassFormat };
 
             //
@@ -338,11 +354,12 @@ export class WebGPUBase
 
             this.runRenderBundleObjects(renderBundleEncoder, renderPassFormat, renderBundleObject.renderObjects);
 
-            gpuRenderBundle = renderBundleEncoder.finish();
-            gpuRenderBundleMap.set(gpuRenderBundleKey, gpuRenderBundle);
-        }
+            const gpuRenderBundle = renderBundleEncoder.finish();
+            return gpuRenderBundle;
+        });
+        gpuRenderBundleMap.set(gpuRenderBundleKey, result);
 
-        passEncoder.executeBundles([gpuRenderBundle]);
+        return result.value;
     }
 
     protected runRenderBundleObjects(passEncoder: GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObjects?: readonly RenderObject[])
@@ -526,7 +543,7 @@ export class WebGPUBase
         const device = this._device;
 
         const buffer = getGBuffer(indices);
-        (buffer as UnReadonly<GBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
+        (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
         const gBuffer = getGPUBuffer(device, buffer);
 
@@ -586,5 +603,5 @@ function getStencilReference(depthStencil?: DepthStencilState)
     return stencilReference;
 }
 
-type GPURenderBundleKey = [renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
-const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, GPURenderBundle>();
+type GPURenderBundleKey = [device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
+const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, ComputedRef<GPURenderBundle>>();

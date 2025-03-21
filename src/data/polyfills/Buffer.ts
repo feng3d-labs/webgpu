@@ -8,7 +8,7 @@ declare module "@feng3d/render-api"
      * {@link GPUBufferDescriptor}
      * {@link GPUBuffer}
      */
-    export interface GBuffer
+    export interface Buffer
     {
         /**
          * The allowed usages for the buffer.
@@ -21,8 +21,12 @@ declare module "@feng3d/render-api"
                 | GPUBufferUsage.STORAGE
                 | GPUBufferUsage.INDIRECT
                 | GPUBufferUsage.QUERY_RESOLVE 。
+
+         *  注：修改允许缓冲区使用的用途时，会重新创建缓冲区。
+         *  
          */
         readonly usage?: GPUBufferUsageFlags;
     }
 
 }
+GPUBufferUsage

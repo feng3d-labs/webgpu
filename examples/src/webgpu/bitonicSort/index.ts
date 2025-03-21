@@ -1,4 +1,4 @@
-import { BindingResources, BufferBinding, CommandEncoder, GBuffer, RenderPassDescriptor, Submit, reactive } from "@feng3d/render-api";
+import { BindingResources, BufferBinding, CommandEncoder, Buffer, RenderPassDescriptor, Submit, reactive } from "@feng3d/render-api";
 import { ComputePass, ComputePipeline, TimestampQuery, WebGPU, getGBuffer } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 
@@ -261,7 +261,7 @@ async function init(
     const elementsOutputBuffer: BufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize)
     };
-    const elementsStagingBuffer: GBuffer = {
+    const elementsStagingBuffer: Buffer = {
         size: elementsBufferSize,
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     };
@@ -271,7 +271,7 @@ async function init(
     const atomicSwapsOutputBuffer: BufferBinding = {
         bufferView: new Uint32Array(1)
     };
-    const atomicSwapsStagingBuffer: GBuffer = {
+    const atomicSwapsStagingBuffer: Buffer = {
         size: Uint32Array.BYTES_PER_ELEMENT,
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     };

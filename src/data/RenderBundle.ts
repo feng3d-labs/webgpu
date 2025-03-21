@@ -22,9 +22,7 @@ export interface RenderBundle
     /**
      * GPU渲染对象列表。
      */
-    renderObjects: readonly RenderObject[];
-
-    _version?: number;
+    readonly renderObjects: readonly RenderObject[];
 }
 
 /**

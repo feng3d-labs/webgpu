@@ -302,6 +302,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     }
     updateRenderBundle();
 
+    const renderPass: RenderPass = {
+        descriptor: renderPassDescriptor,
+        renderObjects: [],
+    };
+
+    const submit: Submit = {
+        commandEncoders: [
+            {
+                passEncoders: [renderPass],
+            }
+        ]
+    };
+
     function frame()
     {
         stats.begin();
@@ -310,33 +323,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
         reactive(getGBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
 
-        let renderObjects: RenderPassObject[] = [];
         if (settings.useRenderBundles)
         {
             // Executing a bundle is equivalent to calling all of the commands encoded
             // in the render bundle as part of the current render pass.
-            renderObjects.push(renderBundle);
+            reactive(renderPass).renderObjects = [renderBundle];
         }
         else
         {
             // Alternatively, the same render commands can be encoded manually, which
             // can take longer since each command needs to be interpreted by the
             // JavaScript virtual machine and re-validated each time.
-            renderObjects = renderBundle.renderObjects as any;
+            reactive(renderPass).renderObjects = renderBundle.renderObjects;
         }
-
-        const renderPass: RenderPass = {
-            descriptor: renderPassDescriptor,
-            renderObjects,
-        };
-
-        const submit: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [renderPass],
-                }
-            ]
-        };
 
         webgpu.submit(submit);
 
