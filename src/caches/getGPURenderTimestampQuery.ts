@@ -4,12 +4,36 @@ import { ComputePass } from "../data/ComputePass";
 import { TimestampQuery } from "../data/TimestampQuery";
 import { GPUQueue_submit } from "../eventnames";
 
-export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: TimestampQuery): GPURenderTimestampQuery
+declare global
+{
+    interface GPURenderPassDescriptor
+    {
+        commandEncoder?: GPUCommandEncoder;
+    }
+
+    interface GPUComputePassDescriptor
+    {
+        commandEncoder?: GPUCommandEncoder;
+    }
+
+    interface GPURenderPassTimestampWrites 
+    {
+        resolve?: () => void;
+    }
+    interface GPUComputePassTimestampWrites 
+    {
+        resolve?: () => void;
+    }
+}
+
+export function getGPURenderTimestampQuery(device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor, timestampQuery?: TimestampQuery): GPURenderTimestampQuery
 {
     if (!timestampQuery) return defautGPURenderTimestampQuery;
     let renderTimestampQuery: GPURenderTimestampQuery = timestampQuery["_GPURenderTimestampQuery"];
     if (renderTimestampQuery) return renderTimestampQuery;
-    
+
+    const commandEncoder = passDescriptor.commandEncoder;
+
     // 判断是否支持 `timestamp-query`
     if (timestampQuery["isSupports"] === undefined)
     {
@@ -23,7 +47,7 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: T
         return defautGPURenderTimestampQuery;
     }
 
-    let querySet: GPUQuerySet;
+    const querySet = device.createQuerySet({ type: "timestamp", count: 2 });
 
     // Create a buffer where to store the result of GPU queries
     const timestampByteSize = 8; // timestamps are uint64
@@ -32,26 +56,13 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: T
     // Create a buffer to map the result back to the CPU
     let resultBuf: GPUBuffer;
 
-    /**
-     * 初始化。
-     *
-     * 在渲染通道描述上设置 occlusionQuerySet 。
-     *
-     * @param device
-     * @param passDescriptor
-     */
-    const init = (device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor) =>
-    {
-        querySet = querySet || device.createQuerySet({ type: "timestamp", count: 2 });
-
-        passDescriptor.timestampWrites = {
-            querySet,
-            beginningOfPassWriteIndex: 0,
-            endOfPassWriteIndex: 1,
-        };
+    passDescriptor.timestampWrites = {
+        querySet,
+        beginningOfPassWriteIndex: 0,
+        endOfPassWriteIndex: 1,
     };
 
-    const resolve = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
+    passDescriptor.timestampWrites.resolve = () =>
     {
         resolveBuf = resolveBuf || device.createBuffer({
             size: 2 * timestampByteSize,
@@ -117,15 +128,14 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: T
         anyEmitter.on(device.queue, GPUQueue_submit, getQueryResult);
     };
 
-    timestampQuery["_GPURenderTimestampQuery"] = renderTimestampQuery = { init, resolve };
+    timestampQuery["_GPURenderTimestampQuery"] = renderTimestampQuery;
 
     return renderTimestampQuery;
 }
 
 interface GPURenderTimestampQuery
 {
-    init: (device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor) => void
-    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass | ComputePass) => void
+    resolve: (commandEncoder: GPUCommandEncoder) => void
 }
 
 const defautGPURenderTimestampQuery = { init: () => { }, resolve: () => { } };

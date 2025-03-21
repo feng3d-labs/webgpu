@@ -197,8 +197,8 @@ export class WebGPUBase
         const renderPassFormat = getGPURenderPassFormat(descriptor);
 
         // 处理时间戳查询
-        const timestampQuery = getGPURenderTimestampQuery(device, renderPass.timestampQuery);
-        timestampQuery.init(device, renderPassDescriptor);
+        renderPassDescriptor.commandEncoder = commandEncoder;
+        const timestampQuery = getGPURenderTimestampQuery(device, renderPassDescriptor, renderPass.timestampQuery);
 
         // 处理不被遮挡查询。
         const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
@@ -216,8 +216,7 @@ export class WebGPUBase
         // 处理不被遮挡查询。
         occlusionQuery.resolve(device, commandEncoder, renderPass);
 
-        // 处理时间戳查询
-        timestampQuery.resolve(device, commandEncoder, renderPass);
+        renderPassDescriptor.timestampWrites?.resolve();
 
         return renderPassCommand;
     }
@@ -271,8 +270,8 @@ export class WebGPUBase
 
         const descriptor: GPUComputePassDescriptor = {};
         // 处理时间戳查询
-        const timestampQuery = getGPURenderTimestampQuery(device, computePass?.timestampQuery);
-        timestampQuery.init(device, descriptor);
+        descriptor.commandEncoder = commandEncoder;
+        const timestampQuery = getGPURenderTimestampQuery(device, descriptor, computePass?.timestampQuery);
 
         const passEncoder = commandEncoder.beginComputePass(descriptor);
 
@@ -281,7 +280,7 @@ export class WebGPUBase
         passEncoder.end();
 
         // 处理时间戳查询
-        timestampQuery.resolve(device, commandEncoder, computePass);
+        descriptor.timestampWrites?.resolve();
     }
 
     protected runComputeObjects(passEncoder: GPUComputePassEncoder, computeObjects: ComputeObject[])
