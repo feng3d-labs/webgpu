@@ -358,7 +358,7 @@ export class WebGPUBase
             {
                 return this.runRenderObject(renderBundleEncoder, renderPassFormat, element as RenderObject);
             });
-            RenderObjectCache.runs(renderObjectCaches, renderBundleEncoder);
+            // RenderObjectCache.runs(renderObjectCaches, renderBundleEncoder);
 
             const gpuRenderBundle = renderBundleEncoder.finish();
             return gpuRenderBundle;
@@ -409,12 +409,12 @@ export class WebGPUBase
         let result = renderObjectCacheMap.get(renderObjectCacheKey);
         if (result)
         {
-            RenderObjectCache.run(result.value, passEncoder);
+            result.value.run(passEncoder);
 
             return result.value;
         }
 
-        const renderObjectCache: RenderObjectCache = {} as any;
+        const renderObjectCache = new RenderObjectCache();
         result = computed(() =>
         {
             this.runviewport(renderObject, renderPassFormat, renderObjectCache);
@@ -429,7 +429,7 @@ export class WebGPUBase
         });
         renderObjectCacheMap.set(renderObjectCacheKey, result);
 
-        RenderObjectCache.run(result.value, passEncoder);
+        result.value.run(passEncoder);
 
         return result.value;
     }
@@ -457,12 +457,12 @@ export class WebGPUBase
                     y = attachmentSize.height - y - height;
                 }
                 //
-                renderObjectCache.setViewport = [x, y, width, height, minDepth, maxDepth];
+                renderObjectCache.push(["setViewport", x, y, width, height, minDepth, maxDepth])
             }
             else
             {
                 //
-                renderObjectCache.setViewport = [0, 0, attachmentSize.width, attachmentSize.height, 0, 1];
+                renderObjectCache.push(["setViewport", 0, 0, attachmentSize.width, attachmentSize.height, 0, 1]);
             }
         }).value;
     }
@@ -488,11 +488,11 @@ export class WebGPUBase
                     y = attachmentSize.height - y - height;
                 }
 
-                renderObjectCache.setScissorRect = [x, y, width, height];
+                renderObjectCache.push(["setScissorRect", x, y, width, height]);
             }
             else
             {
-                renderObjectCache.setScissorRect = [0, 0, attachmentSize.width, attachmentSize.height];
+                renderObjectCache.push(["setScissorRect", 0, 0, attachmentSize.width, attachmentSize.height]);
             }
         }).value;
     }
@@ -515,7 +515,7 @@ export class WebGPUBase
             const gpuRenderPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
 
             //
-            renderObjectCache.setPipeline = [gpuRenderPipeline];
+            renderObjectCache.push(["setPipeline", gpuRenderPipeline]);
 
             //
             this.runStencilReference(pipeline, renderObjectCache);
@@ -548,11 +548,11 @@ export class WebGPUBase
             const blendConstantColor = BlendState.getBlendConstantColor(r_pipeline.fragment?.targets?.[0]?.blend);
             if (blendConstantColor === undefined)
             {
-                renderObjectCache.setBlendConstant = undefined;
+                renderObjectCache.delete("setBlendConstant");
                 return;
             }
 
-            renderObjectCache.setBlendConstant = [blendConstantColor];
+            renderObjectCache.push(["setBlendConstant", blendConstantColor]);
         }).value;
     }
 
