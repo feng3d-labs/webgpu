@@ -26,10 +26,10 @@ declare global
     }
 }
 
-export function getGPURenderTimestampQuery(device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor, timestampQuery?: TimestampQuery): GPURenderTimestampQuery
+export function getGPURenderTimestampQuery(device: GPUDevice, passDescriptor: GPURenderPassDescriptor | GPUComputePassDescriptor, timestampQuery?: TimestampQuery)
 {
-    if (!timestampQuery) return defautGPURenderTimestampQuery;
-    let renderTimestampQuery: GPURenderTimestampQuery = timestampQuery["_GPURenderTimestampQuery"];
+    if (!timestampQuery) return;
+    let renderTimestampQuery: GPURenderPassTimestampWrites | GPUComputePassTimestampWrites = timestampQuery["_GPURenderTimestampQuery"];
     if (renderTimestampQuery) return renderTimestampQuery;
 
     const commandEncoder = passDescriptor.commandEncoder;
@@ -44,7 +44,7 @@ export function getGPURenderTimestampQuery(device: GPUDevice, passDescriptor: GP
     {
         console.warn(`WebGPU未开启或者不支持 timestamp-query 特性，请确认 WebGPU.init 初始化参数是否正确！`);
 
-        return defautGPURenderTimestampQuery;
+        return;
     }
 
     const querySet = device.createQuerySet({ type: "timestamp", count: 2 });
@@ -56,7 +56,7 @@ export function getGPURenderTimestampQuery(device: GPUDevice, passDescriptor: GP
     // Create a buffer to map the result back to the CPU
     let resultBuf: GPUBuffer;
 
-    passDescriptor.timestampWrites = {
+    renderTimestampQuery = passDescriptor.timestampWrites = {
         querySet,
         beginningOfPassWriteIndex: 0,
         endOfPassWriteIndex: 1,
@@ -132,10 +132,3 @@ export function getGPURenderTimestampQuery(device: GPUDevice, passDescriptor: GP
 
     return renderTimestampQuery;
 }
-
-interface GPURenderTimestampQuery
-{
-    resolve: (commandEncoder: GPUCommandEncoder) => void
-}
-
-const defautGPURenderTimestampQuery = { init: () => { }, resolve: () => { } };

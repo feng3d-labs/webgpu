@@ -3,6 +3,7 @@ import { BlendState, Buffer, ChainMap, CommandEncoder, computed, ComputedRef, Co
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
+import { getGPUComputePassDescriptor } from "./caches/getGPUComputePassDescriptor";
 import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
 import { getGPURenderOcclusionQuery, GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
@@ -19,7 +20,7 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit, webgpuEvents } from "./eventnames";
-import { RenderPassObjectCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand } from "./internal/RenderObjectCache";
+import { ComputeObjectCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, RenderPassObjectCommand } from "./internal/RenderObjectCache";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
@@ -28,6 +29,14 @@ import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultipl
 
 declare global
 {
+    interface GPUCommandEncoder
+    {
+        /**
+         * 创建时由引擎设置。
+         */
+        device: GPUDevice;
+    }
+
     interface GPURenderPassEncoder
     {
         /**
@@ -154,6 +163,7 @@ export class WebGPUBase
     {
         const device = this._device;
         const gpuCommandEncoder = device.createCommandEncoder();
+        gpuCommandEncoder.device = device;
 
         commandEncoder.passEncoders.forEach((passEncoder) =>
         {
@@ -198,7 +208,7 @@ export class WebGPUBase
 
         // 处理时间戳查询
         renderPassDescriptor.commandEncoder = commandEncoder;
-        const timestampQuery = getGPURenderTimestampQuery(device, renderPassDescriptor, renderPass.timestampQuery);
+        getGPURenderTimestampQuery(device, renderPassDescriptor, renderPass.timestampQuery);
 
         // 处理不被遮挡查询。
         const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
@@ -266,16 +276,12 @@ export class WebGPUBase
      */
     protected runComputePass(commandEncoder: GPUCommandEncoder, computePass: ComputePass)
     {
-        const device = this._device;
-
-        const descriptor: GPUComputePassDescriptor = {};
+        const descriptor = getGPUComputePassDescriptor(commandEncoder, computePass);
         // 处理时间戳查询
-        descriptor.commandEncoder = commandEncoder;
-        const timestampQuery = getGPURenderTimestampQuery(device, descriptor, computePass?.timestampQuery);
-
         const passEncoder = commandEncoder.beginComputePass(descriptor);
 
-        this.runComputeObjects(passEncoder, computePass.computeObjects);
+        const computeObjectCommands = this.runComputeObjects(computePass.computeObjects);
+        computeObjectCommands.forEach((command) => command.run(passEncoder));
 
         passEncoder.end();
 
@@ -283,12 +289,9 @@ export class WebGPUBase
         descriptor.timestampWrites?.resolve();
     }
 
-    protected runComputeObjects(passEncoder: GPUComputePassEncoder, computeObjects: ComputeObject[])
+    protected runComputeObjects(computeObjects: ComputeObject[])
     {
-        computeObjects.forEach((computeObject) =>
-        {
-            this.runComputeObject(passEncoder, computeObject);
-        });
+        return computeObjects.map((computeObject) => this.runComputeObject(computeObject));
     }
 
     protected runCopyTextureToTexture(commandEncoder: GPUCommandEncoder, copyTextureToTexture: CopyTextureToTexture)
@@ -397,23 +400,28 @@ export class WebGPUBase
      * @param passEncoder 计算通道编码器。
      * @param computeObject 计算对象。
      */
-    protected runComputeObject(passEncoder: GPUComputePassEncoder, computeObject: ComputeObject)
+    protected runComputeObject(computeObject: ComputeObject)
     {
         const device = this._device;
         const { pipeline, bindingResources: bindingResources, workgroups } = computeObject;
 
         const computePipeline = getGPUComputePipeline(device, pipeline);
-        passEncoder.setPipeline(computePipeline);
+
+        const computeObjectCommand = new ComputeObjectCommand();
+        computeObjectCommand.computePipeline = computePipeline;
 
         // 计算 bindGroups
+        computeObjectCommand.setBindGroup = [];
         const layout = getGPUPipelineLayout(device, { compute: pipeline.compute.code });
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
             const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
-            passEncoder.setBindGroup(group, gpuBindGroup);
+            computeObjectCommand.setBindGroup.push([group, gpuBindGroup]);
         });
 
-        passEncoder.dispatchWorkgroups(workgroups.workgroupCountX, workgroups.workgroupCountY, workgroups.workgroupCountZ);
+        computeObjectCommand.dispatchWorkgroups = [workgroups.workgroupCountX, workgroups.workgroupCountY, workgroups.workgroupCountZ];
+
+        return computeObjectCommand;
     }
 
     /**

@@ -309,3 +309,20 @@ export class RenderPassCommand
     renderPassDescriptor: GPURenderPassDescriptor;
     renderPassObjects: RenderPassObjectCommand[];
 }
+
+export class ComputeObjectCommand
+{
+    run(passEncoder: GPUComputePassEncoder)
+    {
+        passEncoder.setPipeline(this.computePipeline);
+        this.setBindGroup.forEach(([index, bindGroup]) =>
+        {
+            passEncoder.setBindGroup(index, bindGroup);
+        });
+        const [workgroupCountX, workgroupCountY, workgroupCountZ] = this.dispatchWorkgroups;
+        passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
+    }
+    computePipeline: GPUComputePipeline;
+    setBindGroup: [index: GPUIndex32, bindGroup: GPUBindGroup][];
+    dispatchWorkgroups: [workgroupCountX: GPUSize32, workgroupCountY?: GPUSize32, workgroupCountZ?: GPUSize32];
+}
