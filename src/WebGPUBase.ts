@@ -638,18 +638,21 @@ export class WebGPUBase
         }).value;
     }
 
-    protected runDraw(geometry: RenderObject, renderObjectCache: RenderObjectCache)
+    protected runDraw(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
-        const { draw } = geometry;
+        computed(() =>
+        {
+            const { draw } = reactive(renderObject);
 
-        if (draw.__type__ === 'DrawVertex')
-        {
-            renderObjectCache.draw = [draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance];
-        }
-        else
-        {
-            renderObjectCache.drawIndexed = [draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance];
-        }
+            if (draw.__type__ === 'DrawVertex')
+            {
+                renderObjectCache.draw = [draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance];
+            }
+            else
+            {
+                renderObjectCache.drawIndexed = [draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance];
+            }
+        }).value;
     }
 }
 
