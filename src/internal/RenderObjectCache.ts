@@ -1,8 +1,8 @@
 import { ChainMap } from "@feng3d/render-api";
 
-export const cache = new ChainMap();
+const cache = new ChainMap();
 
-export function setVaule<T extends Array<any>>(cache: ChainMap<any[], any>, keys: T): T
+function setVaule<T extends Array<any>>(cache: ChainMap<any[], any>, keys: T): T
 {
     const v = cache.get(keys);
     if (v) return v;
