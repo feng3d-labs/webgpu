@@ -440,55 +440,65 @@ export class WebGPUBase
 
     protected runviewport(renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: RenderObjectCache)
     {
-        const attachmentSize = renderPassFormat.attachmentSize;
-        const viewport = renderObject.viewport;
-        if (viewport)
+        const r_renderObject = reactive(renderObject);
+        const r_renderPassFormat = reactive(renderPassFormat);
+        computed(() =>
         {
-            const isYup = viewport.isYup ?? true;
-            const x = viewport.x ?? 0;
-            let y = viewport.y ?? 0;
-            const width = viewport.width ?? attachmentSize.width;
-            const height = viewport.height ?? attachmentSize.height;
-            const minDepth = viewport.minDepth ?? 0;
-            const maxDepth = viewport.maxDepth ?? 1;
-
-            if (isYup)
+            const attachmentSize = r_renderPassFormat.attachmentSize;
+            const viewport = r_renderObject.viewport;
+            if (viewport)
             {
-                y = attachmentSize.height - y - height;
+                const isYup = viewport.isYup ?? true;
+                const x = viewport.x ?? 0;
+                let y = viewport.y ?? 0;
+                const width = viewport.width ?? attachmentSize.width;
+                const height = viewport.height ?? attachmentSize.height;
+                const minDepth = viewport.minDepth ?? 0;
+                const maxDepth = viewport.maxDepth ?? 1;
+
+                if (isYup)
+                {
+                    y = attachmentSize.height - y - height;
+                }
+                //
+                renderObjectCache.setViewport = [x, y, width, height, minDepth, maxDepth];
             }
-            //
-            renderObjectCache.setViewport = [x, y, width, height, minDepth, maxDepth];
-        }
-        else
-        {
-            //
-            renderObjectCache.setViewport = [0, 0, attachmentSize.width, attachmentSize.height, 0, 1];
-        }
+            else
+            {
+                //
+                renderObjectCache.setViewport = [0, 0, attachmentSize.width, attachmentSize.height, 0, 1];
+            }
+        }).value;
     }
 
     protected runScissorRect(renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: RenderObjectCache)
     {
-        const attachmentSize = renderPassFormat.attachmentSize;
-        const scissorRect = renderObject.scissorRect;
-        if (scissorRect)
+        const r_renderObject = reactive(renderObject);
+        const r_renderPassFormat = reactive(renderPassFormat);
+        computed(() =>
         {
-            const isYup = scissorRect.isYup ?? true;
-            const x = scissorRect.x ?? 0;
-            let y = scissorRect.y ?? 0;
-            const width = scissorRect.width ?? attachmentSize.width;
-            const height = scissorRect.height ?? attachmentSize.height;
-
-            if (isYup)
+            const attachmentSize = r_renderPassFormat.attachmentSize;
+            const scissorRect = r_renderObject.scissorRect;
+            if (scissorRect)
             {
-                y = attachmentSize.height - y - height;
-            }
+                const isYup = scissorRect.isYup ?? true;
+                const x = scissorRect.x ?? 0;
+                let y = scissorRect.y ?? 0;
+                const width = scissorRect.width ?? attachmentSize.width;
+                const height = scissorRect.height ?? attachmentSize.height;
 
-            renderObjectCache.setScissorRect = [x, y, width, height];
-        }
-        else
-        {
-            renderObjectCache.setScissorRect = [0, 0, attachmentSize.width, attachmentSize.height];
-        }
+                if (isYup)
+                {
+                    y = attachmentSize.height - y - height;
+                }
+
+                renderObjectCache.setScissorRect = [x, y, width, height];
+            }
+            else
+            {
+                renderObjectCache.setScissorRect = [0, 0, attachmentSize.width, attachmentSize.height];
+            }
+        }).value;
     }
 
     protected runRenderPipeline(renderPassFormat: RenderPassFormat, renderObject: RenderObject, renderObjectCache: RenderObjectCache)
@@ -587,30 +597,45 @@ export class WebGPUBase
             const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
             vertexBuffers?.forEach((vertexBuffer, index) =>
             {
-                const buffer = getGBuffer(vertexBuffer.data);
+                const { data, offset, size } = reactive(vertexBuffer);
+
+                const buffer = getGBuffer(data);
                 (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
                 const gBuffer = getGPUBuffer(device, buffer);
 
-                renderObjectCache.setVertexBuffer[index] = [index, gBuffer, vertexBuffer.offset, vertexBuffer.size];
+                renderObjectCache.setVertexBuffer[index] = [index, gBuffer, offset, size];
             });
         }).value;
     }
 
-    protected runIndices(geometry: RenderObject, renderObjectCache: RenderObjectCache)
+    protected runIndices(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
-        const { indices } = geometry;
-        if (!indices) return;
+        const r_renderObject = reactive(renderObject);
 
-        const device = this._device;
+        computed(() =>
+        {
+            // 监听
+            r_renderObject.indices;
 
-        const buffer = getGBuffer(indices);
-        (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
+            const { indices } = renderObject;
+            if (!indices)
+            {
+                renderObjectCache.setIndexBuffer = undefined;
+                return;
+            }
 
-        const gBuffer = getGPUBuffer(device, buffer);
+            const device = this._device;
 
-        //
-        renderObjectCache.setIndexBuffer = [gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength];
+            const buffer = getGBuffer(indices);
+            (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
+
+            const gBuffer = getGPUBuffer(device, buffer);
+
+            //
+            renderObjectCache.setIndexBuffer = [gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength];
+
+        }).value;
     }
 
     protected runDraw(geometry: RenderObject, renderObjectCache: RenderObjectCache)

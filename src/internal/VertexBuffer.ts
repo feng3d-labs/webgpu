@@ -7,7 +7,7 @@ import { VertexDataTypes } from "@feng3d/render-api";
  *
  * {@link GPURenderCommandsMixin.setVertexBuffer}
  */
-export interface NVertexBuffer
+export interface VertexBuffer
 {
     /**
      * Buffer containing vertex data to use for subsequent drawing commands.

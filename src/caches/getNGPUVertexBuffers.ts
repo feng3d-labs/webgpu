@@ -1,5 +1,5 @@
 import { ChainMap, computed, ComputedRef, reactive, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from "@feng3d/render-api";
-import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
+import { VertexBuffer } from "../internal/VertexBuffer";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
 
 export function getGPUVertexBufferLayouts(vertexState: VertexState, vertices: VertexAttributes)
@@ -14,7 +14,7 @@ export function getGPUVertexBufferLayouts(vertexState: VertexState, vertices: Ve
 
 export function getNVertexBuffers(vertexState: VertexState, vertices: VertexAttributes)
 {
-    let _vertexBuffers: NVertexBuffer[];
+    let _vertexBuffers: VertexBuffer[];
     const result = computed(() =>
     {
         const { vertexBuffers } = getVertexBuffersBuffers(vertexState, vertices);
@@ -75,7 +75,7 @@ function getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttri
 
         // 计算
         const vertexBufferLayouts: GPUVertexBufferLayout[] = [];
-        const vertexBuffers: NVertexBuffer[] = [];
+        const vertexBuffers: VertexBuffer[] = [];
         const bufferIndexMap = new Map<VertexDataTypes, number>();
 
         vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
@@ -153,22 +153,25 @@ function getVertexBuffers(vertexAttribute: VertexAttribute)
 {
     let result = getVertexBuffersMap.get(vertexAttribute);
     if (result) return result.value;
-    const NVertexBuffer: NVertexBuffer = {} as any;
+    const vertexBuffer: VertexBuffer = {} as any;
+    const r_vertexBuffer = reactive(vertexBuffer);
     result = computed(() =>
     {
         // 监听
         reactive(vertexAttribute).data;
+
         //
         const data = vertexAttribute.data;
-        NVertexBuffer.data = data;
-        NVertexBuffer.offset = data.byteOffset;
-        NVertexBuffer.size = data.byteLength;
-        return NVertexBuffer;
+        // 修改数据并通知更新
+        r_vertexBuffer.data = data;
+        r_vertexBuffer.offset = data.byteOffset;
+        r_vertexBuffer.size = data.byteLength;
+        return vertexBuffer;
     });
     getVertexBuffersMap.set(vertexAttribute, result);
     return result.value;
 }
-const getVertexBuffersMap = new WeakMap<VertexAttribute, ComputedRef<NVertexBuffer>>();
+const getVertexBuffersMap = new WeakMap<VertexAttribute, ComputedRef<VertexBuffer>>();
 
 type GetVertexBuffersBuffersKey = [vertexState: VertexState, vertices: VertexAttributes];
-const getVertexBuffersBuffersMap = new ChainMap<GetVertexBuffersBuffersKey, ComputedRef<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: NVertexBuffer[] }>>();
+const getVertexBuffersBuffersMap = new ChainMap<GetVertexBuffersBuffersKey, ComputedRef<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: VertexBuffer[] }>>();
