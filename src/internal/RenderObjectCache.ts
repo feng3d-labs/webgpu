@@ -62,4 +62,93 @@ export class RenderObjectCache
             renderPass.drawIndexed(...drawIndexed);
         }
     }
+
+    static runs(renderObjectCaches: RenderObjectCache[], renderPass: GPURenderPassEncoder | GPURenderBundleEncoder)
+    {
+        if (renderObjectCaches.length === 0) return;
+
+        renderObjectCaches.forEach((renderObjectCache, i) =>
+        {
+            const diff = RenderObjectCache.diff(renderObjectCaches[i - 1], renderObjectCache);
+            RenderObjectCache.run(diff, renderPass);
+        });
+    }
+
+    static diff(a: RenderObjectCache, b: RenderObjectCache)
+    {
+        if (!a) return b;
+
+        const result: RenderObjectCache = {} as any;
+
+        if (b.setViewport && (!a.setViewport || b.setViewport.some((v, i) => v !== a.setViewport[i])))
+        {
+            result.setViewport = b.setViewport;
+        }
+        if (b.setScissorRect && (!a.setScissorRect || b.setScissorRect.some((v, i) => v !== a.setScissorRect[i])))
+        {
+            result.setScissorRect = b.setScissorRect;
+        }
+        if (b.setPipeline && (!a.setPipeline || b.setPipeline.some((v, i) => v !== a.setPipeline[i])))
+        {
+            result.setPipeline = b.setPipeline;
+        }
+        if (b.setBlendConstant && (!a.setBlendConstant || b.setBlendConstant.some((v, i) => v !== a.setBlendConstant[i])))
+        {
+            result.setBlendConstant = b.setBlendConstant;
+        }
+        if (b.setStencilReference && (!a.setStencilReference || b.setStencilReference.some((v, i) => v !== a.setStencilReference[i])))
+        {
+            result.setStencilReference = b.setStencilReference;
+        }
+        result.setBindGroup = [];
+        if (b.setBindGroup)
+        {
+            if (!a.setBindGroup)
+            {
+                result.setBindGroup = b.setBindGroup;
+            }
+            else
+            {
+                for (let i = 0, len = b.setBindGroup.length; i < len; i++)
+                {
+                    if (!a.setBindGroup[i] || b.setBindGroup[i].some((v, i) => v !== a.setBindGroup[i][i]))
+                    {
+                        result.setBindGroup.push(b.setBindGroup[i]);
+                    }
+                }
+            }
+        }
+        result.setVertexBuffer = [];
+        if (b.setVertexBuffer)
+        {
+            if (!a.setVertexBuffer)
+            {
+                result.setVertexBuffer = b.setVertexBuffer;
+            }
+            else
+            {
+                for (let i = 0, len = b.setVertexBuffer.length; i < len; i++)
+                {
+                    if (!a.setVertexBuffer[i] || b.setVertexBuffer[i].some((v, j) => v !== a.setVertexBuffer[i][j]))
+                    {
+                        result.setVertexBuffer.push(b.setVertexBuffer[i]);
+                    }
+                }
+            }
+        }
+        if (b.setIndexBuffer && (!a.setIndexBuffer || b.setIndexBuffer.some((v, i) => v !== a.setIndexBuffer[i])))
+        {
+            result.setIndexBuffer = b.setIndexBuffer;
+        }
+        if (b.draw && (!a.draw || b.draw.some((v, i) => v !== a.draw[i])))
+        {
+            result.draw = b.draw;
+        }
+        if (b.drawIndexed && (!a.drawIndexed || b.drawIndexed.some((v, i) => v !== a.drawIndexed[i])))
+        {
+            result.drawIndexed = b.drawIndexed;
+        }
+
+        return result;
+    }
 }

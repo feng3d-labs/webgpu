@@ -353,7 +353,12 @@ export class WebGPUBase
             //
             const renderBundleEncoder = device.createRenderBundleEncoder(descriptor);
 
-            this.runRenderBundleObjects(renderBundleEncoder, renderPassFormat, renderBundleObject.renderObjects);
+            //
+            const renderObjectCaches = renderBundleObject.renderObjects.map((element) =>
+            {
+                return this.runRenderObject(renderBundleEncoder, renderPassFormat, element as RenderObject);
+            });
+            RenderObjectCache.runs(renderObjectCaches, renderBundleEncoder);
 
             const gpuRenderBundle = renderBundleEncoder.finish();
             return gpuRenderBundle;
@@ -361,15 +366,6 @@ export class WebGPUBase
         gpuRenderBundleMap.set(gpuRenderBundleKey, result);
 
         return result.value;
-    }
-
-    protected runRenderBundleObjects(passEncoder: GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObjects?: readonly RenderObject[])
-    {
-        //
-        renderObjects.forEach((element) =>
-        {
-            this.runRenderObject(passEncoder, renderPassFormat, element as RenderObject);
-        });
     }
 
     /**
