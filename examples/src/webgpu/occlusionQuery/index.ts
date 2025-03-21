@@ -1,4 +1,4 @@
-import { BufferBinding, OcclusionQuery, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
+import { BufferBinding, OcclusionQuery, reactive, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
 import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
@@ -228,7 +228,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
                 const buffer = (renderObjects[i].bindingResources.uni as BufferBinding).bufferView;
-                getGBuffer(buffer).data = uniformValues.slice();
+                reactive(getGBuffer(buffer)).data = uniformValues.subarray();
             }
         );
 

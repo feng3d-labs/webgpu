@@ -199,13 +199,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // which could be updated/culled/etc. with a compute shader
     const extent = vec3.sub(lightExtentMax, lightExtentMin);
     const lightDataStride = 8;
-    const bufferSizeInByte = Float32Array.BYTES_PER_ELEMENT * lightDataStride * kMaxNumLights;
-    const lightsBuffer = new Uint8Array(bufferSizeInByte);
 
     // We randomaly populate lights randomly in a box range
     // And simply move them along y-axis per frame to show they are
     // dynamic lightings
-    const lightData = new Float32Array(lightDataStride * kMaxNumLights);
+    const lightsBuffer = new Float32Array(lightDataStride * kMaxNumLights);
     const tmpVec4 = vec4.create();
     let offset = 0;
     for (let i = 0; i < kMaxNumLights; i++)
@@ -217,16 +215,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             tmpVec4[i] = Math.random() * extent[i] + lightExtentMin[i];
         }
         tmpVec4[3] = 1;
-        lightData.set(tmpVec4, offset);
+        lightsBuffer.set(tmpVec4, offset);
         // color
         tmpVec4[0] = Math.random() * 2;
         tmpVec4[1] = Math.random() * 2;
         tmpVec4[2] = Math.random() * 2;
         // radius
         tmpVec4[3] = 20.0;
-        lightData.set(tmpVec4, offset + 4);
+        lightsBuffer.set(tmpVec4, offset + 4);
     }
-    getGBuffer(lightsBuffer).data = lightData;
 
     const lightExtentBuffer = new Uint8Array(4 * 8);
     const lightExtentData = new Float32Array(8);

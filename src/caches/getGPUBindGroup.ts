@@ -10,7 +10,7 @@ import { getGBuffer } from "./getIGPUBuffer";
 
 export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources)
 {
-    const getGPUBindGroupKey: GetGPUBindGroupKey = [device, bindGroupLayout, bindingResources];
+    const getGPUBindGroupKey: GetGPUBindGroupKey = [bindGroupLayout, bindingResources];
     let result = getGPUBindGroupMap.get(getGPUBindGroupKey);
     if (result) return result.value;
 
@@ -64,7 +64,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
 type GPUBindGroupKey = [bindGroupLayout: GPUBindGroupLayout, ...resources: GPUBindingResource[]];
 const gpuBindGroupMap = new ChainMap<GPUBindGroupKey, GPUBindGroup>();
 
-type GetGPUBindGroupKey = [device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources];
+type GetGPUBindGroupKey = [bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources];
 const getGPUBindGroupMap = new ChainMap<GetGPUBindGroupKey, ComputedRef<GPUBindGroup>>();
 
 function getGPUBindingResource(device: GPUDevice, bindingResources: BindingResources, name: string, type: TypeInfo)

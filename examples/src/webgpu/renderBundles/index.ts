@@ -288,16 +288,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     // using render bundles as much.
     let renderBundle: RenderBundle = {
         __type__: "RenderBundle",
-        renderObjects: [],
+        renderObjects: renderScene(),
     };
-    renderBundle.renderObjects = renderScene();
     function updateRenderBundle()
     {
         const renderBundleEncoder: RenderBundle = {
             __type__: "RenderBundle",
-            renderObjects: [],
+            renderObjects: renderScene(),
         };
-        renderBundleEncoder.renderObjects = renderScene();
         renderBundle = renderBundleEncoder;
     }
     updateRenderBundle();
