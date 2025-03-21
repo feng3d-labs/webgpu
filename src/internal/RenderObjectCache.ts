@@ -23,7 +23,7 @@ type CommandType =
     | [func: "setStencilReference", reference: GPUStencilValue]
     ;
 
-export class RenderObjectCache
+export class RenderObjectCache implements RenderPassObjectCommand
 {
     protected setViewport?: [func: "setViewport", x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
     protected setScissorRect?: [func: "setScissorRect", x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
@@ -259,7 +259,7 @@ export class RenderObjectCache
     }
 }
 
-export class OcclusionQueryCache
+export class OcclusionQueryCache implements RenderPassObjectCommand
 {
     queryIndex: number;
     renderObjectCaches: RenderObjectCache[];
@@ -273,4 +273,39 @@ export class OcclusionQueryCache
         }
         passEncoder.endOcclusionQuery();
     }
+}
+
+export interface RenderPassObjectCommand
+{
+    run(passEncoder: GPURenderPassEncoder): void;
+}
+
+export class RenderBundleCommand implements RenderPassObjectCommand
+{
+    gpuRenderBundle: GPURenderBundle;
+    descriptor: GPURenderBundleEncoderDescriptor;
+    renderObjectCaches: RenderObjectCache[];
+    run(passEncoder: GPURenderPassEncoder): void
+    {
+        if (!this.gpuRenderBundle)
+        {
+            //
+            const renderBundleEncoder = passEncoder.device.createRenderBundleEncoder(this.descriptor);
+            //
+            this.renderObjectCaches.forEach((renderObjectCache) =>
+            {
+                renderObjectCache.run(renderBundleEncoder);
+            });
+
+            this.gpuRenderBundle = renderBundleEncoder.finish();
+        }
+
+        passEncoder.executeBundles([this.gpuRenderBundle]);
+    }
+}
+
+export class RenderPassCommand
+{
+    renderPassDescriptor: GPURenderPassDescriptor;
+    renderPassObjects: RenderPassObjectCommand[];
 }

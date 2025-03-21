@@ -19,12 +19,23 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit, webgpuEvents } from "./eventnames";
-import { OcclusionQueryCache, RenderObjectCache } from "./internal/RenderObjectCache";
+import { RenderPassObjectCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand } from "./internal/RenderObjectCache";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+
+declare global
+{
+    interface GPURenderPassEncoder
+    {
+        /**
+         * 创建时由引擎设置。
+         */
+        device: GPUDevice;
+    }
+}
 
 /**
  * WebGPU 基础类
@@ -180,6 +191,8 @@ export class WebGPUBase
         const device = this._device;
         const { descriptor, renderObjects } = renderPass;
 
+        const renderPassCommand = new RenderPassCommand();
+
         const renderPassDescriptor = getGPURenderPassDescriptor(device, descriptor);
         const renderPassFormat = getGPURenderPassFormat(descriptor);
 
@@ -191,9 +204,12 @@ export class WebGPUBase
         const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
         occlusionQuery.init(device, renderPassDescriptor);
 
-        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+        renderPassCommand.renderPassDescriptor = renderPassDescriptor;
 
-        this.runRenderPassObjects(passEncoder, renderPassFormat, renderObjects, occlusionQuery);
+        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+        passEncoder.device = device;
+
+        renderPassCommand.renderPassObjects = this.runRenderPassObjects(passEncoder, renderPassFormat, renderObjects, occlusionQuery);
 
         passEncoder.end();
 
@@ -202,35 +218,44 @@ export class WebGPUBase
 
         // 处理时间戳查询
         timestampQuery.resolve(device, commandEncoder, renderPass);
+
+        return renderPassCommand;
     }
 
     protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderPassObjects: readonly RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
     {
         if (!renderPassObjects) return;
         //
-        renderPassObjects.forEach((element) =>
+        const commands: RenderPassObjectCommand[] = renderPassObjects.map((element) =>
         {
             if (!element.__type__)
             {
-                const renderObjectCache = this.runRenderObject(passEncoder, renderPassFormat, element as RenderObject);
+                return this.runRenderObject(renderPassFormat, element as RenderObject);
             }
-            else if (element.__type__ === "RenderObject")
+            if (element.__type__ === "RenderObject")
             {
-                const renderObjectCache = this.runRenderObject(passEncoder, renderPassFormat, element);
+                return this.runRenderObject(renderPassFormat, element);
             }
-            else if (element.__type__ === "RenderBundle")
+            if (element.__type__ === "RenderBundle")
             {
-                this.runRenderBundle(passEncoder, renderPassFormat, element);
+                return this.runRenderBundle(renderPassFormat, element);
             }
-            else if (element.__type__ === "OcclusionQuery")
+            if (element.__type__ === "OcclusionQuery")
             {
-                this.runRenderOcclusionQueryObject(passEncoder, renderPassFormat, element, occlusionQuery);
+                return this.runRenderOcclusionQueryObject(renderPassFormat, element, occlusionQuery);
             }
             else
             {
                 throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
             }
         });
+
+        commands.forEach((command) =>
+        {
+            command.run(passEncoder);
+        });
+
+        return commands;
     }
 
     /**
@@ -312,35 +337,33 @@ export class WebGPUBase
         );
     }
 
-    protected runRenderOcclusionQueryObject(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery, occlusionQuery: GPURenderOcclusionQuery)
+    protected runRenderOcclusionQueryObject(renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery, occlusionQuery: GPURenderOcclusionQuery)
     {
         const occlusionQueryCache = new OcclusionQueryCache();
         occlusionQueryCache.queryIndex = occlusionQuery.getQueryIndex(renderOcclusionQueryObject);
 
         occlusionQueryCache.renderObjectCaches = renderOcclusionQueryObject.renderObjects.map((renderObject) =>
         {
-            return this.runRenderObject(passEncoder, renderPassFormat, renderObject);
+            return this.runRenderObject(renderPassFormat, renderObject);
         });
-
-        occlusionQueryCache.run(passEncoder);
 
         return occlusionQueryCache;
     }
 
-    protected runRenderBundle(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
+    protected runRenderBundle(renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
     {
-        const device = this._device;
+        const renderBundleCommand = this.getGPURenderBundle(renderBundleObject, renderPassFormat);
 
-        const gpuRenderBundle = this.getGPURenderBundle(device, renderBundleObject, renderPassFormat);
-
-        passEncoder.executeBundles([gpuRenderBundle]);
+        return renderBundleCommand;
     }
 
-    private getGPURenderBundle(device: GPUDevice, renderBundleObject: RenderBundle, renderPassFormat: RenderPassFormat)
+    private getGPURenderBundle(renderBundleObject: RenderBundle, renderPassFormat: RenderPassFormat)
     {
-        const gpuRenderBundleKey: GPURenderBundleKey = [device, renderBundleObject, renderPassFormat];
+        const gpuRenderBundleKey: GPURenderBundleKey = [renderBundleObject, renderPassFormat];
         let result = gpuRenderBundleMap.get(gpuRenderBundleKey);
         if (result) return result.value;
+
+        const renderBundleCommand = new RenderBundleCommand();
 
         result = computed(() =>
         {
@@ -353,17 +376,15 @@ export class WebGPUBase
             // 执行
             const descriptor: GPURenderBundleEncoderDescriptor = { ...renderBundleObject.descriptor, ...renderPassFormat };
 
-            //
-            const renderBundleEncoder = device.createRenderBundleEncoder(descriptor);
+            renderBundleCommand.descriptor = descriptor;
 
             //
-            const renderObjectCaches = renderBundleObject.renderObjects.map((element) =>
+            renderBundleCommand.renderObjectCaches = renderBundleObject.renderObjects.map((element) =>
             {
-                return this.runRenderObject(renderBundleEncoder, renderPassFormat, element as RenderObject);
+                return this.runRenderObject(renderPassFormat, element as RenderObject);
             });
 
-            const gpuRenderBundle = renderBundleEncoder.finish();
-            return gpuRenderBundle;
+            return renderBundleCommand;
         });
         gpuRenderBundleMap.set(gpuRenderBundleKey, result);
 
@@ -404,17 +425,12 @@ export class WebGPUBase
      * @param renderObject 渲染对象。
      * @param renderPass 渲染通道。
      */
-    protected runRenderObject(passEncoder: GPURenderPassEncoder | GPURenderBundleEncoder, renderPassFormat: RenderPassFormat, renderObject: RenderObject)
+    protected runRenderObject(renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
         const device = this._device;
         const renderObjectCacheKey: RenderObjectCacheKey = [device, renderObject, renderPassFormat];
         let result = renderObjectCacheMap.get(renderObjectCacheKey);
-        if (result)
-        {
-            // result.value.run(passEncoder);
-
-            return result.value;
-        }
+        if (result) { return result.value; }
 
         const renderObjectCache = new RenderObjectCache();
         result = computed(() =>
@@ -430,8 +446,6 @@ export class WebGPUBase
             return renderObjectCache;
         });
         renderObjectCacheMap.set(renderObjectCacheKey, result);
-
-        result.value.run(passEncoder);
 
         return result.value;
     }
@@ -693,8 +707,8 @@ function getStencilReference(depthStencil?: DepthStencilState)
     return stencilReference;
 }
 
-type GPURenderBundleKey = [device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
-const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, ComputedRef<GPURenderBundle>>();
+type GPURenderBundleKey = [renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
+const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, ComputedRef<RenderBundleCommand>>();
 
 type RenderObjectCacheKey = [device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat];
 const renderObjectCacheMap = new ChainMap<RenderObjectCacheKey, ComputedRef<RenderObjectCache>>();
