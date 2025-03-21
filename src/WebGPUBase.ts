@@ -447,8 +447,8 @@ export class WebGPUBase
                 const isYup = viewport.isYup ?? true;
                 const x = viewport.x ?? 0;
                 let y = viewport.y ?? 0;
-                const width = viewport.width ?? attachmentSize.width;
-                const height = viewport.height ?? attachmentSize.height;
+                const width = viewport.width;
+                const height = viewport.height;
                 const minDepth = viewport.minDepth ?? 0;
                 const maxDepth = viewport.maxDepth ?? 1;
 
@@ -480,8 +480,8 @@ export class WebGPUBase
                 const isYup = scissorRect.isYup ?? true;
                 const x = scissorRect.x ?? 0;
                 let y = scissorRect.y ?? 0;
-                const width = scissorRect.width ?? attachmentSize.width;
-                const height = scissorRect.height ?? attachmentSize.height;
+                const width = scissorRect.width;
+                const height = scissorRect.height;
 
                 if (isYup)
                 {
