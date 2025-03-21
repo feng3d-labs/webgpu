@@ -25,75 +25,152 @@ type CommandType =
 
 export class RenderObjectCache
 {
-    private commands: CommandType[] = [];
+    protected setViewport?: [func: "setViewport", x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
+    protected setScissorRect?: [func: "setScissorRect", x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
+    protected setPipeline: [func: "setPipeline", pipeline: GPURenderPipeline];
+    protected setBlendConstant?: [func: "setBlendConstant", color: GPUColor];
+    protected setStencilReference?: [func: "setStencilReference", reference: GPUStencilValue];
+    protected setBindGroup?: [func: "setBindGroup", index: number, bindGroup: GPUBindGroup][];
+    protected setVertexBuffer?: [func: "setVertexBuffer", slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][];
+    protected setIndexBuffer?: [func: "setIndexBuffer", buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
+    protected draw?: [func: "draw", vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32];
+    protected drawIndexed?: [func: "drawIndexed", indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
+
+    // private commands: CommandType[] = [];
     push(command: CommandType)
     {
-        this.commands.push(setVaule(cache, command));
+        const func = command[0];
+        if (func === "setBindGroup")
+        {
+            if (!this.setBindGroup) this.setBindGroup = [];
+            this.setBindGroup.push(command);
+            return;
+        }
+        else if (func === "setVertexBuffer")
+        {
+            if (!this.setVertexBuffer) this.setVertexBuffer = [];
+            this.setVertexBuffer.push(command);
+            return;
+        }
+        command = setVaule(cache, command);
+        this[command[0]] = command as any;
     }
 
     delete(func: CommandType[0])
     {
-        this.commands = this.commands.filter((c) => c[0] !== func);
+        if (func === "setBindGroup")
+        {
+            this.setBindGroup = [];
+            return;
+        }
+        else if (func === "setVertexBuffer")
+        {
+            this.setVertexBuffer = [];
+            return;
+        }
+        this[func as any] = undefined;
     }
-
-    setStencilReference?: [reference: GPUStencilValue];
-    setBindGroup?: [index: number, bindGroup: GPUBindGroup][];
-    setVertexBuffer?: [slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][];
-    setIndexBuffer?: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
-    draw?: [vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32];
-    drawIndexed?: [indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
 
     run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder)
     {
-        this.commands.forEach((command) =>
+        // this.commands.forEach((command) =>
+        // {
+        //     const func = command[0];
+        //     if (func === "setPipeline")
+        //     {
+        //         renderPass.setPipeline(command[1]);
+        //     }
+        //     else if (func === "setBindGroup")
+        //     {
+        //         renderPass.setBindGroup(command[1], command[2]);
+        //     }
+        //     else if (func === "setVertexBuffer")
+        //     {
+        //         renderPass.setVertexBuffer(command[1], command[2], command[3], command[4]);
+        //     }
+        //     else if (func === "setIndexBuffer")
+        //     {
+        //         renderPass.setIndexBuffer(command[1], command[2], command[3], command[4]);
+        //     }
+        //     else if (func === "draw")
+        //     {
+        //         renderPass.draw(command[1], command[2], command[3], command[4]);
+        //     }
+        //     else if (func === "drawIndexed")
+        //     {
+        //         renderPass.drawIndexed(command[1], command[2], command[3], command[4], command[5]);
+        //     }
+        //     else if (func === "setViewport")
+        //     {
+        //         if ("setViewport" in renderPass) renderPass.setViewport(command[1], command[2], command[3], command[4], command[5], command[6]);
+        //     }
+        //     else if (func === "setScissorRect")
+        //     {
+        //         if ("setScissorRect" in renderPass) renderPass.setScissorRect(command[1], command[2], command[3], command[4]);
+        //     }
+        //     else if (func === "setBlendConstant")
+        //     {
+        //         if ("setBlendConstant" in renderPass)
+        //             renderPass.setBlendConstant(command[1]);
+        //     }
+        //     else if (func === "setStencilReference")
+        //     {
+        //         if ("setStencilReference" in renderPass) renderPass.setStencilReference(command[1]);
+        //     }
+        //     else
+        //     {
+        //         func;
+        //     }
+        // });
+
+        const { setViewport, setScissorRect, setPipeline, setBlendConstant, setStencilReference, setBindGroup, setVertexBuffer, setIndexBuffer, draw, drawIndexed } = this;
+
+        if (setViewport && "setViewport" in renderPass)
         {
-            const func = command[0];
-            if (func === "setPipeline")
+            renderPass.setViewport(setViewport[1], setViewport[2], setViewport[3], setViewport[4], setViewport[5], setViewport[6]);
+        }
+        if (setScissorRect && "setScissorRect" in renderPass)
+        {
+            renderPass.setScissorRect(setScissorRect[1], setScissorRect[2], setScissorRect[3], setScissorRect[4]);
+        }
+        renderPass.setPipeline(setPipeline[1]);
+        if (setBlendConstant && "setBlendConstant" in renderPass)
+        {
+            renderPass.setBlendConstant(setBlendConstant[1]);
+        }
+        if (setStencilReference && "setStencilReference" in renderPass)
+        {
+            renderPass.setStencilReference(setStencilReference[1]);
+        }
+        if (setBindGroup)
+        {
+            for (let i = 0, len = setBindGroup.length; i < len; i++)
             {
-                renderPass.setPipeline(command[1]);
+                const [, index, bindGroup] = setBindGroup[i];
+                renderPass.setBindGroup(index, bindGroup);
             }
-            else if (func === "setBindGroup")
+        }
+        if (setVertexBuffer)
+        {
+            for (let i = 0, len = setVertexBuffer.length; i < len; i++)
             {
-                renderPass.setBindGroup(command[1], command[2]);
+                const [, slot, buffer, offset, size] = setVertexBuffer[i];
+                renderPass.setVertexBuffer(slot, buffer, offset, size);
             }
-            else if (func === "setVertexBuffer")
-            {
-                renderPass.setVertexBuffer(command[1], command[2], command[3], command[4]);
-            }
-            else if (func === "setIndexBuffer")
-            {
-                renderPass.setIndexBuffer(command[1], command[2], command[3], command[4]);
-            }
-            else if (func === "draw")
-            {
-                renderPass.draw(command[1], command[2], command[3], command[4]);
-            }
-            else if (func === "drawIndexed")
-            {
-                renderPass.drawIndexed(command[1], command[2], command[3], command[4], command[5]);
-            }
-            else if (func === "setViewport")
-            {
-                if ("setViewport" in renderPass) renderPass.setViewport(command[1], command[2], command[3], command[4], command[5], command[6]);
-            }
-            else if (func === "setScissorRect")
-            {
-                if ("setScissorRect" in renderPass) renderPass.setScissorRect(command[1], command[2], command[3], command[4]);
-            }
-            else if (func === "setBlendConstant")
-            {
-                if ("setBlendConstant" in renderPass)
-                    renderPass.setBlendConstant(command[1]);
-            }
-            else if (func === "setStencilReference")
-            {
-                if ("setStencilReference" in renderPass) renderPass.setStencilReference(command[1]);
-            }
-            else
-            {
-                func;
-            }
-        });
+        }
+        if (setIndexBuffer)
+        {
+            const [, buffer, indexFormat, offset, size] = setIndexBuffer;
+            renderPass.setIndexBuffer(buffer, indexFormat, offset, size);
+        }
+        if (draw)
+        {
+            renderPass.draw(draw[1], draw[2], draw[3], draw[4]);
+        }
+        if (drawIndexed)
+        {
+            renderPass.drawIndexed(drawIndexed[1], drawIndexed[2], drawIndexed[3], drawIndexed[4], drawIndexed[5]);
+        }
     }
 
     // static diff(a: RenderObjectCache, b: RenderObjectCache)

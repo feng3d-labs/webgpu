@@ -531,11 +531,11 @@ export class WebGPUBase
             const stencilReference = getStencilReference(r_pipeline.depthStencil);
             if (stencilReference === undefined)
             {
-                renderObjectCache.setStencilReference = undefined;
+                renderObjectCache.delete("setStencilReference");
                 return;
             }
 
-            renderObjectCache.setStencilReference = [stencilReference];
+            renderObjectCache.push(["setStencilReference", stencilReference]);
         }).value;
     }
 
@@ -566,13 +566,13 @@ export class WebGPUBase
             r_renderObject.bindingResources;
 
             // 执行
-            renderObjectCache.setBindGroup = []
+            renderObjectCache.delete("setBindGroup");
             const { bindingResources } = renderObject;
             const layout = getGPUPipelineLayout(device, { vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
             {
                 const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
-                renderObjectCache.setBindGroup[group] = [group, gpuBindGroup];
+                renderObjectCache.push(["setBindGroup", group, gpuBindGroup]);
             });
         }).value;
     }
@@ -589,7 +589,7 @@ export class WebGPUBase
 
             const { vertices, pipeline } = renderObject;
             //
-            renderObjectCache.setVertexBuffer = [];
+            renderObjectCache.delete("setVertexBuffer");
             const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
             vertexBuffers?.forEach((vertexBuffer, index) =>
             {
@@ -600,7 +600,7 @@ export class WebGPUBase
 
                 const gBuffer = getGPUBuffer(device, buffer);
 
-                renderObjectCache.setVertexBuffer[index] = [index, gBuffer, offset, size];
+                renderObjectCache.push(["setVertexBuffer", index, gBuffer, offset, size]);
             });
         }).value;
     }
@@ -617,7 +617,7 @@ export class WebGPUBase
             const { indices } = renderObject;
             if (!indices)
             {
-                renderObjectCache.setIndexBuffer = undefined;
+                renderObjectCache.delete("setIndexBuffer");
                 return;
             }
 
@@ -629,7 +629,7 @@ export class WebGPUBase
             const gBuffer = getGPUBuffer(device, buffer);
 
             //
-            renderObjectCache.setIndexBuffer = [gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength];
+            renderObjectCache.push(["setIndexBuffer", gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength]);
 
         }).value;
     }
@@ -640,13 +640,15 @@ export class WebGPUBase
         {
             const { draw } = reactive(renderObject);
 
+            renderObjectCache.delete("draw");
+            renderObjectCache.delete("drawIndexed");
             if (draw.__type__ === 'DrawVertex')
             {
-                renderObjectCache.draw = [draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance];
+                renderObjectCache.push(["draw", draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]);
             }
             else
             {
-                renderObjectCache.drawIndexed = [draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance];
+                renderObjectCache.push(["drawIndexed", draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance]);
             }
         }).value;
     }
