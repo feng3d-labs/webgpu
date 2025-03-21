@@ -71,7 +71,7 @@ export class RenderObjectCache
         this[func as any] = undefined;
     }
 
-    run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder)
+    run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder, state?: RenderObjectCache)
     {
         // this.commands.forEach((command) =>
         // {
@@ -127,41 +127,48 @@ export class RenderObjectCache
 
         if (setViewport && "setViewport" in renderPass)
         {
-            renderPass.setViewport(setViewport[1], setViewport[2], setViewport[3], setViewport[4], setViewport[5], setViewport[6]);
+            if (!state || state.setViewport !== setViewport) renderPass.setViewport(setViewport[1], setViewport[2], setViewport[3], setViewport[4], setViewport[5], setViewport[6]);
+            if (state) state.setViewport = setViewport;
         }
         if (setScissorRect && "setScissorRect" in renderPass)
         {
-            renderPass.setScissorRect(setScissorRect[1], setScissorRect[2], setScissorRect[3], setScissorRect[4]);
+            if (!state || state.setScissorRect !== setScissorRect) renderPass.setScissorRect(setScissorRect[1], setScissorRect[2], setScissorRect[3], setScissorRect[4]);
+            if (state) state.setScissorRect = setScissorRect;
         }
-        renderPass.setPipeline(setPipeline[1]);
+        if (!state || state.setPipeline !== setPipeline) renderPass.setPipeline(setPipeline[1]);
+        if (state) state.setPipeline = setPipeline;
         if (setBlendConstant && "setBlendConstant" in renderPass)
         {
-            renderPass.setBlendConstant(setBlendConstant[1]);
+            if (!state || state.setBlendConstant !== setBlendConstant) renderPass.setBlendConstant(setBlendConstant[1]);
+            if (state) state.setBlendConstant = setBlendConstant;
         }
         if (setStencilReference && "setStencilReference" in renderPass)
         {
-            renderPass.setStencilReference(setStencilReference[1]);
+            if (!state || state.setStencilReference !== setStencilReference) renderPass.setStencilReference(setStencilReference[1]);
+            if (state) state.setStencilReference = setStencilReference;
         }
         if (setBindGroup)
         {
+            if (state) state.setBindGroup ??= [];
             for (let i = 0, len = setBindGroup.length; i < len; i++)
             {
-                const [, index, bindGroup] = setBindGroup[i];
-                renderPass.setBindGroup(index, bindGroup);
+                if (!state || !state.setBindGroup[i] || state.setBindGroup[i] !== setBindGroup[i]) renderPass.setBindGroup(setBindGroup[i][1], setBindGroup[i][2]);
+                if (state) state.setBindGroup[i] = setBindGroup[i];
             }
         }
         if (setVertexBuffer)
         {
+            if (state) state.setVertexBuffer ??= [];
             for (let i = 0, len = setVertexBuffer.length; i < len; i++)
             {
-                const [, slot, buffer, offset, size] = setVertexBuffer[i];
-                renderPass.setVertexBuffer(slot, buffer, offset, size);
+                if (!state || !state.setVertexBuffer[i] || state.setVertexBuffer[i] !== setVertexBuffer[i]) renderPass.setVertexBuffer(setVertexBuffer[i][1], setVertexBuffer[i][2], setVertexBuffer[i][3], setVertexBuffer[i][4]);
+                if (state) state.setVertexBuffer[i] = setVertexBuffer[i];
             }
         }
         if (setIndexBuffer)
         {
-            const [, buffer, indexFormat, offset, size] = setIndexBuffer;
-            renderPass.setIndexBuffer(buffer, indexFormat, offset, size);
+            if (!state || state.setIndexBuffer !== setIndexBuffer) renderPass.setIndexBuffer(setIndexBuffer[1], setIndexBuffer[2], setIndexBuffer[3]);
+            if (state) state.setIndexBuffer = setIndexBuffer;
         }
         if (draw)
         {
@@ -173,81 +180,97 @@ export class RenderObjectCache
         }
     }
 
-    // static diff(a: RenderObjectCache, b: RenderObjectCache)
-    // {
-    //     if (!a) return b;
+    static diff(a: RenderObjectCache, b: RenderObjectCache)
+    {
+        if (!a) return b;
 
-    //     const result: RenderObjectCache = {} as any;
+        const result: RenderObjectCache = {} as any;
 
-    //     if (a.setViewport !== b.setViewport && b.setViewport && (a.setViewport[0] !== b.setViewport[0] || a.setViewport[1] !== b.setViewport[1] || a.setViewport[2] !== b.setViewport[2] || a.setViewport[3] !== b.setViewport[3] || a.setViewport[4] !== b.setViewport[4] || a.setViewport[5] !== b.setViewport[5]))
-    //     {
-    //         result.setViewport = b.setViewport;
-    //     }
-    //     if (b.setScissorRect && (!a.setScissorRect || b.setScissorRect.some((v, i) => v !== a.setScissorRect[i])))
-    //     {
-    //         result.setScissorRect = b.setScissorRect;
-    //     }
-    //     if (b.setPipeline && (!a.setPipeline || b.setPipeline.some((v, i) => v !== a.setPipeline[i])))
-    //     {
-    //         result.setPipeline = b.setPipeline;
-    //     }
-    //     if (b.setBlendConstant && (!a.setBlendConstant || b.setBlendConstant.some((v, i) => v !== a.setBlendConstant[i])))
-    //     {
-    //         result.setBlendConstant = b.setBlendConstant;
-    //     }
-    //     if (b.setStencilReference && (!a.setStencilReference || b.setStencilReference.some((v, i) => v !== a.setStencilReference[i])))
-    //     {
-    //         result.setStencilReference = b.setStencilReference;
-    //     }
-    //     result.setBindGroup = [];
-    //     if (b.setBindGroup)
-    //     {
-    //         if (!a.setBindGroup)
-    //         {
-    //             result.setBindGroup = b.setBindGroup;
-    //         }
-    //         else
-    //         {
-    //             for (let i = 0, len = b.setBindGroup.length; i < len; i++)
-    //             {
-    //                 if (!a.setBindGroup[i] || b.setBindGroup[i].some((v, i) => v !== a.setBindGroup[i][i]))
-    //                 {
-    //                     result.setBindGroup.push(b.setBindGroup[i]);
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     result.setVertexBuffer = [];
-    //     if (b.setVertexBuffer)
-    //     {
-    //         if (!a.setVertexBuffer)
-    //         {
-    //             result.setVertexBuffer = b.setVertexBuffer;
-    //         }
-    //         else
-    //         {
-    //             for (let i = 0, len = b.setVertexBuffer.length; i < len; i++)
-    //             {
-    //                 if (!a.setVertexBuffer[i] || b.setVertexBuffer[i].some((v, j) => v !== a.setVertexBuffer[i][j]))
-    //                 {
-    //                     result.setVertexBuffer.push(b.setVertexBuffer[i]);
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     if (b.setIndexBuffer && (!a.setIndexBuffer || b.setIndexBuffer.some((v, i) => v !== a.setIndexBuffer[i])))
-    //     {
-    //         result.setIndexBuffer = b.setIndexBuffer;
-    //     }
-    //     if (b.draw && (!a.draw || b.draw.some((v, i) => v !== a.draw[i])))
-    //     {
-    //         result.draw = b.draw;
-    //     }
-    //     if (b.drawIndexed && (!a.drawIndexed || b.drawIndexed.some((v, i) => v !== a.drawIndexed[i])))
-    //     {
-    //         result.drawIndexed = b.drawIndexed;
-    //     }
+        if (a.setViewport !== b.setViewport && b.setViewport && (a.setViewport[0] !== b.setViewport[0] || a.setViewport[1] !== b.setViewport[1] || a.setViewport[2] !== b.setViewport[2] || a.setViewport[3] !== b.setViewport[3] || a.setViewport[4] !== b.setViewport[4] || a.setViewport[5] !== b.setViewport[5]))
+        {
+            result.setViewport = b.setViewport;
+        }
+        if (b.setScissorRect && (!a.setScissorRect || b.setScissorRect.some((v, i) => v !== a.setScissorRect[i])))
+        {
+            result.setScissorRect = b.setScissorRect;
+        }
+        if (b.setPipeline && (!a.setPipeline || b.setPipeline.some((v, i) => v !== a.setPipeline[i])))
+        {
+            result.setPipeline = b.setPipeline;
+        }
+        if (b.setBlendConstant && (!a.setBlendConstant || b.setBlendConstant.some((v, i) => v !== a.setBlendConstant[i])))
+        {
+            result.setBlendConstant = b.setBlendConstant;
+        }
+        if (b.setStencilReference && (!a.setStencilReference || b.setStencilReference.some((v, i) => v !== a.setStencilReference[i])))
+        {
+            result.setStencilReference = b.setStencilReference;
+        }
+        result.setBindGroup = [];
+        if (b.setBindGroup)
+        {
+            if (!a.setBindGroup)
+            {
+                result.setBindGroup = b.setBindGroup;
+            }
+            else
+            {
+                for (let i = 0, len = b.setBindGroup.length; i < len; i++)
+                {
+                    if (!a.setBindGroup[i] || b.setBindGroup[i].some((v, i) => v !== a.setBindGroup[i][i]))
+                    {
+                        result.setBindGroup.push(b.setBindGroup[i]);
+                    }
+                }
+            }
+        }
+        result.setVertexBuffer = [];
+        if (b.setVertexBuffer)
+        {
+            if (!a.setVertexBuffer)
+            {
+                result.setVertexBuffer = b.setVertexBuffer;
+            }
+            else
+            {
+                for (let i = 0, len = b.setVertexBuffer.length; i < len; i++)
+                {
+                    if (!a.setVertexBuffer[i] || b.setVertexBuffer[i].some((v, j) => v !== a.setVertexBuffer[i][j]))
+                    {
+                        result.setVertexBuffer.push(b.setVertexBuffer[i]);
+                    }
+                }
+            }
+        }
+        if (b.setIndexBuffer && (!a.setIndexBuffer || b.setIndexBuffer.some((v, i) => v !== a.setIndexBuffer[i])))
+        {
+            result.setIndexBuffer = b.setIndexBuffer;
+        }
+        if (b.draw && (!a.draw || b.draw.some((v, i) => v !== a.draw[i])))
+        {
+            result.draw = b.draw;
+        }
+        if (b.drawIndexed && (!a.drawIndexed || b.drawIndexed.some((v, i) => v !== a.drawIndexed[i])))
+        {
+            result.drawIndexed = b.drawIndexed;
+        }
 
-    //     return result;
-    // }
+        return result;
+    }
+}
+
+export class OcclusionQueryCache
+{
+    queryIndex: number;
+    renderObjectCaches: RenderObjectCache[];
+
+    run(passEncoder: GPURenderPassEncoder)
+    {
+        passEncoder.beginOcclusionQuery(this.queryIndex);
+        for (let i = 0, len = this.renderObjectCaches.length; i < len; i++)
+        {
+            this.renderObjectCaches[i].run(passEncoder);
+        }
+        passEncoder.endOcclusionQuery();
+    }
 }

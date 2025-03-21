@@ -19,7 +19,7 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit, webgpuEvents } from "./eventnames";
-import { RenderObjectCache } from "./internal/RenderObjectCache";
+import { OcclusionQueryCache, RenderObjectCache } from "./internal/RenderObjectCache";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
@@ -212,11 +212,11 @@ export class WebGPUBase
         {
             if (!element.__type__)
             {
-                this.runRenderObject(passEncoder, renderPassFormat, element as RenderObject);
+                const renderObjectCache = this.runRenderObject(passEncoder, renderPassFormat, element as RenderObject);
             }
             else if (element.__type__ === "RenderObject")
             {
-                this.runRenderObject(passEncoder, renderPassFormat, element);
+                const renderObjectCache = this.runRenderObject(passEncoder, renderPassFormat, element);
             }
             else if (element.__type__ === "RenderBundle")
             {
@@ -314,14 +314,17 @@ export class WebGPUBase
 
     protected runRenderOcclusionQueryObject(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery, occlusionQuery: GPURenderOcclusionQuery)
     {
-        passEncoder.beginOcclusionQuery(occlusionQuery.getQueryIndex(renderOcclusionQueryObject));
+        const occlusionQueryCache = new OcclusionQueryCache();
+        occlusionQueryCache.queryIndex = occlusionQuery.getQueryIndex(renderOcclusionQueryObject);
 
-        renderOcclusionQueryObject.renderObjects.forEach((renderObject) =>
+        occlusionQueryCache.renderObjectCaches = renderOcclusionQueryObject.renderObjects.map((renderObject) =>
         {
-            this.runRenderObject(passEncoder, renderPassFormat, renderObject);
+            return this.runRenderObject(passEncoder, renderPassFormat, renderObject);
         });
 
-        passEncoder.endOcclusionQuery();
+        occlusionQueryCache.run(passEncoder);
+
+        return occlusionQueryCache;
     }
 
     protected runRenderBundle(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
@@ -358,7 +361,6 @@ export class WebGPUBase
             {
                 return this.runRenderObject(renderBundleEncoder, renderPassFormat, element as RenderObject);
             });
-            // RenderObjectCache.runs(renderObjectCaches, renderBundleEncoder);
 
             const gpuRenderBundle = renderBundleEncoder.finish();
             return gpuRenderBundle;
@@ -409,7 +411,7 @@ export class WebGPUBase
         let result = renderObjectCacheMap.get(renderObjectCacheKey);
         if (result)
         {
-            result.value.run(passEncoder);
+            // result.value.run(passEncoder);
 
             return result.value;
         }
