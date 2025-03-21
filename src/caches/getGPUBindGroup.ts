@@ -21,6 +21,11 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
         {
             const { name, type, resourceType, binding } = v.variableInfo;
 
+            // 监听
+            const r_bindingResources = reactive(bindingResources);
+            r_bindingResources[name];
+
+            // 执行
             const entry: GPUBindGroupEntry = { binding, resource: null };
 
             //
@@ -93,7 +98,7 @@ function getGPUBindingResource(device: GPUDevice, bindingResources: BindingResou
         // 更新缓冲区绑定的数据。
         updateBufferBinding(bufferBinding, type);
         //
-        const gpuBindingResource = _getGPUBindingResource(device, bufferBinding.bufferView);
+        const gpuBindingResource = _getGPUBindingResource(device, bufferBinding.bufferView, name);
         return gpuBindingResource;
     });
 
@@ -104,32 +109,37 @@ function getGPUBindingResource(device: GPUDevice, bindingResources: BindingResou
 type GetGPUBindingResourceKey = [device: GPUDevice, bindingResources: BindingResources, name: string, type: TypeInfo];
 const getGPUBindingResourceMap = new ChainMap<GetGPUBindingResourceKey, ComputedRef<GPUBindingResource>>();
 
-function _getGPUBindingResource(device: GPUDevice, bufferView: TypedArray)
+function _getGPUBindingResource(device: GPUDevice, bufferView: TypedArray, name: string)
 {
     //
     const gpuBindingResourceKey: GPUBindingResourceKey = [device, bufferView];
-    const cache = gpuBindingResourceMap.get(gpuBindingResourceKey);
-    if (cache) return cache;
+    let cache = gpuBindingResourceMap.get(gpuBindingResourceKey);
+    if (cache) return cache.value;
 
-    const gbuffer = getGBuffer(bufferView);
-    (gbuffer as any).label = gbuffer.label || (`BufferBinding ${name}`);
-    //
-    const buffer = getGPUBuffer(device, gbuffer);
+    cache = computed(() =>
+    {
+        const gbuffer = getGBuffer(bufferView);
+        (gbuffer as any).label = gbuffer.label || (`BufferBinding ${name}`);
+        //
+        const buffer = getGPUBuffer(device, gbuffer);
 
-    const offset = bufferView.byteOffset;
-    const size = bufferView.byteLength;
+        const offset = bufferView.byteOffset;
+        const size = bufferView.byteLength;
 
-    const gpuBindingResource: GPUBindingResource = {
-        buffer,
-        offset,
-        size,
-    };
-    gpuBindingResourceMap.set(gpuBindingResourceKey, gpuBindingResource);
+        const gpuBindingResource: GPUBindingResource = {
+            buffer,
+            offset,
+            size,
+        };
 
-    return gpuBindingResource;
+        return gpuBindingResource;
+    });
+    gpuBindingResourceMap.set(gpuBindingResourceKey, cache);
+
+    return cache.value;
 }
 type GPUBindingResourceKey = [device: GPUDevice, bufferView: TypedArray];
-const gpuBindingResourceMap = new ChainMap<GPUBindingResourceKey, GPUBindingResource>();
+const gpuBindingResourceMap = new ChainMap<GPUBindingResourceKey, ComputedRef<GPUBindingResource>>();
 
 function getGPUExternalTexture(device: GPUDevice, videoTexture: VideoTexture)
 {
