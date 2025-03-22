@@ -200,12 +200,10 @@ export class WebGPUBase
         const { descriptor, renderPassObjects } = renderPass;
 
         const renderPassCommand = new RenderPassCommand();
+        renderPassCommand.renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass);
 
-        const renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass);
-        const renderPassFormat = getGPURenderPassFormat(descriptor);
-
-        renderPassCommand.renderPassDescriptor = renderPassDescriptor;
         let queryIndex = 0;
+        const renderPassFormat = getGPURenderPassFormat(descriptor);
         renderPassCommand.renderPassObjects = renderPassObjects?.map((element) =>
         {
             if (!element.__type__)
