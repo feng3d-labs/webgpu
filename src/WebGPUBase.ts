@@ -167,11 +167,13 @@ export class WebGPUBase
         {
             if (!passEncoder.__type__)
             {
-                this.runRenderPass(gpuCommandEncoder, passEncoder as RenderPass);
+                const renderPassCommand = this.runRenderPass(passEncoder as RenderPass);
+                renderPassCommand.run(gpuCommandEncoder);
             }
             else if (passEncoder.__type__ === "RenderPass")
             {
-                this.runRenderPass(gpuCommandEncoder, passEncoder);
+                const renderPassCommand = this.runRenderPass(passEncoder);
+                renderPassCommand.run(gpuCommandEncoder);
             }
             else if (passEncoder.__type__ === "ComputePass")
             {
@@ -194,7 +196,7 @@ export class WebGPUBase
         return gpuCommandEncoder.finish();
     }
 
-    protected runRenderPass(commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
+    protected runRenderPass(renderPass: RenderPass)
     {
         const device = this._device;
         const { descriptor, renderPassObjects } = renderPass;
@@ -229,8 +231,6 @@ export class WebGPUBase
                 throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
             }
         });
-
-        renderPassCommand.run(commandEncoder);
 
         return renderPassCommand;
     }
