@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { OcclusionQuery } from "@feng3d/render-api";
+import { OcclusionQuery, RenderPass } from "@feng3d/render-api";
 
 import { GPUQueue_submit } from "../eventnames";
 
@@ -36,8 +36,9 @@ export class GPURenderOcclusionQuery
 
     init(device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor, _occlusionQuerys: OcclusionQuery[])
     {
-        this.device = device;
         this.occlusionQuerys = _occlusionQuerys;
+        if (this.occlusionQuerys.length === 0) return;
+        this.device = device;
         this.occlusionQuerySet = renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: this.occlusionQuerys.length });
     }
 
@@ -48,8 +49,10 @@ export class GPURenderOcclusionQuery
      * @param commandEncoder
      * @param renderPass
      */
-    resolve(commandEncoder: GPUCommandEncoder, renderPass)
+    resolve(commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
     {
+        if (this.occlusionQuerys.length === 0) return;
+
         const { device, occlusionQuerys, occlusionQuerySet, resolveBuf, resultBuf } = this;
 
         commandEncoder.resolveQuerySet(occlusionQuerySet, 0, occlusionQuerys.length, resolveBuf, 0);
