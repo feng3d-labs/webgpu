@@ -6,7 +6,6 @@ import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUComputePassDescriptor } from "./caches/getGPUComputePassDescriptor";
 import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
-import { getGPURenderOcclusionQuery, GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
@@ -19,7 +18,7 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit, webgpuEvents } from "./eventnames";
-import { ComputeObjectCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, RenderPassObjectCommand } from "./internal/RenderObjectCache";
+import { ComputeObjectCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand } from "./internal/RenderObjectCache";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
@@ -198,40 +197,17 @@ export class WebGPUBase
     protected runRenderPass(commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
     {
         const device = this._device;
-        const { descriptor, renderPassObjects: renderObjects } = renderPass;
+        const { descriptor, renderPassObjects } = renderPass;
 
         const renderPassCommand = new RenderPassCommand();
 
         const renderPassDescriptor = getGPURenderPassDescriptor(device, descriptor);
         const renderPassFormat = getGPURenderPassFormat(descriptor);
 
-        // 处理不被遮挡查询。
-        const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
-        occlusionQuery.init(device, renderPassDescriptor);
-
+        renderPassCommand.renderPass = renderPass;
         renderPassCommand.renderPassDescriptor = renderPassDescriptor;
-
-        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-        passEncoder.device = device;
-
-        renderPassCommand.renderPassObjects = this.runRenderPassObjects(passEncoder, renderPassFormat, renderObjects);
-
-        passEncoder.end();
-
-        // 处理不被遮挡查询。
-        occlusionQuery.resolve(device, commandEncoder, renderPass);
-
-        renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
-
-        return renderPassCommand;
-    }
-
-    protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderPassObjects: readonly RenderPassObject[])
-    {
-        if (!renderPassObjects) return;
-        let queryIndex = 0;
-        //
-        const commands: RenderPassObjectCommand[] = renderPassObjects.map((element) =>
+        renderPassCommand.occlusionQuerys = [];
+        renderPassCommand.renderPassObjects = renderPassObjects?.map((element) =>
         {
             if (!element.__type__)
             {
@@ -248,7 +224,8 @@ export class WebGPUBase
             if (element.__type__ === "OcclusionQuery")
             {
                 const occlusionQueryCache = this.runRenderOcclusionQueryObject(renderPassFormat, element);
-                occlusionQueryCache.queryIndex = queryIndex++;
+                occlusionQueryCache.queryIndex = renderPassCommand.occlusionQuerys.length;
+                renderPassCommand.occlusionQuerys.push(element);
                 return occlusionQueryCache;
             }
             else
@@ -257,14 +234,9 @@ export class WebGPUBase
             }
         });
 
-        commands.forEach((command) =>
-        {
-            command.run(passEncoder);
-        });
+        renderPassCommand.run(commandEncoder);
 
-
-
-        return commands;
+        return renderPassCommand;
     }
 
     /**

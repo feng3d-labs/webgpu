@@ -1,4 +1,5 @@
-import { ChainMap } from "@feng3d/render-api";
+import { ChainMap, OcclusionQuery, RenderPass } from "@feng3d/render-api";
+import { GPURenderOcclusionQuery } from "../caches/getGPURenderOcclusionQuery";
 
 const cache = new ChainMap();
 
@@ -306,8 +307,32 @@ export class RenderBundleCommand implements RenderPassObjectCommand
 
 export class RenderPassCommand
 {
+    run(commandEncoder: GPUCommandEncoder)
+    {
+        const { renderPassDescriptor, renderPassObjects, occlusionQuerys, renderPass } = this;
+        const { device } = commandEncoder;
+
+        // 处理不被遮挡查询。
+        const occlusionQuery = new GPURenderOcclusionQuery();
+        occlusionQuery.init(device, renderPassDescriptor, occlusionQuerys);
+
+        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+        passEncoder.device = device;
+        renderPassObjects.forEach((command) =>
+        {
+            command.run(passEncoder);
+        });
+        passEncoder.end();
+
+        // 处理不被遮挡查询。
+        occlusionQuery.resolve(commandEncoder, renderPass);
+
+        renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
+    }
+    renderPass: RenderPass;
     renderPassDescriptor: GPURenderPassDescriptor;
     renderPassObjects: RenderPassObjectCommand[];
+    occlusionQuerys: OcclusionQuery[];
 }
 
 export class ComputeObjectCommand

@@ -1,43 +1,45 @@
 import { anyEmitter } from "@feng3d/event";
-import { RenderPassObject, OcclusionQuery, RenderPass } from "@feng3d/render-api";
+import { OcclusionQuery } from "@feng3d/render-api";
 
 import { GPUQueue_submit } from "../eventnames";
 
-export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassObject[]): GPURenderOcclusionQuery
+export class GPURenderOcclusionQuery
 {
-    if (!renderObjects) return defautRenderOcclusionQuery;
-    let renderOcclusionQuery: GPURenderOcclusionQuery = renderObjects["_GPURenderOcclusionQuery"];
-    if (renderOcclusionQuery) return renderOcclusionQuery;
+    occlusionQuerySet: GPUQuerySet;
+    occlusionQuerys: OcclusionQuery[];
+    device: GPUDevice;
 
-    const occlusionQuerys: OcclusionQuery[] = renderObjects.filter((cv) => cv.__type__ === "OcclusionQuery") as any;
-    if (occlusionQuerys.length === 0)
+    get resolveBuf()
     {
-        renderObjects["_GPURenderOcclusionQuery"] = defautRenderOcclusionQuery;
-
-        return defautRenderOcclusionQuery;
+        const { device, occlusionQuerys } = this;
+        this._resolveBuf ??= device.createBuffer({
+            label: "resolveBuffer",
+            // Query results are 64bit unsigned integers.
+            size: occlusionQuerys.length * BigUint64Array.BYTES_PER_ELEMENT,
+            usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
+        });
+        return this._resolveBuf;
     }
+    private _resolveBuf: GPUBuffer;
 
-    let occlusionQuerySet: GPUQuerySet;
-    let resolveBuf: GPUBuffer;
-    let resultBuf: GPUBuffer;
-
-    /**
-     * 初始化。
-     *
-     * 在渲染通道描述上设置 occlusionQuerySet 。
-     *
-     * @param device
-     * @param renderPassDescriptor
-     */
-    const init = (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) =>
+    get resultBuf()
     {
-        occlusionQuerySet = renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: occlusionQuerys.length });
-    };
+        const { device, resolveBuf } = this;
+        this._resultBuf ??= device.createBuffer({
+            label: "resultBuffer",
+            size: resolveBuf.size,
+            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+        });
+        return this._resultBuf;
+    }
+    private _resultBuf: GPUBuffer;
 
-    const getQueryIndex = (occlusionQuery: OcclusionQuery) =>
+    init(device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor, _occlusionQuerys: OcclusionQuery[])
     {
-        return occlusionQuerys.indexOf(occlusionQuery);
-    };
+        this.device = device;
+        this.occlusionQuerys = _occlusionQuerys;
+        this.occlusionQuerySet = renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: this.occlusionQuerys.length });
+    }
 
     /**
      * 查询结果。
@@ -46,22 +48,11 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
      * @param commandEncoder
      * @param renderPass
      */
-    const resolve = (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass) =>
+    resolve(commandEncoder: GPUCommandEncoder, renderPass)
     {
-        resolveBuf = resolveBuf || device.createBuffer({
-            label: "resolveBuffer",
-            // Query results are 64bit unsigned integers.
-            size: occlusionQuerys.length * BigUint64Array.BYTES_PER_ELEMENT,
-            usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-        });
+        const { device, occlusionQuerys, occlusionQuerySet, resolveBuf, resultBuf } = this;
 
         commandEncoder.resolveQuerySet(occlusionQuerySet, 0, occlusionQuerys.length, resolveBuf, 0);
-
-        resultBuf = resultBuf || device.createBuffer({
-            label: "resultBuffer",
-            size: resolveBuf.size,
-            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-        });
 
         if (resultBuf.mapState === "unmapped")
         {
@@ -99,17 +90,4 @@ export function getGPURenderOcclusionQuery(renderObjects?: readonly RenderPassOb
         // 监听提交WebGPU事件
         anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
     };
-
-    renderObjects["_GPURenderOcclusionQuery"] = renderOcclusionQuery = { init, resolve, getQueryIndex };
-
-    return renderOcclusionQuery;
 }
-
-export interface GPURenderOcclusionQuery
-{
-    init: (device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor) => void
-    getQueryIndex: (occlusionQuery: OcclusionQuery) => number;
-    resolve: (device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass) => void
-}
-
-const defautRenderOcclusionQuery = { init: () => { }, getQueryIndex: () => 0, resolve: () => { } };
