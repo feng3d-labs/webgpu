@@ -304,6 +304,11 @@ export class RenderBundleCommand implements RenderPassObjectCommand
     }
 }
 
+export interface PassEncoderCommand
+{
+    run(commandEncoder: GPUCommandEncoder): void;
+}
+
 export class RenderPassCommand
 {
     run(commandEncoder: GPUCommandEncoder)
@@ -341,4 +346,54 @@ export class ComputeObjectCommand
     computePipeline: GPUComputePipeline;
     setBindGroup: [index: GPUIndex32, bindGroup: GPUBindGroup][];
     dispatchWorkgroups: [workgroupCountX: GPUSize32, workgroupCountY?: GPUSize32, workgroupCountZ?: GPUSize32];
+}
+
+export class ComputePassCommand
+{
+    run(commandEncoder: GPUCommandEncoder)
+    {
+        const { descriptor, computeObjectCommands } = this;
+        //
+        const passEncoder = commandEncoder.beginComputePass(descriptor);
+        computeObjectCommands.forEach((command) => command.run(passEncoder));
+        passEncoder.end();
+        // 处理时间戳查询
+        descriptor.timestampWrites?.resolve(commandEncoder);
+    }
+    descriptor: GPUComputePassDescriptor;
+    computeObjectCommands: ComputeObjectCommand[];
+}
+
+export class CopyTextureToTextureCommand
+{
+    run(commandEncoder: GPUCommandEncoder)
+    {
+        const { source, destination, copySize } = this;
+
+        commandEncoder.copyTextureToTexture(
+            source,
+            destination,
+            copySize,
+        );
+    }
+    source: GPUImageCopyTexture;
+    destination: GPUImageCopyTexture;
+    copySize: GPUExtent3DStrict;
+}
+
+export class CopyBufferToBufferCommand
+{
+    run(commandEncoder: GPUCommandEncoder)
+    {
+        const { source, sourceOffset, destination, destinationOffset, size } = this;
+
+        commandEncoder.copyBufferToBuffer(
+            source, sourceOffset, destination, destinationOffset, size
+        );
+    }
+    source: GPUBuffer;
+    sourceOffset: number;
+    destination: GPUBuffer;
+    destinationOffset: number;
+    size: number;
 }

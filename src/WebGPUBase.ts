@@ -18,7 +18,7 @@ import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
 import { GPUQueue_submit, webgpuEvents } from "./eventnames";
-import { ComputeObjectCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand } from "./internal/RenderObjectCache";
+import { ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, PassEncoderCommand, RenderBundleCommand, RenderObjectCache, RenderPassCommand } from "./internal/RenderObjectCache";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
@@ -163,35 +163,35 @@ export class WebGPUBase
         const gpuCommandEncoder = device.createCommandEncoder();
         gpuCommandEncoder.device = device;
 
-        commandEncoder.passEncoders.forEach((passEncoder) =>
+        const passEncoders: PassEncoderCommand[] = commandEncoder.passEncoders.map((passEncoder) =>
         {
             if (!passEncoder.__type__)
             {
-                const renderPassCommand = this.runRenderPass(passEncoder as RenderPass);
-                renderPassCommand.run(gpuCommandEncoder);
+                return this.runRenderPass(passEncoder as RenderPass);
             }
             else if (passEncoder.__type__ === "RenderPass")
             {
-                const renderPassCommand = this.runRenderPass(passEncoder);
-                renderPassCommand.run(gpuCommandEncoder);
+                return this.runRenderPass(passEncoder);
             }
             else if (passEncoder.__type__ === "ComputePass")
             {
-                this.runComputePass(gpuCommandEncoder, passEncoder);
+                return this.runComputePass(passEncoder);
             }
             else if (passEncoder.__type__ === "CopyTextureToTexture")
             {
-                this.runCopyTextureToTexture(gpuCommandEncoder, passEncoder);
+                return this.runCopyTextureToTexture(passEncoder);
             }
             else if (passEncoder.__type__ === "CopyBufferToBuffer")
             {
-                this.runCopyBufferToBuffer(gpuCommandEncoder, passEncoder);
+                return this.runCopyBufferToBuffer(passEncoder);
             }
             else
             {
                 console.error(`未处理 passEncoder ${passEncoder}`);
             }
         });
+
+        passEncoders.forEach((passEncoder) => passEncoder.run(gpuCommandEncoder));
 
         return gpuCommandEncoder.finish();
     }
@@ -242,19 +242,14 @@ export class WebGPUBase
      * @param commandEncoder 命令编码器。
      * @param computePass 计算通道。
      */
-    protected runComputePass(commandEncoder: GPUCommandEncoder, computePass: ComputePass)
+    protected runComputePass(computePass: ComputePass)
     {
-        const descriptor = getGPUComputePassDescriptor(commandEncoder, computePass);
-        // 处理时间戳查询
-        const passEncoder = commandEncoder.beginComputePass(descriptor);
+        const computePassCommand = new ComputePassCommand();
 
-        const computeObjectCommands = this.runComputeObjects(computePass.computeObjects);
-        computeObjectCommands.forEach((command) => command.run(passEncoder));
+        computePassCommand.descriptor = getGPUComputePassDescriptor(this._device, computePass);
+        computePassCommand.computeObjectCommands = this.runComputeObjects(computePass.computeObjects);
 
-        passEncoder.end();
-
-        // 处理时间戳查询
-        descriptor.timestampWrites?.resolve(commandEncoder);
+        return computePassCommand;
     }
 
     protected runComputeObjects(computeObjects: ComputeObject[])
@@ -262,49 +257,43 @@ export class WebGPUBase
         return computeObjects.map((computeObject) => this.runComputeObject(computeObject));
     }
 
-    protected runCopyTextureToTexture(commandEncoder: GPUCommandEncoder, copyTextureToTexture: CopyTextureToTexture)
+    protected runCopyTextureToTexture(copyTextureToTexture: CopyTextureToTexture)
     {
         const device = this._device;
+
+        const copyTextureToTextureCommand = new CopyTextureToTextureCommand();
 
         const sourceTexture = getGPUTexture(device, copyTextureToTexture.source.texture);
         const destinationTexture = getGPUTexture(device, copyTextureToTexture.destination.texture);
 
-        const source: GPUImageCopyTexture = {
+        copyTextureToTextureCommand.source = {
             ...copyTextureToTexture.source,
             texture: sourceTexture,
         };
 
-        const destination: GPUImageCopyTexture = {
+        copyTextureToTextureCommand.destination = {
             ...copyTextureToTexture.destination,
             texture: destinationTexture,
         };
 
-        commandEncoder.copyTextureToTexture(
-            source,
-            destination,
-            copyTextureToTexture.copySize,
-        );
+        copyTextureToTextureCommand.copySize = copyTextureToTexture.copySize;
+
+        return copyTextureToTextureCommand;
     }
 
-    protected runCopyBufferToBuffer(commandEncoder: GPUCommandEncoder, v: CopyBufferToBuffer)
+    protected runCopyBufferToBuffer(copyBufferToBuffer: CopyBufferToBuffer)
     {
         const device = this._device;
 
-        v.sourceOffset ||= 0;
-        v.destinationOffset ||= 0;
-        v.size ||= v.source.size;
+        const copyBufferToBufferCommand = new CopyBufferToBufferCommand();
 
-        //
-        const sourceBuffer = getGPUBuffer(device, v.source);
-        const destinationBuffer = getGPUBuffer(device, v.destination);
+        copyBufferToBufferCommand.source = getGPUBuffer(device, copyBufferToBuffer.source);
+        copyBufferToBufferCommand.sourceOffset = copyBufferToBuffer.sourceOffset ?? 0;
+        copyBufferToBufferCommand.destination = getGPUBuffer(device, copyBufferToBuffer.destination);
+        copyBufferToBufferCommand.destinationOffset = copyBufferToBuffer.destinationOffset ?? 0;
+        copyBufferToBufferCommand.size = copyBufferToBuffer.size ?? copyBufferToBuffer.source.size;
 
-        commandEncoder.copyBufferToBuffer(
-            sourceBuffer,
-            v.sourceOffset,
-            destinationBuffer,
-            v.destinationOffset,
-            v.size,
-        );
+        return copyBufferToBufferCommand;
     }
 
     protected runRenderOcclusionQueryObject(renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
