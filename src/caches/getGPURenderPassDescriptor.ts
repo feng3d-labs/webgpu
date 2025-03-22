@@ -1,9 +1,19 @@
-import { CanvasTexture, ChainMap, computed, ComputedRef, reactive, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
+import { anyEmitter } from "@feng3d/event";
+import { CanvasTexture, ChainMap, computed, ComputedRef, OcclusionQuery, reactive, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
+import { GPUQueue_submit } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { getGPUPassTimestampWrites } from "./getGPUPassTimestampWrites";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getTextureSize } from "./getTextureSize";
+
+declare global
+{
+    interface GPUQuerySet
+    {
+        resolve(commandEncoder: GPUCommandEncoder): void;
+    }
+}
 
 /**
  * 获取GPU渲染通道描述。
@@ -12,8 +22,9 @@ import { getTextureSize } from "./getTextureSize";
  * @param descriptor 渲染通道描述。
  * @returns GPU渲染通道描述。
  */
-export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: RenderPassDescriptor): GPURenderPassDescriptor
+export function getGPURenderPassDescriptor(device: GPUDevice, renderPass: RenderPass): GPURenderPassDescriptor
 {
+    const descriptor: RenderPassDescriptor = renderPass.descriptor;
     // 缓存
     const getGPURenderPassDescriptorKey: GetGPURenderPassDescriptorKey = [device, descriptor];
     let result = getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptorKey);
@@ -38,6 +49,8 @@ export function getGPURenderPassDescriptor(device: GPUDevice, descriptor: Render
 
         // 处理时间戳查询
         renderPassDescriptor.timestampWrites = getGPUPassTimestampWrites(device, descriptor.timestampQuery);
+
+        setOcclusionQuerySet(device, renderPass, renderPassDescriptor);
 
         return renderPassDescriptor;
     });
@@ -315,3 +328,63 @@ function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttac
 type GetGPURenderPassColorAttachmentKey = [device: GPUDevice, renderPassColorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor];
 const getGPURenderPassColorAttachmentMap = new ChainMap<GetGPURenderPassColorAttachmentKey, ComputedRef<GPURenderPassColorAttachment>>;
 
+function setOcclusionQuerySet(device: GPUDevice, renderPass: RenderPass, renderPassDescriptor: GPURenderPassDescriptor)
+{
+    const occlusionQuerys = renderPass.renderPassObjects.filter((v) => v.__type__ === "OcclusionQuery") as OcclusionQuery[];
+    renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: occlusionQuerys.length });
+    const resolveBuf = device.createBuffer({
+        label: "resolveBuffer",
+        // Query results are 64bit unsigned integers.
+        size: occlusionQuerys.length * BigUint64Array.BYTES_PER_ELEMENT,
+        usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
+    });
+    const resultBuf = device.createBuffer({
+        label: "resultBuffer",
+        size: resolveBuf.size,
+        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+    });
+
+    //
+    renderPassDescriptor.occlusionQuerySet.resolve = (commandEncoder: GPUCommandEncoder) =>
+    {
+        if (occlusionQuerys.length === 0) return;
+
+        commandEncoder.resolveQuerySet(renderPassDescriptor.occlusionQuerySet, 0, occlusionQuerys.length, resolveBuf, 0);
+
+        if (resultBuf.mapState === "unmapped")
+        {
+            commandEncoder.copyBufferToBuffer(resolveBuf, 0, resultBuf, 0, resultBuf.size);
+        }
+
+        const getOcclusionQueryResult = () =>
+        {
+            if (resultBuf.mapState === "unmapped")
+            {
+                resultBuf.mapAsync(GPUMapMode.READ).then(() =>
+                {
+                    const bigUint64Array = new BigUint64Array(resultBuf.getMappedRange());
+
+                    const results = bigUint64Array.reduce((pv: number[], cv) =>
+                    {
+                        pv.push(Number(cv));
+                        return pv;
+                    }, []);
+                    resultBuf.unmap();
+
+                    occlusionQuerys.forEach((v, i) =>
+                    {
+                        v.onQuery?.(results[i]);
+                    });
+
+                    renderPass.onOcclusionQuery?.(occlusionQuerys, results);
+
+                    //
+                    anyEmitter.off(device.queue, GPUQueue_submit, getOcclusionQueryResult);
+                });
+            }
+        };
+
+        // 监听提交WebGPU事件
+        anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
+    };
+}

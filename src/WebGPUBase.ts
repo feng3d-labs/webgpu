@@ -6,7 +6,6 @@ import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUComputePassDescriptor } from "./caches/getGPUComputePassDescriptor";
 import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
-import { GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
@@ -202,13 +201,11 @@ export class WebGPUBase
 
         const renderPassCommand = new RenderPassCommand();
 
-        const renderPassDescriptor = getGPURenderPassDescriptor(device, descriptor);
+        const renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass);
         const renderPassFormat = getGPURenderPassFormat(descriptor);
 
-        renderPassCommand.occlusionQuery = new GPURenderOcclusionQuery();
-        renderPassCommand.renderPass = renderPass;
         renderPassCommand.renderPassDescriptor = renderPassDescriptor;
-        renderPassCommand.occlusionQuerys = [];
+        let queryIndex = 0;
         renderPassCommand.renderPassObjects = renderPassObjects?.map((element) =>
         {
             if (!element.__type__)
@@ -226,8 +223,7 @@ export class WebGPUBase
             if (element.__type__ === "OcclusionQuery")
             {
                 const occlusionQueryCache = this.runRenderOcclusionQueryObject(renderPassFormat, element);
-                occlusionQueryCache.queryIndex = renderPassCommand.occlusionQuerys.length;
-                renderPassCommand.occlusionQuerys.push(element);
+                occlusionQueryCache.queryIndex = queryIndex++;
                 return occlusionQueryCache;
             }
             else
