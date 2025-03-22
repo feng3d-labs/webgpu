@@ -6,6 +6,7 @@ import { getGPUBuffer } from "./caches/getGPUBuffer";
 import { getGPUComputePassDescriptor } from "./caches/getGPUComputePassDescriptor";
 import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
+import { GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
@@ -24,7 +25,6 @@ import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
-import { GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 
 declare global
 {
