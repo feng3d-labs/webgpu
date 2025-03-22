@@ -24,6 +24,7 @@ import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
 import { readPixels } from "./utils/readPixels";
 import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+import { GPURenderOcclusionQuery } from "./caches/getGPURenderOcclusionQuery";
 
 declare global
 {
@@ -204,6 +205,7 @@ export class WebGPUBase
         const renderPassDescriptor = getGPURenderPassDescriptor(device, descriptor);
         const renderPassFormat = getGPURenderPassFormat(descriptor);
 
+        renderPassCommand.occlusionQuery = new GPURenderOcclusionQuery();
         renderPassCommand.renderPass = renderPass;
         renderPassCommand.renderPassDescriptor = renderPassDescriptor;
         renderPassCommand.occlusionQuerys = [];

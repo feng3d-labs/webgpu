@@ -333,6 +333,7 @@ export class RenderPassCommand
     renderPassDescriptor: GPURenderPassDescriptor;
     renderPassObjects: RenderPassObjectCommand[];
     occlusionQuerys: OcclusionQuery[];
+    occlusionQuery: GPURenderOcclusionQuery;
 }
 
 export class ComputeObjectCommand
