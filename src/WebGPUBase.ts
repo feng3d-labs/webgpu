@@ -10,7 +10,6 @@ import { getGPURenderOcclusionQuery, GPURenderOcclusionQuery } from "./caches/ge
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
-import { getGPURenderTimestampQuery } from "./caches/getGPURenderTimestampQuery";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGBuffer } from "./caches/getIGPUBuffer";
 import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
@@ -205,9 +204,6 @@ export class WebGPUBase
 
         const renderPassDescriptor = getGPURenderPassDescriptor(device, descriptor);
         const renderPassFormat = getGPURenderPassFormat(descriptor);
-
-        // 处理时间戳查询
-        getGPURenderTimestampQuery(device, descriptor.timestampQuery);
 
         // 处理不被遮挡查询。
         const occlusionQuery = getGPURenderOcclusionQuery(renderObjects);
