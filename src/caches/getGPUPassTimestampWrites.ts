@@ -1,6 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { RenderPass } from "@feng3d/render-api";
-import { ComputePass } from "../data/ComputePass";
+import { ChainMap } from "@feng3d/render-api";
 import { TimestampQuery } from "../data/TimestampQuery";
 import { GPUQueue_submit } from "../eventnames";
 
@@ -16,10 +15,12 @@ declare global
     }
 }
 
-export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: TimestampQuery)
+export function getGPUPassTimestampWrites(device: GPUDevice, timestampQuery?: TimestampQuery)
 {
     if (!timestampQuery) return;
-    let timestampWrites: GPURenderPassTimestampWrites | GPUComputePassTimestampWrites = timestampQuery["_GPURenderTimestampQuery"];
+
+    const getGPUPassTimestampWritesKey: GetGPUPassTimestampWritesKey = [device, timestampQuery];
+    let timestampWrites = getGPUPassTimestampWritesMap.get(getGPUPassTimestampWritesKey);
     if (timestampWrites) return timestampWrites;
 
     // 判断是否支持 `timestamp-query`
@@ -116,7 +117,10 @@ export function getGPURenderTimestampQuery(device: GPUDevice, timestampQuery?: T
         anyEmitter.on(device.queue, GPUQueue_submit, getQueryResult);
     };
 
-    timestampQuery["_GPURenderTimestampQuery"] = timestampWrites;
+    getGPUPassTimestampWritesMap.set(getGPUPassTimestampWritesKey, timestampWrites);
 
     return timestampWrites;
 }
+
+type GetGPUPassTimestampWritesKey = [GPUDevice, TimestampQuery];
+const getGPUPassTimestampWritesMap = new ChainMap<GetGPUPassTimestampWritesKey, GPURenderPassTimestampWrites | GPUComputePassTimestampWrites>();

@@ -9,37 +9,49 @@ export class GPURenderOcclusionQuery
     occlusionQuerys: OcclusionQuery[];
     device: GPUDevice;
 
-    get resolveBuf()
-    {
-        const { device, occlusionQuerys } = this;
-        this._resolveBuf ??= device.createBuffer({
-            label: "resolveBuffer",
-            // Query results are 64bit unsigned integers.
-            size: occlusionQuerys.length * BigUint64Array.BYTES_PER_ELEMENT,
-            usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-        });
-        return this._resolveBuf;
-    }
-    private _resolveBuf: GPUBuffer;
+    resolveBuf: GPUBuffer;
 
-    get resultBuf()
-    {
-        const { device, resolveBuf } = this;
-        this._resultBuf ??= device.createBuffer({
-            label: "resultBuffer",
-            size: resolveBuf.size,
-            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-        });
-        return this._resultBuf;
-    }
-    private _resultBuf: GPUBuffer;
+    resultBuf: GPUBuffer;
+
+    querylength: number;
 
     init(device: GPUDevice, renderPassDescriptor: GPURenderPassDescriptor, _occlusionQuerys: OcclusionQuery[])
     {
         this.occlusionQuerys = _occlusionQuerys;
-        if (this.occlusionQuerys.length === 0) return;
+        if (this.occlusionQuerys.length === 0)
+        {
+            renderPassDescriptor.occlusionQuerySet = undefined;
+            return;
+        }
         this.device = device;
-        this.occlusionQuerySet = renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: this.occlusionQuerys.length });
+        //
+        const querylength = this.occlusionQuerys.length;
+        if (this.querylength !== querylength)
+        {
+            //
+            this.occlusionQuerySet?.destroy();
+            this.resolveBuf?.destroy();
+            this.resultBuf?.destroy();
+            this.occlusionQuerySet = null;
+            this.resolveBuf = null;
+            this.resultBuf = null;
+            //
+            this.querylength = querylength;
+        }
+
+        this.occlusionQuerySet = renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: querylength });
+        this.resolveBuf = device.createBuffer({
+            label: "resolveBuffer",
+            // Query results are 64bit unsigned integers.
+            size: querylength * BigUint64Array.BYTES_PER_ELEMENT,
+            usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
+        });
+        this.resultBuf = device.createBuffer({
+            label: "resultBuffer",
+            size: this.resolveBuf.size,
+            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+        });
+
     }
 
     /**

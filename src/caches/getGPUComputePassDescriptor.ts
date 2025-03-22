@@ -1,5 +1,5 @@
 import { ComputePass } from "../data/ComputePass";
-import { getGPURenderTimestampQuery } from "./getGPURenderTimestampQuery";
+import { getGPUPassTimestampWrites } from "./getGPUPassTimestampWrites";
 
 export function getGPUComputePassDescriptor(commandEncoder: GPUCommandEncoder, computePass: ComputePass)
 {
@@ -9,7 +9,7 @@ export function getGPUComputePassDescriptor(commandEncoder: GPUCommandEncoder, c
 
     if (computePass.descriptor?.timestampQuery)
     {
-        descriptor.timestampWrites = getGPURenderTimestampQuery(device, computePass.descriptor.timestampQuery);
+        descriptor.timestampWrites = getGPUPassTimestampWrites(device, computePass.descriptor.timestampQuery);
     }
 
     return descriptor;
