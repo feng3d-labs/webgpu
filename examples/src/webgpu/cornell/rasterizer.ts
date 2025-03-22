@@ -77,7 +77,7 @@ export default class Rasterizer
         //
         this.renderPassEncoder = {
             descriptor: this.renderPassDescriptor,
-            renderObjects: [{
+            renderPassObjects: [{
                 pipeline: this.pipeline,
                 bindingResources: {
                     ...this.common.uniforms.bindGroup,

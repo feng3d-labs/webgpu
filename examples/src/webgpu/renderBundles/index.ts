@@ -302,7 +302,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
     const renderPass: RenderPass = {
         descriptor: renderPassDescriptor,
-        renderObjects: [],
+        renderPassObjects: [],
     };
 
     const submit: Submit = {
@@ -325,14 +325,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         {
             // Executing a bundle is equivalent to calling all of the commands encoded
             // in the render bundle as part of the current render pass.
-            reactive(renderPass).renderObjects = [renderBundle];
+            reactive(renderPass).renderPassObjects = [renderBundle];
         }
         else
         {
             // Alternatively, the same render commands can be encoded manually, which
             // can take longer since each command needs to be interpreted by the
             // JavaScript virtual machine and re-validated each time.
-            reactive(renderPass).renderObjects = renderBundle.renderObjects;
+            reactive(renderPass).renderPassObjects = renderBundle.renderObjects;
         }
 
         webgpu.submit(submit);

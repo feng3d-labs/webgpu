@@ -218,7 +218,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 passEncoders: [
                     {
                         descriptor: shadowPassDescriptor,
-                        renderObjects: [
+                        renderPassObjects: [
                             {
                                 pipeline: shadowPipeline,
                                 bindingResources: {
@@ -233,7 +233,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                     },
                     {
                         descriptor: renderPassDescriptor,
-                        renderObjects: [
+                        renderPassObjects: [
                             {
                                 pipeline: pipeline,
                                 bindingResources: {

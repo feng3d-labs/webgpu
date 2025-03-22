@@ -198,7 +198,7 @@ export class WebGPUBase
     protected runRenderPass(commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
     {
         const device = this._device;
-        const { descriptor, renderObjects } = renderPass;
+        const { descriptor, renderPassObjects: renderObjects } = renderPass;
 
         const renderPassCommand = new RenderPassCommand();
 
@@ -214,7 +214,7 @@ export class WebGPUBase
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
         passEncoder.device = device;
 
-        renderPassCommand.renderPassObjects = this.runRenderPassObjects(passEncoder, renderPassFormat, renderObjects, occlusionQuery);
+        renderPassCommand.renderPassObjects = this.runRenderPassObjects(passEncoder, renderPassFormat, renderObjects);
 
         passEncoder.end();
 
@@ -226,9 +226,10 @@ export class WebGPUBase
         return renderPassCommand;
     }
 
-    protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderPassObjects: readonly RenderPassObject[], occlusionQuery: GPURenderOcclusionQuery)
+    protected runRenderPassObjects(passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat, renderPassObjects: readonly RenderPassObject[])
     {
         if (!renderPassObjects) return;
+        let queryIndex = 0;
         //
         const commands: RenderPassObjectCommand[] = renderPassObjects.map((element) =>
         {
@@ -246,7 +247,9 @@ export class WebGPUBase
             }
             if (element.__type__ === "OcclusionQuery")
             {
-                return this.runRenderOcclusionQueryObject(renderPassFormat, element, occlusionQuery);
+                const occlusionQueryCache = this.runRenderOcclusionQueryObject(renderPassFormat, element);
+                occlusionQueryCache.queryIndex = queryIndex++;
+                return occlusionQueryCache;
             }
             else
             {
@@ -258,6 +261,8 @@ export class WebGPUBase
         {
             command.run(passEncoder);
         });
+
+
 
         return commands;
     }
@@ -334,10 +339,9 @@ export class WebGPUBase
         );
     }
 
-    protected runRenderOcclusionQueryObject(renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery, occlusionQuery: GPURenderOcclusionQuery)
+    protected runRenderOcclusionQueryObject(renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
     {
         const occlusionQueryCache = new OcclusionQueryCache();
-        occlusionQueryCache.queryIndex = occlusionQuery.getQueryIndex(renderOcclusionQueryObject);
 
         occlusionQueryCache.renderObjectCaches = renderOcclusionQueryObject.renderObjects.map((renderObject) =>
         {

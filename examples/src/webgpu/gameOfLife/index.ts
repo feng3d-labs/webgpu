@@ -134,7 +134,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 {
                     descriptor: renderPass,
-                    renderObjects: [
+                    renderPassObjects: [
                         {
                             pipeline: renderPipeline,
                             bindingResources: uniformBindGroup,

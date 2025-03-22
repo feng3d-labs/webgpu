@@ -158,7 +158,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const renderPass: RenderPass = {
         descriptor: renderPassDescriptor,
-        renderObjects: occlusionQueryObjects,
+        renderPassObjects: occlusionQueryObjects,
         onOcclusionQuery(_occlusionQuerys, results)
         {
             const visible = objectInfos

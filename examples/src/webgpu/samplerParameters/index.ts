@@ -340,7 +340,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 passEncoders: [
                     {
                         descriptor: renderPass,
-                        renderObjects,
+                        renderPassObjects: renderObjects,
                     }
                 ]
             }

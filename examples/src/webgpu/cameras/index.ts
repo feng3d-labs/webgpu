@@ -126,7 +126,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         commandEncoders: [
             {
                 passEncoders: [
-                    { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
+                    { descriptor: renderPassDescriptor, renderPassObjects: [renderObject] },
                 ]
             }
         ],

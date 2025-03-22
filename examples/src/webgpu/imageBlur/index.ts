@@ -142,7 +142,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const gpuRenderPassEncoder: RenderPass = {
         descriptor: renderPassDescriptor,
-        renderObjects: [{
+        renderPassObjects: [{
             pipeline: fullscreenQuadPipeline1,
             bindingResources: showResultBindGroup1,
             draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },

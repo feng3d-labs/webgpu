@@ -316,7 +316,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
-                    renderObjects: [{
+                    renderPassObjects: [{
                         pipeline: texturedCubePipeline,
                         bindingResources: bindingResourcesList[currentSurfaceBindGroup],
                         // *   position  : float32x3

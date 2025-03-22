@@ -153,7 +153,7 @@ async function init(canvas: OffscreenCanvas)
         commandEncoders: [{
             passEncoders: [{
                 descriptor: renderPassDescriptor,
-                renderObjects: [{
+                renderPassObjects: [{
                     pipeline,
                     bindingResources: uniformBindGroup,
                     vertices: verticesBuffer,

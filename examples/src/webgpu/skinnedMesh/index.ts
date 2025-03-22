@@ -440,7 +440,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
         const passEncoder: RenderPass = {
             descriptor: gltfRenderPassDescriptor,
-            renderObjects
+            renderPassObjects: renderObjects
         };
         return passEncoder;
     })();
@@ -464,7 +464,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         //
         const passEncoder: RenderPass = {
             descriptor: gltfRenderPassDescriptor,
-            renderObjects: [renderObject],
+            renderPassObjects: [renderObject],
         };
         return passEncoder;
     })();

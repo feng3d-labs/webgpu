@@ -325,7 +325,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const passEncoders: (ComputePass | RenderPass)[] = [];
     passEncoders.push({
         descriptor: writeGBufferPassDescriptor,
-        renderObjects: [
+        renderPassObjects: [
             {
                 pipeline: writeGBuffersPipeline,
                 bindingResources: {
@@ -354,7 +354,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     gBuffersPassEncoders.push({
         descriptor: textureQuadPassDescriptor,
-        renderObjects: [
+        renderPassObjects: [
             {
                 pipeline: gBuffersDebugViewPipeline,
                 bindingResources: {
@@ -367,7 +367,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     passEncoders.push({
         descriptor: textureQuadPassDescriptor,
-        renderObjects: [
+        renderPassObjects: [
             {
                 pipeline: deferredRenderPipeline,
                 bindingResources: {

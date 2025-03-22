@@ -317,7 +317,7 @@ const init = async () =>
             // make a render pass encoder to encode render specific commands
             passEncoders.push({
                 descriptor: renderPassDescriptor,
-                renderObjects: [{
+                renderPassObjects: [{
                     pipeline: pipeline,
                     bindingResources: bindGroup,
                     vertices: vertexAttributes,

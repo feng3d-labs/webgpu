@@ -372,7 +372,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     depthClearValue: depthClearValues[m],
                 }
             },
-            renderObjects: [
+            renderPassObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: colorPassPipelines[m],
@@ -394,7 +394,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     depthClearValue: depthClearValues[m],
                 }
             },
-            renderObjects: [
+            renderPassObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
@@ -411,7 +411,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     depthClearValue: depthClearValues[m],
                 }
             },
-            renderObjects: [
+            renderPassObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: precisionPassPipelines[m],
@@ -433,7 +433,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     depthClearValue: depthClearValues[m],
                 }
             },
-            renderObjects: [
+            renderPassObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: depthPrePassPipelines[m],
@@ -444,7 +444,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
         depthBufferPassEncoders.push({
             descriptor: textureQuadPassDescriptors1[m],
-            renderObjects: [
+            renderPassObjects: [
                 {
                     viewport: { isYup: false, x: (canvas.width * m) / 2, y: 0, width: canvas.width / 2, height: canvas.height, minDepth: 0, maxDepth: 1 },
                     pipeline: textureQuadPassPipline,

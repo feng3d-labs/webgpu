@@ -270,7 +270,7 @@ setBlendConstant().`,
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
-                    renderObjects,
+                    renderPassObjects: renderObjects,
                 }]
             }]
         };

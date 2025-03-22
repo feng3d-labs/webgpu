@@ -123,7 +123,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         commandEncoders: [
             {
                 passEncoders: [
-                    { descriptor: renderPassDescriptor, renderObjects: [renderObject, renderObject1] },
+                    { descriptor: renderPassDescriptor, renderPassObjects: [renderObject, renderObject1] },
                 ]
             }
         ],

@@ -285,7 +285,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Draw the opaque objects
         const opaquePassEncoder: RenderPass = {
             descriptor: opaquePassDescriptor,
-            renderObjects: [{
+            renderPassObjects: [{
                 pipeline: opaquePipeline,
                 bindingResources: bindingResources,
                 vertices,
@@ -315,7 +315,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             const translucentPassEncoder: RenderPass = {
                 descriptor: translucentPassDescriptor,
-                renderObjects: [
+                renderPassObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
@@ -336,7 +336,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             const compositePassEncoder: RenderPass
                 = {
                 descriptor: compositePassDescriptor,
-                renderObjects: [
+                renderPassObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },

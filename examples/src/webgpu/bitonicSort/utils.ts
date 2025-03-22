@@ -56,7 +56,7 @@ export abstract class Base2DRendererClass
     {
         const passEncoder: RenderPass = {
             descriptor: renderPassDescriptor,
-            renderObjects: [{
+            renderPassObjects: [{
                 pipeline: pipeline,
                 bindingResources: bindingResources,
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1 },

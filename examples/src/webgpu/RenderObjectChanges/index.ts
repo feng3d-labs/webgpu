@@ -48,7 +48,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 clearValue: [0.0, 0.0, 0.0, 1.0], // 渲染前填充颜色
                             }],
                         },
-                        renderObjects: [renderObject]
+                        renderPassObjects: [renderObject]
                     },
                 ]
             }

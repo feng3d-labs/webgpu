@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         commandEncoders: [{
             passEncoders: [{
                 descriptor: renderPassDescriptor,
-                renderObjects: [{
+                renderPassObjects: [{
                     pipeline: pipeline,
                     bindingResources: bindGroup,
                     draw: { __type__: "DrawVertex", vertexCount: 3 },

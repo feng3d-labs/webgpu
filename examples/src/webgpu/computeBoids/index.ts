@@ -129,7 +129,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 {
                     passEncoders: [
                         { __type__: "ComputePass", computeObjects: [[computeObject0, computeObject1][t % 2]] },
-                        { descriptor: renderPass, renderObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
+                        { descriptor: renderPass, renderPassObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
                     ]
                 }
             ],
