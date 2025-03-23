@@ -1,4 +1,3 @@
-import { anyEmitter } from "@feng3d/event";
 import { BlendState, Buffer, ChainMap, CommandEncoder, computed, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
@@ -17,8 +16,7 @@ import { ComputePass } from "./data/ComputePass";
 import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
-import { GPUQueue_submit, webgpuEvents } from "./eventnames";
-import { ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, PassEncoderCommand, RenderBundleCommand, RenderObjectCache, RenderPassCommand } from "./internal/RenderObjectCache";
+import { CommandEncoderCommand, ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, SubmitCommand } from "./internal/RenderObjectCache";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
@@ -90,21 +88,17 @@ export class WebGPUBase
     {
         const device = this._device;
 
-        // 提交前数值加一，用于处理提交前需要执行的操作。
-        reactive(webgpuEvents).preSubmit = ~~reactive(webgpuEvents).preSubmit + 1;
+        const submitCommand = new SubmitCommand();
 
         //
-        const commandBuffers = submit.commandEncoders.map((v) =>
+        submitCommand.commandBuffers = submit.commandEncoders.map((v) =>
         {
             const commandBuffer = this.runCommandEncoder(v);
 
             return commandBuffer;
         });
 
-        device.queue.submit(commandBuffers);
-
-        // 派发提交WebGPU事件
-        anyEmitter.emit(device.queue, GPUQueue_submit);
+        submitCommand.run(device);
     }
 
     destoryTexture(texture: TextureLike)
@@ -159,11 +153,9 @@ export class WebGPUBase
 
     protected runCommandEncoder(commandEncoder: CommandEncoder)
     {
-        const device = this._device;
-        const gpuCommandEncoder = device.createCommandEncoder();
-        gpuCommandEncoder.device = device;
+        const commandEncoderCommand = new CommandEncoderCommand();
 
-        const passEncoders: PassEncoderCommand[] = commandEncoder.passEncoders.map((passEncoder) =>
+        commandEncoderCommand.passEncoders = commandEncoder.passEncoders.map((passEncoder) =>
         {
             if (!passEncoder.__type__)
             {
@@ -191,9 +183,7 @@ export class WebGPUBase
             }
         });
 
-        passEncoders.forEach((passEncoder) => passEncoder.run(gpuCommandEncoder));
-
-        return gpuCommandEncoder.finish();
+        return commandEncoderCommand;
     }
 
     protected runRenderPass(renderPass: RenderPass)

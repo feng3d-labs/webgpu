@@ -1,4 +1,6 @@
-import { ChainMap } from "@feng3d/render-api";
+import { anyEmitter } from "@feng3d/event";
+import { ChainMap, reactive } from "@feng3d/render-api";
+import { GPUQueue_submit, webgpuEvents } from "../eventnames";
 
 const cache = new ChainMap();
 
@@ -396,4 +398,34 @@ export class CopyBufferToBufferCommand
     destination: GPUBuffer;
     destinationOffset: number;
     size: number;
+}
+
+export class CommandEncoderCommand
+{
+    run(device: GPUDevice)
+    {
+        const gpuCommandEncoder = device.createCommandEncoder();
+        gpuCommandEncoder.device = device;
+        this.passEncoders.forEach((passEncoder) => passEncoder.run(gpuCommandEncoder));
+        return gpuCommandEncoder.finish();
+    }
+    passEncoders: (RenderPassCommand | ComputePassCommand | CopyTextureToTextureCommand | CopyBufferToBufferCommand)[];
+
+}
+
+export class SubmitCommand
+{
+    run(device: GPUDevice)
+    {
+        const { commandBuffers } = this;
+
+        // 提交前数值加一，用于处理提交前需要执行的操作。
+        reactive(webgpuEvents).preSubmit = ~~reactive(webgpuEvents).preSubmit + 1;
+
+        device.queue.submit(commandBuffers.map((v) => v.run(device)));
+
+        // 派发提交WebGPU事件
+        anyEmitter.emit(device.queue, GPUQueue_submit);
+    }
+    commandBuffers: CommandEncoderCommand[];
 }
