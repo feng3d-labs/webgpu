@@ -410,7 +410,6 @@ export class CommandEncoderCommand
         return gpuCommandEncoder.finish();
     }
     passEncoders: (RenderPassCommand | ComputePassCommand | CopyTextureToTextureCommand | CopyBufferToBufferCommand)[];
-
 }
 
 export class SubmitCommand
