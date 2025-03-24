@@ -330,7 +330,8 @@ const getGPURenderPassColorAttachmentMap = new ChainMap<GetGPURenderPassColorAtt
 
 function setOcclusionQuerySet(device: GPUDevice, renderPass: RenderPass, renderPassDescriptor: GPURenderPassDescriptor)
 {
-    const occlusionQuerys = renderPass.renderPassObjects.filter((v) => v.__type__ === "OcclusionQuery") as OcclusionQuery[];
+    const occlusionQuerys = renderPass.renderPassObjects?.filter((v) => v.__type__ === "OcclusionQuery") as OcclusionQuery[];
+    if (!occlusionQuerys || occlusionQuerys.length === 0) return;
     renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: occlusionQuerys.length });
     const resolveBuf = device.createBuffer({
         label: "resolveBuffer",

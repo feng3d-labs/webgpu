@@ -134,14 +134,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ]
         };
 
-        const renderBundlesPass = {
+        const renderBundlesPass: RenderPass = {
             descriptor: renderPassDescriptor,
-            renderObjects: [renderBundleObject],
+            renderPassObjects: [renderBundleObject],
         };
 
-        const renderPass = {
+        const renderPass: RenderPass = {
             descriptor: renderPassDescriptor,
-            renderObjects,
+            renderPassObjects: renderObjects,
         };
 
         return function doDraw(timestamp: number)

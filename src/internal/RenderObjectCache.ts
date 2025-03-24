@@ -320,7 +320,7 @@ export class RenderPassCommand
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
         passEncoder.device = device;
-        renderPassObjects.forEach((command) =>
+        renderPassObjects?.forEach((command) =>
         {
             command.run(passEncoder);
         });
