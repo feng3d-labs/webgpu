@@ -1,4 +1,4 @@
-import { ChainMap, computed, ComputedRef, reactive, Texture, TextureView } from "@feng3d/render-api";
+import { ChainMap, computed, Computed, reactive, Texture, TextureView } from "@feng3d/render-api";
 import { getGPUTexture } from "./getGPUTexture";
 
 export function getGPUTextureView(device: GPUDevice, view: TextureView)
@@ -31,4 +31,4 @@ export function getGPUTextureView(device: GPUDevice, view: TextureView)
 }
 
 type GetGPUTextureViewKey = [device: GPUDevice, view: TextureView];
-const getGPUTextureViewMap = new ChainMap<GetGPUTextureViewKey, ComputedRef<GPUTextureView>>;
+const getGPUTextureViewMap = new ChainMap<GetGPUTextureViewKey, Computed<GPUTextureView>>;

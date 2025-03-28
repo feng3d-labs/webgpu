@@ -1,4 +1,4 @@
-import { computed, ComputedRef, reactive, VertexState } from "@feng3d/render-api";
+import { computed, reactive, VertexState, Computed } from "@feng3d/render-api";
 import { FunctionInfo } from "wgsl_reflect";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
@@ -10,7 +10,7 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  */
 export function getVertexEntryFunctionInfo(vertexState: VertexState)
 {
-    let result: ComputedRef<FunctionInfo> = _getVertexEntryFunctionInfoMap.get(vertexState);
+    let result: Computed<FunctionInfo> = _getVertexEntryFunctionInfoMap.get(vertexState);
     if (result) return result.value;
 
     result = computed(() =>
@@ -43,4 +43,4 @@ export function getVertexEntryFunctionInfo(vertexState: VertexState)
 
     return result.value;
 }
-const _getVertexEntryFunctionInfoMap = new WeakMap<VertexState, ComputedRef<FunctionInfo>>();
+const _getVertexEntryFunctionInfoMap = new WeakMap<VertexState, Computed<FunctionInfo>>();

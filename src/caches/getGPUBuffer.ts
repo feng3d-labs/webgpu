@@ -1,4 +1,4 @@
-import { ChainMap, computed, ComputedRef, Buffer, reactive } from "@feng3d/render-api";
+import { ChainMap, computed, Computed, Buffer, reactive } from "@feng3d/render-api";
 
 /**
  * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。
@@ -77,7 +77,7 @@ export function getGPUBuffer(device: GPUDevice, buffer: Buffer)
     return result.value;
 }
 type GetGPUBufferKey = [device: GPUDevice, buffer: Buffer];
-const getGPUBufferMap = new ChainMap<GetGPUBufferKey, ComputedRef<GPUBuffer>>;
+const getGPUBufferMap = new ChainMap<GetGPUBufferKey, Computed<GPUBuffer>>;
 
 function dataChange(buffer: Buffer)
 {

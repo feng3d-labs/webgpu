@@ -1,4 +1,4 @@
-import { BlendComponent, BlendState, ChainMap, ColorTargetState, computed, ComputedRef, DepthStencilState, FragmentState, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
+import { BlendComponent, BlendState, ChainMap, ColorTargetState, computed, Computed, DepthStencilState, FragmentState, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
 import { TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { MultisampleState } from "../data/MultisampleState";
@@ -62,7 +62,7 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPi
     return result.value;
 }
 type GetGPURenderPipelineKey = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
-const getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, ComputedRef<GPURenderPipeline>>;
+const getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>;
 
 /**
  * 获取完整的顶点阶段描述与顶点缓冲区列表。
@@ -108,7 +108,7 @@ function getGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices
 }
 
 type GetGPUVertexStateKey = [device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes];
-const getGPUVertexStateMap = new ChainMap<GetGPUVertexStateKey, ComputedRef<GPUVertexState>>();
+const getGPUVertexStateMap = new ChainMap<GetGPUVertexStateKey, Computed<GPUVertexState>>();
 type GPUVertexStateKey = [module: GPUShaderModule, entryPoint: string, buffers: Iterable<GPUVertexBufferLayout>, constants: Record<string, number>];
 const gpuVertexStateMap = new ChainMap<any[], GPUVertexState>();
 
@@ -116,7 +116,7 @@ function getConstants(constants: Record<string, number>)
 {
     if (!constants) return undefined;
 
-    let result: ComputedRef<Record<string, number>> = getConstantsMap.get(constants);
+    let result: Computed<Record<string, number>> = getConstantsMap.get(constants);
     if (result) return result.value;
 
     result = computed(() =>
@@ -142,13 +142,13 @@ function getConstants(constants: Record<string, number>)
     return result.value;
 }
 const constantsMap: { [constantsKey: string]: Record<string, number> } = {};
-const getConstantsMap = new WeakMap<Record<string, number>, ComputedRef<Record<string, number>>>();
+const getConstantsMap = new WeakMap<Record<string, number>, Computed<Record<string, number>>>();
 
 function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndexFormat): GPUPrimitiveState
 {
     if (!primitive) return defaultGPUPrimitiveState;
 
-    const result: ComputedRef<GPUPrimitiveState> = primitive["_cache_GPUPrimitiveState_" + indexFormat] ??= computed(() =>
+    const result: Computed<GPUPrimitiveState> = primitive["_cache_GPUPrimitiveState_" + indexFormat] ??= computed(() =>
     {
         // 监听
         const r_primitive = reactive(primitive);
@@ -179,7 +179,7 @@ function getGPUMultisampleState(multisampleState?: MultisampleState, sampleCount
     if (!sampleCount) return undefined;
     if (!multisampleState) return defaultGPUMultisampleState;
 
-    const result: ComputedRef<GPUMultisampleState> = multisampleState["_cache_GPUMultisampleState_" + sampleCount] ??= computed(() =>
+    const result: Computed<GPUMultisampleState> = multisampleState["_cache_GPUMultisampleState_" + sampleCount] ??= computed(() =>
     {
         // 监听
         const r_multisampleState = reactive(multisampleState);
@@ -281,7 +281,7 @@ function getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFo
     return result.value;
 }
 type GetGPUDepthStencilStateKey = [depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat];
-const getGPUDepthStencilStateMap = new ChainMap<GetGPUDepthStencilStateKey, ComputedRef<GPUDepthStencilState>>();
+const getGPUDepthStencilStateMap = new ChainMap<GetGPUDepthStencilStateKey, Computed<GPUDepthStencilState>>();
 type GPUDepthStencilStateKey = [format: GPUTextureFormat, depthWriteEnabled: boolean, depthCompare: GPUCompareFunction, stencilFront: GPUStencilFaceState, stencilBack: GPUStencilFaceState, stencilReadMask: number, stencilWriteMask: number, depthBias: number, depthBiasSlopeScale: number, depthBiasClamp: number]
 const gpuDepthStencilStateMap = new ChainMap<GPUDepthStencilStateKey, GPUDepthStencilState>();
 
@@ -356,7 +356,7 @@ function getGPUStencilFaceState(stencilFaceState?: StencilFaceState)
     return result.value;
 }
 const defaultGPUStencilFaceState: GPUStencilFaceState = {};
-const getGPUStencilFaceStateMap = new WeakMap<StencilFaceState, ComputedRef<GPUStencilFaceState>>();
+const getGPUStencilFaceStateMap = new WeakMap<StencilFaceState, Computed<GPUStencilFaceState>>();
 type GPUStencilFaceStateKey = [compare: GPUCompareFunction, failOp: GPUStencilOperation, depthFailOp: GPUStencilOperation, passOp: GPUStencilOperation];
 const GPUStencilFaceStateMap = new ChainMap<GPUStencilFaceStateKey, GPUStencilFaceState>();
 
@@ -364,7 +364,7 @@ function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUT
 {
     if (!colorTargetState) return getDefaultGPUColorTargetState(format);
 
-    const result: ComputedRef<GPUColorTargetState> = colorTargetState["_GPUColorTargetState_" + format] ??= computed(() =>
+    const result: Computed<GPUColorTargetState> = colorTargetState["_GPUColorTargetState_" + format] ??= computed(() =>
     {
         // 监听
         const r_colorTargetState = reactive(colorTargetState);
@@ -441,7 +441,7 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
 type GPUFragmentStateKey = [module: GPUShaderModule, entryPoint: string, targets: Iterable<GPUColorTargetState>, constants: Record<string, number>]
 const gpuFragmentStateMap = new ChainMap<GPUFragmentStateKey, GPUFragmentState>();
 type GetGPUFragmentStateKey = [device: GPUDevice, fragmentState: FragmentState, colorAttachmentsKey: string];
-const getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, ComputedRef<GPUFragmentState>>;
+const getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, Computed<GPUFragmentState>>;
 
 function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]): GPUColorTargetState[]
 {
@@ -471,7 +471,7 @@ function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAtta
     return result.value;
 }
 type GetGPUColorTargetStatesKey = [targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]];
-const getGPUColorTargetStatesMap = new ChainMap<GetGPUColorTargetStatesKey, ComputedRef<GPUColorTargetState[]>>();
+const getGPUColorTargetStatesMap = new ChainMap<GetGPUColorTargetStatesKey, Computed<GPUColorTargetState[]>>();
 
 const getDefaultGPUColorTargetStates = (colorAttachments: readonly GPUTextureFormat[]) =>
 {
@@ -484,7 +484,7 @@ const defaultGPUColorTargetStates: { [key: string]: GPUColorTargetState[] } = {}
 
 function getEntryPoint(fragmentState: FragmentState)
 {
-    const result: ComputedRef<string> = fragmentState["_entryPoint"] ??= computed(() =>
+    const result: Computed<string> = fragmentState["_entryPoint"] ??= computed(() =>
     {
         // 监听
         const r_fragmentState = reactive(fragmentState);
@@ -509,7 +509,7 @@ function getGPUBlendState(blend?: BlendState): GPUBlendState
 {
     if (!blend) return undefined;
 
-    let result: ComputedRef<GPUBlendState> = blend["_GPUBlendState"];
+    let result: Computed<GPUBlendState> = blend["_GPUBlendState"];
     if (result) return result.value;
 
     result = blend["_GPUBlendState"] = computed(() =>
@@ -534,7 +534,7 @@ function getGPUBlendComponent(blendComponent?: BlendComponent): GPUBlendComponen
 {
     if (!blendComponent) return { operation: "add", srcFactor: "one", dstFactor: "zero" };
 
-    const result: ComputedRef<GPUBlendComponent> = blendComponent["_GPUBlendComponent"] ??= computed(() =>
+    const result: Computed<GPUBlendComponent> = blendComponent["_GPUBlendComponent"] ??= computed(() =>
     {
         // 监听
         const r_blendComponent = reactive(blendComponent);
@@ -560,7 +560,7 @@ function getGPUColorWriteFlags(writeMask?: WriteMask)
 {
     if (!writeMask) return 15;
 
-    const result: ComputedRef<GPUColorWriteFlags> = writeMask["_GPUColorWriteFlags"] ??= computed(() =>
+    const result: Computed<GPUColorWriteFlags> = writeMask["_GPUColorWriteFlags"] ??= computed(() =>
     {
         // 监听
         const r_writeMask = reactive(writeMask);

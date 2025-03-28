@@ -1,4 +1,4 @@
-import { computed, ComputedRef, reactive, RenderPassDescriptor } from "@feng3d/render-api";
+import { computed, Computed, reactive, RenderPassDescriptor } from "@feng3d/render-api";
 import { getGPUTextureFormat } from "../caches/getGPUTextureFormat";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 
@@ -55,4 +55,4 @@ export function getGPURenderPassFormat(descriptor: RenderPassDescriptor): Render
     return result.value;
 }
 const renderPassFormatMap: Record<string, RenderPassFormat> = {};
-const getGPURenderPassFormatMap = new WeakMap<RenderPassDescriptor, ComputedRef<RenderPassFormat>>();
+const getGPURenderPassFormatMap = new WeakMap<RenderPassDescriptor, Computed<RenderPassFormat>>();

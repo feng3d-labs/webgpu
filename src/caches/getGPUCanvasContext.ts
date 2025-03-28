@@ -1,5 +1,5 @@
 import { CanvasContext, ChainMap } from "@feng3d/render-api";
-import { computed, ComputedRef, reactive } from "@vue/reactivity";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
 import "../data/polyfills/CanvasContext";
 
 export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
@@ -59,4 +59,4 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
     return result.value;
 }
 type GetGPUCanvasContextKey = [device: GPUDevice, context: CanvasContext];
-const getGPUCanvasContextMap = new ChainMap<GetGPUCanvasContextKey, ComputedRef<GPUCanvasContext>>;
+const getGPUCanvasContextMap = new ChainMap<GetGPUCanvasContextKey, Computed<GPUCanvasContext>>;

@@ -1,4 +1,4 @@
-import { computed, ComputedRef, reactive, TextureLike } from "@feng3d/render-api";
+import { computed, Computed, reactive, TextureLike } from "@feng3d/render-api";
 
 /**
  * 获取纹理格式。
@@ -33,4 +33,4 @@ export function getGPUTextureFormat(texture: TextureLike): GPUTextureFormat
     return result.value;
 }
 
-const getGPUTextureFormatMap = new WeakMap<TextureLike, ComputedRef<GPUTextureFormat>>();
+const getGPUTextureFormatMap = new WeakMap<TextureLike, Computed<GPUTextureFormat>>();

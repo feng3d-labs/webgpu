@@ -1,4 +1,4 @@
-import { BlendState, Buffer, ChainMap, CommandEncoder, computed, ComputedRef, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
+import { BlendState, Buffer, ChainMap, CommandEncoder, computed, Computed, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -661,7 +661,7 @@ function getStencilReference(depthStencil?: DepthStencilState)
 }
 
 type GPURenderBundleKey = [renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
-const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, ComputedRef<RenderBundleCommand>>();
+const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, Computed<RenderBundleCommand>>();
 
 type RenderObjectCacheKey = [device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat];
-const renderObjectCacheMap = new ChainMap<RenderObjectCacheKey, ComputedRef<RenderObjectCache>>();
+const renderObjectCacheMap = new ChainMap<RenderObjectCacheKey, Computed<RenderObjectCache>>();

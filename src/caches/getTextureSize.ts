@@ -1,4 +1,4 @@
-import { CanvasTexture, computed, ComputedRef, reactive, TextureLike, TextureSize } from "@feng3d/render-api";
+import { CanvasTexture, computed, Computed, reactive, TextureLike, TextureSize } from "@feng3d/render-api";
 
 /**
  * 获取纹理尺寸。
@@ -37,4 +37,4 @@ export function getTextureSize(texture: TextureLike)
 
     return result.value;
 }
-const getTextureSizeMap = new WeakMap<TextureLike, ComputedRef<TextureSize>>();
+const getTextureSizeMap = new WeakMap<TextureLike, Computed<TextureSize>>();

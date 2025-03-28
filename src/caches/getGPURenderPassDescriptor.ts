@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CanvasTexture, ChainMap, computed, ComputedRef, OcclusionQuery, reactive, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
+import { CanvasTexture, ChainMap, computed, Computed, OcclusionQuery, reactive, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
 import { GPUQueue_submit } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { getGPUPassTimestampWrites } from "./getGPUPassTimestampWrites";
@@ -60,7 +60,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, renderPass: Render
 }
 
 type GetGPURenderPassDescriptorKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
-const getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, ComputedRef<GPURenderPassDescriptor>>;
+const getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, Computed<GPURenderPassDescriptor>>;
 
 /**
  * 设置纹理尺寸。
@@ -117,7 +117,7 @@ function getMultisampleTextureView(texture: TextureLike, sampleCount: 4)
     getMultisampleTextureViewMap.set(texture, result);
     return result.value;
 }
-const getMultisampleTextureViewMap = new WeakMap<TextureLike, ComputedRef<TextureView>>;
+const getMultisampleTextureViewMap = new WeakMap<TextureLike, Computed<TextureView>>;
 
 /**
  * 获取深度模板附件完整描述。
@@ -212,7 +212,7 @@ function getGPURenderPassDepthStencilAttachment(device: GPUDevice, descriptor: R
     return result.value;
 }
 type GetGPURenderPassDepthStencilAttachmentKey = [device: GPUDevice, depthStencilAttachment: RenderPassDepthStencilAttachment];
-const getGPURenderPassDepthStencilAttachmentMap = new ChainMap<GetGPURenderPassDepthStencilAttachmentKey, ComputedRef<GPURenderPassDepthStencilAttachment>>;
+const getGPURenderPassDepthStencilAttachmentMap = new ChainMap<GetGPURenderPassDepthStencilAttachmentKey, Computed<GPURenderPassDepthStencilAttachment>>;
 
 /**
  * 获取颜色附件完整描述列表。
@@ -253,7 +253,7 @@ function getGPURenderPassColorAttachments(device: GPUDevice, descriptor: RenderP
     return result.value;
 }
 type GetGPURenderPassColorAttachmentsKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
-const getIGPURenderPassColorAttachmentsMap = new ChainMap<GetGPURenderPassColorAttachmentsKey, ComputedRef<GPURenderPassColorAttachment[]>>;
+const getIGPURenderPassColorAttachmentsMap = new ChainMap<GetGPURenderPassColorAttachmentsKey, Computed<GPURenderPassColorAttachment[]>>;
 
 /**
  * 获取颜色附件完整描述。
@@ -326,7 +326,7 @@ function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttac
     return result.value;
 }
 type GetGPURenderPassColorAttachmentKey = [device: GPUDevice, renderPassColorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor];
-const getGPURenderPassColorAttachmentMap = new ChainMap<GetGPURenderPassColorAttachmentKey, ComputedRef<GPURenderPassColorAttachment>>;
+const getGPURenderPassColorAttachmentMap = new ChainMap<GetGPURenderPassColorAttachmentKey, Computed<GPURenderPassColorAttachment>>;
 
 function setOcclusionQuerySet(device: GPUDevice, renderPass: RenderPass, renderPassDescriptor: GPURenderPassDescriptor)
 {

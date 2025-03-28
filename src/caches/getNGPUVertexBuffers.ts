@@ -1,4 +1,4 @@
-import { ChainMap, computed, ComputedRef, reactive, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from "@feng3d/render-api";
+import { ChainMap, computed, Computed, reactive, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { VertexBuffer } from "../internal/VertexBuffer";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
 
@@ -171,7 +171,7 @@ function getVertexBuffers(vertexAttribute: VertexAttribute)
     getVertexBuffersMap.set(vertexAttribute, result);
     return result.value;
 }
-const getVertexBuffersMap = new WeakMap<VertexAttribute, ComputedRef<VertexBuffer>>();
+const getVertexBuffersMap = new WeakMap<VertexAttribute, Computed<VertexBuffer>>();
 
 type GetVertexBuffersBuffersKey = [vertexState: VertexState, vertices: VertexAttributes];
-const getVertexBuffersBuffersMap = new ChainMap<GetVertexBuffersBuffersKey, ComputedRef<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: VertexBuffer[] }>>();
+const getVertexBuffersBuffersMap = new ChainMap<GetVertexBuffersBuffersKey, Computed<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: VertexBuffer[] }>>();

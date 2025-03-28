@@ -1,4 +1,4 @@
-import { ChainMap, computed, ComputedRef, reactive, Sampler } from "@feng3d/render-api";
+import { ChainMap, computed, Computed, reactive, Sampler } from "@feng3d/render-api";
 
 export function getGPUSampler(device: GPUDevice, sampler: Sampler)
 {
@@ -45,7 +45,7 @@ export function getGPUSampler(device: GPUDevice, sampler: Sampler)
     return result.value;
 }
 type GetGPUSamplerKey = [device: GPUDevice, sampler: Sampler];
-const getGPUSamplerMap = new ChainMap<GetGPUSamplerKey, ComputedRef<GPUSampler>>;
+const getGPUSamplerMap = new ChainMap<GetGPUSamplerKey, Computed<GPUSampler>>;
 
 /**
  * GPU采样器默认值。

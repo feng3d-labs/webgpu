@@ -1,4 +1,4 @@
-import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, computed, ComputedRef, reactive, Sampler, TextureView, UnReadonly } from "@feng3d/render-api";
+import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, computed, Computed, reactive, Sampler, TextureView, UnReadonly } from "@feng3d/render-api";
 import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { VideoTexture } from "../data/VideoTexture";
 import { webgpuEvents } from "../eventnames";
@@ -81,7 +81,7 @@ type GPUBindGroupKey = [bindGroupLayout: GPUBindGroupLayout, ...resources: GPUBi
 const gpuBindGroupMap = new ChainMap<GPUBindGroupKey, GPUBindGroup>();
 
 type GetGPUBindGroupKey = [bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources];
-const getGPUBindGroupMap = new ChainMap<GetGPUBindGroupKey, ComputedRef<GPUBindGroup>>();
+const getGPUBindGroupMap = new ChainMap<GetGPUBindGroupKey, Computed<GPUBindGroup>>();
 
 function getGPUBufferBinding(device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo)
 {
@@ -128,7 +128,7 @@ type GPUBufferBindingKey = [buffer: GPUBuffer, offset: number, size: number];
 const gpuBufferBindingMap = new ChainMap<GPUBufferBindingKey, GPUBufferBinding>();
 
 type GetGPUBindingResourceKey = [device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo];
-const getGPUBindingResourceMap = new ChainMap<GetGPUBindingResourceKey, ComputedRef<GPUBufferBinding>>();
+const getGPUBindingResourceMap = new ChainMap<GetGPUBindingResourceKey, Computed<GPUBufferBinding>>();
 
 function getGPUExternalTexture(device: GPUDevice, videoTexture: VideoTexture)
 {
@@ -151,7 +151,7 @@ function getGPUExternalTexture(device: GPUDevice, videoTexture: VideoTexture)
     return result.value;
 }
 type GetGPUExternalTextureKey = [device: GPUDevice, videoTexture: VideoTexture];
-const getGPUExternalTextureMap = new ChainMap<GetGPUExternalTextureKey, ComputedRef<GPUExternalTexture>>();
+const getGPUExternalTextureMap = new ChainMap<GetGPUExternalTextureKey, Computed<GPUExternalTexture>>();
 
 /**
  * 初始化缓冲区绑定。
@@ -229,7 +229,7 @@ export function updateBufferBinding(uniformData: BufferBinding, type: TypeInfo)
     return result.value;
 }
 type UpdateBufferBindingKey = [uniformData: BufferBinding, type: TypeInfo];
-const updateBufferBindingMap = new ChainMap<UpdateBufferBindingKey, ComputedRef<void>>();
+const updateBufferBindingMap = new ChainMap<UpdateBufferBindingKey, Computed<void>>();
 
 /**
  * 获取缓冲区绑定信息。
