@@ -31,6 +31,7 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
             const context = getGPUCanvasContext(device, canvasTexture.context);
 
             const gpuTexture = context.getCurrentTexture();
+            gpuTexture.label = "GPU画布纹理";
 
             return gpuTexture;
         }

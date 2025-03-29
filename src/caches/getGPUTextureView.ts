@@ -19,6 +19,7 @@ export function getGPUTextureView(device: GPUDevice, view: TextureView)
         const { texture } = view;
         const gpuTexture = getGPUTexture(device, texture);
         const textureView = gpuTexture.createView({
+            label: "GPU纹理视图",
             ...r_view,
             dimension: r_view.dimension ?? (texture as Texture).dimension,
         });
