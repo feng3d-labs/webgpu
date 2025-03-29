@@ -76,6 +76,7 @@ function setTextureSize(texture: TextureLike, attachmentSize: { width: number, h
         const element = typeof texture.context.canvasId === "string" ? document.getElementById(texture.context.canvasId) as HTMLCanvasElement : texture.context.canvasId;
         if (element.width !== attachmentSize.width) element.width = attachmentSize.width;
         if (element.height !== attachmentSize.height) element.height = attachmentSize.height;
+        reactive(texture)._canvasSizeVersion = ~~texture._canvasSizeVersion + 1;
     }
     else
     {
