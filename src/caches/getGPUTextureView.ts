@@ -14,14 +14,30 @@ export function getGPUTextureView(device: GPUDevice, view: TextureView)
         // 监听
         const r_view = reactive(view);
         r_view.texture;
+        r_view.label;
+        r_view.format;
+        r_view.dimension;
+        r_view.usage;
+        r_view.aspect;
+        r_view.baseMipLevel;
+        r_view.baseArrayLayer;
+        r_view.mipLevelCount;
+        r_view.arrayLayerCount;
 
         // 执行
-        const { texture } = view;
+        const { texture, label, format, dimension, usage, aspect, baseMipLevel, baseArrayLayer, mipLevelCount, arrayLayerCount } = view;
         const gpuTexture = getGPUTexture(device, texture);
         const textureView = gpuTexture.createView({
-            label: "GPU纹理视图",
-            ...r_view,
-            dimension: r_view.dimension ?? (texture as Texture).dimension,
+            label: label ?? `${gpuTexture.label}视图`,
+            format,
+            dimension: dimension ?? (texture as Texture).dimension,
+            usage,
+            aspect,
+            baseMipLevel,
+            mipLevelCount,
+            baseArrayLayer,
+            arrayLayerCount,
+
         });
 
         return textureView;
