@@ -73,30 +73,30 @@ export class RenderObjectCache implements RenderPassObjectCommand
         this[func as any] = undefined;
     }
 
-    run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder, commands?: CommandType[], state?: RenderObjectCache)
+    run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder, commands: CommandType[], state: RenderObjectCache)
     {
         const { setViewport, setScissorRect, setPipeline, setBlendConstant, setStencilReference, setBindGroup, setVertexBuffer, setIndexBuffer, draw, drawIndexed } = this;
 
         if (setViewport && "setViewport" in renderPass)
         {
-            if (!state || state.setViewport !== setViewport) renderPass.setViewport(setViewport[1], setViewport[2], setViewport[3], setViewport[4], setViewport[5], setViewport[6]);
+            if (!state || state.setViewport !== setViewport) commands.push(setViewport);
             if (state) state.setViewport = setViewport;
         }
         if (setScissorRect && "setScissorRect" in renderPass)
         {
-            if (!state || state.setScissorRect !== setScissorRect) renderPass.setScissorRect(setScissorRect[1], setScissorRect[2], setScissorRect[3], setScissorRect[4]);
+            if (!state || state.setScissorRect !== setScissorRect) commands.push(setScissorRect);
             if (state) state.setScissorRect = setScissorRect;
         }
-        if (!state || state.setPipeline !== setPipeline) renderPass.setPipeline(setPipeline[1]);
+        if (!state || state.setPipeline !== setPipeline) commands.push(setPipeline);
         if (state) state.setPipeline = setPipeline;
         if (setBlendConstant && "setBlendConstant" in renderPass)
         {
-            if (!state || state.setBlendConstant !== setBlendConstant) renderPass.setBlendConstant(setBlendConstant[1]);
+            if (!state || state.setBlendConstant !== setBlendConstant) commands.push(setBlendConstant);
             if (state) state.setBlendConstant = setBlendConstant;
         }
         if (setStencilReference && "setStencilReference" in renderPass)
         {
-            if (!state || state.setStencilReference !== setStencilReference) renderPass.setStencilReference(setStencilReference[1]);
+            if (!state || state.setStencilReference !== setStencilReference) commands.push(setStencilReference);
             if (state) state.setStencilReference = setStencilReference;
         }
         if (setBindGroup)
@@ -104,7 +104,7 @@ export class RenderObjectCache implements RenderPassObjectCommand
             if (state) state.setBindGroup ??= [];
             for (let i = 0, len = setBindGroup.length; i < len; i++)
             {
-                if (!state || !state.setBindGroup[i] || state.setBindGroup[i] !== setBindGroup[i]) renderPass.setBindGroup(setBindGroup[i][1], setBindGroup[i][2]);
+                if (!state || !state.setBindGroup[i] || state.setBindGroup[i] !== setBindGroup[i]) commands.push(setBindGroup[i]);
                 if (state) state.setBindGroup[i] = setBindGroup[i];
             }
         }
@@ -113,22 +113,22 @@ export class RenderObjectCache implements RenderPassObjectCommand
             if (state) state.setVertexBuffer ??= [];
             for (let i = 0, len = setVertexBuffer.length; i < len; i++)
             {
-                if (!state || !state.setVertexBuffer[i] || state.setVertexBuffer[i] !== setVertexBuffer[i]) renderPass.setVertexBuffer(setVertexBuffer[i][1], setVertexBuffer[i][2], setVertexBuffer[i][3], setVertexBuffer[i][4]);
+                if (!state || !state.setVertexBuffer[i] || state.setVertexBuffer[i] !== setVertexBuffer[i]) commands.push(setVertexBuffer[i]);
                 if (state) state.setVertexBuffer[i] = setVertexBuffer[i];
             }
         }
         if (setIndexBuffer)
         {
-            if (!state || state.setIndexBuffer !== setIndexBuffer) renderPass.setIndexBuffer(setIndexBuffer[1], setIndexBuffer[2], setIndexBuffer[3]);
+            if (!state || state.setIndexBuffer !== setIndexBuffer) commands.push(setIndexBuffer);
             if (state) state.setIndexBuffer = setIndexBuffer;
         }
         if (draw)
         {
-            renderPass.draw(draw[1], draw[2], draw[3], draw[4]);
+            commands.push(draw);
         }
         if (drawIndexed)
         {
-            renderPass.drawIndexed(drawIndexed[1], drawIndexed[2], drawIndexed[3], drawIndexed[4], drawIndexed[5]);
+            commands.push(drawIndexed);
         }
     }
 
@@ -219,9 +219,11 @@ export class OcclusionQueryCache implements RenderPassObjectCommand
     run(passEncoder: GPURenderPassEncoder)
     {
         passEncoder.beginOcclusionQuery(this.queryIndex);
+        const commands: CommandType[] = [];
+        const state: RenderObjectCache = {} as any;
         for (let i = 0, len = this.renderObjectCaches.length; i < len; i++)
         {
-            this.renderObjectCaches[i].run(passEncoder);
+            this.renderObjectCaches[i].run(passEncoder, commands, state);
         }
         passEncoder.endOcclusionQuery();
     }
@@ -229,7 +231,7 @@ export class OcclusionQueryCache implements RenderPassObjectCommand
 
 export interface RenderPassObjectCommand
 {
-    run(passEncoder: GPURenderPassEncoder): void;
+    run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder, commands: CommandType[], state: RenderObjectCache): void;
 }
 
 export class RenderBundleCommand implements RenderPassObjectCommand
@@ -274,10 +276,14 @@ export class RenderPassCommand
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
         passEncoder.device = device;
+
+        const commands: CommandType[] = [];
+        const state: RenderObjectCache = {} as any;
         renderPassObjects?.forEach((command) =>
         {
-            command.run(passEncoder);
+            command.run(passEncoder, commands, state);
         });
+        runCommands(passEncoder, commands);
         passEncoder.end();
 
         renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
@@ -383,14 +389,14 @@ export class SubmitCommand
     commandBuffers: CommandEncoderCommand[];
 }
 
-function runCommands(renderBundleEncoder: GPURenderBundleEncoder, commands: CommandType[])
+function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, commands: CommandType[])
 {
     commands.forEach((command) =>
     {
         switch (command[0])
         {
             case "setBindGroup":
-                renderBundleEncoder.setBindGroup(command[1], command[2], command[3]);
+                renderBundleEncoder.setBindGroup(command[1], command[2]);
                 break;
             case "setPipeline":
                 renderBundleEncoder.setPipeline(command[1]);
@@ -408,16 +414,16 @@ function runCommands(renderBundleEncoder: GPURenderBundleEncoder, commands: Comm
                 renderBundleEncoder.drawIndexed(command[1], command[2], command[3], command[4], command[5]);
                 break;
             case "setViewport":
-                renderBundleEncoder.setViewport(command[1], command[2], command[3], command[4], command[5], command[6]);
+                (renderBundleEncoder as GPURenderPassEncoder).setViewport(command[1], command[2], command[3], command[4], command[5], command[6]);
                 break;
             case "setScissorRect":
-                renderBundleEncoder.setScissorRect(command[1], command[2], command[3], command[4]);
+                (renderBundleEncoder as GPURenderPassEncoder).setScissorRect(command[1], command[2], command[3], command[4]);
                 break
             case "setBlendConstant":
-                renderBundleEncoder.setBlendConstant(command[1]);
+                (renderBundleEncoder as GPURenderPassEncoder).setBlendConstant(command[1]);
                 break;
             case "setStencilReference":
-                renderBundleEncoder.setStencilReference(command[1]);
+                (renderBundleEncoder as GPURenderPassEncoder).setStencilReference(command[1]);
                 break;
             default:
                 console.error("RenderBundleCommand: unknown command:", command[0]);
