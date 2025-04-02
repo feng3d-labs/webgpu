@@ -1,4 +1,4 @@
-import { BlendState, Buffer, ChainMap, CommandEncoder, computed, Computed, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
+import { BlendState, Buffer, ChainMap, CommandEncoder, computed, Computed, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, effect, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -189,24 +189,33 @@ export class WebGPUBase
     protected runRenderPass(renderPass: RenderPass)
     {
         const device = this._device;
-        // const result = this._renderPassCommandMap.get(renderPass);
-        // if (result) return result;
+        let renderPassCommand = this._renderPassCommandMap.get(renderPass);
+        if (renderPassCommand) return renderPassCommand;
 
-        const { descriptor, renderPassObjects } = renderPass;
+        renderPassCommand = new RenderPassCommand();
 
-        const renderPassCommand = new RenderPassCommand();
-        renderPassCommand.renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass);
-
-        const renderPassFormat = getGPURenderPassFormat(descriptor);
-
-        const renderPassObjectCommands = this.runRenderPassObjects(renderPassFormat, renderPassObjects);
-        const commands: CommandType[] = [];
-        const state = new RenderObjectCache();
-        renderPassObjectCommands?.forEach((command) =>
+        effect(() =>
         {
-            command.run(device, commands, state);
+            const r_renderPass = reactive(renderPass);
+            r_renderPass.renderPassObjects;
+            r_renderPass.descriptor;
+
+            const { descriptor, renderPassObjects } = renderPass;
+            renderPassCommand.renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass);
+
+            const renderPassFormat = getGPURenderPassFormat(descriptor);
+
+            const renderPassObjectCommands = this.runRenderPassObjects(renderPassFormat, renderPassObjects);
+            const commands: CommandType[] = [];
+            const state = new RenderObjectCache();
+            renderPassObjectCommands?.forEach((command) =>
+            {
+                command.run(device, commands, state);
+            });
+            renderPassCommand.commands = commands;
         });
-        renderPassCommand.commands = commands;
+
+        this._renderPassCommandMap.set(renderPass, renderPassCommand);
 
         return renderPassCommand;
     }

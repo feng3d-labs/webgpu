@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { CanvasTexture, ChainMap, computed, Computed, OcclusionQuery, reactive, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
+import { CanvasTexture, ChainMap, computed, Computed, effect, OcclusionQuery, reactive, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
 import { GPUQueue_submit } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { getGPUPassTimestampWrites } from "./getGPUPassTimestampWrites";
@@ -27,12 +27,12 @@ export function getGPURenderPassDescriptor(device: GPUDevice, renderPass: Render
     const descriptor: RenderPassDescriptor = renderPass.descriptor;
     // 缓存
     const getGPURenderPassDescriptorKey: GetGPURenderPassDescriptorKey = [device, descriptor];
-    let result = getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptorKey);
-    if (result) return result.value;
+    let renderPassDescriptor = getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptorKey);
+    if (renderPassDescriptor) return renderPassDescriptor;
 
     // 避免重复创建，触发反应链。
-    const renderPassDescriptor: GPURenderPassDescriptor = {} as any;
-    result = computed(() =>
+    renderPassDescriptor = {} as any;
+    effect(() =>
     {
         // 监听
         const r_descriptor = reactive(descriptor);
@@ -51,16 +51,15 @@ export function getGPURenderPassDescriptor(device: GPUDevice, renderPass: Render
         renderPassDescriptor.timestampWrites = getGPUPassTimestampWrites(device, descriptor.timestampQuery);
 
         setOcclusionQuerySet(device, renderPass, renderPassDescriptor);
-
-        return renderPassDescriptor;
     });
-    getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptorKey, result);
 
-    return result.value;
+    getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptorKey, renderPassDescriptor);
+
+    return renderPassDescriptor;
 }
 
 type GetGPURenderPassDescriptorKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
-const getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, Computed<GPURenderPassDescriptor>>;
+const getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, GPURenderPassDescriptor>;
 
 /**
  * 设置纹理尺寸。
@@ -101,24 +100,23 @@ function getMultisampleTextureView(texture: TextureLike, sampleCount: 4)
     if (sampleCount !== 4) return undefined;
     if (!texture) return undefined;
 
-    let result = getMultisampleTextureViewMap.get(texture);
-    if (result) return result.value;
+    let multisampleTextureView = getMultisampleTextureViewMap.get(texture);
+    if (multisampleTextureView) return multisampleTextureView;
 
     // 新增用于解决多重采样的纹理
     const multisampleTexture: MultisampleTexture = { label: "自动生成多重采样的纹理", sampleCount } as MultisampleTexture;
-    const multisampleTextureView: TextureView = { texture: multisampleTexture };
-    result = computed(() =>
+    multisampleTextureView = { texture: multisampleTexture };
+    effect(() =>
     {
         // 新建的多重采样纹理尺寸与格式与原始纹理同步。
         reactive(multisampleTexture).size = getTextureSize(texture);
         reactive(multisampleTexture).format = getGPUTextureFormat(texture);
-
-        return multisampleTextureView;
     });
-    getMultisampleTextureViewMap.set(texture, result);
-    return result.value;
+
+    getMultisampleTextureViewMap.set(texture, multisampleTextureView);
+    return multisampleTextureView;
 }
-const getMultisampleTextureViewMap = new WeakMap<TextureLike, Computed<TextureView>>;
+const getMultisampleTextureViewMap = new WeakMap<TextureLike, TextureView>;
 
 /**
  * 获取深度模板附件完整描述。
@@ -262,8 +260,8 @@ const getIGPURenderPassColorAttachmentsMap = new ChainMap<GetGPURenderPassColorA
 function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor)
 {
     const getGPURenderPassColorAttachmentKey: GetGPURenderPassColorAttachmentKey = [device, renderPassColorAttachment, descriptor];
-    let result = getGPURenderPassColorAttachmentMap.get(getGPURenderPassColorAttachmentKey);
-    if (result) return result.value;
+    let attachment = getGPURenderPassColorAttachmentMap.get(getGPURenderPassColorAttachmentKey);
+    if (attachment) return attachment;
 
     // 初始化附件尺寸。
     if (!descriptor.attachmentSize)
@@ -272,8 +270,8 @@ function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttac
         reactive(descriptor).attachmentSize = { width: textureSize[0], height: textureSize[1] };
     }
 
-    const attachment: GPURenderPassColorAttachment = {} as any;
-    result = computed(() =>
+    attachment = {} as any;
+    effect(() =>
     {
         // 监听
         const r_renderPassColorAttachment = reactive(renderPassColorAttachment);
@@ -298,7 +296,7 @@ function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttac
         }
 
         // 更新纹理尺寸
-        computed(() =>
+        effect(() =>
         {
             // 监听
             const r_descriptor = reactive(descriptor);
@@ -312,22 +310,21 @@ function getGPURenderPassColorAttachment(device: GPUDevice, renderPassColorAttac
             // 更改纹理尺寸将会销毁重新创建纹理，需要重新获取view。
             attachment.view = getGPUTextureView(device, view);
             attachment.resolveTarget = getGPUTextureView(device, resolveTarget);
-        }).value;
+        });
 
         //
         attachment.depthSlice = depthSlice;
         attachment.clearValue = clearValue;
         attachment.loadOp = loadOp ?? "clear";
         attachment.storeOp = storeOp ?? "store";
-
-        return attachment;
     });
-    getGPURenderPassColorAttachmentMap.set(getGPURenderPassColorAttachmentKey, result);
 
-    return result.value;
+    getGPURenderPassColorAttachmentMap.set(getGPURenderPassColorAttachmentKey, attachment);
+
+    return attachment;
 }
 type GetGPURenderPassColorAttachmentKey = [device: GPUDevice, renderPassColorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor];
-const getGPURenderPassColorAttachmentMap = new ChainMap<GetGPURenderPassColorAttachmentKey, Computed<GPURenderPassColorAttachment>>;
+const getGPURenderPassColorAttachmentMap = new ChainMap<GetGPURenderPassColorAttachmentKey, GPURenderPassColorAttachment>;
 
 function setOcclusionQuerySet(device: GPUDevice, renderPass: RenderPass, renderPassDescriptor: GPURenderPassDescriptor)
 {

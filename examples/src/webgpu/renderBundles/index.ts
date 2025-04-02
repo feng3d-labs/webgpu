@@ -24,7 +24,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         useRenderBundles: true,
         asteroidCount: 5000,
     };
-    gui.add(settings, "useRenderBundles");
+    gui.add(settings, "useRenderBundles").onChange(onUseRenderBundlesChanged);
     gui.add(settings, "asteroidCount", 1000, 10000, 1000).onChange(() =>
     {
         // If the content of the scene changes the render bundle must be recreated.
@@ -275,6 +275,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         return ros;
     }
 
+    const renderPass: RenderPass = {
+        descriptor: renderPassDescriptor,
+        renderPassObjects: [],
+    };
+
+    const submit: Submit = {
+        commandEncoders: [
+            {
+                passEncoders: [renderPass],
+            }
+        ]
+    };
+
     // The render bundle can be encoded once and re-used as many times as needed.
     // Because it encodes all of the commands needed to render at the GPU level,
     // those commands will not need to execute the associated JavaScript code upon
@@ -297,30 +310,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             renderObjects: renderScene(),
         };
         renderBundle = renderBundleEncoder;
+        onUseRenderBundlesChanged();
     }
     updateRenderBundle();
 
-    const renderPass: RenderPass = {
-        descriptor: renderPassDescriptor,
-        renderPassObjects: [],
-    };
-
-    const submit: Submit = {
-        commandEncoders: [
-            {
-                passEncoders: [renderPass],
-            }
-        ]
-    };
-
-    function frame()
+    function onUseRenderBundlesChanged()
     {
-        stats.begin();
-
-        const transformationMatrix = getTransformationMatrix();
-
-        reactive(getGBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
-
         if (settings.useRenderBundles)
         {
             // Executing a bundle is equivalent to calling all of the commands encoded
@@ -334,6 +329,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             // JavaScript virtual machine and re-validated each time.
             reactive(renderPass).renderPassObjects = renderBundle.renderObjects;
         }
+    }
+    onUseRenderBundlesChanged();
+
+    function frame()
+    {
+        stats.begin();
+
+        const transformationMatrix = getTransformationMatrix();
+
+        reactive(getGBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
 
         webgpu.submit(submit);
 
