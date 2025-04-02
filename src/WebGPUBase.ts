@@ -562,8 +562,14 @@ export class WebGPUBase
             const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
             vertexBuffers?.forEach((vertexBuffer, index) =>
             {
-                const { data, offset, size } = reactive(vertexBuffer);
+                // 监听
+                const r_vertexBuffer = reactive(vertexBuffer);
+                r_vertexBuffer.data;
+                r_vertexBuffer.offset;
+                r_vertexBuffer.size;
 
+                // 执行
+                const { data, offset, size } = vertexBuffer;
                 const buffer = getGBuffer(data);
                 (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
