@@ -73,58 +73,8 @@ export class RenderObjectCache implements RenderPassObjectCommand
         this[func as any] = undefined;
     }
 
-    run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder, state?: RenderObjectCache)
+    run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder, commands?: CommandType[], state?: RenderObjectCache)
     {
-        // this.commands.forEach((command) =>
-        // {
-        //     const func = command[0];
-        //     if (func === "setPipeline")
-        //     {
-        //         renderPass.setPipeline(command[1]);
-        //     }
-        //     else if (func === "setBindGroup")
-        //     {
-        //         renderPass.setBindGroup(command[1], command[2]);
-        //     }
-        //     else if (func === "setVertexBuffer")
-        //     {
-        //         renderPass.setVertexBuffer(command[1], command[2], command[3], command[4]);
-        //     }
-        //     else if (func === "setIndexBuffer")
-        //     {
-        //         renderPass.setIndexBuffer(command[1], command[2], command[3], command[4]);
-        //     }
-        //     else if (func === "draw")
-        //     {
-        //         renderPass.draw(command[1], command[2], command[3], command[4]);
-        //     }
-        //     else if (func === "drawIndexed")
-        //     {
-        //         renderPass.drawIndexed(command[1], command[2], command[3], command[4], command[5]);
-        //     }
-        //     else if (func === "setViewport")
-        //     {
-        //         if ("setViewport" in renderPass) renderPass.setViewport(command[1], command[2], command[3], command[4], command[5], command[6]);
-        //     }
-        //     else if (func === "setScissorRect")
-        //     {
-        //         if ("setScissorRect" in renderPass) renderPass.setScissorRect(command[1], command[2], command[3], command[4]);
-        //     }
-        //     else if (func === "setBlendConstant")
-        //     {
-        //         if ("setBlendConstant" in renderPass)
-        //             renderPass.setBlendConstant(command[1]);
-        //     }
-        //     else if (func === "setStencilReference")
-        //     {
-        //         if ("setStencilReference" in renderPass) renderPass.setStencilReference(command[1]);
-        //     }
-        //     else
-        //     {
-        //         func;
-        //     }
-        // });
-
         const { setViewport, setScissorRect, setPipeline, setBlendConstant, setStencilReference, setBindGroup, setVertexBuffer, setIndexBuffer, draw, drawIndexed } = this;
 
         if (setViewport && "setViewport" in renderPass)
@@ -294,10 +244,14 @@ export class RenderBundleCommand implements RenderPassObjectCommand
             //
             const renderBundleEncoder = passEncoder.device.createRenderBundleEncoder(this.descriptor);
             //
+            const state: RenderObjectCache = {} as any;
+            const commands: CommandType[] = [];
             this.renderObjectCaches.forEach((renderObjectCache) =>
             {
-                renderObjectCache.run(renderBundleEncoder);
+                renderObjectCache.run(renderBundleEncoder, commands, state);
             });
+
+            runCommands(renderBundleEncoder, commands);
 
             this.gpuRenderBundle = renderBundleEncoder.finish();
         }
@@ -427,4 +381,47 @@ export class SubmitCommand
         anyEmitter.emit(device.queue, GPUQueue_submit);
     }
     commandBuffers: CommandEncoderCommand[];
+}
+
+function runCommands(renderBundleEncoder: GPURenderBundleEncoder, commands: CommandType[])
+{
+    commands.forEach((command) =>
+    {
+        switch (command[0])
+        {
+            case "setBindGroup":
+                renderBundleEncoder.setBindGroup(command[1], command[2], command[3]);
+                break;
+            case "setPipeline":
+                renderBundleEncoder.setPipeline(command[1]);
+                break;
+            case "setVertexBuffer":
+                renderBundleEncoder.setVertexBuffer(command[1], command[2], command[3], command[4]);
+                break;
+            case "setIndexBuffer":
+                renderBundleEncoder.setIndexBuffer(command[1], command[2], command[3]);
+                break;
+            case "draw":
+                renderBundleEncoder.draw(command[1], command[2], command[3], command[4]);
+                break;
+            case "drawIndexed":
+                renderBundleEncoder.drawIndexed(command[1], command[2], command[3], command[4], command[5]);
+                break;
+            case "setViewport":
+                renderBundleEncoder.setViewport(command[1], command[2], command[3], command[4], command[5], command[6]);
+                break;
+            case "setScissorRect":
+                renderBundleEncoder.setScissorRect(command[1], command[2], command[3], command[4]);
+                break
+            case "setBlendConstant":
+                renderBundleEncoder.setBlendConstant(command[1]);
+                break;
+            case "setStencilReference":
+                renderBundleEncoder.setStencilReference(command[1]);
+                break;
+            default:
+                console.error("RenderBundleCommand: unknown command:", command[0]);
+                break;
+        }
+    });
 }
