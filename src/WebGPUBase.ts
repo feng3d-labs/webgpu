@@ -189,6 +189,9 @@ export class WebGPUBase
     protected runRenderPass(renderPass: RenderPass)
     {
         const device = this._device;
+        // const result = this._renderPassCommandMap.get(renderPass);
+        // if (result) return result;
+
         const { descriptor, renderPassObjects } = renderPass;
 
         const renderPassCommand = new RenderPassCommand();
@@ -221,6 +224,8 @@ export class WebGPUBase
                 throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
             }
         });
+
+        // this._renderPassCommandMap.set(renderPass, renderPassCommand);
 
         return renderPassCommand;
     }
@@ -298,14 +303,7 @@ export class WebGPUBase
         return occlusionQueryCache;
     }
 
-    protected runRenderBundle(renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
-    {
-        const renderBundleCommand = this.getGPURenderBundle(renderBundleObject, renderPassFormat);
-
-        return renderBundleCommand;
-    }
-
-    private getGPURenderBundle(renderBundleObject: RenderBundle, renderPassFormat: RenderPassFormat)
+    private runRenderBundle(renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
     {
         const gpuRenderBundleKey: GPURenderBundleKey = [renderBundleObject, renderPassFormat];
         let result = gpuRenderBundleMap.get(gpuRenderBundleKey);
@@ -627,6 +625,8 @@ export class WebGPUBase
             }
         }).value;
     }
+
+    private _renderPassCommandMap = new WeakMap<RenderPass, RenderPassCommand>();
 }
 
 let autoIndex = 0;
