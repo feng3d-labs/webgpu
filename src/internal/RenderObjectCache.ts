@@ -12,7 +12,7 @@ function setVaule<T extends Array<any>>(cache: ChainMap<any[], any>, keys: T): T
     return keys;
 }
 
-type CommandType =
+export type CommandType =
     | [func: "setViewport", x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]
     | [func: "setScissorRect", x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate]
     | [func: "setPipeline", pipeline: GPURenderPipeline]
@@ -163,29 +163,15 @@ export class RenderBundleCommand implements RenderPassObjectCommand
 {
     gpuRenderBundle: GPURenderBundle;
     descriptor: GPURenderBundleEncoderDescriptor;
-    renderObjectCaches: RenderObjectCache[];
+    bundleCommands: CommandType[];
     run(passEncoder: GPURenderPassEncoder, commands: CommandType[], state: RenderObjectCache): void
     {
         if (!this.gpuRenderBundle)
         {
             //
             const renderBundleEncoder = passEncoder.device.createRenderBundleEncoder(this.descriptor);
-            //
-            const commands: CommandType[] = [];
-            const state = new RenderObjectCache();
-            this.renderObjectCaches.forEach((renderObjectCache) =>
-            {
-                renderObjectCache.run(renderBundleEncoder, commands, state);
-            });
 
-            const bundleCommands = commands.filter((command) => (
-                command[0] !== "setViewport"
-                && command[0] !== "setScissorRect"
-                && command[0] !== "setBlendConstant"
-                && command[0] !== "setStencilReference"
-            ));
-
-            runCommands(renderBundleEncoder, bundleCommands);
+            runCommands(renderBundleEncoder, this.bundleCommands);
 
             this.gpuRenderBundle = renderBundleEncoder.finish();
         }

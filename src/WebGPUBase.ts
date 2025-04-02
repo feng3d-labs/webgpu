@@ -16,7 +16,7 @@ import { ComputePass } from "./data/ComputePass";
 import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
-import { CommandEncoderCommand, ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, RenderPassObjectCommand, SubmitCommand } from "./internal/RenderObjectCache";
+import { CommandEncoderCommand, CommandType, ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, RenderPassObjectCommand, SubmitCommand } from "./internal/RenderObjectCache";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
@@ -339,7 +339,22 @@ export class WebGPUBase
 
             renderBundleCommand.descriptor = descriptor;
 
-            renderBundleCommand.renderObjectCaches = this.runRenderObjects(renderPassFormat, renderBundleObject.renderObjects);
+            const renderObjectCaches = this.runRenderObjects(renderPassFormat, renderBundleObject.renderObjects);
+
+            //
+            const commands: CommandType[] = [];
+            const state = new RenderObjectCache();
+            renderObjectCaches.forEach((renderObjectCache) =>
+            {
+                renderObjectCache.run(undefined, commands, state);
+            });
+
+            renderBundleCommand.bundleCommands = commands.filter((command) => (
+                command[0] !== "setViewport"
+                && command[0] !== "setScissorRect"
+                && command[0] !== "setBlendConstant"
+                && command[0] !== "setStencilReference"
+            ));
 
             return renderBundleCommand;
         });
