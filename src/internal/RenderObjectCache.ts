@@ -344,45 +344,18 @@ export class SubmitCommand
 
 function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, commands: CommandType[])
 {
-    commands.forEach((command) =>
+    for (let i = 0, n = commands.length; i < n; i++)
     {
-        switch (command[0])
+        const command = commands[i];
+        if (command[0] === "setBindGroup")
         {
-            case "setBindGroup":
-                renderBundleEncoder.setBindGroup(command[1], command[2]);
-                break;
-            case "setPipeline":
-                renderBundleEncoder.setPipeline(command[1]);
-                break;
-            case "setVertexBuffer":
-                renderBundleEncoder.setVertexBuffer(command[1], command[2], command[3], command[4]);
-                break;
-            case "setIndexBuffer":
-                renderBundleEncoder.setIndexBuffer(command[1], command[2], command[3]);
-                break;
-            case "draw":
-                renderBundleEncoder.draw(command[1], command[2], command[3], command[4]);
-                break;
-            case "drawIndexed":
-                renderBundleEncoder.drawIndexed(command[1], command[2], command[3], command[4], command[5]);
-                break;
-            case "setViewport":
-                (renderBundleEncoder as GPURenderPassEncoder).setViewport(command[1], command[2], command[3], command[4], command[5], command[6]);
-                break;
-            case "setScissorRect":
-                (renderBundleEncoder as GPURenderPassEncoder).setScissorRect(command[1], command[2], command[3], command[4]);
-                break
-            case "setBlendConstant":
-                (renderBundleEncoder as GPURenderPassEncoder).setBlendConstant(command[1]);
-                break;
-            case "setStencilReference":
-                (renderBundleEncoder as GPURenderPassEncoder).setStencilReference(command[1]);
-                break;
-            default:
-                console.error("RenderBundleCommand: unknown command:", command[0]);
-                break;
+            renderBundleEncoder.setBindGroup(command[1], command[2]);
         }
-    });
+        else
+        {
+            renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5], command[6]);
+        }
+    }
 }
 
 const commandMap = new ChainMap<CommandType, CommandType>();
