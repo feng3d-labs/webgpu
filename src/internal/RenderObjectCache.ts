@@ -40,6 +40,17 @@ export class RenderObjectCache implements RenderPassObjectCommand
 
     push(command: CommandType)
     {
+        let command1 = commandMap.get(command);
+        if (!command1)
+        {
+            command1 = command;
+            commandMap.set(command, command1);
+        }
+        else
+        {
+            command = command1;
+        }
+
         const func = command[0];
         if (func === "setBindGroup")
         {
@@ -373,3 +384,5 @@ function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPass
         }
     });
 }
+
+const commandMap = new ChainMap<CommandType, CommandType>();
