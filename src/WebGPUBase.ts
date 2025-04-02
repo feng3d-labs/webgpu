@@ -199,7 +199,14 @@ export class WebGPUBase
 
         const renderPassFormat = getGPURenderPassFormat(descriptor);
 
-        renderPassCommand.renderPassObjects = this.runRenderPassObjects(renderPassFormat, renderPassObjects);
+        const renderPassObjectCommands = this.runRenderPassObjects(renderPassFormat, renderPassObjects);
+        const commands: CommandType[] = [];
+        const state = new RenderObjectCache();
+        renderPassObjectCommands?.forEach((command) =>
+        {
+            command.run(device, commands, state);
+        });
+        renderPassCommand.commands = commands;
 
         return renderPassCommand;
     }
@@ -240,7 +247,6 @@ export class WebGPUBase
             });
 
             return renderPassObjectCommands;
-
         });
 
         this._renderPassObjectCommandsMap.set(renderPassObjectCommandsKey, result);

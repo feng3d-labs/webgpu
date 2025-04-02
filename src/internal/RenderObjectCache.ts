@@ -84,7 +84,7 @@ export class RenderObjectCache implements RenderPassObjectCommand
         this[func as any] = undefined;
     }
 
-    run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder, commands: CommandType[], state: RenderObjectCache)
+    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache)
     {
         const { setViewport, setScissorRect, setPipeline, setBlendConstant, setStencilReference, setBindGroup, setVertexBuffer, setIndexBuffer, draw, drawIndexed } = this;
 
@@ -143,7 +143,7 @@ export class OcclusionQueryCache implements RenderPassObjectCommand
     queryIndex: number;
     renderObjectCaches: RenderObjectCache[];
 
-    run(passEncoder: GPURenderPassEncoder, commands: CommandType[], state: RenderObjectCache)
+    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache)
     {
         commands.push(["beginOcclusionQuery", this.queryIndex]);
         for (let i = 0, len = this.renderObjectCaches.length; i < len; i++)
@@ -156,7 +156,7 @@ export class OcclusionQueryCache implements RenderPassObjectCommand
 
 export interface RenderPassObjectCommand
 {
-    run(renderPass: GPURenderPassEncoder | GPURenderBundleEncoder, commands: CommandType[], state: RenderObjectCache): void;
+    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache): void;
 }
 
 export class RenderBundleCommand implements RenderPassObjectCommand
@@ -164,12 +164,12 @@ export class RenderBundleCommand implements RenderPassObjectCommand
     gpuRenderBundle: GPURenderBundle;
     descriptor: GPURenderBundleEncoderDescriptor;
     bundleCommands: CommandType[];
-    run(passEncoder: GPURenderPassEncoder, commands: CommandType[], state: RenderObjectCache): void
+    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache): void
     {
         if (!this.gpuRenderBundle)
         {
             //
-            const renderBundleEncoder = passEncoder.device.createRenderBundleEncoder(this.descriptor);
+            const renderBundleEncoder = device.createRenderBundleEncoder(this.descriptor);
 
             runCommands(renderBundleEncoder, this.bundleCommands);
 
@@ -189,18 +189,12 @@ export class RenderPassCommand
 {
     run(commandEncoder: GPUCommandEncoder)
     {
-        const { renderPassDescriptor, renderPassObjects } = this;
+        const { renderPassDescriptor, commands } = this;
         const { device } = commandEncoder;
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
         passEncoder.device = device;
 
-        const commands: CommandType[] = [];
-        const state = new RenderObjectCache();
-        renderPassObjects?.forEach((command) =>
-        {
-            command.run(passEncoder, commands, state);
-        });
         runCommands(passEncoder, commands);
         passEncoder.end();
 
@@ -208,7 +202,7 @@ export class RenderPassCommand
         renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
     }
     renderPassDescriptor: GPURenderPassDescriptor;
-    renderPassObjects: RenderPassObjectCommand[];
+    commands: CommandType[]
 }
 
 export class ComputeObjectCommand
