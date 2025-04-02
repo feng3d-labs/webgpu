@@ -16,7 +16,7 @@ import { ComputePass } from "./data/ComputePass";
 import "./data/polyfills/RenderObject";
 import "./data/polyfills/RenderPass";
 import { RenderBundle } from "./data/RenderBundle";
-import { CommandEncoderCommand, ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, SubmitCommand } from "./internal/RenderObjectCache";
+import { CommandEncoderCommand, ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, RenderPassObjectCommand, SubmitCommand } from "./internal/RenderObjectCache";
 import { RenderPassFormat } from "./internal/RenderPassFormat";
 import { copyDepthTexture } from "./utils/copyDepthTexture";
 import { getGPUDevice } from "./utils/getGPUDevice";
@@ -197,37 +197,55 @@ export class WebGPUBase
         const renderPassCommand = new RenderPassCommand();
         renderPassCommand.renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass);
 
-        let queryIndex = 0;
         const renderPassFormat = getGPURenderPassFormat(descriptor);
-        renderPassCommand.renderPassObjects = renderPassObjects?.map((element) =>
-        {
-            if (!element.__type__)
-            {
-                return this.runRenderObject(renderPassFormat, element as RenderObject);
-            }
-            if (element.__type__ === "RenderObject")
-            {
-                return this.runRenderObject(renderPassFormat, element);
-            }
-            if (element.__type__ === "RenderBundle")
-            {
-                return this.runRenderBundle(renderPassFormat, element);
-            }
-            if (element.__type__ === "OcclusionQuery")
-            {
-                const occlusionQueryCache = this.runRenderOcclusionQueryObject(renderPassFormat, element);
-                occlusionQueryCache.queryIndex = queryIndex++;
-                return occlusionQueryCache;
-            }
-            else
-            {
-                throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
-            }
-        });
 
-        // this._renderPassCommandMap.set(renderPass, renderPassCommand);
+        renderPassCommand.renderPassObjects = this.runRenderPassObjects(renderPassFormat, renderPassObjects);
 
         return renderPassCommand;
+    }
+
+    private runRenderPassObjects(renderPassFormat: RenderPassFormat, renderPassObjects: readonly RenderPassObject[])
+    {
+        const renderPassObjectCommandsKey: RenderPassObjectCommandsKey = [renderPassObjects, renderPassFormat];
+        let result = this._renderPassObjectCommandsMap.get(renderPassObjectCommandsKey);
+        if (result) return result.value;
+
+        result = computed(() =>
+        {
+            let queryIndex = 0;
+            const renderPassObjectCommands: RenderPassObjectCommand[] = renderPassObjects?.map((element) =>
+            {
+                if (!element.__type__)
+                {
+                    return this.runRenderObject(renderPassFormat, element as RenderObject);
+                }
+                if (element.__type__ === "RenderObject")
+                {
+                    return this.runRenderObject(renderPassFormat, element);
+                }
+                if (element.__type__ === "RenderBundle")
+                {
+                    return this.runRenderBundle(renderPassFormat, element);
+                }
+                if (element.__type__ === "OcclusionQuery")
+                {
+                    const occlusionQueryCache = this.runRenderOcclusionQueryObject(renderPassFormat, element);
+                    occlusionQueryCache.queryIndex = queryIndex++;
+                    return occlusionQueryCache;
+                }
+                else
+                {
+                    throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
+                }
+            });
+
+            return renderPassObjectCommands;
+
+        });
+
+        this._renderPassObjectCommandsMap.set(renderPassObjectCommandsKey, result);
+
+        return result.value;
     }
 
     /**
@@ -295,10 +313,7 @@ export class WebGPUBase
     {
         const occlusionQueryCache = new OcclusionQueryCache();
 
-        occlusionQueryCache.renderObjectCaches = renderOcclusionQueryObject.renderObjects.map((renderObject) =>
-        {
-            return this.runRenderObject(renderPassFormat, renderObject);
-        });
+        occlusionQueryCache.renderObjectCaches = this.runRenderObjects(renderPassFormat, renderOcclusionQueryObject.renderObjects);
 
         return occlusionQueryCache;
     }
@@ -324,15 +339,33 @@ export class WebGPUBase
 
             renderBundleCommand.descriptor = descriptor;
 
-            //
-            renderBundleCommand.renderObjectCaches = renderBundleObject.renderObjects.map((element) =>
-            {
-                return this.runRenderObject(renderPassFormat, element as RenderObject);
-            });
+            renderBundleCommand.renderObjectCaches = this.runRenderObjects(renderPassFormat, renderBundleObject.renderObjects);
 
             return renderBundleCommand;
         });
         gpuRenderBundleMap.set(gpuRenderBundleKey, result);
+
+        return result.value;
+    }
+
+    private runRenderObjects(renderPassFormat: RenderPassFormat, renderObjects: readonly RenderObject[])
+    {
+        const renderObjectCachesKey: RenderObjectCachesKey = [renderObjects, renderPassFormat];
+        let result = this._renderObjectCachesMap.get(renderObjectCachesKey);
+        if (result) return result.value;
+
+        result = computed(() =>
+        {
+            //
+            const renderObjectCaches = renderObjects.map((element) =>
+            {
+                return this.runRenderObject(renderPassFormat, element as RenderObject);
+            });
+
+            return renderObjectCaches;
+
+        });
+        this._renderObjectCachesMap.set(renderObjectCachesKey, result);
 
         return result.value;
     }
@@ -627,6 +660,9 @@ export class WebGPUBase
     }
 
     private _renderPassCommandMap = new WeakMap<RenderPass, RenderPassCommand>();
+
+    private _renderObjectCachesMap = new ChainMap<RenderObjectCachesKey, Computed<RenderObjectCache[]>>();
+    private _renderPassObjectCommandsMap = new ChainMap<RenderPassObjectCommandsKey, Computed<RenderPassObjectCommand[]>>();
 }
 
 let autoIndex = 0;
@@ -671,3 +707,6 @@ const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, Computed<RenderBundl
 
 type RenderObjectCacheKey = [device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat];
 const renderObjectCacheMap = new ChainMap<RenderObjectCacheKey, Computed<RenderObjectCache>>();
+
+type RenderObjectCachesKey = [renderObjects: readonly RenderObject[], renderPassFormat: RenderPassFormat];
+type RenderPassObjectCommandsKey = [renderPassObjects: readonly RenderPassObject[], renderPassFormat: RenderPassFormat];
