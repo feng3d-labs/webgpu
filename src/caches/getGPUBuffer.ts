@@ -1,4 +1,4 @@
-import { ChainMap, computed, Computed, Buffer, reactive } from "@feng3d/render-api";
+import { ChainMap, computed, Computed, Buffer, reactive, effect } from "@feng3d/render-api";
 
 /**
  * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。
@@ -103,7 +103,7 @@ function dataChange(buffer: Buffer)
 
 function writeBuffer(device: GPUDevice, buffer: Buffer, gBuffer: GPUBuffer)
 {
-    computed(() =>
+    return effect(() =>
     {
         // 监听
         const rb = reactive(buffer);
@@ -153,5 +153,5 @@ function writeBuffer(device: GPUDevice, buffer: Buffer, gBuffer: GPUBuffer)
 
         // 清空写入数据
         rb.writeBuffers = null;
-    }).value;
+    });
 };
