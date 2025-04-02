@@ -23,6 +23,7 @@ type CommandType =
     | [func: "drawIndexed", indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32]
     | [func: "setBlendConstant", color: GPUColor]
     | [func: "setStencilReference", reference: GPUStencilValue]
+    | [func: "executeBundles", bundles: GPURenderBundle[]]
     ;
 
 export class RenderObjectCache implements RenderPassObjectCommand
@@ -85,82 +86,53 @@ export class RenderObjectCache implements RenderPassObjectCommand
     {
         const { setViewport, setScissorRect, setPipeline, setBlendConstant, setStencilReference, setBindGroup, setVertexBuffer, setIndexBuffer, draw, drawIndexed } = this;
 
-        if (state)
+        if (state.setViewport !== setViewport && setViewport)
         {
-            if (setViewport && "setViewport" in renderPass)
-            {
-                if (state.setViewport !== setViewport && setViewport)
-                {
-                    commands.push(setViewport);
-                    state.setViewport = setViewport;
-                }
-                if (state.setScissorRect !== setScissorRect && setScissorRect)
-                {
-                    commands.push(setScissorRect);
-                    state.setScissorRect = setScissorRect;
-                }
-                if (state.setBlendConstant !== setBlendConstant && setBlendConstant)
-                {
-                    commands.push(setBlendConstant);
-                    state.setBlendConstant = setBlendConstant;
-                }
-                if (state.setStencilReference !== setStencilReference && setStencilReference)
-                {
-                    commands.push(setStencilReference);
-                }
-            }
-            if (state.setPipeline !== setPipeline)
-            {
-                commands.push(setPipeline);
-                state.setPipeline = setPipeline;
-            }
-            for (let i = 0, len = setBindGroup.length; i < len; i++)
-            {
-                if (state.setBindGroup[i] !== setBindGroup[i] && setBindGroup[i])
-                {
-                    commands.push(setBindGroup[i]);
-                    state.setBindGroup[i] = setBindGroup[i];
-                }
-            }
-            for (let i = 0, len = setVertexBuffer.length; i < len; i++)
-            {
-                if (state.setVertexBuffer[i] !== setVertexBuffer[i])
-                {
-                    commands.push(setVertexBuffer[i]);
-                    state.setVertexBuffer[i] = setVertexBuffer[i];
-                }
-            }
-            if (state.setIndexBuffer !== setIndexBuffer && setIndexBuffer)
-            {
-                commands.push(setIndexBuffer);
-                state.setIndexBuffer = setIndexBuffer;
-            }
-            draw && commands.push(draw);
-            drawIndexed && commands.push(drawIndexed);
+            commands.push(setViewport);
+            state.setViewport = setViewport;
         }
-        else
+        if (state.setScissorRect !== setScissorRect && setScissorRect)
         {
-            if (setViewport && "setViewport" in renderPass)
-            {
-                setViewport && commands.push(setViewport);
-                setScissorRect && commands.push(setScissorRect);
-                setBlendConstant && commands.push(setBlendConstant);
-                setStencilReference && commands.push(setStencilReference);
-            }
+            commands.push(setScissorRect);
+            state.setScissorRect = setScissorRect;
+        }
+        if (state.setBlendConstant !== setBlendConstant && setBlendConstant)
+        {
+            commands.push(setBlendConstant);
+            state.setBlendConstant = setBlendConstant;
+        }
+        if (state.setStencilReference !== setStencilReference && setStencilReference)
+        {
+            commands.push(setStencilReference);
+        }
+        if (state.setPipeline !== setPipeline)
+        {
             commands.push(setPipeline);
-            for (let i = 0, len = setBindGroup.length; i < len; i++)
+            state.setPipeline = setPipeline;
+        }
+        for (let i = 0, len = setBindGroup.length; i < len; i++)
+        {
+            if (state.setBindGroup[i] !== setBindGroup[i] && setBindGroup[i])
             {
                 commands.push(setBindGroup[i]);
+                state.setBindGroup[i] = setBindGroup[i];
             }
-            if (state) state.setVertexBuffer ??= [];
-            for (let i = 0, len = setVertexBuffer.length; i < len; i++)
+        }
+        for (let i = 0, len = setVertexBuffer.length; i < len; i++)
+        {
+            if (state.setVertexBuffer[i] !== setVertexBuffer[i])
             {
                 commands.push(setVertexBuffer[i]);
+                state.setVertexBuffer[i] = setVertexBuffer[i];
             }
-            setIndexBuffer && commands.push(setIndexBuffer);
-            draw && commands.push(draw);
-            drawIndexed && commands.push(drawIndexed);
         }
+        if (state.setIndexBuffer !== setIndexBuffer && setIndexBuffer)
+        {
+            commands.push(setIndexBuffer);
+            state.setIndexBuffer = setIndexBuffer;
+        }
+        draw && commands.push(draw);
+        drawIndexed && commands.push(drawIndexed);
     }
 }
 
@@ -192,7 +164,7 @@ export class RenderBundleCommand implements RenderPassObjectCommand
     gpuRenderBundle: GPURenderBundle;
     descriptor: GPURenderBundleEncoderDescriptor;
     renderObjectCaches: RenderObjectCache[];
-    run(passEncoder: GPURenderPassEncoder): void
+    run(passEncoder: GPURenderPassEncoder, commands: CommandType[], state: RenderObjectCache): void
     {
         if (!this.gpuRenderBundle)
         {
@@ -206,12 +178,19 @@ export class RenderBundleCommand implements RenderPassObjectCommand
                 renderObjectCache.run(renderBundleEncoder, commands, state);
             });
 
-            runCommands(renderBundleEncoder, commands);
+            const bundleCommands = commands.filter((command) => (
+                command[0] !== "setViewport"
+                && command[0] !== "setScissorRect"
+                && command[0] !== "setBlendConstant"
+                && command[0] !== "setStencilReference"
+            ));
+
+            runCommands(renderBundleEncoder, bundleCommands);
 
             this.gpuRenderBundle = renderBundleEncoder.finish();
         }
 
-        passEncoder.executeBundles([this.gpuRenderBundle]);
+        commands.push(["executeBundles", [this.gpuRenderBundle]]);
     }
 }
 
