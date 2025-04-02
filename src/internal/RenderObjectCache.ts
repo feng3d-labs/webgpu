@@ -24,6 +24,8 @@ export type CommandType =
     | [func: "setBlendConstant", color: GPUColor]
     | [func: "setStencilReference", reference: GPUStencilValue]
     | [func: "executeBundles", bundles: GPURenderBundle[]]
+    | [func: "beginOcclusionQuery", queryIndex: GPUSize32]
+    | [func: "endOcclusionQuery"]
     ;
 
 export class RenderObjectCache implements RenderPassObjectCommand
@@ -141,16 +143,14 @@ export class OcclusionQueryCache implements RenderPassObjectCommand
     queryIndex: number;
     renderObjectCaches: RenderObjectCache[];
 
-    run(passEncoder: GPURenderPassEncoder)
+    run(passEncoder: GPURenderPassEncoder, commands: CommandType[], state: RenderObjectCache)
     {
-        passEncoder.beginOcclusionQuery(this.queryIndex);
-        const commands: CommandType[] = [];
-        const state = new RenderObjectCache();
+        commands.push(["beginOcclusionQuery", this.queryIndex]);
         for (let i = 0, len = this.renderObjectCaches.length; i < len; i++)
         {
-            this.renderObjectCaches[i].run(passEncoder, commands, state);
+            this.renderObjectCaches[i].run(undefined, commands, state);
         }
-        passEncoder.endOcclusionQuery();
+        commands.push(["endOcclusionQuery"]);
     }
 }
 
