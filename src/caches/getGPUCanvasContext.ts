@@ -1,47 +1,62 @@
-import { watcher } from "@feng3d/watcher";
-import { IGPUCanvasContext } from "../data/IGPUCanvasContext";
+import { CanvasContext, ChainMap } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import "../data/polyfills/CanvasContext";
 
-export function getGPUCanvasContext(device: GPUDevice, context: IGPUCanvasContext)
+export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
 {
-    let gpuCanvasContext = canvasContextMap[context.canvasId];
-    if (gpuCanvasContext) return gpuCanvasContext;
+    const getGPUCanvasContextKey: GetGPUCanvasContextKey = [device, context];
+    let result = getGPUCanvasContextMap.get(getGPUCanvasContextKey);
+    if (result) return result.value;
 
-    const canvas = document.getElementById(context.canvasId) as HTMLCanvasElement;
-
-    gpuCanvasContext = canvas.getContext("webgpu");
-
-    canvasContextMap[context.canvasId] = gpuCanvasContext;
-
-    const updateConfigure = () =>
+    result = computed(() =>
     {
-        //
-        context.configuration = context.configuration || {};
-        const format = (context.configuration as any).format = context.configuration.format || navigator.gpu.getPreferredCanvasFormat();
+        // 监听
+        const ro = reactive(context);
+        ro.canvasId;
 
-        let usage = 0;
+        const canvas = typeof context.canvasId === "string" ? document.getElementById(context.canvasId) as HTMLCanvasElement : context.canvasId;
 
-        if (context.configuration.usage)
+        const gpuCanvasContext = canvas.getContext("webgpu") as GPUCanvasContext;
+
+        // 监听
+        const r_configuration = ro.configuration;
+        if (r_configuration)
         {
-            usage = context.configuration.usage;
+            r_configuration.format;
+            r_configuration.usage;
+            r_configuration.viewFormats?.forEach(() => { });
+            r_configuration.colorSpace;
+            r_configuration.toneMapping?.mode;
+            r_configuration.alphaMode;
         }
 
+        // 执行
+        const configuration = context.configuration || {};
+
+        const format = configuration.format || navigator.gpu.getPreferredCanvasFormat();
+
         // 附加上 GPUTextureUsage.RENDER_ATTACHMENT
-        usage = usage | GPUTextureUsage.RENDER_ATTACHMENT;
+        const usage = (configuration.usage ?? 0)
+            | GPUTextureUsage.COPY_SRC
+            | GPUTextureUsage.COPY_DST
+            | GPUTextureUsage.TEXTURE_BINDING
+            | GPUTextureUsage.STORAGE_BINDING
+            | GPUTextureUsage.RENDER_ATTACHMENT;
 
         //
         gpuCanvasContext.configure({
-            ...context.configuration,
+            ...configuration,
             device,
             usage,
             format,
         });
-    };
 
-    updateConfigure();
+        return gpuCanvasContext;
+    });
 
-    watcher.watchobject(context, { configuration: { usage: undefined, format: undefined, colorSpace: undefined, toneMapping: { mode: undefined }, alphaMode: undefined } }, updateConfigure);
+    getGPUCanvasContextMap.set(getGPUCanvasContextKey, result);
 
-    return gpuCanvasContext;
+    return result.value;
 }
-
-const canvasContextMap: { [canvasId: string]: GPUCanvasContext } = {};
+type GetGPUCanvasContextKey = [device: GPUDevice, context: CanvasContext];
+const getGPUCanvasContextMap = new ChainMap<GetGPUCanvasContextKey, Computed<GPUCanvasContext>>;

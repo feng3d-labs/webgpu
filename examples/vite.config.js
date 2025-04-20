@@ -4,6 +4,9 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+    define: {
+        __DEV__: process.env.NODE_ENV === 'development' ? true : false
+    },
     publicDir: "resources",
     build: {
         rollupOptions: {

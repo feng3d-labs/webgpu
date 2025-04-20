@@ -1,4 +1,4 @@
-import { IBufferBinding, ICommandEncoder, IRenderPassDescriptor, IUniforms } from "@feng3d/render-api";
+import { BindingResources, BufferBinding, CommandEncoder, reactive, RenderPassDescriptor } from "@feng3d/render-api";
 
 import bitonicDisplay from "./bitonicDisplay.frag.wgsl";
 import { Base2DRendererClass } from "./utils";
@@ -12,11 +12,11 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
 {
     switchBindGroup: (name: string) => void;
     setArguments: (args: BitonicDisplayRenderArgs) => void;
-    computeBGDescript: IUniforms;
+    computeBGDescript: BindingResources;
 
     constructor(
-        renderPassDescriptor: IRenderPassDescriptor,
-        computeBGDescript: IUniforms,
+        renderPassDescriptor: RenderPassDescriptor,
+        computeBGDescript: BindingResources,
         label: string
     )
     {
@@ -24,11 +24,11 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
         this.renderPassDescriptor = renderPassDescriptor;
         this.computeBGDescript = computeBGDescript;
 
-        const fragment_uniforms: IBufferBinding = {
+        const fragment_uniforms: BufferBinding = {
             highlight: undefined,
         };
 
-        computeBGDescript.fragment_uniforms = fragment_uniforms;
+        reactive(computeBGDescript).fragment_uniforms = fragment_uniforms;
 
         this.pipeline = super.create2DRenderPipeline(
             label,
@@ -37,11 +37,11 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
 
         this.setArguments = (args: BitonicDisplayRenderArgs) =>
         {
-            fragment_uniforms.highlight = args.highlight;
+            reactive(fragment_uniforms).highlight = args.highlight;
         };
     }
 
-    startRun(commandEncoder: ICommandEncoder, args: BitonicDisplayRenderArgs)
+    startRun(commandEncoder: CommandEncoder, args: BitonicDisplayRenderArgs)
     {
         this.setArguments(args);
         super.executeRun(commandEncoder, this.renderPassDescriptor, this.pipeline, this.computeBGDescript);

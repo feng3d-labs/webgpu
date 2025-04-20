@@ -1,11 +1,9 @@
-import { IBufferBinding, IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUOcclusionQuery, WebGPU } from "@feng3d/webgpu";
+import { BufferBinding, OcclusionQuery, reactive, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
+import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
 import solidColorLitWGSL from "./solidColorLit.wgsl";
-
 
 const info = document.querySelector("#info");
 
@@ -22,7 +20,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: solidColorLitWGSL,
         },
@@ -110,7 +108,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const vertexBuf = vertexData;
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -126,26 +124,26 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const renderObject: IRenderObject = {
-        pipeline,
+    const renderObject: RenderObject = {
+        pipeline: pipeline,
         vertices: {
             position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
             normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
         },
         indices,
-        uniforms: {
+        draw: { __type__: "DrawIndexed", indexCount: indices.length },
+        bindingResources: {
             uni: {
                 bufferView: undefined,
             },
         },
-        drawIndexed: { indexCount: indices.length },
     };
 
-    const renderObjects: IRenderObject[] = objectInfos.map((v) =>
+    const renderObjects: RenderObject[] = objectInfos.map((v) =>
     {
-        const ro: IRenderObject = {
+        const ro: RenderObject = {
             ...renderObject,
-            uniforms: {
+            bindingResources: {
                 uni: {
                     bufferView: v.uniformBuffer,
                 },
@@ -155,16 +153,23 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return ro;
     });
 
-    const occlusionQueryObjects: IGPUOcclusionQuery[] = renderObjects.map((ro) =>
-    ({ __type: "OcclusionQuery", renderObjects: [ro] }));
+    const occlusionQueryObjects: OcclusionQuery[] = renderObjects.map((ro) =>
+        ({ __type__: "OcclusionQuery", renderObjects: [ro] }));
 
-    const renderPass: IRenderPass = {
+    const renderPass: RenderPass = {
         descriptor: renderPassDescriptor,
-        // renderObjects: renderObjects,
-        renderObjects: occlusionQueryObjects,
+        renderPassObjects: occlusionQueryObjects,
+        onOcclusionQuery(_occlusionQuerys, results)
+        {
+            const visible = objectInfos
+                .filter((_, i) => results[i])
+                .map(({ id }) => id)
+                .join("");
+            info.textContent = `visible: ${visible}`;
+        },
     };
 
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [
             {
                 passEncoders: [
@@ -222,22 +227,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
-                const buffer = (renderObjects[i].uniforms.uni as IBufferBinding).bufferView;
-                getIGPUBuffer(buffer).data = uniformValues.slice();
+                const buffer = (renderObjects[i].bindingResources.uni as BufferBinding).bufferView;
+                reactive(getGBuffer(buffer)).data = uniformValues.subarray();
             }
         );
 
         webgpu.submit(submit);
-
-        // 监听查询结果。
-        watcher.watch(renderPass, "occlusionQueryResults", () =>
-        {
-            const visible = objectInfos
-                .filter((_, i) => renderPass.occlusionQueryResults[i].result.result)
-                .map(({ id }) => id)
-                .join("");
-            info.textContent = `visible: ${visible}`;
-        });
 
         requestAnimationFrame(render);
     }

@@ -1,4 +1,4 @@
-import { IBufferBinding, IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture, ITextureImageSource } from "@feng3d/render-api";
+import { BufferBinding, RenderPassDescriptor, Sampler, Submit, Texture, TextureImageSource, RenderObject, reactive } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -16,7 +16,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Fetch the 6 separate images for negative/positive x, y, z axis of a cubemap
     // and upload it into a GPUTexture.
-    let cubemapTexture: ITexture;
+    let cubemapTexture: Texture;
     {
         // The order of the array layers is [+X, -X, +Y, -Y, +Z, -Z]
         const imgSrcs = [
@@ -55,7 +55,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const imageBitmaps = await Promise.all(promises);
         const textureSource = imageBitmaps.map((v, i) =>
         {
-            const item: ITextureImageSource = {
+            const item: TextureImageSource = {
                 image: v, textureOrigin: [0, 0, i]
             };
 
@@ -70,7 +70,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         };
     }
 
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -106,7 +106,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         );
     }
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -119,38 +119,38 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
             primitive: {
                 cullFace: "none",
             },
         },
-        vertices: {
-            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
-        },
-        uniforms: {
+        bindingResources: {
             uniforms: {
                 modelViewProjectionMatrix: new Float32Array(16)
             },
             mySampler: sampler,
             myTexture: { texture: cubemapTexture },
         },
-        drawVertex: { vertexCount: cubeVertexCount },
+        vertices: {
+            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+        },
+        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
     function frame()
     {
         updateTransformationMatrix();
 
-        (renderObject.uniforms.uniforms as IBufferBinding).modelViewProjectionMatrix = modelViewProjectionMatrix;
+        reactive(renderObject.bindingResources.uniforms as BufferBinding).modelViewProjectionMatrix = modelViewProjectionMatrix.subarray();
 
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { descriptor: renderPass, renderObjects: [renderObject] },
+                        { descriptor: renderPass, renderPassObjects: [renderObject] },
                     ]
                 }
             ],

@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPipeline, ITexture, IVertexAttributes } from "@feng3d/render-api";
-import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, reactive, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
@@ -16,7 +16,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const context: IGPUCanvasContext = {
+    const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: {
             // The canvas alphaMode defaults to 'opaque', use 'premultiplied' for transparency.
@@ -25,12 +25,12 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     // Create a vertex buffer from the cube data.
-    const verticesBuffer: IVertexAttributes = {
+    const verticesBuffer: VertexAttributes = {
         position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -41,14 +41,13 @@ const init = async (canvas: HTMLCanvasElement) =>
             topology: "triangle-list",
             cullFace: "back",
         },
-
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
         },
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
@@ -57,7 +56,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         uniforms: { modelViewProjectionMatrix: undefined }
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } }, // Assigned later
@@ -97,23 +96,25 @@ const init = async (canvas: HTMLCanvasElement) =>
         return modelViewProjectionMatrix;
     }
 
-    function frame()
-    {
-        uniformBindGroup.uniforms.modelViewProjectionMatrix = getTransformationMatrix().slice();
-
-        webgpu.submit({
-            commandEncoders: [{
-                passEncoders: [{
-                    descriptor: renderPassDescriptor,
-                    renderObjects: [{
-                        pipeline,
-                        uniforms: uniformBindGroup,
-                        vertices: verticesBuffer,
-                        drawVertex: { vertexCount: cubeVertexCount },
-                    }]
+    const submit: Submit = {
+        commandEncoders: [{
+            passEncoders: [{
+                descriptor: renderPassDescriptor,
+                renderPassObjects: [{
+                    pipeline: pipeline,
+                    bindingResources: uniformBindGroup,
+                    vertices: verticesBuffer,
+                    draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
                 }]
             }]
-        });
+        }]
+    }
+
+    function frame()
+    {
+        reactive(uniformBindGroup.uniforms).modelViewProjectionMatrix = getTransformationMatrix().slice();
+
+        webgpu.submit(submit);
 
         requestAnimationFrame(frame);
     }

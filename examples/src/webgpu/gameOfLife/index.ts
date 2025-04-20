@@ -4,8 +4,8 @@ import computeWGSL from "./compute.wgsl";
 import fragWGSL from "./frag.wgsl";
 import vertWGSL from "./vert.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IVertexAttributes } from "@feng3d/render-api";
-import { IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
+import { ComputePass, ComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const squareVertices = new Uint32Array([0, 0, 0, 1, 1, 0, 1, 1]);
-    const verticesSquareBuffer: IVertexAttributes = {
+    const verticesSquareBuffer: VertexAttributes = {
         pos: { data: squareVertices, format: "uint32x2" }
     };
 
@@ -40,14 +40,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let wholeTime = 0;
     let loopTimes = 0;
     let buffer0: Uint32Array;
-    let verticesBuffer0: IVertexAttributes;
+    let verticesBuffer0: VertexAttributes;
     let buffer1: Uint32Array;
-    let verticesBuffer1: IVertexAttributes;
+    let verticesBuffer1: VertexAttributes;
     let render: () => void;
     function resetGameData()
     {
         // compute pipeline
-        const computePipeline: IGPUComputePipeline = {
+        const computePipeline: ComputePipeline = {
             compute: {
                 code: computeWGSL,
                 constants: {
@@ -74,31 +74,31 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             cell: { data: buffer1, format: "uint32", stepMode: "instance" }
         };
 
-        const bindGroup0:    IUniforms = {
+        const bindGroup0: BindingResources = {
             size: { bufferView: sizeBuffer },
             current: { bufferView: buffer0 },
             next: { bufferView: buffer1 },
         };
 
-        const bindGroup1:    IUniforms = {
+        const bindGroup1: BindingResources = {
             size: { bufferView: sizeBuffer },
             current: { bufferView: buffer1 },
             next: { bufferView: buffer0 },
         };
 
-        const renderPipeline: IRenderPipeline = {
-            primitive: {
-                topology: "triangle-strip",
-            },
+        const renderPipeline: RenderPipeline = {
             vertex: {
                 code: vertWGSL,
             },
             fragment: {
                 code: fragWGSL,
             },
+            primitive: {
+                topology: "triangle-strip",
+            },
         };
 
-        const uniformBindGroup:    IUniforms = {
+        const uniformBindGroup: BindingResources = {
             size: {
                 bufferView: sizeBuffer,
                 offset: 0,
@@ -106,7 +106,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
         };
 
-        const renderPass: IRenderPassDescriptor = {
+        const renderPass: RenderPassDescriptor = {
             colorAttachments: [
                 {
                     view: { texture: { context: { canvasId: canvas.id } } },
@@ -114,18 +114,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ],
         };
 
-        const passEncodersArray: (IGPUComputePass | IRenderPass)[][] = [];
+        const passEncodersArray: (ComputePass | RenderPass)[][] = [];
         for (let i = 0; i < 2; i++)
         {
-            const vertices1: IVertexAttributes = {};
+            const vertices1: VertexAttributes = {};
             Object.assign(vertices1, i ? verticesBuffer1 : verticesBuffer0, verticesSquareBuffer);
 
             passEncodersArray[i] = [
                 {
-                    __type: "ComputePass",
+                    __type__: "ComputePass",
                     computeObjects: [{
                         pipeline: computePipeline,
-                        uniforms: i ? bindGroup1 : bindGroup0,
+                        bindingResources: i ? bindGroup1 : bindGroup0,
                         workgroups: {
                             workgroupCountX: GameOptions.width / GameOptions.workgroupSize,
                             workgroupCountY: GameOptions.height / GameOptions.workgroupSize
@@ -134,12 +134,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 {
                     descriptor: renderPass,
-                    renderObjects: [
+                    renderPassObjects: [
                         {
                             pipeline: renderPipeline,
-                            uniforms: uniformBindGroup,
+                            bindingResources: uniformBindGroup,
                             vertices: vertices1,
-                            drawVertex: { vertexCount: 4, instanceCount: length },
+                            draw: { __type__: "DrawVertex", vertexCount: 4, instanceCount: length },
                         }
                     ],
                 }
@@ -149,7 +149,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         loopTimes = 0;
         render = () =>
         {
-            const submit: ISubmit = {
+            const submit: Submit = {
                 commandEncoders: [
                     {
                         passEncoders: passEncodersArray[loopTimes],

@@ -1,8 +1,8 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { IBuffer, IDrawIndexed, IDrawVertex, IFragmentState, IPrimitiveState, IRenderObject, IRenderPipeline, IUniforms, IVertexAttributes, IVertexState } from "@feng3d/render-api";
-import { getIGPUBuffer, gpuVertexFormatMap } from "@feng3d/webgpu";
+import { BindingResources, FragmentState, Buffer, IDraw, PrimitiveState, reactive, RenderObject, RenderPipeline, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
+import { getGBuffer } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -245,7 +245,7 @@ export class GLTFBufferView
     byteStride: number;
     view: Uint8Array;
     needsUpload: boolean;
-    gpuBuffer: IBuffer;
+    gpuBuffer: Buffer;
     usage: number;
     constructor(buffer: GLTFBuffer, view: BufferView)
     {
@@ -285,7 +285,7 @@ export class GLTFBufferView
     upload()
     {
         // Note: must align to 4 byte size when mapped at creation is true
-        const buf: IBuffer = {
+        const buf: Buffer = {
             size: alignTo(this.view.byteLength, 4),
             usage: this.usage,
             data: this.view,
@@ -342,10 +342,10 @@ interface AttributeMapInterface
 export class GLTFPrimitive
 {
     topology: GLTFRenderMode;
-    renderPipeline: IRenderPipeline;
+    renderPipeline: RenderPipeline;
     private attributeMap: AttributeMapInterface;
     private attributes: string[] = [];
-    vertices: IVertexAttributes;
+    vertices: VertexAttributes;
     indices: Uint16Array | Uint32Array;
     constructor(
         topology: GLTFRenderMode,
@@ -369,7 +369,7 @@ export class GLTFPrimitive
                 const vertexFormat: GPUVertexFormat = this.attributeMap[attr].vertexType;
                 const attrString = attr.toLowerCase().replace(/_0$/, "");
 
-                const Cls = gpuVertexFormatMap[vertexFormat].typedArrayConstructor;
+                const Cls = vertexFormatMap[vertexFormat].typedArrayConstructor;
 
                 const data = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
 
@@ -415,33 +415,22 @@ export class GLTFPrimitive
         );
         VertexInputShaderString += "}";
 
-        const vertexState: IVertexState = {
+        const vertexState: VertexState = {
             // Shader stage info
             code: VertexInputShaderString + vertexShader,
         };
 
-        const fragmentState: IFragmentState = {
+        const fragmentState: FragmentState = {
             // Shader info
             code: VertexInputShaderString + fragmentShader,
             // Output render target info
             // targets: [{ format: colorFormat }],
         };
 
-        // Our loader only supports triangle lists and strips, so by default we set
-        // the primitive topology to triangle list, and check if it's instead a triangle strip
-        let primitive: IPrimitiveState = { topology: "triangle-list" };
-        if (this.topology == GLTFRenderMode.TRIANGLE_STRIP)
-        {
-            primitive = {
-                topology: "triangle-strip",
-            };
-        }
-
-        const rpDescript: IRenderPipeline = {
+        const rpDescript: RenderPipeline = {
             label: `${label}.pipeline`,
             vertex: vertexState,
             fragment: fragmentState,
-            primitive,
             depthStencil: {
                 // format: depthFormat,
                 depthWriteEnabled: true,
@@ -452,31 +441,40 @@ export class GLTFPrimitive
         this.renderPipeline = rpDescript;
     }
 
-    render(renderObjects: IRenderObject[], bindingResources: IUniforms)
+    render(renderObjects: RenderObject[], bindingResources: BindingResources)
     {
-        let drawIndexed: IDrawIndexed;
-        let drawVertex: IDrawVertex;
+        let draw: IDraw;
         if (this.indices)
         {
-            drawIndexed = { indexCount: this.indices.length };
+            draw = { __type__: "DrawIndexed", indexCount: this.indices.length };
         }
         else
         {
             const vertexAttribute = this.vertices[Object.keys(this.vertices)[0]];
 
-            const vertexCount = vertexAttribute.data.byteLength / gpuVertexFormatMap[vertexAttribute.format].byteSize;
+            const vertexCount = vertexAttribute.data.byteLength / vertexFormatMap[vertexAttribute.format].byteSize;
 
-            drawVertex = { vertexCount };
+            draw = { __type__: "DrawVertex", vertexCount };
         }
 
-        const renderObject: IRenderObject = {
+        // Our loader only supports triangle lists and strips, so by default we set
+        // the primitive topology to triangle list, and check if it's instead a triangle strip
+        let primitive: PrimitiveState = { topology: "triangle-list" };
+        if (this.topology == GLTFRenderMode.TRIANGLE_STRIP)
+        {
+            primitive = {
+                topology: "triangle-strip",
+            };
+        }
+        reactive(this.renderPipeline).primitive = primitive;
+
+        const renderObject: RenderObject = {
             pipeline: this.renderPipeline,
-            uniforms: bindingResources,
+            bindingResources: bindingResources,
             //if skin do something with bone bind group
             vertices: this.vertices,
             indices: this.indices,
-            drawVertex,
-            drawIndexed,
+            draw,
         };
         renderObjects.push(renderObject);
     }
@@ -509,7 +507,7 @@ export class GLTFMesh
         }
     }
 
-    render(renderObjects: IRenderObject[], bindingResources: IUniforms)
+    render(renderObjects: RenderObject[], bindingResources: BindingResources)
     {
         // We take a pretty simple approach to start. Just loop through all the primitives and
         // call their individual draw methods
@@ -664,7 +662,7 @@ export class GLTFNode
     }
 
     renderDrawables(
-        renderObjects: IRenderObject[], bindingResources: IUniforms
+        renderObjects: RenderObject[], bindingResources: BindingResources
     )
     {
         if (this.drawables !== undefined)
@@ -733,7 +731,7 @@ export class GLTFSkin
     // [5, 2, 3] means our joint info is at nodes 5, 2, and 3
     joints: number[];
     // Bind Group for this skin's uniform buffer
-    skinBindGroup: IUniforms;
+    skinBindGroup: BindingResources;
     // Static bindGroupLayout shared across all skins
     // In a larger shader with more properties, certain bind groups
     // would likely have to be combined due to device limitations in the number of bind groups
@@ -782,7 +780,7 @@ export class GLTFSkin
         const globalWorldInverse = mat4.inverse(
             nodes[currentNodeIndex].worldMatrix
         );
-        const gpuBuffer = getIGPUBuffer(this.jointMatricesUniformBuffer);
+        const gpuBuffer = getGBuffer(this.jointMatricesUniformBuffer);
         const writeBuffers = gpuBuffer.writeBuffers || [];
 
         for (let j = 0; j < this.joints.length; j++)
@@ -800,7 +798,7 @@ export class GLTFSkin
             });
         }
 
-        gpuBuffer.writeBuffers = writeBuffers;
+        reactive(gpuBuffer).writeBuffers = writeBuffers;
     }
 }
 

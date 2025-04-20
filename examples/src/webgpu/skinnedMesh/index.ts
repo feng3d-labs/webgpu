@@ -7,8 +7,8 @@ import gridWGSL from "./grid.wgsl";
 import { gridIndices } from "./gridData";
 import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
 
-import { IPassEncoder, IRenderObject, IRenderPass, IRenderPassDescriptor, ITexture, IUniforms } from "@feng3d/render-api";
-import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, PassEncoder, reactive, RenderObject, RenderPass, RenderPassDescriptor, Submit, Texture } from "@feng3d/render-api";
+import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -147,14 +147,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         .add(settings, "renderMode", ["NORMAL", "JOINTS", "WEIGHTS"])
         .onChange(() =>
         {
-            const buffer = getIGPUBuffer(generalUniformsBuffer);
+            const buffer = getGBuffer(generalUniformsBuffer);
             const writeBuffers = buffer.writeBuffers || [];
 
             writeBuffers.push({
                 data: new Uint32Array([RenderMode[settings.renderMode]]),
             });
 
-            buffer.writeBuffers = writeBuffers;
+            reactive(buffer).writeBuffers = writeBuffers;
         });
     // Determine whether the mesh is static or whether skinning is activated
     gui.add(settings, "skinMode", ["ON", "OFF"]).onChange(() =>
@@ -174,26 +174,26 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.cameraZ = -14.6;
             }
         }
-        const buffer = getIGPUBuffer(generalUniformsBuffer);
+        const buffer = getGBuffer(generalUniformsBuffer);
         const writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({
             bufferOffset: 4,
             data: new Uint32Array([SkinMode[settings.skinMode]]),
         });
-        buffer.writeBuffers = writeBuffers;
+        reactive(buffer).writeBuffers = writeBuffers;
     });
     const animFolder = gui.addFolder("Animation Settings");
     animFolder.add(settings, "angle", 0.05, 0.5).step(0.05);
     animFolder.add(settings, "speed", 10, 100).step(10);
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
 
     const cameraBuffer = new Float32Array(48);
 
-    const cameraBGCluster: IUniforms = {
+    const cameraBGCluster: BindingResources = {
         camera_uniforms: {
             bufferView: cameraBuffer,
         }
@@ -201,7 +201,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const generalUniformsBuffer = new Uint32Array(2);
 
-    const generalUniformsBGCLuster: IUniforms = {
+    const generalUniformsBGCLuster: BindingResources = {
         general_uniforms: {
             bufferView: generalUniformsBuffer,
         },
@@ -227,7 +227,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Buffer for our uniforms, joints, and inverse bind matrices
     const skinnedGridJointUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
     const skinnedGridInverseBindUniformBuffer = new Uint8Array(MAT4X4_BYTES * 5);
-    const skinnedGridBoneBGCluster: IUniforms = {
+    const skinnedGridBoneBGCluster: BindingResources = {
         joint_matrices: { bufferView: skinnedGridJointUniformBuffer },
         inverse_bind_matrices: { bufferView: skinnedGridInverseBindUniformBuffer },
     };
@@ -303,7 +303,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     // Pass Descriptor for GLTFs
-    const gltfRenderPassDescriptor: IRenderPassDescriptor = {
+    const gltfRenderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -322,7 +322,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Pass descriptor for grid with no depth testing
-    const skinnedGridRenderPassDescriptor: IRenderPassDescriptor = {
+    const skinnedGridRenderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -374,7 +374,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // Create bones of the skinned grid and write the inverse bind positions to
     // the skinned grid's inverse bind matrix array
-    const buffer = getIGPUBuffer(skinnedGridInverseBindUniformBuffer);
+    const buffer = getGBuffer(skinnedGridInverseBindUniformBuffer);
     const writeBuffers = buffer.writeBuffers || [];
     const gridBoneCollection = createBoneCollection(5);
     for (let i = 0; i < gridBoneCollection.bindPosesInv.length; i++)
@@ -384,7 +384,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             data: gridBoneCollection.bindPosesInv[i]
         });
     }
-    buffer.writeBuffers = writeBuffers;
+    reactive(buffer).writeBuffers = writeBuffers;
 
     // A map that maps a joint index to the original matrix transformation of a bone
     const origMatrices = new Map<number, Mat4>();
@@ -424,6 +424,51 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     };
 
+    const passEncoders: PassEncoder[] = [];
+    const submit: Submit = { commandEncoders: [{ passEncoders }] };
+
+    const whaleRenderPass = (() =>
+    {
+        const renderObjects: RenderObject[] = [];
+        const bindingResources: BindingResources = {
+            ...cameraBGCluster,
+            ...generalUniformsBGCLuster,
+        };
+        for (const scene of whaleScene.scenes)
+        {
+            scene.root.renderDrawables(renderObjects, bindingResources);
+        }
+        const passEncoder: RenderPass = {
+            descriptor: gltfRenderPassDescriptor,
+            renderPassObjects: renderObjects
+        };
+        return passEncoder;
+    })();
+    const skinnedGridRenderPass = (() =>
+    {
+        // Our skinned grid isn't checking for depth, so we pass it
+        // a separate render descriptor that does not take in a depth texture
+        // Pass in vertex and index buffers generated from our static skinned grid
+        // data at ./gridData.ts
+        const renderObject: RenderObject = {
+            pipeline: skinnedGridPipeline,
+            bindingResources: {
+                ...cameraBGCluster,
+                ...generalUniformsBGCLuster,
+                ...skinnedGridBoneBGCluster,
+            },
+            vertices: skinnedGridVertexBuffers.vertices,
+            indices: skinnedGridVertexBuffers.indices,
+            draw: { __type__: "DrawIndexed", indexCount: gridIndices.length },
+        };
+        //
+        const passEncoder: RenderPass = {
+            descriptor: gltfRenderPassDescriptor,
+            renderPassObjects: [renderObject],
+        };
+        return passEncoder;
+    })();
+
     function frame()
     {
         // Calculate camera matrices
@@ -438,7 +483,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         animSkinnedGrid(gridBoneCollection.transforms, angle);
 
         // Write to mvp to camera buffer
-        const buffer = getIGPUBuffer(cameraBuffer);
+        const buffer = getGBuffer(cameraBuffer);
         const writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({
             bufferOffset: 0,
@@ -458,10 +503,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             dataOffset: modelMatrix.byteOffset,
             size: modelMatrix.byteLength
         });
-        buffer.writeBuffers = writeBuffers;
+        reactive(buffer).writeBuffers = writeBuffers;
 
         // Write to skinned grid bone uniform buffer
-        const buffer0 = getIGPUBuffer(skinnedGridJointUniformBuffer);
+        const buffer0 = getGBuffer(skinnedGridJointUniformBuffer);
         const writeBuffers0 = buffer0.writeBuffers || [];
         for (let i = 0; i < gridBoneCollection.transforms.length; i++)
         {
@@ -470,7 +515,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 data: gridBoneCollection.transforms[i]
             });
         }
-        buffer0.writeBuffers = writeBuffers0;
+        reactive(buffer0).writeBuffers = writeBuffers0;
 
         // Update node matrixes
         for (const scene of whaleScene.scenes)
@@ -483,50 +528,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Node 6 should be the only node with a drawable mesh so hopefully this works fine
         whaleScene.skins[0].update(6, whaleScene.nodes);
 
-        const passEncoders: IPassEncoder[] = [];
-
+        passEncoders.length = 0;
         if (settings.object === "Whale")
         {
-            const renderObjects: IRenderObject[] = [];
-            const bindingResources: IUniforms = {
-                ...cameraBGCluster,
-                ...generalUniformsBGCLuster,
-            };
-            for (const scene of whaleScene.scenes)
-            {
-                scene.root.renderDrawables(renderObjects, bindingResources);
-            }
-            const passEncoder: IRenderPass = {
-                descriptor: gltfRenderPassDescriptor,
-                renderObjects
-            };
-            passEncoders.push(passEncoder);
+            passEncoders.push(whaleRenderPass);
         }
         else
         {
-            // Our skinned grid isn't checking for depth, so we pass it
-            // a separate render descriptor that does not take in a depth texture
-            // Pass in vertex and index buffers generated from our static skinned grid
-            // data at ./gridData.ts
-            const renderObject: IRenderObject = {
-                pipeline: skinnedGridPipeline,
-                uniforms: {
-                    ...cameraBGCluster,
-                    ...generalUniformsBGCLuster,
-                    ...skinnedGridBoneBGCluster,
-                },
-                vertices: skinnedGridVertexBuffers.vertices,
-                indices: skinnedGridVertexBuffers.indices,
-                drawIndexed: { indexCount: gridIndices.length },
-            };
-            //
-            passEncoders.push({
-                descriptor: skinnedGridRenderPassDescriptor,
-                renderObjects: [renderObject],
-            });
+            passEncoders.push(skinnedGridRenderPass);
         }
 
-        webgpu.submit({ commandEncoders: [{ passEncoders }] });
+        webgpu.submit(submit);
 
         requestAnimationFrame(frame);
     }

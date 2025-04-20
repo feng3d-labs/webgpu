@@ -1,4 +1,4 @@
-import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, IUniforms } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline } from "@feng3d/render-api";
 
 const fullscreenTexturedQuad
     = `
@@ -39,27 +39,27 @@ export abstract class Base2DRendererClass
 {
     abstract switchBindGroup(name: string): void;
     abstract startRun(
-        commandEncoder: ICommandEncoder,
+        commandEncoder: CommandEncoder,
         ...args: unknown[]
     ): void;
-    renderPassDescriptor: IRenderPassDescriptor;
-    pipeline: IRenderPipeline;
+    renderPassDescriptor: RenderPassDescriptor;
+    pipeline: RenderPipeline;
     bindGroupMap: Record<string, GPUBindGroup>;
     currentBindGroupName: string;
 
     executeRun(
-        commandEncoder: ICommandEncoder,
-        renderPassDescriptor: IRenderPassDescriptor,
-        pipeline: IRenderPipeline,
-        bindingResources?: IUniforms
+        commandEncoder: CommandEncoder,
+        renderPassDescriptor: RenderPassDescriptor,
+        pipeline: RenderPipeline,
+        bindingResources?: BindingResources
     )
     {
-        const passEncoder: IRenderPass = {
+        const passEncoder: RenderPass = {
             descriptor: renderPassDescriptor,
-            renderObjects: [{
-                pipeline,
-                uniforms: bindingResources,
-                drawVertex: { vertexCount: 6, instanceCount: 1 }
+            renderPassObjects: [{
+                pipeline: pipeline,
+                bindingResources: bindingResources,
+                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1 },
             }],
         };
         commandEncoder.passEncoders.push(passEncoder);
@@ -70,7 +70,7 @@ export abstract class Base2DRendererClass
         code: string,
     )
     {
-        const renderPipeline: IRenderPipeline = {
+        const renderPipeline: RenderPipeline = {
             label: `${label}.pipeline`,
             vertex: {
                 code: fullscreenTexturedQuad,

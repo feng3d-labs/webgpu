@@ -1,15 +1,13 @@
-import { IDepthStencilState, IRenderPipeline, ITexture } from "@feng3d/render-api";
+import { DepthStencilState, RenderPipeline, Texture } from "@feng3d/render-api";
 
 export const create3DRenderPipeline = (
     label: string,
     vertexShader: string,
     fragmentShader: string,
     depthTest = false,
-    topology: GPUPrimitiveTopology = "triangle-list",
-    cullMode: GPUCullMode = "back"
 ) =>
 {
-    let depthStencil: IDepthStencilState;
+    let depthStencil: DepthStencilState;
     if (depthTest)
     {
         depthStencil = {
@@ -18,7 +16,7 @@ export const create3DRenderPipeline = (
         };
     }
 
-    const pipelineDescriptor: IRenderPipeline = {
+    const pipelineDescriptor: RenderPipeline = {
         label: `${label}.pipeline`,
         vertex: {
             code: vertexShader,
@@ -27,8 +25,8 @@ export const create3DRenderPipeline = (
             code: fragmentShader,
         },
         primitive: {
-            topology,
-            cullFace: cullMode,
+            topology: "triangle-list",
+            cullFace: "back",
         },
         depthStencil,
     };
@@ -40,7 +38,7 @@ export const createTextureFromImage = (
     bitmap: ImageBitmap
 ) =>
 {
-    const texture: ITexture = {
+    const texture: Texture = {
         size: [bitmap.width, bitmap.height],
         format: "rgba8unorm",
         sources: [{ image: bitmap }]

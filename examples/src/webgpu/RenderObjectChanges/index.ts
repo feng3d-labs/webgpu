@@ -1,4 +1,4 @@
-import { IRenderObject, ISubmit } from "@feng3d/render-api";
+import { Submit, RenderObject, reactive } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -9,7 +9,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init(); // 初始化WebGPU
 
-    const renderObject: IRenderObject = { // 渲染对象
+    const renderObject: RenderObject = { // 渲染对象
         pipeline: { // 渲染管线
             vertex: { // 顶点着色器
                 code: `
@@ -33,11 +33,11 @@ const init = async (canvas: HTMLCanvasElement) =>
             position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: "float32x2" }, // 顶点坐标数据
         },
         indices: new Uint16Array([0, 1, 2]), // 顶点索引数据
-        uniforms: { color: [1, 0, 0, 0] }, // Uniform 颜色值。
-        drawIndexed: { indexCount: 3 }, // 绘制命令
+        draw: { __type__: "DrawIndexed", indexCount: 3 }, // 绘制命令
+        bindingResources: { color: [1, 0, 0, 0] as any }, // Uniform 颜色值。
     };
 
-    const submit: ISubmit = { // 一次GPU提交
+    const submit: Submit = { // 一次GPU提交
         commandEncoders: [ // 命令编码列表
             {
                 passEncoders: [ // 通道编码列表
@@ -48,7 +48,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 clearValue: [0.0, 0.0, 0.0, 1.0], // 渲染前填充颜色
                             }],
                         },
-                        renderObjects: [renderObject]
+                        renderPassObjects: [renderObject]
                     },
                 ]
             }
@@ -65,8 +65,13 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     window.onclick = () =>
     {
+        // reactive(renderObject.vertices.position).stepMode = "instance";
+        // reactive(renderObject.vertices.position).stepMode = "vertex";
+        // reactive(renderObject.vertices.position).data = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -1]);
+        // reactive(renderObject.vertices.position).format = "float32x3";
+        // reactive(renderObject.vertices.position).data = new Float32Array([1.0, 0.5, 1.0, -0.5, -0.5, 1.0, 0.5, -1, 1.0]);
         // 修改顶点着色器代码
-        renderObject.pipeline.vertex.code = `
+        reactive(renderObject.pipeline.vertex).code = `
                 @vertex
                 fn main(
                     @location(0) position: vec2<f32>,
@@ -78,7 +83,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 `;
 
         // 修改片段着色器代码
-        renderObject.pipeline.fragment.code = `
+        reactive(renderObject.pipeline.fragment).code = `
                 @binding(0) @group(0) var<uniform> color : vec4<f32>;
                 @fragment
                 fn main() -> @location(0) vec4f {
@@ -89,8 +94,8 @@ const init = async (canvas: HTMLCanvasElement) =>
                     return col;
                 }
                 `;
-        //
-        // renderObject.uniforms.color = [0, 1, 0, 1];
+
+        reactive(renderObject.bindingResources).color = [0, 1, 0, 1];
     };
 };
 

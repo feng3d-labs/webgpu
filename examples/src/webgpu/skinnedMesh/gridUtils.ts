@@ -1,4 +1,4 @@
-import { IRenderPipeline, IVertexAttributes } from "@feng3d/render-api";
+import { RenderPipeline, VertexAttributes } from "@feng3d/render-api";
 
 import { gridIndices, gridJoints, gridVertices, gridWeights } from "./gridData";
 
@@ -7,7 +7,7 @@ export const createSkinnedGridBuffers = () =>
 {
     // Utility function that creates GPUBuffers from data
 
-    const vertices: IVertexAttributes = {
+    const vertices: VertexAttributes = {
         vert_pos: { data: gridVertices, format: "float32x2" },
         joints: { data: gridJoints, format: "uint32x4" },
         weights: { data: gridWeights, format: "float32x4" },
@@ -24,7 +24,7 @@ export const createSkinnedGridRenderPipeline = (
     fragmentShader: string,
 ) =>
 {
-    const pipeline: IRenderPipeline = {
+    const material: RenderPipeline = {
         label: "SkinnedGridRenderer",
         vertex: {
             code: vertexShader,
@@ -37,5 +37,5 @@ export const createSkinnedGridRenderPipeline = (
         },
     };
 
-return pipeline;
+    return material;
 };

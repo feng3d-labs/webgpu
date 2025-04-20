@@ -58,11 +58,9 @@
     "vitest": "^0.32.2"
   },
   "dependencies": {
-    "@feng3d/render-api": "0.0.2",
     "@feng3d/event": "^0.8.4",
-    "@feng3d/watcher": "^0.8.9",
+    "@feng3d/render-api": "0.0.2",
     "@webgpu/types": "0.1.49",
-    "stats.js": "^0.17.0",
     "wgsl_reflect": "^1.0.16"
   }
 }

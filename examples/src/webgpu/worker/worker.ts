@@ -1,7 +1,7 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit, IVertexAttributes } from "@feng3d/render-api";
-import { getOffscreenCanvasId, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, reactive, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 
@@ -70,15 +70,15 @@ self.addEventListener("message", (ev) =>
 async function init(canvas: OffscreenCanvas)
 {
     const webgpu = await new WebGPU().init();
-    const context: IGPUCanvasContext = { canvasId: getOffscreenCanvasId(canvas) };
+    const context: CanvasContext = { canvasId: canvas };
 
     // Create a vertex buffer from the cube data.
-    const verticesBuffer: IVertexAttributes = {
+    const verticesBuffer: VertexAttributes = {
         position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -92,8 +92,8 @@ async function init(canvas: OffscreenCanvas)
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
             cullFace: "back",
+            frontFace: "ccw",
         },
-
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
@@ -106,7 +106,7 @@ async function init(canvas: OffscreenCanvas)
         uniforms: { modelViewProjectionMatrix: undefined },
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } }, // Assigned later
@@ -149,15 +149,15 @@ async function init(canvas: OffscreenCanvas)
         return modelViewProjectionMatrix;
     }
 
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [{
             passEncoders: [{
                 descriptor: renderPassDescriptor,
-                renderObjects: [{
+                renderPassObjects: [{
                     pipeline,
-                    uniforms: uniformBindGroup,
+                    bindingResources: uniformBindGroup,
                     vertices: verticesBuffer,
-                    drawVertex: { vertexCount: cubeVertexCount }
+                    draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount }
                 }]
             }]
         }]
@@ -166,7 +166,7 @@ async function init(canvas: OffscreenCanvas)
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
-        uniformBindGroup.uniforms.modelViewProjectionMatrix = transformationMatrix.slice();
+        reactive(uniformBindGroup.uniforms).modelViewProjectionMatrix = transformationMatrix.slice();
 
         webgpu.submit(submit);
 

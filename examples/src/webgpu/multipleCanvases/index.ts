@@ -1,5 +1,5 @@
-import { IPassEncoder, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, CanvasContext, PassEncoder, reactive, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
+import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -23,14 +23,14 @@ function createBufferWithData(
 type Model = {
     vertices: Float32Array;
     indices: Uint32Array;
-    vertexAttributes: IVertexAttributes,
+    vertexAttributes: VertexAttributes,
 };
 
 function createVertexAndIndexBuffer(
     { vertices, indices }: { vertices: Float32Array; indices: Uint32Array }
 ): Model
 {
-    const vertexAttributes: IVertexAttributes = {
+    const vertexAttributes: VertexAttributes = {
         position: { data: vertices, format: "float32x3", offset: 0, arrayStride: 6 * 4 },
         normal: { data: vertices, format: "float32x3", offset: 3 * 4, arrayStride: 6 * 4 },
     };
@@ -114,7 +114,7 @@ const init = async () =>
   `,
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         label: "our hardcoded red triangle pipeline",
         vertex: {
             ...module,
@@ -167,15 +167,15 @@ const init = async () =>
     });
 
     type CanvasInfo = {
-        context: IGPUCanvasContext;
+        context: CanvasContext;
         clearValue: [number, number, number, number];
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
         uniformValues: Float32Array;
-        bindGroup:  IUniforms;
+        bindGroup: BindingResources;
         rotation: number;
         model: Model;
-        renderPassDescriptor?: IRenderPassDescriptor
+        renderPassDescriptor?: RenderPassDescriptor
     };
 
     const outerElem = document.querySelector("#outer");
@@ -204,7 +204,7 @@ const init = async () =>
 
         // Get a WebGPU context and configure it.
         canvas.id = canvas.id || `gpuCanvas___${globalThis["gpuCanvasAutoID"] = ~~globalThis["gpuCanvasAutoID"] + 1}`;
-        const context: IGPUCanvasContext = { canvasId: canvas.id };
+        const context: CanvasContext = { canvasId: canvas.id };
 
         // Make a uniform buffer and type array views
         // for our uniforms.
@@ -224,7 +224,7 @@ const init = async () =>
         colorValue.set(randColor());
 
         // Make a bind group for this uniform
-        const bindGroup:  IUniforms = {
+        const bindGroup: BindingResources = {
             uni: {
                 bufferView: uniformValues,
                 worldViewProjectionMatrix: undefined,
@@ -254,7 +254,7 @@ const init = async () =>
         time *= 0.001; // convert to seconds;
 
         // make a command encoder to start encoding commands
-        const passEncoders: IPassEncoder[] = [];
+        const passEncoders: PassEncoder[] = [];
 
         visibleCanvasSet.forEach((canvas) =>
         {
@@ -272,7 +272,7 @@ const init = async () =>
 
             // Get the current texture from the canvas context and
             // set it as the texture to render to.
-            const renderPassDescriptor: IRenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
+            const renderPassDescriptor: RenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
                 label: "our basic canvas renderPass",
                 colorAttachments: [
                     {
@@ -307,27 +307,27 @@ const init = async () =>
             mat3.fromMat4(world, worldMatrixValue);
 
             // Upload our uniform values.
-            const buffer = getIGPUBuffer(uniformValues);
+            const buffer = getGBuffer(uniformValues);
             const writeBuffers = buffer.writeBuffers || [];
             writeBuffers.push({
                 data: uniformValues,
             });
-            buffer.writeBuffers = writeBuffers;
+            reactive(buffer).writeBuffers = writeBuffers;
 
             // make a render pass encoder to encode render specific commands
             passEncoders.push({
                 descriptor: renderPassDescriptor,
-                renderObjects: [{
-                    pipeline,
+                renderPassObjects: [{
+                    pipeline: pipeline,
+                    bindingResources: bindGroup,
                     vertices: vertexAttributes,
                     indices,
-                    uniforms: bindGroup,
-                    drawIndexed: { indexCount: indices.length },
+                    draw: { __type__: "DrawIndexed", indexCount: indices.length },
                 }],
             });
         });
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders,
             }]

@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IVertexAttributes } from "@feng3d/render-api";
-import { IGPUCanvasContext, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, reactive, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { TimestampQuery, WebGPU } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -8,39 +8,34 @@ import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cub
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import fragmentWGSL from "../../shaders/black.frag.wgsl";
 
-import { watcher } from "@feng3d/watcher";
 import PerfCounter from "./PerfCounter";
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
+    const renderPassDurationCounter = new PerfCounter();
     // GPU-side timer and the CPU-side counter where we accumulate statistics:
     // NB: Look for 'timestampQueryManager' in this file to locate parts of this
     // snippets that are related to timestamps. Most of the logic is in
     // TimestampQueryManager.ts.
-    const timestampQuery: IGPUTimestampQuery = {};
-    // const timestampQueryManager = new TimestampQueryManager(device);
-    const renderPassDurationCounter = new PerfCounter();
-
-    watcher.watch(timestampQuery, "isSupports", () =>
-    {
-        if (!timestampQuery.isSupports)
+    const timestampQuery: TimestampQuery = {
+        onSupports: (isSupports: boolean) =>
         {
-            perfDisplay.innerHTML = "Timestamp queries are not supported";
+            if (!isSupports)
+            {
+                perfDisplay.innerHTML = "Timestamp queries are not supported";
+            }
+        },
+        onQuery: (elapsedNs: number) =>
+        {
+            // Show the last successfully downloaded elapsed time.
+            // Convert from nanoseconds to milliseconds:
+            const elapsedMs = Number(elapsedNs) * 1e-6;
+            renderPassDurationCounter.addSample(elapsedMs);
+            perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
+                .getAverage()
+                .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
         }
-    });
-
-    // 监听结果。
-    watcher.watch(timestampQuery, "elapsedNs", () =>
-    {
-        // Show the last successfully downloaded elapsed time.
-        const elapsedNs = timestampQuery.elapsedNs;
-        // Convert from nanoseconds to milliseconds:
-        const elapsedMs = Number(elapsedNs) * 1e-6;
-        renderPassDurationCounter.addSample(elapsedMs);
-        perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
-            .getAverage()
-            .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
-    });
+    };
 
     //
     const devicePixelRatio = window.devicePixelRatio || 1;
@@ -49,19 +44,19 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
     //
-    const context: IGPUCanvasContext = { canvasId: canvas.id };
+    const context: CanvasContext = { canvasId: canvas.id };
 
     const perfDisplay = document.querySelector("#info pre");
 
     // Create a vertex buffer from the cube data.
-    const vertices: IVertexAttributes = {
+    const vertices: VertexAttributes = {
         position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
     const uniforms = { modelViewProjectionMatrix: null };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -76,7 +71,6 @@ const init = async (canvas: HTMLCanvasElement) =>
             // pointing toward the camera.
             cullFace: "back",
         },
-
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
@@ -85,12 +79,12 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } }, // Assigned later
@@ -107,25 +101,25 @@ const init = async (canvas: HTMLCanvasElement) =>
             depthLoadOp: "clear",
             depthStoreOp: "store",
         },
+        // 开启时间戳查询
+        timestampQuery,
     };
 
-    const renderObject: IRenderObject = {
-        pipeline,
-        vertices,
-        uniforms: {
+    const renderObject: RenderObject = {
+        pipeline: pipeline,
+        bindingResources: {
             uniforms,
         },
-        drawVertex: { vertexCount: cubeVertexCount },
+        vertices,
+        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [
             {
                 passEncoders: [
                     {
-                        descriptor: renderPassDescriptor, renderObjects: [renderObject],
-                        // 开启时间戳查询
-                        timestampQuery,
+                        descriptor: renderPassDescriptor, renderPassObjects: [renderObject],
                     },
                 ]
             }
@@ -156,7 +150,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
-        uniforms.modelViewProjectionMatrix = new Float32Array(transformationMatrix);
+        reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
 
         webgpu.submit(submit);
 

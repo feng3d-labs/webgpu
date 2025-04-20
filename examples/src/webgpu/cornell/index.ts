@@ -7,8 +7,8 @@ import Raytracer from "./raytracer";
 import Scene from "./scene";
 import Tonemapper from "./tonemapper";
 
-import { ICommandEncoder, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, CommandEncoder, Submit, Texture } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -16,7 +16,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const requiredFeatures: GPUFeatureName[]
         = presentationFormat === "bgra8unorm" ? ["bgra8unorm-storage"] : [];
 
-    const context: IGPUCanvasContext = {
+    const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: {
             format: "rgba16float",
@@ -41,7 +41,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init(undefined, { requiredFeatures });
 
-    const framebuffer: ITexture = {
+    const framebuffer: Texture = {
         label: "framebuffer",
         size: [canvas.width, canvas.height],
         format: "rgba16float",
@@ -55,13 +55,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const tonemapper = new Tonemapper(common, framebuffer, { context });
 
     // 光栅化渲染
-    const rasterizerCommandEncoder: ICommandEncoder = { passEncoders: [] };
+    const rasterizerCommandEncoder: CommandEncoder = { passEncoders: [] };
     radiosity.encode(rasterizerCommandEncoder);
     rasterizer.encode(rasterizerCommandEncoder);
     tonemapper.encode(rasterizerCommandEncoder);
 
     // 光线追踪渲染
-    const raytracerCommandEncoder: ICommandEncoder = { passEncoders: [] };
+    const raytracerCommandEncoder: CommandEncoder = { passEncoders: [] };
     radiosity.encode(raytracerCommandEncoder);
     raytracer.encode(raytracerCommandEncoder);
     tonemapper.encode(raytracerCommandEncoder);
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
         radiosity.run();
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [params.renderer === "rasterizer" ? rasterizerCommandEncoder : raytracerCommandEncoder]
         };
 

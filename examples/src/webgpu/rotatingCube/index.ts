@@ -1,4 +1,4 @@
-import { IBufferBinding, IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { BufferBinding, reactive, RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -15,7 +15,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -29,11 +29,11 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const uniforms: IBufferBinding = {
+    const uniforms: BufferBinding = {
         modelViewProjectionMatrix: new Float32Array(16)
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {
@@ -44,10 +44,10 @@ const init = async (canvas: HTMLCanvasElement) =>
             position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
             uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        uniforms: {
+        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
+        bindingResources: {
             uniforms,
         },
-        drawVertex: { vertexCount: cubeVertexCount },
     };
 
     const aspect = canvas.width / canvas.height;
@@ -80,13 +80,14 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        uniforms.modelViewProjectionMatrix = new Float32Array(transformationMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        // 更新uniforms
+        reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
 
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { descriptor: renderPass, renderObjects: [renderObject] },
+                        { descriptor: renderPass, renderPassObjects: [renderObject] },
                     ]
                 }
             ],

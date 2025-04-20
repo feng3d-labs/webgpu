@@ -1,3 +1,5 @@
+import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes, reactive } from "@feng3d/render-api";
+import { WebGPU, getGBuffer } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { mesh } from "../../meshes/stanfordDragon";
@@ -5,9 +7,6 @@ import { mesh } from "../../meshes/stanfordDragon";
 import fragmentWGSL from "./fragment.wgsl";
 import vertexWGSL from "./vertex.wgsl";
 import vertexShadowWGSL from "./vertexShadow.wgsl";
-
-import { IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
-import { WebGPU, getIGPUBuffer } from "@feng3d/webgpu";
 
 const shadowDepthTextureSize = 1024;
 
@@ -28,7 +27,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         vertexBuffer.set(mesh.normals[i], 6 * i + 3);
     }
 
-    const vertices: IVertexAttributes = {
+    const vertices: VertexAttributes = {
         position: { data: vertexBuffer, format: "float32x3", offset: 0, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
         normal: { data: vertexBuffer, format: "float32x3", offset: Float32Array.BYTES_PER_ELEMENT * 3, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
     };
@@ -42,7 +41,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 
     // Create the depth texture for rendering/sampling the shadow map.
-    const shadowDepthTexture: ITexture = {
+    const shadowDepthTexture: Texture = {
         size: [shadowDepthTextureSize, shadowDepthTextureSize, 1],
         format: "depth32float",
     };
@@ -54,21 +53,21 @@ const init = async (canvas: HTMLCanvasElement) =>
         cullMode: "back",
     };
 
-    const shadowPipeline: IRenderPipeline = {
+    const shadowPipeline: RenderPipeline = {
         vertex: {
             code: vertexShadowWGSL,
         },
+        primitive,
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
         },
-        primitive,
     };
 
     // Create a bind group layout which holds the scene uniforms and
     // the texture+sampler for depth. We create it manually because the WebPU
     // implementation doesn't infer this from the shader (yet).
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: vertexWGSL,
         },
@@ -78,19 +77,19 @@ const init = async (canvas: HTMLCanvasElement) =>
                 shadowDepthTextureSize,
             },
         },
+        primitive,
         depthStencil: {
             depthWriteEnabled: true,
             depthCompare: "less",
         },
-        primitive,
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus-stencil8",
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -117,13 +116,13 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Rounded to the nearest multiple of 16.
     const sceneUniformBuffer = new Uint8Array(2 * 4 * 16 + 4 * 4);
 
-    const sceneBindGroupForShadow: IUniforms = {
+    const sceneBindGroupForShadow: BindingResources = {
         scene: {
             bufferView: sceneUniformBuffer,
         },
     };
 
-    const sceneBindGroupForRender: IUniforms = {
+    const sceneBindGroupForRender: BindingResources = {
         scene: {
             bufferView: sceneUniformBuffer,
         },
@@ -133,7 +132,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const modelBindGroup: IUniforms = {
+    const modelBindGroup: BindingResources = {
         model: {
             bufferView: modelUniformBuffer,
         },
@@ -176,14 +175,14 @@ const init = async (canvas: HTMLCanvasElement) =>
         const lightMatrixData = lightViewProjMatrix as Float32Array;
         const cameraMatrixData = viewProjMatrix as Float32Array;
         const lightData = lightPosition as Float32Array;
-        getIGPUBuffer(sceneUniformBuffer).writeBuffers = [
+        reactive(getGBuffer(sceneUniformBuffer)).writeBuffers = [
             { bufferOffset: 0, data: lightMatrixData },
             { bufferOffset: 64, data: cameraMatrixData },
             { bufferOffset: 128, data: lightData },
         ];
 
         const modelData = modelMatrix as Float32Array;
-        getIGPUBuffer(modelUniformBuffer).writeBuffers = [{ data: modelData }];
+        reactive(getGBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
     }
 
     // Rotates the camera around the origin based on time.
@@ -202,7 +201,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         return viewProjMatrix as Float32Array;
     }
 
-    const shadowPassDescriptor: IRenderPassDescriptor = {
+    const shadowPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [],
         depthStencilAttachment: {
             view: { texture: shadowDepthTexture },
@@ -213,37 +212,37 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [
             {
                 passEncoders: [
                     {
                         descriptor: shadowPassDescriptor,
-                        renderObjects: [
+                        renderPassObjects: [
                             {
                                 pipeline: shadowPipeline,
-                                uniforms: {
+                                bindingResources: {
                                     ...sceneBindGroupForShadow,
                                     ...modelBindGroup,
                                 },
                                 vertices,
                                 indices: indexBuffer,
-                                drawIndexed: { indexCount },
+                                draw: { __type__: "DrawIndexed", indexCount },
                             },
                         ]
                     },
                     {
                         descriptor: renderPassDescriptor,
-                        renderObjects: [
+                        renderPassObjects: [
                             {
-                                pipeline,
-                                uniforms: {
+                                pipeline: pipeline,
+                                bindingResources: {
                                     ...sceneBindGroupForRender,
                                     ...modelBindGroup,
                                 },
                                 vertices,
                                 indices: indexBuffer,
-                                drawIndexed: { indexCount },
+                                draw: { __type__: "DrawIndexed", indexCount },
                             }
                         ],
                     }
@@ -255,9 +254,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     function frame()
     {
         const cameraViewProj = getCameraViewProjMatrix();
-        const writeBuffers = getIGPUBuffer(sceneUniformBuffer).writeBuffers || [];
+        const writeBuffers = getGBuffer(sceneUniformBuffer).writeBuffers || [];
         writeBuffers.push({ bufferOffset: 64, data: cameraViewProj });
-        getIGPUBuffer(sceneUniformBuffer).writeBuffers = writeBuffers;
+        reactive(getGBuffer(sceneUniformBuffer)).writeBuffers = writeBuffers;
 
         webgpu.submit(submit);
 

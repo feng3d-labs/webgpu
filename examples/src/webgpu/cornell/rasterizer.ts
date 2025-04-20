@@ -1,4 +1,4 @@
-import { ICommandEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ITexture, IUniforms } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Texture } from "@feng3d/render-api";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -12,15 +12,15 @@ export default class Rasterizer
 {
     private readonly common: Common;
     private readonly scene: Scene;
-    private readonly renderPassDescriptor: IRenderPassDescriptor;
-    private readonly pipeline: IRenderPipeline;
-    private readonly bindGroup: IUniforms;
+    private readonly renderPassDescriptor: RenderPassDescriptor;
+    private readonly pipeline: RenderPipeline;
+    private readonly bindGroup: BindingResources;
 
     constructor(
         common: Common,
         scene: Scene,
         radiosity: Radiosity,
-        framebuffer: ITexture,
+        framebuffer: Texture,
     )
     {
         this.common = common;
@@ -28,7 +28,7 @@ export default class Rasterizer
 
         const framebufferSize = framebuffer.size;
 
-        const depthTexture: ITexture = {
+        const depthTexture: Texture = {
             label: "RasterizerRenderer.depthTexture",
             size: [framebufferSize[0], framebufferSize[1]],
             format: "depth24plus",
@@ -77,21 +77,21 @@ export default class Rasterizer
         //
         this.renderPassEncoder = {
             descriptor: this.renderPassDescriptor,
-            renderObjects: [{
+            renderPassObjects: [{
                 pipeline: this.pipeline,
-                vertices: this.scene.vertexAttributes,
-                indices: this.scene.indices,
-                uniforms: {
+                bindingResources: {
                     ...this.common.uniforms.bindGroup,
                     ...this.bindGroup,
                 },
-                drawIndexed: { indexCount: this.scene.indexCount },
+                vertices: this.scene.vertexAttributes,
+                indices: this.scene.indices,
+                draw: { __type__: "DrawIndexed", indexCount: this.scene.indexCount },
             }],
         };
     }
-    private renderPassEncoder: IRenderPass;
+    private renderPassEncoder: RenderPass;
 
-    encode(commandEncoder: ICommandEncoder)
+    encode(commandEncoder: CommandEncoder)
     {
         commandEncoder.passEncoders.push(this.renderPassEncoder);
     }

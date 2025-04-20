@@ -1,5 +1,5 @@
-import { ICommandEncoder, IPassEncoder, ITexture, IUniforms } from "@feng3d/render-api";
-import { IGPUCanvasTexture, IGPUComputePipeline } from "@feng3d/webgpu";
+import { BindingResources, CanvasTexture, CommandEncoder, PassEncoder, Texture } from "@feng3d/render-api";
+import { ComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
 import tonemapperWGSL from "./tonemapper.wgsl";
@@ -10,8 +10,8 @@ import tonemapperWGSL from "./tonemapper.wgsl";
  */
 export default class Tonemapper
 {
-    private readonly bindGroup: IUniforms;
-    private readonly pipeline: IGPUComputePipeline;
+    private readonly bindGroup: BindingResources;
+    private readonly material: ComputePipeline;
     private readonly width: number;
     private readonly height: number;
     private readonly kWorkgroupSizeX = 16;
@@ -19,8 +19,8 @@ export default class Tonemapper
 
     constructor(
         common: Common,
-        input: ITexture,
-        output: IGPUCanvasTexture,
+        input: Texture,
+        output: CanvasTexture,
     )
     {
         const inputSize = input.size;
@@ -32,7 +32,7 @@ export default class Tonemapper
             output: { texture: output },
         };
 
-        this.pipeline = {
+        this.material = {
             label: "Tonemap.pipeline",
             compute: {
                 code: tonemapperWGSL.replace("{OUTPUT_FORMAT}", output.context.configuration.format),
@@ -45,10 +45,10 @@ export default class Tonemapper
 
         //
         this.passEncoder = {
-            __type: "ComputePass",
+            __type__: "ComputePass",
             computeObjects: [{
-                pipeline: this.pipeline,
-                uniforms: {
+                pipeline: this.material,
+                bindingResources: {
                     ...this.bindGroup,
                 },
                 workgroups: {
@@ -58,9 +58,9 @@ export default class Tonemapper
             }],
         };
     }
-    private passEncoder: IPassEncoder;
+    private passEncoder: PassEncoder;
 
-    encode(commandEncoder: ICommandEncoder)
+    encode(commandEncoder: CommandEncoder)
     {
         commandEncoder.passEncoders.push(this.passEncoder);
     }

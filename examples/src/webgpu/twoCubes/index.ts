@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IBufferBinding, IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { BufferBinding, reactive, RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -17,7 +17,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -37,36 +37,36 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniformBuffer = new ArrayBuffer(uniformBufferSize);
 
-    const uniforms: IBufferBinding = {
+    const uniforms: BufferBinding = {
         bufferView: new Uint8Array(uniformBuffer, 0, matrixSize),
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {
                 cullFace: "back",
             },
         },
+        bindingResources: {
+            uniforms,
+        },
         vertices: {
             position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
             uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        uniforms: {
-            uniforms,
-        },
-        drawVertex: { vertexCount: cubeVertexCount },
+        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
-    const uniforms1: IBufferBinding = {
+    const uniforms1: BufferBinding = {
         bufferView: new Uint8Array(uniformBuffer, offset, matrixSize),
         modelViewProjectionMatrix: null, // 在帧循环中设置
     };
 
-    const renderObject1: IRenderObject = {
+    const renderObject1: RenderObject = {
         ...renderObject,
-        uniforms: {
+        bindingResources: {
             uniforms: uniforms1,
         },
     };
@@ -119,11 +119,11 @@ const init = async (canvas: HTMLCanvasElement) =>
         );
     }
 
-    const data: ISubmit = {
+    const data: Submit = {
         commandEncoders: [
             {
                 passEncoders: [
-                    { descriptor: renderPassDescriptor, renderObjects: [renderObject, renderObject1] },
+                    { descriptor: renderPassDescriptor, renderPassObjects: [renderObject, renderObject1] },
                 ]
             }
         ],
@@ -133,8 +133,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         updateTransformationMatrix();
 
-        uniforms.modelViewProjectionMatrix = modelViewProjectionMatrix1;
-        uniforms1.modelViewProjectionMatrix = modelViewProjectionMatrix2;
+        // 使用 subarray 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        reactive(uniforms).modelViewProjectionMatrix = modelViewProjectionMatrix1.subarray();
+        reactive(uniforms1).modelViewProjectionMatrix = modelViewProjectionMatrix2.subarray();
 
         webgpu.submit(data);
 

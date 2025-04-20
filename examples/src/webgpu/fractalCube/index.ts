@@ -1,5 +1,5 @@
-import { IBufferBinding, ICopyTextureToTexture, IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
-import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { BufferBinding, CanvasContext, CopyTextureToTexture, reactive, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
@@ -18,13 +18,13 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // We will copy the frame's rendering results into this texture and
     // sample it on the next frame.
-    const cubeTexture: ITexture = {
+    const cubeTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: presentationFormat,
     };
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
@@ -55,14 +55,14 @@ const init = async (canvas: HTMLCanvasElement) =>
         return modelViewProjectionMatrix as Float32Array;
     }
 
-    const context: IGPUCanvasContext = {
+    const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: {
             usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT
         }
     };
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -76,7 +76,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleSelfWGSL },
             primitive: {
@@ -87,18 +87,18 @@ const init = async (canvas: HTMLCanvasElement) =>
             position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
             uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        uniforms: {
+        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
+        bindingResources: {
             uniforms: {
                 modelViewProjectionMatrix: new Float32Array(16)
             },
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
         },
-        drawVertex: { vertexCount: cubeVertexCount },
     };
 
-    const copyTextureToTexture: ICopyTextureToTexture = {
-        __type: "CopyTextureToTexture",
+    const copyTextureToTexture: CopyTextureToTexture = {
+        __type__: "CopyTextureToTexture",
         source: { texture: { context } },
         destination: { texture: cubeTexture },
         copySize: [canvas.width, canvas.height],
@@ -108,13 +108,13 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        (renderObject.uniforms.uniforms as IBufferBinding).modelViewProjectionMatrix = transformationMatrix;
+        reactive(renderObject.bindingResources.uniforms as BufferBinding).modelViewProjectionMatrix = transformationMatrix.subarray();
 
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { descriptor: renderPass, renderObjects: [renderObject] },
+                        { descriptor: renderPass, renderPassObjects: [renderObject] },
                         copyTextureToTexture,
                     ]
                 }

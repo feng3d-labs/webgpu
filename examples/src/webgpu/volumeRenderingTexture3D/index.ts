@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import volumeWGSL from "./volume.wgsl";
 
-import { IRenderPassDescriptor, IRenderPipeline, ISampler, ISubmit, ITexture, IUniforms } from "@feng3d/render-api";
+import { BindingResources, reactive, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const gui = new GUI();
@@ -28,7 +28,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const sampleCount = 4;
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: volumeWGSL,
         },
@@ -46,7 +46,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     // Fetch the image and upload it into a GPUTexture.
-    let volumeTexture: ITexture;
+    let volumeTexture: Texture;
     {
         const width = 180;
         const height = 216;
@@ -79,7 +79,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             size: [width, height, depth],
             format,
             sources: [{
-                __type: "TextureDataSource",
+                __type__: "TextureDataSource",
                 data: byteArray,
                 dataLayout: { width, height },
                 size: [width, height, depth],
@@ -88,20 +88,20 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
         mipmapFilter: "linear",
         maxAnisotropy: 16,
     };
 
-    const uniformBindGroup: IUniforms = {
+    const uniformBindGroup: BindingResources = {
         uniforms: uniformBuffer,
         mySampler: sampler,
         myTexture: { texture: volumeTexture },
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -145,6 +145,19 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     let lastFrameMS = Date.now();
 
+    const submit: Submit = {
+        commandEncoders: [{
+            passEncoders: [{
+                descriptor: renderPassDescriptor,
+                renderPassObjects: [{
+                    pipeline,
+                    bindingResources: uniformBindGroup,
+                    draw: { __type__: "DrawVertex", vertexCount: 3 },
+                }],
+            }]
+        }]
+    };
+
     function frame()
     {
         const now = Date.now();
@@ -154,20 +167,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         const inverseModelViewProjection
             = getInverseModelViewProjectionMatrix(deltaTime);
 
-        uniformBuffer.inverseModelViewProjectionMatrix = inverseModelViewProjection;
+        reactive(uniformBuffer).inverseModelViewProjectionMatrix = inverseModelViewProjection;
 
-        const submit: ISubmit = {
-            commandEncoders: [{
-                passEncoders: [{
-                    descriptor: renderPassDescriptor,
-                    renderObjects: [{
-                        pipeline,
-                        uniforms: uniformBindGroup,
-                        drawVertex: { vertexCount: 3 },
-                    }],
-                }]
-            }]
-        };
         webgpu.submit(submit);
 
         requestAnimationFrame(frame);

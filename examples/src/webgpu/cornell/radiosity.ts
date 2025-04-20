@@ -1,5 +1,5 @@
-import { ICommandEncoder, IPassEncoder, ITexture, IUniforms } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUComputePipeline } from "@feng3d/webgpu";
+import { BindingResources, CommandEncoder, PassEncoder, reactive, Texture } from "@feng3d/render-api";
+import { ComputePipeline, getGBuffer } from "@feng3d/webgpu";
 
 import Common from "./common";
 import radiosityWGSL from "./radiosity.wgsl";
@@ -17,7 +17,7 @@ export default class Radiosity
     static readonly lightmapHeight = 256;
 
     // The output lightmap.
-    readonly lightmap: ITexture;
+    readonly lightmap: Texture;
 
     // Number of photons emitted per workgroup.
     // This is equal to the workgroup size (one photon per invocation)
@@ -37,9 +37,9 @@ export default class Radiosity
 
     private readonly common: Common;
     private readonly scene: Scene;
-    private readonly radiosityPipeline: IGPUComputePipeline;
-    private readonly accumulationToLightmapPipeline: IGPUComputePipeline;
-    private readonly bindGroup: IUniforms;
+    private readonly radiosityPipeline: ComputePipeline;
+    private readonly accumulationToLightmapPipeline: ComputePipeline;
+    private readonly bindGroup: BindingResources;
     private readonly accumulationBuffer: Uint8Array;
     private readonly uniformBuffer: Uint8Array;
 
@@ -109,12 +109,12 @@ export default class Radiosity
         const lightmapSize = this.lightmap.size;
 
         this.passEncoders = [{
-            __type: "ComputePass",
+            __type__: "ComputePass",
             computeObjects: [
                 // Dispatch the radiosity workgroups
                 {
                     pipeline: this.radiosityPipeline,
-                    uniforms: {
+                    bindingResources: {
                         ...this.common.uniforms.bindGroup,
                         ...this.bindGroup,
                     },
@@ -123,7 +123,7 @@ export default class Radiosity
                 // Then copy the 'accumulation' data to 'lightmap'
                 {
                     pipeline: this.accumulationToLightmapPipeline,
-                    uniforms: {
+                    bindingResources: {
                         ...this.common.uniforms.bindGroup,
                         ...this.bindGroup,
                     },
@@ -136,9 +136,9 @@ export default class Radiosity
             ],
         }];
     }
-    private passEncoders: IPassEncoder[];
+    private passEncoders: PassEncoder[];
 
-    encode(commandEncoder: ICommandEncoder)
+    encode(commandEncoder: CommandEncoder)
     {
         this.passEncoders.forEach((v) =>
         {
@@ -169,6 +169,6 @@ export default class Radiosity
         uniformDataF32[4] = this.scene.lightCenter[0];
         uniformDataF32[5] = this.scene.lightCenter[1];
         uniformDataF32[6] = this.scene.lightCenter[2];
-        getIGPUBuffer(this.uniformBuffer).writeBuffers = [{ data: uniformDataF32 }];
+        reactive(getGBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
     }
 }

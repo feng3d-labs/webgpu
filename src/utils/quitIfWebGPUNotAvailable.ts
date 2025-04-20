@@ -79,6 +79,11 @@ const fail = (() =>
                 // (show the first error, not the most recent error).
                 if (!dialogBox.open)
                 {
+                    if (msg.indexOf("allow_unsafe_apis") > -1)
+                    {
+                        msg += "\n\n使用到了您的浏览器不支持的特性，请更换您的浏览器试试。";
+                    }
+
                     dialogText.textContent = msg;
                     dialogBox.showModal();
                 }

@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, IRenderPipeline, ISubmit, IUniforms, IVertexAttributes } from "@feng3d/render-api";
+import { BindingResources, reactive, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
@@ -30,7 +30,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     type Model = {
         vertices: Float32Array;
         indices: Uint32Array;
-        vertexAttributes: IVertexAttributes
+        vertexAttributes: VertexAttributes
     };
 
     const models = Object.values(modelData).map((v) =>
@@ -47,7 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return model;
     });
 
-    let litPipeline: IRenderPipeline;
+    let litPipeline: RenderPipeline;
     function rebuildLitPipeline()
     {
         litPipeline = {
@@ -75,7 +75,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
     rebuildLitPipeline();
 
-    const wireframePipeline: IRenderPipeline = {
+    const wireframePipeline: RenderPipeline = {
         label: "wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
@@ -94,7 +94,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const barycentricCoordinatesBasedWireframePipeline: IRenderPipeline = {
+    const barycentricCoordinatesBasedWireframePipeline: RenderPipeline = {
         label: "barycentric coordinates based wireframe pipeline",
         vertex: {
             code: wireframeWGSL,
@@ -140,8 +140,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             thickness: number;
             alphaThreshold: number;
         };
-        litBindGroup: IUniforms;
-        wireframeBindGroups: IUniforms[];
+        litBindGroup: BindingResources;
+        wireframeBindGroups: BindingResources[];
         model: Model;
     };
 
@@ -164,7 +164,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const model = randElement(models);
 
         // Make a bind group for this uniform
-        const litBindGroup: IUniforms = {
+        const litBindGroup: BindingResources = {
             uni: uniformBuffer,
         };
 
@@ -186,14 +186,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // We're creating 2 bindGroups, one for each pipeline.
         // We could create just one since they are identical. To do
         // so we'd have to manually create a bindGroupLayout.
-        const wireframeBindGroup: IUniforms = {
+        const wireframeBindGroup: BindingResources = {
             uni: uniformBuffer,
             positions: { bufferView: model.vertices },
             indices: { bufferView: model.indices },
             line: lineUniformBuffer,
         };
 
-        const barycentricCoordinatesBasedWireframeBindGroup: IUniforms = {
+        const barycentricCoordinatesBasedWireframeBindGroup: BindingResources = {
             uni: uniformBuffer,
             positions: { bufferView: model.vertices },
             indices: { bufferView: model.indices },
@@ -213,7 +213,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         label: "our basic canvas renderPass",
         colorAttachments: [
             {
@@ -290,7 +290,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const viewProjection = mat4.multiply(projection, view);
 
-        const renderObjects: IRenderObject[] = [];
+        const renderObjects: RenderObject[] = [];
 
         objectInfos.forEach(
             (
@@ -321,17 +321,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.multiply(viewProjection, world, worldViewProjectionMatrixValue);
 
                 // Upload our uniform values.
-                uniformBuffer.worldViewProjectionMatrix = worldViewProjectionMatrixValue;
-                uniformBuffer.worldMatrix = world;
+                reactive(uniformBuffer).worldViewProjectionMatrix = worldViewProjectionMatrixValue.subarray();
+                reactive(uniformBuffer).worldMatrix = world;
 
                 if (settings.models)
                 {
                     renderObjects.push({
                         pipeline: litPipeline,
+                        bindingResources: litBindGroup,
                         vertices: vertexAttributes,
                         indices,
-                        uniforms: litBindGroup,
-                        drawIndexed: { indexCount: indices.length },
+                        draw: { __type__: "DrawIndexed", indexCount: indices.length },
                     });
                 }
             }
@@ -350,17 +350,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 renderObjects.push({
                     pipeline,
-                    uniforms: wireframeBindGroups[bindGroupNdx],
-                    drawVertex: { vertexCount: indices.length * countMult },
+                    bindingResources: wireframeBindGroups[bindGroupNdx],
+                    draw: { __type__: "DrawVertex", vertexCount: indices.length * countMult },
                 });
             });
         }
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
-                    renderObjects,
+                    renderPassObjects: renderObjects,
                 }]
             }]
         };

@@ -1,8 +1,8 @@
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureSource, IUniforms } from "@feng3d/render-api";
-import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, reactive, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureSource } from "@feng3d/render-api";
+import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 
 import showTextureWGSL from "./showTexture.wgsl";
 import texturedSquareWGSL from "./texturedSquare.wgsl";
@@ -51,13 +51,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             Number(config.highlightFlange),
         ]);
 
-        if (getIGPUBuffer(bufConfig).writeBuffers)
+        if (getGBuffer(bufConfig).writeBuffers)
         {
-            getIGPUBuffer(bufConfig).writeBuffers.push({ bufferOffset: 64, data });
+            getGBuffer(bufConfig).writeBuffers.push({ bufferOffset: 64, data });
         }
         else
         {
-            getIGPUBuffer(bufConfig).writeBuffers = [{ bufferOffset: 64, data }];
+            reactive(getGBuffer(bufConfig)).writeBuffers = [{ bufferOffset: 64, data }];
         }
     };
 
@@ -71,50 +71,44 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         lodMaxClamp: 4,
         maxAnisotropy: 1,
     } as const;
-    const samplerDescriptor: GPUSamplerDescriptor = { ...kInitSamplerDescriptor };
+
+    const samplerDescriptor: Sampler = { ...kInitSamplerDescriptor };
+    const r_samplerDescriptor: Sampler = reactive(samplerDescriptor);
 
     {
         const buttons = {
             initial()
             {
                 Object.assign(config, kInitConfig);
-                Object.assign(samplerDescriptor, kInitSamplerDescriptor);
+                Object.assign(r_samplerDescriptor, kInitSamplerDescriptor);
                 gui.updateDisplay();
-
-                updateSamplerResources();
             },
             checkerboard()
             {
                 Object.assign(config, { flangeLogSize: 10 });
-                Object.assign(samplerDescriptor, {
+                Object.assign(r_samplerDescriptor, {
                     addressModeU: "repeat",
                     addressModeV: "repeat",
                 });
                 gui.updateDisplay();
-
-                updateSamplerResources();
             },
             smooth()
             {
-                Object.assign(samplerDescriptor, {
+                Object.assign(r_samplerDescriptor, {
                     magFilter: "linear",
                     minFilter: "linear",
                     mipmapFilter: "linear",
                 });
                 gui.updateDisplay();
-
-                updateSamplerResources();
             },
             crunchy()
             {
-                Object.assign(samplerDescriptor, {
+                Object.assign(r_samplerDescriptor, {
                     magFilter: "nearest",
                     minFilter: "nearest",
                     mipmapFilter: "nearest",
                 });
                 gui.updateDisplay();
-
-                updateSamplerResources();
             },
         };
         const presets = gui.addFolder("Presets");
@@ -136,28 +130,24 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             folder.open();
 
             const kAddressModes = ["clamp-to-edge", "repeat", "mirror-repeat"];
-            folder.add(samplerDescriptor, "addressModeU", kAddressModes).onChange(updateSamplerResources);
-            folder.add(samplerDescriptor, "addressModeV", kAddressModes).onChange(updateSamplerResources);
+            folder.add(r_samplerDescriptor, "addressModeU", kAddressModes);
+            folder.add(r_samplerDescriptor, "addressModeV", kAddressModes);
 
             const kFilterModes = ["nearest", "linear"];
-            folder.add(samplerDescriptor, "magFilter", kFilterModes).onChange(updateSamplerResources);
-            folder.add(samplerDescriptor, "minFilter", kFilterModes).onChange(updateSamplerResources);
+            folder.add(r_samplerDescriptor, "magFilter", kFilterModes);
+            folder.add(r_samplerDescriptor, "minFilter", kFilterModes);
             const kMipmapFilterModes = ["nearest", "linear"] as const;
-            folder.add(samplerDescriptor, "mipmapFilter", kMipmapFilterModes).onChange(updateSamplerResources);
+            folder.add(r_samplerDescriptor, "mipmapFilter", kMipmapFilterModes);
 
-            const ctlMin = folder.add(samplerDescriptor, "lodMinClamp", 0, 4, 0.1);
-            const ctlMax = folder.add(samplerDescriptor, "lodMaxClamp", 0, 4, 0.1);
+            const ctlMin = folder.add(r_samplerDescriptor, "lodMinClamp", 0, 4, 0.1);
+            const ctlMax = folder.add(r_samplerDescriptor, "lodMaxClamp", 0, 4, 0.1);
             ctlMin.onChange((value: number) =>
             {
-                if (samplerDescriptor.lodMaxClamp < value) ctlMax.setValue(value);
-
-                updateSamplerResources();
+                if (r_samplerDescriptor.lodMaxClamp < value) ctlMax.setValue(value);
             });
             ctlMax.onChange((value: number) =>
             {
-                if (samplerDescriptor.lodMinClamp > value) ctlMin.setValue(value);
-
-                updateSamplerResources();
+                if (r_samplerDescriptor.lodMinClamp > value) ctlMin.setValue(value);
             });
 
             {
@@ -166,27 +156,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 );
                 folder2.open();
                 const kMaxAnisotropy = 16;
-                folder2.add(samplerDescriptor, "maxAnisotropy", 1, kMaxAnisotropy, 1).onChange(updateSamplerResources);
+                folder2.add(r_samplerDescriptor, "maxAnisotropy", 1, kMaxAnisotropy, 1);
             }
         }
-    }
-
-    /**
-     * 更新采样资源
-     */
-    function updateSamplerResources()
-    {
-        const sampler: ISampler = {
-            ...samplerDescriptor,
-            maxAnisotropy:
-                samplerDescriptor.minFilter === "linear"
-                    && samplerDescriptor.magFilter === "linear"
-                    && samplerDescriptor.mipmapFilter === "linear"
-                    ? samplerDescriptor.maxAnisotropy
-                    : 1,
-        };
-
-        bindingResources0.samp = sampler;
     }
 
     //
@@ -229,19 +201,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kTextureMipLevels = 4;
     const kTextureBaseSize = 16;
 
-    const checkerboard: ITexture = {
-        format: "rgba8unorm",
-        size: [kTextureBaseSize, kTextureBaseSize],
-        mipLevelCount: 4,
-    };
-
     const kColorForLevel = [
         [255, 255, 255, 255],
         [30, 136, 229, 255], // blue
         [255, 193, 7, 255], // yellow
         [216, 27, 96, 255], // pink
     ];
-    const writeTextures: ITextureSource[] = [];
+    const writeTextures: TextureSource[] = [];
     for (let mipLevel = 0; mipLevel < kTextureMipLevels; ++mipLevel)
     {
         const size = 2 ** (kTextureMipLevels - mipLevel); // 16, 8, 4, 2
@@ -257,20 +223,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
         }
         writeTextures.push({
-            __type: "TextureDataSource",
+            __type__: "TextureDataSource",
             mipLevel,
             data,
             dataLayout: { width: size },
             size: [size, size]
         });
     }
-    checkerboard.sources = writeTextures;
+    const checkerboard: Texture = {
+        format: "rgba8unorm",
+        size: [kTextureBaseSize, kTextureBaseSize],
+        mipLevelCount: 4,
+        sources: writeTextures
+    };
 
     //
     // "Debug" view of the actual texture contents
     //
 
-    const showTexturePipeline: IRenderPipeline = {
+    const showTexturePipeline: RenderPipeline = {
         vertex: { code: showTextureWGSL }, fragment: { code: showTextureWGSL }
     };
 
@@ -278,7 +249,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Pipeline for drawing the test squares
     //
 
-    const texturedSquarePipeline: IRenderPipeline = {
+    const texturedSquarePipeline: RenderPipeline = {
         vertex: { code: texturedSquareWGSL, constants: { kTextureBaseSize, kViewportSize } }, fragment: { code: texturedSquareWGSL },
     };
 
@@ -289,11 +260,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         [0, 0, -kCameraDist]
     );
     const bufConfig = new Uint8Array(128);
-    getIGPUBuffer(bufConfig).writeBuffers = [{ data: viewProj }];
+    reactive(getGBuffer(bufConfig)).writeBuffers = [{ data: viewProj }];
 
     const bufMatrices = kMatrices;
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -302,16 +273,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    const renderObjects: IRenderPassObject[] = [];
+    const renderObjects: RenderPassObject[] = [];
 
-    const bindingResources0: IUniforms = {
+    const bindingResources0: BindingResources = {
         config: { bufferView: bufConfig },
         matrices: { bufferView: bufMatrices },
-        samp: null, // 帧更新中设置
+        samp: samplerDescriptor, // 帧更新中设置
         tex: { texture: checkerboard },
     };
-
-    updateSamplerResources();
 
     for (let i = 0; i < kViewportGridSize ** 2 - 1; ++i)
     {
@@ -320,58 +289,58 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         renderObjects.push(
             {
-                viewport: {isYup: false, x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
+                viewport: { isYup: false, x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
                 pipeline: texturedSquarePipeline,
-                uniforms: bindingResources0,
-                drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
+                bindingResources: bindingResources0,
+                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
             }
         );
     }
 
-    const bindingResources1: IUniforms = {
+    const bindingResources1: BindingResources = {
         tex: { texture: checkerboard },
     };
     const kLastViewport = (kViewportGridSize - 1) * kViewportGridStride + 1;
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            uniforms: bindingResources1,
-            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
+            bindingResources: bindingResources1,
+            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
         }
     );
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            uniforms: bindingResources1,
-            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
+            bindingResources: bindingResources1,
+            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
         }
     );
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            uniforms: bindingResources1,
-            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
+            bindingResources: bindingResources1,
+            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
         }
     );
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
-            uniforms: bindingResources1,
-            drawVertex: { vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
+            bindingResources: bindingResources1,
+            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
         }
     );
 
-    const submit: ISubmit = {
+    const submit: Submit = {
         commandEncoders: [
             {
                 passEncoders: [
                     {
                         descriptor: renderPass,
-                        renderObjects,
+                        renderPassObjects: renderObjects,
                     }
                 ]
             }

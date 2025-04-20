@@ -1,5 +1,5 @@
-import { IBufferBinding, IPassEncoder, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { BufferBinding, CanvasContext, PassEncoder, reactive, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const webgpu = await new WebGPU().init();
 
-    const context: IGPUCanvasContext = {
+    const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: { alphaMode: "opaque" }
     };
@@ -35,7 +35,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Create the model vertex buffer
-    const vertices: IVertexAttributes = {
+    const vertices: VertexAttributes = {
         position: { data: new Float32Array(mesh.positions.flat()), format: "float32x3", arrayStride: 12 }
     };
     // Create the model index buffer
@@ -49,14 +49,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         16 * Float32Array.BYTES_PER_ELEMENT + 2 * Uint32Array.BYTES_PER_ELEMENT,
         16
     );
-    const uniforms: IBufferBinding = {
+    const uniforms: BufferBinding = {
         bufferView: new Uint8Array(uniformsSize),
         modelViewProjectionMatrix: undefined,
         maxStorableFragments: undefined,
         targetWidth: undefined,
     };
 
-    const opaquePipeline: IRenderPipeline = {
+    const opaquePipeline: RenderPipeline = {
         vertex: {
             code: opaqueWGSL,
         },
@@ -73,7 +73,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "opaquePipeline",
     };
 
-    const translucentPipeline: IRenderPipeline = {
+    const translucentPipeline: RenderPipeline = {
         vertex: {
             code: translucentWGSL,
         },
@@ -91,7 +91,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "translucentPipeline",
     };
 
-    const translucentPassDescriptor: IRenderPassDescriptor = {
+    const translucentPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 loadOp: "load",
@@ -102,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "translucentPassDescriptor",
     };
 
-    const compositePipeline: IRenderPipeline = {
+    const compositePipeline: RenderPipeline = {
         vertex: {
             code: compositeWGSL,
         },
@@ -127,7 +127,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         label: "compositePipeline",
     };
 
-    const compositePassDescriptor: IRenderPassDescriptor = {
+    const compositePassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context } },
@@ -167,13 +167,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         canvas.width = canvas.clientWidth * devicePixelRatio;
         canvas.height = canvas.clientHeight * devicePixelRatio;
 
-        const depthTexture: ITexture = {
+        const depthTexture: Texture = {
             size: [canvas.width, canvas.height],
             format: "depth24plus",
             label: "depthTexture",
         };
 
-        const depthTextureView: ITextureView = {
+        const depthTextureView: TextureView = {
             label: "depthTextureView",
             texture: depthTexture,
         };
@@ -199,7 +199,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const sliceHeight = Math.ceil(canvas.height / numSlices);
         const linkedListBufferSize = sliceHeight * bytesPerline;
 
-        const linkedListBuffer: IBufferBinding = {
+        const linkedListBuffer: BufferBinding = {
             bufferView: new Uint8Array(linkedListBufferSize),
             // data: [{ color: undefined, depth: undefined, next: undefined }]
         };
@@ -218,7 +218,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // for a given pixel.
         // * numFragments : u32
         // * data : array<u32>
-        const headsBuffer: IBufferBinding = {
+        const headsBuffer: BufferBinding = {
             bufferView: new Uint32Array(1 + canvas.width * sliceHeight),
             numFragments: undefined,
             data: undefined,
@@ -235,7 +235,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             sliceInfo: { sliceStartY: undefined },
         };
 
-        const opaquePassDescriptor: IRenderPassDescriptor = {
+        const opaquePassDescriptor: RenderPassDescriptor = {
             colorAttachments: [
                 {
                     view: { texture: { context } },
@@ -280,17 +280,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             return viewProjMatrix;
         }
 
-        const passEncoders: IPassEncoder[] = [];
+        const passEncoders: PassEncoder[] = [];
 
         // Draw the opaque objects
-        const opaquePassEncoder: IRenderPass = {
+        const opaquePassEncoder: RenderPass = {
             descriptor: opaquePassDescriptor,
-            renderObjects: [{
+            renderPassObjects: [{
                 pipeline: opaquePipeline,
-                uniforms: bindingResources,
+                bindingResources: bindingResources,
                 vertices,
                 indices,
-                drawIndexed: { indexCount: mesh.triangles.length * 3, instanceCount: 8 },
+                draw: { __type__: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
             }]
         };
         passEncoders.push(opaquePassEncoder);
@@ -299,9 +299,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             // initialize the heads buffer
             passEncoders.push({
-                __type: "CopyBufferToBuffer",
-                source: getIGPUBuffer(headsInitBuffer),
-                destination: getIGPUBuffer(headsBuffer.bufferView),
+                __type__: "CopyBufferToBuffer",
+                source: getGBuffer(headsInitBuffer),
+                destination: getGBuffer(headsBuffer.bufferView),
             });
 
             const scissorX = 0;
@@ -313,60 +313,60 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             // Draw the translucent objects
 
-            const translucentPassEncoder: IRenderPass = {
+            const translucentPassEncoder: RenderPass = {
                 descriptor: translucentPassDescriptor,
-                renderObjects: [
+                renderPassObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
                         pipeline: translucentPipeline,
-                        uniforms: {
+                        bindingResources: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice],
                         },
                         vertices,
                         indices,
-                        drawIndexed: { indexCount: mesh.triangles.length * 3, instanceCount: 8 },
+                        draw: { __type__: "DrawIndexed", indexCount: mesh.triangles.length * 3, instanceCount: 8 },
                     }
                 ],
             };
             passEncoders.push(translucentPassEncoder);
 
             // Composite the opaque and translucent objects
-            const compositePassEncoder: IRenderPass
+            const compositePassEncoder: RenderPass
                 = {
                 descriptor: compositePassDescriptor,
-                renderObjects: [
+                renderPassObjects: [
                     // Set the scissor to only process a horizontal slice of the frame
                     {
                         scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
                         pipeline: compositePipeline,
-                        uniforms: {
+                        bindingResources: {
                             ...bindingResources,
                             sliceInfo: sliceInfoBuffer[slice]
                         },
-                        drawVertex: { vertexCount: 6 },
+                        draw: { __type__: "DrawVertex", vertexCount: 6 },
                     }
                 ]
             };
             passEncoders.push(compositePassEncoder);
         }
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders,
             }],
         };
 
         // update the uniform buffer
-        uniforms.maxStorableFragments = averageLayersPerFragment * canvas.width * sliceHeight;
-        uniforms.targetWidth = canvas.width;
+        reactive(uniforms).maxStorableFragments = averageLayersPerFragment * canvas.width * sliceHeight;
+        reactive(uniforms).targetWidth = canvas.width;
 
         return function doDraw()
         {
             // update the uniform buffer
             {
-                uniforms.modelViewProjectionMatrix = getCameraViewProjMatrix();
+                reactive(uniforms).modelViewProjectionMatrix = getCameraViewProjMatrix();
             }
 
             webgpu.submit(submit);

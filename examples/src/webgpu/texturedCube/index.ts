@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, ISampler, ISubmit, ITexture } from "@feng3d/render-api";
+import { reactive, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
@@ -22,19 +22,19 @@ const init = async (canvas: HTMLCanvasElement) =>
     ).toString();
     await img.decode();
     const imageBitmap = await createImageBitmap(img);
-    const cubeTexture: ITexture = {
+    const cubeTexture: Texture = {
         size: [imageBitmap.width, imageBitmap.height],
         format: "rgba8unorm",
         sources: [{ image: imageBitmap }],
     };
 
     // Create a sampler with linear filtering for smooth interpolation.
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -52,23 +52,23 @@ const init = async (canvas: HTMLCanvasElement) =>
         modelViewProjectionMatrix: new Float32Array(16)
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleTextureMixColorWGSL },
             primitive: {
                 cullFace: "back",
             },
         },
-        vertices: {
-            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
-        },
-        uniforms: {
+        bindingResources: {
             uniforms,
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
         },
-        drawVertex: { vertexCount: cubeVertexCount },
+        vertices: {
+            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
+            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+        },
+        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
     };
 
     const aspect = canvas.width / canvas.height;
@@ -101,13 +101,14 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        uniforms.modelViewProjectionMatrix = transformationMatrix.slice(); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        // 重新设置uniforms
+        reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
 
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { descriptor: renderPass, renderObjects: [renderObject] },
+                        { descriptor: renderPass, renderPassObjects: [renderObject] },
                     ]
                 }
             ],

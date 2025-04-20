@@ -1,6 +1,6 @@
-import { IBuffer, IVertexDataTypes, TypedArray, UnReadonly } from "@feng3d/render-api";
+import { Buffer, TypedArray } from "@feng3d/render-api";
 
-export function getIGPUBuffer(bufferSource: TypedArray)
+export function getGBuffer(bufferSource: TypedArray)
 {
     let arrayBuffer = bufferSource as ArrayBuffer;
     if ((bufferSource as ArrayBufferView).buffer)
@@ -8,28 +8,16 @@ export function getIGPUBuffer(bufferSource: TypedArray)
         arrayBuffer = (bufferSource as ArrayBufferView).buffer;
     }
 
-    const gpuBuffer: IBuffer = arrayBuffer["_IGPUBuffer"] = arrayBuffer["_IGPUBuffer"] || {
+    let gpuBuffer = bufferMap.get(arrayBuffer);
+    if (gpuBuffer) return gpuBuffer;
+
+    gpuBuffer = {
         size: Math.ceil(arrayBuffer.byteLength / 4) * 4,
-        data: arrayBuffer,
+        data: bufferSource,
     };
+    bufferMap.set(arrayBuffer, gpuBuffer);
 
     return gpuBuffer;
 }
 
-export function getIGPUVertexBuffer(data: IVertexDataTypes)
-{
-    const buffer = getIGPUBuffer(data);
-    (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
-
-    return buffer;
-}
-let autoVertexIndex = 0;
-
-export function getIGPUIndexBuffer(data: Uint16Array | Uint32Array)
-{
-    const buffer = getIGPUBuffer(data);
-    (buffer as UnReadonly<IBuffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
-
-    return buffer;
-}
-let autoIndex = 0;
+const bufferMap = new WeakMap<ArrayBuffer, Buffer>();

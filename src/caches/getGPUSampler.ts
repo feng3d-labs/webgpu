@@ -1,43 +1,56 @@
-import { anyEmitter } from "@feng3d/event";
-import { ISampler } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
-import { IGPUSampler_changed } from "../eventnames";
+import { ChainMap, computed, Computed, reactive, Sampler } from "@feng3d/render-api";
 
-export function getGPUSampler(device: GPUDevice, sampler: ISampler)
+export function getGPUSampler(device: GPUDevice, sampler: Sampler)
 {
-    let gSampler = samplerMap.get(sampler);
-    if (gSampler) return gSampler;
+    const getGPUSamplerKey: GetGPUSamplerKey = [device, sampler];
+    let result = getGPUSamplerMap.get(getGPUSamplerKey);
+    if (result) return result.value;
 
-    // 处理默认值
-    sampler.addressModeU = sampler.addressModeU ?? "repeat";
-    sampler.addressModeV = sampler.addressModeV ?? "repeat";
-    sampler.addressModeW = sampler.addressModeW ?? "repeat";
-    sampler.magFilter = sampler.magFilter ?? "nearest";
-    sampler.minFilter = sampler.minFilter ?? "nearest";
-    sampler.mipmapFilter = sampler.mipmapFilter ?? "nearest";
-
-    //
-    gSampler = device.createSampler(sampler);
-    samplerMap.set(sampler, gSampler);
-
-    //
-    watcher.watchobject(sampler, defaultSampler, () =>
+    result = computed(() =>
     {
-        // 移除监听，删除缓存
-        watcher.unwatchobject(sampler, defaultSampler);
-        samplerMap.delete(sampler);
-        //
-        anyEmitter.emit(sampler, IGPUSampler_changed);
-    });
+        // 监听
+        const r_sampler = reactive(sampler);
+        const {
+            label,
+            addressModeU,
+            addressModeV,
+            addressModeW,
+            magFilter,
+            minFilter,
+            mipmapFilter,
+            lodMinClamp,
+            lodMaxClamp,
+            compare,
+            maxAnisotropy,
+        } = r_sampler;
 
-    return gSampler;
+        const gSampler = device.createSampler({
+            label: label,
+            addressModeU: addressModeU ?? "repeat",
+            addressModeV: addressModeV ?? "repeat",
+            addressModeW: addressModeW ?? "repeat",
+            magFilter: magFilter ?? "nearest",
+            minFilter: minFilter ?? "nearest",
+            mipmapFilter: mipmapFilter ?? "nearest",
+            lodMinClamp: lodMinClamp ?? 0,
+            lodMaxClamp: lodMaxClamp,
+            compare: compare,
+            maxAnisotropy: (minFilter === "linear" && magFilter === "linear" && mipmapFilter === "linear") ? maxAnisotropy : 1,
+        });
+
+        return gSampler;
+    });
+    getGPUSamplerMap.set(getGPUSamplerKey, result);
+
+    return result.value;
 }
-const samplerMap = new WeakMap<ISampler, GPUSampler>();
+type GetGPUSamplerKey = [device: GPUDevice, sampler: Sampler];
+const getGPUSamplerMap = new ChainMap<GetGPUSamplerKey, Computed<GPUSampler>>;
 
 /**
  * GPU采样器默认值。
  */
-const defaultSampler: ISampler = {
+const defaultSampler: Sampler = {
     addressModeU: undefined,
     addressModeV: undefined,
     addressModeW: undefined,

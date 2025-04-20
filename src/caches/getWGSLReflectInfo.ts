@@ -1,6 +1,25 @@
-import { ResourceType, TemplateInfo, WgslReflect } from "wgsl_reflect";
-import { IGPUBindGroupLayoutEntry } from "../internal/IGPUPipelineLayoutDescriptor";
+import { ResourceType, TemplateInfo, VariableInfo, WgslReflect } from "wgsl_reflect";
 import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from "../types/TextureType";
+
+declare global
+{
+    interface GPUBindGroupLayoutEntry
+    {
+        /**
+         * 绑定资源变量信息。
+         * 
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        variableInfo: VariableInfo;
+
+        /**
+         * 用于判断布局信息是否相同的标识。
+         * 
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        key: string;
+    }
+}
 
 /**
  * 从WebGPU着色器代码中获取反射信息。
@@ -19,16 +38,15 @@ export function getWGSLReflectInfo(code: string): WgslReflect
 }
 const reflectMap: { [code: string]: WgslReflect } = {};
 
-export type IGPUBindGroupLayoutEntryMap = { [name: string]: IGPUBindGroupLayoutEntry; };
+export type GPUBindGroupLayoutEntryMap = { [name: string]: GPUBindGroupLayoutEntry; };
 
-export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayoutEntryMap
+export function getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayoutEntryMap
 {
     if (shaderLayoutMap[code]) return shaderLayoutMap[code];
 
+    const entryMap: GPUBindGroupLayoutEntryMap = shaderLayoutMap[code] = {};
+
     const reflect = getWGSLReflectInfo(code);
-
-    const entryMap: IGPUBindGroupLayoutEntryMap = shaderLayoutMap[code] = {};
-
     for (const uniform of reflect.uniforms)
     {
         const { binding, name } = uniform;
@@ -41,6 +59,7 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
         entryMap[name] = {
             variableInfo: uniform,
             visibility: Visibility_ALL, binding, buffer: layout,
+            key: `[${binding}, ${name}, buffer, ${layout.type} , ${layout.minBindingSize}]`,
         };
     }
 
@@ -60,7 +79,8 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
 
             entryMap[name] = {
                 variableInfo: storage,
-                visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout
+                visibility: type === "storage" ? Visibility_FRAGMENT_COMPUTE : Visibility_ALL, binding, buffer: layout,
+                key: `[${binding}, ${name}, buffer, ${layout.type}]`,
             };
         }
         else if (storage.resourceType === ResourceType.StorageTexture)
@@ -82,7 +102,8 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
 
             entryMap[name] = {
                 variableInfo: storage,
-                visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout
+                visibility: Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout,
+                key: `[${binding}, ${name}, storageTexture, ${layout.access}, ${layout.format}, ${layout.viewDimension}]`,
             };
         }
         else
@@ -103,7 +124,8 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
         {
             entryMap[name] = {
                 variableInfo: texture,
-                visibility: Visibility_ALL, binding, externalTexture: {}
+                visibility: Visibility_ALL, binding, externalTexture: {},
+                key: `[${binding}, ${name}, externalTexture]`,
             };
         }
         else
@@ -151,7 +173,8 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
 
             entryMap[name] = {
                 variableInfo: texture,
-                visibility: Visibility_ALL, binding, texture: layout
+                visibility: Visibility_ALL, binding, texture: layout,
+                key: `[${binding}, ${name}, texture, ${layout.sampleType}, ${layout.viewDimension}, ${layout.multisampled}]`,
             };
         }
     }
@@ -169,14 +192,15 @@ export function getIGPUBindGroupLayoutEntryMap(code: string): IGPUBindGroupLayou
 
         entryMap[name] = {
             variableInfo: sampler,
-            visibility: Visibility_ALL, binding, sampler: layout
+            visibility: Visibility_ALL, binding, sampler: layout,
+            key: `[${binding}, ${name}, sampler, ${layout.type}]`,
         };
     }
 
     return entryMap;
 }
 
-const shaderLayoutMap: { [code: string]: IGPUBindGroupLayoutEntryMap } = {};
+const shaderLayoutMap: { [code: string]: GPUBindGroupLayoutEntryMap } = {};
 
 /**
  * 片段与计算着色器可见。

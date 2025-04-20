@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, ISampler, ISubmit } from "@feng3d/render-api";
+import { RenderPassDescriptor, Sampler, Submit, RenderObject } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
@@ -23,12 +23,12 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
 
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
     };
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -37,26 +37,26 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: fullscreenTexturedQuadWGSL }, fragment: { code: sampleExternalTextureWGSL },
         },
-        uniforms: {
+        bindingResources: {
             mySampler: sampler,
             myTexture: {
                 source: video,
             },
         },
-        drawVertex: { vertexCount: 6 },
+        draw: { __type__: "DrawVertex", vertexCount: 6 },
     };
 
     function frame()
     {
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { descriptor: renderPass, renderObjects: [renderObject] },
+                        { descriptor: renderPass, renderPassObjects: [renderObject] },
                     ]
                 }
             ],

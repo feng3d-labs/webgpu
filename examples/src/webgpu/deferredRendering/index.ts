@@ -10,8 +10,8 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit, ITexture, ITextureView, IUniforms, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes, reactive } from "@feng3d/render-api";
+import { ComputePass, ComputePipeline, WebGPU, getGBuffer } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -36,7 +36,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         vertexBuffer.set(mesh.uvs[i], kVertexStride * i + 6);
     }
 
-    const vertices: IVertexAttributes = {
+    const vertices: VertexAttributes = {
         position: { data: vertexBuffer, format: "float32x3", offset: 0, arrayStride: Float32Array.BYTES_PER_ELEMENT * 8 },
         normal: { data: vertexBuffer, format: "float32x3", offset: Float32Array.BYTES_PER_ELEMENT * 3, arrayStride: Float32Array.BYTES_PER_ELEMENT * 8 },
         uv: { data: vertexBuffer, format: "float32x2", offset: Float32Array.BYTES_PER_ELEMENT * 6, arrayStride: Float32Array.BYTES_PER_ELEMENT * 8 },
@@ -51,19 +51,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     // GBuffer texture render targets
-    const gBufferTexture2DFloat32: ITexture = {
+    const gBufferTexture2DFloat32: Texture = {
         size: [canvas.width, canvas.height],
         format: "rgba32float",
     };
-    const gBufferTexture2DFloat16: ITexture = {
+    const gBufferTexture2DFloat16: Texture = {
         size: [canvas.width, canvas.height],
         format: "rgba16float",
     };
-    const gBufferTextureAlbedo: ITexture = {
+    const gBufferTextureAlbedo: Texture = {
         size: [canvas.width, canvas.height],
         format: "bgra8unorm",
     };
-    const gBufferTextureViews: ITextureView[] = [
+    const gBufferTextureViews: TextureView[] = [
         { texture: gBufferTexture2DFloat32 },
         { texture: gBufferTexture2DFloat16 },
         { texture: gBufferTextureAlbedo },
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         cullMode: "back",
     };
 
-    const writeGBuffersPipeline: IRenderPipeline = {
+    const writeGBuffersPipeline: RenderPipeline = {
         vertex: {
             code: vertexWriteGBuffers,
         },
@@ -84,7 +84,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         primitive,
     };
 
-    const gBuffersDebugViewPipeline: IRenderPipeline = {
+    const gBuffersDebugViewPipeline: RenderPipeline = {
         vertex: {
             code: vertexTextureQuad,
         },
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
         primitive,
     };
-    const deferredRenderPipeline: IRenderPipeline = {
+    const deferredRenderPipeline: RenderPipeline = {
         vertex: {
             code: vertexTextureQuad,
         },
@@ -107,12 +107,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         primitive,
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: "depth24plus",
     };
 
-    const writeGBufferPassDescriptor: IRenderPassDescriptor = {
+    const writeGBufferPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: gBufferTextureViews[0],
@@ -144,7 +144,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const textureQuadPassDescriptor: IRenderPassDescriptor = {
+    const textureQuadPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -166,13 +166,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         .step(1)
         .onChange(() =>
         {
-            if (getIGPUBuffer(configUniformBuffer).writeBuffers)
+            if (getGBuffer(configUniformBuffer).writeBuffers)
             {
-                getIGPUBuffer(configUniformBuffer).writeBuffers.push({ data: new Uint32Array([settings.numLights]) });
+                getGBuffer(configUniformBuffer).writeBuffers.push({ data: new Uint32Array([settings.numLights]) });
             }
             else
             {
-                getIGPUBuffer(configUniformBuffer).writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
+                reactive(getGBuffer(configUniformBuffer)).writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
             }
         });
 
@@ -180,7 +180,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const cameraUniformBuffer = new Uint8Array(4 * 16);
 
-    const sceneUniformBindGroup: IUniforms = {
+    const sceneUniformBindGroup: BindingResources = {
         uniforms: {
             bufferView: modelUniformBuffer,
         },
@@ -189,7 +189,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
-    const gBufferTexturesBindGroup: IUniforms = {
+    const gBufferTexturesBindGroup: BindingResources = {
         gBufferPosition: gBufferTextureViews[0],
         gBufferNormal: gBufferTextureViews[1],
         gBufferAlbedo: gBufferTextureViews[2],
@@ -199,13 +199,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // which could be updated/culled/etc. with a compute shader
     const extent = vec3.sub(lightExtentMax, lightExtentMin);
     const lightDataStride = 8;
-    const bufferSizeInByte = Float32Array.BYTES_PER_ELEMENT * lightDataStride * kMaxNumLights;
-    const lightsBuffer = new Uint8Array(bufferSizeInByte);
 
     // We randomaly populate lights randomly in a box range
     // And simply move them along y-axis per frame to show they are
     // dynamic lightings
-    const lightData = new Float32Array(lightDataStride * kMaxNumLights);
+    const lightsBuffer = new Float32Array(lightDataStride * kMaxNumLights);
     const tmpVec4 = vec4.create();
     let offset = 0;
     for (let i = 0; i < kMaxNumLights; i++)
@@ -217,29 +215,28 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             tmpVec4[i] = Math.random() * extent[i] + lightExtentMin[i];
         }
         tmpVec4[3] = 1;
-        lightData.set(tmpVec4, offset);
+        lightsBuffer.set(tmpVec4, offset);
         // color
         tmpVec4[0] = Math.random() * 2;
         tmpVec4[1] = Math.random() * 2;
         tmpVec4[2] = Math.random() * 2;
         // radius
         tmpVec4[3] = 20.0;
-        lightData.set(tmpVec4, offset + 4);
+        lightsBuffer.set(tmpVec4, offset + 4);
     }
-    getIGPUBuffer(lightsBuffer).data = lightData;
 
     const lightExtentBuffer = new Uint8Array(4 * 8);
     const lightExtentData = new Float32Array(8);
     lightExtentData.set(lightExtentMin, 0);
     lightExtentData.set(lightExtentMax, 4);
-    getIGPUBuffer(lightExtentBuffer).writeBuffers = [{ data: lightExtentData }];
+    reactive(getGBuffer(lightExtentBuffer)).writeBuffers = [{ data: lightExtentData }];
 
-    const lightUpdateComputePipeline: IGPUComputePipeline = {
+    const lightUpdateComputePipeline: ComputePipeline = {
         compute: {
             code: lightUpdate,
         },
     };
-    const lightsBufferBindGroup: IUniforms = {
+    const lightsBufferBindGroup: BindingResources = {
         lightsBuffer: {
             bufferView: lightsBuffer,
         },
@@ -247,7 +244,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             bufferView: configUniformBuffer,
         },
     };
-    const lightsBufferComputeBindGroup: IUniforms = {
+    const lightsBufferComputeBindGroup: BindingResources = {
         lightsBuffer: {
             bufferView: lightsBuffer,
         },
@@ -280,33 +277,33 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const modelMatrix = mat4.translation([0, -45, 0]);
 
     const cameraMatrixData = viewProjMatrix as Float32Array;
-    if (getIGPUBuffer(cameraUniformBuffer).writeBuffers)
+    if (getGBuffer(cameraUniformBuffer).writeBuffers)
     {
-        getIGPUBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraMatrixData });
+        getGBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraMatrixData });
     }
     else
     {
-        getIGPUBuffer(cameraUniformBuffer).writeBuffers = [{ data: cameraMatrixData }];
+        reactive(getGBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraMatrixData }];
     }
     const modelData = modelMatrix as Float32Array;
-    if (getIGPUBuffer(modelUniformBuffer).writeBuffers)
+    if (getGBuffer(modelUniformBuffer).writeBuffers)
     {
-        getIGPUBuffer(modelUniformBuffer).writeBuffers.push({ data: modelData });
+        getGBuffer(modelUniformBuffer).writeBuffers.push({ data: modelData });
     }
     else
     {
-        getIGPUBuffer(modelUniformBuffer).writeBuffers = [{ data: modelData }];
+        reactive(getGBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
     }
     const invertTransposeModelMatrix = mat4.invert(modelMatrix);
     mat4.transpose(invertTransposeModelMatrix, invertTransposeModelMatrix);
     const normalModelData = invertTransposeModelMatrix as Float32Array;
-    if (getIGPUBuffer(modelUniformBuffer).writeBuffers)
+    if (getGBuffer(modelUniformBuffer).writeBuffers)
     {
-        getIGPUBuffer(modelUniformBuffer).writeBuffers.push({ bufferOffset: 64, data: normalModelData });
+        getGBuffer(modelUniformBuffer).writeBuffers.push({ bufferOffset: 64, data: normalModelData });
     }
     else
     {
-        getIGPUBuffer(modelUniformBuffer).writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
+        reactive(getGBuffer(modelUniformBuffer)).writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
     }
 
     // Rotates the camera around the origin based on time.
@@ -325,27 +322,27 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return viewProjMatrix as Float32Array;
     }
 
-    const passEncoders: (IGPUComputePass | IRenderPass)[] = [];
+    const passEncoders: (ComputePass | RenderPass)[] = [];
     passEncoders.push({
         descriptor: writeGBufferPassDescriptor,
-        renderObjects: [
+        renderPassObjects: [
             {
                 pipeline: writeGBuffersPipeline,
-                uniforms: {
+                bindingResources: {
                     ...sceneUniformBindGroup,
                 },
                 vertices,
                 indices: indexBuffer,
-                drawIndexed: { indexCount },
+                draw: { __type__: "DrawIndexed", indexCount },
             },
         ]
     });
     passEncoders.push({
-        __type: "ComputePass",
+        __type__: "ComputePass",
         computeObjects: [
             {
                 pipeline: lightUpdateComputePipeline,
-                uniforms: {
+                bindingResources: {
                     ...lightsBufferComputeBindGroup,
                 },
                 workgroups: { workgroupCountX: Math.ceil(kMaxNumLights / 64) },
@@ -353,31 +350,31 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ]
     });
 
-    const gBuffersPassEncoders: (IGPUComputePass | IRenderPass)[] = passEncoders.concat();
+    const gBuffersPassEncoders: (ComputePass | RenderPass)[] = passEncoders.concat();
 
     gBuffersPassEncoders.push({
         descriptor: textureQuadPassDescriptor,
-        renderObjects: [
+        renderPassObjects: [
             {
                 pipeline: gBuffersDebugViewPipeline,
-                uniforms: {
+                bindingResources: {
                     ...gBufferTexturesBindGroup,
                 },
-                drawVertex: { vertexCount: 6 },
+                draw: { __type__: "DrawVertex", vertexCount: 6 },
             },
         ]
     });
 
     passEncoders.push({
         descriptor: textureQuadPassDescriptor,
-        renderObjects: [
+        renderPassObjects: [
             {
                 pipeline: deferredRenderPipeline,
-                uniforms: {
+                bindingResources: {
                     ...gBufferTexturesBindGroup,
                     ...lightsBufferBindGroup,
                 },
-                drawVertex: { vertexCount: 6 },
+                draw: { __type__: "DrawVertex", vertexCount: 6 },
             },
         ]
     });
@@ -385,16 +382,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function frame()
     {
         const cameraViewProj = getCameraViewProjMatrix();
-        if (getIGPUBuffer(cameraUniformBuffer).writeBuffers)
+        if (getGBuffer(cameraUniformBuffer).writeBuffers)
         {
-            getIGPUBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraViewProj });
+            getGBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraViewProj });
         }
         else
         {
-            getIGPUBuffer(cameraUniformBuffer).writeBuffers = [{ data: cameraViewProj }];
+            reactive(getGBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraViewProj }];
         }
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [
                 {
                     passEncoders: settings.mode === "gBuffers view" ? gBuffersPassEncoders : passEncoders,

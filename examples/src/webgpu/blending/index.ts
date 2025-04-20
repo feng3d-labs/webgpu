@@ -2,8 +2,16 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { IBlendComponent, IRenderObject, IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISampler, ISubmit, ITexture, ITextureView, IUniforms } from "@feng3d/render-api";
-import { IGPUCanvasContext, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, BlendComponent, CanvasContext, Color, computed, reactive, RenderObject, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
+
+declare module "@feng3d/render-api"
+{
+    interface Uniforms
+    {
+        matrix?: Float32Array;
+    }
+}
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -93,8 +101,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
-    const context: IGPUCanvasContext = { canvasId: canvas.id, configuration: {} };
-    const canvasTexture: ITextureView = { texture: { context } };
+    const context: CanvasContext = { canvasId: canvas.id, configuration: {} };
+    const canvasTexture: TextureView = { texture: { context } };
 
     // Get a WebGPU context from the canvas and configure it
     const webgpu = await new WebGPU().init();
@@ -108,7 +116,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     )
     {
         const { flipY, premultipliedAlpha } = options;
-        const texture: ITexture = {
+        const texture: Texture = {
             format: "rgba8unorm",
             size: [source.width, source.height],
             sources: [{ image: source, flipY, premultipliedAlpha }]
@@ -135,14 +143,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         { premultipliedAlpha: true }
     );
 
-    const sampler: ISampler = {
+    const sampler: Sampler = {
         magFilter: "linear",
         minFilter: "linear",
         mipmapFilter: "linear",
-    };
-
-    type Uniforms = {
-        matrix: Float32Array;
     };
 
     // function makeUniformBufferAndValues(): Uniforms
@@ -163,25 +167,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const srcUniform = { matrix: new Float32Array(16) };
     const dstUniform = { matrix: new Float32Array(16) };
 
-    const srcBindGroupUnpremultipliedAlpha:          IUniforms = {
+    const srcBindGroupUnpremultipliedAlpha: BindingResources = {
         ourSampler: sampler,
         ourTexture: { texture: srcTextureUnpremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupUnpremultipliedAlpha:          IUniforms = {
+    const dstBindGroupUnpremultipliedAlpha: BindingResources = {
         ourSampler: sampler,
         ourTexture: { texture: dstTextureUnpremultipliedAlpha },
         uni: dstUniform,
     };
 
-    const srcBindGroupPremultipliedAlpha:          IUniforms = {
+    const srcBindGroupPremultipliedAlpha: BindingResources = {
         ourSampler: sampler,
         ourTexture: { texture: srcTexturePremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupPremultipliedAlpha:          IUniforms = {
+    const dstBindGroupPremultipliedAlpha: BindingResources = {
         ourSampler: sampler,
         ourTexture: { texture: dstTexturePremultipliedAlpha },
         uni: dstUniform,
@@ -203,7 +207,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ];
 
     const clearValue: [red: number, green: number, blue: number, alpha: number] = [0, 0, 0, 0];
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         label: "our basic canvas renderPass",
         colorAttachments: [
             {
@@ -324,22 +328,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kPresets = keysOf(presets);
     type Preset = (typeof kPresets)[number];
 
-    const color: IBlendComponent = {
-        operation: "add",
-        srcFactor: "one",
-        dstFactor: "one-minus-src",
-    };
-
-    const alpha: IBlendComponent = {
-        operation: "add",
-        srcFactor: "one",
-        dstFactor: "one-minus-src",
-    };
-
-    const constant = {
+    const constant = reactive({
         color: [1, 0.5, 0.25],
         alpha: 1,
-    };
+    });
 
     const clear = {
         color: [0, 0, 0],
@@ -378,58 +370,85 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             );
         }
     }
+    const constantColor: Color = [0, 0, 0, 0];
+    const srcPipeline: RenderPipeline = {
+        label: "hardcoded textured quad pipeline",
+        vertex: {
+            code: texturedQuadWGSL,
+        },
+        fragment: {
+            code: texturedQuadWGSL,
+            targets: [
+                {
+                    blend: {
+                        constantColor: constantColor,
+                        color: {
+                            operation: "add",
+                            srcFactor: "one",
+                            dstFactor: "one-minus-src",
+                        },
+                        alpha: {
+                            operation: "add",
+                            srcFactor: "one",
+                            dstFactor: "one-minus-src",
+                        },
+                    },
+                },
+            ],
+        },
+    };
+
+    const r_color = reactive(srcPipeline.fragment.targets[0].blend.color);
+    const r_alpha = reactive(srcPipeline.fragment.targets[0].blend.alpha);
 
     function applyPreset()
     {
         const preset = presets[settings.preset];
-        Object.assign(color, preset.color);
-        Object.assign(alpha, preset.alpha || preset.color);
+        Object.assign(r_color, preset.color);
+        Object.assign(r_alpha, preset.alpha || preset.color);
     }
 
     gui
         .add(settings, "alphaMode", ["opaque", "premultiplied"])
-        .name("canvas alphaMode")
-        .onChange(render);
+        .name("canvas alphaMode");
     gui
         .add(settings, "textureSet", [
             "premultiplied alpha",
             "un-premultiplied alpha",
         ])
-        .name("texture data")
-        .onChange(render);
+        .name("texture data");
     gui.add(settings, "preset", [...Object.keys(presets)]).onChange(() =>
     {
         applyPreset();
-        render();
     });
 
     const colorFolder = gui.addFolder("color");
     colorFolder.open();
-    colorFolder.add(color, "operation", operations).onChange(render);
-    colorFolder.add(color, "srcFactor", factors).onChange(render);
-    colorFolder.add(color, "dstFactor", factors).onChange(render);
+    colorFolder.add(r_color, "operation", operations);
+    colorFolder.add(r_color, "srcFactor", factors);
+    colorFolder.add(r_color, "dstFactor", factors);
 
     const alphaFolder = gui.addFolder("alpha");
     alphaFolder.open();
-    alphaFolder.add(alpha, "operation", operations).onChange(render);
-    alphaFolder.add(alpha, "srcFactor", factors).onChange(render);
-    alphaFolder.add(alpha, "dstFactor", factors).onChange(render);
+    alphaFolder.add(r_alpha, "operation", operations);
+    alphaFolder.add(r_alpha, "srcFactor", factors);
+    alphaFolder.add(r_alpha, "dstFactor", factors);
 
     const constantFolder = gui.addFolder("constant");
     constantFolder.open();
     constantFolder
         .addColor(new GUIColorHelper(constant.color), "value")
         .name("color")
-        .onChange(render);
-    constantFolder.add(constant, "alpha", 0, 1).onChange(render);
+        ;
+    constantFolder.add(constant, "alpha", 0, 1);
 
     const clearFolder = gui.addFolder("clear color");
     clearFolder.open();
-    clearFolder.add(clear, "premultiply").onChange(render);
-    clearFolder.add(clear, "alpha", 0, 1).onChange(render);
-    clearFolder.addColor(new GUIColorHelper(clear.color), "value").onChange(render);
+    clearFolder.add(clear, "premultiply");
+    clearFolder.add(clear, "alpha", 0, 1);
+    clearFolder.addColor(new GUIColorHelper(clear.color), "value");
 
-    const dstPipeline: IRenderPipeline = {
+    const dstPipeline: RenderPipeline = {
         label: "hardcoded textured quad pipeline",
         vertex: {
             code: texturedQuadWGSL,
@@ -439,33 +458,66 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
     };
 
+    function updateUniforms(
+        uniforms: { matrix: Float32Array; },
+        canvas: HTMLCanvasElement,
+        texture: Texture
+    )
+    {
+        const projectionMatrix = mat4.ortho(
+            0,
+            canvas.width / devicePixelRatio,
+            canvas.height / devicePixelRatio,
+            0,
+            -1,
+            1
+        );
+
+        mat4.scale(
+            projectionMatrix,
+            [texture.size[0], texture.size[1], 1],
+            uniforms.matrix
+        );
+
+        uniforms.matrix = new Float32Array(uniforms.matrix);
+    }
+
+
+    const ro: RenderObject = {
+        pipeline: dstPipeline,
+        draw: { __type__: "DrawVertex", vertexCount: 6 },
+    };
+
+    const ro1: RenderObject = {
+        pipeline: srcPipeline,
+        draw: { __type__: "DrawVertex", vertexCount: 6 },
+    };
+
+    const renderObjects: RenderPassObject[] = [
+        ro,
+        ro1,
+    ];
+
+    const submit: Submit = {
+        commandEncoders: [{
+            passEncoders: [{
+                descriptor: renderPassDescriptor,
+                renderPassObjects: renderObjects
+            }]
+        }],
+    };
+
     function render()
     {
         gui.updateDisplay();
 
-        const srcPipeline: IRenderPipeline = {
-            label: "hardcoded textured quad pipeline",
-            vertex: {
-                code: texturedQuadWGSL,
-            },
-            fragment: {
-                code: texturedQuadWGSL,
-                targets: [
-                    {
-                        blend: {
-                            constantColor: [...constant.color, constant.alpha] as any,
-                            color,
-                            alpha,
-                        },
-                    },
-                ],
-            },
-        };
-
         const { srcTexture, dstTexture, srcBindGroup, dstBindGroup }
             = textureSets[settings.textureSet === "premultiplied alpha" ? 0 : 1];
 
-        context.configuration.alphaMode = settings.alphaMode;
+        reactive(ro).bindingResources = dstBindGroup;
+        reactive(ro1).bindingResources = srcBindGroup;
+
+        reactive(context.configuration).alphaMode = settings.alphaMode;
 
         // Apply the clearValue, pre-multiplying or not it based on the settings.
         {
@@ -477,59 +529,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             clearValue[3] = alpha;
         }
 
-        function updateUniforms(
-            uniforms: Uniforms,
-            canvas: HTMLCanvasElement,
-            texture: ITexture
-        )
-        {
-            const projectionMatrix = mat4.ortho(
-                0,
-                canvas.width / devicePixelRatio,
-                canvas.height / devicePixelRatio,
-                0,
-                -1,
-                1
-            );
+        constantColor[0] = constant.color[0];
+        constantColor[1] = constant.color[1];
+        constantColor[2] = constant.color[2];
+        constantColor[3] = constant.alpha;
 
-            mat4.scale(
-                projectionMatrix,
-                [texture.size[0], texture.size[1], 1],
-                uniforms.matrix
-            );
-
-            uniforms.matrix = new Float32Array(uniforms.matrix);
-        }
         updateUniforms(srcUniform, canvas, srcTexture);
         updateUniforms(dstUniform, canvas, dstTexture);
 
-        const ro: IRenderObject = {
-            pipeline: dstPipeline,
-            uniforms: dstBindGroup,
-            drawVertex: { vertexCount: 6 },
-        };
-
-        const ro1: IRenderObject = {
-            pipeline: srcPipeline,
-            uniforms: srcBindGroup,
-            drawVertex: { vertexCount: 6 },
-        };
-
-        const renderObjects: IRenderPassObject[] = [
-            ro,
-            ro1,
-        ];
-
-        const submit: ISubmit = {
-            commandEncoders: [{
-                passEncoders: [{
-                    descriptor: renderPassDescriptor,
-                    renderObjects: renderObjects
-                }]
-            }],
-        };
-
         webgpu.submit(submit);
+
+        requestAnimationFrame(render);
     }
 
     applyPreset();

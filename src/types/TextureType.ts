@@ -1,27 +1,27 @@
 /**
  * 纹理维度。
  */
-export const TextureDimensionality = {
+const TextureDimensionality = {
     "1D": "1D",
     "2D": "2D",
     "3D": "3D",
     Cube: "Cube",
 };
-export type TextureDimensionality = keyof typeof TextureDimensionality;
+type TextureDimensionality = keyof typeof TextureDimensionality;
 
 /**
  * 纹理为是否数组。
  */
-export const TextureArrayed = {
+const TextureArrayed = {
     No: false,
     Yes: true,
 };
-export type TextureArrayed = keyof typeof TextureArrayed;
+type TextureArrayed = keyof typeof TextureArrayed;
 
 /**
  * 纹理第二类型，描述纹理维度以及是否为数组。
  */
-export type TextureSecondType = [TextureDimensionality, TextureArrayed, GPUTextureViewDimension];
+type TextureSecondType = [TextureDimensionality, TextureArrayed, GPUTextureViewDimension];
 
 /**
  * 采样纹理类型。

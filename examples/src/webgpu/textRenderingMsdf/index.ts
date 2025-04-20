@@ -1,14 +1,13 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassDescriptor, IRenderPassObject, IRenderPipeline, ISubmit, ITexture, IUniforms, IVertexAttributes } from "@feng3d/render-api";
-import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, reactive, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
 import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 import { MsdfTextRenderer } from "./msdfText";
-
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -136,12 +135,12 @@ setBlendConstant().`,
     ];
 
     // Create a vertex buffer from the cube data.
-    const verticesBuffer: IVertexAttributes = {
+    const verticesBuffer: VertexAttributes = {
         position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
         uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         vertex: {
             code: basicVertWGSL,
         },
@@ -154,7 +153,6 @@ setBlendConstant().`,
             // pointing toward the camera.
             cullFace: "back",
         },
-
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
@@ -163,18 +161,18 @@ setBlendConstant().`,
         },
     };
 
-    const depthTexture: ITexture = {
+    const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
         format: depthFormat,
     };
 
     const uniformBuffer = new Float32Array(16);
 
-    const uniformBindGroup: IUniforms = {
+    const uniformBindGroup: BindingResources = {
         uniforms: { bufferView: uniformBuffer },
     };
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -248,31 +246,31 @@ setBlendConstant().`,
     {
         const transformationMatrix = getTransformationMatrix();
 
-        const buffer = getIGPUBuffer(uniformBuffer);
+        const buffer = getGBuffer(uniformBuffer);
         const writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({
             data: transformationMatrix.buffer,
             dataOffset: transformationMatrix.byteOffset,
             size: transformationMatrix.byteLength
         });
-        buffer.writeBuffers = writeBuffers;
+        reactive(buffer).writeBuffers = writeBuffers;
 
-        const renderObjects: IRenderPassObject[] = [];
+        const renderObjects: RenderPassObject[] = [];
 
         renderObjects.push({
-            pipeline,
-            uniforms: uniformBindGroup,
+            pipeline: pipeline,
+            bindingResources: uniformBindGroup,
             vertices: verticesBuffer,
-            drawVertex: { vertexCount: cubeVertexCount, instanceCount: 1 },
+            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: 1 },
         });
 
         textRenderer.render(renderObjects, ...text);
 
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
-                    renderObjects,
+                    renderPassObjects: renderObjects,
                 }]
             }]
         };

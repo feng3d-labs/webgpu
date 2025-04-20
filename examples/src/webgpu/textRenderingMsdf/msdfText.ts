@@ -2,8 +2,8 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { IRenderPassObject, IRenderPipeline, ISampler, ITexture, IUniforms } from "@feng3d/render-api";
-import { getIGPUBuffer, IGPURenderBundle } from "@feng3d/webgpu";
+import { BindingResources, reactive, RenderPassObject, RenderPipeline, Sampler, Texture } from "@feng3d/render-api";
+import { getGBuffer, RenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -32,8 +32,8 @@ export class MsdfFont
   charCount: number;
   defaultChar: MsdfChar;
   constructor(
-    public pipeline: IRenderPipeline,
-    public bindGroup: IUniforms,
+    public material: RenderPipeline,
+    public bindGroup: BindingResources,
     public lineHeight: number,
     public chars: { [x: number]: MsdfChar },
     public kernings: KerningMap
@@ -87,7 +87,7 @@ export class MsdfText
   private bufferArrayDirty = true;
 
   constructor(
-    private renderBundle: IGPURenderBundle,
+    private renderBundle: RenderBundle,
     public measurements: MsdfTextMeasurements,
     public font: MsdfFont,
     public textBuffer: Float32Array
@@ -104,7 +104,7 @@ export class MsdfText
     if (this.bufferArrayDirty)
     {
       this.bufferArrayDirty = false;
-      const buffer = getIGPUBuffer(this.textBuffer);
+      const buffer = getGBuffer(this.textBuffer);
       const writeBuffers = buffer.writeBuffers || [];
       writeBuffers.push({
         bufferOffset: 0,
@@ -112,7 +112,7 @@ export class MsdfText
         dataOffset: 0,
         size: this.bufferArray.length
       });
-      buffer.writeBuffers = writeBuffers;
+      reactive(buffer).writeBuffers = writeBuffers;
     }
 
     return this.renderBundle;
@@ -149,8 +149,8 @@ export interface MsdfTextFormattingOptions
 
 export class MsdfTextRenderer
 {
-  pipelinePromise: IRenderPipeline;
-  sampler: ISampler;
+  pipelinePromise: RenderPipeline;
+  sampler: Sampler;
 
   cameraUniformBuffer: Float32Array = new Float32Array(16 * 2);
 
@@ -204,7 +204,7 @@ export class MsdfTextRenderer
     const response = await fetch(url);
     const imageBitmap = await createImageBitmap(await response.blob());
 
-    const texture: ITexture = {
+    const texture: Texture = {
       size: [imageBitmap.width, imageBitmap.height],
       label: `MSDF font texture ${url}`,
       format: "rgba8unorm",
@@ -224,7 +224,7 @@ export class MsdfTextRenderer
     const i = fontJsonUrl.lastIndexOf("/");
     const baseUrl = i !== -1 ? fontJsonUrl.substring(0, i + 1) : undefined;
 
-    const pagePromises: Promise<ITexture>[] = [];
+    const pagePromises: Promise<Texture>[] = [];
     for (const pageUrl of json.pages)
     {
       pagePromises.push(this.loadTexture(baseUrl + pageUrl));
@@ -256,7 +256,7 @@ export class MsdfTextRenderer
 
     const pageTextures = await Promise.all(pagePromises);
 
-    const bindGroup: IUniforms = {
+    const bindGroup: BindingResources = {
       fontTexture: { texture: pageTextures[0] },
       fontSampler: this.sampler,
       chars: { bufferView: charsArray }
@@ -333,21 +333,21 @@ export class MsdfTextRenderer
       );
     }
 
-    const bindGroup: IUniforms = {
+    const bindGroup: BindingResources = {
       camera: { bufferView: this.cameraUniformBuffer },
       text: { bufferView: textBuffer },
     };
 
-    const renderBundle: IGPURenderBundle = {
-      __type: "RenderBundle",
+    const renderBundle: RenderBundle = {
+      __type__: "RenderBundle",
       renderObjects: [
         {
-          pipeline: font.pipeline,
-          uniforms: {
+          pipeline: font.material,
+          bindingResources: {
             ...font.bindGroup,
             ...bindGroup,
           },
-          drawVertex: { vertexCount: 4, instanceCount: measurements.printedCharCount },
+          draw: { __type__: "DrawVertex", vertexCount: 4, instanceCount: measurements.printedCharCount },
         }
       ],
     };
@@ -436,15 +436,15 @@ export class MsdfTextRenderer
     this.cameraUniformBuffer.set(projection, 0);
     this.cameraUniformBuffer.set(view, 16);
 
-    const buffer = getIGPUBuffer(this.cameraUniformBuffer);
+    const buffer = getGBuffer(this.cameraUniformBuffer);
     const writeBuffers = buffer.writeBuffers || [];
     writeBuffers.push({
       data: this.cameraUniformBuffer,
     });
-    buffer.writeBuffers = writeBuffers;
+    reactive(buffer).writeBuffers = writeBuffers;
   }
 
-  render(renderObjects: IRenderPassObject[], ...text: MsdfText[])
+  render(renderObjects: RenderPassObject[], ...text: MsdfText[])
   {
     const renderBundles = text.map((t) => t.getRenderBundle());
 

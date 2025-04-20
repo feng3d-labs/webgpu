@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import redFragWGSL from "../../shaders/red.frag.wgsl";
@@ -12,7 +12,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init();
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [{
             view: { texture: { context: { canvasId: canvas.id } } },
             clearValue: [0.0, 0.0, 0.0, 1.0],
@@ -20,20 +20,20 @@ const init = async (canvas: HTMLCanvasElement) =>
         sampleCount: 4, // 设置多重采样数量
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
-        drawVertex: { vertexCount: 3 },
+        draw: { __type__: "DrawVertex", vertexCount: 3 },
     };
 
     function frame()
     {
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
+                        { descriptor: renderPassDescriptor, renderPassObjects: [renderObject] },
                     ]
                 }
             ],

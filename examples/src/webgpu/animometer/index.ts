@@ -2,8 +2,8 @@ import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
 
-import { IRenderObject, IRenderPass, IRenderPassDescriptor, IRenderPipeline, ISubmit } from "@feng3d/render-api";
-import { IGPURenderBundle, WebGPU } from "@feng3d/webgpu";
+import { reactive, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
+import { RenderBundle, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -33,7 +33,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const vec4Size = 4 * Float32Array.BYTES_PER_ELEMENT;
 
-    const pipelineDesc: IRenderPipeline = {
+    const pipelineDesc: RenderPipeline = {
         vertex: {
             code: animometerWGSL,
         },
@@ -42,10 +42,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
         primitive: {
             frontFace: "ccw",
-        }
+        },
     };
 
-    const pipeline: IRenderPipeline = {
+    const pipeline: RenderPipeline = {
         ...pipelineDesc,
     };
 
@@ -56,14 +56,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         0.1, -0.1, 0, 1, /**/ 0, 0, 1, 1,
     ]);
 
-    const renderObject: IRenderObject = {
-        pipeline,
+    const renderObject: RenderObject = {
+        pipeline: pipeline,
+        bindingResources: {},
         vertices: {
             position: { data: vertexBuffer, format: "float32x4", offset: 0, arrayStride: 2 * vec4Size },
             color: { data: vertexBuffer, format: "float32x4", offset: vec4Size, arrayStride: 2 * vec4Size },
         },
-        uniforms: {},
-        drawVertex: { vertexCount: 3, instanceCount: 1 },
+        draw: { __type__: "DrawVertex", vertexCount: 3, instanceCount: 1 },
     };
 
     const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
@@ -88,12 +88,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         value: 0,
     };
 
-    const renderObjects0: IRenderObject[] = [];
+    const renderObjects0: RenderObject[] = [];
     for (let i = 0; i < maxTriangles; ++i)
     {
         renderObjects0[i] = {
             ...renderObject,
-            uniforms: {
+            bindingResources: {
                 time,
                 uniforms: {
                     bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
@@ -102,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     }
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -120,13 +120,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         let startTime: number;
         const uniformTime = new Float32Array([0]);
 
-        const renderBundleObject: IGPURenderBundle = {
-            __type: "RenderBundle",
+        const renderBundleObject: RenderBundle = {
+            __type__: "RenderBundle",
             renderObjects
         };
 
-        const renderPasss: IRenderPass[] = [];
-        const submit: ISubmit = {
+        const renderPasss: RenderPass[] = [];
+        const submit: Submit = {
             commandEncoders: [
                 {
                     passEncoders: renderPasss,
@@ -134,14 +134,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ]
         };
 
-        const renderBundlesPass = {
+        const renderBundlesPass: RenderPass = {
             descriptor: renderPassDescriptor,
-            renderObjects: [renderBundleObject],
+            renderPassObjects: [renderBundleObject],
         };
 
-        const renderPass = {
+        const renderPass: RenderPass = {
             descriptor: renderPassDescriptor,
-            renderObjects,
+            renderPassObjects: renderObjects,
         };
 
         return function doDraw(timestamp: number)
@@ -152,7 +152,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
             uniformTime[0] = (timestamp - startTime) / 1000;
 
-            time.value = uniformTime[0];
+            reactive(time).value = uniformTime[0];
 
             if (settings.renderBundles)
             {

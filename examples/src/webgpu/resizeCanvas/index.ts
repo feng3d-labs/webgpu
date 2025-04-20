@@ -1,4 +1,4 @@
-import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
+import { RenderObject, RenderPassDescriptor, Submit, reactive } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 import redFragWGSL from "../../shaders/red.frag.wgsl";
@@ -10,7 +10,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 {
     const webgpu = await new WebGPU().init();
 
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [{
             view: { texture: { context: { canvasId: canvas.id } } },
             clearValue: [0.0, 0.0, 0.0, 1.0],
@@ -18,11 +18,11 @@ const init = async (canvas: HTMLCanvasElement) =>
         sampleCount: 4, // 设置多重采样数量
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
-        drawVertex: { vertexCount: 3 },
+        draw: { __type__: "DrawVertex", vertexCount: 3 },
     };
 
     canvas.classList.add(styles.animatedCanvasSize);
@@ -32,13 +32,13 @@ const init = async (canvas: HTMLCanvasElement) =>
         // 画布尺寸发生变化时更改渲染通道附件尺寸。
         const currentWidth = canvas.clientWidth * devicePixelRatio;
         const currentHeight = canvas.clientHeight * devicePixelRatio;
-        renderPassDescriptor.attachmentSize = { width: currentWidth, height: currentHeight };
+        reactive(renderPassDescriptor).attachmentSize = { width: currentWidth, height: currentHeight };
 
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
+                        { descriptor: renderPassDescriptor, renderPassObjects: [renderObject] },
                     ]
                 }
             ],

@@ -1,8 +1,6 @@
-import { IBuffer, IBufferBinding, ICommandEncoder, IRenderPassDescriptor, ISubmit, IUniforms } from "@feng3d/render-api";
-import { watcher } from "@feng3d/watcher";
-import { getIGPUBuffer, IGPUComputePass, IGPUComputePipeline, IGPUTimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, BufferBinding, CommandEncoder, Buffer, RenderPassDescriptor, Submit, reactive } from "@feng3d/render-api";
+import { ComputePass, ComputePipeline, TimestampQuery, WebGPU, getGBuffer } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
-import Stats from "stats.js";
 
 import atomicToZero from "./atomicToZero.wgsl";
 import { NaiveBitonicCompute } from "./bitonicCompute";
@@ -103,32 +101,33 @@ async function init(
     const maxInvocationsX = webgpu.device.limits.maxComputeWorkgroupSizeX;
 
     // Handle timestamp query stuff
-    const querySet: IGPUTimestampQuery = {};
-    watcher.watch(querySet, "elapsedNs", () =>
-    {
-        // Calculate new step, sort, and average sort times
-        const newStepTime = querySet.elapsedNs / 1000000;
-        const newSortTime = settings.sortTime + newStepTime;
-        // Apply calculated times to settings object as both number and 'ms' appended string
-        settings.stepTime = newStepTime;
-        settings.sortTime = newSortTime;
-        stepTimeController.setValue(`${newStepTime.toFixed(5)}ms`);
-        sortTimeController.setValue(`${newSortTime.toFixed(5)}ms`);
-        // Calculate new average sort upon end of final execution step of a full bitonic sort.
-        if (highestBlockHeight === settings["Total Elements"] * 2)
+    const querySet: TimestampQuery = {
+        onQuery: (elapsedNs) =>
         {
-            // Lock off access to this larger if block..not best architected solution but eh
-            highestBlockHeight *= 2;
-            settings.configToCompleteSwapsMap[settings.configKey].time
-                += newSortTime;
-            const averageSortTime
-                = settings.configToCompleteSwapsMap[settings.configKey].time
-                / settings.configToCompleteSwapsMap[settings.configKey].sorts;
-            averageSortTimeController.setValue(
-                `${averageSortTime.toFixed(5)}ms`
-            );
-        }
-    }, undefined, false);
+            // Calculate new step, sort, and average sort times
+            const newStepTime = elapsedNs / 1000000;
+            const newSortTime = settings.sortTime + newStepTime;
+            // Apply calculated times to settings object as both number and 'ms' appended string
+            settings.stepTime = newStepTime;
+            settings.sortTime = newSortTime;
+            stepTimeController.setValue(`${newStepTime.toFixed(5)}ms`);
+            sortTimeController.setValue(`${newSortTime.toFixed(5)}ms`);
+            // Calculate new average sort upon end of final execution step of a full bitonic sort.
+            if (highestBlockHeight === settings["Total Elements"] * 2)
+            {
+                // Lock off access to this larger if block..not best architected solution but eh
+                highestBlockHeight *= 2;
+                settings.configToCompleteSwapsMap[settings.configKey].time
+                    += newSortTime;
+                const averageSortTime
+                    = settings.configToCompleteSwapsMap[settings.configKey].time
+                    / settings.configToCompleteSwapsMap[settings.configKey].sorts;
+                averageSortTimeController.setValue(
+                    `${averageSortTime.toFixed(5)}ms`
+                );
+            }
+        },
+    };
 
     const totalElementOptions = [];
     const maxElements = maxInvocationsX * 32;
@@ -256,34 +255,34 @@ async function init(
     const elementsBufferSize
         = Float32Array.BYTES_PER_ELEMENT * totalElementOptions[0];
     // Initialize input, output, staging buffers
-    const elementsInputBuffer: IBufferBinding = {
+    const elementsInputBuffer: BufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize)
     };
-    const elementsOutputBuffer: IBufferBinding = {
+    const elementsOutputBuffer: BufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize)
     };
-    const elementsStagingBuffer: IBuffer = {
+    const elementsStagingBuffer: Buffer = {
         size: elementsBufferSize,
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     };
 
     // Initialize atomic swap buffer on GPU and CPU. Counts number of swaps actually performed by
     // compute shader (when value at index x is greater than value at index y)
-    const atomicSwapsOutputBuffer: IBufferBinding = {
+    const atomicSwapsOutputBuffer: BufferBinding = {
         bufferView: new Uint32Array(1)
     };
-    const atomicSwapsStagingBuffer: IBuffer = {
+    const atomicSwapsStagingBuffer: Buffer = {
         size: Uint32Array.BYTES_PER_ELEMENT,
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     };
 
     // Create uniform buffer for compute shader
-    const computeUniformsBuffer: IBufferBinding = {
+    const computeUniformsBuffer: BufferBinding = {
         // width, height, blockHeight, algo
         bufferView: new Float32Array(4),
     };
 
-    const computeBGCluster: IUniforms = {
+    const computeBGCluster: BindingResources = {
         input_data: elementsInputBuffer,
         data: elementsInputBuffer,
         output_data: elementsOutputBuffer,
@@ -291,21 +290,21 @@ async function init(
         uniforms: computeUniformsBuffer,
     };
 
-    let computePipeline: IGPUComputePipeline = {
+    let computePipeline: ComputePipeline = {
         compute: {
             code: NaiveBitonicCompute(settings["Workgroup Size"]),
         },
     };
 
     // Simple pipeline that zeros out an atomic value at group 0 binding 3
-    const atomicToZeroComputePipeline: IGPUComputePipeline = {
+    const atomicToZeroComputePipeline: ComputePipeline = {
         compute: {
             code: atomicToZero,
         },
     };
 
     // Create bitonic debug renderer
-    const renderPassDescriptor: IRenderPassDescriptor = {
+    const renderPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
@@ -375,13 +374,13 @@ async function init(
         nextBlockHeightController.setValue(2);
 
         // Reset Total Swaps by setting atomic value to 0
-        const submit: ISubmit = {
+        const submit: Submit = {
             commandEncoders: [{
                 passEncoders: [{
-                    __type: "ComputePass",
+                    __type__: "ComputePass",
                     computeObjects: [{
                         pipeline: atomicToZeroComputePipeline,
-                        uniforms: computeBGCluster,
+                        bindingResources: computeBGCluster,
                         workgroups: { workgroupCountX: 1 },
                     }]
                 }]
@@ -704,10 +703,10 @@ async function init(
     {
         // Write elements buffer
 
-        let iGPUBuffer = getIGPUBuffer(elementsInputBuffer.bufferView);
+        let iGPUBuffer = getGBuffer(elementsInputBuffer.bufferView);
         let writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: elements });
-        iGPUBuffer.writeBuffers = writeBuffers;
+        reactive(iGPUBuffer).writeBuffers = writeBuffers;
 
         const dims = new Float32Array([
             settings["Grid Width"],
@@ -718,14 +717,14 @@ async function init(
             settings["Next Swap Span"],
         ]);
 
-        iGPUBuffer = getIGPUBuffer(computeUniformsBuffer.bufferView);
+        iGPUBuffer = getGBuffer(computeUniformsBuffer.bufferView);
         writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: dims });
         writeBuffers.push({ bufferOffset: 8, data: stepDetails });
-        iGPUBuffer.writeBuffers = writeBuffers;
+        reactive(iGPUBuffer).writeBuffers = writeBuffers;
 
-        const commandEncoder: ICommandEncoder = { passEncoders: [] };
-        const submit: ISubmit = { commandEncoders: [commandEncoder] };
+        const commandEncoder: CommandEncoder = { passEncoders: [] };
+        const submit: Submit = { commandEncoders: [commandEncoder] };
 
         bitonicDisplayRenderer.startRun(commandEncoder, {
             highlight: settings["Display Mode"] === "Elements" ? 0 : 1,
@@ -735,12 +734,14 @@ async function init(
             && highestBlockHeight < settings["Total Elements"] * 2
         )
         {
-            const computePassEncoder: IGPUComputePass = {
-                __type: "ComputePass",
-                timestampQuery: querySet,
+            const computePassEncoder: ComputePass = {
+                __type__: "ComputePass",
+                descriptor: {
+                    timestampQuery: querySet,
+                },
                 computeObjects: [{
                     pipeline: computePipeline,
-                    uniforms: computeBGCluster,
+                    bindingResources: computeBGCluster,
                     workgroups: { workgroupCountX: settings["Workgroups Per Step"] },
                 }]
             };
@@ -795,16 +796,16 @@ async function init(
             // Copy GPU accessible buffers to CPU accessible buffers
             commandEncoder.passEncoders.push(
                 {
-                    __type: "CopyBufferToBuffer",
-                    source: getIGPUBuffer(elementsOutputBuffer.bufferView),
+                    __type__: "CopyBufferToBuffer",
+                    source: getGBuffer(elementsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: elementsStagingBuffer,
                     destinationOffset: 0,
                     size: elementsBufferSize
                 },
                 {
-                    __type: "CopyBufferToBuffer",
-                    source: getIGPUBuffer(atomicSwapsOutputBuffer.bufferView),
+                    __type__: "CopyBufferToBuffer",
+                    source: getGBuffer(atomicSwapsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: atomicSwapsStagingBuffer,
                     destinationOffset: 0,
@@ -838,10 +839,7 @@ async function init(
 }
 
 const canvas = document.getElementById("webgpu") as HTMLCanvasElement;
-const stats = new Stats();
 const gui = new GUI();
-
-document.body.appendChild(stats.dom);
 
 init(gui, canvas);
 

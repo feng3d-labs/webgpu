@@ -1,5 +1,5 @@
-import { IRenderObject, IRenderPassDescriptor, ISubmit } from "@feng3d/render-api";
-import { IGPUComputeObject, WebGPU } from "@feng3d/webgpu";
+import { RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
+import { ComputeObject, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 
 import spriteWGSL from "./sprite.wgsl";
@@ -50,11 +50,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         particleBuffers[i] = initialParticleData.slice();
     }
 
-    const computeObject0: IGPUComputeObject = {
+    const computeObject0: ComputeObject = {
         pipeline: {
             compute: { code: updateSpritesWGSL }
         },
-        uniforms: {
+        bindingResources: {
             params: simParams,
             particlesA: {
                 bufferView: particleBuffers[0],
@@ -66,22 +66,22 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         workgroups: { workgroupCountX: Math.ceil(numParticles / 64) },
     };
 
-    const computeObject1: IGPUComputeObject = {
+    const computeObject1: ComputeObject = {
         ...computeObject0,
-        uniforms: {
-            ...computeObject0.uniforms,
+        bindingResources: {
+            ...computeObject0.bindingResources,
             particlesA: {
-                ...computeObject0.uniforms.particlesA,
+                ...computeObject0.bindingResources.particlesA as {},
                 bufferView: particleBuffers[1],
             },
             particlesB: {
-                ...computeObject0.uniforms.particlesA,
+                ...computeObject0.bindingResources.particlesA as {},
                 bufferView: particleBuffers[0],
             },
         },
     };
 
-    const renderPass: IRenderPassDescriptor = {
+    const renderPass: RenderPassDescriptor = {
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
@@ -90,7 +90,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    const renderObject: IRenderObject = {
+    const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
             primitive: {
@@ -102,11 +102,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             a_particleVel: { data: particleBuffers[0], format: "float32x2", offset: 2 * 4, arrayStride: 4 * 4, stepMode: "instance" },
             a_pos: { data: vertexBufferData, format: "float32x2" },
         },
-        drawVertex: { vertexCount: 3, instanceCount: numParticles }
+        draw: { __type__: "DrawVertex", vertexCount: 3, instanceCount: numParticles }
     };
 
-    const renderObject1: IRenderObject = {
+    const renderObject1: RenderObject = {
         ...renderObject,
+        draw: renderObject.draw,
         vertices: {
             ...renderObject.vertices,
             a_particlePos: {
@@ -123,12 +124,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let t = 0;
     function frame()
     {
-        const data: ISubmit = {
+        const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { __type: "ComputePass", computeObjects: [[computeObject0, computeObject1][t % 2]] },
-                        { descriptor: renderPass, renderObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
+                        { __type__: "ComputePass", computeObjects: [[computeObject0, computeObject1][t % 2]] },
+                        { descriptor: renderPass, renderPassObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
                     ]
                 }
             ],

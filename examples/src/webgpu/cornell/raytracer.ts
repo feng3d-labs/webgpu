@@ -1,5 +1,5 @@
-import { ICommandEncoder, IPassEncoder, ITexture, IUniforms } from "@feng3d/render-api";
-import { IGPUComputePipeline } from "@feng3d/webgpu";
+import { BindingResources, CommandEncoder, PassEncoder, Texture } from "@feng3d/render-api";
+import { ComputePipeline } from "@feng3d/webgpu";
 
 import Common from "./common";
 import Radiosity from "./radiosity";
@@ -11,9 +11,9 @@ import raytracerWGSL from "./raytracer.wgsl";
 export default class Raytracer
 {
   private readonly common: Common;
-  private readonly framebuffer: ITexture;
-  private readonly pipeline: IGPUComputePipeline;
-  private readonly bindGroup: IUniforms;
+  private readonly framebuffer: Texture;
+  private readonly material: ComputePipeline;
+  private readonly bindGroup: BindingResources;
 
   private readonly kWorkgroupSizeX = 16;
   private readonly kWorkgroupSizeY = 16;
@@ -21,7 +21,7 @@ export default class Raytracer
   constructor(
     common: Common,
     radiosity: Radiosity,
-    framebuffer: ITexture,
+    framebuffer: Texture,
   )
   {
     this.common = common;
@@ -39,7 +39,7 @@ export default class Raytracer
       framebuffer: { texture: framebuffer },
     };
 
-    this.pipeline = {
+    this.material = {
       label: "raytracerPipeline",
       compute: {
         code: raytracerWGSL + common.wgsl,
@@ -53,10 +53,10 @@ export default class Raytracer
     const framebufferSize = this.framebuffer.size;
     //
     this.passEncoder = {
-      __type: "ComputePass",
+      __type__: "ComputePass",
       computeObjects: [{
-        pipeline: this.pipeline,
-        uniforms: {
+        pipeline: this.material,
+        bindingResources: {
           ...this.common.uniforms.bindGroup,
           ...this.bindGroup,
         },
@@ -67,9 +67,9 @@ export default class Raytracer
       }],
     };
   }
-  private passEncoder: IPassEncoder;
+  private passEncoder: PassEncoder;
 
-  encode(commandEncoder: ICommandEncoder)
+  encode(commandEncoder: CommandEncoder)
   {
     commandEncoder.passEncoders.push(this.passEncoder);
   }
