@@ -1,4 +1,5 @@
-import { BlendState, Buffer, ChainMap, CommandEncoder, computed, Computed, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, effect, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
+import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
+import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";

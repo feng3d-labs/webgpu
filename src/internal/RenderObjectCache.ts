@@ -1,5 +1,6 @@
 import { anyEmitter } from "@feng3d/event";
-import { ChainMap, reactive } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
+import { ChainMap } from "@feng3d/render-api";
 import { GPUQueue_submit, webgpuEvents } from "../eventnames";
 
 const cache = new ChainMap();
@@ -291,7 +292,7 @@ export class SubmitCommand
         const { commandBuffers } = this;
 
         // 提交前数值加一，用于处理提交前需要执行的操作。
-        reactive(webgpuEvents).preSubmit = ~~reactive(webgpuEvents).preSubmit + 1;
+        reactive(webgpuEvents).preSubmit = webgpuEvents.preSubmit + 1;
 
         device.queue.submit(commandBuffers.map((v) => v.run(device)));
 

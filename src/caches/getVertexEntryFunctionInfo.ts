@@ -1,5 +1,7 @@
-import { computed, reactive, VertexState, Computed } from "@feng3d/render-api";
+import { Computed, computed, reactive } from "@feng3d/reactivity";
+import { VertexState } from "@feng3d/render-api";
 import { FunctionInfo } from "wgsl_reflect";
+
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
