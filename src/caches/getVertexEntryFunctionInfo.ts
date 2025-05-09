@@ -6,9 +6,9 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 /**
  * 获取顶点入口函数信息。
- * 
+ *
  * @param vertexState 顶点阶段信息。
- * @returns 
+ * @returns
  */
 export function getVertexEntryFunctionInfo(vertexState: VertexState)
 {

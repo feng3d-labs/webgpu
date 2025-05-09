@@ -1,6 +1,5 @@
 import { WGSLVertexType } from "@feng3d/render-api";
 
-
 /**
  * WGSL着色器中顶点类型对应的GPU顶点数据格式。
  */

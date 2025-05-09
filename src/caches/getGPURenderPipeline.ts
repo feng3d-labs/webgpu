@@ -35,8 +35,8 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPi
         // r_renderPipeline.vertex
         r_renderPipeline.vertex.code;
         // r_renderPipeline.fragment
-        r_renderPipeline.fragment?.code
-        r_renderPipeline.multisample
+        r_renderPipeline.fragment?.code;
+        r_renderPipeline.multisample;
 
         // 计算
         const { label, vertex, fragment, primitive, depthStencil, multisample } = renderPipeline;
@@ -45,7 +45,7 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPi
         const gpuVertexState = getGPUVertexState(device, vertex, vertices);
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
-            label: label,
+            label,
             layout: getGPUPipelineLayout(device, shader),
             vertex: gpuVertexState,
             fragment: getGPUFragmentState(device, fragment, colorFormats),
@@ -63,7 +63,7 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPi
     return result.value;
 }
 type GetGPURenderPipelineKey = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
-const getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>;
+const getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();
 
 /**
  * 获取完整的顶点阶段描述与顶点缓冲区列表。
@@ -149,7 +149,7 @@ function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndex
 {
     if (!primitive) return defaultGPUPrimitiveState;
 
-    const result: Computed<GPUPrimitiveState> = primitive["_cache_GPUPrimitiveState_" + indexFormat] ??= computed(() =>
+    const result: Computed<GPUPrimitiveState> = primitive[`_cache_GPUPrimitiveState_${indexFormat}`] ??= computed(() =>
     {
         // 监听
         const r_primitive = reactive(primitive);
@@ -173,14 +173,14 @@ function getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndex
 
     return result.value;
 }
-const defaultGPUPrimitiveState: GPUPrimitiveState = { topology: "triangle-list", cullMode: "none", frontFace: "ccw", }
+const defaultGPUPrimitiveState: GPUPrimitiveState = { topology: "triangle-list", cullMode: "none", frontFace: "ccw" };
 
 function getGPUMultisampleState(multisampleState?: MultisampleState, sampleCount?: 4)
 {
     if (!sampleCount) return undefined;
     if (!multisampleState) return defaultGPUMultisampleState;
 
-    const result: Computed<GPUMultisampleState> = multisampleState["_cache_GPUMultisampleState_" + sampleCount] ??= computed(() =>
+    const result: Computed<GPUMultisampleState> = multisampleState[`_cache_GPUMultisampleState_${sampleCount}`] ??= computed(() =>
     {
         // 监听
         const r_multisampleState = reactive(multisampleState);
@@ -283,7 +283,7 @@ function getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFo
 }
 type GetGPUDepthStencilStateKey = [depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat];
 const getGPUDepthStencilStateMap = new ChainMap<GetGPUDepthStencilStateKey, Computed<GPUDepthStencilState>>();
-type GPUDepthStencilStateKey = [format: GPUTextureFormat, depthWriteEnabled: boolean, depthCompare: GPUCompareFunction, stencilFront: GPUStencilFaceState, stencilBack: GPUStencilFaceState, stencilReadMask: number, stencilWriteMask: number, depthBias: number, depthBiasSlopeScale: number, depthBiasClamp: number]
+type GPUDepthStencilStateKey = [format: GPUTextureFormat, depthWriteEnabled: boolean, depthCompare: GPUCompareFunction, stencilFront: GPUStencilFaceState, stencilBack: GPUStencilFaceState, stencilReadMask: number, stencilWriteMask: number, depthBias: number, depthBiasSlopeScale: number, depthBiasClamp: number];
 const gpuDepthStencilStateMap = new ChainMap<GPUDepthStencilStateKey, GPUDepthStencilState>();
 
 /**
@@ -365,7 +365,7 @@ function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUT
 {
     if (!colorTargetState) return getDefaultGPUColorTargetState(format);
 
-    const result: Computed<GPUColorTargetState> = colorTargetState["_GPUColorTargetState_" + format] ??= computed(() =>
+    const result: Computed<GPUColorTargetState> = colorTargetState[`_GPUColorTargetState_${format}`] ??= computed(() =>
     {
         // 监听
         const r_colorTargetState = reactive(colorTargetState);
@@ -387,9 +387,7 @@ function getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUT
 }
 
 const getDefaultGPUColorTargetState = (format: GPUTextureFormat): GPUColorTargetState =>
-{
-    return defaultGPUColorTargetState[format] ??= { format, blend: getGPUBlendState(undefined), writeMask: getGPUColorWriteFlags(undefined) }
-};
+defaultGPUColorTargetState[format] ??= { format, blend: getGPUBlendState(undefined), writeMask: getGPUColorWriteFlags(undefined) };
 const defaultGPUColorTargetState: Record<GPUTextureFormat, GPUColorTargetState> = {} as any;
 
 /**
@@ -439,10 +437,10 @@ function getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, co
 
     return gpuFragmentState.value;
 }
-type GPUFragmentStateKey = [module: GPUShaderModule, entryPoint: string, targets: Iterable<GPUColorTargetState>, constants: Record<string, number>]
+type GPUFragmentStateKey = [module: GPUShaderModule, entryPoint: string, targets: Iterable<GPUColorTargetState>, constants: Record<string, number>];
 const gpuFragmentStateMap = new ChainMap<GPUFragmentStateKey, GPUFragmentState>();
 type GetGPUFragmentStateKey = [device: GPUDevice, fragmentState: FragmentState, colorAttachmentsKey: string];
-const getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, Computed<GPUFragmentState>>;
+const getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, Computed<GPUFragmentState>>();
 
 function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]): GPUColorTargetState[]
 {
@@ -453,8 +451,7 @@ function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAtta
     if (result) return result.value;
 
     result = computed(() =>
-    {
-        return colorAttachments.map((format, i) =>
+    colorAttachments.map((format, i) =>
         {
             if (!format) return undefined;
 
@@ -465,8 +462,7 @@ function getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAtta
             const gpuColorTargetState = getGPUColorTargetState(targets[i], format);
 
             return gpuColorTargetState;
-        });
-    });
+        }));
     getGPUColorTargetStatesMap.set(getGPUColorTargetStatesKey, result);
 
     return result.value;
@@ -475,12 +471,8 @@ type GetGPUColorTargetStatesKey = [targets: readonly ColorTargetState[], colorAt
 const getGPUColorTargetStatesMap = new ChainMap<GetGPUColorTargetStatesKey, Computed<GPUColorTargetState[]>>();
 
 const getDefaultGPUColorTargetStates = (colorAttachments: readonly GPUTextureFormat[]) =>
-{
-    return defaultGPUColorTargetStates[colorAttachments.toString()] ??= colorAttachments.map((format) =>
-    {
-        return getGPUColorTargetState(undefined, format);
-    });
-};
+defaultGPUColorTargetStates[colorAttachments.toString()] ??= colorAttachments.map((format) =>
+    getGPUColorTargetState(undefined, format));
 const defaultGPUColorTargetStates: { [key: string]: GPUColorTargetState[] } = {};
 
 function getEntryPoint(fragmentState: FragmentState)
@@ -525,8 +517,9 @@ function getGPUBlendState(blend?: BlendState): GPUBlendState
             color: getGPUBlendComponent(color),
             alpha: getGPUBlendComponent(alpha),
         };
-        return gpuBlend;
-    })
+
+return gpuBlend;
+    });
 
     return result.value;
 }
@@ -551,7 +544,8 @@ function getGPUBlendComponent(blendComponent?: BlendComponent): GPUBlendComponen
             srcFactor: (operation === "max" || operation === "min") ? "one" : (srcFactor ?? "one"),
             dstFactor: (operation === "max" || operation === "min") ? "one" : (dstFactor ?? "zero"),
         };
-        return gpuBlendComponent;
+
+return gpuBlendComponent;
     });
 
     return result.value;

@@ -1,6 +1,6 @@
 /**
  * 渲染通道格式。
- * 
+ *
  * @private
  */
 export interface RenderPassFormat extends GPURenderPassLayout

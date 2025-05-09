@@ -49,4 +49,4 @@ export function getGPUTextureView(device: GPUDevice, view: TextureView)
 }
 
 type GetGPUTextureViewKey = [device: GPUDevice, view: TextureView];
-const getGPUTextureViewMap = new ChainMap<GetGPUTextureViewKey, Computed<GPUTextureView>>;
+const getGPUTextureViewMap = new ChainMap<GetGPUTextureViewKey, Computed<GPUTextureView>>();

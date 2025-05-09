@@ -1,4 +1,4 @@
-import { ComputeStage as ComputeStage } from "./ComputeStage";
+import { ComputeStage } from "./ComputeStage";
 
 /**
  * WebGPU计算管线。

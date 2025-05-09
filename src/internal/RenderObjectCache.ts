@@ -10,7 +10,8 @@ function setVaule<T extends Array<any>>(cache: ChainMap<any[], any>, keys: T): T
     const v = cache.get(keys);
     if (v) return v;
     cache.set(keys, keys);
-    return keys;
+
+return keys;
 }
 
 export type CommandType =
@@ -59,12 +60,14 @@ export class RenderObjectCache implements RenderPassObjectCommand
         if (func === "setBindGroup")
         {
             this.setBindGroup[command[1]] = command;
-            return;
+
+return;
         }
         else if (func === "setVertexBuffer")
         {
             this.setVertexBuffer[command[1]] = command;
-            return;
+
+return;
         }
         command = setVaule(cache, command);
         this[command[0]] = command as any;
@@ -75,12 +78,14 @@ export class RenderObjectCache implements RenderPassObjectCommand
         if (func === "setBindGroup")
         {
             this.setBindGroup = [];
-            return;
+
+return;
         }
         else if (func === "setVertexBuffer")
         {
             this.setVertexBuffer = [];
-            return;
+
+return;
         }
         this[func as any] = undefined;
     }
@@ -203,7 +208,7 @@ export class RenderPassCommand
         renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
     }
     renderPassDescriptor: GPURenderPassDescriptor;
-    commands: CommandType[]
+    commands: CommandType[];
 }
 
 export class ComputeObjectCommand
@@ -280,7 +285,8 @@ export class CommandEncoderCommand
         const gpuCommandEncoder = device.createCommandEncoder();
         gpuCommandEncoder.device = device;
         this.passEncoders.forEach((passEncoder) => passEncoder.run(gpuCommandEncoder));
-        return gpuCommandEncoder.finish();
+
+return gpuCommandEncoder.finish();
     }
     passEncoders: (RenderPassCommand | ComputePassCommand | CopyTextureToTextureCommand | CopyBufferToBufferCommand)[];
 }

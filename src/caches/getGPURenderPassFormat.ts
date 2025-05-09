@@ -41,10 +41,10 @@ export function getGPURenderPassFormat(descriptor: RenderPassDescriptor): Render
         };
 
         // 缓存
-        const renderPassFormatKey = renderPassFormat.attachmentSize.width + "," + renderPassFormat.attachmentSize.height
-            + "|" + renderPassFormat.colorFormats.join('')
-            + "|" + renderPassFormat.depthStencilFormat
-            + "|" + renderPassFormat.sampleCount;
+        const renderPassFormatKey = `${renderPassFormat.attachmentSize.width},${renderPassFormat.attachmentSize.height
+             }|${renderPassFormat.colorFormats.join("")
+             }|${renderPassFormat.depthStencilFormat
+             }|${renderPassFormat.sampleCount}`;
         const cache = renderPassFormatMap[renderPassFormatKey];
         if (cache) return cache;
         renderPassFormatMap[renderPassFormatKey] = renderPassFormat;

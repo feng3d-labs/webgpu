@@ -5,11 +5,11 @@ import { GPUQueue_submit } from "../eventnames";
 
 declare global
 {
-    interface GPURenderPassTimestampWrites 
+    interface GPURenderPassTimestampWrites
     {
         resolve?: (commandEncoder: GPUCommandEncoder) => void;
     }
-    interface GPUComputePassTimestampWrites 
+    interface GPUComputePassTimestampWrites
     {
         resolve?: (commandEncoder: GPUCommandEncoder) => void;
     }

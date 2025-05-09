@@ -43,4 +43,4 @@ export function getGPUComputePipeline(device: GPUDevice, computePipeline: Comput
 }
 
 type GetGPUComputePipeline = [device: GPUDevice, computePipeline: ComputePipeline];
-const _computePipelineMap = new ChainMap<GetGPUComputePipeline, GPUComputePipeline>;
+const _computePipelineMap = new ChainMap<GetGPUComputePipeline, GPUComputePipeline>();

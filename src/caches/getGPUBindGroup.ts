@@ -16,7 +16,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
     if (result) return result.value;
 
     let gBindGroup: GPUBindGroup;
-    let numberBufferBinding: { [name: string]: number[] } = {};
+    const numberBufferBinding: { [name: string]: number[] } = {};
     result = computed(() =>
     {
         const entries = bindGroupLayout.entries.map((v) =>
@@ -61,7 +61,7 @@ export function getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroup
             return entry;
         });
 
-        // 
+        //
         const resources = entries.map((v) => v.resource);
         const gpuBindGroupKey: GPUBindGroupKey = [bindGroupLayout, ...resources];
         const cache = gpuBindGroupMap.get(gpuBindGroupKey);
@@ -233,7 +233,8 @@ function getBufferBindingInfo(type: TypeInfo)
     result = _getBufferBindingInfo(type);
 
     bufferBindingInfoMap.set(type, result);
-    return result;
+
+return result;
 }
 const bufferBindingInfoMap = new Map<TypeInfo, BufferBindingInfo>();
 

@@ -8,13 +8,13 @@ export const IGPUSampler_changed = "IGPUSampler_changed";
 export const webgpuEvents: {
     /**
      * 提交WebGPU前数值加一。
-     * 
+     *
      * 用于处理提交前需要执行的操作。
-     * 
+     *
      * 例如 {@link GPUCanvasContext.getCurrentTexture} 与 {@linkGPUDevice.importExternalTexture } 需要在提交前执行，检查结果是否变化。
-     * 
+     *
      * 注：引擎内部处理，外部无需关心。
-     * 
+     *
      * @private
      */
     readonly preSubmit: number;
