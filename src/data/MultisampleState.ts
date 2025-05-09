@@ -9,7 +9,7 @@ export interface MultisampleState
 {
     /**
      * Mask determining which samples are written to.
-     * 
+     *
      * 默认为 0xFFFFFFFF 。
      */
     readonly mask?: GPUSampleMask;
@@ -17,7 +17,7 @@ export interface MultisampleState
     /**
      * When `true` indicates that a fragment's alpha channel should be used to generate a sample
      * coverage mask.
-     * 
+     *
      * 默认为 `false` 。
      */
     readonly alphaToCoverageEnabled?: boolean;

@@ -47,7 +47,7 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string
     else
     {
         shaderKey += shader.vertex;
-        if (shader.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n` + shader.fragment;
+        if (shader.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n${shader.fragment}`;
     }
 
     const getGPUPipelineLayoutKey: GetGPUPipelineLayoutKey = [device, shaderKey];
@@ -121,7 +121,8 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string
             bindGroupLayout.entries = entries;
             bindGroupLayout.key = key;
         }
-        return bindGroupLayout;
+
+return bindGroupLayout;
     });
 
     // 管线布局描述标识符。
@@ -140,7 +141,7 @@ export function getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string
     return gpuPipelineLayout;
 }
 type GetGPUPipelineLayoutKey = [device: GPUDevice, shaderKey: string];
-const getGPUPipelineLayoutMap = new ChainMap<GetGPUPipelineLayoutKey, GPUPipelineLayout>;
+const getGPUPipelineLayoutMap = new ChainMap<GetGPUPipelineLayoutKey, GPUPipelineLayout>();
 
 const bindGroupLayoutMap: { [key: string]: GPUBindGroupLayout } = {};
 const pipelineLayoutDescriptorMap: { [key: string]: GPUPipelineLayout } = {};

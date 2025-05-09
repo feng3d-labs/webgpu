@@ -1,4 +1,5 @@
-import { ChainMap, computed, Computed, Buffer, reactive, effect } from "@feng3d/render-api";
+import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
+import { ChainMap, Buffer } from "@feng3d/render-api";
 
 /**
  * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。
@@ -77,7 +78,7 @@ export function getGPUBuffer(device: GPUDevice, buffer: Buffer)
     return result.value;
 }
 type GetGPUBufferKey = [device: GPUDevice, buffer: Buffer];
-const getGPUBufferMap = new ChainMap<GetGPUBufferKey, Computed<GPUBuffer>>;
+const getGPUBufferMap = new ChainMap<GetGPUBufferKey, Computed<GPUBuffer>>();
 
 function dataChange(buffer: Buffer)
 {
@@ -89,7 +90,12 @@ function dataChange(buffer: Buffer)
         rb.data;
 
         // 第一次初始存在数据，则不再处理。
-        if (isInitData) { isInitData = false; return }
+        if (isInitData)
+        {
+            isInitData = false;
+
+            return;
+        }
 
         // 处理数据写入GPU缓冲
         const { data } = buffer;
@@ -99,7 +105,7 @@ function dataChange(buffer: Buffer)
         // 触发下次写入数据
         rb.writeBuffers = writeBuffers;
     }).value;
-};
+}
 
 function writeBuffer(device: GPUDevice, buffer: Buffer, gBuffer: GPUBuffer)
 {
@@ -154,4 +160,4 @@ function writeBuffer(device: GPUDevice, buffer: Buffer, gBuffer: GPUBuffer)
         // 清空写入数据
         rb.writeBuffers = null;
     });
-};
+}

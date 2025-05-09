@@ -1,6 +1,6 @@
 /**
  * 视频纹理，WebGPU外部纹理。
- * 
+ *
  * @see GPUExternalTexture
  * @see GPUExternalTextureDescriptor
  * @see GPUDevice.importExternalTexture

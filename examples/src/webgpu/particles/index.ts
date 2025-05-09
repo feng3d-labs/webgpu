@@ -7,7 +7,8 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes, reactive } from "@feng3d/render-api";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
 import { ComputePass, ComputePipeline, WebGPU, getGBuffer } from "@feng3d/webgpu";
 
 const numParticles = 50000;

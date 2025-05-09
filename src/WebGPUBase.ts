@@ -1,4 +1,5 @@
-import { BlendState, Buffer, ChainMap, CommandEncoder, computed, Computed, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, effect, OcclusionQuery, reactive, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
+import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
+import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
 import { getGPUBuffer } from "./caches/getGPUBuffer";
@@ -177,10 +178,10 @@ export class WebGPUBase
             {
                 return this.runCopyBufferToBuffer(passEncoder);
             }
-            else
-            {
-                console.error(`未处理 passEncoder ${passEncoder}`);
-            }
+
+            console.error(`未处理 passEncoder ${passEncoder}`);
+
+            return null;
         });
 
         return commandEncoderCommand;
@@ -247,12 +248,11 @@ export class WebGPUBase
                 {
                     const occlusionQueryCache = this.runRenderOcclusionQueryObject(renderPassFormat, element);
                     occlusionQueryCache.queryIndex = queryIndex++;
+
                     return occlusionQueryCache;
                 }
-                else
-                {
-                    throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
-                }
+
+                throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
             });
 
             return renderPassObjectCommands;
@@ -388,12 +388,9 @@ export class WebGPUBase
         {
             //
             const renderObjectCaches = renderObjects.map((element) =>
-            {
-                return this.runRenderObject(renderPassFormat, element as RenderObject);
-            });
+                this.runRenderObject(renderPassFormat, element as RenderObject));
 
             return renderObjectCaches;
-
         });
         this._renderObjectCachesMap.set(renderObjectCachesKey, result);
 
@@ -410,7 +407,7 @@ export class WebGPUBase
     protected runComputeObject(computeObject: ComputeObject)
     {
         const device = this._device;
-        const { pipeline, bindingResources: bindingResources, workgroups } = computeObject;
+        const { pipeline, bindingResources, workgroups } = computeObject;
 
         const computePipeline = getGPUComputePipeline(device, pipeline);
 
@@ -487,7 +484,7 @@ export class WebGPUBase
                     y = attachmentSize.height - y - height;
                 }
                 //
-                renderObjectCache.push(["setViewport", x, y, width, height, minDepth, maxDepth])
+                renderObjectCache.push(["setViewport", x, y, width, height, minDepth, maxDepth]);
             }
             else
             {
@@ -562,6 +559,7 @@ export class WebGPUBase
             if (stencilReference === undefined)
             {
                 renderObjectCache.delete("setStencilReference");
+
                 return;
             }
 
@@ -579,6 +577,7 @@ export class WebGPUBase
             if (blendConstantColor === undefined)
             {
                 renderObjectCache.delete("setBlendConstant");
+
                 return;
             }
 
@@ -620,7 +619,7 @@ export class WebGPUBase
             const { vertices, pipeline } = renderObject;
             //
             renderObjectCache.delete("setVertexBuffer");
-            const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices)
+            const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices);
             vertexBuffers?.forEach((vertexBuffer, index) =>
             {
                 // 监听
@@ -654,6 +653,7 @@ export class WebGPUBase
             if (!indices)
             {
                 renderObjectCache.delete("setIndexBuffer");
+
                 return;
             }
 
@@ -666,7 +666,6 @@ export class WebGPUBase
 
             //
             renderObjectCache.push(["setIndexBuffer", gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength]);
-
         }).value;
     }
 
@@ -678,7 +677,7 @@ export class WebGPUBase
 
             renderObjectCache.delete("draw");
             renderObjectCache.delete("drawIndexed");
-            if (draw.__type__ === 'DrawVertex')
+            if (draw.__type__ === "DrawVertex")
             {
                 renderObjectCache.push(["draw", draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]);
             }

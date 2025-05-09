@@ -1,4 +1,5 @@
-import { computed, Computed, reactive, RenderPassDescriptor } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import { RenderPassDescriptor } from "@feng3d/render-api";
 import { getGPUTextureFormat } from "../caches/getGPUTextureFormat";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 
@@ -40,10 +41,10 @@ export function getGPURenderPassFormat(descriptor: RenderPassDescriptor): Render
         };
 
         // 缓存
-        const renderPassFormatKey = renderPassFormat.attachmentSize.width + "," + renderPassFormat.attachmentSize.height
-            + "|" + renderPassFormat.colorFormats.join('')
-            + "|" + renderPassFormat.depthStencilFormat
-            + "|" + renderPassFormat.sampleCount;
+        const renderPassFormatKey = `${renderPassFormat.attachmentSize.width},${renderPassFormat.attachmentSize.height
+             }|${renderPassFormat.colorFormats.join("")
+             }|${renderPassFormat.depthStencilFormat
+             }|${renderPassFormat.sampleCount}`;
         const cache = renderPassFormatMap[renderPassFormatKey];
         if (cache) return cache;
         renderPassFormatMap[renderPassFormatKey] = renderPassFormat;

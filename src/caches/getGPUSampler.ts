@@ -1,4 +1,5 @@
-import { ChainMap, computed, Computed, reactive, Sampler } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import { ChainMap, Sampler } from "@feng3d/render-api";
 
 export function getGPUSampler(device: GPUDevice, sampler: Sampler)
 {
@@ -25,7 +26,7 @@ export function getGPUSampler(device: GPUDevice, sampler: Sampler)
         } = r_sampler;
 
         const gSampler = device.createSampler({
-            label: label,
+            label,
             addressModeU: addressModeU ?? "repeat",
             addressModeV: addressModeV ?? "repeat",
             addressModeW: addressModeW ?? "repeat",
@@ -33,8 +34,8 @@ export function getGPUSampler(device: GPUDevice, sampler: Sampler)
             minFilter: minFilter ?? "nearest",
             mipmapFilter: mipmapFilter ?? "nearest",
             lodMinClamp: lodMinClamp ?? 0,
-            lodMaxClamp: lodMaxClamp,
-            compare: compare,
+            lodMaxClamp,
+            compare,
             maxAnisotropy: (minFilter === "linear" && magFilter === "linear" && mipmapFilter === "linear") ? maxAnisotropy : 1,
         });
 
@@ -45,7 +46,7 @@ export function getGPUSampler(device: GPUDevice, sampler: Sampler)
     return result.value;
 }
 type GetGPUSamplerKey = [device: GPUDevice, sampler: Sampler];
-const getGPUSamplerMap = new ChainMap<GetGPUSamplerKey, Computed<GPUSampler>>;
+const getGPUSamplerMap = new ChainMap<GetGPUSamplerKey, Computed<GPUSampler>>();
 
 /**
  * GPU采样器默认值。

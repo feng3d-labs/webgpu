@@ -2,7 +2,8 @@ import { mat4, Mat4 } from "wgpu-matrix";
 
 import msdfTextWGSL from "./msdfText.wgsl";
 
-import { BindingResources, reactive, RenderPassObject, RenderPipeline, Sampler, Texture } from "@feng3d/render-api";
+import { BindingResources, RenderPassObject, RenderPipeline, Sampler, Texture } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
 import { getGBuffer, RenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated

@@ -1,4 +1,5 @@
-import { ChainMap, computed, Computed, reactive, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from "@feng3d/render-api";
 import { webgpuEvents } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { generateMipmap } from "../utils/generate-mipmap";
@@ -109,13 +110,13 @@ export function getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoC
 }
 let autoIndex = 0;
 type GetGPUTextureMap = [device: GPUDevice, texture: TextureLike];
-const getGPUTextureMap = new ChainMap<GetGPUTextureMap, Computed<GPUTexture>>;
+const getGPUTextureMap = new ChainMap<GetGPUTextureMap, Computed<GPUTexture>>();
 
 const textureMap = new ChainMap<[device: GPUDevice, texture: Texture], GPUTexture>();
 
 /**
  * 更新纹理
- * @param texture 
+ * @param texture
  */
 function updateSources(texture: Texture)
 {
@@ -133,15 +134,15 @@ function updateSources(texture: Texture)
         });
         reactive(texture).writeTextures = writeTextures.concat(texture.writeTextures || []);
     }).value;
-};
+}
 
 function updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, texture: Texture)
 {
     computed(() =>
     {
         // 监听
-        const r_texture = reactive(texture)
-        r_texture.writeTextures
+        const r_texture = reactive(texture);
+        r_texture.writeTextures;
 
         // 执行
         if (!texture.writeTextures) return;
@@ -243,7 +244,7 @@ function updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, texture:
             );
         });
     }).value;
-};
+}
 
 const dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
     "1d": "1d",

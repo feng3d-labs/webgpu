@@ -1,5 +1,6 @@
 import { anyEmitter } from "@feng3d/event";
-import { ChainMap, reactive } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
+import { ChainMap } from "@feng3d/render-api";
 import { GPUQueue_submit, webgpuEvents } from "../eventnames";
 
 const cache = new ChainMap();
@@ -9,7 +10,8 @@ function setVaule<T extends Array<any>>(cache: ChainMap<any[], any>, keys: T): T
     const v = cache.get(keys);
     if (v) return v;
     cache.set(keys, keys);
-    return keys;
+
+return keys;
 }
 
 export type CommandType =
@@ -58,12 +60,14 @@ export class RenderObjectCache implements RenderPassObjectCommand
         if (func === "setBindGroup")
         {
             this.setBindGroup[command[1]] = command;
-            return;
+
+return;
         }
         else if (func === "setVertexBuffer")
         {
             this.setVertexBuffer[command[1]] = command;
-            return;
+
+return;
         }
         command = setVaule(cache, command);
         this[command[0]] = command as any;
@@ -74,12 +78,14 @@ export class RenderObjectCache implements RenderPassObjectCommand
         if (func === "setBindGroup")
         {
             this.setBindGroup = [];
-            return;
+
+return;
         }
         else if (func === "setVertexBuffer")
         {
             this.setVertexBuffer = [];
-            return;
+
+return;
         }
         this[func as any] = undefined;
     }
@@ -202,7 +208,7 @@ export class RenderPassCommand
         renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
     }
     renderPassDescriptor: GPURenderPassDescriptor;
-    commands: CommandType[]
+    commands: CommandType[];
 }
 
 export class ComputeObjectCommand
@@ -279,7 +285,8 @@ export class CommandEncoderCommand
         const gpuCommandEncoder = device.createCommandEncoder();
         gpuCommandEncoder.device = device;
         this.passEncoders.forEach((passEncoder) => passEncoder.run(gpuCommandEncoder));
-        return gpuCommandEncoder.finish();
+
+return gpuCommandEncoder.finish();
     }
     passEncoders: (RenderPassCommand | ComputePassCommand | CopyTextureToTextureCommand | CopyBufferToBufferCommand)[];
 }
@@ -291,7 +298,7 @@ export class SubmitCommand
         const { commandBuffers } = this;
 
         // 提交前数值加一，用于处理提交前需要执行的操作。
-        reactive(webgpuEvents).preSubmit = ~~reactive(webgpuEvents).preSubmit + 1;
+        reactive(webgpuEvents).preSubmit = webgpuEvents.preSubmit + 1;
 
         device.queue.submit(commandBuffers.map((v) => v.run(device)));
 

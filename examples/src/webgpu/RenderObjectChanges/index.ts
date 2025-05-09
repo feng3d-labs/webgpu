@@ -1,4 +1,6 @@
-import { Submit, RenderObject, reactive } from "@feng3d/render-api";
+import { Submit, RenderObject } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
+import { getGBuffer } from "@feng3d/webgpu";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>

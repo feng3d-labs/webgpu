@@ -59,4 +59,4 @@ export function getGPUCanvasContext(device: GPUDevice, context: CanvasContext)
     return result.value;
 }
 type GetGPUCanvasContextKey = [device: GPUDevice, context: CanvasContext];
-const getGPUCanvasContextMap = new ChainMap<GetGPUCanvasContextKey, Computed<GPUCanvasContext>>;
+const getGPUCanvasContextMap = new ChainMap<GetGPUCanvasContextKey, Computed<GPUCanvasContext>>();

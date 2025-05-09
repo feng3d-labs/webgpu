@@ -42,7 +42,7 @@ declare module "@feng3d/render-api"
     {
         /**
          * First instance to draw.
-         * 
+         *
          * 默认为 0 。
          */
         firstInstance?: number;

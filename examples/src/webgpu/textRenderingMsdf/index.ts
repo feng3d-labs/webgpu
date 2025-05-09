@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
-
-import { BindingResources, reactive, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
+import { BindingResources, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
@@ -79,7 +79,7 @@ to WebGL and does not explicitly target OpenGL ES.
 
 WebGPU sees physical GPU hardware as GPUAdapters. It provides a
 connection to an adapter via GPUDevice, which manages resources, and
-the device’s GPUQueues, which execute commands. GPUDevice may have
+the device's GPUQueues, which execute commands. GPUDevice may have
 its own memory with high-speed access to the processing units.
 GPUBuffer and GPUTexture are the physical resources backed by GPU
 memory. GPUCommandBuffer and GPURenderBundle are containers for

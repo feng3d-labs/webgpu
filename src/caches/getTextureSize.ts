@@ -1,4 +1,5 @@
-import { CanvasTexture, computed, Computed, reactive, TextureLike, TextureSize } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import { CanvasTexture, TextureLike, TextureSize } from "@feng3d/render-api";
 
 /**
  * 获取纹理尺寸。

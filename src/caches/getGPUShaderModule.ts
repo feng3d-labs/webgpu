@@ -14,4 +14,4 @@ export function getGPUShaderModule(device: GPUDevice, code: string)
     return gShaderModule;
 }
 type GetGPUShaderModuleKey = [device: GPUDevice, code: string];
-const getGPUShaderModuleMap = new ChainMap<GetGPUShaderModuleKey, GPUShaderModule>;
+const getGPUShaderModuleMap = new ChainMap<GetGPUShaderModuleKey, GPUShaderModule>();
