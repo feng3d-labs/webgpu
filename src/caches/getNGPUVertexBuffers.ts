@@ -1,4 +1,5 @@
-import { ChainMap, computed, Computed, reactive, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import { ChainMap, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { VertexBuffer } from "../internal/VertexBuffer";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
 

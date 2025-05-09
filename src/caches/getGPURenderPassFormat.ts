@@ -1,4 +1,5 @@
-import { computed, Computed, reactive, RenderPassDescriptor } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import { RenderPassDescriptor } from "@feng3d/render-api";
 import { getGPUTextureFormat } from "../caches/getGPUTextureFormat";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 

@@ -1,4 +1,5 @@
-import { ChainMap, computed, Computed, Buffer, reactive, effect } from "@feng3d/render-api";
+import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
+import { ChainMap, Buffer } from "@feng3d/render-api";
 
 /**
  * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。

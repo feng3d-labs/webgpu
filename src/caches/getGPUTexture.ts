@@ -1,4 +1,5 @@
-import { ChainMap, computed, Computed, reactive, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from "@feng3d/render-api";
 import { webgpuEvents } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { generateMipmap } from "../utils/generate-mipmap";

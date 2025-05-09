@@ -1,4 +1,5 @@
-import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, computed, Computed, effect, reactive, Sampler, TextureView, UnReadonly } from "@feng3d/render-api";
+import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
+import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, Sampler, TextureView, UnReadonly } from "@feng3d/render-api";
 import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { VideoTexture } from "../data/VideoTexture";
 import { webgpuEvents } from "../eventnames";

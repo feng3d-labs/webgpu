@@ -1,4 +1,5 @@
-import { ChainMap, computed, Computed, reactive, Sampler } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import { ChainMap, Sampler } from "@feng3d/render-api";
 
 export function getGPUSampler(device: GPUDevice, sampler: Sampler)
 {

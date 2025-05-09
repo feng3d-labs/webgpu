@@ -1,4 +1,5 @@
-import { BlendComponent, BlendState, ChainMap, ColorTargetState, computed, Computed, DepthStencilState, FragmentState, PrimitiveState, reactive, RenderPipeline, StencilFaceState, VertexAttributes, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
+import { computed, Computed, reactive } from "@feng3d/reactivity";
+import { BlendComponent, BlendState, ChainMap, ColorTargetState, DepthStencilState, FragmentState, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
 import { TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { MultisampleState } from "../data/MultisampleState";
