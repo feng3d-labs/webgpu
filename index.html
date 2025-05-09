@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>WebGPU examples</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link rel="shortcut icon" href="./resources/files/favicon_white.ico" media="(prefers-color-scheme: dark)" />
+    <link rel="shortcut icon" href="./resources/files/favicon.ico" media="(prefers-color-scheme: light)" />
+    
+  <script type="module" crossorigin src="./assets/index.html-d07f2983.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-3cfb730f.js">
+  <link rel="stylesheet" href="./assets/index-44021e17.css">
+</head>
+
+<body>
+
+    <div id="panel">
+
+        <div id="header">
+            <h1><a href="http://www.feng3d.com">feng3d</a>/<a href="https://github.com/feng3d-labs/webgpu">webgpu</a> </h1>
+
+            <div id="sections">
+                <a href="https://feng3d.com/webgpu/docs">docs</a>
+                <a href="https://github.com/feng3d-labs/webgpu">source</a>
+            </div>
+
+            <div id="expandButton"></div>
+        </div>
+
+        <div id="panelScrim"></div>
+
+        <div id="contentWrapper">
+
+            <div id="inputWrapper">
+                <input placeholder="" type="text" id="filterInput" autocorrect="off" autocapitalize="off"
+                    spellcheck="false" />
+                <div id="clearSearchButton"></div>
+            </div>
+
+            <div id="content">
+                <img id="previewsToggler" src="./assets/thumbnails-50dae2c6.svg" width="20" height="20" />
+            </div>
+        </div>
+
+    </div>
+
+    <iframe id="viewer" name="viewer" allow="fullscreen; xr-spatial-tracking;"></iframe>
+
+    <a id="button" target="_blank"><img src="./assets/ic_code_black_24dp-a579b3f0.svg"></a>
+
+    <template id="PlaceholderHTML">
+        <!DOCTYPE html>
+        <html lang="en">
+
+        <head>
+            <meta charset="utf-8">
+            <title>WebGPU examples</title>
+            <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+            <link rel="stylesheet" type="text/css" href="./resources/files/main.css">
+            <style>
+                html,
+                body {
+                    height: 100%;
+                }
+
+                body {
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    user-select: none;
+                }
+            </style>
+        </head>
+
+        <body>
+            Select an example from the sidebar
+        </body>
+
+        </html>
+    </template>
+
+    
+</body>
+
+</html>
