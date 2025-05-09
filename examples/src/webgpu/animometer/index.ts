@@ -1,9 +1,9 @@
+import { reactive } from "@feng3d/reactivity";
+import { RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
+import { RenderBundle, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 
 import animometerWGSL from "./animometer.wgsl";
-
-import { reactive, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
-import { RenderBundle, WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

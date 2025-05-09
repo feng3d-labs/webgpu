@@ -1,4 +1,5 @@
-import { BufferBinding, CanvasContext, PassEncoder, reactive, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
+import { BufferBinding, CanvasContext, PassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
 import { getGBuffer, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";

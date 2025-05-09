@@ -1,6 +1,8 @@
-import { RenderPassDescriptor, Submit, RenderObject, reactive } from "@feng3d/render-api";
+import { RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
 import { WebGPU } from "@feng3d/webgpu";
 import { Mat4, mat4, vec3 } from "wgpu-matrix";
+import { getGBuffer } from "@feng3d/webgpu";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
 import instancedVertWGSL from "../../shaders/instanced.vert.wgsl";

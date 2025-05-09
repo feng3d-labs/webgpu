@@ -1,7 +1,8 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { BindingResources, FragmentState, Buffer, IDraw, PrimitiveState, reactive, RenderObject, RenderPipeline, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
+import { BindingResources, FragmentState, Buffer, IDraw, PrimitiveState, RenderObject, RenderPipeline, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
 import { getGBuffer } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models

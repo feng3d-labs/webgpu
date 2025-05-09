@@ -10,7 +10,8 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes, reactive } from "@feng3d/render-api";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
 import { ComputePass, ComputePipeline, WebGPU, getGBuffer } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;

@@ -1,9 +1,10 @@
+import { reactive } from "@feng3d/reactivity";
+import { BindingResources, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
+import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
-import volumeWGSL from "./volume.wgsl";
 
-import { BindingResources, reactive, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
+import volumeWGSL from "./volume.wgsl";
 
 const gui = new GUI();
 

@@ -1,4 +1,5 @@
-import { BindingResources, BufferBinding, CommandEncoder, reactive, RenderPassDescriptor } from "@feng3d/render-api";
+import { reactive } from "@feng3d/reactivity";
+import { BindingResources, BufferBinding, CommandEncoder, RenderPassDescriptor } from "@feng3d/render-api";
 
 import bitonicDisplay from "./bitonicDisplay.frag.wgsl";
 import { Base2DRendererClass } from "./utils";
