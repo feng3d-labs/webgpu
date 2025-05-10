@@ -11,7 +11,7 @@ function setVaule<T extends Array<any>>(cache: ChainMap<any[], any>, keys: T): T
     if (v) return v;
     cache.set(keys, keys);
 
-return keys;
+    return keys;
 }
 
 export type CommandType =
@@ -61,13 +61,13 @@ export class RenderObjectCache implements RenderPassObjectCommand
         {
             this.setBindGroup[command[1]] = command;
 
-return;
+            return;
         }
         else if (func === "setVertexBuffer")
         {
             this.setVertexBuffer[command[1]] = command;
 
-return;
+            return;
         }
         command = setVaule(cache, command);
         this[command[0]] = command as any;
@@ -79,13 +79,13 @@ return;
         {
             this.setBindGroup = [];
 
-return;
+            return;
         }
         else if (func === "setVertexBuffer")
         {
             this.setVertexBuffer = [];
 
-return;
+            return;
         }
         this[func as any] = undefined;
     }
@@ -286,7 +286,7 @@ export class CommandEncoderCommand
         gpuCommandEncoder.device = device;
         this.passEncoders.forEach((passEncoder) => passEncoder.run(gpuCommandEncoder));
 
-return gpuCommandEncoder.finish();
+        return gpuCommandEncoder.finish();
     }
     passEncoders: (RenderPassCommand | ComputePassCommand | CopyTextureToTextureCommand | CopyBufferToBufferCommand)[];
 }

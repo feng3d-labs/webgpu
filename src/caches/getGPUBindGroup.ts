@@ -182,11 +182,12 @@ export function updateBufferBinding(uniformData: BufferBinding, type: TypeInfo)
         // 更新数据
         effect(() =>
         {
-            // 监听
-            let value: any = reactive(uniformData);
+            let value: any = uniformData;
+            let r_value: any = reactive(uniformData); // 监听
             for (let i = 0; i < paths.length; i++)
             {
                 value = value[paths[i]];
+                r_value = r_value[paths[i]]; // 监听
                 if (value === undefined)
                 {
                     if (!hasDefautValue)
@@ -234,7 +235,7 @@ function getBufferBindingInfo(type: TypeInfo)
 
     bufferBindingInfoMap.set(type, result);
 
-return result;
+    return result;
 }
 const bufferBindingInfoMap = new Map<TypeInfo, BufferBindingInfo>();
 
