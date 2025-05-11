@@ -21,5 +21,6 @@ export * from "./data/polyfills/RenderPassDescriptor";
 export * from "./data/polyfills/RenderPipeline";
 export * from "./data/polyfills/Uniforms";
 
-export * from "./caches/getIGPUBuffer";
+export * from "./caches/BufferManager";
 export * from "./types/VertexFormat";
+

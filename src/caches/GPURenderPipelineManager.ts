@@ -6,7 +6,7 @@ import { MultisampleState } from "../data/MultisampleState";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { GPUPipelineLayoutManager } from "./GPUPipelineLayoutManager";
 import { GPUShaderModuleManager } from "./GPUShaderModuleManager";
-import { getGPUVertexBufferLayouts } from "./getNGPUVertexBuffers";
+import { GPUVertexBufferManager } from "./GPUVertexBufferManager";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
@@ -90,7 +90,7 @@ export class GPURenderPipelineManager
             const { code, constants } = vertexState;
 
             const vertexEntryFunctionInfo = getVertexEntryFunctionInfo(vertexState);
-            const vertexBufferLayouts = getGPUVertexBufferLayouts(vertexState, vertices);
+            const vertexBufferLayouts = GPUVertexBufferManager.getGPUVertexBufferLayouts(vertexState, vertices);
 
             const gpuVertexState: GPUVertexState = {
                 module: GPUShaderModuleManager.getGPUShaderModule(device, code),

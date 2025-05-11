@@ -1,8 +1,7 @@
 import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
 import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
-import { BufferManager } from "./caches/getIGPUBuffer";
-import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
+import { BufferManager } from "./caches/BufferManager";
 import { GPUBindGroupManager } from "./caches/GPUBindGroupManager";
 import { GPUBufferManager } from "./caches/GPUBufferManager";
 import { GPUComputePassDescriptorManager } from "./caches/GPUComputePassDescriptorManager";
@@ -12,6 +11,7 @@ import { GPURenderPassDescriptorManager } from "./caches/GPURenderPassDescriptor
 import { GPURenderPassFormatManager } from "./caches/GPURenderPassFormatManager";
 import { GPURenderPipelineManager } from "./caches/GPURenderPipelineManager";
 import { GPUTextureManager } from "./caches/GPUTextureManager";
+import { GPUVertexBufferManager } from "./caches/GPUVertexBufferManager";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
 import "./data/polyfills/RenderObject";
@@ -619,7 +619,7 @@ export class WebGPUBase
             const { vertices, pipeline } = renderObject;
             //
             renderObjectCache.delete("setVertexBuffer");
-            const vertexBuffers = getNVertexBuffers(pipeline.vertex, vertices);
+            const vertexBuffers = GPUVertexBufferManager.getNVertexBuffers(pipeline.vertex, vertices);
             vertexBuffers?.forEach((vertexBuffer, index) =>
             {
                 // 监听

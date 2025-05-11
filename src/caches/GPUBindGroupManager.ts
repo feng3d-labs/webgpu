@@ -7,7 +7,7 @@ import { ExternalSampledTextureType } from "../types/TextureType";
 import { GPUBufferManager } from "./GPUBufferManager";
 import { GPUSamplerManager } from "./GPUSamplerManager";
 import { GPUTextureViewManager } from "./GPUTextureViewManager";
-import { BufferManager } from "./getIGPUBuffer";
+import { BufferManager } from "./BufferManager";
 
 export class GPUBindGroupManager
 {
