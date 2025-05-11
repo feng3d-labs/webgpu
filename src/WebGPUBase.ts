@@ -1,9 +1,7 @@
 import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
 import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
-import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
-import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
-import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
+import { GPURenderPipelineManager } from "./caches/GPURenderPipelineManager";
 import { getGBuffer } from "./caches/getIGPUBuffer";
 import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
 import { GPUBindGroupManager } from "./caches/GPUBindGroupManager";
@@ -11,6 +9,8 @@ import { GPUBufferManager } from "./caches/GPUBufferManager";
 import { GPUComputePassDescriptorManager } from "./caches/GPUComputePassDescriptorManager";
 import { GPUComputePipelineManager } from "./caches/GPUComputePipelineManager";
 import { GPUPipelineLayoutManager } from "./caches/GPUPipelineLayoutManager";
+import { GPURenderPassDescriptorManager } from "./caches/GPURenderPassDescriptorManager";
+import { GPURenderPassFormatManager } from "./caches/GPURenderPassFormatManager";
 import { GPUTextureManager } from "./caches/GPUTextureManager";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
@@ -202,9 +202,9 @@ export class WebGPUBase
             r_renderPass.descriptor;
 
             const { descriptor, renderPassObjects } = renderPass;
-            renderPassCommand.renderPassDescriptor = getGPURenderPassDescriptor(device, renderPass);
+            renderPassCommand.renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(device, renderPass);
 
-            const renderPassFormat = getGPURenderPassFormat(descriptor);
+            const renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(descriptor);
 
             const renderPassObjectCommands = this.runRenderPassObjects(renderPassFormat, renderPassObjects);
             const commands: CommandType[] = [];
@@ -539,7 +539,7 @@ export class WebGPUBase
             const { pipeline, vertices, indices } = renderObject;
             //
             const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
-            const gpuRenderPipeline = getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
+            const gpuRenderPipeline = GPURenderPipelineManager.getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
 
             //
             renderObjectCache.push(["setPipeline", gpuRenderPipeline]);
