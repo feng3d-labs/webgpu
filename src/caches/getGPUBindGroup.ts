@@ -4,7 +4,7 @@ import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from "wgs
 import { VideoTexture } from "../data/VideoTexture";
 import { webgpuEvents } from "../eventnames";
 import { ExternalSampledTextureType } from "../types/TextureType";
-import { GPUBufferManager } from "./getGPUBuffer";
+import { GPUBufferManager } from "./GPUBufferManager";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getGBuffer } from "./getIGPUBuffer";

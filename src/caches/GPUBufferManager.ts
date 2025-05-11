@@ -9,7 +9,7 @@ export class GPUBufferManager
     /**
      * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。
      */
-    static readonly defaultGPUBufferUsage = 0
+    private static readonly defaultGPUBufferUsage = 0
         // | GPUBufferUsage.MAP_READ
         // | GPUBufferUsage.MAP_WRITE
         | GPUBufferUsage.COPY_SRC
