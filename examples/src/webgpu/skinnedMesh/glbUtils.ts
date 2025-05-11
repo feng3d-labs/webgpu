@@ -1,8 +1,8 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { BindingResources, FragmentState, Buffer, IDraw, PrimitiveState, RenderObject, RenderPipeline, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { reactive } from "@feng3d/reactivity";
+import { BindingResources, Buffer, FragmentState, IDraw, PrimitiveState, RenderObject, RenderPipeline, VertexAttributes, VertexFormat, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { getGBuffer } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
@@ -367,10 +367,10 @@ export class GLTFPrimitive
             (attr, idx) =>
             {
                 const view = this.attributeMap[attr].view.view;
-                const vertexFormat: GPUVertexFormat = this.attributeMap[attr].vertexType;
+                const vertexFormat = this.attributeMap[attr].vertexType as VertexFormat;
                 const attrString = attr.toLowerCase().replace(/_0$/, "");
 
-                const Cls = vertexFormatMap[vertexFormat].typedArrayConstructor;
+                const Cls = vertexFormatMap[vertexFormat].typedArrayConstructor as Int8ArrayConstructor;
 
                 const data = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
 
@@ -381,16 +381,14 @@ export class GLTFPrimitive
             const INDICES = attributeMap["INDICES"];
             const view = INDICES.view.view;
             const vertexFormat: GPUIndexFormat = INDICES.vertexType;
-            let Cls: Uint16ArrayConstructor | Uint32ArrayConstructor;
             if (vertexFormat === "uint16")
             {
-                Cls = Uint16Array;
+                this.indices = new Uint16Array(view.buffer, view.byteOffset, view.byteLength / Uint16Array.BYTES_PER_ELEMENT);
             }
             else
             {
-                Cls = Uint32Array;
+                this.indices = new Uint32Array(view.buffer, view.byteOffset, view.byteLength / Uint32Array.BYTES_PER_ELEMENT);
             }
-            this.indices = new Cls(view.buffer, view.byteOffset, view.byteLength / Cls.BYTES_PER_ELEMENT);
         }
     }
 

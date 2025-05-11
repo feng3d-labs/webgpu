@@ -4,7 +4,7 @@ import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from "wgs
 import { VideoTexture } from "../data/VideoTexture";
 import { webgpuEvents } from "../eventnames";
 import { ExternalSampledTextureType } from "../types/TextureType";
-import { getGPUBuffer } from "./getGPUBuffer";
+import { GPUBufferManager } from "./getGPUBuffer";
 import { getGPUSampler } from "./getGPUSampler";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getGBuffer } from "./getIGPUBuffer";
@@ -103,7 +103,7 @@ function getGPUBufferBinding(device: GPUDevice, bufferBinding: BufferBinding, ty
         const gbuffer = getGBuffer(bufferView);
         (gbuffer as any).label = gbuffer.label || (`BufferBinding ${type.name}`);
         //
-        const buffer = getGPUBuffer(device, gbuffer);
+        const buffer = GPUBufferManager.getGPUBuffer(device, gbuffer);
 
         const offset = bufferView.byteOffset;
         const size = bufferView.byteLength;

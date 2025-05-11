@@ -17,66 +17,70 @@ const defaultGPUBufferUsage = 0
     | GPUBufferUsage.QUERY_RESOLVE
     ;
 
-/**
- * 获取 GPU 缓冲。
- *
- * @param device
- * @param buffer
- * @returns
- */
-export function getGPUBuffer(device: GPUDevice, buffer: Buffer)
+export class GPUBufferManager
 {
-    const getGPUBufferKey: GetGPUBufferKey = [device, buffer];
-    let result = getGPUBufferMap.get(getGPUBufferKey);
-    if (result) return result.value;
-
-    let gpuBuffer: GPUBuffer;
-    result = computed(() =>
+    /**
+     * 获取 GPU 缓冲。
+     *
+     * @param device
+     * @param buffer
+     * @returns
+     */
+    static getGPUBuffer(device: GPUDevice, buffer: Buffer)
     {
-        // 监听
-        const r_buffer = reactive(buffer);
-        r_buffer.size;
-        r_buffer.usage;
+        const getGPUBufferKey: GetGPUBufferKey = [device, buffer];
+        let result = getGPUBufferMap.get(getGPUBufferKey);
+        if (result) return result.value;
 
-        // 执行
-        const { label, size, usage } = buffer;
-        console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
-
-        // 初始化时存在数据，则使用map方式上传第一次数据。
-        const mappedAtCreation = buffer.data !== undefined;
-
-        // 销毁旧的缓冲区
-        if (gpuBuffer) gpuBuffer.destroy();
-        gpuBuffer = device.createBuffer({ label, size, usage: usage ?? defaultGPUBufferUsage, mappedAtCreation });
-
-        // 初始化时存在数据，则使用map方式上传第一次数据。
-        if (mappedAtCreation)
+        let gpuBuffer: GPUBuffer;
+        result = computed(() =>
         {
-            const bufferData = buffer.data;
-            if (ArrayBuffer.isView(bufferData))
+            // 监听
+            const r_buffer = reactive(buffer);
+            r_buffer.size;
+            r_buffer.usage;
+
+            // 执行
+            const { label, size, usage } = buffer;
+            console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
+
+            // 初始化时存在数据，则使用map方式上传第一次数据。
+            const mappedAtCreation = buffer.data !== undefined;
+
+            // 销毁旧的缓冲区
+            if (gpuBuffer) gpuBuffer.destroy();
+            gpuBuffer = device.createBuffer({ label, size, usage: usage ?? defaultGPUBufferUsage, mappedAtCreation });
+
+            // 初始化时存在数据，则使用map方式上传第一次数据。
+            if (mappedAtCreation)
             {
-                new Int8Array(gpuBuffer.getMappedRange()).set(new Int8Array(bufferData.buffer));
+                const bufferData = buffer.data;
+                if (ArrayBuffer.isView(bufferData))
+                {
+                    new Int8Array(gpuBuffer.getMappedRange()).set(new Int8Array(bufferData.buffer));
+                }
+                else
+                {
+                    new Int8Array(gpuBuffer.getMappedRange()).set(new Int8Array(bufferData));
+                }
+
+                gpuBuffer.unmap();
             }
-            else
-            {
-                new Int8Array(gpuBuffer.getMappedRange()).set(new Int8Array(bufferData));
-            }
 
-            gpuBuffer.unmap();
-        }
+            // 更新数据
+            dataChange(buffer);
 
-        // 更新数据
-        dataChange(buffer);
+            // 写入数据
+            writeBuffer(device, buffer, gpuBuffer);
 
-        // 写入数据
-        writeBuffer(device, buffer, gpuBuffer);
+            return gpuBuffer;
+        });
+        getGPUBufferMap.set(getGPUBufferKey, result);
 
-        return gpuBuffer;
-    });
-    getGPUBufferMap.set(getGPUBufferKey, result);
-
-    return result.value;
+        return result.value;
+    }
 }
+
 type GetGPUBufferKey = [device: GPUDevice, buffer: Buffer];
 const getGPUBufferMap = new ChainMap<GetGPUBufferKey, Computed<GPUBuffer>>();
 

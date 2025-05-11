@@ -2,7 +2,7 @@ import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
 import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
 import { getGPUBindGroup } from "./caches/getGPUBindGroup";
-import { getGPUBuffer } from "./caches/getGPUBuffer";
+import { GPUBufferManager } from "./caches/getGPUBuffer";
 import { getGPUComputePassDescriptor } from "./caches/getGPUComputePassDescriptor";
 import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
@@ -142,7 +142,7 @@ export class WebGPUBase
     async readBuffer(buffer: Buffer, offset?: GPUSize64, size?: GPUSize64)
     {
         const device = this._device;
-        const gpuBuffer = getGPUBuffer(device, buffer);
+        const gpuBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
         await gpuBuffer.mapAsync(GPUMapMode.READ);
 
         const result = gpuBuffer.getMappedRange(offset, size).slice(0);
@@ -315,9 +315,9 @@ export class WebGPUBase
 
         const copyBufferToBufferCommand = new CopyBufferToBufferCommand();
 
-        copyBufferToBufferCommand.source = getGPUBuffer(device, copyBufferToBuffer.source);
+        copyBufferToBufferCommand.source = GPUBufferManager.getGPUBuffer(device, copyBufferToBuffer.source);
         copyBufferToBufferCommand.sourceOffset = copyBufferToBuffer.sourceOffset ?? 0;
-        copyBufferToBufferCommand.destination = getGPUBuffer(device, copyBufferToBuffer.destination);
+        copyBufferToBufferCommand.destination = GPUBufferManager.getGPUBuffer(device, copyBufferToBuffer.destination);
         copyBufferToBufferCommand.destinationOffset = copyBufferToBuffer.destinationOffset ?? 0;
         copyBufferToBufferCommand.size = copyBufferToBuffer.size ?? copyBufferToBuffer.source.size;
 
@@ -633,7 +633,7 @@ export class WebGPUBase
                 const buffer = getGBuffer(data);
                 (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
-                const gBuffer = getGPUBuffer(device, buffer);
+                const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
 
                 renderObjectCache.push(["setVertexBuffer", index, gBuffer, offset, size]);
             });
@@ -662,7 +662,7 @@ export class WebGPUBase
             const buffer = getGBuffer(indices);
             (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
-            const gBuffer = getGPUBuffer(device, buffer);
+            const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
 
             //
             renderObjectCache.push(["setIndexBuffer", gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength]);
