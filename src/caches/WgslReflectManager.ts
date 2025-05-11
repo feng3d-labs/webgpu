@@ -34,7 +34,7 @@ export class WgslReflectManager
         let reflect = WgslReflectManager.reflectMap[code];
         if (reflect) return reflect;
 
-        WgslReflectManager.reflectMap[code] = new WgslReflect(code);
+        reflect = WgslReflectManager.reflectMap[code] = new WgslReflect(code);
 
         return reflect;
     }
