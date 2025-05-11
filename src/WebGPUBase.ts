@@ -1,8 +1,7 @@
 import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
 import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
-import { getGPUBindGroup } from "./caches/getGPUBindGroup";
-import { GPUBufferManager } from "./caches/GPUBufferManager";
+import { GPUBindGroupManager } from "./caches/GPUBindGroupManager";
 import { getGPUComputePassDescriptor } from "./caches/getGPUComputePassDescriptor";
 import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
 import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
@@ -12,6 +11,7 @@ import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
 import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGBuffer } from "./caches/getIGPUBuffer";
 import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
+import { GPUBufferManager } from "./caches/GPUBufferManager";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
 import "./data/polyfills/RenderObject";
@@ -419,7 +419,7 @@ export class WebGPUBase
         const layout = getGPUPipelineLayout(device, { compute: pipeline.compute.code });
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
-            const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
+            const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
             computeObjectCommand.setBindGroup.push([group, gpuBindGroup]);
         });
 
@@ -600,7 +600,7 @@ export class WebGPUBase
             const layout = getGPUPipelineLayout(device, { vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
             {
-                const gpuBindGroup: GPUBindGroup = getGPUBindGroup(device, bindGroupLayout, bindingResources);
+                const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
                 renderObjectCache.push(["setBindGroup", group, gpuBindGroup]);
             });
         }).value;
