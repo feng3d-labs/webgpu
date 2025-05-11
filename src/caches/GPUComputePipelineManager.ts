@@ -2,7 +2,7 @@ import { ChainMap, UnReadonly } from "@feng3d/render-api";
 import { ComputePipeline } from "../data/ComputePipeline";
 import { ComputeStage } from "../data/ComputeStage";
 import { GPUPipelineLayoutManager } from "./GPUPipelineLayoutManager";
-import { getGPUShaderModule } from "./getGPUShaderModule";
+import { GPUShaderModuleManager } from "./GPUShaderModuleManager";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 export class GPUComputePipelineManager
@@ -36,7 +36,7 @@ export class GPUComputePipelineManager
             layout,
             compute: {
                 ...computeStage,
-                module: getGPUShaderModule(device, computeStage.code),
+                module: GPUShaderModuleManager.getGPUShaderModule(device, computeStage.code),
             },
         });
         GPUComputePipelineManager._computePipelineMap.set(getGPUComputePipelineKey, pipeline);

@@ -5,7 +5,7 @@ import { TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { MultisampleState } from "../data/MultisampleState";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { GPUPipelineLayoutManager } from "./GPUPipelineLayoutManager";
-import { getGPUShaderModule } from "./getGPUShaderModule";
+import { GPUShaderModuleManager } from "./GPUShaderModuleManager";
 import { getGPUVertexBufferLayouts } from "./getNGPUVertexBuffers";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
@@ -93,7 +93,7 @@ export class GPURenderPipelineManager
             const vertexBufferLayouts = getGPUVertexBufferLayouts(vertexState, vertices);
 
             const gpuVertexState: GPUVertexState = {
-                module: getGPUShaderModule(device, code),
+                module: GPUShaderModuleManager.getGPUShaderModule(device, code),
                 entryPoint: vertexEntryFunctionInfo.name,
                 buffers: vertexBufferLayouts,
                 constants: this.getConstants(constants),
@@ -394,7 +394,7 @@ export class GPURenderPipelineManager
             // 计算
             const { code, targets, constants } = fragmentState;
             const gpuFragmentState: GPUFragmentState = {
-                module: getGPUShaderModule(device, code),
+                module: GPUShaderModuleManager.getGPUShaderModule(device, code),
                 entryPoint: this.getEntryPoint(fragmentState),
                 targets: this.getGPUColorTargetStates(targets, colorAttachments),
                 constants: this.getConstants(constants)
