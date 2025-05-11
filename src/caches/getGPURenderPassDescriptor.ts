@@ -3,7 +3,7 @@ import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
 import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
 import { GPUQueue_submit } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
-import { getGPUPassTimestampWrites } from "./getGPUPassTimestampWrites";
+import { GPUPassTimestampWritesManager } from "./GPUPassTimestampWritesManager";
 import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { getGPUTextureView } from "./getGPUTextureView";
 import { getTextureSize } from "./getTextureSize";
@@ -49,7 +49,7 @@ export function getGPURenderPassDescriptor(device: GPUDevice, renderPass: Render
         renderPassDescriptor.depthStencilAttachment = getGPURenderPassDepthStencilAttachment(device, descriptor);
 
         // 处理时间戳查询
-        renderPassDescriptor.timestampWrites = getGPUPassTimestampWrites(device, descriptor.timestampQuery);
+        renderPassDescriptor.timestampWrites = GPUPassTimestampWritesManager.getGPUPassTimestampWrites(device, descriptor.timestampQuery);
 
         setOcclusionQuerySet(device, renderPass, renderPassDescriptor);
     });

@@ -4,7 +4,7 @@ import { TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { MultisampleState } from "../data/MultisampleState";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
-import { getGPUPipelineLayout } from "./getGPUPipelineLayout";
+import { GPUPipelineLayoutManager } from "./GPUPipelineLayoutManager";
 import { getGPUShaderModule } from "./getGPUShaderModule";
 import { getGPUVertexBufferLayouts } from "./getNGPUVertexBuffers";
 import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
@@ -46,7 +46,7 @@ export function getGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPi
         //
         const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
             label,
-            layout: getGPUPipelineLayout(device, shader),
+            layout: GPUPipelineLayoutManager.getGPUPipelineLayout(device, shader),
             vertex: gpuVertexState,
             fragment: getGPUFragmentState(device, fragment, colorFormats),
             primitive: getGPUPrimitiveState(primitive, indexFormat),

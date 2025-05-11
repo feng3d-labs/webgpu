@@ -1,17 +1,17 @@
 import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
 import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
-import { GPUBindGroupManager } from "./caches/GPUBindGroupManager";
-import { getGPUComputePassDescriptor } from "./caches/getGPUComputePassDescriptor";
-import { getGPUComputePipeline } from "./caches/getGPUComputePipeline";
-import { getGPUPipelineLayout } from "./caches/getGPUPipelineLayout";
 import { getGPURenderPassDescriptor } from "./caches/getGPURenderPassDescriptor";
 import { getGPURenderPassFormat } from "./caches/getGPURenderPassFormat";
 import { getGPURenderPipeline } from "./caches/getGPURenderPipeline";
-import { getGPUTexture } from "./caches/getGPUTexture";
 import { getGBuffer } from "./caches/getIGPUBuffer";
 import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
+import { GPUBindGroupManager } from "./caches/GPUBindGroupManager";
 import { GPUBufferManager } from "./caches/GPUBufferManager";
+import { GPUComputePassDescriptorManager } from "./caches/GPUComputePassDescriptorManager";
+import { GPUComputePipelineManager } from "./caches/GPUComputePipelineManager";
+import { GPUPipelineLayoutManager } from "./caches/GPUPipelineLayoutManager";
+import { GPUTextureManager } from "./caches/GPUTextureManager";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
 import "./data/polyfills/RenderObject";
@@ -104,13 +104,13 @@ export class WebGPUBase
 
     destoryTexture(texture: TextureLike)
     {
-        getGPUTexture(this._device, texture, false)?.destroy();
+        GPUTextureManager.getGPUTexture(this._device, texture, false)?.destroy();
     }
 
     textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
         const device = this._device;
-        const gpuTexture = getGPUTexture(device, texture);
+        const gpuTexture = GPUTextureManager.getGPUTexture(device, texture);
 
         textureInvertYPremultiplyAlpha(device, gpuTexture, options);
     }
@@ -118,8 +118,8 @@ export class WebGPUBase
     copyDepthTexture(sourceTexture: TextureLike, targetTexture: TextureLike)
     {
         const device = this._device;
-        const gpuSourceTexture = getGPUTexture(device, sourceTexture);
-        const gpuTargetTexture = getGPUTexture(device, targetTexture);
+        const gpuSourceTexture = GPUTextureManager.getGPUTexture(device, sourceTexture);
+        const gpuTargetTexture = GPUTextureManager.getGPUTexture(device, targetTexture);
 
         copyDepthTexture(device, gpuSourceTexture, gpuTargetTexture);
     }
@@ -127,7 +127,7 @@ export class WebGPUBase
     async readPixels(gpuReadPixels: ReadPixels)
     {
         const device = this._device;
-        const gpuTexture = getGPUTexture(device, gpuReadPixels.texture, false);
+        const gpuTexture = GPUTextureManager.getGPUTexture(device, gpuReadPixels.texture, false);
 
         const result = await readPixels(device, {
             ...gpuReadPixels,
@@ -274,7 +274,7 @@ export class WebGPUBase
     {
         const computePassCommand = new ComputePassCommand();
 
-        computePassCommand.descriptor = getGPUComputePassDescriptor(this._device, computePass);
+        computePassCommand.descriptor = GPUComputePassDescriptorManager.getGPUComputePassDescriptor(this._device, computePass);
         computePassCommand.computeObjectCommands = this.runComputeObjects(computePass.computeObjects);
 
         return computePassCommand;
@@ -291,8 +291,8 @@ export class WebGPUBase
 
         const copyTextureToTextureCommand = new CopyTextureToTextureCommand();
 
-        const sourceTexture = getGPUTexture(device, copyTextureToTexture.source.texture);
-        const destinationTexture = getGPUTexture(device, copyTextureToTexture.destination.texture);
+        const sourceTexture = GPUTextureManager.getGPUTexture(device, copyTextureToTexture.source.texture);
+        const destinationTexture = GPUTextureManager.getGPUTexture(device, copyTextureToTexture.destination.texture);
 
         copyTextureToTextureCommand.source = {
             ...copyTextureToTexture.source,
@@ -409,14 +409,14 @@ export class WebGPUBase
         const device = this._device;
         const { pipeline, bindingResources, workgroups } = computeObject;
 
-        const computePipeline = getGPUComputePipeline(device, pipeline);
+        const computePipeline = GPUComputePipelineManager.getGPUComputePipeline(device, pipeline);
 
         const computeObjectCommand = new ComputeObjectCommand();
         computeObjectCommand.computePipeline = computePipeline;
 
         // 计算 bindGroups
         computeObjectCommand.setBindGroup = [];
-        const layout = getGPUPipelineLayout(device, { compute: pipeline.compute.code });
+        const layout = GPUPipelineLayoutManager.getGPUPipelineLayout(device, { compute: pipeline.compute.code });
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
             const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
@@ -597,7 +597,7 @@ export class WebGPUBase
             // 执行
             renderObjectCache.delete("setBindGroup");
             const { bindingResources } = renderObject;
-            const layout = getGPUPipelineLayout(device, { vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
+            const layout = GPUPipelineLayoutManager.getGPUPipelineLayout(device, { vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
             {
                 const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);

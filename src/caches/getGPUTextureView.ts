@@ -1,6 +1,6 @@
 import { computed, Computed, reactive } from "@feng3d/reactivity";
 import { ChainMap, Texture, TextureView } from "@feng3d/render-api";
-import { getGPUTexture } from "./getGPUTexture";
+import { GPUTextureManager } from "./GPUTextureManager";
 
 export function getGPUTextureView(device: GPUDevice, view: TextureView)
 {
@@ -27,7 +27,7 @@ export function getGPUTextureView(device: GPUDevice, view: TextureView)
 
         // 执行
         const { texture, label, format, dimension, usage, aspect, baseMipLevel, baseArrayLayer, mipLevelCount, arrayLayerCount } = view;
-        const gpuTexture = getGPUTexture(device, texture);
+        const gpuTexture = GPUTextureManager.getGPUTexture(device, texture);
         const textureView = gpuTexture.createView({
             label: label ?? `${gpuTexture.label}视图`,
             format,
