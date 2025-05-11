@@ -1,12 +1,11 @@
-import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, BindingResources } from "@feng3d/render-api";
 import { reactive } from "@feng3d/reactivity";
+import { BindingResources, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
 import { createBoxMeshWithTangents } from "../../meshes/box";
 import normalMapWGSL from "./normalMap.wgsl";
 import { create3DRenderPipeline, createTextureFromImage } from "./utils";
-import { getGBuffer } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

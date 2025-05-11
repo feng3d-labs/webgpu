@@ -1,6 +1,6 @@
-import { BindingResources, CanvasContext, PassEncoder, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
 import { reactive } from "@feng3d/reactivity";
-import { getGBuffer, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, CanvasContext, PassEncoder, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
+import { BufferManager, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
 
@@ -308,7 +308,7 @@ const init = async () =>
             mat3.fromMat4(world, worldMatrixValue);
 
             // Upload our uniform values.
-            const buffer = getGBuffer(uniformValues);
+            const buffer = BufferManager.getGBuffer(uniformValues);
             const writeBuffers = buffer.writeBuffers || [];
             writeBuffers.push({
                 data: uniformValues,

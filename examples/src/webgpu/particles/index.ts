@@ -7,9 +7,9 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { reactive } from "@feng3d/reactivity";
-import { ComputePass, ComputePipeline, WebGPU, getGBuffer } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { BufferManager, ComputePass, ComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -164,7 +164,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const probabilityMapUBOBuffer = new Uint8Array(probabilityMapUBOBufferSize);
     const bufferA = new Uint8Array(textureWidth * textureHeight * 4);
     const bufferB = new Uint8Array(textureWidth * textureHeight * 4);
-    reactive(getGBuffer(probabilityMapUBOBuffer)).writeBuffers = [{ data: new Int32Array([textureWidth]) }];
+    reactive(BufferManager.getGBuffer(probabilityMapUBOBuffer)).writeBuffers = [{ data: new Int32Array([textureWidth]) }];
 
     const passEncoders: ComputePass[] = [];
 
@@ -300,7 +300,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   function frame()
   {
-    reactive(getGBuffer(simulationUBOBuffer)).writeBuffers = [{
+    reactive(BufferManager.getGBuffer(simulationUBOBuffer)).writeBuffers = [{
       data: new Float32Array([
         simulationParams.simulate ? simulationParams.deltaTime : 0.0,
         0.0,
@@ -319,7 +319,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     mat4.multiply(projection, view, mvp);
 
     // prettier-ignore
-    reactive(getGBuffer(uniformBuffer)).writeBuffers = [{
+    reactive(BufferManager.getGBuffer(uniformBuffer)).writeBuffers = [{
       data: new Float32Array([
         // modelViewProjectionMatrix
         mvp[0], mvp[1], mvp[2], mvp[3],

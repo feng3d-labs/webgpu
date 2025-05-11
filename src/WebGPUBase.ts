@@ -1,8 +1,7 @@
 import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
 import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
-import { GPURenderPipelineManager } from "./caches/GPURenderPipelineManager";
-import { getGBuffer } from "./caches/getIGPUBuffer";
+import { BufferManager } from "./caches/getIGPUBuffer";
 import { getNVertexBuffers } from "./caches/getNGPUVertexBuffers";
 import { GPUBindGroupManager } from "./caches/GPUBindGroupManager";
 import { GPUBufferManager } from "./caches/GPUBufferManager";
@@ -11,6 +10,7 @@ import { GPUComputePipelineManager } from "./caches/GPUComputePipelineManager";
 import { GPUPipelineLayoutManager } from "./caches/GPUPipelineLayoutManager";
 import { GPURenderPassDescriptorManager } from "./caches/GPURenderPassDescriptorManager";
 import { GPURenderPassFormatManager } from "./caches/GPURenderPassFormatManager";
+import { GPURenderPipelineManager } from "./caches/GPURenderPipelineManager";
 import { GPUTextureManager } from "./caches/GPUTextureManager";
 import { ComputeObject } from "./data/ComputeObject";
 import { ComputePass } from "./data/ComputePass";
@@ -630,7 +630,7 @@ export class WebGPUBase
 
                 // 执行
                 const { data, offset, size } = vertexBuffer;
-                const buffer = getGBuffer(data);
+                const buffer = BufferManager.getGBuffer(data);
                 (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
                 const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
@@ -659,7 +659,7 @@ export class WebGPUBase
 
             const device = this._device;
 
-            const buffer = getGBuffer(indices);
+            const buffer = BufferManager.getGBuffer(indices);
             (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
             const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);

@@ -1,9 +1,9 @@
-import { BindingResources, CanvasContext, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { reactive } from "@feng3d/reactivity";
-import { RenderBundle, WebGPU, getGBuffer } from "@feng3d/webgpu";
+import { BindingResources, CanvasContext, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { BufferManager, RenderBundle, WebGPU } from "@feng3d/webgpu";
 
 import { GUI } from "dat.gui";
-import Stats from "stats-js";
+import Stats from "stats.js";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
@@ -19,7 +19,7 @@ interface Renderable
     bindGroup?: BindingResources;
 }
 
-const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
+const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
 {
     const settings = {
         useRenderBundles: true,
@@ -339,7 +339,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
         const transformationMatrix = getTransformationMatrix();
 
-        reactive(getGBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
+        reactive(BufferManager.getGBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
 
         webgpu.submit(submit);
 

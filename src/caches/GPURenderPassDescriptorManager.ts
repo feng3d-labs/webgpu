@@ -4,8 +4,8 @@ import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAtt
 import { GPUQueue_submit } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { GPUPassTimestampWritesManager } from "./GPUPassTimestampWritesManager";
-import { getGPUTextureFormat } from "./getGPUTextureFormat";
-import { getGPUTextureView } from "./getGPUTextureView";
+import { GPUTextureFormatManager } from "./GPUTextureFormatManager";
+import { GPUTextureViewManager } from "./GPUTextureViewManager";
 import { getTextureSize } from "./getTextureSize";
 
 declare global
@@ -111,7 +111,7 @@ export class GPURenderPassDescriptorManager
         {
             // 新建的多重采样纹理尺寸与格式与原始纹理同步。
             reactive(multisampleTexture).size = getTextureSize(texture);
-            reactive(multisampleTexture).format = getGPUTextureFormat(texture);
+            reactive(multisampleTexture).format = GPUTextureFormatManager.getGPUTextureFormat(texture);
         });
 
         this.getMultisampleTextureViewMap.set(texture, multisampleTextureView);
@@ -192,7 +192,7 @@ export class GPURenderPassDescriptorManager
                 this.setTextureSize(view.texture, descriptor.attachmentSize);
 
                 // 更改纹理尺寸将会销毁重新创建纹理，需要重新获取view。
-                gpuDepthStencilAttachment.view = getGPUTextureView(device, view);
+                gpuDepthStencilAttachment.view = GPUTextureViewManager.getGPUTextureView(device, view);
             }).value;
 
             //
@@ -305,8 +305,8 @@ export class GPURenderPassDescriptorManager
                 resolveTarget && this.setTextureSize(resolveTarget.texture, descriptor.attachmentSize);
 
                 // 更改纹理尺寸将会销毁重新创建纹理，需要重新获取view。
-                attachment.view = getGPUTextureView(device, view);
-                attachment.resolveTarget = getGPUTextureView(device, resolveTarget);
+                attachment.view = GPUTextureViewManager.getGPUTextureView(device, view);
+                attachment.resolveTarget = GPUTextureViewManager.getGPUTextureView(device, resolveTarget);
             });
 
             //

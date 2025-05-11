@@ -6,8 +6,8 @@ import { webgpuEvents } from "../eventnames";
 import { ExternalSampledTextureType } from "../types/TextureType";
 import { GPUBufferManager } from "./GPUBufferManager";
 import { GPUSamplerManager } from "./GPUSamplerManager";
-import { getGPUTextureView } from "./getGPUTextureView";
-import { getGBuffer } from "./getIGPUBuffer";
+import { GPUTextureViewManager } from "./GPUTextureViewManager";
+import { BufferManager } from "./getIGPUBuffer";
 
 export class GPUBindGroupManager
 {
@@ -53,7 +53,7 @@ export class GPUBindGroupManager
                 }
                 else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)
                 {
-                    entry.resource = getGPUTextureView(device, bindingResources[name] as TextureView);
+                    entry.resource = GPUTextureViewManager.getGPUTextureView(device, bindingResources[name] as TextureView);
                 }
                 else
                 {
@@ -96,7 +96,7 @@ export class GPUBindGroupManager
             GPUBindGroupManager.updateBufferBinding(bufferBinding, type);
             const bufferView = bufferBinding.bufferView;
             //
-            const gbuffer = getGBuffer(bufferView);
+            const gbuffer = BufferManager.getGBuffer(bufferView);
             (gbuffer as any).label = gbuffer.label || (`BufferBinding ${type.name}`);
             //
             const buffer = GPUBufferManager.getGPUBuffer(device, gbuffer);
@@ -162,7 +162,7 @@ export class GPUBindGroupManager
             (uniformData as UnReadonly<BufferBinding>).bufferView = new Uint8Array(size);
         }
 
-        const buffer = getGBuffer(uniformData.bufferView);
+        const buffer = BufferManager.getGBuffer(uniformData.bufferView);
         const offset = uniformData.bufferView.byteOffset;
 
         for (let i = 0; i < bufferBindingInfo.items.length; i++)

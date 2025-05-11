@@ -1,6 +1,6 @@
-import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { reactive } from "@feng3d/reactivity";
-import { WebGPU, getGBuffer } from "@feng3d/webgpu";
+import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { BufferManager, WebGPU } from "@feng3d/webgpu";
 import { mat4, vec3 } from "wgpu-matrix";
 
 import { mesh } from "../../meshes/stanfordDragon";
@@ -176,14 +176,14 @@ const init = async (canvas: HTMLCanvasElement) =>
         const lightMatrixData = lightViewProjMatrix as Float32Array;
         const cameraMatrixData = viewProjMatrix as Float32Array;
         const lightData = lightPosition as Float32Array;
-        reactive(getGBuffer(sceneUniformBuffer)).writeBuffers = [
+        reactive(BufferManager.getGBuffer(sceneUniformBuffer)).writeBuffers = [
             { bufferOffset: 0, data: lightMatrixData },
             { bufferOffset: 64, data: cameraMatrixData },
             { bufferOffset: 128, data: lightData },
         ];
 
         const modelData = modelMatrix as Float32Array;
-        reactive(getGBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
+        reactive(BufferManager.getGBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
     }
 
     // Rotates the camera around the origin based on time.
@@ -255,9 +255,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     function frame()
     {
         const cameraViewProj = getCameraViewProjMatrix();
-        const writeBuffers = getGBuffer(sceneUniformBuffer).writeBuffers || [];
+        const writeBuffers = BufferManager.getGBuffer(sceneUniformBuffer).writeBuffers || [];
         writeBuffers.push({ bufferOffset: 64, data: cameraViewProj });
-        reactive(getGBuffer(sceneUniformBuffer)).writeBuffers = writeBuffers;
+        reactive(BufferManager.getGBuffer(sceneUniformBuffer)).writeBuffers = writeBuffers;
 
         webgpu.submit(submit);
 

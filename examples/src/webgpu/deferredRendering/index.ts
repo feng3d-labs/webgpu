@@ -10,9 +10,9 @@ import lightUpdate from "./lightUpdate.wgsl";
 import vertexTextureQuad from "./vertexTextureQuad.wgsl";
 import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
 
-import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
 import { reactive } from "@feng3d/reactivity";
-import { ComputePass, ComputePipeline, WebGPU, getGBuffer } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
+import { BufferManager, ComputePass, ComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -167,13 +167,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         .step(1)
         .onChange(() =>
         {
-            if (getGBuffer(configUniformBuffer).writeBuffers)
+            if (BufferManager.getGBuffer(configUniformBuffer).writeBuffers)
             {
-                getGBuffer(configUniformBuffer).writeBuffers.push({ data: new Uint32Array([settings.numLights]) });
+                BufferManager.getGBuffer(configUniformBuffer).writeBuffers.push({ data: new Uint32Array([settings.numLights]) });
             }
             else
             {
-                reactive(getGBuffer(configUniformBuffer)).writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
+                reactive(BufferManager.getGBuffer(configUniformBuffer)).writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
             }
         });
 
@@ -230,7 +230,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const lightExtentData = new Float32Array(8);
     lightExtentData.set(lightExtentMin, 0);
     lightExtentData.set(lightExtentMax, 4);
-    reactive(getGBuffer(lightExtentBuffer)).writeBuffers = [{ data: lightExtentData }];
+    reactive(BufferManager.getGBuffer(lightExtentBuffer)).writeBuffers = [{ data: lightExtentData }];
 
     const lightUpdateComputePipeline: ComputePipeline = {
         compute: {
@@ -278,33 +278,33 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const modelMatrix = mat4.translation([0, -45, 0]);
 
     const cameraMatrixData = viewProjMatrix as Float32Array;
-    if (getGBuffer(cameraUniformBuffer).writeBuffers)
+    if (BufferManager.getGBuffer(cameraUniformBuffer).writeBuffers)
     {
-        getGBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraMatrixData });
+        BufferManager.getGBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraMatrixData });
     }
     else
     {
-        reactive(getGBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraMatrixData }];
+        reactive(BufferManager.getGBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraMatrixData }];
     }
     const modelData = modelMatrix as Float32Array;
-    if (getGBuffer(modelUniformBuffer).writeBuffers)
+    if (BufferManager.getGBuffer(modelUniformBuffer).writeBuffers)
     {
-        getGBuffer(modelUniformBuffer).writeBuffers.push({ data: modelData });
+        BufferManager.getGBuffer(modelUniformBuffer).writeBuffers.push({ data: modelData });
     }
     else
     {
-        reactive(getGBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
+        reactive(BufferManager.getGBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
     }
     const invertTransposeModelMatrix = mat4.invert(modelMatrix);
     mat4.transpose(invertTransposeModelMatrix, invertTransposeModelMatrix);
     const normalModelData = invertTransposeModelMatrix as Float32Array;
-    if (getGBuffer(modelUniformBuffer).writeBuffers)
+    if (BufferManager.getGBuffer(modelUniformBuffer).writeBuffers)
     {
-        getGBuffer(modelUniformBuffer).writeBuffers.push({ bufferOffset: 64, data: normalModelData });
+        BufferManager.getGBuffer(modelUniformBuffer).writeBuffers.push({ bufferOffset: 64, data: normalModelData });
     }
     else
     {
-        reactive(getGBuffer(modelUniformBuffer)).writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
+        reactive(BufferManager.getGBuffer(modelUniformBuffer)).writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
     }
 
     // Rotates the camera around the origin based on time.
@@ -383,13 +383,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function frame()
     {
         const cameraViewProj = getCameraViewProjMatrix();
-        if (getGBuffer(cameraUniformBuffer).writeBuffers)
+        if (BufferManager.getGBuffer(cameraUniformBuffer).writeBuffers)
         {
-            getGBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraViewProj });
+            BufferManager.getGBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraViewProj });
         }
         else
         {
-            reactive(getGBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraViewProj }];
+            reactive(BufferManager.getGBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraViewProj }];
         }
 
         const submit: Submit = {

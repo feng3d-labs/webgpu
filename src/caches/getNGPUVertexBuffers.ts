@@ -9,10 +9,10 @@ export function getGPUVertexBufferLayouts(vertexState: VertexState, vertices: Ve
     {
         const { vertexBufferLayouts } = getVertexBuffersBuffers(vertexState, vertices);
 
-return vertexBufferLayouts;
+        return vertexBufferLayouts;
     });
 
-return result.value;
+    return result.value;
 }
 
 export function getNVertexBuffers(vertexState: VertexState, vertices: VertexAttributes)
@@ -31,7 +31,7 @@ export function getNVertexBuffers(vertexState: VertexState, vertices: VertexAttr
         return vertexBuffers;
     });
 
-return result.value;
+    return result.value;
 }
 
 declare global
@@ -171,11 +171,11 @@ function getVertexBuffers(vertexAttribute: VertexAttribute)
         r_vertexBuffer.offset = data.byteOffset;
         r_vertexBuffer.size = data.byteLength;
 
-return vertexBuffer;
+        return vertexBuffer;
     });
     getVertexBuffersMap.set(vertexAttribute, result);
 
-return result.value;
+    return result.value;
 }
 const getVertexBuffersMap = new WeakMap<VertexAttribute, Computed<VertexBuffer>>();
 

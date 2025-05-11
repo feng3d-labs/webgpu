@@ -1,9 +1,8 @@
-import { RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { reactive } from "@feng3d/reactivity";
+import { RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
-import { getGBuffer } from "@feng3d/webgpu";
 
 import distanceSizedPointsVertWGSL from "./distance-sized-points.vert.wgsl";
 import fixedSizePointsVertWGSL from "./fixed-size-points.vert.wgsl";

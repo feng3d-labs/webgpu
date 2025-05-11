@@ -3,9 +3,9 @@ import { GUI } from "dat.gui";
 import fullscreenTexturedQuadWGSL from "../../shaders/fullscreenTexturedQuad.wgsl";
 import blurWGSL from "./blur.wgsl";
 
-import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
 import { reactive } from "@feng3d/reactivity";
-import { ComputePass, ComputePipeline, WebGPU, getGBuffer } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
+import { BufferManager, ComputePass, ComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 // Contants from the blur.wgsl shader.
 const tileDim = 128;
@@ -114,13 +114,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const updateSettings = () =>
     {
         blockDim = tileDim - (settings.filterSize - 1);
-        if (getGBuffer(blurParamsBuffer).writeBuffers)
+        if (BufferManager.getGBuffer(blurParamsBuffer).writeBuffers)
         {
-            getGBuffer(blurParamsBuffer).writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
+            BufferManager.getGBuffer(blurParamsBuffer).writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
         }
         else
         {
-            reactive(getGBuffer(blurParamsBuffer)).writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
+            reactive(BufferManager.getGBuffer(blurParamsBuffer)).writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
         }
         needUpdateEncoder = true;
     };

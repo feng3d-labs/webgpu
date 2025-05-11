@@ -1,7 +1,7 @@
 import { computed, Computed, reactive } from "@feng3d/reactivity";
 import { RenderPassDescriptor } from "@feng3d/render-api";
-import { getGPUTextureFormat } from "./getGPUTextureFormat";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
+import { GPUTextureFormatManager } from "./GPUTextureFormatManager";
 
 export class GPURenderPassFormatManager
 {
@@ -27,12 +27,12 @@ export class GPURenderPassFormatManager
             r_descriptor.sampleCount;
 
             // 计算
-            const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => getGPUTextureFormat(v.view.texture));
+            const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => GPUTextureFormatManager.getGPUTextureFormat(v.view.texture));
 
             let depthStencilAttachmentTextureFormat: GPUTextureFormat;
             if (descriptor.depthStencilAttachment)
             {
-                depthStencilAttachmentTextureFormat = getGPUTextureFormat(descriptor.depthStencilAttachment.view?.texture) || "depth24plus";
+                depthStencilAttachmentTextureFormat = GPUTextureFormatManager.getGPUTextureFormat(descriptor.depthStencilAttachment.view?.texture) || "depth24plus";
             }
 
             const renderPassFormat: RenderPassFormat = {

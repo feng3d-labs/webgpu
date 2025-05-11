@@ -3,7 +3,7 @@ import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
 import { reactive } from "@feng3d/reactivity";
 import { BindingResources, Buffer, FragmentState, IDraw, PrimitiveState, RenderObject, RenderPipeline, VertexAttributes, VertexFormat, vertexFormatMap, VertexState } from "@feng3d/render-api";
-import { getGBuffer } from "@feng3d/webgpu";
+import { BufferManager } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
 // Modified from Will Usher code found at this link https://www.willusher.io/graphics/2023/05/16/0-to-gltf-first-mesh
@@ -779,7 +779,7 @@ export class GLTFSkin
         const globalWorldInverse = mat4.inverse(
             nodes[currentNodeIndex].worldMatrix
         );
-        const gpuBuffer = getGBuffer(this.jointMatricesUniformBuffer);
+        const gpuBuffer = BufferManager.getGBuffer(this.jointMatricesUniformBuffer);
         const writeBuffers = gpuBuffer.writeBuffers || [];
 
         for (let j = 0; j < this.joints.length; j++)
