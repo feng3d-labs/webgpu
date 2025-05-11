@@ -4,11 +4,9 @@ import { webgpuEvents } from "../eventnames";
 import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { generateMipmap } from "../utils/generate-mipmap";
 import { GPUCanvasContextManager } from "./GPUCanvasContextManager";
-import { getTextureUsageFromFormat } from "./getTextureUsageFromFormat";
 
 export class GPUTextureManager
 {
-
     /**
      * 获取GPU纹理 {@link GPUTexture} 。
      *
@@ -63,7 +61,7 @@ export class GPUTextureManager
             const size = texture.size;
             console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
 
-            const usage = getTextureUsageFromFormat(device, format, sampleCount);
+            const usage = GPUTextureManager.getTextureUsageFromFormat(device, format, sampleCount);
 
             // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
             if (texture.generateMipmap && mipLevelCount === undefined)
@@ -242,6 +240,44 @@ export class GPUTextureManager
                 );
             });
         }).value;
+    }
+
+    /**
+     * 由纹理格式获取纹理可支持的用途。
+     *
+     * 包含深度、多重采样、以及个别的无法作为存储纹理。
+     *
+     * @param format
+     * @param sampleCount
+     * @returns
+     */
+    private static getTextureUsageFromFormat(device: GPUDevice, format: GPUTextureFormat, sampleCount?: 4): GPUTextureUsageFlags
+    {
+        let usage: GPUTextureUsageFlags;
+        // 包含深度以及多重采样的纹理不支持 STORAGE_BINDING
+        if (format.indexOf("depth") !== -1 // 包含深度的纹理
+            || sampleCount // 多重采样纹理
+            || format === "r8unorm"
+            || (!device.features.has("bgra8unorm-storage") && format === "bgra8unorm") // 判断GPU设备是否支持 "bgra8unorm-storage" 特性。
+        )
+        {
+            usage = (0
+                | GPUTextureUsage.COPY_SRC
+                | GPUTextureUsage.COPY_DST
+                | GPUTextureUsage.TEXTURE_BINDING
+                | GPUTextureUsage.RENDER_ATTACHMENT);
+        }
+        else
+        {
+            usage = (0
+                | GPUTextureUsage.COPY_SRC
+                | GPUTextureUsage.COPY_DST
+                | GPUTextureUsage.TEXTURE_BINDING
+                | GPUTextureUsage.STORAGE_BINDING
+                | GPUTextureUsage.RENDER_ATTACHMENT);
+        }
+
+        return usage;
     }
 
     private static readonly dimensionMap: Record<TextureDimension, GPUTextureDimension> = {

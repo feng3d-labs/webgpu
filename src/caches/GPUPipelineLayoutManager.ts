@@ -1,5 +1,5 @@
 import { ChainMap } from "@feng3d/render-api";
-import { getIGPUBindGroupLayoutEntryMap, GPUBindGroupLayoutEntryMap } from "./getWGSLReflectInfo";
+import { GPUBindGroupLayoutEntryMap, WgslReflectManager } from "./WgslReflectManager";
 
 declare global
 {
@@ -60,14 +60,14 @@ export class GPUPipelineLayoutManager
         let entryMap: GPUBindGroupLayoutEntryMap;
         if ("compute" in shader)
         {
-            entryMap = getIGPUBindGroupLayoutEntryMap(shader.compute);
+            entryMap = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(shader.compute);
         }
         else
         {
-            entryMap = getIGPUBindGroupLayoutEntryMap(shader.vertex);
+            entryMap = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(shader.vertex);
             if ("fragment" in shader)
             {
-                const fragmentEntryMap = getIGPUBindGroupLayoutEntryMap(shader.fragment);
+                const fragmentEntryMap = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(shader.fragment);
                 for (const resourceName in fragmentEntryMap)
                 {
                     // 检测相同名称是否被定义在多个地方

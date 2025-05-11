@@ -1,7 +1,7 @@
 import { computed, Computed, reactive } from "@feng3d/reactivity";
 import { ChainMap, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { VertexBuffer } from "../internal/VertexBuffer";
-import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
+import { FunctionInfoManager } from "./FunctionInfoManager";
 
 export class GPUVertexBufferManager
 {
@@ -52,7 +52,7 @@ export class GPUVertexBufferManager
 
         result = computed(() =>
         {
-            const vertexEntryFunctionInfo = getVertexEntryFunctionInfo(vertexState);
+            const vertexEntryFunctionInfo = FunctionInfoManager.getVertexEntryFunctionInfo(vertexState);
             // 监听
             const r_vertices = vertices && reactive(vertices);
             vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>

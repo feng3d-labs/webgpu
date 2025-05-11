@@ -3,7 +3,7 @@ import { ComputePipeline } from "../data/ComputePipeline";
 import { ComputeStage } from "../data/ComputeStage";
 import { GPUPipelineLayoutManager } from "./GPUPipelineLayoutManager";
 import { GPUShaderModuleManager } from "./GPUShaderModuleManager";
-import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
+import { WgslReflectManager } from "./WgslReflectManager";
 
 export class GPUComputePipelineManager
 {
@@ -15,7 +15,7 @@ export class GPUComputePipelineManager
 
         const computeStage = computePipeline.compute;
 
-        const reflect = getWGSLReflectInfo(computeStage.code);
+        const reflect = WgslReflectManager.getWGSLReflectInfo(computeStage.code);
         if (!computeStage.entryPoint)
         {
             const compute = reflect.entry.compute[0];

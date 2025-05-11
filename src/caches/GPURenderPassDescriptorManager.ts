@@ -6,7 +6,7 @@ import { MultisampleTexture } from "../internal/MultisampleTexture";
 import { GPUPassTimestampWritesManager } from "./GPUPassTimestampWritesManager";
 import { GPUTextureFormatManager } from "./GPUTextureFormatManager";
 import { GPUTextureViewManager } from "./GPUTextureViewManager";
-import { getTextureSize } from "./getTextureSize";
+import { TextureSizeManager } from "./TextureSizeManager";
 
 declare global
 {
@@ -110,7 +110,7 @@ export class GPURenderPassDescriptorManager
         effect(() =>
         {
             // 新建的多重采样纹理尺寸与格式与原始纹理同步。
-            reactive(multisampleTexture).size = getTextureSize(texture);
+            reactive(multisampleTexture).size = TextureSizeManager.getTextureSize(texture);
             reactive(multisampleTexture).format = GPUTextureFormatManager.getGPUTextureFormat(texture);
         });
 
@@ -135,7 +135,7 @@ export class GPURenderPassDescriptorManager
         // 初始化附件尺寸。
         if (!descriptor.attachmentSize)
         {
-            const textureSize = getTextureSize(depthStencilAttachment.view.texture);
+            const textureSize = TextureSizeManager.getTextureSize(depthStencilAttachment.view.texture);
             reactive(descriptor).attachmentSize = { width: textureSize[0], height: textureSize[1] };
         }
         const attachmentSize = descriptor.attachmentSize;
@@ -263,7 +263,7 @@ export class GPURenderPassDescriptorManager
         // 初始化附件尺寸。
         if (!descriptor.attachmentSize)
         {
-            const textureSize = getTextureSize(renderPassColorAttachment.view.texture);
+            const textureSize = TextureSizeManager.getTextureSize(renderPassColorAttachment.view.texture);
             reactive(descriptor).attachmentSize = { width: textureSize[0], height: textureSize[1] };
         }
 

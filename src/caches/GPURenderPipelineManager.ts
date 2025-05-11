@@ -4,11 +4,11 @@ import { TemplateInfo, TypeInfo } from "wgsl_reflect";
 
 import { MultisampleState } from "../data/MultisampleState";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
+import { FunctionInfoManager } from "./FunctionInfoManager";
+import { WgslReflectManager } from "./WgslReflectManager";
 import { GPUPipelineLayoutManager } from "./GPUPipelineLayoutManager";
 import { GPUShaderModuleManager } from "./GPUShaderModuleManager";
 import { GPUVertexBufferManager } from "./GPUVertexBufferManager";
-import { getVertexEntryFunctionInfo } from "./getVertexEntryFunctionInfo";
-import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
 export class GPURenderPipelineManager
 {
@@ -89,7 +89,7 @@ export class GPURenderPipelineManager
             // 计算
             const { code, constants } = vertexState;
 
-            const vertexEntryFunctionInfo = getVertexEntryFunctionInfo(vertexState);
+            const vertexEntryFunctionInfo = FunctionInfoManager.getVertexEntryFunctionInfo(vertexState);
             const vertexBufferLayouts = GPUVertexBufferManager.getGPUVertexBufferLayouts(vertexState, vertices);
 
             const gpuVertexState: GPUVertexState = {
@@ -454,7 +454,7 @@ export class GPURenderPipelineManager
             const { entryPoint, code } = fragmentState;
             //
             if (entryPoint) return entryPoint;
-            const reflect = getWGSLReflectInfo(code);
+            const reflect = WgslReflectManager.getWGSLReflectInfo(code);
             const fragment = reflect.entry.fragment[0];
             console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
 
