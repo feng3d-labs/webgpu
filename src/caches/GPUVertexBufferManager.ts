@@ -10,7 +10,7 @@ export class GPUVertexBufferManager
     {
         const result = computed(() =>
         {
-            const { vertexBufferLayouts } = GPUVertexBufferManager.getVertexBuffersBuffers(vertexState, vertices);
+            const { vertexBufferLayouts } = this.getVertexBuffersBuffers(vertexState, vertices);
 
             return vertexBufferLayouts;
         });
@@ -23,7 +23,7 @@ export class GPUVertexBufferManager
         let _vertexBuffers: VertexBuffer[];
         const result = computed(() =>
         {
-            const { vertexBuffers } = GPUVertexBufferManager.getVertexBuffersBuffers(vertexState, vertices);
+            const { vertexBuffers } = this.getVertexBuffersBuffers(vertexState, vertices);
 
             if (_vertexBuffers && _vertexBuffers.length === vertexBuffers.length && _vertexBuffers.every((v, i) => v === vertexBuffers[i]))
             {
@@ -46,12 +46,18 @@ export class GPUVertexBufferManager
     private static getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttributes)
     {
         const getVertexBuffersBuffersKey: GetVertexBuffersBuffersKey = [vertexState, vertices];
-        let result = GPUVertexBufferManager.getVertexBuffersBuffersMap.get(getVertexBuffersBuffersKey);
+        let result = this.getVertexBuffersBuffersMap.get(getVertexBuffersBuffersKey);
         if (result) return result.value;
 
         result = computed(() =>
         {
-            const vertexEntryFunctionInfo = FunctionInfoManager.getVertexEntryFunctionInfo(vertexState);
+            const r_vertexState = reactive(vertexState);
+            r_vertexState.code;
+            r_vertexState.entryPoint;
+
+            const { code, entryPoint } = vertexState;
+            const vertexEntryFunctionInfo = FunctionInfoManager.getVertexEntryFunctionInfo(code, entryPoint);
+
             // 监听
             const r_vertices = vertices && reactive(vertices);
             vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
@@ -113,7 +119,7 @@ export class GPUVertexBufferManager
                     index = vertexBufferLayouts.length;
                     bufferIndexMap.set(data, index);
 
-                    vertexBuffers[index] = GPUVertexBufferManager.getVertexBuffers(vertexAttribute);
+                    vertexBuffers[index] = this.getVertexBuffers(vertexAttribute);
 
                     //
                     gpuVertexBufferLayout = vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [], key: `${stepMode}-${arrayStride}` };
@@ -133,12 +139,12 @@ export class GPUVertexBufferManager
 
             // 相同的顶点缓冲区布局合并为一个。
             const vertexBufferLayoutsKey = vertexBufferLayouts.reduce((prev, cur) => prev + cur.key, "");
-            GPUVertexBufferManager.vertexBufferLayoutsMap[vertexBufferLayoutsKey] ??= vertexBufferLayouts;
+            this.vertexBufferLayoutsMap[vertexBufferLayoutsKey] ??= vertexBufferLayouts;
 
-            return { vertexBufferLayouts: GPUVertexBufferManager.vertexBufferLayoutsMap[vertexBufferLayoutsKey], vertexBuffers };
+            return { vertexBufferLayouts: this.vertexBufferLayoutsMap[vertexBufferLayoutsKey], vertexBuffers };
         });
 
-        GPUVertexBufferManager.getVertexBuffersBuffersMap.set(getVertexBuffersBuffersKey, result);
+        this.getVertexBuffersBuffersMap.set(getVertexBuffersBuffersKey, result);
 
         return result.value;
     }
@@ -147,7 +153,7 @@ export class GPUVertexBufferManager
 
     private static getVertexBuffers(vertexAttribute: VertexAttribute)
     {
-        let result = GPUVertexBufferManager.getVertexBuffersMap.get(vertexAttribute);
+        let result = this.getVertexBuffersMap.get(vertexAttribute);
         if (result) return result.value;
         const vertexBuffer: VertexBuffer = {} as any;
         const r_vertexBuffer = reactive(vertexBuffer);
@@ -165,7 +171,7 @@ export class GPUVertexBufferManager
 
             return vertexBuffer;
         });
-        GPUVertexBufferManager.getVertexBuffersMap.set(vertexAttribute, result);
+        this.getVertexBuffersMap.set(vertexAttribute, result);
 
         return result.value;
     }

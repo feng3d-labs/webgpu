@@ -1,5 +1,3 @@
-import { Computed, computed, reactive } from "@feng3d/reactivity";
-import { VertexState } from "@feng3d/render-api";
 import { FunctionInfo } from "wgsl_reflect";
 
 import { WgslReflectManager } from "./WgslReflectManager";
@@ -12,40 +10,23 @@ export class FunctionInfoManager
      * @param vertexState 顶点阶段信息。
      * @returns
      */
-    static getVertexEntryFunctionInfo(vertexState: VertexState)
+    static getVertexEntryFunctionInfo(code: string, entryPoint?: string)
     {
-        let result: Computed<FunctionInfo> = FunctionInfoManager._getVertexEntryFunctionInfoMap.get(vertexState);
-        if (result) return result.value;
-
-        result = computed(() =>
+        // 解析顶点着色器
+        const reflect = WgslReflectManager.getWGSLReflectInfo(code);
+        //
+        let vertexEntryFunctionInfo: FunctionInfo;
+        if (entryPoint)
         {
-            // 监听
-            const r_vertexState = reactive(vertexState);
-            r_vertexState.code;
-            r_vertexState.entryPoint;
+            vertexEntryFunctionInfo = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
+            console.assert(!!vertexEntryFunctionInfo, `WGSL着色器 ${code} 中不存在顶点入口点 ${entryPoint} 。`);
+        }
+        else
+        {
+            vertexEntryFunctionInfo = reflect.entry.vertex[0];
+            console.assert(!!reflect.entry.vertex[0], `WGSL着色器 ${code} 中不存在顶点入口点。`);
+        }
 
-            // 计算
-            const { code, entryPoint } = vertexState;
-            // 解析顶点着色器
-            const reflect = WgslReflectManager.getWGSLReflectInfo(code);
-            //
-            let vertexEntryFunctionInfo: FunctionInfo;
-            if (entryPoint)
-            {
-                vertexEntryFunctionInfo = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
-                console.assert(!!vertexEntryFunctionInfo, `WGSL着色器 ${code} 中不存在顶点入口点 ${entryPoint} 。`);
-            }
-            else
-            {
-                vertexEntryFunctionInfo = reflect.entry.vertex[0];
-                console.assert(!!reflect.entry.vertex[0], `WGSL着色器 ${code} 中不存在顶点入口点。`);
-            }
-
-            return vertexEntryFunctionInfo;
-        });
-        FunctionInfoManager._getVertexEntryFunctionInfoMap.set(vertexState, result);
-
-        return result.value;
+        return vertexEntryFunctionInfo;
     }
-    private static readonly _getVertexEntryFunctionInfoMap = new WeakMap<VertexState, Computed<FunctionInfo>>();
 }

@@ -85,11 +85,12 @@ export class GPURenderPipelineManager
             const r_vertexState = reactive(vertexState);
             r_vertexState.code;
             r_vertexState.constants;
+            r_vertexState.entryPoint;
 
             // 计算
-            const { code, constants } = vertexState;
+            const { code, constants, entryPoint } = vertexState;
 
-            const vertexEntryFunctionInfo = FunctionInfoManager.getVertexEntryFunctionInfo(vertexState);
+            const vertexEntryFunctionInfo = FunctionInfoManager.getVertexEntryFunctionInfo(code, entryPoint);
             const vertexBufferLayouts = GPUVertexBufferManager.getGPUVertexBufferLayouts(vertexState, vertices);
 
             const gpuVertexState: GPUVertexState = {
