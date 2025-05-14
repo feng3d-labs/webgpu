@@ -21,18 +21,61 @@ declare global
          * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
          */
         entries: GPUBindGroupLayoutEntry[];
+    }
+
+    interface BindGroupLayoutDescriptor
+    {
+        /**
+         * 绑定组布局的入口列表。
+         *
+         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+         */
+        entries: GPUBindGroupLayoutEntry[];
 
         /**
          * 用于判断布局信息是否相同的标识。
          *
          * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
          */
-        key: string,
+        label?: string,
     }
+}
+
+interface PipelineLayoutDescriptor
+{
+    bindGroupLayouts: BindGroupLayoutDescriptor[];
 }
 
 export class GPUPipelineLayoutManager
 {
+    static getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
+    {
+        const pipelineLayout = GPUPipelineLayoutManager.getPipelineLayout(shader);
+
+        //
+        const key = [device, pipelineLayout];
+        let gpuPipelineLayout = this._gpuPipelineLayoutMap.get(key);
+        if (gpuPipelineLayout) return gpuPipelineLayout;
+
+        const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
+        {
+            const gpuBindGroupLayout = device.createBindGroupLayout(v);
+            gpuBindGroupLayout.entries = v.entries;
+
+            return gpuBindGroupLayout;
+        });
+
+        const descriptor: GPUPipelineLayoutDescriptor = {
+            bindGroupLayouts,
+        };
+
+        gpuPipelineLayout = device.createPipelineLayout(descriptor);
+        gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
+        this._gpuPipelineLayoutMap.set(key, gpuPipelineLayout);
+
+        return gpuPipelineLayout;
+    }
+    private static readonly _gpuPipelineLayoutMap = new ChainMap<any[], GPUPipelineLayout>();
 
     /**
      * 从GPU管线中获取管线布局。
@@ -40,7 +83,7 @@ export class GPUPipelineLayoutManager
      * @param shader GPU管线。
      * @returns 管线布局。
      */
-    static getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
+    static getPipelineLayout(shader: { vertex: string, fragment: string } | { compute: string })
     {
         let shaderKey = "";
         if ("compute" in shader)
@@ -53,8 +96,7 @@ export class GPUPipelineLayoutManager
             if (shader.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n${shader.fragment}`;
         }
 
-        const getGPUPipelineLayoutKey: GetGPUPipelineLayoutKey = [device, shaderKey];
-        let gpuPipelineLayout = this.getGPUPipelineLayoutMap.get(getGPUPipelineLayoutKey);
+        let gpuPipelineLayout = this.getGPUPipelineLayoutMap[shaderKey];
         if (gpuPipelineLayout) return gpuPipelineLayout;
 
         let entryMap: GPUBindGroupLayoutEntryMap;
@@ -90,13 +132,13 @@ export class GPUPipelineLayoutManager
         }
 
         // 绑定组布局描述列表。
-        const bindGroupLayoutDescriptors: GPUBindGroupLayoutDescriptor[] = [];
+        const bindGroupLayoutDescriptors: BindGroupLayoutDescriptor[] = [];
         for (const resourceName in entryMap)
         {
             const bindGroupLayoutEntry = entryMap[resourceName];
             const { group, binding } = bindGroupLayoutEntry.variableInfo;
             //
-            const bindGroupLayoutDescriptor = bindGroupLayoutDescriptors[group] = bindGroupLayoutDescriptors[group] || { entries: [] };
+            const bindGroupLayoutDescriptor = bindGroupLayoutDescriptors[group] ??= { entries: [] };
 
             // 检测相同位置是否存在多个定义
             if (bindGroupLayoutDescriptor.entries[binding])
@@ -115,37 +157,35 @@ export class GPUPipelineLayoutManager
         {
             // 排除 undefined 元素。
             const entries = (descriptor.entries as GPUBindGroupLayoutEntry[]).filter((v) => !!v);
-            const key = entries.map((v) => v.key).join(",");
+            const label = entries.map((v) => v.key).join(",");
             // 相同的布局只保留一个。
-            let bindGroupLayout = this.bindGroupLayoutMap[key];
+            let bindGroupLayout = this._bindGroupLayoutDescriptor[label];
             if (!bindGroupLayout)
             {
-                bindGroupLayout = this.bindGroupLayoutMap[key] = device.createBindGroupLayout({ entries, label: key });
-                bindGroupLayout.entries = entries;
-                bindGroupLayout.key = key;
+                bindGroupLayout = this._bindGroupLayoutDescriptor[label] = { entries, label: label };
             }
 
             return bindGroupLayout;
         });
 
         // 管线布局描述标识符。
-        const pipelineLayoutKey = bindGroupLayouts.map((v, i) => `[${i}: ${v.key}]`).join(",");
-        gpuPipelineLayout = this.pipelineLayoutDescriptorMap[pipelineLayoutKey];
+        const pipelineLayoutKey = bindGroupLayouts.map((v, i) => `[${i}: ${v.label}]`).join(",");
+        gpuPipelineLayout = this._pipelineLayoutDescriptorMap[pipelineLayoutKey];
         if (!gpuPipelineLayout)
         {
-            gpuPipelineLayout = this.pipelineLayoutDescriptorMap[pipelineLayoutKey] = device.createPipelineLayout({
+            gpuPipelineLayout = this._pipelineLayoutDescriptorMap[pipelineLayoutKey] = {
                 bindGroupLayouts,
-            });
+            };
             gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
         }
 
-        this.getGPUPipelineLayoutMap.set(getGPUPipelineLayoutKey, gpuPipelineLayout);
+        this.getGPUPipelineLayoutMap[shaderKey] = gpuPipelineLayout;
 
         return gpuPipelineLayout;
     }
-    private static readonly getGPUPipelineLayoutMap = new ChainMap<GetGPUPipelineLayoutKey, GPUPipelineLayout>();
-    private static readonly bindGroupLayoutMap: { [key: string]: GPUBindGroupLayout } = {};
-    private static readonly pipelineLayoutDescriptorMap: { [key: string]: GPUPipelineLayout } = {};
+    private static readonly getGPUPipelineLayoutMap: { [shaderKey: string]: PipelineLayoutDescriptor } = {};
+    private static readonly _bindGroupLayoutDescriptor: { [key: string]: BindGroupLayoutDescriptor } = {};
+    private static readonly _pipelineLayoutDescriptorMap: { [key: string]: PipelineLayoutDescriptor } = {};
 }
 
-type GetGPUPipelineLayoutKey = [device: GPUDevice, shaderKey: string];
+type GetGPUPipelineLayoutKey = [shaderKey: string];

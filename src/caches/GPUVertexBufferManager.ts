@@ -37,7 +37,6 @@ export class GPUVertexBufferManager
         return result.value;
     }
 
-
     /**
      * 从顶点属性信息与顶点数据中获取顶点缓冲区布局数组以及顶点缓冲区数组。
      *
