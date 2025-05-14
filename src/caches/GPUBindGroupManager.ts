@@ -5,13 +5,15 @@ import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from "wgs
 import { VideoTexture } from "../data/VideoTexture";
 import { webgpuEvents } from "../eventnames";
 import { ExternalSampledTextureType } from "../types/TextureType";
+import { GPUBindGroupLayoutManager } from "./GPUBindGroupLayoutManager";
 import { GPUBufferManager } from "./GPUBufferManager";
+import { BindGroupLayoutDescriptor } from "./GPUPipelineLayoutManager";
 import { GPUSamplerManager } from "./GPUSamplerManager";
 import { GPUTextureViewManager } from "./GPUTextureViewManager";
 
 export class GPUBindGroupManager
 {
-    static getGPUBindGroup(device: GPUDevice, bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources)
+    static getGPUBindGroup(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
     {
         const getGPUBindGroupKey: GetGPUBindGroupKey = [bindGroupLayout, bindingResources];
         let result = GPUBindGroupManager.getGPUBindGroupMap.get(getGPUBindGroupKey);
@@ -69,7 +71,8 @@ export class GPUBindGroupManager
             const cache = GPUBindGroupManager.gpuBindGroupMap.get(gpuBindGroupKey);
             if (cache) return cache;
 
-            gBindGroup = device.createBindGroup({ layout: bindGroupLayout, entries });
+            const gpuBindGroupLayout = GPUBindGroupLayoutManager.getGPUBindGroupLayout(device, bindGroupLayout);
+            gBindGroup = device.createBindGroup({ layout: gpuBindGroupLayout, entries });
 
             GPUBindGroupManager.gpuBindGroupMap.set(gpuBindGroupKey, gBindGroup);
 
@@ -351,8 +354,8 @@ export class GPUBindGroupManager
     private static readonly bufferBindingInfoMap = new Map<TypeInfo, BufferBindingInfo>();
 }
 
-type GPUBindGroupKey = [bindGroupLayout: GPUBindGroupLayout, ...resources: GPUBindingResource[]];
-type GetGPUBindGroupKey = [bindGroupLayout: GPUBindGroupLayout, bindingResources: BindingResources];
+type GPUBindGroupKey = [bindGroupLayout: BindGroupLayoutDescriptor, ...resources: GPUBindingResource[]];
+type GetGPUBindGroupKey = [bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources];
 type GPUBufferBindingKey = [buffer: GPUBuffer, offset: number, size: number];
 type GetGPUBindingResourceKey = [device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo];
 type GetGPUExternalTextureKey = [device: GPUDevice, videoTexture: VideoTexture];

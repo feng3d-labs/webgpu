@@ -47,7 +47,6 @@ export class GPUTextureViewManager
                 mipLevelCount,
                 baseArrayLayer,
                 arrayLayerCount,
-
             });
 
             return textureView;

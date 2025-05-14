@@ -415,7 +415,7 @@ export class WebGPUBase
 
         // 计算 bindGroups
         computeObjectCommand.setBindGroup = [];
-        const layout = GPUPipelineLayoutManager.getGPUPipelineLayout(device, { compute: pipeline.compute.code });
+        const layout = GPUPipelineLayoutManager.getPipelineLayout({ compute: pipeline.compute.code });
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
             const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
@@ -596,7 +596,7 @@ export class WebGPUBase
             // 执行
             renderObjectCache.delete("setBindGroup");
             const { bindingResources } = renderObject;
-            const layout = GPUPipelineLayoutManager.getGPUPipelineLayout(device, { vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
+            const layout = GPUPipelineLayoutManager.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
             {
                 const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);

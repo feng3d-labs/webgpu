@@ -1,49 +1,35 @@
 import { ChainMap } from "@feng3d/render-api";
+import { GPUBindGroupLayoutManager } from "./GPUBindGroupLayoutManager";
 import { GPUBindGroupLayoutEntryMap, WgslReflectManager } from "./WgslReflectManager";
 
-declare global
+export interface PipelineLayoutDescriptor
 {
-    interface GPUPipelineLayout
-    {
-        /**
-         * 绑定组布局列表。
-         *
-         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
-         */
-        bindGroupLayouts: GPUBindGroupLayout[];
-    }
+    /**
+     * 绑定组布局列表。
+     */
+    bindGroupLayouts: BindGroupLayoutDescriptor[];
 
-    interface GPUBindGroupLayout
-    {
-        /**
-         * 绑定组布局的入口列表。
-         *
-         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
-         */
-        entries: GPUBindGroupLayoutEntry[];
-    }
-
-    interface BindGroupLayoutDescriptor
-    {
-        /**
-         * 绑定组布局的入口列表。
-         *
-         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
-         */
-        entries: GPUBindGroupLayoutEntry[];
-
-        /**
-         * 用于判断布局信息是否相同的标识。
-         *
-         * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
-         */
-        label?: string,
-    }
+    /**
+     * 用于判断管线布局信息是否相同的标识。
+     */
+    label?: string;
 }
 
-interface PipelineLayoutDescriptor
+export interface BindGroupLayoutDescriptor
 {
-    bindGroupLayouts: BindGroupLayoutDescriptor[];
+    /**
+     * 绑定组布局的入口列表。
+     *
+     * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+     */
+    entries: GPUBindGroupLayoutEntry[];
+
+    /**
+     * 用于判断布局信息是否相同的标识。
+     *
+     * 注：wgsl着色器被反射过程中将会被引擎自动赋值。
+     */
+    label?: string,
 }
 
 export class GPUPipelineLayoutManager
@@ -59,9 +45,7 @@ export class GPUPipelineLayoutManager
 
         const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
         {
-            const gpuBindGroupLayout = device.createBindGroupLayout(v);
-            gpuBindGroupLayout.entries = v.entries;
-
+            const gpuBindGroupLayout = GPUBindGroupLayoutManager.getGPUBindGroupLayout(device, v);
             return gpuBindGroupLayout;
         });
 
@@ -70,7 +54,6 @@ export class GPUPipelineLayoutManager
         };
 
         gpuPipelineLayout = device.createPipelineLayout(descriptor);
-        gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
         this._gpuPipelineLayoutMap.set(key, gpuPipelineLayout);
 
         return gpuPipelineLayout;
@@ -175,6 +158,7 @@ export class GPUPipelineLayoutManager
         {
             gpuPipelineLayout = this._pipelineLayoutDescriptorMap[pipelineLayoutKey] = {
                 bindGroupLayouts,
+                label: pipelineLayoutKey,
             };
             gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
         }
