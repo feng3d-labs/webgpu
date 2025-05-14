@@ -1,6 +1,6 @@
 import { reactive } from "@feng3d/reactivity";
 import { BindingResources } from "@feng3d/render-api";
-import { BufferManager } from "@feng3d/webgpu";
+import { GPUBufferManager } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
 import commonWGSL from "./common.wgsl";
@@ -78,7 +78,7 @@ export default class Common
     uniformDataU32[33] = 0xffffffff * Math.random();
     uniformDataU32[34] = 0xffffffff * Math.random();
 
-    reactive(BufferManager.getGBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
+    reactive(GPUBufferManager.getBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
 
     this.frame++;
   }

@@ -1,7 +1,6 @@
 import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
 import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
 
-import { BufferManager } from "./caches/BufferManager";
 import { GPUBindGroupManager } from "./caches/GPUBindGroupManager";
 import { GPUBufferManager } from "./caches/GPUBufferManager";
 import { GPUComputePassDescriptorManager } from "./caches/GPUComputePassDescriptorManager";
@@ -630,7 +629,7 @@ export class WebGPUBase
 
                 // 执行
                 const { data, offset, size } = vertexBuffer;
-                const buffer = BufferManager.getGBuffer(data);
+                const buffer = GPUBufferManager.getBuffer(data);
                 (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
                 const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
@@ -659,7 +658,7 @@ export class WebGPUBase
 
             const device = this._device;
 
-            const buffer = BufferManager.getGBuffer(indices);
+            const buffer = GPUBufferManager.getBuffer(indices);
             (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
             const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);

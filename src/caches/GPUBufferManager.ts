@@ -1,5 +1,5 @@
 import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
-import { Buffer, ChainMap } from "@feng3d/render-api";
+import { Buffer, ChainMap, TypedArray } from "@feng3d/render-api";
 
 /**
  * GPU缓冲区管理器。
@@ -21,6 +21,28 @@ export class GPUBufferManager
         | GPUBufferUsage.INDIRECT
         | GPUBufferUsage.QUERY_RESOLVE
         ;
+
+    static getBuffer(bufferSource: TypedArray)
+    {
+        let arrayBuffer = bufferSource as ArrayBuffer;
+        if ((bufferSource as ArrayBufferView).buffer)
+        {
+            arrayBuffer = (bufferSource as ArrayBufferView).buffer;
+        }
+
+        let buffer = this.bufferMap.get(arrayBuffer);
+        if (buffer) return buffer;
+
+        buffer = {
+            size: Math.ceil(arrayBuffer.byteLength / 4) * 4,
+            data: bufferSource,
+        };
+        this.bufferMap.set(arrayBuffer, buffer);
+
+        return buffer;
+    }
+
+    private static readonly bufferMap = new WeakMap<ArrayBuffer, Buffer>();
 
     /**
      * 获取 GPU 缓冲。

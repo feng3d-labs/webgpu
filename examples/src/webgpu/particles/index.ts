@@ -1,5 +1,7 @@
+import { reactive } from "@feng3d/reactivity";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { ComputePass, ComputePipeline, GPUBufferManager, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
-
 import { mat4, vec3 } from "wgpu-matrix";
 
 import importLevelWGSL from "./import_level.wgsl";
@@ -7,9 +9,6 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { reactive } from "@feng3d/reactivity";
-import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { BufferManager, ComputePass, ComputePipeline, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -164,7 +163,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const probabilityMapUBOBuffer = new Uint8Array(probabilityMapUBOBufferSize);
     const bufferA = new Uint8Array(textureWidth * textureHeight * 4);
     const bufferB = new Uint8Array(textureWidth * textureHeight * 4);
-    reactive(BufferManager.getGBuffer(probabilityMapUBOBuffer)).writeBuffers = [{ data: new Int32Array([textureWidth]) }];
+    reactive(GPUBufferManager.getBuffer(probabilityMapUBOBuffer)).writeBuffers = [{ data: new Int32Array([textureWidth]) }];
 
     const passEncoders: ComputePass[] = [];
 
@@ -300,7 +299,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
   function frame()
   {
-    reactive(BufferManager.getGBuffer(simulationUBOBuffer)).writeBuffers = [{
+    reactive(GPUBufferManager.getBuffer(simulationUBOBuffer)).writeBuffers = [{
       data: new Float32Array([
         simulationParams.simulate ? simulationParams.deltaTime : 0.0,
         0.0,
@@ -319,7 +318,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     mat4.multiply(projection, view, mvp);
 
     // prettier-ignore
-    reactive(BufferManager.getGBuffer(uniformBuffer)).writeBuffers = [{
+    reactive(GPUBufferManager.getBuffer(uniformBuffer)).writeBuffers = [{
       data: new Float32Array([
         // modelViewProjectionMatrix
         mvp[0], mvp[1], mvp[2], mvp[3],

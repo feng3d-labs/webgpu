@@ -1,6 +1,7 @@
+
 import { reactive } from "@feng3d/reactivity";
 import { BindingResources, Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit } from "@feng3d/render-api";
-import { ComputePass, ComputePipeline, TimestampQuery, WebGPU, BufferManager } from "@feng3d/webgpu";
+import { ComputePass, ComputePipeline, GPUBufferManager, TimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 
 import atomicToZero from "./atomicToZero.wgsl";
@@ -704,7 +705,7 @@ async function init(
     {
         // Write elements buffer
 
-        let iGPUBuffer = BufferManager.getGBuffer(elementsInputBuffer.bufferView);
+        let iGPUBuffer = GPUBufferManager.getBuffer(elementsInputBuffer.bufferView);
         let writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: elements });
         reactive(iGPUBuffer).writeBuffers = writeBuffers;
@@ -718,7 +719,7 @@ async function init(
             settings["Next Swap Span"],
         ]);
 
-        iGPUBuffer = BufferManager.getGBuffer(computeUniformsBuffer.bufferView);
+        iGPUBuffer = GPUBufferManager.getBuffer(computeUniformsBuffer.bufferView);
         writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: dims });
         writeBuffers.push({ bufferOffset: 8, data: stepDetails });
@@ -798,7 +799,7 @@ async function init(
             commandEncoder.passEncoders.push(
                 {
                     __type__: "CopyBufferToBuffer",
-                    source: BufferManager.getGBuffer(elementsOutputBuffer.bufferView),
+                    source: GPUBufferManager.getBuffer(elementsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: elementsStagingBuffer,
                     destinationOffset: 0,
@@ -806,7 +807,7 @@ async function init(
                 },
                 {
                     __type__: "CopyBufferToBuffer",
-                    source: BufferManager.getGBuffer(atomicSwapsOutputBuffer.bufferView),
+                    source: GPUBufferManager.getBuffer(atomicSwapsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: atomicSwapsStagingBuffer,
                     destinationOffset: 0,

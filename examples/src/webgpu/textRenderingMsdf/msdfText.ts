@@ -4,7 +4,7 @@ import msdfTextWGSL from "./msdfText.wgsl";
 
 import { reactive } from "@feng3d/reactivity";
 import { BindingResources, RenderPassObject, RenderPipeline, Sampler, Texture } from "@feng3d/render-api";
-import { BufferManager, RenderBundle } from "@feng3d/webgpu";
+import { GPUBufferManager, RenderBundle } from "@feng3d/webgpu";
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -105,7 +105,7 @@ export class MsdfText
     if (this.bufferArrayDirty)
     {
       this.bufferArrayDirty = false;
-      const buffer = BufferManager.getGBuffer(this.textBuffer);
+      const buffer = GPUBufferManager.getBuffer(this.textBuffer);
       const writeBuffers = buffer.writeBuffers || [];
       writeBuffers.push({
         bufferOffset: 0,
@@ -437,7 +437,7 @@ export class MsdfTextRenderer
     this.cameraUniformBuffer.set(projection, 0);
     this.cameraUniformBuffer.set(view, 16);
 
-    const buffer = BufferManager.getGBuffer(this.cameraUniformBuffer);
+    const buffer = GPUBufferManager.getBuffer(this.cameraUniformBuffer);
     const writeBuffers = buffer.writeBuffers || [];
     writeBuffers.push({
       data: this.cameraUniformBuffer,

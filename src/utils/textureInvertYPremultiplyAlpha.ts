@@ -17,13 +17,11 @@ export function textureInvertYPremultiplyAlpha(device: GPUDevice, texture: GPUTe
     }
 
     // 同一个纹理不能 同时作为输入与输出，此处复制一份临时纹理作为输入。
-    const tempTexture = device.createTexture(
-        {
-            size: { width: texture.width, height: texture.height },
-            format: texture.format,
-            usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
-        }
-    );
+    const tempTexture = device.createTexture({
+        size: { width: texture.width, height: texture.height },
+        format: texture.format,
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
+    });
     let commandEncoder = device.createCommandEncoder();
     commandEncoder.copyTextureToTexture({ texture }, { texture: tempTexture }, { width: texture.width, height: texture.height });
     device.queue.submit([commandEncoder.finish()]);

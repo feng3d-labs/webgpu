@@ -1,12 +1,11 @@
-import { mat4, vec3 } from "wgpu-matrix";
 import { reactive } from "@feng3d/reactivity";
 import { BindingResources, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { BufferManager, WebGPU } from "@feng3d/webgpu";
-
-import basicVertWGSL from "../../shaders/basic.vert.wgsl";
-import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
+import { GPUBufferManager, WebGPU } from "@feng3d/webgpu";
+import { mat4, vec3 } from "wgpu-matrix";
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import basicVertWGSL from "../../shaders/basic.vert.wgsl";
+import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
 import { MsdfTextRenderer } from "./msdfText";
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -246,7 +245,7 @@ setBlendConstant().`,
     {
         const transformationMatrix = getTransformationMatrix();
 
-        const buffer = BufferManager.getGBuffer(uniformBuffer);
+        const buffer = GPUBufferManager.getBuffer(uniformBuffer);
         const writeBuffers = buffer.writeBuffers || [];
         writeBuffers.push({
             data: transformationMatrix.buffer,

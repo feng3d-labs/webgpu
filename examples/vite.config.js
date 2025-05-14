@@ -4,9 +4,6 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
-    server: {
-        open: true,
-    },
     define: {
         __DEV__: process.env.NODE_ENV === 'development' ? true : false
     },
