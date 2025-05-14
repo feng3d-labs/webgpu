@@ -5,10 +5,10 @@ import { TemplateInfo, TypeInfo } from "wgsl_reflect";
 import { MultisampleState } from "../data/MultisampleState";
 import { RenderPassFormat } from "../internal/RenderPassFormat";
 import { FunctionInfoManager } from "./FunctionInfoManager";
-import { WgslReflectManager } from "./WgslReflectManager";
 import { GPUPipelineLayoutManager } from "./GPUPipelineLayoutManager";
 import { GPUShaderModuleManager } from "./GPUShaderModuleManager";
 import { GPUVertexBufferManager } from "./GPUVertexBufferManager";
+import { WgslReflectManager } from "./WgslReflectManager";
 
 export class GPURenderPipelineManager
 {
@@ -76,10 +76,10 @@ export class GPURenderPipelineManager
     private static getGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
     {
         const getGPUVertexStateKey: GetGPUVertexStateKey = [device, vertexState, vertices];
-        const result = this.getGPUVertexStateMap.get(getGPUVertexStateKey);
+        let result = this.getGPUVertexStateMap.get(getGPUVertexStateKey);
         if (result) return result.value;
 
-        return this.getGPUVertexStateMap.set(getGPUVertexStateKey, computed(() =>
+        result = computed(() =>
         {
             // 监听
             const r_vertexState = reactive(vertexState);
@@ -106,7 +106,11 @@ export class GPURenderPipelineManager
             this.gpuVertexStateMap.set(gpuVertexStateKey, gpuVertexState);
 
             return gpuVertexState;
-        })).value;
+        });
+
+        this.getGPUVertexStateMap.set(getGPUVertexStateKey, result);
+
+        return result.value;
     }
 
     private static getConstants(constants: Record<string, number>)
@@ -422,19 +426,19 @@ export class GPURenderPipelineManager
         let result = this.getGPUColorTargetStatesMap.get(getGPUColorTargetStatesKey);
         if (result) return result.value;
 
-        result = computed(() =>
-            colorAttachments.map((format, i) =>
-            {
-                if (!format) return undefined;
+        result = computed(() => colorAttachments.map((format, i) =>
+        {
+            if (!format) return undefined;
 
-                // 监听
-                reactive(targets)[i];
+            // 监听
+            reactive(targets)[i];
 
-                // 计算
-                const gpuColorTargetState = this.getGPUColorTargetState(targets[i], format);
+            // 计算
+            const gpuColorTargetState = this.getGPUColorTargetState(targets[i], format);
 
-                return gpuColorTargetState;
-            }));
+            return gpuColorTargetState;
+        }));
+
         this.getGPUColorTargetStatesMap.set(getGPUColorTargetStatesKey, result);
 
         return result.value;
@@ -592,8 +596,21 @@ export class GPURenderPipelineManager
     }
 
 
-    private static readonly getDefaultGPUColorTargetState = (format: GPUTextureFormat): GPUColorTargetState =>
+    private static getDefaultGPUColorTargetState(format: GPUTextureFormat): GPUColorTargetState
+    {
         this.defaultGPUColorTargetState[format] ??= { format, blend: this.getGPUBlendState(undefined), writeMask: this.getGPUColorWriteFlags(undefined) };
+
+        return this.defaultGPUColorTargetState[format];
+    }
+
+    private static getDefaultGPUColorTargetStates(colorAttachments: readonly GPUTextureFormat[])
+    {
+        this.defaultGPUColorTargetStates[colorAttachments.toString()] ??= colorAttachments.map((format) =>
+            this.getGPUColorTargetState(undefined, format));
+
+        return this.defaultGPUColorTargetStates[colorAttachments.toString()];
+    }
+
     private static readonly defaultGPUColorTargetState: Record<GPUTextureFormat, GPUColorTargetState> = {} as any;
 
     private static readonly defaultGPUStencilFaceState: GPUStencilFaceState = {};
@@ -611,9 +628,6 @@ export class GPURenderPipelineManager
     private static readonly gpuFragmentStateMap = new ChainMap<GPUFragmentStateKey, GPUFragmentState>();
     private static readonly getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, Computed<GPUFragmentState>>();
     private static readonly getGPUColorTargetStatesMap = new ChainMap<GetGPUColorTargetStatesKey, Computed<GPUColorTargetState[]>>();
-    private static readonly getDefaultGPUColorTargetStates = (colorAttachments: readonly GPUTextureFormat[]) =>
-        this.defaultGPUColorTargetStates[colorAttachments.toString()] ??= colorAttachments.map((format) =>
-            this.getGPUColorTargetState(undefined, format));
     private static readonly defaultGPUColorTargetStates: { [key: string]: GPUColorTargetState[] } = {};
 }
 

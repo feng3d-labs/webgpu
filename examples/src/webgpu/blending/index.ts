@@ -530,10 +530,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             clearValue[3] = alpha;
         }
 
-        constantColor[0] = constant.color[0];
-        constantColor[1] = constant.color[1];
-        constantColor[2] = constant.color[2];
-        constantColor[3] = constant.alpha;
+        reactive(constantColor)[0] = constant.color[0];
+        reactive(constantColor)[1] = constant.color[1];
+        reactive(constantColor)[2] = constant.color[2];
+        reactive(constantColor)[3] = constant.alpha;
 
         updateUniforms(srcUniform, canvas, srcTexture);
         updateUniforms(dstUniform, canvas, dstTexture);
