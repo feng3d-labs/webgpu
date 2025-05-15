@@ -39,7 +39,8 @@
   "workspaces": [
     ".",
     "./examples",
-    "packages/*"
+    "packages/*",
+    "packages/*/examples"
   ],
   "publishConfig": {
     "access": "public"
