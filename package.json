@@ -61,6 +61,6 @@
     "@feng3d/render-api": "0.0.4",
     "@webgpu/types": "0.1.49",
     "wgsl_reflect": "^1.0.16",
-    "@feng3d/reactivity": "^1.0.4"
+    "@feng3d/reactivity": "^3.5.14-0.0.1"
   }
 }
