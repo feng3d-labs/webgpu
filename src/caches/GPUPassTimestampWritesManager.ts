@@ -1,7 +1,7 @@
-import { anyEmitter } from "@feng3d/event";
-import { ChainMap } from "@feng3d/render-api";
-import { TimestampQuery } from "../data/TimestampQuery";
-import { GPUQueue_submit } from "../eventnames";
+import { anyEmitter } from '@feng3d/event';
+import { ChainMap } from '@feng3d/render-api';
+import { TimestampQuery } from '../data/TimestampQuery';
+import { GPUQueue_submit } from '../eventnames';
 
 declare global
 {
@@ -23,22 +23,23 @@ export class GPUPassTimestampWritesManager
 
         const getGPUPassTimestampWritesKey: GetGPUPassTimestampWritesKey = [device, timestampQuery];
         let timestampWrites = this.getGPUPassTimestampWritesMap.get(getGPUPassTimestampWritesKey);
+
         if (timestampWrites) return timestampWrites;
 
         // 判断是否支持 `timestamp-query`
-        if (timestampQuery["isSupports"] === undefined)
+        if (timestampQuery['isSupports'] === undefined)
         {
-            timestampQuery["isSupports"] = device.features.has(`timestamp-query`);
-            timestampQuery.onSupports?.(timestampQuery["isSupports"]);
+            timestampQuery['isSupports'] = device.features.has(`timestamp-query`);
+            timestampQuery.onSupports?.(timestampQuery['isSupports']);
         }
-        if (!timestampQuery["isSupports"])
+        if (!timestampQuery['isSupports'])
         {
             console.warn(`WebGPU未开启或者不支持 timestamp-query 特性，请确认 WebGPU.init 初始化参数是否正确！`);
 
             return;
         }
 
-        const querySet = device.createQuerySet({ type: "timestamp", count: 2 });
+        const querySet = device.createQuerySet({ type: 'timestamp', count: 2 });
 
         // Create a buffer where to store the result of GPU queries
         const timestampByteSize = 8; // timestamps are uint64
@@ -67,7 +68,7 @@ export class GPUPassTimestampWritesManager
                 0 /* firstQuery */,
                 querySet.count /* queryCount */,
                 resolveBuf,
-                0 /* destinationOffset */
+                0, /* destinationOffset */
             );
 
             // Create a buffer to map the result back to the CPU
@@ -76,7 +77,7 @@ export class GPUPassTimestampWritesManager
                 usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
             });
 
-            if (resultBuf.mapState === "unmapped")
+            if (resultBuf.mapState === 'unmapped')
             {
                 // Copy values to the mappable buffer
                 commandEncoder.copyBufferToBuffer(
@@ -84,13 +85,13 @@ export class GPUPassTimestampWritesManager
                     0,
                     resultBuf,
                     0,
-                    resultBuf.size
+                    resultBuf.size,
                 );
             }
 
             const getQueryResult = () =>
             {
-                if (resultBuf.mapState === "unmapped")
+                if (resultBuf.mapState === 'unmapped')
                 {
                     resultBuf.mapAsync(GPUMapMode.READ).then(() =>
                     {
@@ -100,6 +101,7 @@ export class GPUPassTimestampWritesManager
                         // Cast into number. Number can be 9007199254740991 as max integer
                         // which is 109 days of nano seconds.
                         const elapsedNs = Number(timestamps[1] - timestamps[0]);
+
                         // It's possible elapsedNs is negative which means it's invalid
                         // (see spec https://gpuweb.github.io/gpuweb/#timestamp)
                         if (elapsedNs >= 0)

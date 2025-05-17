@@ -1,4 +1,4 @@
-import { WebGPUBase } from "./WebGPUBase";
+import { WebGPUBase } from './WebGPUBase';
 
 /**
  * WebGPU 对象。

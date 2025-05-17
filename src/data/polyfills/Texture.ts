@@ -1,6 +1,6 @@
-import { Texture } from "@feng3d/render-api";
+import { Texture } from '@feng3d/render-api';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * 纹理的图片资源。

@@ -1,18 +1,18 @@
-import { GUI } from "dat.gui";
+import { GUI } from 'dat.gui';
 
-import { mat4, vec3, vec4 } from "wgpu-matrix";
-import { mesh } from "../../meshes/stanfordDragon";
+import { mat4, vec3, vec4 } from 'wgpu-matrix';
+import { mesh } from '../../meshes/stanfordDragon';
 
-import fragmentDeferredRendering from "./fragmentDeferredRendering.wgsl";
-import fragmentGBuffersDebugView from "./fragmentGBuffersDebugView.wgsl";
-import fragmentWriteGBuffers from "./fragmentWriteGBuffers.wgsl";
-import lightUpdate from "./lightUpdate.wgsl";
-import vertexTextureQuad from "./vertexTextureQuad.wgsl";
-import vertexWriteGBuffers from "./vertexWriteGBuffers.wgsl";
+import fragmentDeferredRendering from './fragmentDeferredRendering.wgsl';
+import fragmentGBuffersDebugView from './fragmentGBuffersDebugView.wgsl';
+import fragmentWriteGBuffers from './fragmentWriteGBuffers.wgsl';
+import lightUpdate from './lightUpdate.wgsl';
+import vertexTextureQuad from './vertexTextureQuad.wgsl';
+import vertexWriteGBuffers from './vertexWriteGBuffers.wgsl';
 
-import { reactive } from "@feng3d/reactivity";
-import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from "@feng3d/render-api";
-import { GPUBufferManager, ComputePass, ComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/render-api';
+import { GPUBufferManager, ComputePass, ComputePipeline, WebGPU } from '@feng3d/webgpu';
 
 const kMaxNumLights = 1024;
 const lightExtentMin = vec3.fromValues(-50, -30, -50);
@@ -21,6 +21,7 @@ const lightExtentMax = vec3.fromValues(50, 50, 50);
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
     const aspect = canvas.width / canvas.height;
@@ -30,6 +31,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Create the model vertex buffer.
     const kVertexStride = 8;
     const vertexBuffer = new Float32Array(mesh.positions.length * kVertexStride);
+
     for (let i = 0; i < mesh.positions.length; ++i)
     {
         vertexBuffer.set(mesh.positions[i], kVertexStride * i);
@@ -38,14 +40,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     const vertices: VertexAttributes = {
-        position: { data: vertexBuffer, format: "float32x3", offset: 0, arrayStride: Float32Array.BYTES_PER_ELEMENT * 8 },
-        normal: { data: vertexBuffer, format: "float32x3", offset: Float32Array.BYTES_PER_ELEMENT * 3, arrayStride: Float32Array.BYTES_PER_ELEMENT * 8 },
-        uv: { data: vertexBuffer, format: "float32x2", offset: Float32Array.BYTES_PER_ELEMENT * 6, arrayStride: Float32Array.BYTES_PER_ELEMENT * 8 },
+        position: { data: vertexBuffer, format: 'float32x3', offset: 0, arrayStride: Float32Array.BYTES_PER_ELEMENT * 8 },
+        normal: { data: vertexBuffer, format: 'float32x3', offset: Float32Array.BYTES_PER_ELEMENT * 3, arrayStride: Float32Array.BYTES_PER_ELEMENT * 8 },
+        uv: { data: vertexBuffer, format: 'float32x2', offset: Float32Array.BYTES_PER_ELEMENT * 6, arrayStride: Float32Array.BYTES_PER_ELEMENT * 8 },
     };
 
     // Create the model index buffer.
     const indexCount = mesh.triangles.length * 3;
     const indexBuffer = new Uint16Array(indexCount);
+
     for (let i = 0; i < mesh.triangles.length; ++i)
     {
         indexBuffer.set(mesh.triangles[i], 3 * i);
@@ -54,15 +57,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // GBuffer texture render targets
     const gBufferTexture2DFloat32: Texture = {
         size: [canvas.width, canvas.height],
-        format: "rgba32float",
+        format: 'rgba32float',
     };
     const gBufferTexture2DFloat16: Texture = {
         size: [canvas.width, canvas.height],
-        format: "rgba16float",
+        format: 'rgba16float',
     };
     const gBufferTextureAlbedo: Texture = {
         size: [canvas.width, canvas.height],
-        format: "bgra8unorm",
+        format: 'bgra8unorm',
     };
     const gBufferTextureViews: TextureView[] = [
         { texture: gBufferTexture2DFloat32 },
@@ -71,8 +74,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ];
 
     const primitive: GPUPrimitiveState = {
-        topology: "triangle-list",
-        cullMode: "back",
+        topology: 'triangle-list',
+        cullMode: 'back',
     };
 
     const writeGBuffersPipeline: RenderPipeline = {
@@ -110,7 +113,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
-        format: "depth24plus",
+        format: 'depth24plus',
     };
 
     const writeGBufferPassDescriptor: RenderPassDescriptor = {
@@ -140,8 +143,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             view: { texture: depthTexture },
 
             depthClearValue: 1,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
@@ -151,19 +154,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 view: { texture: { context: { canvasId: canvas.id } } },
 
                 clearValue: [0.0, 0.0, 0.0, 1.0],
-            }
+            },
         ],
     };
 
     const settings = {
-        mode: "rendering",
+        mode: 'rendering',
         numLights: 128,
     };
     const configUniformBuffer = new Uint32Array([settings.numLights]);
 
-    gui.add(settings, "mode", ["rendering", "gBuffers view"]);
+    gui.add(settings, 'mode', ['rendering', 'gBuffers view']);
     gui
-        .add(settings, "numLights", 1, kMaxNumLights)
+        .add(settings, 'numLights', 1, kMaxNumLights)
         .step(1)
         .onChange(() =>
         {
@@ -207,6 +210,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const lightsBuffer = new Float32Array(lightDataStride * kMaxNumLights);
     const tmpVec4 = vec4.create();
     let offset = 0;
+
     for (let i = 0; i < kMaxNumLights; i++)
     {
         offset = lightDataStride * i;
@@ -228,6 +232,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const lightExtentBuffer = new Uint8Array(4 * 8);
     const lightExtentData = new Float32Array(8);
+
     lightExtentData.set(lightExtentMin, 0);
     lightExtentData.set(lightExtentMax, 4);
     reactive(GPUBufferManager.getBuffer(lightExtentBuffer)).writeBuffers = [{ data: lightExtentData }];
@@ -267,7 +272,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         (2 * Math.PI) / 5,
         aspect,
         1,
-        2000.0
+        2000.0,
     );
 
     const viewMatrix = mat4.lookAt(eyePosition, origin, upVector);
@@ -278,6 +283,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const modelMatrix = mat4.translation([0, -45, 0]);
 
     const cameraMatrixData = viewProjMatrix as Float32Array;
+
     if (GPUBufferManager.getBuffer(cameraUniformBuffer).writeBuffers)
     {
         GPUBufferManager.getBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraMatrixData });
@@ -287,6 +293,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         reactive(GPUBufferManager.getBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraMatrixData }];
     }
     const modelData = modelMatrix as Float32Array;
+
     if (GPUBufferManager.getBuffer(modelUniformBuffer).writeBuffers)
     {
         GPUBufferManager.getBuffer(modelUniformBuffer).writeBuffers.push({ data: modelData });
@@ -296,8 +303,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         reactive(GPUBufferManager.getBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
     }
     const invertTransposeModelMatrix = mat4.invert(modelMatrix);
+
     mat4.transpose(invertTransposeModelMatrix, invertTransposeModelMatrix);
     const normalModelData = invertTransposeModelMatrix as Float32Array;
+
     if (GPUBufferManager.getBuffer(modelUniformBuffer).writeBuffers)
     {
         GPUBufferManager.getBuffer(modelUniformBuffer).writeBuffers.push({ bufferOffset: 64, data: normalModelData });
@@ -314,6 +323,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const rad = Math.PI * (Date.now() / 5000);
         const rotation = mat4.rotateY(mat4.translation(origin), rad);
+
         vec3.transformMat4(eyePosition, rotation, eyePosition);
 
         const viewMatrix = mat4.lookAt(eyePosition, origin, upVector);
@@ -324,6 +334,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     const passEncoders: (ComputePass | RenderPass)[] = [];
+
     passEncoders.push({
         descriptor: writeGBufferPassDescriptor,
         renderPassObjects: [
@@ -334,12 +345,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 vertices,
                 indices: indexBuffer,
-                draw: { __type__: "DrawIndexed", indexCount },
+                draw: { __type__: 'DrawIndexed', indexCount },
             },
-        ]
+        ],
     });
     passEncoders.push({
-        __type__: "ComputePass",
+        __type__: 'ComputePass',
         computeObjects: [
             {
                 pipeline: lightUpdateComputePipeline,
@@ -348,7 +359,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 },
                 workgroups: { workgroupCountX: Math.ceil(kMaxNumLights / 64) },
             },
-        ]
+        ],
     });
 
     const gBuffersPassEncoders: (ComputePass | RenderPass)[] = passEncoders.concat();
@@ -361,9 +372,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 bindingResources: {
                     ...gBufferTexturesBindGroup,
                 },
-                draw: { __type__: "DrawVertex", vertexCount: 6 },
+                draw: { __type__: 'DrawVertex', vertexCount: 6 },
             },
-        ]
+        ],
     });
 
     passEncoders.push({
@@ -375,14 +386,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     ...gBufferTexturesBindGroup,
                     ...lightsBufferBindGroup,
                 },
-                draw: { __type__: "DrawVertex", vertexCount: 6 },
+                draw: { __type__: 'DrawVertex', vertexCount: 6 },
             },
-        ]
+        ],
     });
 
     function frame()
     {
         const cameraViewProj = getCameraViewProjMatrix();
+
         if (GPUBufferManager.getBuffer(cameraUniformBuffer).writeBuffers)
         {
             GPUBufferManager.getBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraViewProj });
@@ -395,9 +407,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const submit: Submit = {
             commandEncoders: [
                 {
-                    passEncoders: settings.mode === "gBuffers view" ? gBuffersPassEncoders : passEncoders,
-                }
-            ]
+                    passEncoders: settings.mode === 'gBuffers view' ? gBuffersPassEncoders : passEncoders,
+                },
+            ],
         };
 
         webgpu.submit(submit);
@@ -408,5 +420,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);

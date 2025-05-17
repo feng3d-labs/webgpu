@@ -1,4 +1,4 @@
-import { textureInvertYPremultiplyAlpha_wgsl as wgsl } from "./textureInvertYPremultiplyAlpha.wgsl";
+import { textureInvertYPremultiplyAlpha_wgsl as wgsl } from './textureInvertYPremultiplyAlpha.wgsl';
 
 /**
  * 操作纹理进行Y轴翻转或进行预乘Alpha。
@@ -23,28 +23,29 @@ export function textureInvertYPremultiplyAlpha(device: GPUDevice, texture: GPUTe
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
     });
     let commandEncoder = device.createCommandEncoder();
+
     commandEncoder.copyTextureToTexture({ texture }, { texture: tempTexture }, { width: texture.width, height: texture.height });
     device.queue.submit([commandEncoder.finish()]);
 
     //
     const pipeline = device.createRenderPipeline({
-        layout: "auto",
+        layout: 'auto',
         vertex: {
             module: wgslModel,
-            entryPoint: "vsmain",
+            entryPoint: 'vsmain',
             constants: {
                 invertY: invertY ? 1 : 0,
-            }
+            },
         },
         fragment: {
             module: wgslModel,
-            entryPoint: "fsmain",
+            entryPoint: 'fsmain',
             constants: {
-                premultiplyAlpha: premultiplyAlpha ? 1 : 0
+                premultiplyAlpha: premultiplyAlpha ? 1 : 0,
             },
-            targets: [{ format: "rgba8unorm" }] as GPUColorTargetState[],
+            targets: [{ format: 'rgba8unorm' }] as GPUColorTargetState[],
         },
-        primitive: { topology: "triangle-strip" }
+        primitive: { topology: 'triangle-strip' },
     });
 
     const bindGroup = device.createBindGroup({
@@ -53,14 +54,14 @@ export function textureInvertYPremultiplyAlpha(device: GPUDevice, texture: GPUTe
             {
                 binding: 0,
                 resource: device.createSampler({
-                    magFilter: "linear",
-                    minFilter: "linear",
-                })
+                    magFilter: 'linear',
+                    minFilter: 'linear',
+                }),
             },
             {
                 binding: 1,
                 resource: tempTexture.createView(),
-            }
+            },
         ] as GPUBindGroupEntry[],
     });
 
@@ -70,11 +71,12 @@ export function textureInvertYPremultiplyAlpha(device: GPUDevice, texture: GPUTe
         colorAttachments: [
             {
                 view: texture.createView(),
-                loadOp: "load",
-                storeOp: "store",
-            } as GPURenderPassColorAttachment
-        ]
+                loadOp: 'load',
+                storeOp: 'store',
+            } as GPURenderPassColorAttachment,
+        ],
     });
+
     renderPassEncoder.setPipeline(pipeline);
     renderPassEncoder.setBindGroup(0, bindGroup);
     renderPassEncoder.draw(4);

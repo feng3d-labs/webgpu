@@ -1,30 +1,31 @@
-import { GUI } from "dat.gui";
+import { GUI } from 'dat.gui';
 
-import atmosphericScatteringSkyWGSL from "./atmosphericScatteringSky.wgsl";
+import atmosphericScatteringSkyWGSL from './atmosphericScatteringSky.wgsl';
 
-import { CanvasContext, Texture } from "@feng3d/render-api";
-import { ComputeObject, WebGPU } from "@feng3d/webgpu";
+import { CanvasContext, Texture } from '@feng3d/render-api';
+import { ComputeObject, WebGPU } from '@feng3d/webgpu';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
     const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: {
-            format: "rgba16float",
+            format: 'rgba16float',
             usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.STORAGE_BINDING,
-        }
+        },
     };
 
     const webgpu = await new WebGPU().init();
 
     const framebuffer: Texture = {
-        label: "framebuffer",
+        label: 'framebuffer',
         size: [canvas.width, canvas.height],
-        format: "rgba16float",
+        format: 'rgba16float',
     };
 
     const uniformBuffer = {
@@ -46,20 +47,21 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const computeObject0: ComputeObject = {
         pipeline: {
-            compute: { code: atmosphericScatteringSkyWGSL }
+            compute: { code: atmosphericScatteringSkyWGSL },
         },
         bindingResources: {
             uniformBuffer,
-            outTexture: { texture: framebuffer }
+            outTexture: { texture: framebuffer },
         },
         workgroups: { workgroupCountX: Math.ceil(uniformBuffer.width / 64), workgroupCountY: Math.ceil(uniformBuffer.height / 64) },
     };
 
     let t = 0;
+
     function frame()
     {
         webgpu.submit({
-            commandEncoders: [{ passEncoders: [{ __type__: "ComputePass", computeObjects: [computeObject0] }] }]
+            commandEncoders: [{ passEncoders: [{ __type__: 'ComputePass', computeObjects: [computeObject0] }] }],
         });
 
         ++t;
@@ -70,5 +72,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);

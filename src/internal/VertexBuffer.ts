@@ -1,4 +1,4 @@
-import { VertexDataTypes } from "@feng3d/render-api";
+import { VertexDataTypes } from '@feng3d/render-api';
 
 /**
  * Sets the current vertex buffer for the given slot.

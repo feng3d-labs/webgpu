@@ -1,16 +1,17 @@
-import { reactive } from "@feng3d/reactivity";
-import { BufferBinding, CanvasContext, CopyTextureToTexture, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
-import { mat4, vec3 } from "wgpu-matrix";
+import { reactive } from '@feng3d/reactivity';
+import { BufferBinding, CanvasContext, CopyTextureToTexture, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
-import basicVertWGSL from "../../shaders/basic.vert.wgsl";
-import sampleSelfWGSL from "./sampleSelf.frag.wgsl";
+import basicVertWGSL from '../../shaders/basic.vert.wgsl';
+import sampleSelfWGSL from './sampleSelf.frag.wgsl';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
     const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
@@ -26,8 +27,8 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Create a sampler with linear filtering for smooth interpolation.
     const sampler: Sampler = {
-        magFilter: "linear",
-        minFilter: "linear",
+        magFilter: 'linear',
+        minFilter: 'linear',
     };
 
     const aspect = canvas.width / canvas.height;
@@ -35,20 +36,22 @@ const init = async (canvas: HTMLCanvasElement) =>
         (2 * Math.PI) / 5,
         aspect,
         1,
-        100.0
+        100.0,
     );
     const modelViewProjectionMatrix = mat4.create();
 
     function getTransformationMatrix()
     {
         const viewMatrix = mat4.identity();
+
         mat4.translate(viewMatrix, vec3.fromValues(0, 0, -4), viewMatrix);
         const now = Date.now() / 1000;
+
         mat4.rotate(
             viewMatrix,
             vec3.fromValues(Math.sin(now), Math.cos(now), 0),
             1,
-            viewMatrix
+            viewMatrix,
         );
 
         mat4.multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
@@ -59,8 +62,8 @@ const init = async (canvas: HTMLCanvasElement) =>
     const context: CanvasContext = {
         canvasId: canvas.id,
         configuration: {
-            usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT
-        }
+            usage: GPUTextureUsage.COPY_SRC | GPUTextureUsage.RENDER_ATTACHMENT,
+        },
     };
 
     const renderPass: RenderPassDescriptor = {
@@ -68,12 +71,12 @@ const init = async (canvas: HTMLCanvasElement) =>
             {
                 view: { texture: { context } },
                 clearValue: [0.5, 0.5, 0.5, 1.0],
-            }
+            },
         ],
         depthStencilAttachment: {
             depthClearValue: 1,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
@@ -81,17 +84,17 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleSelfWGSL },
             primitive: {
-                cullFace: "back",
+                cullFace: 'back',
             },
         },
         vertices: {
-            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+            position: { data: cubeVertexArray, format: 'float32x4', offset: cubePositionOffset, arrayStride: cubeVertexSize },
+            uv: { data: cubeVertexArray, format: 'float32x2', offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
+        draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount },
         bindingResources: {
             uniforms: {
-                modelViewProjectionMatrix: new Float32Array(16)
+                modelViewProjectionMatrix: new Float32Array(16),
             },
             mySampler: sampler,
             myTexture: { texture: cubeTexture },
@@ -99,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const copyTextureToTexture: CopyTextureToTexture = {
-        __type__: "CopyTextureToTexture",
+        __type__: 'CopyTextureToTexture',
         source: { texture: { context } },
         destination: { texture: cubeTexture },
         copySize: [canvas.width, canvas.height],
@@ -117,8 +120,8 @@ const init = async (canvas: HTMLCanvasElement) =>
                     passEncoders: [
                         { descriptor: renderPass, renderPassObjects: [renderObject] },
                         copyTextureToTexture,
-                    ]
-                }
+                    ],
+                },
             ],
         };
 
@@ -129,5 +132,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);

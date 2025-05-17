@@ -1,4 +1,4 @@
-import { ChainMap } from "@feng3d/render-api";
+import { ChainMap } from '@feng3d/render-api';
 
 /**
  * GPU着色器模块管理器。
@@ -16,6 +16,7 @@ export class GPUShaderModuleManager
     {
         const getGPUShaderModuleKey: GetGPUShaderModuleKey = [device, code];
         let gShaderModule = this.getGPUShaderModuleMap.get(getGPUShaderModuleKey);
+
         if (gShaderModule) return gShaderModule;
 
         gShaderModule = device.createShaderModule({

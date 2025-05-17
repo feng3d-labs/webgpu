@@ -1,5 +1,5 @@
-import { ComputePass } from "../data/ComputePass";
-import { GPUPassTimestampWritesManager } from "./GPUPassTimestampWritesManager";
+import { ComputePass } from '../data/ComputePass';
+import { GPUPassTimestampWritesManager } from './GPUPassTimestampWritesManager';
 
 export class GPUComputePassDescriptorManager
 {

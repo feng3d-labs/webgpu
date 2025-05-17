@@ -1,6 +1,6 @@
-import { computed, Computed, reactive } from "@feng3d/reactivity";
-import { ChainMap, Texture, TextureView } from "@feng3d/render-api";
-import { GPUTextureManager } from "./GPUTextureManager";
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, Texture, TextureView } from '@feng3d/render-api';
+import { GPUTextureManager } from './GPUTextureManager';
 
 export class GPUTextureViewManager
 {
@@ -17,12 +17,14 @@ export class GPUTextureViewManager
 
         const getGPUTextureViewKey: GetGPUTextureViewKey = [device, view];
         let result = this.getGPUTextureViewMap.get(getGPUTextureViewKey);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             // 监听
             const r_view = reactive(view);
+
             r_view.texture;
             r_view.label;
             r_view.format;
@@ -55,8 +57,8 @@ export class GPUTextureViewManager
 
         return result.value;
     }
+
     private static readonly getGPUTextureViewMap = new ChainMap<GetGPUTextureViewKey, Computed<GPUTextureView>>();
 }
-
 
 type GetGPUTextureViewKey = [device: GPUDevice, view: TextureView];

@@ -19,7 +19,7 @@ export class ChainMap3<K1, K2, K3, V>
     {
         const map = this._map;
 
-return map.get(keys[0])?.get(keys[1])?.get(keys[2]);
+        return map.get(keys[0])?.get(keys[1])?.get(keys[2]);
     }
 
     /**
@@ -31,12 +31,15 @@ return map.get(keys[0])?.get(keys[1])?.get(keys[2]);
     set(keys: [K1, K2, K3], value: V)
     {
         const map = this._map;
+
         //
         if (map.has(keys[0]) === false) map.set(keys[0], new Map());
         const map0 = map.get(keys[0]);
+
         //
         if (map0.has(keys[1]) === false) map0.set(keys[1], new Map());
         const map1 = map0.get(keys[1]);
+
         //
         map1.set(keys[2], value);
     }
@@ -51,7 +54,7 @@ return map.get(keys[0])?.get(keys[1])?.get(keys[2]);
     {
         const map = this._map;
 
-return !!(map.get(keys[0])?.get(keys[1])?.delete(keys[2]));
+        return !!(map.get(keys[0])?.get(keys[1])?.delete(keys[2]));
     }
 }
 

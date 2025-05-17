@@ -1,12 +1,12 @@
-import { GUI } from "dat.gui";
-import { mat4 } from "wgpu-matrix";
-import texturedQuadWGSL from "./texturedQuad.wgsl";
+import { GUI } from 'dat.gui';
+import { mat4 } from 'wgpu-matrix';
+import texturedQuadWGSL from './texturedQuad.wgsl';
 
-import { reactive } from "@feng3d/reactivity";
-import { BindingResources, CanvasContext, Color, RenderObject, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, CanvasContext, Color, RenderObject, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     interface Uniforms
     {
@@ -25,7 +25,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         hue: number,
         saturation: number,
         lightness: number,
-        alpha: number
+        alpha: number,
     ) =>
         // prettier-ignore
         `hsla(${(hue * 360) | 0}, ${saturation * 100}%, ${(lightness * 100) | 0}%, ${alpha})`;
@@ -33,14 +33,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Generates a canvas with 3 circles of different colors with blurred edges.
     function createSourceImage(size: number)
     {
-        const canvas = document.createElement("canvas");
+        const canvas = document.createElement('canvas');
+
         canvas.width = size;
         canvas.height = size;
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext('2d');
+
         ctx.translate(size / 2, size / 2);
 
-        ctx.globalCompositeOperation = "screen";
+        ctx.globalCompositeOperation = 'screen';
         const numCircles = 3;
+
         for (let i = 0; i < numCircles; ++i)
         {
             ctx.rotate((Math.PI * 2) / numCircles);
@@ -49,10 +52,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ctx.beginPath();
 
             const radius = size / 3;
+
             ctx.arc(0, 0, radius, 0, Math.PI * 2);
 
             const gradient = ctx.createRadialGradient(0, 0, radius / 2, 0, 0, radius);
             const h = i / numCircles;
+
             gradient.addColorStop(0.5, hsla(h, 1, 0.5, 1));
             gradient.addColorStop(1, hsla(h, 1, 0.5, 0));
 
@@ -67,12 +72,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // Generates a canvas with alternating colored and transparent stripes
     function createDestinationImage(size: number)
     {
-        const canvas = document.createElement("canvas");
+        const canvas = document.createElement('canvas');
+
         canvas.width = size;
         canvas.height = size;
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext('2d');
 
         const gradient = ctx.createLinearGradient(0, 0, size, size);
+
         for (let i = 0; i <= 6; ++i)
         {
             gradient.addColorStop(i / 6, hsl(i / -6, 1, 0.5));
@@ -81,8 +88,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, size, size);
 
-        ctx.fillStyle = "rgba(0, 0, 0, 255)";
-        ctx.globalCompositeOperation = "destination-out";
+        ctx.fillStyle = 'rgba(0, 0, 0, 255)';
+        ctx.globalCompositeOperation = 'destination-out';
         ctx.rotate(Math.PI / -4);
         for (let i = 0; i < size * 2; i += 32)
         {
@@ -99,6 +106,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const dstCanvas = createDestinationImage(size);
 
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -113,14 +121,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         options: {
             flipY?: boolean;
             premultipliedAlpha?: boolean;
-        } = {}
+        } = {},
     )
     {
         const { flipY, premultipliedAlpha } = options;
         const texture: Texture = {
-            format: "rgba8unorm",
+            format: 'rgba8unorm',
             size: [source.width, source.height],
-            sources: [{ image: source, flipY, premultipliedAlpha }]
+            sources: [{ image: source, flipY, premultipliedAlpha }],
         };
 
         return texture;
@@ -128,26 +136,26 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // create 2 textures with unpremultiplied alpha
     const srcTextureUnpremultipliedAlpha = createTextureFromSource(
-        srcCanvas
+        srcCanvas,
     );
     const dstTextureUnpremultipliedAlpha = createTextureFromSource(
-        dstCanvas
+        dstCanvas,
     );
 
     // create 2 textures with premultiplied alpha
     const srcTexturePremultipliedAlpha = createTextureFromSource(
         srcCanvas,
-        { premultipliedAlpha: true }
+        { premultipliedAlpha: true },
     );
     const dstTexturePremultipliedAlpha = createTextureFromSource(
         dstCanvas,
-        { premultipliedAlpha: true }
+        { premultipliedAlpha: true },
     );
 
     const sampler: Sampler = {
-        magFilter: "linear",
-        minFilter: "linear",
-        mipmapFilter: "linear",
+        magFilter: 'linear',
+        minFilter: 'linear',
+        mipmapFilter: 'linear',
     };
 
     // function makeUniformBufferAndValues(): Uniforms
@@ -209,113 +217,113 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const clearValue: [red: number, green: number, blue: number, alpha: number] = [0, 0, 0, 0];
     const renderPassDescriptor: RenderPassDescriptor = {
-        label: "our basic canvas renderPass",
+        label: 'our basic canvas renderPass',
         colorAttachments: [
             {
                 view: canvasTexture, // <- to be filled out when we render
                 clearValue,
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
     };
 
-    const operations = ["add", "subtract", "reverse-subtract", "min", "max"];
+    const operations = ['add', 'subtract', 'reverse-subtract', 'min', 'max'];
 
     const factors = [
-        "zero",
-        "one",
-        "src",
-        "one-minus-src",
-        "src-alpha",
-        "one-minus-src-alpha",
-        "dst",
-        "one-minus-dst",
-        "dst-alpha",
-        "one-minus-dst-alpha",
-        "src-alpha-saturated",
-        "constant",
-        "one-minus-constant",
+        'zero',
+        'one',
+        'src',
+        'one-minus-src',
+        'src-alpha',
+        'one-minus-src-alpha',
+        'dst',
+        'one-minus-dst',
+        'dst-alpha',
+        'one-minus-dst-alpha',
+        'src-alpha-saturated',
+        'constant',
+        'one-minus-constant',
     ];
 
     const presets: {
         [key: string]: { color?: GPUBlendComponent; alpha?: GPUBlendComponent };
     } = {
-        "default (copy)": {
+        'default (copy)': {
             color: {
-                operation: "add",
-                srcFactor: "one",
-                dstFactor: "zero",
+                operation: 'add',
+                srcFactor: 'one',
+                dstFactor: 'zero',
             },
         },
-        "premultiplied blend (source-over)": {
+        'premultiplied blend (source-over)': {
             color: {
-                operation: "add",
-                srcFactor: "one",
-                dstFactor: "one-minus-src-alpha",
+                operation: 'add',
+                srcFactor: 'one',
+                dstFactor: 'one-minus-src-alpha',
             },
         },
-        "un-premultiplied blend": {
+        'un-premultiplied blend': {
             color: {
-                operation: "add",
-                srcFactor: "src-alpha",
-                dstFactor: "one-minus-src-alpha",
+                operation: 'add',
+                srcFactor: 'src-alpha',
+                dstFactor: 'one-minus-src-alpha',
             },
         },
-        "destination-over": {
+        'destination-over': {
             color: {
-                operation: "add",
-                srcFactor: "one-minus-dst-alpha",
-                dstFactor: "one",
+                operation: 'add',
+                srcFactor: 'one-minus-dst-alpha',
+                dstFactor: 'one',
             },
         },
-        "source-in": {
+        'source-in': {
             color: {
-                operation: "add",
-                srcFactor: "dst-alpha",
-                dstFactor: "zero",
+                operation: 'add',
+                srcFactor: 'dst-alpha',
+                dstFactor: 'zero',
             },
         },
-        "destination-in": {
+        'destination-in': {
             color: {
-                operation: "add",
-                srcFactor: "zero",
-                dstFactor: "src-alpha",
+                operation: 'add',
+                srcFactor: 'zero',
+                dstFactor: 'src-alpha',
             },
         },
-        "source-out": {
+        'source-out': {
             color: {
-                operation: "add",
-                srcFactor: "one-minus-dst-alpha",
-                dstFactor: "zero",
+                operation: 'add',
+                srcFactor: 'one-minus-dst-alpha',
+                dstFactor: 'zero',
             },
         },
-        "destination-out": {
+        'destination-out': {
             color: {
-                operation: "add",
-                srcFactor: "zero",
-                dstFactor: "one-minus-src-alpha",
+                operation: 'add',
+                srcFactor: 'zero',
+                dstFactor: 'one-minus-src-alpha',
             },
         },
-        "source-atop": {
+        'source-atop': {
             color: {
-                operation: "add",
-                srcFactor: "dst-alpha",
-                dstFactor: "one-minus-src-alpha",
+                operation: 'add',
+                srcFactor: 'dst-alpha',
+                dstFactor: 'one-minus-src-alpha',
             },
         },
-        "destination-atop": {
+        'destination-atop': {
             color: {
-                operation: "add",
-                srcFactor: "one-minus-dst-alpha",
-                dstFactor: "src-alpha",
+                operation: 'add',
+                srcFactor: 'one-minus-dst-alpha',
+                dstFactor: 'src-alpha',
             },
         },
-        "additive (lighten)": {
+        'additive (lighten)': {
             color: {
-                operation: "add",
-                srcFactor: "one",
-                dstFactor: "one",
+                operation: 'add',
+                srcFactor: 'one',
+                dstFactor: 'one',
             },
         },
     } as const;
@@ -327,6 +335,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return Object.keys(obj) as unknown[] as T[];
     }
     const kPresets = keysOf(presets);
+
     type Preset = (typeof kPresets)[number];
 
     const constant = reactive({
@@ -345,9 +354,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         textureSet: string;
         preset: Preset;
     } = {
-        alphaMode: "premultiplied",
-        textureSet: "premultiplied alpha",
-        preset: "premultiplied blend (source-over)",
+        alphaMode: 'premultiplied',
+        textureSet: 'premultiplied alpha',
+        preset: 'premultiplied blend (source-over)',
     };
 
     // Translates to/from a normalized color value and an 8bit unsigned color value.
@@ -360,20 +369,22 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             this.normalizedColor = normalizedColor;
         }
+
         get value()
         {
             return this.normalizedColor.map((v) => Math.round(v * 255));
         }
+
         set value(rgb255Color: number[])
         {
             this.normalizedColor.forEach(
-                (_, i) => (this.normalizedColor[i] = rgb255Color[i] / 255)
+                (_, i) => (this.normalizedColor[i] = rgb255Color[i] / 255),
             );
         }
     }
     const constantColor: Color = [0, 0, 0, 0];
     const srcPipeline: RenderPipeline = {
-        label: "hardcoded textured quad pipeline",
+        label: 'hardcoded textured quad pipeline',
         vertex: {
             code: texturedQuadWGSL,
         },
@@ -384,14 +395,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     blend: {
                         constantColor: constantColor,
                         color: {
-                            operation: "add",
-                            srcFactor: "one",
-                            dstFactor: "one-minus-src",
+                            operation: 'add',
+                            srcFactor: 'one',
+                            dstFactor: 'one-minus-src',
                         },
                         alpha: {
-                            operation: "add",
-                            srcFactor: "one",
-                            dstFactor: "one-minus-src",
+                            operation: 'add',
+                            srcFactor: 'one',
+                            dstFactor: 'one-minus-src',
                         },
                     },
                 },
@@ -405,52 +416,57 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function applyPreset()
     {
         const preset = presets[settings.preset];
+
         Object.assign(r_color, preset.color);
         Object.assign(r_alpha, preset.alpha || preset.color);
     }
 
     gui
-        .add(settings, "alphaMode", ["opaque", "premultiplied"])
-        .name("canvas alphaMode");
+        .add(settings, 'alphaMode', ['opaque', 'premultiplied'])
+        .name('canvas alphaMode');
     gui
-        .add(settings, "textureSet", [
-            "premultiplied alpha",
-            "un-premultiplied alpha",
+        .add(settings, 'textureSet', [
+            'premultiplied alpha',
+            'un-premultiplied alpha',
         ])
-        .name("texture data");
-    gui.add(settings, "preset", [...Object.keys(presets)]).onChange(() =>
+        .name('texture data');
+    gui.add(settings, 'preset', [...Object.keys(presets)]).onChange(() =>
     {
         applyPreset();
     });
 
-    const colorFolder = gui.addFolder("color");
+    const colorFolder = gui.addFolder('color');
+
     colorFolder.open();
-    colorFolder.add(r_color, "operation", operations);
-    colorFolder.add(r_color, "srcFactor", factors);
-    colorFolder.add(r_color, "dstFactor", factors);
+    colorFolder.add(r_color, 'operation', operations);
+    colorFolder.add(r_color, 'srcFactor', factors);
+    colorFolder.add(r_color, 'dstFactor', factors);
 
-    const alphaFolder = gui.addFolder("alpha");
+    const alphaFolder = gui.addFolder('alpha');
+
     alphaFolder.open();
-    alphaFolder.add(r_alpha, "operation", operations);
-    alphaFolder.add(r_alpha, "srcFactor", factors);
-    alphaFolder.add(r_alpha, "dstFactor", factors);
+    alphaFolder.add(r_alpha, 'operation', operations);
+    alphaFolder.add(r_alpha, 'srcFactor', factors);
+    alphaFolder.add(r_alpha, 'dstFactor', factors);
 
-    const constantFolder = gui.addFolder("constant");
+    const constantFolder = gui.addFolder('constant');
+
     constantFolder.open();
     constantFolder
-        .addColor(new GUIColorHelper(constant.color), "value")
-        .name("color")
-        ;
-    constantFolder.add(constant, "alpha", 0, 1);
+        .addColor(new GUIColorHelper(constant.color), 'value')
+        .name('color')
+    ;
+    constantFolder.add(constant, 'alpha', 0, 1);
 
-    const clearFolder = gui.addFolder("clear color");
+    const clearFolder = gui.addFolder('clear color');
+
     clearFolder.open();
-    clearFolder.add(clear, "premultiply");
-    clearFolder.add(clear, "alpha", 0, 1);
-    clearFolder.addColor(new GUIColorHelper(clear.color), "value");
+    clearFolder.add(clear, 'premultiply');
+    clearFolder.add(clear, 'alpha', 0, 1);
+    clearFolder.addColor(new GUIColorHelper(clear.color), 'value');
 
     const dstPipeline: RenderPipeline = {
-        label: "hardcoded textured quad pipeline",
+        label: 'hardcoded textured quad pipeline',
         vertex: {
             code: texturedQuadWGSL,
         },
@@ -462,7 +478,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function updateUniforms(
         uniforms: { matrix: Float32Array; },
         canvas: HTMLCanvasElement,
-        texture: Texture
+        texture: Texture,
     )
     {
         const projectionMatrix = mat4.ortho(
@@ -471,27 +487,26 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             canvas.height / devicePixelRatio,
             0,
             -1,
-            1
+            1,
         );
 
         mat4.scale(
             projectionMatrix,
             [texture.size[0], texture.size[1], 1],
-            uniforms.matrix
+            uniforms.matrix,
         );
 
         uniforms.matrix = new Float32Array(uniforms.matrix);
     }
 
-
     const ro: RenderObject = {
         pipeline: dstPipeline,
-        draw: { __type__: "DrawVertex", vertexCount: 6 },
+        draw: { __type__: 'DrawVertex', vertexCount: 6 },
     };
 
     const ro1: RenderObject = {
         pipeline: srcPipeline,
-        draw: { __type__: "DrawVertex", vertexCount: 6 },
+        draw: { __type__: 'DrawVertex', vertexCount: 6 },
     };
 
     const renderObjects: RenderPassObject[] = [
@@ -503,8 +518,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         commandEncoders: [{
             passEncoders: [{
                 descriptor: renderPassDescriptor,
-                renderPassObjects: renderObjects
-            }]
+                renderPassObjects: renderObjects,
+            }],
         }],
     };
 
@@ -513,7 +528,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         gui.updateDisplay();
 
         const { srcTexture, dstTexture, srcBindGroup, dstBindGroup }
-            = textureSets[settings.textureSet === "premultiplied alpha" ? 0 : 1];
+            = textureSets[settings.textureSet === 'premultiplied alpha' ? 0 : 1];
 
         reactive(ro).bindingResources = dstBindGroup;
         reactive(ro1).bindingResources = srcBindGroup;
@@ -524,6 +539,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             const { alpha, color, premultiply } = clear;
             const mult = premultiply ? alpha : 1;
+
             clearValue[0] = color[0] * mult;
             clearValue[1] = color[1] * mult;
             clearValue[2] = color[2] * mult;
@@ -548,5 +564,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);

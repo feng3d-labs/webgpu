@@ -1,9 +1,9 @@
-import { assert, describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from 'vitest';
 const { ok, equal, deepEqual, strictEqual } = assert;
 
-describe("test", () =>
+describe('test', () =>
 {
-    it("constructor", () =>
+    it('constructor', () =>
     {
         ok(true);
     });

@@ -1,4 +1,4 @@
-import { RenderObject } from "@feng3d/render-api";
+import { RenderObject } from '@feng3d/render-api';
 
 /**
  * GPU渲染捆绑对象。
@@ -12,7 +12,7 @@ export interface RenderBundle
     /**
      * 数据类型。
      */
-    readonly __type__: "RenderBundle";
+    readonly __type__: 'RenderBundle';
 
     /**
      * GPU渲染捆绑编码器描述。

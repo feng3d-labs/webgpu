@@ -1,6 +1,6 @@
-import { computed, Computed, reactive } from "@feng3d/reactivity";
-import { CanvasContext, ChainMap } from "@feng3d/render-api";
-import "../data/polyfills/CanvasContext";
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { CanvasContext, ChainMap } from '@feng3d/render-api';
+import '../data/polyfills/CanvasContext';
 
 export class GPUCanvasContextManager
 {
@@ -10,25 +10,29 @@ export class GPUCanvasContextManager
     {
         const getGPUCanvasContextKey: GetGPUCanvasContextKey = [device, context];
         let result = GPUCanvasContextManager.getGPUCanvasContextMap.get(getGPUCanvasContextKey);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             // 监听
             const ro = reactive(context);
+
             ro.canvasId;
 
-            const canvas = typeof context.canvasId === "string" ? document.getElementById(context.canvasId) as HTMLCanvasElement : context.canvasId;
+            const canvas = typeof context.canvasId === 'string' ? document.getElementById(context.canvasId) as HTMLCanvasElement : context.canvasId;
 
-            const gpuCanvasContext = canvas.getContext("webgpu") as GPUCanvasContext;
+            const gpuCanvasContext = canvas.getContext('webgpu') as GPUCanvasContext;
 
             // 监听
             const r_configuration = ro.configuration;
+
             if (r_configuration)
             {
                 r_configuration.format;
                 r_configuration.usage;
-                r_configuration.viewFormats?.forEach(() => { });
+                r_configuration.viewFormats?.forEach(() =>
+                { });
                 r_configuration.colorSpace;
                 r_configuration.toneMapping?.mode;
                 r_configuration.alphaMode;

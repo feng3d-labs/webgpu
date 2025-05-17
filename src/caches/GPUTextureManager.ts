@@ -1,9 +1,9 @@
-import { computed, Computed, reactive } from "@feng3d/reactivity";
-import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from "@feng3d/render-api";
-import { webgpuEvents } from "../eventnames";
-import { MultisampleTexture } from "../internal/MultisampleTexture";
-import { generateMipmap } from "../utils/generate-mipmap";
-import { GPUCanvasContextManager } from "./GPUCanvasContextManager";
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
+import { webgpuEvents } from '../eventnames';
+import { MultisampleTexture } from '../internal/MultisampleTexture';
+import { generateMipmap } from '../utils/generate-mipmap';
+import { GPUCanvasContextManager } from './GPUCanvasContextManager';
 
 export class GPUTextureManager
 {
@@ -18,13 +18,14 @@ export class GPUTextureManager
     {
         const getGPUTextureKey: GetGPUTextureMap = [device, textureLike];
         let result = GPUTextureManager.getGPUTextureMap.get(getGPUTextureKey);
+
         if (result) return result.value;
 
         if (!autoCreate) return null;
 
         result = computed(() =>
         {
-            if ("context" in textureLike)
+            if ('context' in textureLike)
             {
                 const canvasTexture = textureLike;
 
@@ -35,7 +36,8 @@ export class GPUTextureManager
                 const context = GPUCanvasContextManager.getGPUCanvasContext(device, canvasTexture.context);
 
                 const gpuTexture = context.getCurrentTexture();
-                gpuTexture.label = "GPU画布纹理";
+
+                gpuTexture.label = 'GPU画布纹理';
 
                 return gpuTexture;
             }
@@ -44,6 +46,7 @@ export class GPUTextureManager
 
             // 监听
             const r_texture = reactive(texture);
+
             r_texture.format;
             r_texture.sampleCount;
             r_texture.dimension;
@@ -59,6 +62,7 @@ export class GPUTextureManager
             let { label, mipLevelCount } = texture;
 
             const size = texture.size;
+
             console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
 
             const usage = GPUTextureManager.getTextureUsageFromFormat(device, format, sampleCount);
@@ -68,6 +72,7 @@ export class GPUTextureManager
             {
                 //
                 const maxSize = Math.max(size[0], size[1]);
+
                 mipLevelCount = 1 + Math.log2(maxSize) | 0;
             }
             mipLevelCount = mipLevelCount ?? 1;
@@ -90,6 +95,7 @@ export class GPUTextureManager
                 usage,
                 viewFormats,
             });
+
             GPUTextureManager.textureMap.get([device, textureLike])?.destroy(); // 销毁旧的纹理
             GPUTextureManager.textureMap.set([device, textureLike], gpuTexture);
 
@@ -119,11 +125,13 @@ export class GPUTextureManager
         computed(() =>
         {
             const r_texture = reactive(texture);
+
             r_texture.sources;
 
             if (!texture.sources) return;
 
             const writeTextures: TextureSource[] = [];
+
             texture.sources.forEach((v) =>
             {
                 writeTextures.push(v);
@@ -138,18 +146,21 @@ export class GPUTextureManager
         {
             // 监听
             const r_texture = reactive(texture);
+
             r_texture.writeTextures;
 
             // 执行
             if (!texture.writeTextures) return;
 
             const { writeTextures, format } = texture;
+
             reactive(texture).writeTextures = null;
 
             writeTextures.forEach((v) =>
             {
                 // 处理图片纹理
                 const imageSource = v as TextureImageSource;
+
                 if (imageSource.image)
                 {
                     const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
@@ -191,7 +202,7 @@ export class GPUTextureManager
                     device.queue.copyExternalImageToTexture(
                         gpuSource,
                         gpuDestination,
-                        copySize
+                        copySize,
                     );
 
                     return;
@@ -254,11 +265,12 @@ export class GPUTextureManager
     private static getTextureUsageFromFormat(device: GPUDevice, format: GPUTextureFormat, sampleCount?: 4): GPUTextureUsageFlags
     {
         let usage: GPUTextureUsageFlags;
+
         // 包含深度以及多重采样的纹理不支持 STORAGE_BINDING
-        if (format.indexOf("depth") !== -1 // 包含深度的纹理
+        if (format.indexOf('depth') !== -1 // 包含深度的纹理
             || sampleCount // 多重采样纹理
-            || format === "r8unorm"
-            || (!device.features.has("bgra8unorm-storage") && format === "bgra8unorm") // 判断GPU设备是否支持 "bgra8unorm-storage" 特性。
+            || format === 'r8unorm'
+            || (!device.features.has('bgra8unorm-storage') && format === 'bgra8unorm') // 判断GPU设备是否支持 "bgra8unorm-storage" 特性。
         )
         {
             usage = (0
@@ -281,14 +293,13 @@ export class GPUTextureManager
     }
 
     private static readonly dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
-        "1d": "1d",
-        "2d": "2d",
-        "2d-array": "2d",
-        cube: "2d",
-        "cube-array": "3d",
-        "3d": "3d",
+        '1d': '1d',
+        '2d': '2d',
+        '2d-array': '2d',
+        cube: '2d',
+        'cube-array': '3d',
+        '3d': '3d',
     };
-
 
     private static autoIndex = 0;
     private static readonly getGPUTextureMap = new ChainMap<GetGPUTextureMap, Computed<GPUTexture>>();

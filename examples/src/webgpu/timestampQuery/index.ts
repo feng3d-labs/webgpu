@@ -1,15 +1,15 @@
-import { reactive } from "@feng3d/reactivity";
-import { CanvasContext, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { TimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { CanvasContext, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
+import { TimestampQuery, WebGPU } from '@feng3d/webgpu';
 
-import { mat4, vec3 } from "wgpu-matrix";
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
-import basicVertWGSL from "../../shaders/basic.vert.wgsl";
-import fragmentWGSL from "../../shaders/black.frag.wgsl";
+import basicVertWGSL from '../../shaders/basic.vert.wgsl';
+import fragmentWGSL from '../../shaders/black.frag.wgsl';
 
-import PerfCounter from "./PerfCounter";
+import PerfCounter from './PerfCounter';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         {
             if (!isSupports)
             {
-                perfDisplay.innerHTML = "Timestamp queries are not supported";
+                perfDisplay.innerHTML = 'Timestamp queries are not supported';
             }
         },
         onQuery: (elapsedNs: number) =>
@@ -31,15 +31,17 @@ const init = async (canvas: HTMLCanvasElement) =>
             // Show the last successfully downloaded elapsed time.
             // Convert from nanoseconds to milliseconds:
             const elapsedMs = Number(elapsedNs) * 1e-6;
+
             renderPassDurationCounter.addSample(elapsedMs);
             perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
                 .getAverage()
                 .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
-        }
+        },
     };
 
     //
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -47,12 +49,12 @@ const init = async (canvas: HTMLCanvasElement) =>
     //
     const context: CanvasContext = { canvasId: canvas.id };
 
-    const perfDisplay = document.querySelector("#info pre");
+    const perfDisplay = document.querySelector('#info pre');
 
     // Create a vertex buffer from the cube data.
     const vertices: VertexAttributes = {
-        position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-        uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+        position: { data: cubeVertexArray, format: 'float32x4', offset: cubePositionOffset, arrayStride: cubeVertexSize },
+        uv: { data: cubeVertexArray, format: 'float32x2', offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
     const uniforms = { modelViewProjectionMatrix: null };
@@ -65,24 +67,24 @@ const init = async (canvas: HTMLCanvasElement) =>
             code: fragmentWGSL,
         },
         primitive: {
-            topology: "triangle-list",
+            topology: 'triangle-list',
 
             // Backface culling since the cube is solid piece of geometry.
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
-            cullFace: "back",
+            cullFace: 'back',
         },
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less",
+            depthCompare: 'less',
         },
     };
 
     const depthTexture: Texture = {
         size: [canvas.width, canvas.height],
-        format: "depth24plus",
+        format: 'depth24plus',
     };
 
     const renderPassDescriptor: RenderPassDescriptor = {
@@ -91,16 +93,16 @@ const init = async (canvas: HTMLCanvasElement) =>
                 view: { texture: { context } }, // Assigned later
 
                 clearValue: [0.95, 0.95, 0.95, 1.0],
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
         depthStencilAttachment: {
             view: { texture: depthTexture },
 
             depthClearValue: 1.0,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
         // 开启时间戳查询
         timestampQuery,
@@ -112,7 +114,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             uniforms,
         },
         vertices,
-        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
+        draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount },
     };
 
     const submit: Submit = {
@@ -122,8 +124,8 @@ const init = async (canvas: HTMLCanvasElement) =>
                     {
                         descriptor: renderPassDescriptor, renderPassObjects: [renderObject],
                     },
-                ]
-            }
+                ],
+            },
         ],
     };
 
@@ -134,13 +136,15 @@ const init = async (canvas: HTMLCanvasElement) =>
     function getTransformationMatrix()
     {
         const viewMatrix = mat4.identity();
+
         mat4.translate(viewMatrix, vec3.fromValues(0, 0, -4), viewMatrix);
         const now = Date.now() / 1000;
+
         mat4.rotate(
             viewMatrix,
             vec3.fromValues(Math.sin(now), Math.cos(now), 0),
             1,
-            viewMatrix
+            viewMatrix,
         );
 
         mat4.multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
@@ -151,6 +155,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
+
         reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
 
         webgpu.submit(submit);
@@ -160,5 +165,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);

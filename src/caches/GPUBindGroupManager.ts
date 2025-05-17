@@ -1,15 +1,15 @@
-import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
-import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, Sampler, TextureView, UnReadonly } from "@feng3d/render-api";
-import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
+import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
+import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, Sampler, TextureView, UnReadonly } from '@feng3d/render-api';
+import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
-import { VideoTexture } from "../data/VideoTexture";
-import { webgpuEvents } from "../eventnames";
-import { ExternalSampledTextureType } from "../types/TextureType";
-import { GPUBindGroupLayoutManager } from "./GPUBindGroupLayoutManager";
-import { GPUBufferManager } from "./GPUBufferManager";
-import { BindGroupLayoutDescriptor } from "./GPUPipelineLayoutManager";
-import { GPUSamplerManager } from "./GPUSamplerManager";
-import { GPUTextureViewManager } from "./GPUTextureViewManager";
+import { VideoTexture } from '../data/VideoTexture';
+import { webgpuEvents } from '../eventnames';
+import { ExternalSampledTextureType } from '../types/TextureType';
+import { GPUBindGroupLayoutManager } from './GPUBindGroupLayoutManager';
+import { GPUBufferManager } from './GPUBufferManager';
+import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
+import { GPUSamplerManager } from './GPUSamplerManager';
+import { GPUTextureViewManager } from './GPUTextureViewManager';
 
 export class GPUBindGroupManager
 {
@@ -17,10 +17,12 @@ export class GPUBindGroupManager
     {
         const getGPUBindGroupKey: GetGPUBindGroupKey = [bindGroupLayout, bindingResources];
         let result = GPUBindGroupManager.getGPUBindGroupMap.get(getGPUBindGroupKey);
+
         if (result) return result.value;
 
         let gBindGroup: GPUBindGroup;
         const numberBufferBinding: { [name: string]: number[] } = {};
+
         result = computed(() =>
         {
             const entries = bindGroupLayout.entries.map((v) =>
@@ -29,6 +31,7 @@ export class GPUBindGroupManager
 
                 // 监听
                 const r_bindingResources = reactive(bindingResources);
+
                 r_bindingResources[name];
 
                 // 执行
@@ -39,14 +42,16 @@ export class GPUBindGroupManager
                 {
                     // 执行
                     let resource = bindingResources[name];
+
                     // 当值为number时，将其视为一个数组。
-                    if (typeof resource === "number")
+                    if (typeof resource === 'number')
                     {
                         numberBufferBinding[name] ??= [];
                         numberBufferBinding[name][0] = resource;
                         resource = numberBufferBinding[name];
                     }
                     const bufferBinding = resource as BufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
+
                     entry.resource = GPUBindGroupManager.getGPUBufferBinding(device, bufferBinding, type);
                 }
                 else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
@@ -69,9 +74,11 @@ export class GPUBindGroupManager
             const resources = entries.map((v) => v.resource);
             const gpuBindGroupKey: GPUBindGroupKey = [bindGroupLayout, ...resources];
             const cache = GPUBindGroupManager.gpuBindGroupMap.get(gpuBindGroupKey);
+
             if (cache) return cache;
 
             const gpuBindGroupLayout = GPUBindGroupLayoutManager.getGPUBindGroupLayout(device, bindGroupLayout);
+
             gBindGroup = device.createBindGroup({ layout: gpuBindGroupLayout, entries });
 
             GPUBindGroupManager.gpuBindGroupMap.set(gpuBindGroupKey, gBindGroup);
@@ -87,12 +94,14 @@ export class GPUBindGroupManager
     {
         const getGPUBindingResourceKey: GetGPUBindingResourceKey = [device, bufferBinding, type];
         let result = GPUBindGroupManager.getGPUBindingResourceMap.get(getGPUBindingResourceKey);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             // 监听
             const r_bufferBinding = reactive(bufferBinding);
+
             r_bufferBinding?.bufferView;
 
             // 更新缓冲区绑定的数据。
@@ -100,6 +109,7 @@ export class GPUBindGroupManager
             const bufferView = bufferBinding.bufferView;
             //
             const gbuffer = GPUBufferManager.getBuffer(bufferView);
+
             (gbuffer as any).label = gbuffer.label || (`BufferBinding ${type.name}`);
             //
             const buffer = GPUBufferManager.getGPUBuffer(device, gbuffer);
@@ -114,6 +124,7 @@ export class GPUBindGroupManager
             };
             const gpuBufferBindingKey: GPUBufferBindingKey = [buffer, offset, size];
             const cache = GPUBindGroupManager.gpuBufferBindingMap.get(gpuBufferBindingKey);
+
             if (cache) return cache;
             GPUBindGroupManager.gpuBufferBindingMap.set(gpuBufferBindingKey, gpuBufferBinding);
 
@@ -129,6 +140,7 @@ export class GPUBindGroupManager
     {
         const getGPUExternalTextureKey: GetGPUExternalTextureKey = [device, videoTexture];
         let result = GPUBindGroupManager.getGPUExternalTextureMap.get(getGPUExternalTextureKey);
+
         if (result) return result.value;
 
         result = computed(() =>
@@ -160,6 +172,7 @@ export class GPUBindGroupManager
         const size = bufferBindingInfo.size;
         // 是否存在默认值。
         const hasDefautValue = !!uniformData.bufferView;
+
         if (!hasDefautValue)
         {
             (uniformData as UnReadonly<BufferBinding>).bufferView = new Uint8Array(size);
@@ -171,11 +184,13 @@ export class GPUBindGroupManager
         for (let i = 0; i < bufferBindingInfo.items.length; i++)
         {
             const { paths, offset: itemInfoOffset, size: itemInfoSize, Cls } = bufferBindingInfo.items[i];
+
             // 更新数据
             effect(() =>
             {
                 let value: any = uniformData;
                 let r_value: any = reactive(uniformData); // 监听
+
                 for (let i = 0; i < paths.length; i++)
                 {
                     value = value[paths[i]];
@@ -184,7 +199,7 @@ export class GPUBindGroupManager
                     {
                         if (!hasDefautValue)
                         {
-                            console.warn(`没有找到 统一块变量属性 ${paths.join(".")} 的值！`);
+                            console.warn(`没有找到 统一块变量属性 ${paths.join('.')} 的值！`);
                         }
 
                         return;
@@ -193,7 +208,8 @@ export class GPUBindGroupManager
 
                 // 更新数据
                 let data: Float32Array | Int32Array | Uint32Array | Int16Array;
-                if (typeof value === "number")
+
+                if (typeof value === 'number')
                 {
                     data = new Cls([value]);
                 }
@@ -207,6 +223,7 @@ export class GPUBindGroupManager
                 }
 
                 const writeBuffers = buffer.writeBuffers ?? [];
+
                 writeBuffers.push({ bufferOffset: offset + itemInfoOffset, data: data.buffer, dataOffset: data.byteOffset, size: Math.min(itemInfoSize, data.byteLength) });
                 reactive(buffer).writeBuffers = writeBuffers;
             });
@@ -222,6 +239,7 @@ export class GPUBindGroupManager
     private static getBufferBindingInfo(type: TypeInfo)
     {
         let result = GPUBindGroupManager.bufferBindingInfoMap.get(type);
+
         if (result) return result;
         result = GPUBindGroupManager._getBufferBindingInfo(type);
 
@@ -244,15 +262,18 @@ export class GPUBindGroupManager
         if (type.isStruct)
         {
             const structInfo = type as StructInfo;
+
             for (let i = 0; i < structInfo.members.length; i++)
             {
                 const memberInfo = structInfo.members[i];
+
                 GPUBindGroupManager._getBufferBindingInfo(memberInfo.type, paths.concat(memberInfo.name), offset + memberInfo.offset, bufferBindingInfo);
             }
         }
         else if (type.isArray)
         {
             const arrayInfo = type as ArrayInfo;
+
             for (let i = 0; i < arrayInfo.count; i++)
             {
                 GPUBindGroupManager._getBufferBindingInfo(arrayInfo.format, paths.concat(`${i}`), offset + i * arrayInfo.format.size, bufferBindingInfo);
@@ -262,6 +283,7 @@ export class GPUBindGroupManager
         {
             const templateInfo = type as TemplateInfo;
             const templateFormatName = templateInfo.format?.name;
+
             bufferBindingInfo.items.push({
                 paths: paths.concat(),
                 offset,
@@ -331,7 +353,7 @@ export class GPUBindGroupManager
         mat4x4h: Float32Array,
     };
 
-    private static getTemplateDataCls(templateFormatName: "i32" | "u32" | "f32" | "f16")
+    private static getTemplateDataCls(templateFormatName: 'i32' | 'u32' | 'f32' | 'f16')
     {
         const dataCls = GPUBindGroupManager.templateFormatDataCls[templateFormatName];
 
@@ -339,6 +361,7 @@ export class GPUBindGroupManager
 
         return dataCls;
     }
+
     private static readonly templateFormatDataCls: { [key: string]: DataCls } = {
         i32: Int32Array,
         u32: Uint32Array,

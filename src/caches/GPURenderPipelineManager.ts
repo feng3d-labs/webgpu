@@ -1,14 +1,14 @@
-import { computed, Computed, reactive } from "@feng3d/reactivity";
-import { BlendComponent, BlendState, ChainMap, ColorTargetState, DepthStencilState, FragmentState, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, VertexState, WGSLVertexType, WriteMask } from "@feng3d/render-api";
-import { TemplateInfo, TypeInfo } from "wgsl_reflect";
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { BlendComponent, BlendState, ChainMap, ColorTargetState, DepthStencilState, FragmentState, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, VertexState, WGSLVertexType, WriteMask } from '@feng3d/render-api';
+import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
-import { MultisampleState } from "../data/MultisampleState";
-import { RenderPassFormat } from "../internal/RenderPassFormat";
-import { FunctionInfoManager } from "./FunctionInfoManager";
-import { GPUPipelineLayoutManager } from "./GPUPipelineLayoutManager";
-import { GPUShaderModuleManager } from "./GPUShaderModuleManager";
-import { GPUVertexBufferManager } from "./GPUVertexBufferManager";
-import { WgslReflectManager } from "./WgslReflectManager";
+import { MultisampleState } from '../data/MultisampleState';
+import { RenderPassFormat } from '../internal/RenderPassFormat';
+import { FunctionInfoManager } from './FunctionInfoManager';
+import { GPUPipelineLayoutManager } from './GPUPipelineLayoutManager';
+import { GPUShaderModuleManager } from './GPUShaderModuleManager';
+import { GPUVertexBufferManager } from './GPUVertexBufferManager';
+import { WgslReflectManager } from './WgslReflectManager';
 
 export class GPURenderPipelineManager
 {
@@ -24,12 +24,14 @@ export class GPURenderPipelineManager
     {
         const getGPURenderPipelineKey: GetGPURenderPipelineKey = [device, renderPipeline, renderPassFormat, vertices, indexFormat];
         let result = this.getGPURenderPipelineMap.get(getGPURenderPipelineKey);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             // 监听
             const r_renderPipeline = reactive(renderPipeline);
+
             r_renderPipeline.label;
             r_renderPipeline.fragment;
             r_renderPipeline.primitive;
@@ -65,7 +67,6 @@ export class GPURenderPipelineManager
         return result.value;
     }
 
-
     /**
      * 获取完整的顶点阶段描述与顶点缓冲区列表。
      *
@@ -77,12 +78,14 @@ export class GPURenderPipelineManager
     {
         const getGPUVertexStateKey: GetGPUVertexStateKey = [device, vertexState, vertices];
         let result = this.getGPUVertexStateMap.get(getGPUVertexStateKey);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             // 监听
             const r_vertexState = reactive(vertexState);
+
             r_vertexState.code;
             r_vertexState.constants;
             r_vertexState.entryPoint;
@@ -103,6 +106,7 @@ export class GPURenderPipelineManager
             // 缓存
             const gpuVertexStateKey: GPUVertexStateKey = [gpuVertexState.module, gpuVertexState.entryPoint, gpuVertexState.buffers, gpuVertexState.constants];
             const cache = this.gpuVertexStateMap.get(gpuVertexStateKey);
+
             if (cache) return cache;
             this.gpuVertexStateMap.set(gpuVertexStateKey, gpuVertexState);
 
@@ -119,13 +123,15 @@ export class GPURenderPipelineManager
         if (!constants) return undefined;
 
         let result: Computed<Record<string, number>> = this.getConstantsMap.get(constants);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             const r_constants = reactive(constants);
 
-            let constantsKey = "";
+            let constantsKey = '';
+
             for (const key in r_constants)
             {
                 constantsKey += `${key}:${r_constants[key]},`;
@@ -143,6 +149,7 @@ export class GPURenderPipelineManager
 
         return result.value;
     }
+
     private static readonly constantsMap: { [constantsKey: string]: Record<string, number> } = {};
     private static readonly getConstantsMap = new WeakMap<Record<string, number>, Computed<Record<string, number>>>();
 
@@ -154,6 +161,7 @@ export class GPURenderPipelineManager
         {
             // 监听
             const r_primitive = reactive(primitive);
+
             r_primitive.topology;
             r_primitive.cullFace;
             r_primitive.frontFace;
@@ -162,10 +170,10 @@ export class GPURenderPipelineManager
             // 计算
             const { topology, cullFace, frontFace, unclippedDepth } = primitive;
             const gpuPrimitive: GPUPrimitiveState = {
-                topology: topology ?? "triangle-list",
-                stripIndexFormat: (topology === "triangle-strip" || topology === "line-strip") ? indexFormat : undefined,
-                frontFace: frontFace ?? "ccw",
-                cullMode: cullFace ?? "none",
+                topology: topology ?? 'triangle-list',
+                stripIndexFormat: (topology === 'triangle-strip' || topology === 'line-strip') ? indexFormat : undefined,
+                frontFace: frontFace ?? 'ccw',
+                cullMode: cullFace ?? 'none',
                 unclippedDepth: unclippedDepth ?? false,
             };
 
@@ -184,6 +192,7 @@ export class GPURenderPipelineManager
         {
             // 监听
             const r_multisampleState = reactive(multisampleState);
+
             r_multisampleState.mask;
             r_multisampleState.alphaToCoverageEnabled;
 
@@ -216,12 +225,14 @@ export class GPURenderPipelineManager
 
         const getGPUDepthStencilStateKey: GetGPUDepthStencilStateKey = [depthStencil, depthStencilFormat];
         let result = this.getGPUDepthStencilStateMap.get(getGPUDepthStencilStateKey);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             // 监听
             const r_depthStencil = reactive(depthStencil);
+
             r_depthStencil.depthWriteEnabled;
             r_depthStencil.depthCompare;
             r_depthStencil.stencilFront;
@@ -246,7 +257,7 @@ export class GPURenderPipelineManager
             const gpuDepthStencilState: GPUDepthStencilState = {
                 format: depthStencilFormat,
                 depthWriteEnabled: depthWriteEnabled ?? true,
-                depthCompare: depthCompare ?? "less",
+                depthCompare: depthCompare ?? 'less',
                 stencilFront: this.getGPUStencilFaceState(stencilFront),
                 stencilBack: this.getGPUStencilFaceState(stencilBack),
                 stencilReadMask: stencilReadMask ?? 0xFFFFFFFF,
@@ -270,6 +281,7 @@ export class GPURenderPipelineManager
                 gpuDepthStencilState.depthBiasClamp,
             ];
             const cache = this.gpuDepthStencilStateMap.get(gpuDepthStencilStateKey);
+
             if (cache) return cache;
             this.gpuDepthStencilStateMap.set(gpuDepthStencilStateKey, gpuDepthStencilState);
 
@@ -289,12 +301,13 @@ export class GPURenderPipelineManager
     private static getDefaultGPUDepthStencilState(depthStencilFormat: GPUTextureFormat)
     {
         let result = this.defaultGPUDepthStencilStates[depthStencilFormat];
+
         if (result) return result;
 
         result = this.defaultGPUDepthStencilStates[depthStencilFormat] = {
             format: depthStencilFormat,
             depthWriteEnabled: true,
-            depthCompare: "less",
+            depthCompare: 'less',
             stencilFront: {},
             stencilBack: {},
             stencilReadMask: 0xFFFFFFFF,
@@ -312,12 +325,14 @@ export class GPURenderPipelineManager
         if (!stencilFaceState) return this.defaultGPUStencilFaceState;
 
         let result = this.getGPUStencilFaceStateMap.get(stencilFaceState);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             // 监听
             const r_stencilFaceState = reactive(stencilFaceState);
+
             r_stencilFaceState.compare;
             r_stencilFaceState.failOp;
             r_stencilFaceState.depthFailOp;
@@ -326,15 +341,16 @@ export class GPURenderPipelineManager
             // 计算
             const { compare, failOp, depthFailOp, passOp } = stencilFaceState;
             const gpuStencilFaceState: GPUStencilFaceState = {
-                compare: compare ?? "always",
-                failOp: failOp ?? "keep",
-                depthFailOp: depthFailOp ?? "keep",
-                passOp: passOp ?? "keep",
+                compare: compare ?? 'always',
+                failOp: failOp ?? 'keep',
+                depthFailOp: depthFailOp ?? 'keep',
+                passOp: passOp ?? 'keep',
             };
 
             // 缓存
             const gpuStencilFaceStateKey: GPUStencilFaceStateKey = [gpuStencilFaceState.compare, gpuStencilFaceState.failOp, gpuStencilFaceState.depthFailOp, gpuStencilFaceState.passOp];
             const cache = this.GPUStencilFaceStateMap.get(gpuStencilFaceStateKey);
+
             if (cache) return cache;
             this.GPUStencilFaceStateMap.set(gpuStencilFaceStateKey, gpuStencilFaceState);
 
@@ -354,6 +370,7 @@ export class GPURenderPipelineManager
         {
             // 监听
             const r_colorTargetState = reactive(colorTargetState);
+
             r_colorTargetState.writeMask;
             r_colorTargetState.blend;
 
@@ -386,12 +403,14 @@ export class GPURenderPipelineManager
 
         const getGPUFragmentStateKey: GetGPUFragmentStateKey = [device, fragmentState, colorAttachmentsKey];
         let gpuFragmentState = this.getGPUFragmentStateMap.get(getGPUFragmentStateKey);
+
         if (gpuFragmentState) return gpuFragmentState.value;
 
         gpuFragmentState = computed(() =>
         {
             // 监听
             const r_fragmentState = reactive(fragmentState);
+
             r_fragmentState.code;
             r_fragmentState.targets;
             r_fragmentState.constants;
@@ -402,11 +421,12 @@ export class GPURenderPipelineManager
                 module: GPUShaderModuleManager.getGPUShaderModule(device, code),
                 entryPoint: this.getEntryPoint(fragmentState),
                 targets: this.getGPUColorTargetStates(targets, colorAttachments),
-                constants: this.getConstants(constants)
+                constants: this.getConstants(constants),
             };
 
             const gpuFragmentStateKey: GPUFragmentStateKey = [gpuFragmentState.module, gpuFragmentState.entryPoint, gpuFragmentState.targets, gpuFragmentState.constants];
             const cache = this.gpuFragmentStateMap.get(gpuFragmentStateKey);
+
             if (cache) return cache;
 
             this.gpuFragmentStateMap.set(gpuFragmentStateKey, gpuFragmentState);
@@ -425,6 +445,7 @@ export class GPURenderPipelineManager
 
         const getGPUColorTargetStatesKey: GetGPUColorTargetStatesKey = [targets, colorAttachments];
         let result = this.getGPUColorTargetStatesMap.get(getGPUColorTargetStatesKey);
+
         if (result) return result.value;
 
         result = computed(() => colorAttachments.map((format, i) =>
@@ -445,22 +466,24 @@ export class GPURenderPipelineManager
         return result.value;
     }
 
-
     private static getEntryPoint(fragmentState: FragmentState)
     {
-        const result: Computed<string> = fragmentState["_entryPoint"] ??= computed(() =>
+        const result: Computed<string> = fragmentState['_entryPoint'] ??= computed(() =>
         {
             // 监听
             const r_fragmentState = reactive(fragmentState);
+
             r_fragmentState.entryPoint;
             r_fragmentState.code;
 
             // 计算
             const { entryPoint, code } = fragmentState;
+
             //
             if (entryPoint) return entryPoint;
             const reflect = WgslReflectManager.getWGSLReflectInfo(code);
             const fragment = reflect.entry.fragment[0];
+
             console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
 
             return fragment.name;
@@ -473,13 +496,15 @@ export class GPURenderPipelineManager
     {
         if (!blend) return undefined;
 
-        let result: Computed<GPUBlendState> = blend["_GPUBlendState"];
+        let result: Computed<GPUBlendState> = blend['_GPUBlendState'];
+
         if (result) return result.value;
 
-        result = blend["_GPUBlendState"] = computed(() =>
+        result = blend['_GPUBlendState'] = computed(() =>
         {
             // 监听
             const r_blend = reactive(blend);
+
             r_blend.color;
             r_blend.alpha;
             // 计算
@@ -497,12 +522,13 @@ export class GPURenderPipelineManager
 
     private static getGPUBlendComponent(blendComponent?: BlendComponent): GPUBlendComponent
     {
-        if (!blendComponent) return { operation: "add", srcFactor: "one", dstFactor: "zero" };
+        if (!blendComponent) return { operation: 'add', srcFactor: 'one', dstFactor: 'zero' };
 
-        const result: Computed<GPUBlendComponent> = blendComponent["_GPUBlendComponent"] ??= computed(() =>
+        const result: Computed<GPUBlendComponent> = blendComponent['_GPUBlendComponent'] ??= computed(() =>
         {
             // 监听
             const r_blendComponent = reactive(blendComponent);
+
             r_blendComponent.operation;
             r_blendComponent.srcFactor;
             r_blendComponent.dstFactor;
@@ -511,9 +537,9 @@ export class GPURenderPipelineManager
             const { operation, srcFactor, dstFactor } = blendComponent;
             // 当 operation 为 max 或 min 时，srcFactor 和 dstFactor 必须为 one。
             const gpuBlendComponent: GPUBlendComponent = {
-                operation: operation ?? "add",
-                srcFactor: (operation === "max" || operation === "min") ? "one" : (srcFactor ?? "one"),
-                dstFactor: (operation === "max" || operation === "min") ? "one" : (dstFactor ?? "zero"),
+                operation: operation ?? 'add',
+                srcFactor: (operation === 'max' || operation === 'min') ? 'one' : (srcFactor ?? 'one'),
+                dstFactor: (operation === 'max' || operation === 'min') ? 'one' : (dstFactor ?? 'zero'),
             };
 
             return gpuBlendComponent;
@@ -526,10 +552,11 @@ export class GPURenderPipelineManager
     {
         if (!writeMask) return 15;
 
-        const result: Computed<GPUColorWriteFlags> = writeMask["_GPUColorWriteFlags"] ??= computed(() =>
+        const result: Computed<GPUColorWriteFlags> = writeMask['_GPUColorWriteFlags'] ??= computed(() =>
         {
             // 监听
             const r_writeMask = reactive(writeMask);
+
             r_writeMask[0];
             r_writeMask[1];
             r_writeMask[2];
@@ -538,6 +565,7 @@ export class GPURenderPipelineManager
             // 计算
             const [red, green, blue, alpha] = writeMask;
             let gpuWriteMask: GPUColorWriteFlags = 0;
+
             if (red)
             {
                 gpuWriteMask += 1;
@@ -564,6 +592,7 @@ export class GPURenderPipelineManager
     private static getWGSLType(type: TypeInfo)
     {
         let wgslType = type.name;
+
         if (this.isTemplateType(type))
         {
             wgslType += `<${type.format.name}>`;
@@ -580,22 +609,21 @@ export class GPURenderPipelineManager
      * 别名
      */
     private static readonly wgslTypeMap = {
-        vec2u: "vec2<u32>",
-        vec3u: "vec3<u32>",
-        vec4u: "vec4<u32>",
-        vec2i: "vec2<i32>",
-        vec3i: "vec3<i32>",
-        vec4i: "vec4<i32>",
-        vec2f: "vec2<f32>",
-        vec3f: "vec3<f32>",
-        vec4f: "vec4<f32>",
+        vec2u: 'vec2<u32>',
+        vec3u: 'vec3<u32>',
+        vec4u: 'vec4<u32>',
+        vec2i: 'vec2<i32>',
+        vec3i: 'vec3<i32>',
+        vec4i: 'vec4<i32>',
+        vec2f: 'vec2<f32>',
+        vec3f: 'vec3<f32>',
+        vec4f: 'vec4<f32>',
     };
 
     private static isTemplateType(type: TypeInfo): type is TemplateInfo
     {
         return !!(type as TemplateInfo).format;
     }
-
 
     private static getDefaultGPUColorTargetState(format: GPUTextureFormat): GPUColorTargetState
     {
@@ -620,7 +648,7 @@ export class GPURenderPipelineManager
     private static readonly getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();
     private static readonly getGPUVertexStateMap = new ChainMap<GetGPUVertexStateKey, Computed<GPUVertexState>>();
     private static readonly gpuVertexStateMap = new ChainMap<any[], GPUVertexState>();
-    private static readonly defaultGPUPrimitiveState: GPUPrimitiveState = { topology: "triangle-list", cullMode: "none", frontFace: "ccw" };
+    private static readonly defaultGPUPrimitiveState: GPUPrimitiveState = { topology: 'triangle-list', cullMode: 'none', frontFace: 'ccw' };
     private static readonly defaultGPUMultisampleState: GPUMultisampleState = { count: 4, mask: 0xFFFFFFFF, alphaToCoverageEnabled: false };
     private static readonly getGPUDepthStencilStateMap = new ChainMap<GetGPUDepthStencilStateKey, Computed<GPUDepthStencilState>>();
     private static readonly gpuDepthStencilStateMap = new ChainMap<GPUDepthStencilStateKey, GPUDepthStencilState>();

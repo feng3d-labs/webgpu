@@ -1,9 +1,10 @@
-import { Submit } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
+import { Submit } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -41,28 +42,29 @@ const init = async (canvas: HTMLCanvasElement) =>
                                     ` },
                             },
                             vertices: {
-                                position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: "float32x2" }, // 顶点坐标数据
+                                position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: 'float32x2' }, // 顶点坐标数据
                             },
                             indices: new Uint16Array([0, 1, 2]), // 顶点索引数据
-                            draw: { __type__: "DrawIndexed", indexCount: 3 }, // 绘制命令
+                            draw: { __type__: 'DrawIndexed', indexCount: 3 }, // 绘制命令
                             bindingResources: { color: [1, 0, 0, 0] }, // Uniform 颜色值。
-                        }]
+                        }],
                     },
-                ]
-            }
+                ],
+            },
         ],
     };
 
     webgpu.submit(submit); // 提交GPU执行
 };
 
-let webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+let webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 if (!webgpuCanvas)
 {
-    webgpuCanvas = document.createElement("canvas");
-    webgpuCanvas.id = "webgpu";
-    webgpuCanvas.style.width = "400px";
-    webgpuCanvas.style.height = "300px";
+    webgpuCanvas = document.createElement('canvas');
+    webgpuCanvas.id = 'webgpu';
+    webgpuCanvas.style.width = '400px';
+    webgpuCanvas.style.height = '300px';
     document.body.appendChild(webgpuCanvas);
 }
 init(webgpuCanvas);

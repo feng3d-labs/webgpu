@@ -1,4 +1,4 @@
-import { Texture } from "@feng3d/render-api";
+import { Texture } from '@feng3d/render-api';
 
 /**
  * 多重采样纹理，一般只在渲染通道中需要解决多重采样时使用。

@@ -1,21 +1,23 @@
-import { reactive } from "@feng3d/reactivity";
-import { BufferBinding, OcclusionQuery, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
-import { GPUBufferManager, WebGPU } from "@feng3d/webgpu";
-import { GUI } from "dat.gui";
-import { mat4 } from "wgpu-matrix";
+import { reactive } from '@feng3d/reactivity';
+import { BufferBinding, OcclusionQuery, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';
+import { GPUBufferManager, WebGPU } from '@feng3d/webgpu';
+import { GUI } from 'dat.gui';
+import { mat4 } from 'wgpu-matrix';
 
-import solidColorLitWGSL from "./solidColorLit.wgsl";
+import solidColorLitWGSL from './solidColorLit.wgsl';
 
-const info = document.querySelector("#info");
+const info = document.querySelector('#info');
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
     const settings = {
         animate: true,
     };
-    gui.add(settings, "animate");
+
+    gui.add(settings, 'animate');
 
     const devicePixelRatio = window.devicePixelRatio;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -29,23 +31,23 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: solidColorLitWGSL,
         },
         primitive: {
-            topology: "triangle-list",
-            cullFace: "back",
+            topology: 'triangle-list',
+            cullFace: 'back',
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less",
+            depthCompare: 'less',
         },
     };
 
     // prettier-ignore
     const cubePositions = [
-        { position: [-1, 0, 0], id: "🟥", color: [1, 0, 0, 1] },
-        { position: [1, 0, 0], id: "🟨", color: [1, 1, 0, 1] },
-        { position: [0, -1, 0], id: "🟩", color: [0, 0.5, 0, 1] },
-        { position: [0, 1, 0], id: "🟧", color: [1, 0.6, 0, 1] },
-        { position: [0, 0, -1], id: "🟦", color: [0, 0, 1, 1] },
-        { position: [0, 0, 1], id: "🟪", color: [0.5, 0, 0.5, 1] },
+        { position: [-1, 0, 0], id: '🟥', color: [1, 0, 0, 1] },
+        { position: [1, 0, 0], id: '🟨', color: [1, 1, 0, 1] },
+        { position: [0, -1, 0], id: '🟩', color: [0, 0.5, 0, 1] },
+        { position: [0, 1, 0], id: '🟧', color: [1, 0.6, 0, 1] },
+        { position: [0, 0, -1], id: '🟦', color: [0, 0, 1, 1] },
+        { position: [0, 0, 1], id: '🟪', color: [0.5, 0, 0.5, 1] },
     ];
 
     const objectInfos = cubePositions.map(({ position, id, color }) =>
@@ -114,25 +116,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.5, 0.5, 0.5, 1.0],
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
         depthStencilAttachment: {
             depthClearValue: 1.0,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
     const renderObject: RenderObject = {
         pipeline: pipeline,
         vertices: {
-            position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: "float32x3" },
-            normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: "float32x3" },
+            position: { data: vertexBuf, offset: 0, arrayStride: 6 * 4, format: 'float32x3' },
+            normal: { data: vertexBuf, offset: 12, arrayStride: 6 * 4, format: 'float32x3' },
         },
         indices,
-        draw: { __type__: "DrawIndexed", indexCount: indices.length },
+        draw: { __type__: 'DrawIndexed', indexCount: indices.length },
         bindingResources: {
             uni: {
                 bufferView: undefined,
@@ -155,7 +157,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     });
 
     const occlusionQueryObjects: OcclusionQuery[] = renderObjects.map((ro) =>
-        ({ __type__: "OcclusionQuery", renderObjects: [ro] }));
+        ({ __type__: 'OcclusionQuery', renderObjects: [ro] }));
 
     const renderPass: RenderPass = {
         descriptor: renderPassDescriptor,
@@ -165,7 +167,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             const visible = objectInfos
                 .filter((_, i) => results[i])
                 .map(({ id }) => id)
-                .join("");
+                .join('');
+
             info.textContent = `visible: ${visible}`;
         },
     };
@@ -174,10 +177,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         commandEncoders: [
             {
                 passEncoders: [
-                    renderPass
-                ]
-            }
-        ]
+                    renderPass,
+                ],
+            },
+        ],
     };
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -187,10 +190,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     let time = 0;
     let then = 0;
+
     function render(now: number)
     {
         now *= 0.001; // convert to seconds
         const deltaTime = now - then;
+
         then = now;
 
         if (settings.animate)
@@ -202,10 +207,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             (30 * Math.PI) / 180,
             canvas.clientWidth / canvas.clientHeight,
             0.5,
-            100
+            100,
         );
 
         const m = mat4.identity();
+
         mat4.rotateX(m, time, m);
         mat4.rotateY(m, time * 0.7, m);
         mat4.translate(m, lerpV([0, 0, 5], [0, 0, 40], pingPongSine(time * 0.2)), m);
@@ -221,16 +227,18 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     worldInverseTranspose,
                     position,
                 },
-                i
+                i,
             ) =>
             {
                 const world = mat4.translation(position);
+
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
                 const buffer = (renderObjects[i].bindingResources.uni as BufferBinding).bufferView;
+
                 reactive(GPUBufferManager.getBuffer(buffer)).data = uniformValues.subarray();
-            }
+            },
         );
 
         webgpu.submit(submit);
@@ -241,5 +249,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);

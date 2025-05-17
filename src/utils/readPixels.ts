@@ -1,4 +1,4 @@
-import { Texture } from "@feng3d/render-api";
+import { Texture } from '@feng3d/render-api';
 
 /**
  * 从 GPU纹理 上读取数据。
@@ -39,7 +39,7 @@ export async function readPixels(device: GPUDevice, params: { texture: GPUTextur
             offset: 0,
             bytesPerRow,
         },
-        copySize
+        copySize,
     );
 
     device.queue.submit([commandEncoder.finish()]);

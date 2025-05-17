@@ -1,5 +1,5 @@
-import { ChainMap } from "@feng3d/render-api";
-import { BindGroupLayoutDescriptor } from "./GPUPipelineLayoutManager";
+import { ChainMap } from '@feng3d/render-api';
+import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
 
 export class GPUBindGroupLayoutManager
 {
@@ -7,6 +7,7 @@ export class GPUBindGroupLayoutManager
     {
         const key = [device, bindGroupLayout];
         let gpuBindGroupLayout = this._gpuBindGroupLayoutMap.get(key);
+
         if (gpuBindGroupLayout) return gpuBindGroupLayout;
 
         gpuBindGroupLayout = device.createBindGroupLayout(bindGroupLayout);

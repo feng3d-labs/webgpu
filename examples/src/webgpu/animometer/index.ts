@@ -1,31 +1,34 @@
-import { reactive } from "@feng3d/reactivity";
-import { RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
-import { RenderBundle, WebGPU } from "@feng3d/webgpu";
-import { GUI } from "dat.gui";
+import { reactive } from '@feng3d/reactivity';
+import { RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';
+import { RenderBundle, WebGPU } from '@feng3d/webgpu';
+import { GUI } from 'dat.gui';
 
-import animometerWGSL from "./animometer.wgsl";
+import animometerWGSL from './animometer.wgsl';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
-    const perfDisplayContainer = document.createElement("div");
-    perfDisplayContainer.style.color = "white";
-    perfDisplayContainer.style.background = "black";
-    perfDisplayContainer.style.position = "absolute";
-    perfDisplayContainer.style.top = "10px";
-    perfDisplayContainer.style.left = "10px";
+    const perfDisplayContainer = document.createElement('div');
 
-    const perfDisplay = document.createElement("pre");
+    perfDisplayContainer.style.color = 'white';
+    perfDisplayContainer.style.background = 'black';
+    perfDisplayContainer.style.position = 'absolute';
+    perfDisplayContainer.style.top = '10px';
+    perfDisplayContainer.style.left = '10px';
+
+    const perfDisplay = document.createElement('pre');
+
     perfDisplayContainer.appendChild(perfDisplay);
     canvas.parentNode.appendChild(perfDisplayContainer);
 
     const params = new URLSearchParams(window.location.search);
     const maxTriangles = 200000;
     const settings = {
-        numTriangles: Number(params.get("numTriangles")) || 20000,
-        renderBundles: Boolean(params.get("renderBundles")),
+        numTriangles: Number(params.get('numTriangles')) || 20000,
+        renderBundles: Boolean(params.get('renderBundles')),
     };
 
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -41,7 +44,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             code: animometerWGSL,
         },
         primitive: {
-            frontFace: "ccw",
+            frontFace: 'ccw',
         },
     };
 
@@ -60,18 +63,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         pipeline: pipeline,
         bindingResources: {},
         vertices: {
-            position: { data: vertexBuffer, format: "float32x4", offset: 0, arrayStride: 2 * vec4Size },
-            color: { data: vertexBuffer, format: "float32x4", offset: vec4Size, arrayStride: 2 * vec4Size },
+            position: { data: vertexBuffer, format: 'float32x4', offset: 0, arrayStride: 2 * vec4Size },
+            color: { data: vertexBuffer, format: 'float32x4', offset: vec4Size, arrayStride: 2 * vec4Size },
         },
-        draw: { __type__: "DrawVertex", vertexCount: 3, instanceCount: 1 },
+        draw: { __type__: 'DrawVertex', vertexCount: 3, instanceCount: 1 },
     };
 
     const uniformBytes = 5 * Float32Array.BYTES_PER_ELEMENT;
     const alignedUniformBytes = Math.ceil(uniformBytes / 256) * 256;
     const alignedUniformFloats = alignedUniformBytes / Float32Array.BYTES_PER_ELEMENT;
     const uniformBuffer = new Float32Array(
-        maxTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT
+        maxTriangles * alignedUniformBytes + Float32Array.BYTES_PER_ELEMENT,
     );
+
     for (let i = 0; i < maxTriangles; ++i)
     {
         uniformBuffer[alignedUniformFloats * i + 0] = Math.random() * 0.2 + 0.2; // scale
@@ -89,6 +93,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const renderObjects0: RenderObject[] = [];
+
     for (let i = 0; i < maxTriangles; ++i)
     {
         renderObjects0[i] = {
@@ -97,7 +102,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 time,
                 uniforms: {
                     bufferView: new Float32Array(uniformBuffer.buffer, i * alignedUniformBytes, 5),
-                }
+                },
             },
         };
     }
@@ -107,7 +112,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.0, 0.0, 0.0, 1.0],
-            }
+            },
         ],
     };
 
@@ -121,8 +126,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const uniformTime = new Float32Array([0]);
 
         const renderBundleObject: RenderBundle = {
-            __type__: "RenderBundle",
-            renderObjects
+            __type__: 'RenderBundle',
+            renderObjects,
         };
 
         const renderPasss: RenderPass[] = [];
@@ -130,8 +135,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             commandEncoders: [
                 {
                     passEncoders: renderPasss,
-                }
-            ]
+                },
+            ],
         };
 
         const renderBundlesPass: RenderPass = {
@@ -173,11 +178,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         doDraw = configure();
     };
+
     gui
-        .add(settings, "numTriangles", 0, maxTriangles)
+        .add(settings, 'numTriangles', 0, maxTriangles)
         .step(1)
         .onFinishChange(updateSettings);
-    gui.add(settings, "renderBundles");
+    gui.add(settings, 'renderBundles');
 
     let previousFrameTimestamp: number;
     let jsTimeAvg: number;
@@ -187,6 +193,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function frame(timestamp: number)
     {
         let frameTime = 0;
+
         if (previousFrameTimestamp !== undefined)
         {
             frameTime = timestamp - previousFrameTimestamp;
@@ -194,8 +201,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         previousFrameTimestamp = timestamp;
 
         const start = performance.now();
+
         doDraw(timestamp);
         const jsTime = performance.now() - start;
+
         if (frameTimeAvg === undefined)
         {
             frameTimeAvg = frameTime;
@@ -206,13 +215,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
 
         const w = 0.2;
+
         frameTimeAvg = (1 - w) * frameTimeAvg + w * frameTime;
         jsTimeAvg = (1 - w) * jsTimeAvg + w * jsTime;
 
         if (updateDisplay)
         {
             perfDisplay.innerHTML = `Avg Javascript: ${jsTimeAvg.toFixed(
-                2
+                2,
             )} ms\nAvg Frame: ${frameTimeAvg.toFixed(2)} ms`;
             updateDisplay = false;
             setTimeout(() =>
@@ -226,5 +236,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);

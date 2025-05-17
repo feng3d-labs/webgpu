@@ -1,22 +1,23 @@
-import { reactive } from "@feng3d/reactivity";
-import { BindingResources, CanvasContext, PassEncoder, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
-import { GPUBufferManager, WebGPU } from "@feng3d/webgpu";
-import { mat3, mat4 } from "wgpu-matrix";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, CanvasContext, PassEncoder, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
+import { GPUBufferManager, WebGPU } from '@feng3d/webgpu';
+import { mat3, mat4 } from 'wgpu-matrix';
 
-import { modelData } from "./models";
+import { modelData } from './models';
 
 type TypedArrayView = Float32Array | Uint32Array;
 
 function createBufferWithData(
     device: GPUDevice,
     data: TypedArrayView,
-    usage: number
+    usage: number,
 )
 {
     const buffer = device.createBuffer({
         size: data.byteLength,
         usage,
     });
+
     device.queue.writeBuffer(buffer, 0, data);
 
     return buffer;
@@ -29,12 +30,12 @@ type Model = {
 };
 
 function createVertexAndIndexBuffer(
-    { vertices, indices }: { vertices: Float32Array; indices: Uint32Array }
+    { vertices, indices }: { vertices: Float32Array; indices: Uint32Array },
 ): Model
 {
     const vertexAttributes: VertexAttributes = {
-        position: { data: vertices, format: "float32x3", offset: 0, arrayStride: 6 * 4 },
-        normal: { data: vertices, format: "float32x3", offset: 3 * 4, arrayStride: 6 * 4 },
+        position: { data: vertices, format: 'float32x3', offset: 0, arrayStride: 6 * 4 },
+        normal: { data: vertices, format: 'float32x3', offset: 3 * 4, arrayStride: 6 * 4 },
     };
 
     return {
@@ -49,7 +50,7 @@ const init = async () =>
     const webgpu = await new WebGPU().init();
 
     const models = Object.values(modelData).map((data) =>
-        createVertexAndIndexBuffer(data)
+        createVertexAndIndexBuffer(data),
     );
 
     function rand(min?: number, max?: number)
@@ -79,7 +80,7 @@ const init = async () =>
     }
 
     const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-    const depthFormat = "depth24plus";
+    const depthFormat = 'depth24plus';
 
     const module = {
         code: `
@@ -117,7 +118,7 @@ const init = async () =>
     };
 
     const pipeline: RenderPipeline = {
-        label: "our hardcoded red triangle pipeline",
+        label: 'our hardcoded red triangle pipeline',
         vertex: {
             ...module,
         },
@@ -125,11 +126,11 @@ const init = async () =>
             ...module,
         },
         primitive: {
-            cullFace: "back",
+            cullFace: 'back',
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less",
+            depthCompare: 'less',
         },
     };
 
@@ -140,13 +141,14 @@ const init = async () =>
             const canvas = entry.target as HTMLCanvasElement;
             const width = entry.contentBoxSize[0].inlineSize;
             const height = entry.contentBoxSize[0].blockSize;
+
             canvas.width = Math.max(
                 1,
-                Math.min(width, webgpu.device.limits.maxTextureDimension2D)
+                Math.min(width, webgpu.device.limits.maxTextureDimension2D),
             );
             canvas.height = Math.max(
                 1,
-                Math.min(height, webgpu.device.limits.maxTextureDimension2D)
+                Math.min(height, webgpu.device.limits.maxTextureDimension2D),
             );
         }
     });
@@ -157,6 +159,7 @@ const init = async () =>
         for (const { target, isIntersecting } of entries)
         {
             const canvas = target as HTMLCanvasElement;
+
             if (isIntersecting)
             {
                 visibleCanvasSet.add(canvas);
@@ -180,9 +183,10 @@ const init = async () =>
         renderPassDescriptor?: RenderPassDescriptor
     };
 
-    const outerElem = document.querySelector("#outer");
+    const outerElem = document.querySelector('#outer');
     const canvasToInfoMap = new Map<HTMLCanvasElement, CanvasInfo>();
     const numProducts = 200;
+
     for (let i = 0; i < numProducts; ++i)
     {
         // making this
@@ -190,14 +194,17 @@ const init = async () =>
         //   <canvas></canvas>
         //   <div>Product#: ?</div>
         // </div>
-        const canvas = document.createElement("canvas");
+        const canvas = document.createElement('canvas');
+
         resizeObserver.observe(canvas);
         intersectionObserver.observe(canvas);
 
-        const container = document.createElement("div");
+        const container = document.createElement('div');
+
         container.className = `product size${randInt(4)}`;
 
-        const description = document.createElement("div");
+        const description = document.createElement('div');
+
         description.textContent = `product#: ${i + 1}`;
 
         container.appendChild(canvas);
@@ -205,7 +212,7 @@ const init = async () =>
         outerElem.appendChild(container);
 
         // Get a WebGPU context and configure it.
-        canvas.id = canvas.id || `gpuCanvas___${globalThis["gpuCanvasAutoID"] = ~~globalThis["gpuCanvasAutoID"] + 1}`;
+        canvas.id = canvas.id || `gpuCanvas___${globalThis['gpuCanvasAutoID'] = ~~globalThis['gpuCanvasAutoID'] + 1}`;
         const context: CanvasContext = { canvasId: canvas.id };
 
         // Make a uniform buffer and type array views
@@ -216,13 +223,14 @@ const init = async () =>
         const kColorOffset = 32;
         const worldViewProjectionMatrixValue = uniformValues.subarray(
             kWorldViewProjectionMatrixOffset,
-            kWorldViewProjectionMatrixOffset + 16
+            kWorldViewProjectionMatrixOffset + 16,
         );
         const worldMatrixValue = uniformValues.subarray(
             kWorldMatrixOffset,
-            kWorldMatrixOffset + 15
+            kWorldMatrixOffset + 15,
         );
         const colorValue = uniformValues.subarray(kColorOffset, kColorOffset + 4);
+
         colorValue.set(randColor());
 
         // Make a bind group for this uniform
@@ -232,7 +240,7 @@ const init = async () =>
                 worldViewProjectionMatrix: undefined,
                 worldMatrix: undefined,
                 color: undefined,
-            }
+            },
         };
         // device.createBindGroup({
         //     layout: pipeline.getBindGroupLayout(0),
@@ -275,20 +283,20 @@ const init = async () =>
             // Get the current texture from the canvas context and
             // set it as the texture to render to.
             const renderPassDescriptor: RenderPassDescriptor = canvasInfo.renderPassDescriptor = canvasInfo.renderPassDescriptor || {
-                label: "our basic canvas renderPass",
+                label: 'our basic canvas renderPass',
                 colorAttachments: [
                     {
                         view: { texture: { context } }, // <- to be filled out when we render
                         clearValue,
-                        loadOp: "clear",
-                        storeOp: "store",
+                        loadOp: 'clear',
+                        storeOp: 'store',
                     },
                 ],
                 depthStencilAttachment: {
                     view: undefined, // <- to be filled out when we render
                     depthClearValue: 1.0,
-                    depthLoadOp: "clear",
-                    depthStoreOp: "store",
+                    depthLoadOp: 'clear',
+                    depthStoreOp: 'store',
                 },
             };
 
@@ -299,18 +307,20 @@ const init = async () =>
             const view = mat4.lookAt(
                 [0, 30, 50], // eye
                 [0, 0, 0], // target
-                [0, 1, 0] // up
+                [0, 1, 0], // up
             );
 
             const viewProjection = mat4.multiply(projection, view);
 
             const world = mat4.rotationY(time * 0.1 + rotation);
+
             mat4.multiply(viewProjection, world, worldViewProjectionMatrixValue);
             mat3.fromMat4(world, worldMatrixValue);
 
             // Upload our uniform values.
             const buffer = GPUBufferManager.getBuffer(uniformValues);
             const writeBuffers = buffer.writeBuffers || [];
+
             writeBuffers.push({
                 data: uniformValues,
             });
@@ -324,7 +334,7 @@ const init = async () =>
                     bindingResources: bindGroup,
                     vertices: vertexAttributes,
                     indices,
-                    draw: { __type__: "DrawIndexed", indexCount: indices.length },
+                    draw: { __type__: 'DrawIndexed', indexCount: indices.length },
                 }],
             });
         });
@@ -332,8 +342,9 @@ const init = async () =>
         const submit: Submit = {
             commandEncoders: [{
                 passEncoders,
-            }]
+            }],
         };
+
         webgpu.submit(submit);
 
         requestAnimationFrame(render);

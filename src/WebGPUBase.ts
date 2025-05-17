@@ -1,27 +1,27 @@
-import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
-import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from "@feng3d/render-api";
+import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
+import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from '@feng3d/render-api';
 
-import { GPUBindGroupManager } from "./caches/GPUBindGroupManager";
-import { GPUBufferManager } from "./caches/GPUBufferManager";
-import { GPUComputePassDescriptorManager } from "./caches/GPUComputePassDescriptorManager";
-import { GPUComputePipelineManager } from "./caches/GPUComputePipelineManager";
-import { GPUPipelineLayoutManager } from "./caches/GPUPipelineLayoutManager";
-import { GPURenderPassDescriptorManager } from "./caches/GPURenderPassDescriptorManager";
-import { GPURenderPassFormatManager } from "./caches/GPURenderPassFormatManager";
-import { GPURenderPipelineManager } from "./caches/GPURenderPipelineManager";
-import { GPUTextureManager } from "./caches/GPUTextureManager";
-import { GPUVertexBufferManager } from "./caches/GPUVertexBufferManager";
-import { ComputeObject } from "./data/ComputeObject";
-import { ComputePass } from "./data/ComputePass";
-import "./data/polyfills/RenderObject";
-import "./data/polyfills/RenderPass";
-import { RenderBundle } from "./data/RenderBundle";
-import { CommandEncoderCommand, CommandType, ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, RenderPassObjectCommand, SubmitCommand } from "./internal/RenderObjectCache";
-import { RenderPassFormat } from "./internal/RenderPassFormat";
-import { copyDepthTexture } from "./utils/copyDepthTexture";
-import { getGPUDevice } from "./utils/getGPUDevice";
-import { readPixels } from "./utils/readPixels";
-import { textureInvertYPremultiplyAlpha } from "./utils/textureInvertYPremultiplyAlpha";
+import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
+import { GPUBufferManager } from './caches/GPUBufferManager';
+import { GPUComputePassDescriptorManager } from './caches/GPUComputePassDescriptorManager';
+import { GPUComputePipelineManager } from './caches/GPUComputePipelineManager';
+import { GPUPipelineLayoutManager } from './caches/GPUPipelineLayoutManager';
+import { GPURenderPassDescriptorManager } from './caches/GPURenderPassDescriptorManager';
+import { GPURenderPassFormatManager } from './caches/GPURenderPassFormatManager';
+import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
+import { GPUTextureManager } from './caches/GPUTextureManager';
+import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
+import { ComputeObject } from './data/ComputeObject';
+import { ComputePass } from './data/ComputePass';
+import './data/polyfills/RenderObject';
+import './data/polyfills/RenderPass';
+import { RenderBundle } from './data/RenderBundle';
+import { CommandEncoderCommand, CommandType, ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, RenderPassObjectCommand, SubmitCommand } from './internal/RenderObjectCache';
+import { RenderPassFormat } from './internal/RenderPassFormat';
+import { copyDepthTexture } from './utils/copyDepthTexture';
+import { getGPUDevice } from './utils/getGPUDevice';
+import { readPixels } from './utils/readPixels';
+import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
 
 declare global
 {
@@ -59,7 +59,7 @@ export class WebGPUBase
             console.error(`WebGPU device was lost: ${info.message}`);
 
             // 'reason' will be 'destroyed' if we intentionally destroy the device.
-            if (info.reason !== "destroyed")
+            if (info.reason !== 'destroyed')
             {
                 // try again
                 this.device = await getGPUDevice(options, descriptor);
@@ -73,10 +73,12 @@ export class WebGPUBase
     {
         return this._device;
     }
+
     set device(v)
     {
         this._device = v;
     }
+
     protected _device: GPUDevice;
 
     constructor(device?: GPUDevice)
@@ -142,6 +144,7 @@ export class WebGPUBase
     {
         const device = this._device;
         const gpuBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
+
         await gpuBuffer.mapAsync(GPUMapMode.READ);
 
         const result = gpuBuffer.getMappedRange(offset, size).slice(0);
@@ -161,19 +164,19 @@ export class WebGPUBase
             {
                 return this.runRenderPass(passEncoder as RenderPass);
             }
-            else if (passEncoder.__type__ === "RenderPass")
+            else if (passEncoder.__type__ === 'RenderPass')
             {
                 return this.runRenderPass(passEncoder);
             }
-            else if (passEncoder.__type__ === "ComputePass")
+            else if (passEncoder.__type__ === 'ComputePass')
             {
                 return this.runComputePass(passEncoder);
             }
-            else if (passEncoder.__type__ === "CopyTextureToTexture")
+            else if (passEncoder.__type__ === 'CopyTextureToTexture')
             {
                 return this.runCopyTextureToTexture(passEncoder);
             }
-            else if (passEncoder.__type__ === "CopyBufferToBuffer")
+            else if (passEncoder.__type__ === 'CopyBufferToBuffer')
             {
                 return this.runCopyBufferToBuffer(passEncoder);
             }
@@ -190,6 +193,7 @@ export class WebGPUBase
     {
         const device = this._device;
         let renderPassCommand = this._renderPassCommandMap.get(renderPass);
+
         if (renderPassCommand) return renderPassCommand;
 
         renderPassCommand = new RenderPassCommand();
@@ -197,10 +201,12 @@ export class WebGPUBase
         effect(() =>
         {
             const r_renderPass = reactive(renderPass);
+
             r_renderPass.renderPassObjects;
             r_renderPass.descriptor;
 
             const { descriptor, renderPassObjects } = renderPass;
+
             renderPassCommand.renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(device, renderPass);
 
             const renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(descriptor);
@@ -208,6 +214,7 @@ export class WebGPUBase
             const renderPassObjectCommands = this.runRenderPassObjects(renderPassFormat, renderPassObjects);
             const commands: CommandType[] = [];
             const state = new RenderObjectCache();
+
             renderPassObjectCommands?.forEach((command) =>
             {
                 command.run(device, commands, state);
@@ -224,6 +231,7 @@ export class WebGPUBase
     {
         const renderPassObjectCommandsKey: RenderPassObjectCommandsKey = [renderPassObjects, renderPassFormat];
         let result = this._renderPassObjectCommandsMap.get(renderPassObjectCommandsKey);
+
         if (result) return result.value;
 
         result = computed(() =>
@@ -235,17 +243,18 @@ export class WebGPUBase
                 {
                     return this.runRenderObject(renderPassFormat, element as RenderObject);
                 }
-                if (element.__type__ === "RenderObject")
+                if (element.__type__ === 'RenderObject')
                 {
                     return this.runRenderObject(renderPassFormat, element);
                 }
-                if (element.__type__ === "RenderBundle")
+                if (element.__type__ === 'RenderBundle')
                 {
                     return this.runRenderBundle(renderPassFormat, element);
                 }
-                if (element.__type__ === "OcclusionQuery")
+                if (element.__type__ === 'OcclusionQuery')
                 {
                     const occlusionQueryCache = this.runRenderOcclusionQueryObject(renderPassFormat, element);
+
                     occlusionQueryCache.queryIndex = queryIndex++;
 
                     return occlusionQueryCache;
@@ -336,6 +345,7 @@ export class WebGPUBase
     {
         const gpuRenderBundleKey: GPURenderBundleKey = [renderBundleObject, renderPassFormat];
         let result = gpuRenderBundleMap.get(gpuRenderBundleKey);
+
         if (result) return result.value;
 
         const renderBundleCommand = new RenderBundleCommand();
@@ -344,6 +354,7 @@ export class WebGPUBase
         {
             // 监听
             const r_renderBundleObject = reactive(renderBundleObject);
+
             r_renderBundleObject.renderObjects;
             r_renderBundleObject.descriptor?.depthReadOnly;
             r_renderBundleObject.descriptor?.stencilReadOnly;
@@ -358,16 +369,17 @@ export class WebGPUBase
             //
             const commands: CommandType[] = [];
             const state = new RenderObjectCache();
+
             renderObjectCaches.forEach((renderObjectCache) =>
             {
                 renderObjectCache.run(undefined, commands, state);
             });
 
             renderBundleCommand.bundleCommands = commands.filter((command) => (
-                command[0] !== "setViewport"
-                && command[0] !== "setScissorRect"
-                && command[0] !== "setBlendConstant"
-                && command[0] !== "setStencilReference"
+                command[0] !== 'setViewport'
+                && command[0] !== 'setScissorRect'
+                && command[0] !== 'setBlendConstant'
+                && command[0] !== 'setStencilReference'
             ));
 
             return renderBundleCommand;
@@ -381,6 +393,7 @@ export class WebGPUBase
     {
         const renderObjectCachesKey: RenderObjectCachesKey = [renderObjects, renderPassFormat];
         let result = this._renderObjectCachesMap.get(renderObjectCachesKey);
+
         if (result) return result.value;
 
         result = computed(() =>
@@ -411,14 +424,17 @@ export class WebGPUBase
         const computePipeline = GPUComputePipelineManager.getGPUComputePipeline(device, pipeline);
 
         const computeObjectCommand = new ComputeObjectCommand();
+
         computeObjectCommand.computePipeline = computePipeline;
 
         // 计算 bindGroups
         computeObjectCommand.setBindGroup = [];
         const layout = GPUPipelineLayoutManager.getPipelineLayout({ compute: pipeline.compute.code });
+
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
             const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
+
             computeObjectCommand.setBindGroup.push([group, gpuBindGroup]);
         });
 
@@ -440,9 +456,14 @@ export class WebGPUBase
         const device = this._device;
         const renderObjectCacheKey: RenderObjectCacheKey = [device, renderObject, renderPassFormat];
         let result = renderObjectCacheMap.get(renderObjectCacheKey);
-        if (result) { return result.value; }
+
+        if (result)
+        {
+            return result.value;
+        }
 
         const renderObjectCache = new RenderObjectCache();
+
         result = computed(() =>
         {
             this.runviewport(renderObject, renderPassFormat, renderObjectCache);
@@ -464,10 +485,12 @@ export class WebGPUBase
     {
         const r_renderObject = reactive(renderObject);
         const r_renderPassFormat = reactive(renderPassFormat);
+
         computed(() =>
         {
             const attachmentSize = r_renderPassFormat.attachmentSize;
             const viewport = r_renderObject.viewport;
+
             if (viewport)
             {
                 const isYup = viewport.isYup ?? true;
@@ -483,12 +506,12 @@ export class WebGPUBase
                     y = attachmentSize.height - y - height;
                 }
                 //
-                renderObjectCache.push(["setViewport", x, y, width, height, minDepth, maxDepth]);
+                renderObjectCache.push(['setViewport', x, y, width, height, minDepth, maxDepth]);
             }
             else
             {
                 //
-                renderObjectCache.push(["setViewport", 0, 0, attachmentSize.width, attachmentSize.height, 0, 1]);
+                renderObjectCache.push(['setViewport', 0, 0, attachmentSize.width, attachmentSize.height, 0, 1]);
             }
         }).value;
     }
@@ -497,10 +520,12 @@ export class WebGPUBase
     {
         const r_renderObject = reactive(renderObject);
         const r_renderPassFormat = reactive(renderPassFormat);
+
         computed(() =>
         {
             const attachmentSize = r_renderPassFormat.attachmentSize;
             const scissorRect = r_renderObject.scissorRect;
+
             if (scissorRect)
             {
                 const isYup = scissorRect.isYup ?? true;
@@ -514,11 +539,11 @@ export class WebGPUBase
                     y = attachmentSize.height - y - height;
                 }
 
-                renderObjectCache.push(["setScissorRect", x, y, width, height]);
+                renderObjectCache.push(['setScissorRect', x, y, width, height]);
             }
             else
             {
-                renderObjectCache.push(["setScissorRect", 0, 0, attachmentSize.width, attachmentSize.height]);
+                renderObjectCache.push(['setScissorRect', 0, 0, attachmentSize.width, attachmentSize.height]);
             }
         }).value;
     }
@@ -527,6 +552,7 @@ export class WebGPUBase
     {
         const device = this._device;
         const r_renderObject = reactive(renderObject);
+
         computed(() =>
         {
             // 监听
@@ -537,11 +563,11 @@ export class WebGPUBase
             //
             const { pipeline, vertices, indices } = renderObject;
             //
-            const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16") : undefined;
+            const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16') : undefined;
             const gpuRenderPipeline = GPURenderPipelineManager.getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
 
             //
-            renderObjectCache.push(["setPipeline", gpuRenderPipeline]);
+            renderObjectCache.push(['setPipeline', gpuRenderPipeline]);
 
             //
             this.runStencilReference(pipeline, renderObjectCache);
@@ -552,35 +578,39 @@ export class WebGPUBase
     protected runStencilReference(pipeline: RenderPipeline, renderObjectCache: RenderObjectCache)
     {
         const r_pipeline = reactive(pipeline);
+
         computed(() =>
         {
             const stencilReference = getStencilReference(r_pipeline.depthStencil);
+
             if (stencilReference === undefined)
             {
-                renderObjectCache.delete("setStencilReference");
+                renderObjectCache.delete('setStencilReference');
 
                 return;
             }
 
-            renderObjectCache.push(["setStencilReference", stencilReference]);
+            renderObjectCache.push(['setStencilReference', stencilReference]);
         }).value;
     }
 
     protected runBlendConstant(pipeline: RenderPipeline, renderObjectCache: RenderObjectCache)
     {
         const r_pipeline = reactive(pipeline);
+
         computed(() =>
         {
             //
             const blendConstantColor = BlendState.getBlendConstantColor(r_pipeline.fragment?.targets?.[0]?.blend);
+
             if (blendConstantColor === undefined)
             {
-                renderObjectCache.delete("setBlendConstant");
+                renderObjectCache.delete('setBlendConstant');
 
                 return;
             }
 
-            renderObjectCache.push(["setBlendConstant", blendConstantColor]);
+            renderObjectCache.push(['setBlendConstant', blendConstantColor]);
         }).value;
     }
 
@@ -588,19 +618,22 @@ export class WebGPUBase
     {
         const device = this._device;
         const r_renderObject = reactive(renderObject);
+
         computed(() =>
         {
             // 监听
             r_renderObject.bindingResources;
 
             // 执行
-            renderObjectCache.delete("setBindGroup");
+            renderObjectCache.delete('setBindGroup');
             const { bindingResources } = renderObject;
             const layout = GPUPipelineLayoutManager.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
+
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
             {
                 const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
-                renderObjectCache.push(["setBindGroup", group, gpuBindGroup]);
+
+                renderObjectCache.push(['setBindGroup', group, gpuBindGroup]);
             });
         }).value;
     }
@@ -609,6 +642,7 @@ export class WebGPUBase
     {
         const device = this._device;
         const r_renderObject = reactive(renderObject);
+
         computed(() =>
         {
             // 监听
@@ -616,13 +650,16 @@ export class WebGPUBase
             r_renderObject.pipeline.vertex;
 
             const { vertices, pipeline } = renderObject;
+
             //
-            renderObjectCache.delete("setVertexBuffer");
+            renderObjectCache.delete('setVertexBuffer');
             const vertexBuffers = GPUVertexBufferManager.getNVertexBuffers(pipeline.vertex, vertices);
+
             vertexBuffers?.forEach((vertexBuffer, index) =>
             {
                 // 监听
                 const r_vertexBuffer = reactive(vertexBuffer);
+
                 r_vertexBuffer.data;
                 r_vertexBuffer.offset;
                 r_vertexBuffer.size;
@@ -630,11 +667,12 @@ export class WebGPUBase
                 // 执行
                 const { data, offset, size } = vertexBuffer;
                 const buffer = GPUBufferManager.getBuffer(data);
+
                 (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
                 const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
 
-                renderObjectCache.push(["setVertexBuffer", index, gBuffer, offset, size]);
+                renderObjectCache.push(['setVertexBuffer', index, gBuffer, offset, size]);
             });
         }).value;
     }
@@ -649,9 +687,10 @@ export class WebGPUBase
             r_renderObject.indices;
 
             const { indices } = renderObject;
+
             if (!indices)
             {
-                renderObjectCache.delete("setIndexBuffer");
+                renderObjectCache.delete('setIndexBuffer');
 
                 return;
             }
@@ -659,12 +698,13 @@ export class WebGPUBase
             const device = this._device;
 
             const buffer = GPUBufferManager.getBuffer(indices);
+
             (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
             const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
 
             //
-            renderObjectCache.push(["setIndexBuffer", gBuffer, indices.BYTES_PER_ELEMENT === 4 ? "uint32" : "uint16", indices.byteOffset, indices.byteLength]);
+            renderObjectCache.push(['setIndexBuffer', gBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength]);
         }).value;
     }
 
@@ -674,15 +714,15 @@ export class WebGPUBase
         {
             const { draw } = reactive(renderObject);
 
-            renderObjectCache.delete("draw");
-            renderObjectCache.delete("drawIndexed");
-            if (draw.__type__ === "DrawVertex")
+            renderObjectCache.delete('draw');
+            renderObjectCache.delete('drawIndexed');
+            if (draw.__type__ === 'DrawVertex')
             {
-                renderObjectCache.push(["draw", draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]);
+                renderObjectCache.push(['draw', draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]);
             }
             else
             {
-                renderObjectCache.push(["drawIndexed", draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance]);
+                renderObjectCache.push(['drawIndexed', draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance]);
             }
         }).value;
     }
@@ -710,10 +750,12 @@ function getStencilReference(depthStencil?: DepthStencilState)
 
     // 如果开启了模板测试，则需要设置模板索引值
     let stencilReference: number;
+
     if (stencilFront)
     {
         const { failOp, depthFailOp, passOp } = stencilFront;
-        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
+
+        if (failOp === 'replace' || depthFailOp === 'replace' || passOp === 'replace')
         {
             stencilReference = depthStencil?.stencilReference ?? 0;
         }
@@ -721,7 +763,8 @@ function getStencilReference(depthStencil?: DepthStencilState)
     if (stencilBack)
     {
         const { failOp, depthFailOp, passOp } = stencilBack;
-        if (failOp === "replace" || depthFailOp === "replace" || passOp === "replace")
+
+        if (failOp === 'replace' || depthFailOp === 'replace' || passOp === 'replace')
         {
             stencilReference = depthStencil?.stencilReference ?? 0;
         }

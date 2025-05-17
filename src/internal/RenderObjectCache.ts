@@ -1,13 +1,14 @@
-import { anyEmitter } from "@feng3d/event";
-import { reactive } from "@feng3d/reactivity";
-import { ChainMap } from "@feng3d/render-api";
-import { GPUQueue_submit, webgpuEvents } from "../eventnames";
+import { anyEmitter } from '@feng3d/event';
+import { reactive } from '@feng3d/reactivity';
+import { ChainMap } from '@feng3d/render-api';
+import { GPUQueue_submit, webgpuEvents } from '../eventnames';
 
 const cache = new ChainMap();
 
 function setVaule<T extends Array<any>>(cache: ChainMap<any[], any>, keys: T): T
 {
     const v = cache.get(keys);
+
     if (v) return v;
     cache.set(keys, keys);
 
@@ -15,37 +16,38 @@ function setVaule<T extends Array<any>>(cache: ChainMap<any[], any>, keys: T): T
 }
 
 export type CommandType =
-    | [func: "setViewport", x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]
-    | [func: "setScissorRect", x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate]
-    | [func: "setPipeline", pipeline: GPURenderPipeline]
-    | [func: "setBindGroup", index: number, bindGroup: GPUBindGroup]
-    | [func: "setVertexBuffer", slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64]
-    | [func: "setIndexBuffer", buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64]
-    | [func: "draw", vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32]
-    | [func: "drawIndexed", indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32]
-    | [func: "setBlendConstant", color: GPUColor]
-    | [func: "setStencilReference", reference: GPUStencilValue]
-    | [func: "executeBundles", bundles: GPURenderBundle[]]
-    | [func: "beginOcclusionQuery", queryIndex: GPUSize32]
-    | [func: "endOcclusionQuery"]
+    | [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]
+    | [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate]
+    | [func: 'setPipeline', pipeline: GPURenderPipeline]
+    | [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup]
+    | [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64]
+    | [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64]
+    | [func: 'draw', vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32]
+    | [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32]
+    | [func: 'setBlendConstant', color: GPUColor]
+    | [func: 'setStencilReference', reference: GPUStencilValue]
+    | [func: 'executeBundles', bundles: GPURenderBundle[]]
+    | [func: 'beginOcclusionQuery', queryIndex: GPUSize32]
+    | [func: 'endOcclusionQuery']
     ;
 
 export class RenderObjectCache implements RenderPassObjectCommand
 {
-    protected setViewport?: [func: "setViewport", x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
-    protected setScissorRect?: [func: "setScissorRect", x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
-    protected setPipeline: [func: "setPipeline", pipeline: GPURenderPipeline];
-    protected setBlendConstant?: [func: "setBlendConstant", color: GPUColor];
-    protected setStencilReference?: [func: "setStencilReference", reference: GPUStencilValue];
-    protected setBindGroup?: [func: "setBindGroup", index: number, bindGroup: GPUBindGroup][] = [];
-    protected setVertexBuffer?: [func: "setVertexBuffer", slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
-    protected setIndexBuffer?: [func: "setIndexBuffer", buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
-    protected draw?: [func: "draw", vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32];
-    protected drawIndexed?: [func: "drawIndexed", indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
+    protected setViewport?: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
+    protected setScissorRect?: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
+    protected setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline];
+    protected setBlendConstant?: [func: 'setBlendConstant', color: GPUColor];
+    protected setStencilReference?: [func: 'setStencilReference', reference: GPUStencilValue];
+    protected setBindGroup?: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
+    protected setVertexBuffer?: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
+    protected setIndexBuffer?: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
+    protected draw?: [func: 'draw', vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32];
+    protected drawIndexed?: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
 
     push(command: CommandType)
     {
         let command1 = commandMap.get(command);
+
         if (!command1)
         {
             command1 = command;
@@ -57,13 +59,14 @@ export class RenderObjectCache implements RenderPassObjectCommand
         }
 
         const func = command[0];
-        if (func === "setBindGroup")
+
+        if (func === 'setBindGroup')
         {
             this.setBindGroup[command[1]] = command;
 
             return;
         }
-        else if (func === "setVertexBuffer")
+        else if (func === 'setVertexBuffer')
         {
             this.setVertexBuffer[command[1]] = command;
 
@@ -75,13 +78,13 @@ export class RenderObjectCache implements RenderPassObjectCommand
 
     delete(func: CommandType[0])
     {
-        if (func === "setBindGroup")
+        if (func === 'setBindGroup')
         {
             this.setBindGroup = [];
 
             return;
         }
-        else if (func === "setVertexBuffer")
+        else if (func === 'setVertexBuffer')
         {
             this.setVertexBuffer = [];
 
@@ -151,12 +154,12 @@ export class OcclusionQueryCache implements RenderPassObjectCommand
 
     run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache)
     {
-        commands.push(["beginOcclusionQuery", this.queryIndex]);
+        commands.push(['beginOcclusionQuery', this.queryIndex]);
         for (let i = 0, len = this.renderObjectCaches.length; i < len; i++)
         {
             this.renderObjectCaches[i].run(undefined, commands, state);
         }
-        commands.push(["endOcclusionQuery"]);
+        commands.push(['endOcclusionQuery']);
     }
 }
 
@@ -182,7 +185,7 @@ export class RenderBundleCommand implements RenderPassObjectCommand
             this.gpuRenderBundle = renderBundleEncoder.finish();
         }
 
-        commands.push(["executeBundles", [this.gpuRenderBundle]]);
+        commands.push(['executeBundles', [this.gpuRenderBundle]]);
     }
 }
 
@@ -199,6 +202,7 @@ export class RenderPassCommand
         const { device } = commandEncoder;
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+
         passEncoder.device = device;
 
         runCommands(passEncoder, commands);
@@ -207,6 +211,7 @@ export class RenderPassCommand
         renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
         renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
     }
+
     renderPassDescriptor: GPURenderPassDescriptor;
     commands: CommandType[];
 }
@@ -221,8 +226,10 @@ export class ComputeObjectCommand
             passEncoder.setBindGroup(index, bindGroup);
         });
         const [workgroupCountX, workgroupCountY, workgroupCountZ] = this.dispatchWorkgroups;
+
         passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
     }
+
     computePipeline: GPUComputePipeline;
     setBindGroup: [index: GPUIndex32, bindGroup: GPUBindGroup][];
     dispatchWorkgroups: [workgroupCountX: GPUSize32, workgroupCountY?: GPUSize32, workgroupCountZ?: GPUSize32];
@@ -235,11 +242,13 @@ export class ComputePassCommand
         const { descriptor, computeObjectCommands } = this;
         //
         const passEncoder = commandEncoder.beginComputePass(descriptor);
+
         computeObjectCommands.forEach((command) => command.run(passEncoder));
         passEncoder.end();
         // 处理时间戳查询
         descriptor.timestampWrites?.resolve(commandEncoder);
     }
+
     descriptor: GPUComputePassDescriptor;
     computeObjectCommands: ComputeObjectCommand[];
 }
@@ -256,6 +265,7 @@ export class CopyTextureToTextureCommand
             copySize,
         );
     }
+
     source: GPUImageCopyTexture;
     destination: GPUImageCopyTexture;
     copySize: GPUExtent3DStrict;
@@ -268,9 +278,10 @@ export class CopyBufferToBufferCommand
         const { source, sourceOffset, destination, destinationOffset, size } = this;
 
         commandEncoder.copyBufferToBuffer(
-            source, sourceOffset, destination, destinationOffset, size
+            source, sourceOffset, destination, destinationOffset, size,
         );
     }
+
     source: GPUBuffer;
     sourceOffset: number;
     destination: GPUBuffer;
@@ -283,11 +294,13 @@ export class CommandEncoderCommand
     run(device: GPUDevice)
     {
         const gpuCommandEncoder = device.createCommandEncoder();
+
         gpuCommandEncoder.device = device;
         this.passEncoders.forEach((passEncoder) => passEncoder.run(gpuCommandEncoder));
 
         return gpuCommandEncoder.finish();
     }
+
     passEncoders: (RenderPassCommand | ComputePassCommand | CopyTextureToTextureCommand | CopyBufferToBufferCommand)[];
 }
 
@@ -305,6 +318,7 @@ export class SubmitCommand
         // 派发提交WebGPU事件
         anyEmitter.emit(device.queue, GPUQueue_submit);
     }
+
     commandBuffers: CommandEncoderCommand[];
 }
 
@@ -313,7 +327,8 @@ function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPass
     for (let i = 0, n = commands.length; i < n; i++)
     {
         const command = commands[i];
-        if (command[0] === "setBindGroup")
+
+        if (command[0] === 'setBindGroup')
         {
             renderBundleEncoder.setBindGroup(command[1], command[2]);
         }

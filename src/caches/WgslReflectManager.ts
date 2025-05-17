@@ -1,5 +1,5 @@
-import { ResourceType, TemplateInfo, VariableInfo, WgslReflect } from "wgsl_reflect";
-import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from "../types/TextureType";
+import { ResourceType, TemplateInfo, VariableInfo, WgslReflect } from 'wgsl_reflect';
+import { DepthTextureType, ExternalSampledTextureType, MultisampledTextureType, TextureType } from '../types/TextureType';
 
 declare global
 {
@@ -32,12 +32,14 @@ export class WgslReflectManager
     static getWGSLReflectInfo(code: string): WgslReflect
     {
         let reflect = WgslReflectManager.reflectMap[code];
+
         if (reflect) return reflect;
 
         reflect = WgslReflectManager.reflectMap[code] = new WgslReflect(code);
 
         return reflect;
     }
+
     private static readonly reflectMap: { [code: string]: WgslReflect } = {};
 
     static getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayoutEntryMap
@@ -47,12 +49,13 @@ export class WgslReflectManager
         const entryMap: GPUBindGroupLayoutEntryMap = WgslReflectManager.shaderLayoutMap[code] = {};
 
         const reflect = WgslReflectManager.getWGSLReflectInfo(code);
+
         for (const uniform of reflect.uniforms)
         {
             const { binding, name } = uniform;
 
             const layout: GPUBufferBindingLayout = {
-                type: "uniform",
+                type: 'uniform',
                 minBindingSize: uniform.size,
             };
 
@@ -68,9 +71,10 @@ export class WgslReflectManager
             const { group, binding, name } = storage;
 
             let layout: GPUBufferBindingLayout;
+
             if (storage.resourceType === ResourceType.Storage)
             {
-                const type: GPUBufferBindingType = storage.access === "read_write" ? "storage" : "read-only-storage";
+                const type: GPUBufferBindingType = storage.access === 'read_write' ? 'storage' : 'read-only-storage';
 
                 // 无法确定 storage 中数据的尺寸，不设置 minBindingSize 属性。
                 layout = {
@@ -79,7 +83,7 @@ export class WgslReflectManager
 
                 entryMap[name] = {
                     variableInfo: storage,
-                    visibility: type === "storage" ? WgslReflectManager.Visibility_FRAGMENT_COMPUTE : WgslReflectManager.Visibility_ALL, binding, buffer: layout,
+                    visibility: type === 'storage' ? WgslReflectManager.Visibility_FRAGMENT_COMPUTE : WgslReflectManager.Visibility_ALL, binding, buffer: layout,
                     key: `[${binding}, ${name}, buffer, ${layout.type}]`,
                 };
             }
@@ -92,10 +96,11 @@ export class WgslReflectManager
                 const viewDimension = TextureType[textureType][2];
 
                 const access = (storage.type as TemplateInfo).access;
-                console.assert(access === "write");
+
+                console.assert(access === 'write');
 
                 const layout: GPUStorageTextureBindingLayout = {
-                    access: "write-only",
+                    access: 'write-only',
                     format: textureSecondType as any,
                     viewDimension,
                 };
@@ -130,30 +135,32 @@ export class WgslReflectManager
             }
             else
             {
-                const textureSecondType = (texture.type as TemplateInfo)?.format?.name as "f32" | "u32" | "i32";
+                const textureSecondType = (texture.type as TemplateInfo)?.format?.name as 'f32' | 'u32' | 'i32';
 
                 let sampleType: GPUTextureSampleType;
+
                 if (DepthTextureType[textureType])
                 {
-                    sampleType = "depth";
+                    sampleType = 'depth';
                 }
-                else if (textureSecondType === "f32")
+                else if (textureSecondType === 'f32')
                 {
-                    sampleType = "float";
+                    sampleType = 'float';
                     // 判断是否使用 `textureLoad` 函数 对当前纹理进行非过滤采样。
                     const result = new RegExp(`\\s*textureLoad\\s*\\(\\s*${name}`).exec(code);
+
                     if (result)
                     {
-                        sampleType = "unfilterable-float";
+                        sampleType = 'unfilterable-float';
                     }
                 }
-                else if (textureSecondType === "u32")
+                else if (textureSecondType === 'u32')
                 {
-                    sampleType = "uint";
+                    sampleType = 'uint';
                 }
-                else if (textureSecondType === "i32")
+                else if (textureSecondType === 'i32')
                 {
-                    sampleType = "sint";
+                    sampleType = 'sint';
                 }
                 else
                 {
@@ -185,9 +192,9 @@ export class WgslReflectManager
 
             const layout: GPUSamplerBindingLayout = {};
 
-            if (sampler.type.name === "sampler_comparison")
+            if (sampler.type.name === 'sampler_comparison')
             {
-                layout.type = "comparison";
+                layout.type = 'comparison';
             }
 
             entryMap[name] = {
@@ -209,9 +216,8 @@ export class WgslReflectManager
     /**
      * 全部着色器可见。
      */
-    static readonly Visibility_ALL = 7; //GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
+    static readonly Visibility_ALL = 7; // GPUShaderStage.VERTEX | GPUShaderStage.FRAGMENT | GPUShaderStage.COMPUTE;
 
 }
-
 
 export type GPUBindGroupLayoutEntryMap = { [name: string]: GPUBindGroupLayoutEntry; };

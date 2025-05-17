@@ -1,6 +1,6 @@
-import { CanvasTexture, TextureLike } from "@feng3d/render-api";
+import { CanvasTexture, TextureLike } from '@feng3d/render-api';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     export interface TextureLikeMap
     {

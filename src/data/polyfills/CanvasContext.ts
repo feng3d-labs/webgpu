@@ -1,7 +1,7 @@
-import { CanvasContext } from "@feng3d/render-api";
-import { CanvasConfiguration } from "../CanvasConfiguration";
+import { CanvasContext } from '@feng3d/render-api';
+import { CanvasConfiguration } from '../CanvasConfiguration';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * @see GPUCanvasContext

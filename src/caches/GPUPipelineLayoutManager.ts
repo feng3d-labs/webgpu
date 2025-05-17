@@ -1,6 +1,6 @@
-import { ChainMap } from "@feng3d/render-api";
-import { GPUBindGroupLayoutManager } from "./GPUBindGroupLayoutManager";
-import { GPUBindGroupLayoutEntryMap, WgslReflectManager } from "./WgslReflectManager";
+import { ChainMap } from '@feng3d/render-api';
+import { GPUBindGroupLayoutManager } from './GPUBindGroupLayoutManager';
+import { GPUBindGroupLayoutEntryMap, WgslReflectManager } from './WgslReflectManager';
 
 export interface PipelineLayoutDescriptor
 {
@@ -41,11 +41,13 @@ export class GPUPipelineLayoutManager
         //
         const key = [device, pipelineLayout];
         let gpuPipelineLayout = this._gpuPipelineLayoutMap.get(key);
+
         if (gpuPipelineLayout) return gpuPipelineLayout;
 
         const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
         {
             const gpuBindGroupLayout = GPUBindGroupLayoutManager.getGPUBindGroupLayout(device, v);
+
             return gpuBindGroupLayout;
         });
 
@@ -58,6 +60,7 @@ export class GPUPipelineLayoutManager
 
         return gpuPipelineLayout;
     }
+
     private static readonly _gpuPipelineLayoutMap = new ChainMap<any[], GPUPipelineLayout>();
 
     /**
@@ -68,8 +71,9 @@ export class GPUPipelineLayoutManager
      */
     static getPipelineLayout(shader: { vertex: string, fragment: string } | { compute: string })
     {
-        let shaderKey = "";
-        if ("compute" in shader)
+        let shaderKey = '';
+
+        if ('compute' in shader)
         {
             shaderKey += shader.compute;
         }
@@ -80,19 +84,22 @@ export class GPUPipelineLayoutManager
         }
 
         let gpuPipelineLayout = this.getGPUPipelineLayoutMap[shaderKey];
+
         if (gpuPipelineLayout) return gpuPipelineLayout;
 
         let entryMap: GPUBindGroupLayoutEntryMap;
-        if ("compute" in shader)
+
+        if ('compute' in shader)
         {
             entryMap = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(shader.compute);
         }
         else
         {
             entryMap = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(shader.vertex);
-            if ("fragment" in shader)
+            if ('fragment' in shader)
             {
                 const fragmentEntryMap = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(shader.fragment);
+
                 for (const resourceName in fragmentEntryMap)
                 {
                     // 检测相同名称是否被定义在多个地方
@@ -116,6 +123,7 @@ export class GPUPipelineLayoutManager
 
         // 绑定组布局描述列表。
         const bindGroupLayoutDescriptors: BindGroupLayoutDescriptor[] = [];
+
         for (const resourceName in entryMap)
         {
             const bindGroupLayoutEntry = entryMap[resourceName];
@@ -128,6 +136,7 @@ export class GPUPipelineLayoutManager
             {
                 // 存在重复定义时，判断是否兼容
                 const preEntry = bindGroupLayoutDescriptor.entries[binding];
+
                 console.error(`在管线中 @group(${group}) @binding(${binding}) 处存在多个定义 ${preEntry.variableInfo.name} ${resourceName} ！`);
             }
 
@@ -140,9 +149,10 @@ export class GPUPipelineLayoutManager
         {
             // 排除 undefined 元素。
             const entries = (descriptor.entries as GPUBindGroupLayoutEntry[]).filter((v) => !!v);
-            const label = entries.map((v) => v.key).join(",");
+            const label = entries.map((v) => v.key).join(',');
             // 相同的布局只保留一个。
             let bindGroupLayout = this._bindGroupLayoutDescriptor[label];
+
             if (!bindGroupLayout)
             {
                 bindGroupLayout = this._bindGroupLayoutDescriptor[label] = { entries, label: label };
@@ -152,7 +162,8 @@ export class GPUPipelineLayoutManager
         });
 
         // 管线布局描述标识符。
-        const pipelineLayoutKey = bindGroupLayouts.map((v, i) => `[${i}: ${v.label}]`).join(",");
+        const pipelineLayoutKey = bindGroupLayouts.map((v, i) => `[${i}: ${v.label}]`).join(',');
+
         gpuPipelineLayout = this._pipelineLayoutDescriptorMap[pipelineLayoutKey];
         if (!gpuPipelineLayout)
         {
@@ -167,6 +178,7 @@ export class GPUPipelineLayoutManager
 
         return gpuPipelineLayout;
     }
+
     private static readonly getGPUPipelineLayoutMap: { [shaderKey: string]: PipelineLayoutDescriptor } = {};
     private static readonly _bindGroupLayoutDescriptor: { [key: string]: BindGroupLayoutDescriptor } = {};
     private static readonly _pipelineLayoutDescriptorMap: { [key: string]: PipelineLayoutDescriptor } = {};

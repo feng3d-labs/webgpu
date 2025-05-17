@@ -1,7 +1,7 @@
-import { DrawIndexed, DrawVertex, Viewport } from "@feng3d/render-api";
-import { } from "./Uniforms";
+import { DrawIndexed, DrawVertex, Viewport } from '@feng3d/render-api';
+import { } from './Uniforms';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * Sets the viewport used during the rasterization stage to linearly map from NDC|normalized device coordinates to viewport coordinates.

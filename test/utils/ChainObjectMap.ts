@@ -22,9 +22,10 @@ export class ChainObjectMap<K extends Array<any>, V>
         for (let i = 0, n = keys.length; i < n; i++)
         {
             let key = keys[i];
-            if (typeof key === "object" || typeof key === "function")
+
+            if (typeof key === 'object' || typeof key === 'function')
             {
-                key = key["_id"];
+                key = key['_id'];
             }
 
             map = map[key];
@@ -45,12 +46,13 @@ export class ChainObjectMap<K extends Array<any>, V>
         let map = this._map;
 
         let key: any;
+
         for (let i = 0, n = keys.length; i < n; i++)
         {
             key = keys[i];
-            if (typeof key === "object" || typeof key === "function")
+            if (typeof key === 'object' || typeof key === 'function')
             {
-                key = key["_id"] = key["_id"] || autoId++;
+                key = key['_id'] = key['_id'] || autoId++;
             }
             if (i < n - 1)
             {
@@ -76,9 +78,10 @@ export class ChainObjectMap<K extends Array<any>, V>
         for (let i = 0, n = keys.length; i < n; i++)
         {
             let key = keys[i];
-            if (typeof key === "object" || typeof key === "function")
+
+            if (typeof key === 'object' || typeof key === 'function')
             {
-                key = key["_id"];
+                key = key['_id'];
             }
 
             if (i < n - 1)

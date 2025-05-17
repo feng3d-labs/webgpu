@@ -1,12 +1,12 @@
-import { anyEmitter } from "@feng3d/event";
-import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
-import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from "@feng3d/render-api";
-import { GPUQueue_submit } from "../eventnames";
-import { MultisampleTexture } from "../internal/MultisampleTexture";
-import { GPUPassTimestampWritesManager } from "./GPUPassTimestampWritesManager";
-import { GPUTextureFormatManager } from "./GPUTextureFormatManager";
-import { GPUTextureViewManager } from "./GPUTextureViewManager";
-import { TextureSizeManager } from "./TextureSizeManager";
+import { anyEmitter } from '@feng3d/event';
+import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
+import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from '@feng3d/render-api';
+import { GPUQueue_submit } from '../eventnames';
+import { MultisampleTexture } from '../internal/MultisampleTexture';
+import { GPUPassTimestampWritesManager } from './GPUPassTimestampWritesManager';
+import { GPUTextureFormatManager } from './GPUTextureFormatManager';
+import { GPUTextureViewManager } from './GPUTextureViewManager';
+import { TextureSizeManager } from './TextureSizeManager';
 
 declare global
 {
@@ -31,6 +31,7 @@ export class GPURenderPassDescriptorManager
         // 缓存
         const getGPURenderPassDescriptorKey: GetGPURenderPassDescriptorKey = [device, descriptor];
         let renderPassDescriptor = this.getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptorKey);
+
         if (renderPassDescriptor) return renderPassDescriptor;
 
         // 避免重复创建，触发反应链。
@@ -39,6 +40,7 @@ export class GPURenderPassDescriptorManager
         {
             // 监听
             const r_descriptor = reactive(descriptor);
+
             r_descriptor.label;
             r_descriptor.maxDrawCount;
             r_descriptor.colorAttachments;
@@ -61,7 +63,6 @@ export class GPURenderPassDescriptorManager
         return renderPassDescriptor;
     }
 
-
     /**
      * 设置纹理尺寸。
      *
@@ -70,10 +71,11 @@ export class GPURenderPassDescriptorManager
      */
     private static setTextureSize(texture: TextureLike, attachmentSize: { width: number, height: number })
     {
-        if ("context" in texture)
+        if ('context' in texture)
         {
             texture = texture as CanvasTexture;
-            const element = typeof texture.context.canvasId === "string" ? document.getElementById(texture.context.canvasId) as HTMLCanvasElement : texture.context.canvasId;
+            const element = typeof texture.context.canvasId === 'string' ? document.getElementById(texture.context.canvasId) as HTMLCanvasElement : texture.context.canvasId;
+
             if (element.width !== attachmentSize.width) element.width = attachmentSize.width;
             if (element.height !== attachmentSize.height) element.height = attachmentSize.height;
             reactive(texture)._canvasSizeVersion = ~~texture._canvasSizeVersion + 1;
@@ -102,10 +104,12 @@ export class GPURenderPassDescriptorManager
         if (!texture) return undefined;
 
         let multisampleTextureView = this.getMultisampleTextureViewMap.get(texture);
+
         if (multisampleTextureView) return multisampleTextureView;
 
         // 新增用于解决多重采样的纹理
-        const multisampleTexture: MultisampleTexture = { label: "自动生成多重采样的纹理", sampleCount } as MultisampleTexture;
+        const multisampleTexture: MultisampleTexture = { label: '自动生成多重采样的纹理', sampleCount } as MultisampleTexture;
+
         multisampleTextureView = { texture: multisampleTexture };
         effect(() =>
         {
@@ -130,12 +134,14 @@ export class GPURenderPassDescriptorManager
     private static getGPURenderPassDepthStencilAttachment(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
         const depthStencilAttachment = descriptor.depthStencilAttachment;
+
         if (!depthStencilAttachment) return undefined;
 
         // 初始化附件尺寸。
         if (!descriptor.attachmentSize)
         {
             const textureSize = TextureSizeManager.getTextureSize(depthStencilAttachment.view.texture);
+
             reactive(descriptor).attachmentSize = { width: textureSize[0], height: textureSize[1] };
         }
         const attachmentSize = descriptor.attachmentSize;
@@ -143,6 +149,7 @@ export class GPURenderPassDescriptorManager
         // 缓存
         const getGPURenderPassDepthStencilAttachmentKey: GetGPURenderPassDepthStencilAttachmentKey = [device, depthStencilAttachment];
         let result = this.getGPURenderPassDepthStencilAttachmentMap.get(getGPURenderPassDepthStencilAttachmentKey);
+
         if (result) return result.value;
 
         //
@@ -151,10 +158,12 @@ export class GPURenderPassDescriptorManager
 
         // 避免重复创建，触发反应链。
         const gpuDepthStencilAttachment: GPURenderPassDepthStencilAttachment = {} as any;
+
         result = computed(() =>
         {
             // 监听
             const r_depthStencilAttachment = reactive(depthStencilAttachment);
+
             r_depthStencilAttachment.depthClearValue;
             r_depthStencilAttachment.depthLoadOp;
             r_depthStencilAttachment.depthStoreOp;
@@ -168,12 +177,13 @@ export class GPURenderPassDescriptorManager
             // 执行
             const { depthClearValue, depthLoadOp, depthStoreOp, depthReadOnly, stencilClearValue, stencilLoadOp, stencilStoreOp, stencilReadOnly } = depthStencilAttachment;
             let view = depthStencilAttachment.view;
+
             if (!view)
             {
                 atuoCreateDepthTexture ??= {
                     label: `自动生成的深度纹理`,
                     size: [attachmentSize.width, attachmentSize.height],
-                    format: "depth24plus",
+                    format: 'depth24plus',
                 };
                 atuoCreateDepthTextureView ??= { texture: atuoCreateDepthTexture };
                 //
@@ -185,6 +195,7 @@ export class GPURenderPassDescriptorManager
             {
                 // 监听
                 const r_descriptor = reactive(descriptor);
+
                 r_descriptor.attachmentSize.width;
                 r_descriptor.attachmentSize.height;
 
@@ -223,17 +234,21 @@ export class GPURenderPassDescriptorManager
     {
         const getGPURenderPassColorAttachmentsKey: GetGPURenderPassColorAttachmentsKey = [device, descriptor];
         let result = this.getIGPURenderPassColorAttachmentsMap.get(getGPURenderPassColorAttachmentsKey);
+
         if (result) return result.value;
 
         const gpuColorAttachments: GPURenderPassColorAttachment[] = [];
+
         result = computed(() =>
         {
             // 监听
             const r_descriptor = reactive(descriptor);
+
             r_descriptor.colorAttachments.forEach((v) => v);
 
             // 执行
             const { colorAttachments } = descriptor;
+
             gpuColorAttachments.length = 0;
             colorAttachments.forEach((v) =>
             {
@@ -258,12 +273,14 @@ export class GPURenderPassDescriptorManager
     {
         const getGPURenderPassColorAttachmentKey: GetGPURenderPassColorAttachmentKey = [device, renderPassColorAttachment, descriptor];
         let attachment = this.getGPURenderPassColorAttachmentMap.get(getGPURenderPassColorAttachmentKey);
+
         if (attachment) return attachment;
 
         // 初始化附件尺寸。
         if (!descriptor.attachmentSize)
         {
             const textureSize = TextureSizeManager.getTextureSize(renderPassColorAttachment.view.texture);
+
             reactive(descriptor).attachmentSize = { width: textureSize[0], height: textureSize[1] };
         }
 
@@ -272,12 +289,14 @@ export class GPURenderPassDescriptorManager
         {
             // 监听
             const r_renderPassColorAttachment = reactive(renderPassColorAttachment);
+
             r_renderPassColorAttachment.view;
             r_renderPassColorAttachment.depthSlice;
             r_renderPassColorAttachment.clearValue;
             r_renderPassColorAttachment.loadOp;
             r_renderPassColorAttachment.storeOp;
             const r_descriptor = reactive(descriptor);
+
             r_descriptor.sampleCount;
 
             //
@@ -286,6 +305,7 @@ export class GPURenderPassDescriptorManager
 
             const { sampleCount } = descriptor;
             let resolveTarget: TextureView;
+
             if (sampleCount)
             {
                 resolveTarget = view;
@@ -297,6 +317,7 @@ export class GPURenderPassDescriptorManager
             {
                 // 监听
                 const r_descriptor = reactive(descriptor);
+
                 r_descriptor.attachmentSize.width;
                 r_descriptor.attachmentSize.height;
 
@@ -312,8 +333,8 @@ export class GPURenderPassDescriptorManager
             //
             attachment.depthSlice = depthSlice;
             attachment.clearValue = clearValue;
-            attachment.loadOp = loadOp ?? "clear";
-            attachment.storeOp = storeOp ?? "store";
+            attachment.loadOp = loadOp ?? 'clear';
+            attachment.storeOp = storeOp ?? 'store';
         });
 
         this.getGPURenderPassColorAttachmentMap.set(getGPURenderPassColorAttachmentKey, attachment);
@@ -323,17 +344,18 @@ export class GPURenderPassDescriptorManager
 
     private static setOcclusionQuerySet(device: GPUDevice, renderPass: RenderPass, renderPassDescriptor: GPURenderPassDescriptor)
     {
-        const occlusionQuerys = renderPass.renderPassObjects?.filter((v) => v.__type__ === "OcclusionQuery") as OcclusionQuery[];
+        const occlusionQuerys = renderPass.renderPassObjects?.filter((v) => v.__type__ === 'OcclusionQuery') as OcclusionQuery[];
+
         if (!occlusionQuerys || occlusionQuerys.length === 0) return;
-        renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: "occlusion", count: occlusionQuerys.length });
+        renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: 'occlusion', count: occlusionQuerys.length });
         const resolveBuf = device.createBuffer({
-            label: "resolveBuffer",
+            label: 'resolveBuffer',
             // Query results are 64bit unsigned integers.
             size: occlusionQuerys.length * BigUint64Array.BYTES_PER_ELEMENT,
             usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
         });
         const resultBuf = device.createBuffer({
-            label: "resultBuffer",
+            label: 'resultBuffer',
             size: resolveBuf.size,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
         });
@@ -345,14 +367,14 @@ export class GPURenderPassDescriptorManager
 
             commandEncoder.resolveQuerySet(renderPassDescriptor.occlusionQuerySet, 0, occlusionQuerys.length, resolveBuf, 0);
 
-            if (resultBuf.mapState === "unmapped")
+            if (resultBuf.mapState === 'unmapped')
             {
                 commandEncoder.copyBufferToBuffer(resolveBuf, 0, resultBuf, 0, resultBuf.size);
             }
 
             const getOcclusionQueryResult = () =>
             {
-                if (resultBuf.mapState === "unmapped")
+                if (resultBuf.mapState === 'unmapped')
                 {
                     resultBuf.mapAsync(GPUMapMode.READ).then(() =>
                     {
@@ -364,6 +386,7 @@ export class GPURenderPassDescriptorManager
 
                             return pv;
                         }, []);
+
                         resultBuf.unmap();
 
                         occlusionQuerys.forEach((v, i) =>
@@ -390,7 +413,6 @@ export class GPURenderPassDescriptorManager
     private static readonly getIGPURenderPassColorAttachmentsMap = new ChainMap<GetGPURenderPassColorAttachmentsKey, Computed<GPURenderPassColorAttachment[]>>();
     private static readonly getGPURenderPassColorAttachmentMap = new ChainMap<GetGPURenderPassColorAttachmentKey, GPURenderPassColorAttachment>();
 }
-
 
 type GetGPURenderPassDescriptorKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
 type GetGPURenderPassDepthStencilAttachmentKey = [device: GPUDevice, depthStencilAttachment: RenderPassDepthStencilAttachment];

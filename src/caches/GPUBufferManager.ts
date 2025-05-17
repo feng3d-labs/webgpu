@@ -1,5 +1,5 @@
-import { computed, Computed, effect, reactive } from "@feng3d/reactivity";
-import { Buffer, ChainMap, TypedArray } from "@feng3d/render-api";
+import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
+import { Buffer, ChainMap, TypedArray } from '@feng3d/render-api';
 
 /**
  * GPU缓冲区管理器。
@@ -25,12 +25,14 @@ export class GPUBufferManager
     static getBuffer(bufferSource: TypedArray)
     {
         let arrayBuffer = bufferSource as ArrayBuffer;
+
         if ((bufferSource as ArrayBufferView).buffer)
         {
             arrayBuffer = (bufferSource as ArrayBufferView).buffer;
         }
 
         let buffer = this.bufferMap.get(arrayBuffer);
+
         if (buffer) return buffer;
 
         buffer = {
@@ -55,18 +57,22 @@ export class GPUBufferManager
     {
         const getGPUBufferKey: GetGPUBufferKey = [device, buffer];
         let result = GPUBufferManager.getGPUBufferMap.get(getGPUBufferKey);
+
         if (result) return result.value;
 
         let gpuBuffer: GPUBuffer;
+
         result = computed(() =>
         {
             // 监听
             const r_buffer = reactive(buffer);
+
             r_buffer.size;
             r_buffer.usage;
 
             // 执行
             const { label, size, usage } = buffer;
+
             console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
 
             // 初始化时存在数据，则使用map方式上传第一次数据。
@@ -80,6 +86,7 @@ export class GPUBufferManager
             if (mappedAtCreation)
             {
                 const bufferData = buffer.data;
+
                 if (ArrayBuffer.isView(bufferData))
                 {
                     new Int8Array(gpuBuffer.getMappedRange()).set(new Int8Array(bufferData.buffer));
@@ -94,10 +101,12 @@ export class GPUBufferManager
 
             // 更新数据
             let isInitData = true;
+
             effect(() =>
             {
                 // 监听数据变化
                 const rb = reactive(buffer);
+
                 rb.data;
 
                 // 第一次初始存在数据，则不再处理。
@@ -111,6 +120,7 @@ export class GPUBufferManager
                 // 处理数据写入GPU缓冲
                 const { data } = buffer;
                 const writeBuffers = buffer.writeBuffers || [];
+
                 writeBuffers.push({ data });
 
                 // 触发下次写入数据
@@ -122,7 +132,9 @@ export class GPUBufferManager
             {
                 // 监听
                 const rb = reactive(buffer);
-                rb.writeBuffers?.forEach(() => { });
+
+                rb.writeBuffers?.forEach(() =>
+                { });
 
                 // 处理数据写入GPU缓冲
                 if (!buffer.writeBuffers) return;
@@ -136,6 +148,7 @@ export class GPUBufferManager
                     let arrayBuffer: ArrayBuffer;
                     let dataOffsetByte: number;
                     let sizeByte: number;
+
                     if (ArrayBuffer.isView(data))
                     {
                         const bytesPerElement = (data as Uint8Array).BYTES_PER_ELEMENT;

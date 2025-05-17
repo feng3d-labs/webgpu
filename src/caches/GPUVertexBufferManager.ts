@@ -1,7 +1,7 @@
-import { computed, Computed, reactive } from "@feng3d/reactivity";
-import { ChainMap, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from "@feng3d/render-api";
-import { VertexBuffer } from "../internal/VertexBuffer";
-import { FunctionInfoManager } from "./FunctionInfoManager";
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from '@feng3d/render-api';
+import { VertexBuffer } from '../internal/VertexBuffer';
+import { FunctionInfoManager } from './FunctionInfoManager';
 
 export class GPUVertexBufferManager
 {
@@ -47,11 +47,13 @@ export class GPUVertexBufferManager
     {
         const getVertexBuffersBuffersKey: GetVertexBuffersBuffersKey = [vertexState, vertices];
         let result = this.getVertexBuffersBuffersMap.get(getVertexBuffersBuffersKey);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             const r_vertexState = reactive(vertexState);
+
             r_vertexState.code;
             r_vertexState.entryPoint;
 
@@ -60,12 +62,14 @@ export class GPUVertexBufferManager
 
             // 监听
             const r_vertices = vertices && reactive(vertices);
+
             vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
             {
                 // 跳过内置属性。
-                if (inputInfo.locationType === "builtin") return;
+                if (inputInfo.locationType === 'builtin') return;
                 // 监听每个顶点属性数据。
                 const vertexAttribute = r_vertices[inputInfo.name];
+
                 if (vertexAttribute)
                 {
                     vertexAttribute.arrayStride;
@@ -83,19 +87,21 @@ export class GPUVertexBufferManager
             vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
             {
                 // 跳过内置属性。
-                if (inputInfo.locationType === "builtin") return;
+                if (inputInfo.locationType === 'builtin') return;
 
                 const shaderLocation = inputInfo.location as number;
                 const attributeName = inputInfo.name;
 
                 const vertexAttribute = vertices[attributeName];
+
                 console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
                 //
                 const data = vertexAttribute.data;
                 const attributeOffset = vertexAttribute.offset || 0;
                 let arrayStride = vertexAttribute.arrayStride;
-                const stepMode = vertexAttribute.stepMode ?? "vertex";
+                const stepMode = vertexAttribute.stepMode ?? 'vertex';
                 const format = vertexAttribute.format;
+
                 // 检查提供的顶点数据格式是否与着色器匹配
                 // const wgslType = getWGSLType(v.type);
                 // let possibleFormats = wgslVertexTypeMap[wgslType].possibleFormats;
@@ -105,6 +111,7 @@ export class GPUVertexBufferManager
 
                 // 如果 偏移值大于 单个顶点尺寸，则该值被放入 IGPUVertexBuffer.offset。
                 const vertexByteSize = vertexFormatMap[format].byteSize;
+
                 //
                 if (!arrayStride)
                 {
@@ -114,6 +121,7 @@ export class GPUVertexBufferManager
 
                 let index = bufferIndexMap.get(data);
                 let gpuVertexBufferLayout: GPUVertexBufferLayout;
+
                 if (index === undefined)
                 {
                     index = vertexBufferLayouts.length;
@@ -129,7 +137,7 @@ export class GPUVertexBufferManager
                     gpuVertexBufferLayout = vertexBufferLayouts[index];
                     if (__DEV__)
                     {
-                        console.assert(vertexBufferLayouts[index].arrayStride === arrayStride && vertexBufferLayouts[index].stepMode === stepMode, "要求同一顶点缓冲区中 arrayStride 与 stepMode 必须相同。");
+                        console.assert(vertexBufferLayouts[index].arrayStride === arrayStride && vertexBufferLayouts[index].stepMode === stepMode, '要求同一顶点缓冲区中 arrayStride 与 stepMode 必须相同。');
                     }
                 }
 
@@ -138,7 +146,8 @@ export class GPUVertexBufferManager
             });
 
             // 相同的顶点缓冲区布局合并为一个。
-            const vertexBufferLayoutsKey = vertexBufferLayouts.reduce((prev, cur) => prev + cur.key, "");
+            const vertexBufferLayoutsKey = vertexBufferLayouts.reduce((prev, cur) => prev + cur.key, '');
+
             this.vertexBufferLayoutsMap[vertexBufferLayoutsKey] ??= vertexBufferLayouts;
 
             return { vertexBufferLayouts: this.vertexBufferLayoutsMap[vertexBufferLayoutsKey], vertexBuffers };
@@ -154,9 +163,11 @@ export class GPUVertexBufferManager
     private static getVertexBuffers(vertexAttribute: VertexAttribute)
     {
         let result = this.getVertexBuffersMap.get(vertexAttribute);
+
         if (result) return result.value;
         const vertexBuffer: VertexBuffer = {} as any;
         const r_vertexBuffer = reactive(vertexBuffer);
+
         result = computed(() =>
         {
             // 监听
@@ -164,6 +175,7 @@ export class GPUVertexBufferManager
 
             //
             const data = vertexAttribute.data;
+
             // 修改数据并通知更新
             r_vertexBuffer.data = data;
             r_vertexBuffer.offset = data.byteOffset;
@@ -175,6 +187,7 @@ export class GPUVertexBufferManager
 
         return result.value;
     }
+
     private static readonly getVertexBuffersMap = new WeakMap<VertexAttribute, Computed<VertexBuffer>>();
     private static readonly getVertexBuffersBuffersMap = new ChainMap<GetVertexBuffersBuffersKey, Computed<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: VertexBuffer[] }>>();
 }

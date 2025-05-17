@@ -1,13 +1,13 @@
-import { assert, describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from 'vitest';
 const { ok, equal, deepEqual, strictEqual } = assert;
 
-import { getIGPUBindGroupLayoutEntryMap } from "../src/caches/getWGSLReflectInfo";
+import { getIGPUBindGroupLayoutEntryMap } from '../src/caches/getWGSLReflectInfo';
 
-describe("test", () =>
+describe('test', () =>
 {
-  it("getWGSLBindGroups", () =>
-  {
-    getIGPUBindGroupLayoutEntryMap(`
+    it('getWGSLBindGroups', () =>
+    {
+        getIGPUBindGroupLayoutEntryMap(`
         override shadowDepthTextureSize: f32 = 1024.0;
 
 struct Scene {
@@ -55,6 +55,6 @@ fn main(input : FragmentInput) -> @location(0) vec4<f32> {
 
         
         `);
-    equal(true, true);
-  });
+        equal(true, true);
+    });
 });

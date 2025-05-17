@@ -1,6 +1,6 @@
-import { } from "@feng3d/render-api";
+import { } from '@feng3d/render-api';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * GPU缓冲区。

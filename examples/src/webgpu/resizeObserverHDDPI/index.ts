@@ -1,9 +1,9 @@
-import { GUI } from "dat.gui";
-import checkerWGSL from "./checker.wgsl";
+import { GUI } from 'dat.gui';
+import checkerWGSL from './checker.wgsl';
 
-import { reactive } from "@feng3d/reactivity";
-import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -27,8 +27,8 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const settings = {
-        color0: "#FF0000",
-        color1: "#00FFFF",
+        color0: '#FF0000',
+        color1: '#00FFFF',
         size: 1,
         resizable: false,
         fullscreen()
@@ -44,14 +44,15 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const containerElem = document.querySelector("#container") as HTMLElement;
+    const containerElem = document.querySelector('#container') as HTMLElement;
 
     const gui = new GUI();
-    gui.addColor(settings, "color0").onChange(frame);
-    gui.addColor(settings, "color1").onChange(frame);
-    gui.add(settings, "size", 1, 32, 1).name("checker size").onChange(frame);
-    gui.add(settings, "fullscreen");
-    gui.add(settings, "resizable").onChange(() =>
+
+    gui.addColor(settings, 'color0').onChange(frame);
+    gui.addColor(settings, 'color1').onChange(frame);
+    gui.add(settings, 'size', 1, 32, 1).name('checker size').onChange(frame);
+    gui.add(settings, 'fullscreen');
+    gui.add(settings, 'resizable').onChange(() =>
     {
         const { resizable } = settings;
         // Get these before we adjust the CSS because our canvas is sized in device pixels
@@ -59,17 +60,17 @@ const init = async (canvas: HTMLCanvasElement) =>
         const width = containerElem.clientWidth;
         const height = containerElem.clientHeight;
 
-        containerElem.classList.toggle("resizable", resizable);
-        containerElem.classList.toggle("fit-container", !resizable);
+        containerElem.classList.toggle('resizable', resizable);
+        containerElem.classList.toggle('fit-container', !resizable);
 
-        containerElem.style.width = resizable ? `${width}px` : "";
-        containerElem.style.height = resizable ? `${height}px` : "";
+        containerElem.style.width = resizable ? `${width}px` : '';
+        containerElem.style.height = resizable ? `${height}px` : '';
     });
 
     // Given a CSS color, returns the color in 0 to 1 RGBA values.
     const cssColorToRGBA = (function ()
     {
-        const ctx = new OffscreenCanvas(1, 1).getContext("2d", {
+        const ctx = new OffscreenCanvas(1, 1).getContext('2d', {
             willReadFrequently: true,
         });
 
@@ -88,8 +89,8 @@ const init = async (canvas: HTMLCanvasElement) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.2, 0.2, 0.2, 1.0],
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
     };
@@ -101,11 +102,12 @@ const init = async (canvas: HTMLCanvasElement) =>
                 renderPassObjects: [{
                     pipeline: pipeline,
                     bindingResources: bindGroup,
-                    draw: { __type__: "DrawVertex", vertexCount: 3 },
-                }]
-            }]
-        }]
+                    draw: { __type__: 'DrawVertex', vertexCount: 3 },
+                }],
+            }],
+        }],
     };
+
     function frame()
     {
         reactive(uni).color0 = cssColorToRGBA(settings.color0);
@@ -125,6 +127,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 height: entry.devicePixelContentBoxSize[0].blockSize,
             };
         }
+
         // These values not correct but they're as close as you can get in Safari
         return {
             width: entry.contentBoxSize[0].inlineSize * devicePixelRatio,
@@ -146,8 +149,10 @@ const init = async (canvas: HTMLCanvasElement) =>
         canvas.height = Math.max(1, Math.min(height, maxTextureDimension2D));
         frame();
     });
+
     observer.observe(canvas);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);

@@ -1,17 +1,18 @@
-import { reactive } from "@feng3d/reactivity";
-import { BindingResources, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 
-import { GUI } from "dat.gui";
-import { mat4 } from "wgpu-matrix";
-import { modelData } from "./models";
-import solidColorLitWGSL from "./solidColorLit.wgsl";
-import { randColor, randElement } from "./utils";
-import wireframeWGSL from "./wireframe.wgsl";
+import { GUI } from 'dat.gui';
+import { mat4 } from 'wgpu-matrix';
+import { modelData } from './models';
+import solidColorLitWGSL from './solidColorLit.wgsl';
+import { randColor, randElement } from './utils';
+import wireframeWGSL from './wireframe.wgsl';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -40,8 +41,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             vertices: v.vertices,
             indices: v.indices,
             vertexAttributes: {
-                position: { data: v.vertices, format: "float32x3", offset: 0, arrayStride: 6 * 4 },
-                normal: { data: v.vertices, format: "float32x3", offset: 3 * 4, arrayStride: 6 * 4 },
+                position: { data: v.vertices, format: 'float32x3', offset: 0, arrayStride: 6 * 4 },
+                normal: { data: v.vertices, format: 'float32x3', offset: 3 * 4, arrayStride: 6 * 4 },
             },
         };
 
@@ -49,10 +50,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     });
 
     let litPipeline: RenderPipeline;
+
     function rebuildLitPipeline()
     {
         litPipeline = {
-            label: "lit pipeline",
+            label: 'lit pipeline',
             vertex: {
                 code: solidColorLitWGSL,
             },
@@ -60,11 +62,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 code: solidColorLitWGSL,
             },
             primitive: {
-                cullFace: "back",
+                cullFace: 'back',
             },
             depthStencil: {
                 depthWriteEnabled: true,
-                depthCompare: "less",
+                depthCompare: 'less',
                 // Applying a depth bias can prevent aliasing from z-fighting with the
                 // wireframe lines. The depth bias has to be applied to the lit meshes
                 // rather that the wireframe because depthBias isn't considered when
@@ -77,54 +79,54 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     rebuildLitPipeline();
 
     const wireframePipeline: RenderPipeline = {
-        label: "wireframe pipeline",
+        label: 'wireframe pipeline',
         vertex: {
             code: wireframeWGSL,
-            entryPoint: "vsIndexedU32",
+            entryPoint: 'vsIndexedU32',
         },
         fragment: {
             code: wireframeWGSL,
-            entryPoint: "fs",
+            entryPoint: 'fs',
         },
         primitive: {
-            topology: "line-list",
+            topology: 'line-list',
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less-equal",
+            depthCompare: 'less-equal',
         },
     };
 
     const barycentricCoordinatesBasedWireframePipeline: RenderPipeline = {
-        label: "barycentric coordinates based wireframe pipeline",
+        label: 'barycentric coordinates based wireframe pipeline',
         vertex: {
             code: wireframeWGSL,
-            entryPoint: "vsIndexedU32BarycentricCoordinateBasedLines",
+            entryPoint: 'vsIndexedU32BarycentricCoordinateBasedLines',
         },
         fragment: {
             code: wireframeWGSL,
-            entryPoint: "fsBarycentricCoordinateBasedLines",
+            entryPoint: 'fsBarycentricCoordinateBasedLines',
             targets: [
                 {
                     blend: {
                         color: {
-                            srcFactor: "one",
-                            dstFactor: "one-minus-src-alpha",
+                            srcFactor: 'one',
+                            dstFactor: 'one-minus-src-alpha',
                         },
                         alpha: {
-                            srcFactor: "one",
-                            dstFactor: "one-minus-src-alpha",
+                            srcFactor: 'one',
+                            dstFactor: 'one-minus-src-alpha',
                         },
                     },
                 },
             ],
         },
         primitive: {
-            topology: "triangle-list",
+            topology: 'triangle-list',
         },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less-equal",
+            depthCompare: 'less-equal',
         },
     };
 
@@ -149,6 +151,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const objectInfos: ObjectInfo[] = [];
 
     const numObjects = 200;
+
     for (let i = 0; i < numObjects; ++i)
     {
         // Make a uniform buffer and type array views
@@ -182,6 +185,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             thickness: undefined as number,
             alphaThreshold: undefined as number,
         };
+
         lineUniformValuesAsU32[0] = 6; // the array stride for positions for this model.
 
         // We're creating 2 bindGroups, one for each pipeline.
@@ -215,29 +219,30 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     const renderPassDescriptor: RenderPassDescriptor = {
-        label: "our basic canvas renderPass",
+        label: 'our basic canvas renderPass',
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } }, // <- to be filled out when we render
                 clearValue: [0.3, 0.3, 0.3, 1],
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
         depthStencilAttachment: {
             view: undefined, // <- to be filled out when we render
             depthClearValue: 1.0,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
-    gui.add(settings, "barycentricCoordinatesBased").onChange(addRemoveGUI);
-    gui.add(settings, "lines");
-    gui.add(settings, "models");
-    gui.add(settings, "animate");
+    gui.add(settings, 'barycentricCoordinatesBased').onChange(addRemoveGUI);
+    gui.add(settings, 'lines');
+    gui.add(settings, 'models');
+    gui.add(settings, 'animate');
 
     const guis = [];
+
     function addRemoveGUI()
     {
         guis.forEach((g) => g.remove());
@@ -245,17 +250,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         if (settings.barycentricCoordinatesBased)
         {
             guis.push(
-                gui.add(settings, "thickness", 0.0, 10).onChange(updateThickness),
-                gui.add(settings, "alphaThreshold", 0, 1).onChange(updateThickness)
+                gui.add(settings, 'thickness', 0.0, 10).onChange(updateThickness),
+                gui.add(settings, 'alphaThreshold', 0, 1).onChange(updateThickness),
             );
         }
         else
         {
             guis.push(
-                gui.add(settings, "depthBias", -3, 3, 1).onChange(rebuildLitPipeline),
+                gui.add(settings, 'depthBias', -3, 3, 1).onChange(rebuildLitPipeline),
                 gui
-                    .add(settings, "depthBiasSlopeScale", -1, 1, 0.05)
-                    .onChange(rebuildLitPipeline)
+                    .add(settings, 'depthBiasSlopeScale', -1, 1, 0.05)
+                    .onChange(rebuildLitPipeline),
             );
         }
     }
@@ -272,6 +277,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     updateThickness();
 
     let time = 0.0;
+
     function render(ts: number)
     {
         if (settings.animate)
@@ -286,7 +292,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const view = mat4.lookAt(
             [-300, 0, 300], // eye
             [0, 0, 0], // target
-            [0, 1, 0] // up
+            [0, 1, 0], // up
         );
 
         const viewProjection = mat4.multiply(projection, view);
@@ -300,25 +306,27 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     litBindGroup,
                     model: { vertexAttributes, indices },
                 },
-                i
+                i,
             ) =>
             {
                 const world = mat4.identity();
+
                 mat4.translate(
                     world,
                     [0, 0, Math.sin(i * 3.721 + time * 0.1) * 200],
-                    world
+                    world,
                 );
                 mat4.rotateX(world, i * 4.567, world);
                 mat4.rotateY(world, i * 2.967, world);
                 mat4.translate(
                     world,
                     [0, 0, Math.sin(i * 9.721 + time * 0.1) * 200],
-                    world
+                    world,
                 );
                 mat4.rotateX(world, time * 0.53 + i, world);
 
                 const worldViewProjectionMatrixValue = uniformBuffer.worldViewProjectionMatrix || new Float32Array(16);
+
                 mat4.multiply(viewProjection, world, worldViewProjectionMatrixValue);
 
                 // Upload our uniform values.
@@ -332,10 +340,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                         bindingResources: litBindGroup,
                         vertices: vertexAttributes,
                         indices,
-                        draw: { __type__: "DrawIndexed", indexCount: indices.length },
+                        draw: { __type__: 'DrawIndexed', indexCount: indices.length },
                     });
                 }
-            }
+            },
         );
 
         if (settings.lines)
@@ -347,12 +355,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 = settings.barycentricCoordinatesBased
                     ? [1, 1, barycentricCoordinatesBasedWireframePipeline]
                     : [0, 2, wireframePipeline];
+
             objectInfos.forEach(({ wireframeBindGroups, model: { indices } }) =>
             {
                 renderObjects.push({
                     pipeline,
                     bindingResources: wireframeBindGroups[bindGroupNdx],
-                    draw: { __type__: "DrawVertex", vertexCount: indices.length * countMult },
+                    draw: { __type__: 'DrawVertex', vertexCount: indices.length * countMult },
                 });
             });
         }
@@ -362,9 +371,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderPassObjects: renderObjects,
-                }]
-            }]
+                }],
+            }],
         };
+
         webgpu.submit(submit);
 
         requestAnimationFrame(render);
@@ -373,5 +383,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);

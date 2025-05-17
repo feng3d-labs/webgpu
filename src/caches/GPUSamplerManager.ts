@@ -1,5 +1,5 @@
-import { computed, Computed, reactive } from "@feng3d/reactivity";
-import { ChainMap, Sampler } from "@feng3d/render-api";
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, Sampler } from '@feng3d/render-api';
 
 export class GPUSamplerManager
 {
@@ -14,6 +14,7 @@ export class GPUSamplerManager
     {
         const getGPUSamplerKey: GetGPUSamplerKey = [device, sampler];
         let result = this.getGPUSamplerMap.get(getGPUSamplerKey);
+
         if (result) return result.value;
 
         result = computed(() =>
@@ -36,16 +37,16 @@ export class GPUSamplerManager
 
             const gSampler = device.createSampler({
                 label,
-                addressModeU: addressModeU ?? "repeat",
-                addressModeV: addressModeV ?? "repeat",
-                addressModeW: addressModeW ?? "repeat",
-                magFilter: magFilter ?? "nearest",
-                minFilter: minFilter ?? "nearest",
-                mipmapFilter: mipmapFilter ?? "nearest",
+                addressModeU: addressModeU ?? 'repeat',
+                addressModeV: addressModeV ?? 'repeat',
+                addressModeW: addressModeW ?? 'repeat',
+                magFilter: magFilter ?? 'nearest',
+                minFilter: minFilter ?? 'nearest',
+                mipmapFilter: mipmapFilter ?? 'nearest',
                 lodMinClamp: lodMinClamp ?? 0,
                 lodMaxClamp,
                 compare,
-                maxAnisotropy: (minFilter === "linear" && magFilter === "linear" && mipmapFilter === "linear") ? maxAnisotropy : 1,
+                maxAnisotropy: (minFilter === 'linear' && magFilter === 'linear' && mipmapFilter === 'linear') ? maxAnisotropy : 1,
             });
 
             return gSampler;

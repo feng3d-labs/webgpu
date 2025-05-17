@@ -1,6 +1,6 @@
-import { FunctionInfo } from "wgsl_reflect";
+import { FunctionInfo } from 'wgsl_reflect';
 
-import { WgslReflectManager } from "./WgslReflectManager";
+import { WgslReflectManager } from './WgslReflectManager';
 
 export class FunctionInfoManager
 {
@@ -16,6 +16,7 @@ export class FunctionInfoManager
         const reflect = WgslReflectManager.getWGSLReflectInfo(code);
         //
         let vertexEntryFunctionInfo: FunctionInfo;
+
         if (entryPoint)
         {
             vertexEntryFunctionInfo = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];

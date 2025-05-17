@@ -1,37 +1,39 @@
-import { reactive } from "@feng3d/reactivity";
-import { BindingResources, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { GPUBufferManager, WebGPU } from "@feng3d/webgpu";
-import { mat4, vec3 } from "wgpu-matrix";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
+import { GPUBufferManager, WebGPU } from '@feng3d/webgpu';
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
-import basicVertWGSL from "../../shaders/basic.vert.wgsl";
-import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
-import { MsdfTextRenderer } from "./msdfText";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
+import basicVertWGSL from '../../shaders/basic.vert.wgsl';
+import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
+import { MsdfTextRenderer } from './msdfText';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
     const webgpu = await new WebGPU().init();
 
-    const depthFormat = "depth24plus";
+    const depthFormat = 'depth24plus';
 
     const textRenderer = new MsdfTextRenderer();
     const font = await textRenderer.createFont(
         new URL(
-            "../../../assets/font/ya-hei-ascii-msdf.json",
-            import.meta.url
-        ).toString()
+            '../../../assets/font/ya-hei-ascii-msdf.json',
+            import.meta.url,
+        ).toString(),
     );
 
     function getTextTransform(
         position: [number, number, number],
-        rotation?: [number, number, number]
+        rotation?: [number, number, number],
     )
     {
         const textTransform = mat4.create();
+
         mat4.identity(textTransform);
         mat4.translate(textTransform, position, textTransform);
         if (rotation && rotation[0] != 0)
@@ -94,36 +96,36 @@ pipeline is defined by a GPURenderPipeline or a GPUComputePipeline
 object. The state not included in these pipeline objects is set
 during encoding with commands, such as beginRenderPass() or
 setBlendConstant().`,
-        { pixelScale: 1 / 256 }
+        { pixelScale: 1 / 256 },
     );
 
     const text = [
-        textRenderer.formatText(font, "Front", {
+        textRenderer.formatText(font, 'Front', {
             centered: true,
             pixelScale: 1 / 128,
             color: [1, 0, 0, 1],
         }),
-        textRenderer.formatText(font, "Back", {
+        textRenderer.formatText(font, 'Back', {
             centered: true,
             pixelScale: 1 / 128,
             color: [0, 1, 1, 1],
         }),
-        textRenderer.formatText(font, "Right", {
+        textRenderer.formatText(font, 'Right', {
             centered: true,
             pixelScale: 1 / 128,
             color: [0, 1, 0, 1],
         }),
-        textRenderer.formatText(font, "Left", {
+        textRenderer.formatText(font, 'Left', {
             centered: true,
             pixelScale: 1 / 128,
             color: [1, 0, 1, 1],
         }),
-        textRenderer.formatText(font, "Top", {
+        textRenderer.formatText(font, 'Top', {
             centered: true,
             pixelScale: 1 / 128,
             color: [0, 0, 1, 1],
         }),
-        textRenderer.formatText(font, "Bottom", {
+        textRenderer.formatText(font, 'Bottom', {
             centered: true,
             pixelScale: 1 / 128,
             color: [1, 1, 0, 1],
@@ -135,8 +137,8 @@ setBlendConstant().`,
 
     // Create a vertex buffer from the cube data.
     const verticesBuffer: VertexAttributes = {
-        position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-        uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+        position: { data: cubeVertexArray, format: 'float32x4', offset: cubePositionOffset, arrayStride: cubeVertexSize },
+        uv: { data: cubeVertexArray, format: 'float32x2', offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
     const pipeline: RenderPipeline = {
@@ -150,13 +152,13 @@ setBlendConstant().`,
             // Backface culling since the cube is solid piece of geometry.
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
-            cullFace: "back",
+            cullFace: 'back',
         },
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less",
+            depthCompare: 'less',
         },
     };
 
@@ -177,16 +179,16 @@ setBlendConstant().`,
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0, 0, 0, 1],
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
         depthStencilAttachment: {
             view: { texture: depthTexture },
 
             depthClearValue: 1.0,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
@@ -195,19 +197,22 @@ setBlendConstant().`,
     const modelViewProjectionMatrix = mat4.create();
 
     const start = Date.now();
+
     function getTransformationMatrix()
     {
         const now = Date.now() / 5000;
         const viewMatrix = mat4.identity();
+
         mat4.translate(viewMatrix, vec3.fromValues(0, 0, -5), viewMatrix);
 
         const modelMatrix = mat4.identity();
+
         mat4.translate(modelMatrix, vec3.fromValues(0, 2, -3), modelMatrix);
         mat4.rotate(
             modelMatrix,
             vec3.fromValues(Math.sin(now), Math.cos(now), 0),
             1,
-            modelMatrix
+            modelMatrix,
         );
 
         // Update the matrix for the cube
@@ -215,7 +220,7 @@ setBlendConstant().`,
         mat4.multiply(
             modelViewProjectionMatrix,
             modelMatrix,
-            modelViewProjectionMatrix
+            modelViewProjectionMatrix,
         );
 
         // Update the projection and view matrices for the text
@@ -223,6 +228,7 @@ setBlendConstant().`,
 
         // Update the transform of all the text surrounding the cube
         const textMatrix = mat4.create();
+
         for (const [index, transform] of textTransforms.entries())
         {
             mat4.multiply(modelMatrix, transform, textMatrix);
@@ -231,6 +237,7 @@ setBlendConstant().`,
 
         // Update the transform of the larger block of text
         const crawl = ((Date.now() - start) / 2500) % 14;
+
         mat4.identity(textMatrix);
         mat4.rotateX(textMatrix, -Math.PI / 8, textMatrix);
         mat4.translate(textMatrix, [0, crawl - 3, 0], textMatrix);
@@ -247,10 +254,11 @@ setBlendConstant().`,
 
         const buffer = GPUBufferManager.getBuffer(uniformBuffer);
         const writeBuffers = buffer.writeBuffers || [];
+
         writeBuffers.push({
             data: transformationMatrix.buffer,
             dataOffset: transformationMatrix.byteOffset,
-            size: transformationMatrix.byteLength
+            size: transformationMatrix.byteLength,
         });
         reactive(buffer).writeBuffers = writeBuffers;
 
@@ -260,7 +268,7 @@ setBlendConstant().`,
             pipeline: pipeline,
             bindingResources: uniformBindGroup,
             vertices: verticesBuffer,
-            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount, instanceCount: 1 },
+            draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount, instanceCount: 1 },
         });
 
         textRenderer.render(renderObjects, ...text);
@@ -270,9 +278,10 @@ setBlendConstant().`,
                 passEncoders: [{
                     descriptor: renderPassDescriptor,
                     renderPassObjects: renderObjects,
-                }]
-            }]
+                }],
+            }],
         };
+
         webgpu.submit(submit);
 
         requestAnimationFrame(frame);
@@ -280,5 +289,6 @@ setBlendConstant().`,
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);

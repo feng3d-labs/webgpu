@@ -1,6 +1,6 @@
-import { PrimitiveState } from "@feng3d/render-api";
+import { PrimitiveState } from '@feng3d/render-api';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * {@link GPUPrimitiveState}

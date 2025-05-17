@@ -1,7 +1,7 @@
-import { computed, Computed, reactive } from "@feng3d/reactivity";
-import { RenderPassDescriptor } from "@feng3d/render-api";
-import { RenderPassFormat } from "../internal/RenderPassFormat";
-import { GPUTextureFormatManager } from "./GPUTextureFormatManager";
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { RenderPassDescriptor } from '@feng3d/render-api';
+import { RenderPassFormat } from '../internal/RenderPassFormat';
+import { GPUTextureFormatManager } from './GPUTextureFormatManager';
 
 export class GPURenderPassFormatManager
 {
@@ -14,12 +14,14 @@ export class GPURenderPassFormatManager
     static getGPURenderPassFormat(descriptor: RenderPassDescriptor): RenderPassFormat
     {
         let result = this.getGPURenderPassFormatMap.get(descriptor);
+
         if (result) return result.value;
 
         result = computed(() =>
         {
             // 监听
             const r_descriptor = reactive(descriptor);
+
             r_descriptor.attachmentSize?.width;
             r_descriptor.attachmentSize?.height;
             r_descriptor.colorAttachments?.map((v) => v.view.texture);
@@ -30,9 +32,10 @@ export class GPURenderPassFormatManager
             const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => GPUTextureFormatManager.getGPUTextureFormat(v.view.texture));
 
             let depthStencilAttachmentTextureFormat: GPUTextureFormat;
+
             if (descriptor.depthStencilAttachment)
             {
-                depthStencilAttachmentTextureFormat = GPUTextureFormatManager.getGPUTextureFormat(descriptor.depthStencilAttachment.view?.texture) || "depth24plus";
+                depthStencilAttachmentTextureFormat = GPUTextureFormatManager.getGPUTextureFormat(descriptor.depthStencilAttachment.view?.texture) || 'depth24plus';
             }
 
             const renderPassFormat: RenderPassFormat = {
@@ -44,10 +47,11 @@ export class GPURenderPassFormatManager
 
             // 缓存
             const renderPassFormatKey = `${renderPassFormat.attachmentSize.width},${renderPassFormat.attachmentSize.height
-                }|${renderPassFormat.colorFormats.join("")
-                }|${renderPassFormat.depthStencilFormat
-                }|${renderPassFormat.sampleCount}`;
+            }|${renderPassFormat.colorFormats.join('')
+            }|${renderPassFormat.depthStencilFormat
+            }|${renderPassFormat.sampleCount}`;
             const cache = this.renderPassFormatMap[renderPassFormatKey];
+
             if (cache) return cache;
             this.renderPassFormatMap[renderPassFormatKey] = renderPassFormat;
 
@@ -57,6 +61,7 @@ export class GPURenderPassFormatManager
 
         return result.value;
     }
+
     private static readonly renderPassFormatMap: Record<string, RenderPassFormat> = {};
     private static readonly getGPURenderPassFormatMap = new WeakMap<RenderPassDescriptor, Computed<RenderPassFormat>>();
 

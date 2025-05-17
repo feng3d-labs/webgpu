@@ -1,5 +1,5 @@
-import { computed, Computed, reactive } from "@feng3d/reactivity";
-import { TextureLike } from "@feng3d/render-api";
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { TextureLike } from '@feng3d/render-api';
 
 export class GPUTextureFormatManager
 {
@@ -14,6 +14,7 @@ export class GPUTextureFormatManager
         if (!texture) return undefined;
 
         let result = this.getGPUTextureFormatMap.get(texture);
+
         if (result) return result.value;
 
         result = computed(() =>
@@ -22,7 +23,7 @@ export class GPUTextureFormatManager
             const r_texture = reactive(texture);
 
             // 计算
-            if ("context" in r_texture)
+            if ('context' in r_texture)
             {
                 const format = r_texture.context?.configuration?.format || navigator.gpu.getPreferredCanvasFormat();
 

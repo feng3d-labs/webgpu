@@ -1,6 +1,6 @@
-export const GPUQueue_submit = "GPUQueue_submit";
+export const GPUQueue_submit = 'GPUQueue_submit';
 
-export const IGPUSampler_changed = "IGPUSampler_changed";
+export const IGPUSampler_changed = 'IGPUSampler_changed';
 
 /**
  * 通过反应式机制更改数值来触发事件。
