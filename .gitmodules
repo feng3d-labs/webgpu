@@ -1,6 +1,3 @@
 [submodule "packages/render-api"]
 	path = packages/render-api
 	url = https://github.com/feng3d-labs/render-api.git
-[submodule "packages/reactivity"]
-	path = packages/reactivity
-	url = https://github.com/feng3d-labs/reactivity.git
