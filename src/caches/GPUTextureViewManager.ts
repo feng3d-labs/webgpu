@@ -38,7 +38,7 @@ export class GPUTextureViewManager
 
             // 执行
             const { texture, label, format, dimension, usage, aspect, baseMipLevel, baseArrayLayer, mipLevelCount, arrayLayerCount } = view;
-            const gpuTexture = GPUTextureManager.getGPUTexture(device, texture);
+            const gpuTexture = GPUTextureManager.getInstance(device).getGPUTexture(texture);
             const textureView = gpuTexture.createView({
                 label: label ?? `${gpuTexture.label}视图`,
                 format,

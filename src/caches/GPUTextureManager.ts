@@ -7,6 +7,61 @@ import { GPUCanvasContextManager } from './GPUCanvasContextManager';
 
 export class GPUTextureManager
 {
+    static getInstance(device: GPUDevice)
+    {
+        if (!device) return null;
+
+        let result = GPUTextureManager._instanceMap.get(device);
+
+        if (!result)
+        {
+            result = new GPUTextureManager(device);
+            this._instanceMap.set(device, result);
+        }
+        result.refCount++;
+
+        return result;
+    }
+
+    private static _instanceMap = new WeakMap<GPUDevice, GPUTextureManager>();
+
+    readonly device: GPUDevice;
+
+    private refCount = 0;
+
+    constructor(device: GPUDevice)
+    {
+        this.device = device;
+    }
+
+    /**
+     * 释放
+     */
+    release()
+    {
+        this.refCount--;
+
+        if (this.refCount <= 0)
+        {
+            this.destroy();
+        }
+    }
+
+    /**
+     * 销毁
+     */
+    private destroy()
+    {
+        const r_this = reactive(this);
+
+        //
+        this._gpuTextureMap.clear();
+
+        //
+        r_this.device = null;
+        r_this._gpuTextureMap = null;
+    }
+
     /**
      * 获取GPU纹理 {@link GPUTexture} 。
      *
@@ -14,10 +69,10 @@ export class GPUTextureManager
      * @param iGPUTextureBase 纹理描述。
      * @returns GPU纹理。
      */
-    static getGPUTexture(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
+    getGPUTexture(textureLike: TextureLike, autoCreate = true)
     {
-        const getGPUTextureKey: GetGPUTextureMap = [device, textureLike];
-        let result = GPUTextureManager.getGPUTextureMap.get(getGPUTextureKey);
+        const device = this.device;
+        let result = this._gpuTextureMap.get(textureLike);
 
         if (result) return result.value;
 
@@ -111,7 +166,7 @@ export class GPUTextureManager
 
             return gpuTexture;
         });
-        GPUTextureManager.getGPUTextureMap.set(getGPUTextureKey, result);
+        this._gpuTextureMap.set(textureLike, result);
 
         return result.value;
     }
@@ -302,8 +357,7 @@ export class GPUTextureManager
     };
 
     private static autoIndex = 0;
-    private static readonly getGPUTextureMap = new ChainMap<GetGPUTextureMap, Computed<GPUTexture>>();
+    readonly _gpuTextureMap = new Map<TextureLike, Computed<GPUTexture>>();
     private static readonly textureMap = new ChainMap<[device: GPUDevice, texture: Texture], GPUTexture>();
 }
 
-type GetGPUTextureMap = [device: GPUDevice, texture: TextureLike];

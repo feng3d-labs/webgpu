@@ -52,7 +52,9 @@ export class WebGPU
      */
     async init(options?: GPURequestAdapterOptions, descriptor?: GPUDeviceDescriptor)
     {
-        this.device = await getGPUDevice(options, descriptor);
+        const r_this = reactive(this);
+
+        r_this.device = await getGPUDevice(options, descriptor);
         //
         this.device?.lost.then(async (info) =>
         {
@@ -62,33 +64,43 @@ export class WebGPU
             if (info.reason !== 'destroyed')
             {
                 // try again
-                this.device = await getGPUDevice(options, descriptor);
+                r_this.device = await getGPUDevice(options, descriptor);
             }
         });
 
         return this;
     }
 
-    get device()
-    {
-        return this._device;
-    }
+    readonly device: GPUDevice;
 
-    set device(v)
-    {
-        this._device = v;
-    }
-
-    protected _device: GPUDevice;
+    readonly textureManager: GPUTextureManager;
 
     constructor(device?: GPUDevice)
     {
         this.device = device;
+        this.textureManager = GPUTextureManager.getInstance(device);
+
+        const r_this = reactive(this);
+
+        effect(() =>
+        {
+            r_this.device;
+
+            if (device)
+            {
+                r_this.textureManager = GPUTextureManager.getInstance(device);
+            }
+            else
+            {
+                this.textureManager?.release();
+                r_this.textureManager = null;
+            }
+        });
     }
 
     submit(submit: Submit)
     {
-        const device = this._device;
+        const device = this.device;
 
         const submitCommand = new SubmitCommand();
 
@@ -105,30 +117,30 @@ export class WebGPU
 
     destoryTexture(texture: TextureLike)
     {
-        GPUTextureManager.getGPUTexture(this._device, texture, false)?.destroy();
+        this.textureManager.getGPUTexture(texture, false)?.destroy();
     }
 
     textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
-        const device = this._device;
-        const gpuTexture = GPUTextureManager.getGPUTexture(device, texture);
+        const device = this.device;
+        const gpuTexture = this.textureManager.getGPUTexture(texture);
 
         textureInvertYPremultiplyAlpha(device, gpuTexture, options);
     }
 
     copyDepthTexture(sourceTexture: TextureLike, targetTexture: TextureLike)
     {
-        const device = this._device;
-        const gpuSourceTexture = GPUTextureManager.getGPUTexture(device, sourceTexture);
-        const gpuTargetTexture = GPUTextureManager.getGPUTexture(device, targetTexture);
+        const device = this.device;
+        const gpuSourceTexture = this.textureManager.getGPUTexture(sourceTexture);
+        const gpuTargetTexture = this.textureManager.getGPUTexture(targetTexture);
 
         copyDepthTexture(device, gpuSourceTexture, gpuTargetTexture);
     }
 
     async readPixels(gpuReadPixels: ReadPixels)
     {
-        const device = this._device;
-        const gpuTexture = GPUTextureManager.getGPUTexture(device, gpuReadPixels.texture, false);
+        const device = this.device;
+        const gpuTexture = this.textureManager.getGPUTexture(gpuReadPixels.texture, false);
 
         const result = await readPixels(device, {
             ...gpuReadPixels,
@@ -142,7 +154,7 @@ export class WebGPU
 
     async readBuffer(buffer: Buffer, offset?: GPUSize64, size?: GPUSize64)
     {
-        const device = this._device;
+        const device = this.device;
         const gpuBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
 
         await gpuBuffer.mapAsync(GPUMapMode.READ);
@@ -191,7 +203,7 @@ export class WebGPU
 
     protected runRenderPass(renderPass: RenderPass)
     {
-        const device = this._device;
+        const device = this.device;
         let renderPassCommand = this._renderPassCommandMap.get(renderPass);
 
         if (renderPassCommand) return renderPassCommand;
@@ -282,7 +294,7 @@ export class WebGPU
     {
         const computePassCommand = new ComputePassCommand();
 
-        computePassCommand.descriptor = GPUComputePassDescriptorManager.getGPUComputePassDescriptor(this._device, computePass);
+        computePassCommand.descriptor = GPUComputePassDescriptorManager.getGPUComputePassDescriptor(this.device, computePass);
         computePassCommand.computeObjectCommands = this.runComputeObjects(computePass.computeObjects);
 
         return computePassCommand;
@@ -295,12 +307,12 @@ export class WebGPU
 
     protected runCopyTextureToTexture(copyTextureToTexture: CopyTextureToTexture)
     {
-        const device = this._device;
+        const device = this.device;
 
         const copyTextureToTextureCommand = new CopyTextureToTextureCommand();
 
-        const sourceTexture = GPUTextureManager.getGPUTexture(device, copyTextureToTexture.source.texture);
-        const destinationTexture = GPUTextureManager.getGPUTexture(device, copyTextureToTexture.destination.texture);
+        const sourceTexture = this.textureManager.getGPUTexture(copyTextureToTexture.source.texture);
+        const destinationTexture = this.textureManager.getGPUTexture(copyTextureToTexture.destination.texture);
 
         copyTextureToTextureCommand.source = {
             ...copyTextureToTexture.source,
@@ -319,7 +331,7 @@ export class WebGPU
 
     protected runCopyBufferToBuffer(copyBufferToBuffer: CopyBufferToBuffer)
     {
-        const device = this._device;
+        const device = this.device;
 
         const copyBufferToBufferCommand = new CopyBufferToBufferCommand();
 
@@ -418,7 +430,7 @@ export class WebGPU
      */
     protected runComputeObject(computeObject: ComputeObject)
     {
-        const device = this._device;
+        const device = this.device;
         const { pipeline, bindingResources, workgroups } = computeObject;
 
         const computePipeline = GPUComputePipelineManager.getGPUComputePipeline(device, pipeline);
@@ -453,7 +465,7 @@ export class WebGPU
      */
     protected runRenderObject(renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
-        const device = this._device;
+        const device = this.device;
         const renderObjectCacheKey: RenderObjectCacheKey = [device, renderObject, renderPassFormat];
         let result = renderObjectCacheMap.get(renderObjectCacheKey);
 
@@ -550,7 +562,7 @@ export class WebGPU
 
     protected runRenderPipeline(renderPassFormat: RenderPassFormat, renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
-        const device = this._device;
+        const device = this.device;
         const r_renderObject = reactive(renderObject);
 
         computed(() =>
@@ -616,7 +628,7 @@ export class WebGPU
 
     protected runBindingResources(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
-        const device = this._device;
+        const device = this.device;
         const r_renderObject = reactive(renderObject);
 
         computed(() =>
@@ -640,7 +652,7 @@ export class WebGPU
 
     protected runVertexAttributes(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
     {
-        const device = this._device;
+        const device = this.device;
         const r_renderObject = reactive(renderObject);
 
         computed(() =>
@@ -695,7 +707,7 @@ export class WebGPU
                 return;
             }
 
-            const device = this._device;
+            const device = this.device;
 
             const buffer = GPUBufferManager.getBuffer(indices);
 
