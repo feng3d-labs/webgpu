@@ -1,7 +1,7 @@
 {
   "name": "webgpu-examples",
   "version": "0.0.1",
-  "description": "webgpu示例 https://github.com/webgpu/webgpu-samples",
+  "description": "feng3d实现webgpu示例 https://github.com/webgpu/webgpu-samples",
   "main": "public/index.html",
   "scripts": {
     "dev": "vite",
