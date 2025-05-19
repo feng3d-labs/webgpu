@@ -1,4 +1,4 @@
-import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
+import { computed, Computed, effect, effectScope, EffectScope, reactive } from '@feng3d/reactivity';
 import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from '@feng3d/render-api';
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
@@ -73,14 +73,17 @@ export class WebGPU
 
     readonly device: GPUDevice;
 
-    readonly textureManager: GPUTextureManager;
+    private _textureManager: GPUTextureManager;
+    readonly effectScope: EffectScope;
 
     constructor(device?: GPUDevice)
     {
         this.device = device;
-        this.textureManager = GPUTextureManager.getInstance(device);
+        this._textureManager = GPUTextureManager.getInstance(device);
 
         const r_this = reactive(this);
+
+        this.effectScope = effectScope();
 
         effect(() =>
         {
@@ -88,14 +91,23 @@ export class WebGPU
 
             if (device)
             {
-                r_this.textureManager = GPUTextureManager.getInstance(device);
+                this._textureManager = GPUTextureManager.getInstance(device);
             }
             else
             {
-                this.textureManager?.release();
-                r_this.textureManager = null;
+                this._textureManager?.release();
+                this._textureManager = null;
             }
         });
+    }
+
+    destroy()
+    {
+        const r_this = reactive(this);
+
+        r_this.device = null;
+
+        this.effectScope.stop();
     }
 
     submit(submit: Submit)
@@ -117,13 +129,13 @@ export class WebGPU
 
     destoryTexture(texture: TextureLike)
     {
-        this.textureManager.getGPUTexture(texture, false)?.destroy();
+        this._textureManager.getGPUTexture(texture, false)?.destroy();
     }
 
     textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
         const device = this.device;
-        const gpuTexture = this.textureManager.getGPUTexture(texture);
+        const gpuTexture = this._textureManager.getGPUTexture(texture);
 
         textureInvertYPremultiplyAlpha(device, gpuTexture, options);
     }
@@ -131,8 +143,8 @@ export class WebGPU
     copyDepthTexture(sourceTexture: TextureLike, targetTexture: TextureLike)
     {
         const device = this.device;
-        const gpuSourceTexture = this.textureManager.getGPUTexture(sourceTexture);
-        const gpuTargetTexture = this.textureManager.getGPUTexture(targetTexture);
+        const gpuSourceTexture = this._textureManager.getGPUTexture(sourceTexture);
+        const gpuTargetTexture = this._textureManager.getGPUTexture(targetTexture);
 
         copyDepthTexture(device, gpuSourceTexture, gpuTargetTexture);
     }
@@ -140,7 +152,7 @@ export class WebGPU
     async readPixels(gpuReadPixels: ReadPixels)
     {
         const device = this.device;
-        const gpuTexture = this.textureManager.getGPUTexture(gpuReadPixels.texture, false);
+        const gpuTexture = this._textureManager.getGPUTexture(gpuReadPixels.texture, false);
 
         const result = await readPixels(device, {
             ...gpuReadPixels,
@@ -311,8 +323,8 @@ export class WebGPU
 
         const copyTextureToTextureCommand = new CopyTextureToTextureCommand();
 
-        const sourceTexture = this.textureManager.getGPUTexture(copyTextureToTexture.source.texture);
-        const destinationTexture = this.textureManager.getGPUTexture(copyTextureToTexture.destination.texture);
+        const sourceTexture = this._textureManager.getGPUTexture(copyTextureToTexture.source.texture);
+        const destinationTexture = this._textureManager.getGPUTexture(copyTextureToTexture.destination.texture);
 
         copyTextureToTextureCommand.source = {
             ...copyTextureToTexture.source,
