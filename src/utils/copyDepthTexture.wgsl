@@ -1,5 +1,3 @@
-export const copyDepthTexture_wgsl = /* wgsl */`
-
 struct VarysStruct {
     @builtin( position ) Position: vec4<f32>,
     @location( 0 ) vUV : vec2<f32>
@@ -49,4 +47,3 @@ fn fsmain(Varys : VarysStruct) -> FragmentOut {
 
     return output;
 }
-`;
