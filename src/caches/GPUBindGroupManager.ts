@@ -1,5 +1,5 @@
-import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
-import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, Sampler, TextureView, UnReadonly } from '@feng3d/render-api';
+import { computed, Computed, effect, reactive, UnReadonly } from '@feng3d/reactivity';
+import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, Sampler, TextureView } from '@feng3d/render-api';
 import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { VideoTexture } from '../data/VideoTexture';

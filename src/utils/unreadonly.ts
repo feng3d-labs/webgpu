@@ -1,4 +1,4 @@
-import { UnReadonly } from '@feng3d/render-api';
+import { UnReadonly } from '@feng3d/reactivity';
 
 /**
  * 取消只读

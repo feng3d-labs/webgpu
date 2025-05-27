@@ -1,5 +1,5 @@
-import { computed, Computed, effect, effectScope, EffectScope, reactive } from '@feng3d/reactivity';
-import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike, UnReadonly } from '@feng3d/render-api';
+import { computed, Computed, effect, effectScope, EffectScope, reactive, UnReadonly } from '@feng3d/reactivity';
+import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
 import { GPUBufferManager } from './caches/GPUBufferManager';

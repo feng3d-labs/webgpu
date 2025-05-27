@@ -1,9 +1,10 @@
-import { ChainMap, UnReadonly } from '@feng3d/render-api';
+import { ChainMap } from '@feng3d/render-api';
 import { ComputePipeline } from '../data/ComputePipeline';
 import { ComputeStage } from '../data/ComputeStage';
 import { GPUPipelineLayoutManager } from './GPUPipelineLayoutManager';
 import { GPUShaderModuleManager } from './GPUShaderModuleManager';
 import { WgslReflectManager } from './WgslReflectManager';
+import { UnReadonly } from '@feng3d/reactivity';
 
 export class GPUComputePipelineManager
 {
