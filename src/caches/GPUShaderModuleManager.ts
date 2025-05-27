@@ -1,5 +1,16 @@
 import { ChainMap } from '@feng3d/render-api';
 
+declare global
+{
+    interface GPUShaderModule
+    {
+        /**
+         * 用于缓存的着色器代码。
+         */
+        code: string;
+    }
+}
+
 /**
  * GPU着色器模块管理器。
  */
@@ -22,6 +33,7 @@ export class GPUShaderModuleManager
         gShaderModule = device.createShaderModule({
             code,
         });
+        gShaderModule.code = code;
         this.getGPUShaderModuleMap.set(getGPUShaderModuleKey, gShaderModule);
 
         return gShaderModule;
