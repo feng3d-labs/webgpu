@@ -1,4 +1,4 @@
-import { textureInvertYPremultiplyAlpha_wgsl as wgsl } from './textureInvertYPremultiplyAlpha.wgsl';
+import textureInvertYPremultiplyAlpha_wgsl from './textureInvertYPremultiplyAlpha.wgsl';
 
 /**
  * 操作纹理进行Y轴翻转或进行预乘Alpha。
@@ -13,7 +13,7 @@ export function textureInvertYPremultiplyAlpha(device: GPUDevice, texture: GPUTe
 
     if (!wgslModel)
     {
-        wgslModel = device.createShaderModule({ code: wgsl });
+        wgslModel = device.createShaderModule({ code: textureInvertYPremultiplyAlpha_wgsl });
     }
 
     // 同一个纹理不能 同时作为输入与输出，此处复制一份临时纹理作为输入。

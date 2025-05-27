@@ -1,4 +1,3 @@
-export const textureInvertYPremultiplyAlpha_wgsl = /* wgsl */`
 override invertY = false;
 override premultiplyAlpha = false;
 
@@ -59,4 +58,3 @@ fn fsmain(Varys : VarysStruct) -> FragmentOut {
 
     return output;
 }
-`;
