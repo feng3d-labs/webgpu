@@ -1,22 +1,16 @@
 import { computed, Computed, effect, effectScope, EffectScope, reactive, UnReadonly } from '@feng3d/reactivity';
-import { BlendState, Buffer, ChainMap, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPass, RenderPassObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
+import { BlendState, Buffer, ChainMap, CopyBufferToBuffer, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPassObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
 import { GPUBufferManager } from './caches/GPUBufferManager';
-import { GPUComputePassDescriptorManager } from './caches/GPUComputePassDescriptorManager';
-import { GPUComputePipelineManager } from './caches/GPUComputePipelineManager';
 import { GPUPipelineLayoutManager } from './caches/GPUPipelineLayoutManager';
-import { GPURenderPassDescriptorManager } from './caches/GPURenderPassDescriptorManager';
-import { GPURenderPassFormatManager } from './caches/GPURenderPassFormatManager';
 import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
 import { GPUTextureManager } from './caches/GPUTextureManager';
 import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
-import { ComputeObject } from './data/ComputeObject';
-import { ComputePass } from './data/ComputePass';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
 import { RenderBundle } from './data/RenderBundle';
-import { CommandEncoderCommand, CommandType, ComputeObjectCommand, ComputePassCommand, CopyBufferToBufferCommand, CopyTextureToTextureCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassCommand, RenderPassObjectCommand, SubmitCommand } from './internal/RenderObjectCache';
+import { CommandType, CopyBufferToBufferCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassObjectCommand, SubmitCommand } from './internal/RenderObjectCache';
 import { RenderPassFormat } from './internal/RenderPassFormat';
 import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
@@ -73,7 +67,7 @@ export class WebGPU
 
     readonly device: GPUDevice;
 
-    private _textureManager: GPUTextureManager;
+    _textureManager: GPUTextureManager;
     readonly effectScope: EffectScope;
 
     constructor(device?: GPUDevice)
@@ -212,30 +206,6 @@ export class WebGPU
         this._renderPassObjectCommandsMap.set(renderPassObjectCommandsKey, result);
 
         return result.value;
-    }
-
-    runCopyTextureToTexture(copyTextureToTexture: CopyTextureToTexture)
-    {
-        const device = this.device;
-
-        const copyTextureToTextureCommand = new CopyTextureToTextureCommand();
-
-        const sourceTexture = this._textureManager.getGPUTexture(copyTextureToTexture.source.texture);
-        const destinationTexture = this._textureManager.getGPUTexture(copyTextureToTexture.destination.texture);
-
-        copyTextureToTextureCommand.source = {
-            ...copyTextureToTexture.source,
-            texture: sourceTexture,
-        };
-
-        copyTextureToTextureCommand.destination = {
-            ...copyTextureToTexture.destination,
-            texture: destinationTexture,
-        };
-
-        copyTextureToTextureCommand.copySize = copyTextureToTexture.copySize;
-
-        return copyTextureToTextureCommand;
     }
 
     runCopyBufferToBuffer(copyBufferToBuffer: CopyBufferToBuffer)

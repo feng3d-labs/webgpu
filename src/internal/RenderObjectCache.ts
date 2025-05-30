@@ -1,6 +1,6 @@
 import { anyEmitter } from '@feng3d/event';
 import { effect, reactive } from '@feng3d/reactivity';
-import { ChainMap, CommandEncoder, RenderPass, Submit } from '@feng3d/render-api';
+import { ChainMap, CommandEncoder, CopyTextureToTexture, RenderPass, Submit } from '@feng3d/render-api';
 import { GPUBindGroupManager } from '../caches/GPUBindGroupManager';
 import { GPUComputePassDescriptorManager } from '../caches/GPUComputePassDescriptorManager';
 import { GPUComputePipelineManager } from '../caches/GPUComputePipelineManager';
@@ -333,6 +333,31 @@ export class ComputePassCommand
 
 export class CopyTextureToTextureCommand
 {
+    static getInstance(webgpu: WebGPU, passEncoder: CopyTextureToTexture)
+    {
+        return new CopyTextureToTextureCommand(webgpu, passEncoder);
+    }
+
+    constructor(public readonly webgpu: WebGPU, public readonly copyTextureToTexture: CopyTextureToTexture)
+    {
+        const device = this.webgpu.device;
+
+        const sourceTexture = this.webgpu._textureManager.getGPUTexture(copyTextureToTexture.source.texture);
+        const destinationTexture = this.webgpu._textureManager.getGPUTexture(copyTextureToTexture.destination.texture);
+
+        this.source = {
+            ...copyTextureToTexture.source,
+            texture: sourceTexture,
+        };
+
+        this.destination = {
+            ...copyTextureToTexture.destination,
+            texture: destinationTexture,
+        };
+
+        this.copySize = copyTextureToTexture.copySize;
+    }
+
     run(commandEncoder: GPUCommandEncoder)
     {
         const { source, destination, copySize } = this;
@@ -398,7 +423,9 @@ export class CommandEncoderCommand
             }
             else if (passEncoder.__type__ === 'CopyTextureToTexture')
             {
-                return this.webgpu.runCopyTextureToTexture(passEncoder);
+                const copyTextureToTextureCommand = CopyTextureToTextureCommand.getInstance(this.webgpu, passEncoder);
+
+                return copyTextureToTextureCommand;
             }
             else if (passEncoder.__type__ === 'CopyBufferToBuffer')
             {
