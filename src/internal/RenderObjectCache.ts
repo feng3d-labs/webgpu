@@ -1,6 +1,6 @@
 import { anyEmitter } from '@feng3d/event';
 import { effect, reactive } from '@feng3d/reactivity';
-import { ChainMap, CommandEncoder, CopyTextureToTexture, RenderPass, Submit } from '@feng3d/render-api';
+import { ChainMap, CommandEncoder, RenderPass, Submit } from '@feng3d/render-api';
 import { GPUBindGroupManager } from '../caches/GPUBindGroupManager';
 import { GPUComputePassDescriptorManager } from '../caches/GPUComputePassDescriptorManager';
 import { GPUComputePipelineManager } from '../caches/GPUComputePipelineManager';
@@ -11,6 +11,8 @@ import { ComputeObject } from '../data/ComputeObject';
 import { ComputePass } from '../data/ComputePass';
 import { GPUQueue_submit, webgpuEvents } from '../eventnames';
 import { WebGPU } from '../WebGPU';
+import { CopyTextureToTextureCommand } from './CopyTextureToTextureCommand';
+import { CommandEncoderCommand } from './CommandEncoderCommand';
 
 const cache = new ChainMap();
 
@@ -329,159 +331,6 @@ export class ComputePassCommand
 
     descriptor: GPUComputePassDescriptor;
     computeObjectCommands: ComputeObjectCommand[];
-}
-
-export class CopyTextureToTextureCommand
-{
-    static getInstance(webgpu: WebGPU, passEncoder: CopyTextureToTexture)
-    {
-        return new CopyTextureToTextureCommand(webgpu, passEncoder);
-    }
-
-    constructor(public readonly webgpu: WebGPU, public readonly copyTextureToTexture: CopyTextureToTexture)
-    {
-        const device = this.webgpu.device;
-
-        const sourceTexture = this.webgpu._textureManager.getGPUTexture(copyTextureToTexture.source.texture);
-        const destinationTexture = this.webgpu._textureManager.getGPUTexture(copyTextureToTexture.destination.texture);
-
-        this.source = {
-            ...copyTextureToTexture.source,
-            texture: sourceTexture,
-        };
-
-        this.destination = {
-            ...copyTextureToTexture.destination,
-            texture: destinationTexture,
-        };
-
-        this.copySize = copyTextureToTexture.copySize;
-    }
-
-    run(commandEncoder: GPUCommandEncoder)
-    {
-        const { source, destination, copySize } = this;
-
-        commandEncoder.copyTextureToTexture(
-            source,
-            destination,
-            copySize,
-        );
-    }
-
-    source: GPUImageCopyTexture;
-    destination: GPUImageCopyTexture;
-    copySize: GPUExtent3DStrict;
-}
-
-export class CopyBufferToBufferCommand
-{
-    run(commandEncoder: GPUCommandEncoder)
-    {
-        const { source, sourceOffset, destination, destinationOffset, size } = this;
-
-        commandEncoder.copyBufferToBuffer(
-            source, sourceOffset, destination, destinationOffset, size,
-        );
-    }
-
-    source: GPUBuffer;
-    sourceOffset: number;
-    destination: GPUBuffer;
-    destinationOffset: number;
-    size: number;
-}
-
-export class CommandEncoderCommand
-{
-    static getInstance(webgpu: WebGPU, commandEncoder: CommandEncoder)
-    {
-        return new CommandEncoderCommand(webgpu, commandEncoder);
-    }
-
-    constructor(public readonly webgpu: WebGPU, public readonly commandEncoder: CommandEncoder)
-    {
-        this.passEncoders = commandEncoder.passEncoders.map((passEncoder) =>
-        {
-            if (!passEncoder.__type__)
-            {
-                const renderPassCommand = RenderPassCommand.getInstance(this.webgpu, passEncoder as RenderPass);
-
-                return renderPassCommand;
-            }
-            else if (passEncoder.__type__ === 'RenderPass')
-            {
-                const renderPassCommand = RenderPassCommand.getInstance(this.webgpu, passEncoder);
-
-                return renderPassCommand;
-            }
-            else if (passEncoder.__type__ === 'ComputePass')
-            {
-                const computePassCommand = ComputePassCommand.getInstance(this.webgpu, passEncoder);
-
-                return computePassCommand;
-            }
-            else if (passEncoder.__type__ === 'CopyTextureToTexture')
-            {
-                const copyTextureToTextureCommand = CopyTextureToTextureCommand.getInstance(this.webgpu, passEncoder);
-
-                return copyTextureToTextureCommand;
-            }
-            else if (passEncoder.__type__ === 'CopyBufferToBuffer')
-            {
-                return this.webgpu.runCopyBufferToBuffer(passEncoder);
-            }
-
-            console.error(`未处理 passEncoder ${passEncoder}`);
-
-            return null;
-        });
-    }
-
-    run(device: GPUDevice)
-    {
-        const gpuCommandEncoder = device.createCommandEncoder();
-
-        gpuCommandEncoder.device = device;
-        this.passEncoders.forEach((passEncoder) => passEncoder.run(gpuCommandEncoder));
-
-        return gpuCommandEncoder.finish();
-    }
-
-    passEncoders: (RenderPassCommand | ComputePassCommand | CopyTextureToTextureCommand | CopyBufferToBufferCommand)[];
-}
-
-export class SubmitCommand
-{
-    static getInstance(webgpu: WebGPU, submit: Submit)
-    {
-        return new SubmitCommand(webgpu, submit);
-    }
-
-    constructor(public readonly webgpu: WebGPU, public readonly submit: Submit)
-    {
-        this.commandBuffers = submit.commandEncoders.map((v) =>
-        {
-            const commandEncoderCommand = CommandEncoderCommand.getInstance(this.webgpu, v);
-
-            return commandEncoderCommand;
-        });
-    }
-
-    run(device: GPUDevice)
-    {
-        const { commandBuffers } = this;
-
-        // 提交前数值加一，用于处理提交前需要执行的操作。
-        reactive(webgpuEvents).preSubmit = webgpuEvents.preSubmit + 1;
-
-        device.queue.submit(commandBuffers.map((v) => v.run(device)));
-
-        // 派发提交WebGPU事件
-        anyEmitter.emit(device.queue, GPUQueue_submit);
-    }
-
-    commandBuffers: CommandEncoderCommand[];
 }
 
 function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, commands: CommandType[])

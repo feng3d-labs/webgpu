@@ -10,12 +10,14 @@ import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
 import { RenderBundle } from './data/RenderBundle';
-import { CommandType, CopyBufferToBufferCommand, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassObjectCommand, SubmitCommand } from './internal/RenderObjectCache';
+import { CommandType, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassObjectCommand } from './internal/RenderObjectCache';
 import { RenderPassFormat } from './internal/RenderPassFormat';
 import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
 import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
+import { SubmitCommand } from './internal/SubmitCommand';
+import { CopyBufferToBufferCommand } from './internal/CopyBufferToBufferCommand';
 
 declare global
 {
@@ -206,21 +208,6 @@ export class WebGPU
         this._renderPassObjectCommandsMap.set(renderPassObjectCommandsKey, result);
 
         return result.value;
-    }
-
-    runCopyBufferToBuffer(copyBufferToBuffer: CopyBufferToBuffer)
-    {
-        const device = this.device;
-
-        const copyBufferToBufferCommand = new CopyBufferToBufferCommand();
-
-        copyBufferToBufferCommand.source = GPUBufferManager.getGPUBuffer(device, copyBufferToBuffer.source);
-        copyBufferToBufferCommand.sourceOffset = copyBufferToBuffer.sourceOffset ?? 0;
-        copyBufferToBufferCommand.destination = GPUBufferManager.getGPUBuffer(device, copyBufferToBuffer.destination);
-        copyBufferToBufferCommand.destinationOffset = copyBufferToBuffer.destinationOffset ?? 0;
-        copyBufferToBufferCommand.size = copyBufferToBuffer.size ?? copyBufferToBuffer.source.size;
-
-        return copyBufferToBufferCommand;
     }
 
     protected runRenderOcclusionQueryObject(renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
