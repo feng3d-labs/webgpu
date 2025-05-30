@@ -114,15 +114,7 @@ export class WebGPU
     {
         const device = this.device;
 
-        const submitCommand = new SubmitCommand();
-
-        //
-        submitCommand.commandBuffers = submit.commandEncoders.map((v) =>
-        {
-            const commandBuffer = this.runCommandEncoder(v);
-
-            return commandBuffer;
-        });
+        const submitCommand = SubmitCommand.getInstance(this, submit);
 
         submitCommand.run(device);
     }
@@ -178,80 +170,7 @@ export class WebGPU
         return result;
     }
 
-    protected runCommandEncoder(commandEncoder: CommandEncoder)
-    {
-        const commandEncoderCommand = new CommandEncoderCommand();
-
-        commandEncoderCommand.passEncoders = commandEncoder.passEncoders.map((passEncoder) =>
-        {
-            if (!passEncoder.__type__)
-            {
-                return this.runRenderPass(passEncoder as RenderPass);
-            }
-            else if (passEncoder.__type__ === 'RenderPass')
-            {
-                return this.runRenderPass(passEncoder);
-            }
-            else if (passEncoder.__type__ === 'ComputePass')
-            {
-                return this.runComputePass(passEncoder);
-            }
-            else if (passEncoder.__type__ === 'CopyTextureToTexture')
-            {
-                return this.runCopyTextureToTexture(passEncoder);
-            }
-            else if (passEncoder.__type__ === 'CopyBufferToBuffer')
-            {
-                return this.runCopyBufferToBuffer(passEncoder);
-            }
-
-            console.error(`未处理 passEncoder ${passEncoder}`);
-
-            return null;
-        });
-
-        return commandEncoderCommand;
-    }
-
-    protected runRenderPass(renderPass: RenderPass)
-    {
-        const device = this.device;
-        let renderPassCommand = this._renderPassCommandMap.get(renderPass);
-
-        if (renderPassCommand) return renderPassCommand;
-
-        renderPassCommand = new RenderPassCommand();
-
-        effect(() =>
-        {
-            const r_renderPass = reactive(renderPass);
-
-            r_renderPass.renderPassObjects;
-            r_renderPass.descriptor;
-
-            const { descriptor, renderPassObjects } = renderPass;
-
-            renderPassCommand.renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(device, renderPass);
-
-            const renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(descriptor);
-
-            const renderPassObjectCommands = this.runRenderPassObjects(renderPassFormat, renderPassObjects);
-            const commands: CommandType[] = [];
-            const state = new RenderObjectCache();
-
-            renderPassObjectCommands?.forEach((command) =>
-            {
-                command.run(device, commands, state);
-            });
-            renderPassCommand.commands = commands;
-        });
-
-        this._renderPassCommandMap.set(renderPass, renderPassCommand);
-
-        return renderPassCommand;
-    }
-
-    private runRenderPassObjects(renderPassFormat: RenderPassFormat, renderPassObjects: readonly RenderPassObject[])
+    runRenderPassObjects(renderPassFormat: RenderPassFormat, renderPassObjects: readonly RenderPassObject[])
     {
         const renderPassObjectCommandsKey: RenderPassObjectCommandsKey = [renderPassObjects, renderPassFormat];
         let result = this._renderPassObjectCommandsMap.get(renderPassObjectCommandsKey);
@@ -295,29 +214,7 @@ export class WebGPU
         return result.value;
     }
 
-    /**
-     * 执行计算通道。
-     *
-     * @param device GPU设备。
-     * @param commandEncoder 命令编码器。
-     * @param computePass 计算通道。
-     */
-    protected runComputePass(computePass: ComputePass)
-    {
-        const computePassCommand = new ComputePassCommand();
-
-        computePassCommand.descriptor = GPUComputePassDescriptorManager.getGPUComputePassDescriptor(this.device, computePass);
-        computePassCommand.computeObjectCommands = this.runComputeObjects(computePass.computeObjects);
-
-        return computePassCommand;
-    }
-
-    protected runComputeObjects(computeObjects: ComputeObject[])
-    {
-        return computeObjects.map((computeObject) => this.runComputeObject(computeObject));
-    }
-
-    protected runCopyTextureToTexture(copyTextureToTexture: CopyTextureToTexture)
+    runCopyTextureToTexture(copyTextureToTexture: CopyTextureToTexture)
     {
         const device = this.device;
 
@@ -341,7 +238,7 @@ export class WebGPU
         return copyTextureToTextureCommand;
     }
 
-    protected runCopyBufferToBuffer(copyBufferToBuffer: CopyBufferToBuffer)
+    runCopyBufferToBuffer(copyBufferToBuffer: CopyBufferToBuffer)
     {
         const device = this.device;
 
@@ -431,40 +328,6 @@ export class WebGPU
         this._renderObjectCachesMap.set(renderObjectCachesKey, result);
 
         return result.value;
-    }
-
-    /**
-     * 执行计算对象。
-     *
-     * @param device GPU设备。
-     * @param passEncoder 计算通道编码器。
-     * @param computeObject 计算对象。
-     */
-    protected runComputeObject(computeObject: ComputeObject)
-    {
-        const device = this.device;
-        const { pipeline, bindingResources, workgroups } = computeObject;
-
-        const computePipeline = GPUComputePipelineManager.getGPUComputePipeline(device, pipeline);
-
-        const computeObjectCommand = new ComputeObjectCommand();
-
-        computeObjectCommand.computePipeline = computePipeline;
-
-        // 计算 bindGroups
-        computeObjectCommand.setBindGroup = [];
-        const layout = GPUPipelineLayoutManager.getPipelineLayout({ compute: pipeline.compute.code });
-
-        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
-        {
-            const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
-
-            computeObjectCommand.setBindGroup.push([group, gpuBindGroup]);
-        });
-
-        computeObjectCommand.dispatchWorkgroups = [workgroups.workgroupCountX, workgroups.workgroupCountY, workgroups.workgroupCountZ];
-
-        return computeObjectCommand;
     }
 
     /**
@@ -750,8 +613,6 @@ export class WebGPU
             }
         }).value;
     }
-
-    private _renderPassCommandMap = new WeakMap<RenderPass, RenderPassCommand>();
 
     private _renderObjectCachesMap = new ChainMap<RenderObjectCachesKey, Computed<RenderObjectCache[]>>();
     private _renderPassObjectCommandsMap = new ChainMap<RenderPassObjectCommandsKey, Computed<RenderPassObjectCommand[]>>();

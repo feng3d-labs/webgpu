@@ -1,7 +1,16 @@
 import { anyEmitter } from '@feng3d/event';
-import { reactive } from '@feng3d/reactivity';
-import { ChainMap } from '@feng3d/render-api';
+import { effect, reactive } from '@feng3d/reactivity';
+import { ChainMap, CommandEncoder, RenderPass, Submit } from '@feng3d/render-api';
+import { GPUBindGroupManager } from '../caches/GPUBindGroupManager';
+import { GPUComputePassDescriptorManager } from '../caches/GPUComputePassDescriptorManager';
+import { GPUComputePipelineManager } from '../caches/GPUComputePipelineManager';
+import { GPUPipelineLayoutManager } from '../caches/GPUPipelineLayoutManager';
+import { GPURenderPassDescriptorManager } from '../caches/GPURenderPassDescriptorManager';
+import { GPURenderPassFormatManager } from '../caches/GPURenderPassFormatManager';
+import { ComputeObject } from '../data/ComputeObject';
+import { ComputePass } from '../data/ComputePass';
 import { GPUQueue_submit, webgpuEvents } from '../eventnames';
+import { WebGPU } from '../WebGPU';
 
 const cache = new ChainMap();
 
@@ -196,6 +205,38 @@ export interface PassEncoderCommand
 
 export class RenderPassCommand
 {
+    static getInstance(webgpu: WebGPU, renderPass: RenderPass)
+    {
+        return new RenderPassCommand(webgpu, renderPass);
+    }
+
+    constructor(public readonly webgpu: WebGPU, public readonly renderPass: RenderPass)
+    {
+        effect(() =>
+        {
+            const r_renderPass = reactive(renderPass);
+
+            r_renderPass.renderPassObjects;
+            r_renderPass.descriptor;
+
+            const { descriptor, renderPassObjects } = renderPass;
+
+            this.renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(webgpu.device, renderPass);
+
+            const renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(descriptor);
+
+            const renderPassObjectCommands = webgpu.runRenderPassObjects(renderPassFormat, renderPassObjects);
+            const commands: CommandType[] = [];
+            const state = new RenderObjectCache();
+
+            renderPassObjectCommands?.forEach((command) =>
+            {
+                command.run(webgpu.device, commands, state);
+            });
+            this.commands = commands;
+        });
+    }
+
     run(commandEncoder: GPUCommandEncoder)
     {
         const { renderPassDescriptor, commands } = this;
@@ -218,6 +259,32 @@ export class RenderPassCommand
 
 export class ComputeObjectCommand
 {
+    static getInstance(webgpu: WebGPU, computeObject: ComputeObject)
+    {
+        return new ComputeObjectCommand(webgpu, computeObject);
+    }
+
+    constructor(public readonly webgpu: WebGPU, public readonly computeObject: ComputeObject)
+    {
+        const device = this.webgpu.device;
+        const { pipeline, bindingResources, workgroups } = computeObject;
+
+        this.computePipeline = GPUComputePipelineManager.getGPUComputePipeline(device, pipeline);
+
+        // 计算 bindGroups
+        this.setBindGroup = [];
+        const layout = GPUPipelineLayoutManager.getPipelineLayout({ compute: pipeline.compute.code });
+
+        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+        {
+            const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
+
+            this.setBindGroup.push([group, gpuBindGroup]);
+        });
+
+        this.dispatchWorkgroups = [workgroups.workgroupCountX, workgroups.workgroupCountY, workgroups.workgroupCountZ];
+    }
+
     run(passEncoder: GPUComputePassEncoder)
     {
         passEncoder.setPipeline(this.computePipeline);
@@ -237,6 +304,17 @@ export class ComputeObjectCommand
 
 export class ComputePassCommand
 {
+    static getInstance(webgpu: WebGPU, computePass: ComputePass)
+    {
+        return new ComputePassCommand(webgpu, computePass);
+    }
+
+    constructor(public readonly webgpu: WebGPU, public readonly computePass: ComputePass)
+    {
+        this.descriptor = GPUComputePassDescriptorManager.getGPUComputePassDescriptor(webgpu.device, computePass);
+        this.computeObjectCommands = computePass.computeObjects.map((computeObject) => ComputeObjectCommand.getInstance(webgpu, computeObject));
+    }
+
     run(commandEncoder: GPUCommandEncoder)
     {
         const { descriptor, computeObjectCommands } = this;
@@ -291,6 +369,48 @@ export class CopyBufferToBufferCommand
 
 export class CommandEncoderCommand
 {
+    static getInstance(webgpu: WebGPU, commandEncoder: CommandEncoder)
+    {
+        return new CommandEncoderCommand(webgpu, commandEncoder);
+    }
+
+    constructor(public readonly webgpu: WebGPU, public readonly commandEncoder: CommandEncoder)
+    {
+        this.passEncoders = commandEncoder.passEncoders.map((passEncoder) =>
+        {
+            if (!passEncoder.__type__)
+            {
+                const renderPassCommand = RenderPassCommand.getInstance(this.webgpu, passEncoder as RenderPass);
+
+                return renderPassCommand;
+            }
+            else if (passEncoder.__type__ === 'RenderPass')
+            {
+                const renderPassCommand = RenderPassCommand.getInstance(this.webgpu, passEncoder);
+
+                return renderPassCommand;
+            }
+            else if (passEncoder.__type__ === 'ComputePass')
+            {
+                const computePassCommand = ComputePassCommand.getInstance(this.webgpu, passEncoder);
+
+                return computePassCommand;
+            }
+            else if (passEncoder.__type__ === 'CopyTextureToTexture')
+            {
+                return this.webgpu.runCopyTextureToTexture(passEncoder);
+            }
+            else if (passEncoder.__type__ === 'CopyBufferToBuffer')
+            {
+                return this.webgpu.runCopyBufferToBuffer(passEncoder);
+            }
+
+            console.error(`未处理 passEncoder ${passEncoder}`);
+
+            return null;
+        });
+    }
+
     run(device: GPUDevice)
     {
         const gpuCommandEncoder = device.createCommandEncoder();
@@ -306,6 +426,21 @@ export class CommandEncoderCommand
 
 export class SubmitCommand
 {
+    static getInstance(webgpu: WebGPU, submit: Submit)
+    {
+        return new SubmitCommand(webgpu, submit);
+    }
+
+    constructor(public readonly webgpu: WebGPU, public readonly submit: Submit)
+    {
+        this.commandBuffers = submit.commandEncoders.map((v) =>
+        {
+            const commandEncoderCommand = CommandEncoderCommand.getInstance(this.webgpu, v);
+
+            return commandEncoderCommand;
+        });
+    }
+
     run(device: GPUDevice)
     {
         const { commandBuffers } = this;
