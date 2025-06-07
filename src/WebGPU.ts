@@ -86,6 +86,8 @@ export class WebGPU
         {
             r_this.device;
 
+            const device = this.device;
+
             if (device)
             {
                 this._textureManager = GPUTextureManager.getInstance(device);
