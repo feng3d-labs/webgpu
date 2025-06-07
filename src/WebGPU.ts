@@ -171,9 +171,7 @@ export class WebGPU
 
     runRenderOcclusionQueryObject(renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
     {
-        const occlusionQueryCache = new OcclusionQueryCache();
-
-        occlusionQueryCache.renderObjectCaches = this.runRenderObjects(renderPassFormat, renderOcclusionQueryObject.renderObjects);
+        const occlusionQueryCache = OcclusionQueryCache.getInstance(this, renderPassFormat, renderOcclusionQueryObject);
 
         return occlusionQueryCache;
     }
@@ -226,7 +224,7 @@ export class WebGPU
         return result.value;
     }
 
-    private runRenderObjects(renderPassFormat: RenderPassFormat, renderObjects: readonly RenderObject[])
+    runRenderObjects(renderPassFormat: RenderPassFormat, renderObjects: readonly RenderObject[])
     {
         const renderObjectCachesKey: RenderObjectCachesKey = [renderObjects, renderPassFormat];
         let result = this._renderObjectCachesMap.get(renderObjectCachesKey);
