@@ -1,5 +1,5 @@
 import { computed, Computed, effect, effectScope, EffectScope, reactive, UnReadonly } from '@feng3d/reactivity';
-import { BlendState, Buffer, ChainMap, CopyBufferToBuffer, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPassObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
+import { BlendState, Buffer, ChainMap, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
 import { GPUBufferManager } from './caches/GPUBufferManager';
@@ -10,14 +10,15 @@ import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
 import { RenderBundle } from './data/RenderBundle';
-import { CommandType, OcclusionQueryCache, RenderBundleCommand, RenderObjectCache, RenderPassObjectCommand } from './internal/RenderObjectCache';
+import { OcclusionQueryCache } from './internal/OcclusionQueryCache';
+import { RenderBundleCommand } from './internal/RenderBundleCommand';
+import { CommandType, RenderObjectCache } from './internal/RenderObjectCache';
 import { RenderPassFormat } from './internal/RenderPassFormat';
+import { SubmitCommand } from './internal/SubmitCommand';
 import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
 import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
-import { SubmitCommand } from './internal/SubmitCommand';
-import { CopyBufferToBufferCommand } from './internal/CopyBufferToBufferCommand';
 
 declare global
 {
@@ -166,51 +167,7 @@ export class WebGPU
         return result;
     }
 
-    runRenderPassObjects(renderPassFormat: RenderPassFormat, renderPassObjects: readonly RenderPassObject[])
-    {
-        const renderPassObjectCommandsKey: RenderPassObjectCommandsKey = [renderPassObjects, renderPassFormat];
-        let result = this._renderPassObjectCommandsMap.get(renderPassObjectCommandsKey);
-
-        if (result) return result.value;
-
-        result = computed(() =>
-        {
-            let queryIndex = 0;
-            const renderPassObjectCommands: RenderPassObjectCommand[] = renderPassObjects?.map((element) =>
-            {
-                if (!element.__type__)
-                {
-                    return this.runRenderObject(renderPassFormat, element as RenderObject);
-                }
-                if (element.__type__ === 'RenderObject')
-                {
-                    return this.runRenderObject(renderPassFormat, element);
-                }
-                if (element.__type__ === 'RenderBundle')
-                {
-                    return this.runRenderBundle(renderPassFormat, element);
-                }
-                if (element.__type__ === 'OcclusionQuery')
-                {
-                    const occlusionQueryCache = this.runRenderOcclusionQueryObject(renderPassFormat, element);
-
-                    occlusionQueryCache.queryIndex = queryIndex++;
-
-                    return occlusionQueryCache;
-                }
-
-                throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
-            });
-
-            return renderPassObjectCommands;
-        });
-
-        this._renderPassObjectCommandsMap.set(renderPassObjectCommandsKey, result);
-
-        return result.value;
-    }
-
-    protected runRenderOcclusionQueryObject(renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
+    runRenderOcclusionQueryObject(renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
     {
         const occlusionQueryCache = new OcclusionQueryCache();
 
@@ -219,7 +176,7 @@ export class WebGPU
         return occlusionQueryCache;
     }
 
-    private runRenderBundle(renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
+    runRenderBundle(renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
     {
         const gpuRenderBundleKey: GPURenderBundleKey = [renderBundleObject, renderPassFormat];
         let result = gpuRenderBundleMap.get(gpuRenderBundleKey);
@@ -295,7 +252,7 @@ export class WebGPU
      * @param renderObject 渲染对象。
      * @param renderPass 渲染通道。
      */
-    protected runRenderObject(renderPassFormat: RenderPassFormat, renderObject: RenderObject)
+    runRenderObject(renderPassFormat: RenderPassFormat, renderObject: RenderObject)
     {
         const device = this.device;
         const renderObjectCacheKey: RenderObjectCacheKey = [device, renderObject, renderPassFormat];
@@ -572,7 +529,6 @@ export class WebGPU
     }
 
     private _renderObjectCachesMap = new ChainMap<RenderObjectCachesKey, Computed<RenderObjectCache[]>>();
-    private _renderPassObjectCommandsMap = new ChainMap<RenderPassObjectCommandsKey, Computed<RenderPassObjectCommand[]>>();
 }
 
 let autoIndex = 0;
@@ -622,4 +578,3 @@ type RenderObjectCacheKey = [device: GPUDevice, renderObject: RenderObject, rend
 const renderObjectCacheMap = new ChainMap<RenderObjectCacheKey, Computed<RenderObjectCache>>();
 
 type RenderObjectCachesKey = [renderObjects: readonly RenderObject[], renderPassFormat: RenderPassFormat];
-type RenderPassObjectCommandsKey = [renderPassObjects: readonly RenderPassObject[], renderPassFormat: RenderPassFormat];

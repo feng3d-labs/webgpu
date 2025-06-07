@@ -1,9 +1,10 @@
 import { CommandEncoder, RenderPass } from '@feng3d/render-api';
 
 import { WebGPU } from '../WebGPU';
+import { ComputePassCommand } from './ComputePassCommand';
 import { CopyBufferToBufferCommand } from './CopyBufferToBufferCommand';
 import { CopyTextureToTextureCommand } from './CopyTextureToTextureCommand';
-import { ComputePassCommand, RenderPassCommand } from './RenderObjectCache';
+import { RenderPassCommand } from './RenderPassCommand';
 
 export class CommandEncoderCommand
 {

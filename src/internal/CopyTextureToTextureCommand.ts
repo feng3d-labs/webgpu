@@ -10,8 +10,6 @@ export class CopyTextureToTextureCommand
 
     constructor(public readonly webgpu: WebGPU, public readonly copyTextureToTexture: CopyTextureToTexture)
     {
-        const device = this.webgpu.device;
-
         const sourceTexture = this.webgpu._textureManager.getGPUTexture(copyTextureToTexture.source.texture);
         const destinationTexture = this.webgpu._textureManager.getGPUTexture(copyTextureToTexture.destination.texture);
 

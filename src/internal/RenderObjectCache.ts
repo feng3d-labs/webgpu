@@ -1,18 +1,4 @@
-import { anyEmitter } from '@feng3d/event';
-import { effect, reactive } from '@feng3d/reactivity';
-import { ChainMap, CommandEncoder, RenderPass, Submit } from '@feng3d/render-api';
-import { GPUBindGroupManager } from '../caches/GPUBindGroupManager';
-import { GPUComputePassDescriptorManager } from '../caches/GPUComputePassDescriptorManager';
-import { GPUComputePipelineManager } from '../caches/GPUComputePipelineManager';
-import { GPUPipelineLayoutManager } from '../caches/GPUPipelineLayoutManager';
-import { GPURenderPassDescriptorManager } from '../caches/GPURenderPassDescriptorManager';
-import { GPURenderPassFormatManager } from '../caches/GPURenderPassFormatManager';
-import { ComputeObject } from '../data/ComputeObject';
-import { ComputePass } from '../data/ComputePass';
-import { GPUQueue_submit, webgpuEvents } from '../eventnames';
-import { WebGPU } from '../WebGPU';
-import { CopyTextureToTextureCommand } from './CopyTextureToTextureCommand';
-import { CommandEncoderCommand } from './CommandEncoderCommand';
+import { ChainMap } from '@feng3d/render-api';
 
 const cache = new ChainMap();
 
@@ -158,46 +144,9 @@ export class RenderObjectCache implements RenderPassObjectCommand
     }
 }
 
-export class OcclusionQueryCache implements RenderPassObjectCommand
-{
-    queryIndex: number;
-    renderObjectCaches: RenderObjectCache[];
-
-    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache)
-    {
-        commands.push(['beginOcclusionQuery', this.queryIndex]);
-        for (let i = 0, len = this.renderObjectCaches.length; i < len; i++)
-        {
-            this.renderObjectCaches[i].run(undefined, commands, state);
-        }
-        commands.push(['endOcclusionQuery']);
-    }
-}
-
 export interface RenderPassObjectCommand
 {
     run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache): void;
-}
-
-export class RenderBundleCommand implements RenderPassObjectCommand
-{
-    gpuRenderBundle: GPURenderBundle;
-    descriptor: GPURenderBundleEncoderDescriptor;
-    bundleCommands: CommandType[];
-    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache): void
-    {
-        if (!this.gpuRenderBundle)
-        {
-            //
-            const renderBundleEncoder = device.createRenderBundleEncoder(this.descriptor);
-
-            runCommands(renderBundleEncoder, this.bundleCommands);
-
-            this.gpuRenderBundle = renderBundleEncoder.finish();
-        }
-
-        commands.push(['executeBundles', [this.gpuRenderBundle]]);
-    }
 }
 
 export interface PassEncoderCommand
@@ -205,135 +154,7 @@ export interface PassEncoderCommand
     run(commandEncoder: GPUCommandEncoder): void;
 }
 
-export class RenderPassCommand
-{
-    static getInstance(webgpu: WebGPU, renderPass: RenderPass)
-    {
-        return new RenderPassCommand(webgpu, renderPass);
-    }
-
-    constructor(public readonly webgpu: WebGPU, public readonly renderPass: RenderPass)
-    {
-        effect(() =>
-        {
-            const r_renderPass = reactive(renderPass);
-
-            r_renderPass.renderPassObjects;
-            r_renderPass.descriptor;
-
-            const { descriptor, renderPassObjects } = renderPass;
-
-            this.renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(webgpu.device, renderPass);
-
-            const renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(descriptor);
-
-            const renderPassObjectCommands = webgpu.runRenderPassObjects(renderPassFormat, renderPassObjects);
-            const commands: CommandType[] = [];
-            const state = new RenderObjectCache();
-
-            renderPassObjectCommands?.forEach((command) =>
-            {
-                command.run(webgpu.device, commands, state);
-            });
-            this.commands = commands;
-        });
-    }
-
-    run(commandEncoder: GPUCommandEncoder)
-    {
-        const { renderPassDescriptor, commands } = this;
-        const { device } = commandEncoder;
-
-        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-
-        passEncoder.device = device;
-
-        runCommands(passEncoder, commands);
-        passEncoder.end();
-
-        renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
-        renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
-    }
-
-    renderPassDescriptor: GPURenderPassDescriptor;
-    commands: CommandType[];
-}
-
-export class ComputeObjectCommand
-{
-    static getInstance(webgpu: WebGPU, computeObject: ComputeObject)
-    {
-        return new ComputeObjectCommand(webgpu, computeObject);
-    }
-
-    constructor(public readonly webgpu: WebGPU, public readonly computeObject: ComputeObject)
-    {
-        const device = this.webgpu.device;
-        const { pipeline, bindingResources, workgroups } = computeObject;
-
-        this.computePipeline = GPUComputePipelineManager.getGPUComputePipeline(device, pipeline);
-
-        // 计算 bindGroups
-        this.setBindGroup = [];
-        const layout = GPUPipelineLayoutManager.getPipelineLayout({ compute: pipeline.compute.code });
-
-        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
-        {
-            const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
-
-            this.setBindGroup.push([group, gpuBindGroup]);
-        });
-
-        this.dispatchWorkgroups = [workgroups.workgroupCountX, workgroups.workgroupCountY, workgroups.workgroupCountZ];
-    }
-
-    run(passEncoder: GPUComputePassEncoder)
-    {
-        passEncoder.setPipeline(this.computePipeline);
-        this.setBindGroup.forEach(([index, bindGroup]) =>
-        {
-            passEncoder.setBindGroup(index, bindGroup);
-        });
-        const [workgroupCountX, workgroupCountY, workgroupCountZ] = this.dispatchWorkgroups;
-
-        passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
-    }
-
-    computePipeline: GPUComputePipeline;
-    setBindGroup: [index: GPUIndex32, bindGroup: GPUBindGroup][];
-    dispatchWorkgroups: [workgroupCountX: GPUSize32, workgroupCountY?: GPUSize32, workgroupCountZ?: GPUSize32];
-}
-
-export class ComputePassCommand
-{
-    static getInstance(webgpu: WebGPU, computePass: ComputePass)
-    {
-        return new ComputePassCommand(webgpu, computePass);
-    }
-
-    constructor(public readonly webgpu: WebGPU, public readonly computePass: ComputePass)
-    {
-        this.descriptor = GPUComputePassDescriptorManager.getGPUComputePassDescriptor(webgpu.device, computePass);
-        this.computeObjectCommands = computePass.computeObjects.map((computeObject) => ComputeObjectCommand.getInstance(webgpu, computeObject));
-    }
-
-    run(commandEncoder: GPUCommandEncoder)
-    {
-        const { descriptor, computeObjectCommands } = this;
-        //
-        const passEncoder = commandEncoder.beginComputePass(descriptor);
-
-        computeObjectCommands.forEach((command) => command.run(passEncoder));
-        passEncoder.end();
-        // 处理时间戳查询
-        descriptor.timestampWrites?.resolve(commandEncoder);
-    }
-
-    descriptor: GPUComputePassDescriptor;
-    computeObjectCommands: ComputeObjectCommand[];
-}
-
-function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, commands: CommandType[])
+export function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, commands: CommandType[])
 {
     for (let i = 0, n = commands.length; i < n; i++)
     {
