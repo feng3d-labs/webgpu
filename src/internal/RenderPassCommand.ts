@@ -13,18 +13,29 @@ export class RenderPassCommand
         return new RenderPassCommand(webgpu, renderPass);
     }
 
+    readonly renderPassFormat: RenderPassFormat;
+
     constructor(public readonly webgpu: WebGPU, public readonly renderPass: RenderPass)
     {
+        const r_renderPass = reactive(renderPass);
+
+        this.renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(webgpu.device, renderPass);
+
         effect(() =>
         {
-            const r_renderPass = reactive(renderPass);
+            r_renderPass.descriptor;
 
+            const { descriptor } = renderPass;
+
+            reactive(this).renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(descriptor);
+        });
+
+        effect(() =>
+        {
             r_renderPass.renderPassObjects;
             r_renderPass.descriptor;
 
             const { descriptor, renderPassObjects } = renderPass;
-
-            this.renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(webgpu.device, renderPass);
 
             const renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(descriptor);
 

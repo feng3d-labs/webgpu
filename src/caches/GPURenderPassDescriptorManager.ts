@@ -34,13 +34,13 @@ export class GPURenderPassDescriptorManager
 
         if (renderPassDescriptor) return renderPassDescriptor;
 
+        const r_descriptor = reactive(descriptor);
+
         // 避免重复创建，触发反应链。
         renderPassDescriptor = {} as any;
         effect(() =>
         {
             // 监听
-            const r_descriptor = reactive(descriptor);
-
             r_descriptor.label;
             r_descriptor.maxDrawCount;
             r_descriptor.colorAttachments;
@@ -52,10 +52,24 @@ export class GPURenderPassDescriptorManager
             renderPassDescriptor.colorAttachments = this.getGPURenderPassColorAttachments(device, descriptor);
             renderPassDescriptor.depthStencilAttachment = this.getGPURenderPassDepthStencilAttachment(device, descriptor);
 
-            // 处理时间戳查询
-            renderPassDescriptor.timestampWrites = GPUPassTimestampWritesManager.getGPUPassTimestampWrites(device, descriptor.timestampQuery);
-
             this.setOcclusionQuerySet(device, renderPass, renderPassDescriptor);
+        });
+
+        effect(() =>
+        {
+            r_descriptor.timestampQuery;
+
+            const timestampQuery = descriptor.timestampQuery;
+
+            // 处理时间戳查询
+            if (timestampQuery)
+            {
+                renderPassDescriptor.timestampWrites = GPUPassTimestampWritesManager.getGPUPassTimestampWrites(device, timestampQuery);
+            }
+            else
+            {
+                delete renderPassDescriptor.timestampWrites;
+            }
         });
 
         this.getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptorKey, renderPassDescriptor);
