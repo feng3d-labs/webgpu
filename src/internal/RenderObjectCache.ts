@@ -30,65 +30,16 @@ export type CommandType =
 
 export class RenderObjectCache implements RenderPassObjectCommand
 {
-    protected setViewport?: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
-    protected setScissorRect?: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
-    protected setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline];
-    protected setBlendConstant?: [func: 'setBlendConstant', color: GPUColor];
-    protected setStencilReference?: [func: 'setStencilReference', reference: GPUStencilValue];
-    protected setBindGroup?: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
-    protected setVertexBuffer?: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
-    protected setIndexBuffer?: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
-    protected draw?: [func: 'draw', vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32];
-    protected drawIndexed?: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
-
-    push(command: CommandType)
-    {
-        let command1 = commandMap.get(command);
-
-        if (!command1)
-        {
-            command1 = command;
-            commandMap.set(command, command1);
-        }
-        else
-        {
-            command = command1;
-        }
-
-        const func = command[0];
-
-        if (func === 'setBindGroup')
-        {
-            this.setBindGroup[command[1]] = command;
-
-            return;
-        }
-        else if (func === 'setVertexBuffer')
-        {
-            this.setVertexBuffer[command[1]] = command;
-
-            return;
-        }
-        command = setVaule(cache, command);
-        this[command[0]] = command as any;
-    }
-
-    delete(func: CommandType[0])
-    {
-        if (func === 'setBindGroup')
-        {
-            this.setBindGroup = [];
-
-            return;
-        }
-        else if (func === 'setVertexBuffer')
-        {
-            this.setVertexBuffer = [];
-
-            return;
-        }
-        this[func as any] = undefined;
-    }
+    setViewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
+    setScissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
+    setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline];
+    setBlendConstant: [func: 'setBlendConstant', color: GPUColor];
+    setStencilReference: [func: 'setStencilReference', reference: GPUStencilValue];
+    setBindGroup: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
+    setVertexBuffer: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
+    setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
+    draw: [func: 'draw', vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32];
+    drawIndexed: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
 
     run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache)
     {

@@ -307,12 +307,12 @@ export class WebGPU
                     y = attachmentSize.height - y - height;
                 }
                 //
-                renderObjectCache.push(['setViewport', x, y, width, height, minDepth, maxDepth]);
+                renderObjectCache.setViewport = ['setViewport', x, y, width, height, minDepth, maxDepth];
             }
             else
             {
                 //
-                renderObjectCache.push(['setViewport', 0, 0, attachmentSize.width, attachmentSize.height, 0, 1]);
+                renderObjectCache.setViewport = ['setViewport', 0, 0, attachmentSize.width, attachmentSize.height, 0, 1];
             }
         }).value;
     }
@@ -340,11 +340,11 @@ export class WebGPU
                     y = attachmentSize.height - y - height;
                 }
 
-                renderObjectCache.push(['setScissorRect', x, y, width, height]);
+                renderObjectCache.setScissorRect = ['setScissorRect', x, y, width, height];
             }
             else
             {
-                renderObjectCache.push(['setScissorRect', 0, 0, attachmentSize.width, attachmentSize.height]);
+                renderObjectCache.setScissorRect = ['setScissorRect', 0, 0, attachmentSize.width, attachmentSize.height];
             }
         }).value;
     }
@@ -368,7 +368,7 @@ export class WebGPU
             const gpuRenderPipeline = GPURenderPipelineManager.getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
 
             //
-            renderObjectCache.push(['setPipeline', gpuRenderPipeline]);
+            renderObjectCache.setPipeline = ['setPipeline', gpuRenderPipeline];
 
             //
             this.runStencilReference(pipeline, renderObjectCache);
@@ -386,12 +386,12 @@ export class WebGPU
 
             if (stencilReference === undefined)
             {
-                renderObjectCache.delete('setStencilReference');
+                renderObjectCache.setStencilReference = null;
 
                 return;
             }
 
-            renderObjectCache.push(['setStencilReference', stencilReference]);
+            renderObjectCache.setStencilReference = ['setStencilReference', stencilReference];
         }).value;
     }
 
@@ -406,12 +406,12 @@ export class WebGPU
 
             if (blendConstantColor === undefined)
             {
-                renderObjectCache.delete('setBlendConstant');
+                renderObjectCache.setBlendConstant = null;
 
                 return;
             }
 
-            renderObjectCache.push(['setBlendConstant', blendConstantColor]);
+            renderObjectCache.setBlendConstant = ['setBlendConstant', blendConstantColor];
         }).value;
     }
 
@@ -426,15 +426,15 @@ export class WebGPU
             r_renderObject.bindingResources;
 
             // 执行
-            renderObjectCache.delete('setBindGroup');
             const { bindingResources } = renderObject;
             const layout = GPUPipelineLayoutManager.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
 
+            renderObjectCache.setBindGroup.length = layout.bindGroupLayouts.length;
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
             {
                 const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
 
-                renderObjectCache.push(['setBindGroup', group, gpuBindGroup]);
+                renderObjectCache.setBindGroup[group] = ['setBindGroup', group, gpuBindGroup];
             });
         }).value;
     }
@@ -453,9 +453,9 @@ export class WebGPU
             const { vertices, pipeline } = renderObject;
 
             //
-            renderObjectCache.delete('setVertexBuffer');
             const vertexBuffers = GPUVertexBufferManager.getNVertexBuffers(pipeline.vertex, vertices);
 
+            renderObjectCache.setVertexBuffer.length = vertexBuffers?.length ?? 0;
             vertexBuffers?.forEach((vertexBuffer, index) =>
             {
                 // 监听
@@ -473,7 +473,7 @@ export class WebGPU
 
                 const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
 
-                renderObjectCache.push(['setVertexBuffer', index, gBuffer, offset, size]);
+                renderObjectCache.setVertexBuffer[index] = ['setVertexBuffer', index, gBuffer, offset, size];
             });
         }).value;
     }
@@ -491,7 +491,7 @@ export class WebGPU
 
             if (!indices)
             {
-                renderObjectCache.delete('setIndexBuffer');
+                renderObjectCache.setIndexBuffer = null;
 
                 return;
             }
@@ -505,7 +505,7 @@ export class WebGPU
             const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
 
             //
-            renderObjectCache.push(['setIndexBuffer', gBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength]);
+            renderObjectCache.setIndexBuffer = ['setIndexBuffer', gBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
         }).value;
     }
 
@@ -515,15 +515,15 @@ export class WebGPU
         {
             const { draw } = reactive(renderObject);
 
-            renderObjectCache.delete('draw');
-            renderObjectCache.delete('drawIndexed');
+            renderObjectCache.draw = null;
+            renderObjectCache.drawIndexed = null;
             if (draw.__type__ === 'DrawVertex')
             {
-                renderObjectCache.push(['draw', draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]);
+                renderObjectCache.draw = ['draw', draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance];
             }
             else
             {
-                renderObjectCache.push(['drawIndexed', draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance]);
+                renderObjectCache.drawIndexed = ['drawIndexed', draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance];
             }
         }).value;
     }
