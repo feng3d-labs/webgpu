@@ -3,6 +3,7 @@ import { ChainMap, RenderObject, RenderPass, RenderPassObject } from '@feng3d/re
 import { GPURenderPassDescriptorManager } from '../caches/GPURenderPassDescriptorManager';
 import { GPURenderPassFormatManager } from '../caches/GPURenderPassFormatManager';
 import { WebGPU } from '../WebGPU';
+import { GDeviceContext } from './GDeviceContext';
 import { CommandType, RenderObjectCache, RenderPassObjectCommand, runCommands } from './RenderObjectCache';
 import { RenderPassFormat } from './RenderPassFormat';
 
@@ -97,14 +98,13 @@ export class RenderPassCommand
 
     private _renderPassObjectCommandsMap = new ChainMap<RenderPassObjectCommandsKey, Computed<RenderPassObjectCommand[]>>();
 
-    run(commandEncoder: GPUCommandEncoder)
+    run(context: GDeviceContext)
     {
         const { renderPassDescriptor, commands } = this;
-        const { device } = commandEncoder;
+
+        const commandEncoder = context.gpuCommandEncoder;
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
-
-        passEncoder.device = device;
 
         runCommands(passEncoder, commands);
         passEncoder.end();

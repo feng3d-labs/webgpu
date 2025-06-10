@@ -3,6 +3,7 @@ import { GPUComputePipelineManager } from '../caches/GPUComputePipelineManager';
 import { GPUPipelineLayoutManager } from '../caches/GPUPipelineLayoutManager';
 import { ComputeObject } from '../data/ComputeObject';
 import { WebGPU } from '../WebGPU';
+import { GDeviceContext } from './GDeviceContext';
 
 export class ComputeObjectCommand
 {
@@ -32,8 +33,10 @@ export class ComputeObjectCommand
         this.dispatchWorkgroups = [workgroups.workgroupCountX, workgroups.workgroupCountY, workgroups.workgroupCountZ];
     }
 
-    run(passEncoder: GPUComputePassEncoder)
+    run(context: GDeviceContext)
     {
+        const passEncoder = context.passEncoder;
+
         passEncoder.setPipeline(this.computePipeline);
         this.setBindGroup.forEach(([index, bindGroup]) =>
         {

@@ -1,5 +1,6 @@
 import { CopyTextureToTexture } from '@feng3d/render-api';
 import { WebGPU } from '../WebGPU';
+import { GDeviceContext } from './GDeviceContext';
 
 export class CopyTextureToTextureCommand
 {
@@ -26,11 +27,11 @@ export class CopyTextureToTextureCommand
         this.copySize = copyTextureToTexture.copySize;
     }
 
-    run(commandEncoder: GPUCommandEncoder)
+    run(context: GDeviceContext)
     {
         const { source, destination, copySize } = this;
 
-        commandEncoder.copyTextureToTexture(
+        context.gpuCommandEncoder.copyTextureToTexture(
             source,
             destination,
             copySize,

@@ -1,6 +1,7 @@
 import { CopyBufferToBuffer } from '@feng3d/render-api';
 import { WebGPU } from '../WebGPU';
 import { GPUBufferManager } from '../caches/GPUBufferManager';
+import { GDeviceContext } from './GDeviceContext';
 
 export class CopyBufferToBufferCommand
 {
@@ -20,11 +21,11 @@ export class CopyBufferToBufferCommand
         this.size = copyBufferToBuffer.size ?? copyBufferToBuffer.source.size;
     }
 
-    run(commandEncoder: GPUCommandEncoder)
+    run(context: GDeviceContext)
     {
         const { source, sourceOffset, destination, destinationOffset, size } = this;
 
-        commandEncoder.copyBufferToBuffer(
+        context.gpuCommandEncoder.copyBufferToBuffer(
             source, sourceOffset, destination, destinationOffset, size,
         );
     }

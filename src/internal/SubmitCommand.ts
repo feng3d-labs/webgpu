@@ -29,7 +29,7 @@ export class SubmitCommand
         // 提交前数值加一，用于处理提交前需要执行的操作。
         reactive(webgpuEvents).preSubmit = webgpuEvents.preSubmit + 1;
 
-        device.queue.submit(commandBuffers.map((v) => v.run(device)));
+        device.queue.submit(commandBuffers.map((v) => v.run({ device })));
 
         // 派发提交WebGPU事件
         anyEmitter.emit(device.queue, GPUQueue_submit);

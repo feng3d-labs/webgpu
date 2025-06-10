@@ -20,25 +20,6 @@ import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
 import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
 
-declare global
-{
-    interface GPUCommandEncoder
-    {
-        /**
-         * 创建时由引擎设置。
-         */
-        device: GPUDevice;
-    }
-
-    interface GPURenderPassEncoder
-    {
-        /**
-         * 创建时由引擎设置。
-         */
-        device: GPUDevice;
-    }
-}
-
 /**
  * WebGPU
  */

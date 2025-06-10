@@ -3,7 +3,7 @@ import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
 import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
-import { GPUPassTimestampWritesManager } from './GPUPassTimestampWritesManager';
+import { WGPUTimestampQuery } from './GPUPassTimestampWritesManager';
 import { GPUTextureFormatManager } from './GPUTextureFormatManager';
 import { GPUTextureViewManager } from './GPUTextureViewManager';
 import { TextureSizeManager } from './TextureSizeManager';
@@ -64,7 +64,7 @@ export class GPURenderPassDescriptorManager
             // 处理时间戳查询
             if (timestampQuery)
             {
-                renderPassDescriptor.timestampWrites = GPUPassTimestampWritesManager.getGPUPassTimestampWrites(device, timestampQuery);
+                renderPassDescriptor.timestampWrites = WGPUTimestampQuery.getGPUPassTimestampWrites(device, timestampQuery);
             }
             else
             {

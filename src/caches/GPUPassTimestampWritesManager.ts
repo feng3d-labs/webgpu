@@ -15,7 +15,7 @@ declare global
     }
 }
 
-export class GPUPassTimestampWritesManager
+export class WGPUTimestampQuery
 {
     public static getGPUPassTimestampWrites(device: GPUDevice, timestampQuery?: TimestampQuery)
     {

@@ -5,6 +5,7 @@ import { ComputePassCommand } from './ComputePassCommand';
 import { CopyBufferToBufferCommand } from './CopyBufferToBufferCommand';
 import { CopyTextureToTextureCommand } from './CopyTextureToTextureCommand';
 import { RenderPassCommand } from './RenderPassCommand';
+import { GDeviceContext } from './GDeviceContext';
 
 export class CommandEncoderCommand
 {
@@ -54,14 +55,13 @@ export class CommandEncoderCommand
         });
     }
 
-    run(device: GPUDevice)
+    run(context: GDeviceContext)
     {
-        const gpuCommandEncoder = device.createCommandEncoder();
+        context.gpuCommandEncoder = context.device.createCommandEncoder();
 
-        gpuCommandEncoder.device = device;
-        this.passEncoders.forEach((passEncoder) => passEncoder.run(gpuCommandEncoder));
+        this.passEncoders.forEach((passEncoder) => passEncoder.run(context));
 
-        return gpuCommandEncoder.finish();
+        return context.gpuCommandEncoder.finish();
     }
 
     passEncoders: (RenderPassCommand | ComputePassCommand | CopyTextureToTextureCommand | CopyBufferToBufferCommand)[];
