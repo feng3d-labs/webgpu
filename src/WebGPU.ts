@@ -79,8 +79,6 @@ export class WebGPU
 
     destoryTexture(texture: TextureLike)
     {
-        WGPUTexture.getInstance(this.device, texture, false)?.destroy();
-
         WGPUTexture.destroy(this.device, texture);
     }
 
