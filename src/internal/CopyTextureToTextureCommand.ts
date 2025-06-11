@@ -1,5 +1,5 @@
 import { CopyTextureToTexture } from '@feng3d/render-api';
-import { WGPUTexture } from '../caches/GPUTextureManager';
+import { WGPUTexture } from '../caches/WGPUTexture';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
 

@@ -1,6 +1,6 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureView } from '@feng3d/render-api';
-import { WGPUTexture } from './GPUTextureManager';
+import { WGPUTexture } from './WGPUTexture';
 
 export class GPUTextureViewManager
 {

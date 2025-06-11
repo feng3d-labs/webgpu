@@ -5,7 +5,7 @@ import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { GPUPipelineLayoutManager } from './caches/GPUPipelineLayoutManager';
 import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
-import { WGPUTexture } from './caches/GPUTextureManager';
+import { WGPUTexture } from './caches/WGPUTexture';
 import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
