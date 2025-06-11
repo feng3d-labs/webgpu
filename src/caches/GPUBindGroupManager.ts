@@ -6,10 +6,10 @@ import { VideoTexture } from '../data/VideoTexture';
 import { webgpuEvents } from '../eventnames';
 import { ExternalSampledTextureType } from '../types/TextureType';
 import { GPUBindGroupLayoutManager } from './GPUBindGroupLayoutManager';
-import { WGPUBuffer } from './WGPUBuffer';
 import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
 import { GPUSamplerManager } from './GPUSamplerManager';
-import { GPUTextureViewManager } from './GPUTextureViewManager';
+import { WGPUTextureView } from './WGPUTextureView';
+import { WGPUBuffer } from './WGPUBuffer';
 
 export class GPUBindGroupManager
 {
@@ -60,7 +60,7 @@ export class GPUBindGroupManager
                 }
                 else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)
                 {
-                    entry.resource = GPUTextureViewManager.getGPUTextureView(device, bindingResources[name] as TextureView);
+                    entry.resource = WGPUTextureView.getInstance(device, bindingResources[name] as TextureView).textureView;
                 }
                 else
                 {

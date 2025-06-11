@@ -1,8 +1,8 @@
-import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { effect, reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureView } from '@feng3d/render-api';
 import { WGPUTexture } from './WGPUTexture';
 
-export class GPUTextureViewManager
+export class WGPUTextureView
 {
     /**
      * 获取纹理视图。
@@ -11,20 +11,32 @@ export class GPUTextureViewManager
      * @param view 纹理视图。
      * @returns 纹理视图。
      */
-    static getGPUTextureView(device: GPUDevice, view: TextureView)
+    static getInstance(device: GPUDevice, view: TextureView)
     {
         if (!view) return undefined;
 
-        const getGPUTextureViewKey: GetGPUTextureViewKey = [device, view];
-        let result = this.getGPUTextureViewMap.get(getGPUTextureViewKey);
+        let result = this.getGPUTextureViewMap.get([device, view]);
 
-        if (result) return result.value;
+        if (result) return result;
 
-        result = computed(() =>
+        result = new WGPUTextureView(device, view);
+
+        this.getGPUTextureViewMap.set([device, view], result);
+
+        return result;
+    }
+
+    private static readonly getGPUTextureViewMap = new ChainMap<[device: GPUDevice, view: TextureView], WGPUTextureView>();
+
+    textureView: GPUTextureView
+
+    constructor(device: GPUDevice, view: TextureView)
+    {
+        // 监听
+        const r_view = reactive(view);
+
+        effect(() =>
         {
-            // 监听
-            const r_view = reactive(view);
-
             r_view.texture;
             r_view.label;
             r_view.format;
@@ -51,14 +63,7 @@ export class GPUTextureViewManager
                 arrayLayerCount,
             });
 
-            return textureView;
+            this.textureView = textureView;
         });
-        this.getGPUTextureViewMap.set(getGPUTextureViewKey, result);
-
-        return result.value;
     }
-
-    private static readonly getGPUTextureViewMap = new ChainMap<GetGPUTextureViewKey, Computed<GPUTextureView>>();
 }
-
-type GetGPUTextureViewKey = [device: GPUDevice, view: TextureView];

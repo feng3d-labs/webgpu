@@ -5,7 +5,7 @@ import { GPUQueue_submit } from '../eventnames';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { WGPUTimestampQuery } from './GPUPassTimestampWritesManager';
 import { GPUTextureFormatManager } from './GPUTextureFormatManager';
-import { GPUTextureViewManager } from './GPUTextureViewManager';
+import { WGPUTextureView } from './WGPUTextureView';
 import { TextureSizeManager } from './TextureSizeManager';
 
 declare global
@@ -217,7 +217,7 @@ export class GPURenderPassDescriptorManager
                 this.setTextureSize(view.texture, descriptor.attachmentSize);
 
                 // 更改纹理尺寸将会销毁重新创建纹理，需要重新获取view。
-                gpuDepthStencilAttachment.view = GPUTextureViewManager.getGPUTextureView(device, view);
+                gpuDepthStencilAttachment.view = WGPUTextureView.getInstance(device, view).textureView;
             }).value;
 
             //
@@ -340,8 +340,8 @@ export class GPURenderPassDescriptorManager
                 resolveTarget && this.setTextureSize(resolveTarget.texture, descriptor.attachmentSize);
 
                 // 更改纹理尺寸将会销毁重新创建纹理，需要重新获取view。
-                attachment.view = GPUTextureViewManager.getGPUTextureView(device, view);
-                attachment.resolveTarget = GPUTextureViewManager.getGPUTextureView(device, resolveTarget);
+                attachment.view = WGPUTextureView.getInstance(device, view).textureView;
+                attachment.resolveTarget = WGPUTextureView.getInstance(device, resolveTarget).textureView;
             });
 
             //
