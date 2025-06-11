@@ -1,6 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, CanvasContext, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
-import { GPUBufferManager, RenderBundle, WebGPU } from '@feng3d/webgpu';
+import { WGPUBuffer, RenderBundle, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import Stats from 'stats.js';
 import { mat4, vec3 } from 'wgpu-matrix';
@@ -348,7 +348,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
 
         const transformationMatrix = getTransformationMatrix();
 
-        reactive(GPUBufferManager.getBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
+        reactive(WGPUBuffer.getBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
 
         webgpu.submit(submit);
 

@@ -1,6 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from '@feng3d/render-api';
-import { ComputePass, ComputePipeline, GPUBufferManager, WebGPU } from '@feng3d/webgpu';
+import { ComputePass, ComputePipeline, WGPUBuffer, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 
 import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
@@ -115,13 +115,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const updateSettings = () =>
     {
         blockDim = tileDim - (settings.filterSize - 1);
-        if (GPUBufferManager.getBuffer(blurParamsBuffer).writeBuffers)
+        if (WGPUBuffer.getBuffer(blurParamsBuffer).writeBuffers)
         {
-            GPUBufferManager.getBuffer(blurParamsBuffer).writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
+            WGPUBuffer.getBuffer(blurParamsBuffer).writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
         }
         else
         {
-            reactive(GPUBufferManager.getBuffer(blurParamsBuffer)).writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
+            reactive(WGPUBuffer.getBuffer(blurParamsBuffer)).writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
         }
         needUpdateEncoder = true;
     };

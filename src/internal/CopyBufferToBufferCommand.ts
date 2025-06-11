@@ -1,6 +1,6 @@
 import { CopyBufferToBuffer } from '@feng3d/render-api';
 import { WebGPU } from '../WebGPU';
-import { GPUBufferManager } from '../caches/GPUBufferManager';
+import { WGPUBuffer } from '../caches/WGPUBuffer';
 import { GDeviceContext } from './GDeviceContext';
 
 export class CopyBufferToBufferCommand
@@ -14,9 +14,9 @@ export class CopyBufferToBufferCommand
     {
         const device = this.webgpu.device;
 
-        this.source = GPUBufferManager.getGPUBuffer(device, copyBufferToBuffer.source);
+        this.source = WGPUBuffer.getInstance(device, copyBufferToBuffer.source).gpuBuffer;
         this.sourceOffset = copyBufferToBuffer.sourceOffset ?? 0;
-        this.destination = GPUBufferManager.getGPUBuffer(device, copyBufferToBuffer.destination);
+        this.destination = WGPUBuffer.getInstance(device, copyBufferToBuffer.destination).gpuBuffer;
         this.destinationOffset = copyBufferToBuffer.destinationOffset ?? 0;
         this.size = copyBufferToBuffer.size ?? copyBufferToBuffer.source.size;
     }

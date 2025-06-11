@@ -1,6 +1,6 @@
 import { BindingResources, CommandEncoder, PassEncoder, Texture } from '@feng3d/render-api';
 import { reactive } from '@feng3d/reactivity';
-import { ComputePipeline, GPUBufferManager } from '@feng3d/webgpu';
+import { ComputePipeline, WGPUBuffer } from '@feng3d/webgpu';
 
 import Common from './common';
 import radiosityWGSL from './radiosity.wgsl';
@@ -174,6 +174,6 @@ export default class Radiosity
         uniformDataF32[4] = this.scene.lightCenter[0];
         uniformDataF32[5] = this.scene.lightCenter[1];
         uniformDataF32[6] = this.scene.lightCenter[2];
-        reactive(GPUBufferManager.getBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
+        reactive(WGPUBuffer.getBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
     }
 }

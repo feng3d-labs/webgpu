@@ -1,6 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, RenderPassDescriptor, RenderPassObject, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
-import { GPUBufferManager, WebGPU } from '@feng3d/webgpu';
+import { WGPUBuffer, WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
@@ -252,7 +252,7 @@ setBlendConstant().`,
     {
         const transformationMatrix = getTransformationMatrix();
 
-        const buffer = GPUBufferManager.getBuffer(uniformBuffer);
+        const buffer = WGPUBuffer.getBuffer(uniformBuffer);
         const writeBuffers = buffer.writeBuffers || [];
 
         writeBuffers.push({

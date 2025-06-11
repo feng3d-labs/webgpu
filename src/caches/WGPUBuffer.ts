@@ -1,10 +1,10 @@
-import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
+import { effect, reactive } from '@feng3d/reactivity';
 import { Buffer, ChainMap, TypedArray } from '@feng3d/render-api';
 
 /**
  * GPU缓冲区管理器。
  */
-export class GPUBufferManager
+export class WGPUBuffer
 {
     /**
      * 除了GPU与CPU数据交换的`MAP_READ`与`MAP_WRITE`除外。
@@ -53,16 +53,26 @@ export class GPUBufferManager
      * @param buffer
      * @returns
      */
-    static getGPUBuffer(device: GPUDevice, buffer: Buffer)
+    static getInstance(device: GPUDevice, buffer: Buffer)
     {
-        const getGPUBufferKey: GetGPUBufferKey = [device, buffer];
-        let result = GPUBufferManager.getGPUBufferMap.get(getGPUBufferKey);
+        let result = WGPUBuffer.getGPUBufferMap.get([device, buffer]);
 
-        if (result) return result.value;
+        if (result) return result;
 
-        let gpuBuffer: GPUBuffer;
+        result = new WGPUBuffer(device, buffer);
 
-        result = computed(() =>
+        WGPUBuffer.getGPUBufferMap.set([device, buffer], result);
+
+        return result;
+    }
+
+    private static readonly getGPUBufferMap = new ChainMap<[device: GPUDevice, buffer: Buffer], WGPUBuffer>();
+
+    gpuBuffer: GPUBuffer;
+
+    constructor(device: GPUDevice, buffer: Buffer)
+    {
+        effect(() =>
         {
             // 监听
             const r_buffer = reactive(buffer);
@@ -78,9 +88,7 @@ export class GPUBufferManager
             // 初始化时存在数据，则使用map方式上传第一次数据。
             const mappedAtCreation = buffer.data !== undefined;
 
-            // 销毁旧的缓冲区
-            if (gpuBuffer) gpuBuffer.destroy();
-            gpuBuffer = device.createBuffer({ label, size, usage: usage ?? GPUBufferManager.defaultGPUBufferUsage, mappedAtCreation });
+            const gpuBuffer = device.createBuffer({ label, size, usage: usage ?? WGPUBuffer.defaultGPUBufferUsage, mappedAtCreation });
 
             // 初始化时存在数据，则使用map方式上传第一次数据。
             if (mappedAtCreation)
@@ -183,14 +191,10 @@ export class GPUBufferManager
                 rb.writeBuffers = null;
             });
 
-            return gpuBuffer;
+            // 销毁旧的缓冲区
+            if (this.gpuBuffer) this.gpuBuffer.destroy();
+
+            this.gpuBuffer = gpuBuffer;
         });
-        GPUBufferManager.getGPUBufferMap.set(getGPUBufferKey, result);
-
-        return result.value;
     }
-
-    private static readonly getGPUBufferMap = new ChainMap<GetGPUBufferKey, Computed<GPUBuffer>>();
 }
-
-type GetGPUBufferKey = [device: GPUDevice, buffer: Buffer];

@@ -2,7 +2,7 @@ import { computed, Computed, effect, effectScope, EffectScope, reactive, UnReado
 import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
-import { GPUBufferManager } from './caches/GPUBufferManager';
+import { WGPUBuffer } from './caches/WGPUBuffer';
 import { GPUPipelineLayoutManager } from './caches/GPUPipelineLayoutManager';
 import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
 import { WGPUTexture } from './caches/GPUTextureManager';
@@ -117,7 +117,7 @@ export class WebGPU
     async readBuffer(buffer: Buffer, offset?: GPUSize64, size?: GPUSize64)
     {
         const device = this.device;
-        const gpuBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
+        const gpuBuffer = WGPUBuffer.getInstance(device, buffer).gpuBuffer;
 
         await gpuBuffer.mapAsync(GPUMapMode.READ);
 
@@ -419,11 +419,11 @@ export class WebGPU
 
                 // 执行
                 const { data, offset, size } = vertexBuffer;
-                const buffer = GPUBufferManager.getBuffer(data);
+                const buffer = WGPUBuffer.getBuffer(data);
 
                 (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
-                const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
+                const gBuffer = WGPUBuffer.getInstance(device, buffer).gpuBuffer;
 
                 renderObjectCache.setVertexBuffer[index] = ['setVertexBuffer', index, gBuffer, offset, size];
             });
@@ -450,14 +450,14 @@ export class WebGPU
 
             const device = this.device;
 
-            const buffer = GPUBufferManager.getBuffer(indices);
+            const buffer = WGPUBuffer.getBuffer(indices);
 
             (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
-            const gBuffer = GPUBufferManager.getGPUBuffer(device, buffer);
+            const gBuffer = WGPUBuffer.getInstance(device, buffer);
 
             //
-            renderObjectCache.setIndexBuffer = ['setIndexBuffer', gBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
+            renderObjectCache.setIndexBuffer = ['setIndexBuffer', gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
         }).value;
     }
 
