@@ -1,5 +1,5 @@
 import { computed, Computed, effect, effectScope, EffectScope, reactive, UnReadonly } from '@feng3d/reactivity';
-import { BlendState, Buffer, ChainMap, DepthStencilState, OcclusionQuery, ReadPixels, RenderObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
+import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
 import { GPUBufferManager } from './caches/GPUBufferManager';
@@ -10,7 +10,6 @@ import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
 import { RenderBundle } from './data/RenderBundle';
-import { OcclusionQueryCache } from './internal/OcclusionQueryCache';
 import { RenderBundleCommand } from './internal/RenderBundleCommand';
 import { CommandType, RenderObjectCache } from './internal/RenderObjectCache';
 import { RenderPassFormat } from './internal/RenderPassFormat';
@@ -148,13 +147,6 @@ export class WebGPU
         gpuBuffer.unmap();
 
         return result;
-    }
-
-    runRenderOcclusionQueryObject(renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery)
-    {
-        const occlusionQueryCache = OcclusionQueryCache.getInstance(this, renderPassFormat, renderOcclusionQueryObject);
-
-        return occlusionQueryCache;
     }
 
     runRenderBundle(renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)

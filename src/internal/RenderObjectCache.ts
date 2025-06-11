@@ -1,17 +1,5 @@
 import { ChainMap } from '@feng3d/render-api';
 
-const cache = new ChainMap();
-
-function setVaule<T extends Array<any>>(cache: ChainMap<any[], any>, keys: T): T
-{
-    const v = cache.get(keys);
-
-    if (v) return v;
-    cache.set(keys, keys);
-
-    return keys;
-}
-
 export type CommandType =
     | [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]
     | [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate]

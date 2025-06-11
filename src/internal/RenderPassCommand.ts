@@ -4,6 +4,7 @@ import { GPURenderPassDescriptorManager } from '../caches/GPURenderPassDescripto
 import { GPURenderPassFormatManager } from '../caches/GPURenderPassFormatManager';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
+import { OcclusionQueryCache } from './OcclusionQueryCache';
 import { CommandType, RenderObjectCache, RenderPassObjectCommand, runCommands } from './RenderObjectCache';
 import { RenderPassFormat } from './RenderPassFormat';
 
@@ -78,7 +79,7 @@ export class RenderPassCommand
                 }
                 if (element.__type__ === 'OcclusionQuery')
                 {
-                    const occlusionQueryCache = webgpu.runRenderOcclusionQueryObject(renderPassFormat, element);
+                    const occlusionQueryCache = OcclusionQueryCache.getInstance(webgpu, renderPassFormat, element);
 
                     occlusionQueryCache.queryIndex = queryIndex++;
 
