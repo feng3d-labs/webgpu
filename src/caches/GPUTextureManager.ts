@@ -1,84 +1,46 @@
-import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { computed, effect, reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
 import { webgpuEvents } from '../eventnames';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { generateMipmap } from '../utils/generate-mipmap';
 import { GPUCanvasContextManager } from './GPUCanvasContextManager';
 
-export class GPUTextureManager
+export class WGPUTexture
 {
-    static getInstance(device: GPUDevice)
+    static getInstance(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
     {
         if (!device) return null;
 
-        let result = GPUTextureManager._instanceMap.get(device);
+        let result = WGPUTexture.textureMap.get([device, textureLike]);
+
+        if (!autoCreate) return result;
 
         if (!result)
         {
-            result = new GPUTextureManager(device);
-            this._instanceMap.set(device, result);
+            result = new WGPUTexture(device, textureLike);
+
+            this.textureMap.set([device, textureLike], result);
         }
-        result.refCount++;
 
         return result;
     }
 
-    private static _instanceMap = new WeakMap<GPUDevice, GPUTextureManager>();
-
-    readonly device: GPUDevice;
-
-    private refCount = 0;
-
-    constructor(device: GPUDevice)
+    static destroy(device: GPUDevice, textureLike: TextureLike)
     {
-        this.device = device;
+        const result = WGPUTexture.textureMap.get([device, textureLike]);
+
+        if (!result) return;
+
+        result.destroy();
+
+        WGPUTexture.textureMap.delete([device, textureLike]);
     }
 
-    /**
-     * 释放
-     */
-    release()
+    gpuTexture: GPUTexture;
+
+    constructor(device: GPUDevice, textureLike: TextureLike)
     {
-        this.refCount--;
-
-        if (this.refCount <= 0)
-        {
-            this.destroy();
-        }
-    }
-
-    /**
-     * 销毁
-     */
-    private destroy()
-    {
-        const r_this = reactive(this);
-
-        //
-        this._gpuTextureMap.clear();
-
-        //
-        r_this.device = null;
-        r_this._gpuTextureMap = null;
-    }
-
-    /**
-     * 获取GPU纹理 {@link GPUTexture} 。
-     *
-     * @param device GPU设备。
-     * @param iGPUTextureBase 纹理描述。
-     * @returns GPU纹理。
-     */
-    getGPUTexture(textureLike: TextureLike, autoCreate = true)
-    {
-        const device = this.device;
-        let result = this._gpuTextureMap.get(textureLike);
-
-        if (result) return result.value;
-
-        if (!autoCreate) return null;
-
-        result = computed(() =>
+        effect(() =>
         {
             if ('context' in textureLike)
             {
@@ -94,7 +56,9 @@ export class GPUTextureManager
 
                 gpuTexture.label = 'GPU画布纹理';
 
-                return gpuTexture;
+                this.gpuTexture = gpuTexture;
+
+                return
             }
 
             const texture = textureLike as MultisampleTexture;
@@ -120,7 +84,7 @@ export class GPUTextureManager
 
             console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
 
-            const usage = GPUTextureManager.getTextureUsageFromFormat(device, format, sampleCount);
+            const usage = WGPUTexture.getTextureUsageFromFormat(device, format, sampleCount);
 
             // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
             if (texture.generateMipmap && mipLevelCount === undefined)
@@ -134,10 +98,10 @@ export class GPUTextureManager
 
             if (label === undefined)
             {
-                label = `GPUTexture ${GPUTextureManager.autoIndex++}`;
+                label = `GPUTexture ${WGPUTexture.autoIndex++}`;
             }
 
-            const textureDimension = GPUTextureManager.dimensionMap[dimension];
+            const textureDimension = WGPUTexture.dimensionMap[dimension];
 
             // 创建纹理
             const gpuTexture = device.createTexture({
@@ -151,12 +115,9 @@ export class GPUTextureManager
                 viewFormats,
             });
 
-            GPUTextureManager.textureMap.get([device, textureLike])?.destroy(); // 销毁旧的纹理
-            GPUTextureManager.textureMap.set([device, textureLike], gpuTexture);
-
             // 初始化纹理内容
-            GPUTextureManager.updateSources(texture);
-            GPUTextureManager.updateWriteTextures(device, gpuTexture, texture);
+            WGPUTexture.updateSources(texture);
+            WGPUTexture.updateWriteTextures(device, gpuTexture, texture);
 
             // 自动生成 mipmap。
             if (texture.generateMipmap)
@@ -164,11 +125,17 @@ export class GPUTextureManager
                 generateMipmap(device, gpuTexture);
             }
 
-            return gpuTexture;
-        });
-        this._gpuTextureMap.set(textureLike, result);
+            if (!this.gpuTexture) this.gpuTexture.destroy();
 
-        return result.value;
+            this.gpuTexture = gpuTexture;
+        });
+    }
+
+    destroy()
+    {
+        this.gpuTexture?.destroy();
+
+        this.gpuTexture = null;
     }
 
     /**
@@ -357,7 +324,6 @@ export class GPUTextureManager
     };
 
     private static autoIndex = 0;
-    readonly _gpuTextureMap = new Map<TextureLike, Computed<GPUTexture>>();
-    private static readonly textureMap = new ChainMap<[device: GPUDevice, texture: Texture], GPUTexture>();
+    private static readonly textureMap = new ChainMap<[device: GPUDevice, texture: TextureLike], WGPUTexture>();
 }
 

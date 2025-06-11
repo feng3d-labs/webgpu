@@ -5,7 +5,7 @@ import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
 import { GPUBufferManager } from './caches/GPUBufferManager';
 import { GPUPipelineLayoutManager } from './caches/GPUPipelineLayoutManager';
 import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
-import { GPUTextureManager } from './caches/GPUTextureManager';
+import { WGPUTexture } from './caches/GPUTextureManager';
 import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
@@ -50,34 +50,13 @@ export class WebGPU
 
     readonly device: GPUDevice;
 
-    _textureManager: GPUTextureManager;
     readonly effectScope: EffectScope;
 
     constructor(device?: GPUDevice)
     {
         this.device = device;
-        this._textureManager = GPUTextureManager.getInstance(device);
-
-        const r_this = reactive(this);
 
         this.effectScope = effectScope();
-
-        effect(() =>
-        {
-            r_this.device;
-
-            const device = this.device;
-
-            if (device)
-            {
-                this._textureManager = GPUTextureManager.getInstance(device);
-            }
-            else
-            {
-                this._textureManager?.release();
-                this._textureManager = null;
-            }
-        });
     }
 
     destroy()
@@ -100,34 +79,36 @@ export class WebGPU
 
     destoryTexture(texture: TextureLike)
     {
-        this._textureManager.getGPUTexture(texture, false)?.destroy();
+        WGPUTexture.getInstance(this.device, texture, false)?.destroy();
+
+        WGPUTexture.destroy(this.device, texture);
     }
 
     textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
         const device = this.device;
-        const gpuTexture = this._textureManager.getGPUTexture(texture);
+        const gpuTexture = WGPUTexture.getInstance(this.device, texture);
 
-        textureInvertYPremultiplyAlpha(device, gpuTexture, options);
+        textureInvertYPremultiplyAlpha(device, gpuTexture.gpuTexture, options);
     }
 
     copyDepthTexture(sourceTexture: TextureLike, targetTexture: TextureLike)
     {
         const device = this.device;
-        const gpuSourceTexture = this._textureManager.getGPUTexture(sourceTexture);
-        const gpuTargetTexture = this._textureManager.getGPUTexture(targetTexture);
+        const gpuSourceTexture = WGPUTexture.getInstance(this.device, sourceTexture);
+        const gpuTargetTexture = WGPUTexture.getInstance(this.device, targetTexture);
 
-        copyDepthTexture(device, gpuSourceTexture, gpuTargetTexture);
+        copyDepthTexture(device, gpuSourceTexture.gpuTexture, gpuTargetTexture.gpuTexture);
     }
 
     async readPixels(gpuReadPixels: ReadPixels)
     {
         const device = this.device;
-        const gpuTexture = this._textureManager.getGPUTexture(gpuReadPixels.texture, false);
+        const gpuTexture = WGPUTexture.getInstance(this.device, gpuReadPixels.texture, false);
 
         const result = await readPixels(device, {
             ...gpuReadPixels,
-            texture: gpuTexture,
+            texture: gpuTexture.gpuTexture,
         });
 
         gpuReadPixels.result = result;

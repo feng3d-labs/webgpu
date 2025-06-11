@@ -1,4 +1,5 @@
 import { CopyTextureToTexture } from '@feng3d/render-api';
+import { WGPUTexture } from '../caches/GPUTextureManager';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
 
@@ -11,17 +12,17 @@ export class CopyTextureToTextureCommand
 
     constructor(public readonly webgpu: WebGPU, public readonly copyTextureToTexture: CopyTextureToTexture)
     {
-        const sourceTexture = this.webgpu._textureManager.getGPUTexture(copyTextureToTexture.source.texture);
-        const destinationTexture = this.webgpu._textureManager.getGPUTexture(copyTextureToTexture.destination.texture);
+        const sourceTexture = WGPUTexture.getInstance(this.webgpu.device, copyTextureToTexture.source.texture);
+        const destinationTexture = WGPUTexture.getInstance(this.webgpu.device, copyTextureToTexture.destination.texture);
 
         this.source = {
             ...copyTextureToTexture.source,
-            texture: sourceTexture,
+            texture: sourceTexture.gpuTexture,
         };
 
         this.destination = {
             ...copyTextureToTexture.destination,
-            texture: destinationTexture,
+            texture: destinationTexture.gpuTexture,
         };
 
         this.copySize = copyTextureToTexture.copySize;
