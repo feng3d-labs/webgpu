@@ -4,6 +4,7 @@ import { Submit } from '@feng3d/render-api';
 import { GPUQueue_submit, webgpuEvents } from '../eventnames';
 import { WebGPU } from '../WebGPU';
 import { CommandEncoderCommand } from './CommandEncoderCommand';
+import { GDeviceContext } from './GDeviceContext';
 
 export class SubmitCommand
 {
@@ -22,14 +23,16 @@ export class SubmitCommand
         });
     }
 
-    run(device: GPUDevice)
+    run(context: GDeviceContext)
     {
         const { commandBuffers } = this;
 
         // 提交前数值加一，用于处理提交前需要执行的操作。
         reactive(webgpuEvents).preSubmit = webgpuEvents.preSubmit + 1;
 
-        device.queue.submit(commandBuffers.map((v) => v.run({ device })));
+        const { device } = context;
+
+        device.queue.submit(commandBuffers.map((v) => v.run(context)));
 
         // 派发提交WebGPU事件
         anyEmitter.emit(device.queue, GPUQueue_submit);

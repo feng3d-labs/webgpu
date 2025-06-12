@@ -18,6 +18,7 @@ import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
 import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
+import { GDeviceContext } from './internal/GDeviceContext';
 
 /**
  * WebGPU
@@ -74,7 +75,9 @@ export class WebGPU
 
         const submitCommand = SubmitCommand.getInstance(this, submit);
 
-        submitCommand.run(device);
+        const context = GDeviceContext.getInstance(device);
+
+        submitCommand.run(context);
     }
 
     destoryTexture(texture: TextureLike)
