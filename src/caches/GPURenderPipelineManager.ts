@@ -4,7 +4,6 @@ import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { MultisampleState } from '../data/MultisampleState';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
-import { FunctionInfoManager } from './FunctionInfoManager';
 import { GPUPipelineLayoutManager } from './GPUPipelineLayoutManager';
 import { GPUShaderModuleManager } from './GPUShaderModuleManager';
 import { GPUVertexBufferManager } from './GPUVertexBufferManager';
@@ -102,14 +101,20 @@ export class GPURenderPipelineManager
             r_vertexState.entryPoint;
 
             // 计算
-            const { code, constants, entryPoint } = vertexState;
+            const { code, constants } = vertexState;
 
-            const vertexEntryFunctionInfo = FunctionInfoManager.getVertexEntryFunctionInfo(code, entryPoint);
+            let entryPoint = vertexState.entryPoint;
+
+            if (!entryPoint)
+            {
+                entryPoint = WgslReflectManager.getWGSLReflectInfo(code).entry.vertex[0].name;
+            }
+
             const vertexBufferLayouts = GPUVertexBufferManager.getGPUVertexBufferLayouts(vertexState, vertices);
 
             const gpuVertexState: GPUVertexState = {
                 module: GPUShaderModuleManager.getGPUShaderModule(device, code),
-                entryPoint: vertexEntryFunctionInfo.name,
+                entryPoint: entryPoint,
                 buffers: vertexBufferLayouts,
                 constants: this.getConstants(constants),
             };

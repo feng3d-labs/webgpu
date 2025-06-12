@@ -1,7 +1,8 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
 import { ChainMap, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from '@feng3d/render-api';
+import { FunctionInfo } from 'wgsl_reflect';
 import { VertexBuffer } from '../internal/VertexBuffer';
-import { FunctionInfoManager } from './FunctionInfoManager';
+import { WgslReflectManager } from './WgslReflectManager';
 
 export class GPUVertexBufferManager
 {
@@ -58,7 +59,18 @@ export class GPUVertexBufferManager
             r_vertexState.entryPoint;
 
             const { code, entryPoint } = vertexState;
-            const vertexEntryFunctionInfo = FunctionInfoManager.getVertexEntryFunctionInfo(code, entryPoint);
+
+            const wgslReflect = WgslReflectManager.getWGSLReflectInfo(code);
+            let vertexEntryFunctionInfo: FunctionInfo;
+
+            if (entryPoint)
+            {
+                vertexEntryFunctionInfo = wgslReflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
+            }
+            else
+            {
+                vertexEntryFunctionInfo = WgslReflectManager.getWGSLReflectInfo(code).entry.vertex[0];
+            }
 
             // 监听
             const r_vertices = vertices && reactive(vertices);
