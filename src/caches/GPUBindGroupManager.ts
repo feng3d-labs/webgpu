@@ -5,11 +5,11 @@ import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from 'wgs
 import { VideoTexture } from '../data/VideoTexture';
 import { webgpuEvents } from '../eventnames';
 import { ExternalSampledTextureType } from '../types/TextureType';
-import { GPUBindGroupLayoutManager } from './GPUBindGroupLayoutManager';
+import { WGPUBindGroupLayout } from './GPUBindGroupLayoutManager';
 import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
 import { GPUSamplerManager } from './GPUSamplerManager';
-import { WGPUTextureView } from './WGPUTextureView';
 import { WGPUBuffer } from './WGPUBuffer';
+import { WGPUTextureView } from './WGPUTextureView';
 
 export class GPUBindGroupManager
 {
@@ -77,9 +77,9 @@ export class GPUBindGroupManager
 
             if (cache) return cache;
 
-            const gpuBindGroupLayout = GPUBindGroupLayoutManager.getGPUBindGroupLayout(device, bindGroupLayout);
+            const wGPUBindGroupLayout = WGPUBindGroupLayout.getInstance(device, bindGroupLayout);
 
-            gBindGroup = device.createBindGroup({ layout: gpuBindGroupLayout, entries });
+            gBindGroup = device.createBindGroup({ layout: wGPUBindGroupLayout.gpuBindGroupLayout, entries });
 
             GPUBindGroupManager.gpuBindGroupMap.set(gpuBindGroupKey, gBindGroup);
 

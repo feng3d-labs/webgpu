@@ -1,5 +1,5 @@
 import { ChainMap } from '@feng3d/render-api';
-import { GPUBindGroupLayoutManager } from './GPUBindGroupLayoutManager';
+import { WGPUBindGroupLayout } from './GPUBindGroupLayoutManager';
 import { GPUBindGroupLayoutEntryMap, WgslReflectManager } from './WgslReflectManager';
 
 export interface PipelineLayoutDescriptor
@@ -46,7 +46,7 @@ export class GPUPipelineLayoutManager
 
         const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
         {
-            const gpuBindGroupLayout = GPUBindGroupLayoutManager.getGPUBindGroupLayout(device, v);
+            const gpuBindGroupLayout = WGPUBindGroupLayout.getInstance(device, v).gpuBindGroupLayout;
 
             return gpuBindGroupLayout;
         });
@@ -183,5 +183,3 @@ export class GPUPipelineLayoutManager
     private static readonly _bindGroupLayoutDescriptor: { [key: string]: BindGroupLayoutDescriptor } = {};
     private static readonly _pipelineLayoutDescriptorMap: { [key: string]: PipelineLayoutDescriptor } = {};
 }
-
-type GetGPUPipelineLayoutKey = [shaderKey: string];
