@@ -1,5 +1,5 @@
 import { ChainMap } from '@feng3d/render-api';
-import { WGPUBindGroupLayout } from './GPUBindGroupLayoutManager';
+import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { GPUBindGroupLayoutEntryMap, WgslReflectManager } from './WgslReflectManager';
 
 export interface PipelineLayoutDescriptor

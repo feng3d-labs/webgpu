@@ -36,7 +36,7 @@ export class WGPUTexture
         WGPUTexture.textureMap.delete([device, textureLike]);
     }
 
-    gpuTexture: GPUTexture;
+    readonly gpuTexture: GPUTexture;
 
     constructor(device: GPUDevice, textureLike: TextureLike)
     {
@@ -56,7 +56,7 @@ export class WGPUTexture
 
                 gpuTexture.label = 'GPU画布纹理';
 
-                this.gpuTexture = gpuTexture;
+                reactive(this).gpuTexture = gpuTexture;
 
                 return
             }
@@ -127,7 +127,7 @@ export class WGPUTexture
 
             if (!this.gpuTexture) this.gpuTexture.destroy();
 
-            this.gpuTexture = gpuTexture;
+            reactive(this).gpuTexture = gpuTexture;
         });
     }
 
@@ -135,7 +135,7 @@ export class WGPUTexture
     {
         this.gpuTexture?.destroy();
 
-        this.gpuTexture = null;
+        reactive(this).gpuTexture = null;
     }
 
     /**

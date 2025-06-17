@@ -5,7 +5,7 @@ import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from 'wgs
 import { VideoTexture } from '../data/VideoTexture';
 import { webgpuEvents } from '../eventnames';
 import { ExternalSampledTextureType } from '../types/TextureType';
-import { WGPUBindGroupLayout } from './GPUBindGroupLayoutManager';
+import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
 import { GPUSamplerManager } from './GPUSamplerManager';
 import { WGPUBuffer } from './WGPUBuffer';
