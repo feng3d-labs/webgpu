@@ -1,4 +1,4 @@
-import { computed, effect, reactive } from '@feng3d/reactivity';
+import { computed, effect, EffectScope, reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
 import { webgpuEvents } from '../eventnames';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
@@ -36,103 +36,171 @@ export class WGPUTexture
         WGPUTexture.textureMap.delete([device, textureLike]);
     }
 
-    readonly gpuTexture: GPUTexture;
-
-    constructor(device: GPUDevice, textureLike: TextureLike)
+    get gpuTexture()
     {
-        effect(() =>
+        if (this.gpuTextureInvalid)
         {
-            if ('context' in textureLike)
+            this._gpuTexture = WGPUTexture.getGPUTexture(this.device, this.textureLike);
+            this.gpuTextureInvalid = false;
+        }
+
+        return this._gpuTexture;
+    }
+
+    private _gpuTexture: GPUTexture;
+
+    gpuTextureInvalid = true;
+
+    static getGPUTexture(device: GPUDevice, textureLike: TextureLike)
+    {
+        if ('context' in textureLike)
+        {
+            const canvasTexture = textureLike;
+
+            // 确保在提交之前使用正确的画布纹理。
+            reactive(webgpuEvents).preSubmit;
+            reactive(canvasTexture)._canvasSizeVersion;
+
+            const context = GPUCanvasContextManager.getGPUCanvasContext(device, canvasTexture.context);
+
+            const gpuTexture = context.getCurrentTexture();
+
+            gpuTexture.label = 'GPU画布纹理';
+
+            return gpuTexture;
+        }
+
+        const texture = textureLike as MultisampleTexture;
+
+        // 执行
+        const { format, sampleCount, dimension, viewFormats } = texture;
+        let { label, mipLevelCount } = texture;
+
+        const size = texture.size;
+
+        console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
+
+        const usage = WGPUTexture.getTextureUsageFromFormat(device, format, sampleCount);
+
+        // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
+        if (texture.generateMipmap && mipLevelCount === undefined)
+        {
+            //
+            const maxSize = Math.max(size[0], size[1]);
+
+            mipLevelCount = 1 + Math.log2(maxSize) | 0;
+        }
+        mipLevelCount = mipLevelCount ?? 1;
+
+        if (label === undefined)
+        {
+            label = `GPUTexture ${WGPUTexture.autoIndex++}`;
+        }
+
+        const textureDimension = WGPUTexture.dimensionMap[dimension];
+
+        // 创建纹理
+        const gpuTexture = device.createTexture({
+            label,
+            size,
+            mipLevelCount,
+            sampleCount,
+            dimension: textureDimension,
+            format,
+            usage,
+            viewFormats,
+        });
+
+        // 初始化纹理内容
+        WGPUTexture.updateSources(texture);
+        WGPUTexture.updateWriteTextures(device, gpuTexture, texture);
+
+        // 自动生成 mipmap。
+        if (texture.generateMipmap)
+        {
+            generateMipmap(device, gpuTexture);
+        }
+
+        return gpuTexture;
+    }
+
+    private _effectScope = new EffectScope();
+    constructor(private device: GPUDevice, private textureLike: TextureLike)
+    {
+        this.effectScopeRun(() =>
+        {
+            this.init();
+        });
+    }
+
+    effectScopeRun(callback: () => void)
+    {
+        this._effectScope.run(() =>
+        {
+            callback();
+        });
+    }
+
+    init()
+    {
+        const textureLike = this.textureLike;
+        const r_this = reactive(this);
+        const r_webgpuEvents = reactive(webgpuEvents);
+
+        if ('context' in textureLike)
+        {
+            const canvasTexture = textureLike;
+            const r_canvasTexture = reactive(canvasTexture);
+
+            effect(() =>
             {
-                const canvasTexture = textureLike;
+                r_webgpuEvents.preSubmit;
+                r_canvasTexture._canvasSizeVersion;
 
-                // 确保在提交之前使用正确的画布纹理。
-                reactive(webgpuEvents).preSubmit;
-                reactive(canvasTexture)._canvasSizeVersion;
-
-                const context = GPUCanvasContextManager.getGPUCanvasContext(device, canvasTexture.context);
-
-                const gpuTexture = context.getCurrentTexture();
-
-                gpuTexture.label = 'GPU画布纹理';
-
-                reactive(this).gpuTexture = gpuTexture;
-
-                return
-            }
-
+                //
+                r_this.gpuTextureInvalid = true;
+            });
+        }
+        else
+        {
             const texture = textureLike as MultisampleTexture;
-
             // 监听
             const r_texture = reactive(texture);
 
-            r_texture.format;
-            r_texture.sampleCount;
-            r_texture.dimension;
-            r_texture.viewFormats;
-            r_texture.generateMipmap;
-            r_texture.mipLevelCount;
-            r_texture.size[0];
-            r_texture.size[1];
-            r_texture.size[2];
-
-            // 执行
-            const { format, sampleCount, dimension, viewFormats } = texture;
-            let { label, mipLevelCount } = texture;
-
-            const size = texture.size;
-
-            console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
-
-            const usage = WGPUTexture.getTextureUsageFromFormat(device, format, sampleCount);
-
-            // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
-            if (texture.generateMipmap && mipLevelCount === undefined)
+            effect(() =>
             {
+                r_texture.format;
+                r_texture.sampleCount;
+                r_texture.dimension;
+                r_texture.viewFormats;
+                r_texture.generateMipmap;
+                r_texture.mipLevelCount;
+                r_texture.size[0];
+                r_texture.size[1];
+                r_texture.size[2];
+
                 //
-                const maxSize = Math.max(size[0], size[1]);
-
-                mipLevelCount = 1 + Math.log2(maxSize) | 0;
-            }
-            mipLevelCount = mipLevelCount ?? 1;
-
-            if (label === undefined)
-            {
-                label = `GPUTexture ${WGPUTexture.autoIndex++}`;
-            }
-
-            const textureDimension = WGPUTexture.dimensionMap[dimension];
-
-            // 创建纹理
-            const gpuTexture = device.createTexture({
-                label,
-                size,
-                mipLevelCount,
-                sampleCount,
-                dimension: textureDimension,
-                format,
-                usage,
-                viewFormats,
+                r_this.gpuTextureInvalid = true;
             });
+        }
 
-            // 初始化纹理内容
-            WGPUTexture.updateSources(texture);
-            WGPUTexture.updateWriteTextures(device, gpuTexture, texture);
+        effect(() =>
+        {
+            r_this.gpuTextureInvalid;
 
-            // 自动生成 mipmap。
-            if (texture.generateMipmap)
-            {
-                generateMipmap(device, gpuTexture);
-            }
+            if (!this.gpuTextureInvalid) return;
+            if (!this._gpuTexture) return;
 
-            if (!this.gpuTexture) this.gpuTexture.destroy();
-
-            reactive(this).gpuTexture = gpuTexture;
+            this._gpuTexture.destroy();
+            this._gpuTexture = null;
         });
     }
 
     destroy()
     {
+        this._effectScope.stop();
+        this._effectScope = null;
+
         this.gpuTexture?.destroy();
 
         reactive(this).gpuTexture = null;
