@@ -4,12 +4,18 @@ import { webgpuEvents } from '../eventnames';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { generateMipmap } from '../utils/generate-mipmap';
 import { GPUCanvasContextManager } from './GPUCanvasContextManager';
+import { WGPUCanvasTexture } from './WGPUCanvasTexture';
 
 export class WGPUTexture
 {
     static getInstance(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
     {
         if (!device) return null;
+
+        if ('context' in textureLike)
+        {
+            return WGPUCanvasTexture.getInstance(device, textureLike);
+        }
 
         let result = this.textureMap.get([device, textureLike]);
 
