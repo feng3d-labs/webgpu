@@ -11,7 +11,7 @@ export class WGPUTexture
     {
         if (!device) return null;
 
-        let result = WGPUTexture.textureMap.get([device, textureLike]);
+        let result = this.textureMap.get([device, textureLike]);
 
         if (!autoCreate) return result;
 
@@ -41,7 +41,7 @@ export class WGPUTexture
         if (this.gpuTextureInvalid)
         {
             this._gpuTexture = WGPUTexture.getGPUTexture(this.device, this.textureLike);
-            this.gpuTextureInvalid = false;
+            reactive(this).gpuTextureInvalid = false;
         }
 
         return this._gpuTexture;
@@ -49,7 +49,7 @@ export class WGPUTexture
 
     private _gpuTexture: GPUTexture;
 
-    gpuTextureInvalid = true;
+    readonly gpuTextureInvalid: boolean = true;
 
     static getGPUTexture(device: GPUDevice, textureLike: TextureLike)
     {
@@ -145,15 +145,17 @@ export class WGPUTexture
     {
         const textureLike = this.textureLike;
         const r_this = reactive(this);
-        const r_webgpuEvents = reactive(webgpuEvents);
 
         if ('context' in textureLike)
         {
+            const r_webgpuEvents = reactive(webgpuEvents);
             const canvasTexture = textureLike;
             const r_canvasTexture = reactive(canvasTexture);
 
             effect(() =>
             {
+                if (r_this.gpuTextureInvalid) return;
+
                 r_webgpuEvents.preSubmit;
                 r_canvasTexture._canvasSizeVersion;
 
@@ -169,6 +171,8 @@ export class WGPUTexture
 
             effect(() =>
             {
+                if (r_this.gpuTextureInvalid) return;
+
                 r_texture.format;
                 r_texture.sampleCount;
                 r_texture.dimension;
@@ -273,14 +277,14 @@ export class WGPUTexture
                     }
 
                     //
-                    const gpuSource: GPUImageCopyExternalImage = {
+                    const gpuSource: GPUCopyExternalImageSourceInfo = {
                         source: image,
                         origin: imageOrigin,
                         flipY,
                     };
 
                     //
-                    const gpuDestination: GPUImageCopyTextureTagged = {
+                    const gpuDestination: GPUCopyExternalImageDestInfo = {
                         colorSpace,
                         premultipliedAlpha,
                         mipLevel,
