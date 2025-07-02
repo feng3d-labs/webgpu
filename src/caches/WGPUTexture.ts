@@ -1,9 +1,7 @@
 import { computed, effect, EffectScope, reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
-import { webgpuEvents } from '../eventnames';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { generateMipmap } from '../utils/generate-mipmap';
-import { GPUCanvasContextManager } from './GPUCanvasContextManager';
 import { WGPUCanvasTexture } from './WGPUCanvasTexture';
 
 export class WGPUTexture
