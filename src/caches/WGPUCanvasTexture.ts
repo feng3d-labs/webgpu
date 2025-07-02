@@ -1,7 +1,7 @@
 import { effect, reactive } from '@feng3d/reactivity';
 import { CanvasTexture, ChainMap } from '@feng3d/render-api';
 import { webgpuEvents } from '../eventnames';
-import { WGPUTexture } from './WGPUTexture';
+import { GPUCanvasContextManager } from './GPUCanvasContextManager';
 
 export class WGPUCanvasTexture
 {
@@ -17,7 +17,6 @@ export class WGPUCanvasTexture
 
         return result;
     }
-
     private static readonly textureMap = new ChainMap<[GPUDevice, CanvasTexture], WGPUCanvasTexture>();
 
     constructor(private device: GPUDevice, private texture: CanvasTexture)
@@ -29,7 +28,7 @@ export class WGPUCanvasTexture
     {
         if (this.gpuTextureInvalid)
         {
-            this._gpuTexture = WGPUTexture.getGPUTexture(this.device, this.texture);
+            this._gpuTexture = this.getGPUTexture();
             reactive(this).gpuTextureInvalid = false;
         }
 
@@ -69,6 +68,19 @@ export class WGPUCanvasTexture
             this._gpuTexture.destroy();
             this._gpuTexture = null;
         });
+    }
+
+    getGPUTexture()
+    {
+        const { device, texture } = this;
+
+        const context = GPUCanvasContextManager.getGPUCanvasContext(device, texture.context);
+
+        const gpuTexture = context.getCurrentTexture();
+
+        gpuTexture.label = 'GPU画布纹理';
+
+        return gpuTexture;
     }
 
 }

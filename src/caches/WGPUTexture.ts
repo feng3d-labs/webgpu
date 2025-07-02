@@ -8,10 +8,70 @@ import { WGPUCanvasTexture } from './WGPUCanvasTexture';
 
 export class WGPUTexture
 {
+    get gpuTexture()
+    {
+        if (this.gpuTextureInvalid)
+        {
+            this._gpuTexture = this.getGPUTexture();
+            reactive(this).gpuTextureInvalid = false;
+        }
+
+        return this._gpuTexture;
+    }
+
+    constructor(private readonly device: GPUDevice, private readonly texture: Texture)
+    {
+        this._effectScope.run(() => this.init());
+    }
+
+    init()
+    {
+        const texture = this.texture as MultisampleTexture;
+        const r_this = reactive(this);
+        const r_texture = reactive(texture);
+
+        effect(() =>
+        {
+            if (r_this.gpuTextureInvalid) return;
+
+            r_texture.format;
+            r_texture.sampleCount;
+            r_texture.dimension;
+            r_texture.viewFormats;
+            r_texture.generateMipmap;
+            r_texture.mipLevelCount;
+            r_texture.size[0];
+            r_texture.size[1];
+            r_texture.size[2];
+
+            //
+            r_this.gpuTextureInvalid = true;
+        });
+
+        effect(() =>
+        {
+            r_this.gpuTextureInvalid;
+
+            if (!this.gpuTextureInvalid) return;
+            if (!this._gpuTexture) return;
+
+            this._gpuTexture.destroy();
+            this._gpuTexture = null;
+        });
+    }
+
+    destroy()
+    {
+        this._effectScope.stop();
+        this._effectScope = null;
+
+        this.gpuTexture?.destroy();
+
+        reactive(this).gpuTexture = null;
+    }
+
     static getInstance(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
     {
-        if (!device) return null;
-
         if ('context' in textureLike)
         {
             return WGPUCanvasTexture.getInstance(device, textureLike);
@@ -42,41 +102,14 @@ export class WGPUTexture
         WGPUTexture.textureMap.delete([device, textureLike]);
     }
 
-    get gpuTexture()
-    {
-        if (this.gpuTextureInvalid)
-        {
-            this._gpuTexture = WGPUTexture.getGPUTexture(this.device, this.textureLike);
-            reactive(this).gpuTextureInvalid = false;
-        }
-
-        return this._gpuTexture;
-    }
-
     private _gpuTexture: GPUTexture;
 
     readonly gpuTextureInvalid: boolean = true;
 
-    static getGPUTexture(device: GPUDevice, textureLike: TextureLike)
+    getGPUTexture()
     {
-        if ('context' in textureLike)
-        {
-            const canvasTexture = textureLike;
-
-            // 确保在提交之前使用正确的画布纹理。
-            reactive(webgpuEvents).preSubmit;
-            reactive(canvasTexture)._canvasSizeVersion;
-
-            const context = GPUCanvasContextManager.getGPUCanvasContext(device, canvasTexture.context);
-
-            const gpuTexture = context.getCurrentTexture();
-
-            gpuTexture.label = 'GPU画布纹理';
-
-            return gpuTexture;
-        }
-
-        const texture = textureLike as MultisampleTexture;
+        const device = this.device;
+        const texture = this.texture as MultisampleTexture;
 
         // 执行
         const { format, sampleCount, dimension, viewFormats } = texture;
@@ -131,90 +164,6 @@ export class WGPUTexture
     }
 
     private _effectScope = new EffectScope();
-    constructor(private device: GPUDevice, private textureLike: TextureLike)
-    {
-        this.effectScopeRun(() =>
-        {
-            this.init();
-        });
-    }
-
-    effectScopeRun(callback: () => void)
-    {
-        this._effectScope.run(() =>
-        {
-            callback();
-        });
-    }
-
-    init()
-    {
-        const textureLike = this.textureLike;
-        const r_this = reactive(this);
-
-        if ('context' in textureLike)
-        {
-            const r_webgpuEvents = reactive(webgpuEvents);
-            const canvasTexture = textureLike;
-            const r_canvasTexture = reactive(canvasTexture);
-
-            effect(() =>
-            {
-                if (r_this.gpuTextureInvalid) return;
-
-                r_webgpuEvents.preSubmit;
-                r_canvasTexture._canvasSizeVersion;
-
-                //
-                r_this.gpuTextureInvalid = true;
-            });
-        }
-        else
-        {
-            const texture = textureLike as MultisampleTexture;
-            // 监听
-            const r_texture = reactive(texture);
-
-            effect(() =>
-            {
-                if (r_this.gpuTextureInvalid) return;
-
-                r_texture.format;
-                r_texture.sampleCount;
-                r_texture.dimension;
-                r_texture.viewFormats;
-                r_texture.generateMipmap;
-                r_texture.mipLevelCount;
-                r_texture.size[0];
-                r_texture.size[1];
-                r_texture.size[2];
-
-                //
-                r_this.gpuTextureInvalid = true;
-            });
-        }
-
-        effect(() =>
-        {
-            r_this.gpuTextureInvalid;
-
-            if (!this.gpuTextureInvalid) return;
-            if (!this._gpuTexture) return;
-
-            this._gpuTexture.destroy();
-            this._gpuTexture = null;
-        });
-    }
-
-    destroy()
-    {
-        this._effectScope.stop();
-        this._effectScope = null;
-
-        this.gpuTexture?.destroy();
-
-        reactive(this).gpuTexture = null;
-    }
 
     /**
      * 更新纹理
