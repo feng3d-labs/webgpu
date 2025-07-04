@@ -10,7 +10,7 @@ export class WGPUTexture
     {
         if (this.gpuTextureInvalid)
         {
-            this._gpuTexture = this.getGPUTexture();
+            this._gpuTexture = WGPUTexture.getGPUTexture(this.device, this.texture);
             reactive(this).gpuTextureInvalid = false;
         }
 
@@ -104,20 +104,18 @@ export class WGPUTexture
 
     readonly gpuTextureInvalid: boolean = true;
 
-    getGPUTexture()
+    static getGPUTexture(device: GPUDevice, texture: Texture)
     {
-        const device = this.device;
-        const texture = this.texture as MultisampleTexture;
-
         // 执行
-        const { format, sampleCount, dimension, viewFormats } = texture;
+        const { format, dimension, viewFormats } = texture;
+        const sampleCount = (texture as MultisampleTexture).sampleCount;
         let { label, mipLevelCount } = texture;
 
         const size = texture.size;
 
         console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
 
-        const usage = WGPUTexture.getTextureUsageFromFormat(device, format, sampleCount);
+        const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
 
         // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
         if (texture.generateMipmap && mipLevelCount === undefined)
@@ -136,8 +134,13 @@ export class WGPUTexture
 
         const textureDimension = WGPUTexture.dimensionMap[dimension];
 
-        // 创建纹理
-        const gpuTexture = device.createTexture({
+        if (format === 'bgra8unorm')
+        {
+            console.assert(!!device, `bgra8unorm 格式需要指定 GPUDevice 设备！`);
+            console.assert(!!device && device.features.has('bgra8unorm-storage'), `当前设备不支持 bgra8unorm 格式！请使用其他格式或者添加 "bgra8unorm-storage" 特性！`);
+        }
+
+        const descriptor: GPUTextureDescriptor = {
             label,
             size,
             mipLevelCount,
@@ -146,7 +149,10 @@ export class WGPUTexture
             format,
             usage,
             viewFormats,
-        });
+        };
+
+        // 创建纹理
+        const gpuTexture = device.createTexture(descriptor);
 
         // 初始化纹理内容
         WGPUTexture.updateSources(texture);
@@ -309,7 +315,7 @@ export class WGPUTexture
      * @param sampleCount
      * @returns
      */
-    private static getTextureUsageFromFormat(device: GPUDevice, format: GPUTextureFormat, sampleCount?: 4): GPUTextureUsageFlags
+    private static _getGPUTextureUsageFlags(format: GPUTextureFormat, sampleCount?: 4): GPUTextureUsageFlags
     {
         let usage: GPUTextureUsageFlags;
 
@@ -317,7 +323,7 @@ export class WGPUTexture
         if (format.indexOf('depth') !== -1 // 包含深度的纹理
             || sampleCount // 多重采样纹理
             || format === 'r8unorm'
-            || (!device.features.has('bgra8unorm-storage') && format === 'bgra8unorm') // 判断GPU设备是否支持 "bgra8unorm-storage" 特性。
+            || format === 'bgra8unorm' // 判断GPU设备是否支持 "bgra8unorm-storage" 特性。
         )
         {
             usage = (0
