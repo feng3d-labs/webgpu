@@ -75,7 +75,7 @@ export class WGPUTexture
             return WGPUCanvasTexture.getInstance(device, textureLike);
         }
 
-        let result = this.textureMap.get([device, textureLike]);
+        let result = this._textureMap.get([device, textureLike]);
 
         if (!autoCreate) return result;
 
@@ -83,7 +83,7 @@ export class WGPUTexture
         {
             result = new WGPUTexture(device, textureLike);
 
-            this.textureMap.set([device, textureLike], result);
+            this._textureMap.set([device, textureLike], result);
         }
 
         return result;
@@ -91,13 +91,13 @@ export class WGPUTexture
 
     static destroy(device: GPUDevice, textureLike: TextureLike)
     {
-        const result = WGPUTexture.textureMap.get([device, textureLike]);
+        const result = WGPUTexture._textureMap.get([device, textureLike]);
 
         if (!result) return;
 
         result.destroy();
 
-        WGPUTexture.textureMap.delete([device, textureLike]);
+        WGPUTexture._textureMap.delete([device, textureLike]);
     }
 
     private _gpuTexture: GPUTexture;
@@ -129,10 +129,10 @@ export class WGPUTexture
 
         if (label === undefined)
         {
-            label = `GPUTexture ${WGPUTexture.autoIndex++}`;
+            label = `GPUTexture ${WGPUTexture._autoIndex++}`;
         }
 
-        const textureDimension = WGPUTexture.dimensionMap[dimension];
+        const textureDimension = WGPUTexture._dimensionMap[dimension];
 
         if (format === 'bgra8unorm')
         {
@@ -265,7 +265,7 @@ export class WGPUTexture
                 const bufferSource = v as TextureDataSource;
                 const { data, dataLayout, dataImageOrigin, size, mipLevel, textureOrigin, aspect } = bufferSource;
 
-                const gpuDestination: GPUImageCopyTexture = {
+                const gpuDestination: GPUTexelCopyTextureInfo = {
                     mipLevel,
                     origin: textureOrigin,
                     aspect,
@@ -315,7 +315,7 @@ export class WGPUTexture
      * @param sampleCount
      * @returns
      */
-    private static _getGPUTextureUsageFlags(format: GPUTextureFormat, sampleCount?: 4): GPUTextureUsageFlags
+    static _getGPUTextureUsageFlags(format: GPUTextureFormat, sampleCount?: 4): GPUTextureUsageFlags
     {
         let usage: GPUTextureUsageFlags;
 
@@ -345,7 +345,7 @@ export class WGPUTexture
         return usage;
     }
 
-    private static readonly dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
+    private static readonly _dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
         '1d': '1d',
         '2d': '2d',
         '2d-array': '2d',
@@ -354,7 +354,7 @@ export class WGPUTexture
         '3d': '3d',
     };
 
-    private static autoIndex = 0;
-    private static readonly textureMap = new ChainMap<[device: GPUDevice, texture: TextureLike], WGPUTexture>();
+    private static _autoIndex = 0;
+    private static readonly _textureMap = new ChainMap<[device: GPUDevice, texture: TextureLike], WGPUTexture>();
 }
 
