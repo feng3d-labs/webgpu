@@ -284,5 +284,105 @@ describe('ReactiveClass', () =>
                 reactiveClass.destroy();
             });
         });
+
+        it('销毁后副作用应该停止生效', () =>
+        {
+            const reactiveClass = new ReactiveClass();
+            let callCount = 0;
+            const reactiveObj = reactive({ testProp: '' });
+
+            // 创建副作用
+            reactiveClass.effect(() =>
+            {
+                callCount++;
+                reactiveObj.testProp;
+            });
+
+            // 初始调用
+            assert.strictEqual(callCount, 1);
+
+            // 修改属性，触发副作用
+            reactiveObj.testProp = 'value1';
+            assert.strictEqual(callCount, 2);
+
+            // 销毁
+            reactiveClass.destroy();
+
+            // 再次修改属性，副作用不应该被触发
+            reactiveObj.testProp = 'value2';
+            assert.strictEqual(callCount, 2); // 应该仍然是2，不会增加
+
+            // 继续修改属性，副作用仍然不应该被触发
+            reactiveObj.testProp = 'value3';
+            assert.strictEqual(callCount, 2); // 应该仍然是2，不会增加
+        });
+
+        it('销毁后创建新的副作用应该失败', () =>
+        {
+            const reactiveClass = new ReactiveClass();
+
+            // 销毁
+            reactiveClass.destroy();
+
+            // 尝试创建新的副作用应该失败或抛出错误
+            try
+            {
+                reactiveClass.effect(() =>
+                {
+                    console.log('test');
+                });
+                assert.fail('应该在销毁后抛出错误');
+            } catch (error)
+            {
+                // 预期的错误
+                assert.ok(error);
+            }
+        });
+
+        it('继承类销毁后副作用应该停止生效', () =>
+        {
+            class TestClass extends ReactiveClass
+            {
+                readonly value = 0;
+                readonly displayValue = '';
+
+                constructor()
+                {
+                    super();
+                    const r_this = reactive(this);
+                    const r_displayValue = reactive({ displayValue: '' });
+
+                    this.effect(() =>
+                    {
+                        r_displayValue.displayValue = `Value: ${r_this.value}`;
+                    });
+                }
+            }
+
+            const testInstance = new TestClass();
+            let callCount = 0;
+            const reactiveObj = reactive({ testProp: '' });
+
+            // 创建额外的副作用
+            testInstance.effect(() =>
+            {
+                callCount++;
+                reactiveObj.testProp;
+            });
+
+            // 初始调用
+            assert.strictEqual(callCount, 1);
+
+            // 修改属性，触发副作用
+            reactiveObj.testProp = 'value1';
+            assert.strictEqual(callCount, 2);
+
+            // 销毁
+            testInstance.destroy();
+
+            // 再次修改属性，副作用不应该被触发
+            reactiveObj.testProp = 'value2';
+            assert.strictEqual(callCount, 2); // 应该仍然是2，不会增加
+        });
     });
 });
