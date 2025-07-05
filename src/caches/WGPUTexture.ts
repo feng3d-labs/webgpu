@@ -23,9 +23,12 @@ export class WGPUTexture
     readonly _descriptor: GPUTextureDescriptor;
 
     private readonly _r_this: Reactive<this>;
+    private _effectScope = new EffectScope();
 
     constructor(device: GPUDevice, texture: Texture)
     {
+        WGPUTexture._textureMap.set([device, texture], this);
+
         this._r_this = reactive(this);
         this._device = device;
         this._texture = texture;
@@ -174,23 +177,17 @@ export class WGPUTexture
 
         if (!autoCreate) return result;
 
-        if (!result)
-        {
-            result = new WGPUTexture(device, textureLike);
-
-            this._textureMap.set([device, textureLike], result);
-        }
-
-        return result;
+        return new WGPUTexture(device, textureLike);
     }
 
     static destroy(device: GPUDevice, textureLike: TextureLike)
     {
-        const result = WGPUTexture._textureMap.get([device, textureLike]);
+        if ('context' in textureLike)
+        {
+            return WGPUCanvasTexture.destroy(device, textureLike);
+        }
 
-        if (!result) return;
-
-        result.destroy();
+        WGPUTexture._textureMap.get([device, textureLike])?.destroy();
     }
 
     static _createGPUTexture(device: GPUDevice, descriptor: GPUTextureDescriptor)
@@ -206,8 +203,6 @@ export class WGPUTexture
 
         return gpuTexture
     }
-
-    private _effectScope = new EffectScope();
 
     /**
      * 更新纹理

@@ -7,20 +7,20 @@ export class WGPUCanvasTexture
 {
     static getInstance(device: GPUDevice, canvasTexture: CanvasTexture)
     {
-        let result = this.textureMap.get([device, canvasTexture]);
-
-        if (result) return result;
-
-        result = new WGPUCanvasTexture(device, canvasTexture);
-
-        this.textureMap.set([device, canvasTexture], result);
-
-        return result;
+        return this._textureMap.get([device, canvasTexture]) || new WGPUCanvasTexture(device, canvasTexture);
     }
-    private static readonly textureMap = new ChainMap<[GPUDevice, CanvasTexture], WGPUCanvasTexture>();
+
+    static destroy(device: GPUDevice, canvasTexture: CanvasTexture)
+    {
+        this._textureMap.get([device, canvasTexture])?.destroy();
+    }
+
+    private static readonly _textureMap = new ChainMap<[GPUDevice, CanvasTexture], WGPUCanvasTexture>();
 
     constructor(private device: GPUDevice, private texture: CanvasTexture)
     {
+        WGPUCanvasTexture._textureMap.set([device, texture], this);
+
         this.init();
     }
 
@@ -83,4 +83,9 @@ export class WGPUCanvasTexture
         return gpuTexture;
     }
 
+    destroy()
+    {
+        this._gpuTexture.destroy();
+        this._gpuTexture = null;
+    }
 }
