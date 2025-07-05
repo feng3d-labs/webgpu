@@ -20,6 +20,8 @@ export class WGPUTexture
     private readonly _texture: Texture;
     private readonly _r_texture: Reactive<Texture>;
 
+    readonly _descriptor: GPUTextureDescriptor;
+
     private readonly _r_this: Reactive<this>;
 
     constructor(device: GPUDevice, texture: Texture)
@@ -38,9 +40,24 @@ export class WGPUTexture
 
         const r_this = this._r_this;
 
+        if (!this._descriptor)
+        {
+            r_this._descriptor = WGPUTexture._createGPUTextureDescriptor(this._texture);
+        }
+
         if (!this.gpuTexture)
         {
-            r_this.gpuTexture = WGPUTexture.createGPUTexture(this._device, this._texture);
+            r_this.gpuTexture = WGPUTexture._createGPUTexture(this._device, this._descriptor);
+
+            // 初始化纹理内容
+            WGPUTexture.updateSources(this._texture);
+            WGPUTexture.updateWriteTextures(this._device, this.gpuTexture, this._texture);
+
+            // 创建时自动生成 mipmap。
+            if (this._texture.generateMipmap)
+            {
+                generateMipmap(this._device, this.gpuTexture);
+            }
         }
 
         r_this.invalid = true;
@@ -85,6 +102,50 @@ export class WGPUTexture
         this._r_this.gpuTexture = null;
 
         WGPUTexture._textureMap.delete([this._device, this._texture]);
+    }
+
+    private static _createGPUTextureDescriptor(texture: Texture)
+    {
+        // 执行
+        const { format, dimension, viewFormats } = texture;
+        const sampleCount = (texture as MultisampleTexture).sampleCount;
+        let { label, mipLevelCount } = texture;
+
+        const size = texture.size;
+
+        console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
+
+        const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
+
+        // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
+        if (texture.generateMipmap && mipLevelCount === undefined)
+        {
+            //
+            const maxSize = Math.max(size[0], size[1]);
+
+            mipLevelCount = 1 + Math.log2(maxSize) | 0;
+        }
+        mipLevelCount = mipLevelCount ?? 1;
+
+        if (label === undefined)
+        {
+            label = `GPUTexture ${WGPUTexture._autoIndex++}`;
+        }
+
+        const textureDimension = WGPUTexture._dimensionMap[dimension];
+
+        const descriptor: GPUTextureDescriptor = {
+            label,
+            size,
+            mipLevelCount,
+            sampleCount,
+            dimension: textureDimension,
+            format,
+            usage,
+            viewFormats,
+        };
+
+        return descriptor;
     }
 
     private _destroyGPUTexture()
@@ -132,67 +193,18 @@ export class WGPUTexture
         result.destroy();
     }
 
-    static createGPUTexture(device: GPUDevice, texture: Texture)
+    static _createGPUTexture(device: GPUDevice, descriptor: GPUTextureDescriptor)
     {
-        // 执行
-        const { format, dimension, viewFormats } = texture;
-        const sampleCount = (texture as MultisampleTexture).sampleCount;
-        let { label, mipLevelCount } = texture;
-
-        const size = texture.size;
-
-        console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
-
-        const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
-
-        // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
-        if (texture.generateMipmap && mipLevelCount === undefined)
-        {
-            //
-            const maxSize = Math.max(size[0], size[1]);
-
-            mipLevelCount = 1 + Math.log2(maxSize) | 0;
-        }
-        mipLevelCount = mipLevelCount ?? 1;
-
-        if (label === undefined)
-        {
-            label = `GPUTexture ${WGPUTexture._autoIndex++}`;
-        }
-
-        const textureDimension = WGPUTexture._dimensionMap[dimension];
-
-        if (format === 'bgra8unorm')
+        if (descriptor.format === 'bgra8unorm')
         {
             console.assert(!!device, `bgra8unorm 格式需要指定 GPUDevice 设备！`);
             console.assert(!!device && device.features.has('bgra8unorm-storage'), `当前设备不支持 bgra8unorm 格式！请使用其他格式或者添加 "bgra8unorm-storage" 特性！`);
         }
 
-        const descriptor: GPUTextureDescriptor = {
-            label,
-            size,
-            mipLevelCount,
-            sampleCount,
-            dimension: textureDimension,
-            format,
-            usage,
-            viewFormats,
-        };
-
         // 创建纹理
         const gpuTexture = device.createTexture(descriptor);
 
-        // 初始化纹理内容
-        WGPUTexture.updateSources(texture);
-        WGPUTexture.updateWriteTextures(device, gpuTexture, texture);
-
-        // 自动生成 mipmap。
-        if (texture.generateMipmap)
-        {
-            generateMipmap(device, gpuTexture);
-        }
-
-        return gpuTexture;
+        return gpuTexture
     }
 
     private _effectScope = new EffectScope();
