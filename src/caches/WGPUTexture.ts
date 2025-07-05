@@ -50,7 +50,7 @@ export class WGPUTexture extends ReactiveClass
 
         //
         const r_texture = this._r_texture;
-        const r_this = this._r_this;
+        const r_this = reactive(this);
 
         // 监听纹理属性变化
         {
@@ -98,7 +98,7 @@ export class WGPUTexture extends ReactiveClass
         }
 
         // 监听写入纹理变化
-        this.effect(() => { r_texture.writeTextures?.concat(); this._r_this.invalid = true; });
+        this.effect(() => { r_texture.writeTextures?.concat(); r_this.invalid = true; });
     }
 
     /**
@@ -112,7 +112,7 @@ export class WGPUTexture extends ReactiveClass
         const texture = this._texture;
         const device = this._device;
 
-        const r_this = this._r_this;
+        const r_this = reactive(this);
         const r_texture = this._r_texture;
 
         let descriptor = this._descriptor;
@@ -159,7 +159,7 @@ export class WGPUTexture extends ReactiveClass
     destroy()
     {
         // 清理纹理
-        this._r_this.gpuTexture = null;
+        reactive(this).gpuTexture = null;
 
         //
         WGPUTexture._textureMap.delete([this._device, this._texture]);

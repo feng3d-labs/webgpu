@@ -25,21 +25,6 @@ import { Effect, effect, EffectScope, Reactive, reactive } from '@feng3d/reactiv
 export class ReactiveClass
 {
     /**
-     * 响应式实例
-     *
-     * 将当前类实例包装为响应式对象，使得：
-     * - 实例属性的变化可以被监听
-     * - 在副作用中访问属性时会自动建立依赖关系
-     * - 属性变化时会自动触发相关的副作用重新执行
-     *
-     * 使用示例：
-     * ```typescript
-     * this._r_this.someProperty = newValue; // 会触发相关副作用
-     * ```
-     */
-    readonly _r_this: Reactive<this> = reactive(this);
-
-    /**
      * 副作用作用域
      *
      * 用于管理所有副作用的生命周期：
