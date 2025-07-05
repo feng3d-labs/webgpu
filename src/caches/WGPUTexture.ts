@@ -1,6 +1,7 @@
-import { effect, EffectScope, Reactive, reactive } from '@feng3d/reactivity';
+import { Reactive, reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
+import { ReactiveClass } from '../ReactiveClass';
 import { generateMipmap } from '../utils/generate-mipmap';
 import { WGPUCanvasTexture } from './WGPUCanvasTexture';
 
@@ -8,7 +9,7 @@ import { WGPUCanvasTexture } from './WGPUCanvasTexture';
  * WebGPU纹理缓存类
  * 负责管理WebGPU纹理的创建、更新和销毁
  */
-export class WGPUTexture
+export class WGPUTexture extends ReactiveClass
 {
     // ==================== 公开属性 ====================
     /**
@@ -19,7 +20,7 @@ export class WGPUTexture
     /**
      * 纹理是否有效
      */
-    readonly invalid = true;
+    readonly invalid: boolean = true;
 
     /** 纹理描述符 */
     readonly _descriptor: GPUTextureDescriptor;
@@ -31,10 +32,6 @@ export class WGPUTexture
     private readonly _texture: Texture;
     /** 响应式纹理对象 */
     private readonly _r_texture: Reactive<Texture>;
-    /** 响应式实例 */
-    private readonly _r_this: Reactive<this>;
-    /** 副作用作用域 */
-    private _effectScope = new EffectScope();
 
     // ==================== 构造函数 ====================
     /**
@@ -44,14 +41,67 @@ export class WGPUTexture
      */
     constructor(device: GPUDevice, texture: Texture)
     {
+        super();
+
         WGPUTexture._textureMap.set([device, texture], this);
 
-        this._r_this = reactive(this);
         this._device = device;
         this._texture = texture;
+
+        //
         this._r_texture = reactive(this._texture);
 
-        this._effectScope.run(() => this._init());
+        //
+        const r_texture = this._r_texture;
+        const r_this = this._r_this;
+
+        // 监听纹理属性变化
+        {
+            let preGPUTexture: GPUTexture;
+            this.effect(() =>
+            {
+                if (r_this.gpuTexture)
+                {
+                    r_texture.format;
+                    r_texture.dimension;
+                    r_texture.viewFormats;
+                    r_texture.generateMipmap;
+                    r_texture.mipLevelCount;
+                    r_texture.size[0];
+                    r_texture.size[1];
+                    r_texture.size[2];
+                    (r_texture as MultisampleTexture).sampleCount;
+
+                    // 纹理参数变化时，重置纹理
+                    if (preGPUTexture === this.gpuTexture)
+                    {
+                        r_this.gpuTexture = null;
+                    }
+                }
+
+                preGPUTexture = this.gpuTexture;
+            });
+        }
+
+        // 监听纹理变化
+        {
+            let preGPUTexture: GPUTexture
+            this.effect(() =>
+            {
+                r_this.gpuTexture;
+
+                preGPUTexture?.destroy();
+                preGPUTexture = this.gpuTexture;
+
+                if (!this.gpuTexture)
+                {
+                    r_this.invalid = true;
+                }
+            });
+        }
+
+        // 监听写入纹理变化
+        this.effect(() => { r_texture.writeTextures?.concat(); this._r_this.invalid = true; });
     }
 
     // ==================== 公开函数 ====================
@@ -63,9 +113,10 @@ export class WGPUTexture
     {
         if (!this.invalid) return this;
 
-        const r_this = this._r_this;
         const texture = this._texture;
         const device = this._device;
+
+        const r_this = this._r_this;
         const r_texture = this._r_texture;
 
         let descriptor = this._descriptor;
@@ -84,7 +135,7 @@ export class WGPUTexture
             r_this.gpuTexture = gpuTexture = WGPUTexture._createGPUTexture(device, descriptor);
 
             // 初始化纹理内容
-            WGPUTexture._updateWriteTextures(device, gpuTexture, texture.sources);
+            WGPUTexture._writeTextures(device, gpuTexture, texture.sources);
 
             // 自动生成mipmap
             if (texture.generateMipmap)
@@ -93,21 +144,21 @@ export class WGPUTexture
             }
         }
 
-        // 处理写入纹理数据
+        // 写入纹理数据
         if (texture.writeTextures?.length > 0)
         {
-            WGPUTexture._updateWriteTextures(device, gpuTexture, texture.writeTextures);
+            WGPUTexture._writeTextures(device, gpuTexture, texture.writeTextures);
 
             r_texture.writeTextures = null;
         }
 
-        r_this.invalid = true;
+        r_this.invalid = false;
 
         return this;
     }
 
     /**
-     * 销毁纹理
+     * 销毁
      */
     destroy()
     {
@@ -117,46 +168,10 @@ export class WGPUTexture
         //
         WGPUTexture._textureMap.delete([this._device, this._texture]);
 
-        // 停止副作用作用域
-        this._effectScope.stop();
-        this._effectScope = null;
+        super.destroy();
     }
 
     // ==================== 私有函数 ====================
-    /**
-     * 初始化响应式监听
-     */
-    private _init()
-    {
-        const r_texture = this._r_texture;
-        const r_this = this._r_this;
-
-        // 监听纹理属性变化
-        effect(() =>
-        {
-            if (!r_this.gpuTexture) return;
-
-            r_texture.format;
-            r_texture.dimension;
-            r_texture.viewFormats;
-            r_texture.generateMipmap;
-            r_texture.mipLevelCount;
-            r_texture.size[0];
-            r_texture.size[1];
-            r_texture.size[2];
-            (r_texture as MultisampleTexture).sampleCount;
-
-            // 重置纹理
-            r_this.gpuTexture = null;
-        });
-
-        // 监听纹理销毁
-        let preGPUTexture: GPUTexture
-        effect(() => { r_this.gpuTexture; preGPUTexture?.destroy(); preGPUTexture = this.gpuTexture; });
-
-        // 监听写入纹理变化
-        effect(() => { r_texture.writeTextures?.concat(); this._r_this.invalid = true; });
-    }
 
     // ==================== 公开static函数 ====================
     /**
@@ -247,12 +262,12 @@ export class WGPUTexture
     }
 
     /**
-     * 更新纹理数据
+     * 写入纹理数据
      * @param device GPU设备
      * @param gpuTexture WebGPU纹理
      * @param textureSources 纹理数据源
      */
-    static _updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, textureSources: readonly TextureSource[])
+    static _writeTextures(device: GPUDevice, gpuTexture: GPUTexture, textureSources: readonly TextureSource[])
     {
         textureSources?.forEach((v) =>
         {
