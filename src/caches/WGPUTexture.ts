@@ -10,6 +10,7 @@ import { WGPUCanvasTexture } from './WGPUCanvasTexture';
  */
 export class WGPUTexture
 {
+    // ==================== 公开属性 ====================
     /**
      * WebGPU纹理对象
      */
@@ -20,21 +21,24 @@ export class WGPUTexture
      */
     readonly invalid = true;
 
+    /** 纹理描述符 */
+    readonly _descriptor: GPUTextureDescriptor;
+
+    // ==================== 私有属性 ====================
     /** GPU设备 */
     private readonly _device: GPUDevice;
     /** 纹理对象 */
     private readonly _texture: Texture;
     /** 响应式纹理对象 */
     private readonly _r_texture: Reactive<Texture>;
-
-    /** 纹理描述符 */
-    readonly _descriptor: GPUTextureDescriptor;
-
     /** 响应式实例 */
     private readonly _r_this: Reactive<this>;
     /** 副作用作用域 */
     private _effectScope = new EffectScope();
+    /** 前一个纹理对象 */
+    private _preGPUTexture: GPUTexture = null;
 
+    // ==================== 构造函数 ====================
     /**
      * 构造函数
      * @param device GPU设备
@@ -52,6 +56,7 @@ export class WGPUTexture
         this._effectScope.run(() => this._init());
     }
 
+    // ==================== 公开函数 ====================
     /**
      * 更新纹理
      * 创建或重新创建WebGPU纹理并处理纹理数据
@@ -104,6 +109,21 @@ export class WGPUTexture
     }
 
     /**
+     * 销毁纹理
+     */
+    destroy()
+    {
+        this._effectScope.stop();
+        this._effectScope = null;
+
+        // 清理纹理
+        this._r_this.gpuTexture = null;
+
+        WGPUTexture._textureMap.delete([this._device, this._texture]);
+    }
+
+    // ==================== 私有函数 ====================
+    /**
      * 初始化响应式监听
      */
     private _init()
@@ -138,19 +158,60 @@ export class WGPUTexture
     }
 
     /**
-     * 销毁纹理
+     * 销毁WebGPU纹理
      */
-    destroy()
+    private _destroyGPUTexture()
     {
-        this._effectScope.stop();
-        this._effectScope = null;
+        if (!this.gpuTexture) return;
 
-        // 清理纹理
-        this._r_this.gpuTexture = null;
+        if (this._preGPUTexture)
+        {
+            this._preGPUTexture.destroy();
+            this._preGPUTexture = null;
+        }
 
-        WGPUTexture._textureMap.delete([this._device, this._texture]);
+        this._preGPUTexture = this.gpuTexture;
     }
 
+    // ==================== 公开static函数 ====================
+    /**
+     * 获取纹理实例
+     * @param device GPU设备
+     * @param textureLike 纹理对象
+     * @param autoCreate 是否自动创建
+     * @returns 纹理实例
+     */
+    static getInstance(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
+    {
+        // 处理画布纹理
+        if ('context' in textureLike)
+        {
+            return WGPUCanvasTexture.getInstance(device, textureLike);
+        }
+
+        let result = this._textureMap.get([device, textureLike]);
+
+        if (!autoCreate) return result;
+
+        return new WGPUTexture(device, textureLike);
+    }
+
+    /**
+     * 销毁纹理实例
+     * @param device GPU设备
+     * @param textureLike 纹理对象
+     */
+    static destroy(device: GPUDevice, textureLike: TextureLike)
+    {
+        if ('context' in textureLike)
+        {
+            return WGPUCanvasTexture.destroy(device, textureLike);
+        }
+
+        WGPUTexture._textureMap.get([device, textureLike])?.destroy();
+    }
+
+    // ==================== 私有static函数 ====================
     /**
      * 创建WebGPU纹理描述符
      * @param texture 纹理对象
@@ -306,62 +367,6 @@ export class WGPUTexture
     }
 
     /**
-     * 销毁WebGPU纹理
-     */
-    private _destroyGPUTexture()
-    {
-        if (!this.gpuTexture) return;
-
-        if (this._preGPUTexture)
-        {
-            this._preGPUTexture.destroy();
-            this._preGPUTexture = null;
-        }
-
-        this._preGPUTexture = this.gpuTexture;
-    }
-
-    /** 前一个纹理对象 */
-    private _preGPUTexture: GPUTexture = null;
-
-    /**
-     * 获取纹理实例
-     * @param device GPU设备
-     * @param textureLike 纹理对象
-     * @param autoCreate 是否自动创建
-     * @returns 纹理实例
-     */
-    static getInstance(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
-    {
-        // 处理画布纹理
-        if ('context' in textureLike)
-        {
-            return WGPUCanvasTexture.getInstance(device, textureLike);
-        }
-
-        let result = this._textureMap.get([device, textureLike]);
-
-        if (!autoCreate) return result;
-
-        return new WGPUTexture(device, textureLike);
-    }
-
-    /**
-     * 销毁纹理实例
-     * @param device GPU设备
-     * @param textureLike 纹理对象
-     */
-    static destroy(device: GPUDevice, textureLike: TextureLike)
-    {
-        if ('context' in textureLike)
-        {
-            return WGPUCanvasTexture.destroy(device, textureLike);
-        }
-
-        WGPUTexture._textureMap.get([device, textureLike])?.destroy();
-    }
-
-    /**
      * 创建WebGPU纹理
      * @param device GPU设备
      * @param descriptor 纹理描述符
@@ -421,6 +426,7 @@ export class WGPUTexture
         return usage;
     }
 
+    // ==================== 私有static属性 ====================
     /** 纹理维度映射表 */
     private static readonly _dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
         '1d': '1d',
