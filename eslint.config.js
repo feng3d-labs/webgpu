@@ -126,9 +126,6 @@ export default [
                 'after': true,                    // 箭头后需要空格
             }],
             'block-spacing': ['warn', 'always'],  // 块级代码需要空格
-            'brace-style': ['warn', 'allman', {   // 大括号风格
-                'allowSingleLine': false,         // 不允许单行大括号
-            }],
             'comma-spacing': ['warn', {           // 逗号空格规则
                 'before': false,                  // 逗号前不允许空格
                 'after': true,                    // 逗号后需要空格

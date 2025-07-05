@@ -1,4 +1,4 @@
-import { computed, effect, EffectScope, reactive } from '@feng3d/reactivity';
+import { computed, effect, EffectScope, Reactive, reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { generateMipmap } from '../utils/generate-mipmap';
@@ -6,34 +6,59 @@ import { WGPUCanvasTexture } from './WGPUCanvasTexture';
 
 export class WGPUTexture
 {
-    get gpuTexture()
+    /**
+     * WebGPU 纹理
+     */
+    readonly gpuTexture: GPUTexture;
+
+    /**
+     * 是否无效
+     */
+    readonly invalid = true;
+
+    private readonly _device: GPUDevice;
+    private readonly _texture: Texture;
+    private readonly _r_texture: Reactive<Texture>;
+
+    private readonly _r_this: Reactive<this>;
+
+    constructor(device: GPUDevice, texture: Texture)
     {
-        if (this.gpuTextureInvalid)
+        this._r_this = reactive(this);
+        this._device = device;
+        this._texture = texture;
+        this._r_texture = reactive(this._texture);
+
+        this._effectScope.run(() => this._init());
+    }
+
+    update()
+    {
+        if (!this.invalid) return this;
+
+        const r_this = this._r_this;
+
+        if (!this.gpuTexture)
         {
-            this._gpuTexture = WGPUTexture.getGPUTexture(this.device, this.texture);
-            reactive(this).gpuTextureInvalid = false;
+            r_this.gpuTexture = WGPUTexture.createGPUTexture(this._device, this._texture);
         }
 
-        return this._gpuTexture;
+        r_this.invalid = true;
+
+        return this;
     }
 
-    constructor(private readonly device: GPUDevice, private readonly texture: Texture)
+    private _init()
     {
-        this._effectScope.run(() => this.init());
-    }
+        const r_texture = this._r_texture;
+        const r_this = this._r_this;
 
-    init()
-    {
-        const texture = this.texture as MultisampleTexture;
-        const r_this = reactive(this);
-        const r_texture = reactive(texture);
-
+        // 监听纹理变化
         effect(() =>
         {
-            if (r_this.gpuTextureInvalid) return;
+            if (!r_this.gpuTexture) return;
 
             r_texture.format;
-            r_texture.sampleCount;
             r_texture.dimension;
             r_texture.viewFormats;
             r_texture.generateMipmap;
@@ -41,21 +66,14 @@ export class WGPUTexture
             r_texture.size[0];
             r_texture.size[1];
             r_texture.size[2];
+            (r_texture as MultisampleTexture).sampleCount;
 
             //
-            r_this.gpuTextureInvalid = true;
+            r_this.gpuTexture = null;
         });
 
-        effect(() =>
-        {
-            r_this.gpuTextureInvalid;
-
-            if (!this.gpuTextureInvalid) return;
-            if (!this._gpuTexture) return;
-
-            this._gpuTexture.destroy();
-            this._gpuTexture = null;
-        });
+        // 触发销毁逻辑
+        effect(() => { r_this.gpuTexture; this._destroyGPUTexture(); });
     }
 
     destroy()
@@ -63,10 +81,26 @@ export class WGPUTexture
         this._effectScope.stop();
         this._effectScope = null;
 
-        this.gpuTexture?.destroy();
+        //
+        this._r_this.gpuTexture = null;
 
-        reactive(this).gpuTexture = null;
+        WGPUTexture._textureMap.delete([this._device, this._texture]);
     }
+
+    private _destroyGPUTexture()
+    {
+        if (!this.gpuTexture) return;
+
+        if (this._preGPUTexture)
+        {
+            this._preGPUTexture.destroy();
+            this._preGPUTexture = null;
+        }
+
+        this._preGPUTexture = this.gpuTexture;
+    }
+
+    private _preGPUTexture: GPUTexture = null;
 
     static getInstance(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
     {
@@ -96,15 +130,9 @@ export class WGPUTexture
         if (!result) return;
 
         result.destroy();
-
-        WGPUTexture._textureMap.delete([device, textureLike]);
     }
 
-    private _gpuTexture: GPUTexture;
-
-    readonly gpuTextureInvalid: boolean = true;
-
-    static getGPUTexture(device: GPUDevice, texture: Texture)
+    static createGPUTexture(device: GPUDevice, texture: Texture)
     {
         // 执行
         const { format, dimension, viewFormats } = texture;
