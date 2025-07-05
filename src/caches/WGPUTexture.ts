@@ -1,4 +1,4 @@
-import { Reactive, reactive } from '@feng3d/reactivity';
+import { reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { ReactiveClass } from '../ReactiveClass';
@@ -11,6 +11,12 @@ import { WGPUCanvasTexture } from './WGPUCanvasTexture';
  */
 export class WGPUTexture extends ReactiveClass
 {
+
+    /**
+     * 纹理描述符
+     */
+    readonly descriptor: GPUTextureDescriptor;
+
     /**
      * WebGPU纹理对象
      */
@@ -21,15 +27,10 @@ export class WGPUTexture extends ReactiveClass
      */
     readonly invalid: boolean = true;
 
-    /** 纹理描述符 */
-    readonly _descriptor: GPUTextureDescriptor;
-
     /** GPU设备 */
     private readonly _device: GPUDevice;
     /** 纹理对象 */
     private readonly _texture: Texture;
-    /** 响应式纹理对象 */
-    private readonly _r_texture: Reactive<Texture>;
 
     /**
      * 构造函数
@@ -46,18 +47,15 @@ export class WGPUTexture extends ReactiveClass
         this._texture = texture;
 
         //
-        this._r_texture = reactive(this._texture);
-
-        //
-        const r_texture = this._r_texture;
         const r_this = reactive(this);
+        const r_texture = reactive(this._texture);
 
         // 监听纹理属性变化
         {
-            let preGPUTexture: GPUTexture;
+            let preDescriptor: GPUTextureDescriptor;
             this.effect(() =>
             {
-                if (r_this.gpuTexture)
+                if (r_this.descriptor)
                 {
                     r_texture.format;
                     r_texture.dimension;
@@ -69,14 +67,21 @@ export class WGPUTexture extends ReactiveClass
                     r_texture.size[2];
                     (r_texture as MultisampleTexture).sampleCount;
 
-                    // 纹理参数变化时，重置纹理
-                    if (preGPUTexture === this.gpuTexture)
+                    // 纹理参数变化时，重置纹理对象
+                    if (preDescriptor === this.descriptor)
                     {
-                        r_this.gpuTexture = null;
+                        r_this.descriptor = null;
                     }
                 }
 
-                preGPUTexture = this.gpuTexture;
+                preDescriptor = this.descriptor;
+            });
+
+            this.effect(() =>
+            {
+                r_this.descriptor;
+
+                r_this.gpuTexture = null;
             });
         }
 
@@ -98,7 +103,13 @@ export class WGPUTexture extends ReactiveClass
         }
 
         // 监听写入纹理变化
-        this.effect(() => { r_texture.writeTextures?.concat(); r_this.invalid = true; });
+        this.effect(() =>
+        {
+            if (r_texture.writeTextures?.length > 0)
+            {
+                r_this.invalid = true;
+            }
+        });
     }
 
     /**
@@ -113,18 +124,18 @@ export class WGPUTexture extends ReactiveClass
         const device = this._device;
 
         const r_this = reactive(this);
-        const r_texture = this._r_texture;
+        const r_texture = reactive(texture);
 
-        let descriptor = this._descriptor;
-        let gpuTexture = this.gpuTexture;
+        let descriptor = this.descriptor;
 
         // 创建纹理描述符
-        if (!this._descriptor)
+        if (!this.descriptor)
         {
-            r_this._descriptor = descriptor = WGPUTexture._createGPUTextureDescriptor(texture);
+            r_this.descriptor = descriptor = WGPUTexture._createGPUTextureDescriptor(texture);
         }
 
         // 创建WebGPU纹理
+        let gpuTexture = this.gpuTexture;
         if (!gpuTexture)
         {
             // 创建纹理
