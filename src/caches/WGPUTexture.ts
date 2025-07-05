@@ -4,27 +4,42 @@ import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { generateMipmap } from '../utils/generate-mipmap';
 import { WGPUCanvasTexture } from './WGPUCanvasTexture';
 
+/**
+ * WebGPU纹理缓存类
+ * 负责管理WebGPU纹理的创建、更新和销毁
+ */
 export class WGPUTexture
 {
     /**
-     * WebGPU 纹理
+     * WebGPU纹理对象
      */
     readonly gpuTexture: GPUTexture;
 
     /**
-     * 是否无效
+     * 纹理是否有效
      */
     readonly invalid = true;
 
+    /** GPU设备 */
     private readonly _device: GPUDevice;
+    /** 纹理对象 */
     private readonly _texture: Texture;
+    /** 响应式纹理对象 */
     private readonly _r_texture: Reactive<Texture>;
 
+    /** 纹理描述符 */
     readonly _descriptor: GPUTextureDescriptor;
 
+    /** 响应式实例 */
     private readonly _r_this: Reactive<this>;
+    /** 副作用作用域 */
     private _effectScope = new EffectScope();
 
+    /**
+     * 构造函数
+     * @param device GPU设备
+     * @param texture 纹理对象
+     */
     constructor(device: GPUDevice, texture: Texture)
     {
         WGPUTexture._textureMap.set([device, texture], this);
@@ -37,6 +52,10 @@ export class WGPUTexture
         this._effectScope.run(() => this._init());
     }
 
+    /**
+     * 更新纹理
+     * 创建或重新创建WebGPU纹理并处理纹理数据
+     */
     update()
     {
         if (!this.invalid) return this;
@@ -49,11 +68,13 @@ export class WGPUTexture
         let descriptor = this._descriptor;
         let gpuTexture = this.gpuTexture;
 
+        // 创建纹理描述符
         if (!this._descriptor)
         {
             r_this._descriptor = descriptor = WGPUTexture._createGPUTextureDescriptor(texture);
         }
 
+        // 创建WebGPU纹理
         if (!gpuTexture)
         {
             // 创建纹理
@@ -62,14 +83,14 @@ export class WGPUTexture
             // 初始化纹理内容
             WGPUTexture._updateWriteTextures(device, gpuTexture, texture.sources);
 
-            // 创建时自动生成 mipmap。
+            // 自动生成mipmap
             if (texture.generateMipmap)
             {
                 generateMipmap(device, gpuTexture);
             }
         }
 
-        // 执行
+        // 处理写入纹理数据
         if (texture.writeTextures && texture.writeTextures.length > 0)
         {
             WGPUTexture._updateWriteTextures(device, gpuTexture, texture.writeTextures);
@@ -82,12 +103,15 @@ export class WGPUTexture
         return this;
     }
 
+    /**
+     * 初始化响应式监听
+     */
     private _init()
     {
         const r_texture = this._r_texture;
         const r_this = this._r_this;
 
-        // 监听纹理变化
+        // 监听纹理属性变化
         effect(() =>
         {
             if (!r_this.gpuTexture) return;
@@ -102,31 +126,39 @@ export class WGPUTexture
             r_texture.size[2];
             (r_texture as MultisampleTexture).sampleCount;
 
-            //
+            // 重置纹理
             r_this.gpuTexture = null;
         });
 
-        // 触发销毁逻辑
+        // 监听纹理销毁
         effect(() => { r_this.gpuTexture; this._destroyGPUTexture(); });
 
-        // 触发写入纹理
+        // 监听写入纹理变化
         effect(() => { r_texture.writeTextures?.concat(); this._r_this.invalid = true; });
     }
 
+    /**
+     * 销毁纹理
+     */
     destroy()
     {
         this._effectScope.stop();
         this._effectScope = null;
 
-        //
+        // 清理纹理
         this._r_this.gpuTexture = null;
 
         WGPUTexture._textureMap.delete([this._device, this._texture]);
     }
 
+    /**
+     * 创建WebGPU纹理描述符
+     * @param texture 纹理对象
+     * @returns 纹理描述符
+     */
     private static _createGPUTextureDescriptor(texture: Texture)
     {
-        // 执行
+        // 获取纹理属性
         const { format, dimension, viewFormats } = texture;
         const sampleCount = (texture as MultisampleTexture).sampleCount;
         let { label, mipLevelCount } = texture;
@@ -137,16 +169,15 @@ export class WGPUTexture
 
         const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
 
-        // 当需要生成 mipmap 并且 mipLevelCount 并未赋值时，将自动计算 可生成的 mipmap 数量。
+        // 自动计算mipmap层级数
         if (texture.generateMipmap && mipLevelCount === undefined)
         {
-            //
             const maxSize = Math.max(size[0], size[1]);
-
             mipLevelCount = 1 + Math.log2(maxSize) | 0;
         }
         mipLevelCount = mipLevelCount ?? 1;
 
+        // 设置标签
         if (label === undefined)
         {
             label = `GPUTexture ${WGPUTexture._autoIndex++}`;
@@ -168,6 +199,12 @@ export class WGPUTexture
         return descriptor;
     }
 
+    /**
+     * 更新纹理数据
+     * @param device GPU设备
+     * @param gpuTexture WebGPU纹理
+     * @param textureSources 纹理数据源
+     */
     static _updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, textureSources: readonly TextureSource[])
     {
         textureSources?.forEach((v) =>
@@ -179,13 +216,13 @@ export class WGPUTexture
             {
                 const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
 
-                //
+                // 获取图片尺寸
                 const imageSize = TextureImageSource.getTexImageSourceSize(imageSource.image);
                 const copySize = imageSource.size || imageSize;
 
                 let imageOrigin = imageSource.imageOrigin;
 
-                // 转换为WebGPU翻转模式
+                // 处理Y轴翻转
                 if (flipY)
                 {
                     const x = imageOrigin?.[0] ?? 0;
@@ -196,14 +233,14 @@ export class WGPUTexture
                     imageOrigin = [x, y];
                 }
 
-                //
+                // 设置源信息
                 const gpuSource: GPUCopyExternalImageSourceInfo = {
                     source: image,
                     origin: imageOrigin,
                     flipY,
                 };
 
-                //
+                // 设置目标信息
                 const gpuDestination: GPUCopyExternalImageDestInfo = {
                     colorSpace,
                     premultipliedAlpha,
@@ -213,6 +250,7 @@ export class WGPUTexture
                     texture: gpuTexture,
                 };
 
+                // 复制图片到纹理
                 device.queue.copyExternalImageToTexture(
                     gpuSource,
                     gpuDestination,
@@ -233,7 +271,7 @@ export class WGPUTexture
                 texture: gpuTexture,
             };
 
-            // 计算 WebGPU 中支持的参数
+            // 计算数据布局参数
             const offset = dataLayout?.offset || 0;
             const width = dataLayout?.width || size[0];
             const height = dataLayout?.height || size[1];
@@ -241,14 +279,14 @@ export class WGPUTexture
             const y = dataImageOrigin?.[1] || 0;
             const depthOrArrayLayers = dataImageOrigin?.[2] || 0;
 
-            // 获取纹理每个像素对应的字节数量。
+            // 获取像素字节数
             const bytesPerPixel = Texture.getTextureBytesPerPixel(gpuTexture.format);
 
-            // 计算偏移
+            // 计算GPU偏移量
             const gpuOffset
-                = (offset || 0) // 头部
-                + (depthOrArrayLayers || 0) * (width * height * bytesPerPixel) // 读取第几张图片
-                + (x + (y * width)) * bytesPerPixel // 读取图片位置
+                = (offset || 0) // 数据偏移
+                + (depthOrArrayLayers || 0) * (width * height * bytesPerPixel) // 数组层偏移
+                + (x + (y * width)) * bytesPerPixel // 像素偏移
                 ;
 
             const gpuDataLayout: GPUTexelCopyBufferLayout = {
@@ -257,6 +295,7 @@ export class WGPUTexture
                 rowsPerImage: height,
             };
 
+            // 写入纹理数据
             device.queue.writeTexture(
                 gpuDestination,
                 data,
@@ -266,6 +305,9 @@ export class WGPUTexture
         });
     }
 
+    /**
+     * 销毁WebGPU纹理
+     */
     private _destroyGPUTexture()
     {
         if (!this.gpuTexture) return;
@@ -279,10 +321,19 @@ export class WGPUTexture
         this._preGPUTexture = this.gpuTexture;
     }
 
+    /** 前一个纹理对象 */
     private _preGPUTexture: GPUTexture = null;
 
+    /**
+     * 获取纹理实例
+     * @param device GPU设备
+     * @param textureLike 纹理对象
+     * @param autoCreate 是否自动创建
+     * @returns 纹理实例
+     */
     static getInstance(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
     {
+        // 处理画布纹理
         if ('context' in textureLike)
         {
             return WGPUCanvasTexture.getInstance(device, textureLike);
@@ -295,6 +346,11 @@ export class WGPUTexture
         return new WGPUTexture(device, textureLike);
     }
 
+    /**
+     * 销毁纹理实例
+     * @param device GPU设备
+     * @param textureLike 纹理对象
+     */
     static destroy(device: GPUDevice, textureLike: TextureLike)
     {
         if ('context' in textureLike)
@@ -305,8 +361,15 @@ export class WGPUTexture
         WGPUTexture._textureMap.get([device, textureLike])?.destroy();
     }
 
+    /**
+     * 创建WebGPU纹理
+     * @param device GPU设备
+     * @param descriptor 纹理描述符
+     * @returns WebGPU纹理
+     */
     static _createGPUTexture(device: GPUDevice, descriptor: GPUTextureDescriptor)
     {
+        // 检查bgra8unorm格式支持
         if (descriptor.format === 'bgra8unorm')
         {
             console.assert(!!device, `bgra8unorm 格式需要指定 GPUDevice 设备！`);
@@ -320,25 +383,24 @@ export class WGPUTexture
     }
 
     /**
-     * 由纹理格式获取纹理可支持的用途。
+     * 根据纹理格式和采样数确定纹理的使用标志
      *
-     * 包含深度、多重采样、以及个别的无法作为存储纹理。
-     *
-     * @param format
-     * @param sampleCount
-     * @returns
+     * @param format 纹理格式
+     * @param sampleCount 采样数（多重采样时使用）
+     * @returns 纹理使用标志
      */
     static _getGPUTextureUsageFlags(format: GPUTextureFormat, sampleCount?: 4): GPUTextureUsageFlags
     {
         let usage: GPUTextureUsageFlags;
 
-        // 包含深度以及多重采样的纹理不支持 STORAGE_BINDING
-        if (format.indexOf('depth') !== -1 // 包含深度的纹理
+        // 深度纹理、多重采样纹理和某些特定格式不支持存储绑定
+        if (format.indexOf('depth') !== -1 // 深度纹理
             || sampleCount // 多重采样纹理
             || format === 'r8unorm'
-            || format === 'bgra8unorm' // 判断GPU设备是否支持 "bgra8unorm-storage" 特性。
+            || format === 'bgra8unorm' // 需要设备支持 "bgra8unorm-storage" 特性
         )
         {
+            // 基础使用标志（不包含存储绑定）
             usage = (0
                 | GPUTextureUsage.COPY_SRC
                 | GPUTextureUsage.COPY_DST
@@ -347,6 +409,7 @@ export class WGPUTexture
         }
         else
         {
+            // 完整使用标志（包含存储绑定）
             usage = (0
                 | GPUTextureUsage.COPY_SRC
                 | GPUTextureUsage.COPY_DST
@@ -358,6 +421,7 @@ export class WGPUTexture
         return usage;
     }
 
+    /** 纹理维度映射表 */
     private static readonly _dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
         '1d': '1d',
         '2d': '2d',
@@ -367,7 +431,9 @@ export class WGPUTexture
         '3d': '3d',
     };
 
+    /** 自动索引计数器 */
     private static _autoIndex = 0;
+    /** 纹理实例映射表 */
     private static readonly _textureMap = new ChainMap<[device: GPUDevice, texture: TextureLike], WGPUTexture>();
 }
 
