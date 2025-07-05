@@ -168,11 +168,9 @@ export class WGPUTexture
         return descriptor;
     }
 
-    static _updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, writeTextures: readonly TextureSource[])
+    static _updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, textureSources: readonly TextureSource[])
     {
-        if (!writeTextures) return;
-
-        writeTextures.forEach((v) =>
+        textureSources?.forEach((v) =>
         {
             // 处理图片纹理
             const imageSource = v as TextureImageSource;
