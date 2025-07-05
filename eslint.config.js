@@ -82,7 +82,6 @@ export default [
             'padding-line-between-statements': [   // 语句之间的空行规则
                 'warn',
                 { 'blankLine': 'always', 'prev': '*', 'next': 'return' },  // return 前需要空行
-                { 'blankLine': 'always', 'prev': ['const', 'let', 'var'], 'next': '*' },  // 变量声明后需要空行
                 { 'blankLine': 'any', 'prev': ['const', 'let', 'var'], 'next': ['const', 'let', 'var'] },  // 变量声明之间可以没有空行
             ],
 

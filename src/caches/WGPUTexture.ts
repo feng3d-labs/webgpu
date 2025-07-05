@@ -35,8 +35,6 @@ export class WGPUTexture
     private readonly _r_this: Reactive<this>;
     /** 副作用作用域 */
     private _effectScope = new EffectScope();
-    /** 前一个纹理对象 */
-    private _preGPUTexture: GPUTexture = null;
 
     // ==================== 构造函数 ====================
     /**
@@ -96,7 +94,7 @@ export class WGPUTexture
         }
 
         // 处理写入纹理数据
-        if (texture.writeTextures && texture.writeTextures.length > 0)
+        if (texture.writeTextures?.length > 0)
         {
             WGPUTexture._updateWriteTextures(device, gpuTexture, texture.writeTextures);
 
@@ -113,13 +111,15 @@ export class WGPUTexture
      */
     destroy()
     {
-        this._effectScope.stop();
-        this._effectScope = null;
-
         // 清理纹理
         this._r_this.gpuTexture = null;
 
+        //
         WGPUTexture._textureMap.delete([this._device, this._texture]);
+
+        // 停止副作用作用域
+        this._effectScope.stop();
+        this._effectScope = null;
     }
 
     // ==================== 私有函数 ====================
@@ -151,26 +151,11 @@ export class WGPUTexture
         });
 
         // 监听纹理销毁
-        effect(() => { r_this.gpuTexture; this._destroyGPUTexture(); });
+        let preGPUTexture: GPUTexture
+        effect(() => { r_this.gpuTexture; preGPUTexture?.destroy(); preGPUTexture = this.gpuTexture; });
 
         // 监听写入纹理变化
         effect(() => { r_texture.writeTextures?.concat(); this._r_this.invalid = true; });
-    }
-
-    /**
-     * 销毁WebGPU纹理
-     */
-    private _destroyGPUTexture()
-    {
-        if (!this.gpuTexture) return;
-
-        if (this._preGPUTexture)
-        {
-            this._preGPUTexture.destroy();
-            this._preGPUTexture = null;
-        }
-
-        this._preGPUTexture = this.gpuTexture;
     }
 
     // ==================== 公开static函数 ====================
@@ -234,6 +219,7 @@ export class WGPUTexture
         if (texture.generateMipmap && mipLevelCount === undefined)
         {
             const maxSize = Math.max(size[0], size[1]);
+
             mipLevelCount = 1 + Math.log2(maxSize) | 0;
         }
         mipLevelCount = mipLevelCount ?? 1;
