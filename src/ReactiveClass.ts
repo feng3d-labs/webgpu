@@ -1,32 +1,126 @@
-import { effect, EffectScope, Reactive, reactive } from '@feng3d/reactivity';
+import { Effect, effect, EffectScope, Reactive, reactive } from '@feng3d/reactivity';
 
+/**
+ * 响应式类基类
+ *
+ * 提供响应式编程的基础功能，包括：
+ * 1. 自动创建响应式实例，使类实例的属性变化可以被监听
+ * 2. 提供副作用管理机制，自动管理副作用的生命周期
+ * 3. 在类销毁时自动清理所有副作用，防止内存泄漏
+ *
+ * 使用方式：
+ * ```typescript
+ * class MyClass extends ReactiveClass {
+ *   constructor() {
+ *     super();
+ *
+ *     // 创建副作用，会自动管理生命周期
+ *     this.effect(() => {
+ *       ...
+ *     });
+ *   }
+ * }
+ * ```
+ */
 export class ReactiveClass
 {
-    /** 响应式实例 */
+    /**
+     * 响应式实例
+     *
+     * 将当前类实例包装为响应式对象，使得：
+     * - 实例属性的变化可以被监听
+     * - 在副作用中访问属性时会自动建立依赖关系
+     * - 属性变化时会自动触发相关的副作用重新执行
+     *
+     * 使用示例：
+     * ```typescript
+     * this._r_this.someProperty = newValue; // 会触发相关副作用
+     * ```
+     */
     readonly _r_this: Reactive<this> = reactive(this);
 
-    /** 副作用作用域 */
+    /**
+     * 副作用作用域
+     *
+     * 用于管理所有副作用的生命周期：
+     * - 收集所有通过 effect() 方法创建的副作用
+     * - 在类销毁时自动停止所有副作用
+     * - 防止副作用在类销毁后继续执行，避免内存泄漏
+     *
+     * 私有属性，外部无法直接访问，只能通过 effect() 方法使用
+     */
     private _effectScope = new EffectScope();
 
     /**
-     * 运行副作用，在销毁时会自动停止
-     * @param fn 副作用函数
+     * 创建并运行副作用
+     *
+     * 功能：
+     * 1. 将传入的函数包装为副作用
+     * 2. 自动收集副作用中访问的响应式属性作为依赖
+     * 3. 当依赖变化时自动重新执行副作用
+     * 4. 在类销毁时自动停止副作用
+     *
+     * 使用场景：
+     * - 监听属性变化并执行相应操作
+     * - 自动更新UI或重新计算派生状态
+     * - 执行清理或初始化逻辑
+     *
+     * @param fn 副作用函数，会在依赖变化时自动执行
+     *
+     * 使用示例：
+     * ```typescript
+     * this.effect(() => {
+     *   // 访问响应式属性，建立依赖关系
+     *   const value = this._r_this.someProperty;
+     *
+     *   // 执行相应的逻辑
+     *   this.updateUI(value);
+     * });
+     * ```
      */
     effect(fn: () => void)
     {
+        let eff: Effect;
         this._effectScope.run(() =>
         {
-            effect(fn);
+            eff = effect(fn);
         });
+
+        return eff;
     }
 
     /**
-     * 销毁
+     * 销毁响应式类实例
+     *
+     * 执行清理操作：
+     * 1. 停止所有副作用作用域，防止副作用继续执行
+     * 2. 清理副作用作用域引用，帮助垃圾回收
+     * 3. 防止内存泄漏
+     *
+     * 重要：
+     * - 子类重写此方法时必须调用 super.destroy()
+     * - 确保在类实例不再使用时调用此方法
+     * - 调用后实例将无法再使用 effect() 方法
+     *
+     * 使用示例：
+     * ```typescript
+     * class MyClass extends ReactiveClass {
+     *   destroy() {
+     *     // 执行子类特定的清理逻辑
+     *     this.cleanup();
+     *
+     *     // 必须调用父类的destroy方法
+     *     super.destroy();
+     *   }
+     * }
+     * ```
      */
     destroy()
     {
-        // 停止副作用作用域
+        // 停止副作用作用域，这会自动停止所有通过 effect() 创建的副作用
         this._effectScope.stop();
+
+        // 清理引用，帮助垃圾回收
         this._effectScope = null;
     }
 }
