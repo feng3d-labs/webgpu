@@ -1,12 +1,11 @@
-import { Effect, effect, EffectScope, Reactive, reactive } from '@feng3d/reactivity';
+import { Effect, effect, EffectScope } from '@feng3d/reactivity';
 
 /**
  * 响应式类基类
  *
  * 提供响应式编程的基础功能，包括：
- * 1. 自动创建响应式实例，使类实例的属性变化可以被监听
- * 2. 提供副作用管理机制，自动管理副作用的生命周期
- * 3. 在类销毁时自动清理所有副作用，防止内存泄漏
+ * 1. 提供副作用管理机制，自动管理副作用的生命周期
+ * 2. 在类销毁时自动清理所有副作用，防止内存泄漏
  *
  * 使用方式：
  * ```typescript
@@ -56,7 +55,7 @@ export class ReactiveClass
      * ```typescript
      * this.effect(() => {
      *   // 访问响应式属性，建立依赖关系
-     *   const value = this._r_this.someProperty;
+     *   const value = reactive(this).someProperty;
      *
      *   // 执行相应的逻辑
      *   this.updateUI(value);
@@ -103,7 +102,7 @@ export class ReactiveClass
     destroy()
     {
         // 停止副作用作用域，这会自动停止所有通过 effect() 创建的副作用
-        this._effectScope.stop();
+        this._effectScope?.stop();
 
         // 清理引用，帮助垃圾回收
         this._effectScope = null;
