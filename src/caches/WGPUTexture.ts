@@ -1,4 +1,4 @@
-import { computed, effect, EffectScope, Reactive, reactive } from '@feng3d/reactivity';
+import { effect, EffectScope, Reactive, reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { generateMipmap } from '../utils/generate-mipmap';
@@ -42,25 +42,39 @@ export class WGPUTexture
         if (!this.invalid) return this;
 
         const r_this = this._r_this;
+        const texture = this._texture;
+        const device = this._device;
+        const r_texture = this._r_texture;
+
+        let descriptor = this._descriptor;
+        let gpuTexture = this.gpuTexture;
 
         if (!this._descriptor)
         {
-            r_this._descriptor = WGPUTexture._createGPUTextureDescriptor(this._texture);
+            r_this._descriptor = descriptor = WGPUTexture._createGPUTextureDescriptor(texture);
         }
 
-        if (!this.gpuTexture)
+        if (!gpuTexture)
         {
-            r_this.gpuTexture = WGPUTexture._createGPUTexture(this._device, this._descriptor);
+            // 创建纹理
+            r_this.gpuTexture = gpuTexture = WGPUTexture._createGPUTexture(device, descriptor);
 
             // 初始化纹理内容
-            WGPUTexture.updateSources(this._texture);
-            WGPUTexture.updateWriteTextures(this._device, this.gpuTexture, this._texture);
+            WGPUTexture._updateWriteTextures(device, gpuTexture, texture.sources);
 
             // 创建时自动生成 mipmap。
-            if (this._texture.generateMipmap)
+            if (texture.generateMipmap)
             {
-                generateMipmap(this._device, this.gpuTexture);
+                generateMipmap(device, gpuTexture);
             }
+        }
+
+        // 执行
+        if (texture.writeTextures && texture.writeTextures.length > 0)
+        {
+            WGPUTexture._updateWriteTextures(device, gpuTexture, texture.writeTextures);
+
+            r_texture.writeTextures = null;
         }
 
         r_this.invalid = true;
@@ -94,6 +108,9 @@ export class WGPUTexture
 
         // 触发销毁逻辑
         effect(() => { r_this.gpuTexture; this._destroyGPUTexture(); });
+
+        // 触发写入纹理
+        effect(() => { r_texture.writeTextures?.concat(); this._r_this.invalid = true; });
     }
 
     destroy()
@@ -151,6 +168,106 @@ export class WGPUTexture
         return descriptor;
     }
 
+    static _updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, writeTextures: readonly TextureSource[])
+    {
+        if (!writeTextures) return;
+
+        writeTextures.forEach((v) =>
+        {
+            // 处理图片纹理
+            const imageSource = v as TextureImageSource;
+
+            if (imageSource.image)
+            {
+                const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
+
+                //
+                const imageSize = TextureImageSource.getTexImageSourceSize(imageSource.image);
+                const copySize = imageSource.size || imageSize;
+
+                let imageOrigin = imageSource.imageOrigin;
+
+                // 转换为WebGPU翻转模式
+                if (flipY)
+                {
+                    const x = imageOrigin?.[0] ?? 0;
+                    let y = imageOrigin?.[1] ?? 0;
+
+                    y = imageSize[1] - y - copySize[1];
+
+                    imageOrigin = [x, y];
+                }
+
+                //
+                const gpuSource: GPUCopyExternalImageSourceInfo = {
+                    source: image,
+                    origin: imageOrigin,
+                    flipY,
+                };
+
+                //
+                const gpuDestination: GPUCopyExternalImageDestInfo = {
+                    colorSpace,
+                    premultipliedAlpha,
+                    mipLevel,
+                    origin: textureOrigin,
+                    aspect,
+                    texture: gpuTexture,
+                };
+
+                device.queue.copyExternalImageToTexture(
+                    gpuSource,
+                    gpuDestination,
+                    copySize,
+                );
+
+                return;
+            }
+
+            // 处理数据纹理
+            const bufferSource = v as TextureDataSource;
+            const { data, dataLayout, dataImageOrigin, size, mipLevel, textureOrigin, aspect } = bufferSource;
+
+            const gpuDestination: GPUTexelCopyTextureInfo = {
+                mipLevel,
+                origin: textureOrigin,
+                aspect,
+                texture: gpuTexture,
+            };
+
+            // 计算 WebGPU 中支持的参数
+            const offset = dataLayout?.offset || 0;
+            const width = dataLayout?.width || size[0];
+            const height = dataLayout?.height || size[1];
+            const x = dataImageOrigin?.[0] || 0;
+            const y = dataImageOrigin?.[1] || 0;
+            const depthOrArrayLayers = dataImageOrigin?.[2] || 0;
+
+            // 获取纹理每个像素对应的字节数量。
+            const bytesPerPixel = Texture.getTextureBytesPerPixel(gpuTexture.format);
+
+            // 计算偏移
+            const gpuOffset
+                = (offset || 0) // 头部
+                + (depthOrArrayLayers || 0) * (width * height * bytesPerPixel) // 读取第几张图片
+                + (x + (y * width)) * bytesPerPixel // 读取图片位置
+                ;
+
+            const gpuDataLayout: GPUTexelCopyBufferLayout = {
+                offset: gpuOffset,
+                bytesPerRow: width * bytesPerPixel,
+                rowsPerImage: height,
+            };
+
+            device.queue.writeTexture(
+                gpuDestination,
+                data,
+                gpuDataLayout,
+                size,
+            );
+        });
+    }
+
     private _destroyGPUTexture()
     {
         if (!this.gpuTexture) return;
@@ -202,143 +319,6 @@ export class WGPUTexture
         const gpuTexture = device.createTexture(descriptor);
 
         return gpuTexture
-    }
-
-    /**
-     * 更新纹理
-     * @param texture
-     */
-    private static updateSources(texture: Texture)
-    {
-        computed(() =>
-        {
-            const r_texture = reactive(texture);
-
-            r_texture.sources;
-
-            if (!texture.sources) return;
-
-            const writeTextures: TextureSource[] = [];
-
-            texture.sources.forEach((v) =>
-            {
-                writeTextures.push(v);
-            });
-            reactive(texture).writeTextures = writeTextures.concat(texture.writeTextures || []);
-        }).value;
-    }
-
-    private static updateWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, texture: Texture)
-    {
-        computed(() =>
-        {
-            // 监听
-            const r_texture = reactive(texture);
-
-            r_texture.writeTextures;
-
-            // 执行
-            if (!texture.writeTextures) return;
-
-            const { writeTextures, format } = texture;
-
-            reactive(texture).writeTextures = null;
-
-            writeTextures.forEach((v) =>
-            {
-                // 处理图片纹理
-                const imageSource = v as TextureImageSource;
-
-                if (imageSource.image)
-                {
-                    const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
-
-                    //
-                    const imageSize = TextureImageSource.getTexImageSourceSize(imageSource.image);
-                    const copySize = imageSource.size || imageSize;
-
-                    let imageOrigin = imageSource.imageOrigin;
-
-                    // 转换为WebGPU翻转模式
-                    if (flipY)
-                    {
-                        const x = imageOrigin?.[0] ?? 0;
-                        let y = imageOrigin?.[1] ?? 0;
-
-                        y = imageSize[1] - y - copySize[1];
-
-                        imageOrigin = [x, y];
-                    }
-
-                    //
-                    const gpuSource: GPUCopyExternalImageSourceInfo = {
-                        source: image,
-                        origin: imageOrigin,
-                        flipY,
-                    };
-
-                    //
-                    const gpuDestination: GPUCopyExternalImageDestInfo = {
-                        colorSpace,
-                        premultipliedAlpha,
-                        mipLevel,
-                        origin: textureOrigin,
-                        aspect,
-                        texture: gpuTexture,
-                    };
-
-                    device.queue.copyExternalImageToTexture(
-                        gpuSource,
-                        gpuDestination,
-                        copySize,
-                    );
-
-                    return;
-                }
-
-                // 处理数据纹理
-                const bufferSource = v as TextureDataSource;
-                const { data, dataLayout, dataImageOrigin, size, mipLevel, textureOrigin, aspect } = bufferSource;
-
-                const gpuDestination: GPUTexelCopyTextureInfo = {
-                    mipLevel,
-                    origin: textureOrigin,
-                    aspect,
-                    texture: gpuTexture,
-                };
-
-                // 计算 WebGPU 中支持的参数
-                const offset = dataLayout?.offset || 0;
-                const width = dataLayout?.width || size[0];
-                const height = dataLayout?.height || size[1];
-                const x = dataImageOrigin?.[0] || 0;
-                const y = dataImageOrigin?.[1] || 0;
-                const depthOrArrayLayers = dataImageOrigin?.[2] || 0;
-
-                // 获取纹理每个像素对应的字节数量。
-                const bytesPerPixel = Texture.getTextureBytesPerPixel(format);
-
-                // 计算偏移
-                const gpuOffset
-                    = (offset || 0) // 头部
-                    + (depthOrArrayLayers || 0) * (width * height * bytesPerPixel) // 读取第几张图片
-                    + (x + (y * width)) * bytesPerPixel // 读取图片位置
-                    ;
-
-                const gpuDataLayout: GPUImageDataLayout = {
-                    offset: gpuOffset,
-                    bytesPerRow: width * bytesPerPixel,
-                    rowsPerImage: height,
-                };
-
-                device.queue.writeTexture(
-                    gpuDestination,
-                    data,
-                    gpuDataLayout,
-                    size,
-                );
-            });
-        }).value;
     }
 
     /**
