@@ -11,7 +11,6 @@ import { WGPUCanvasTexture } from './WGPUCanvasTexture';
  */
 export class WGPUTexture extends ReactiveClass
 {
-    // ==================== 公开属性 ====================
     /**
      * WebGPU纹理对象
      */
@@ -25,7 +24,6 @@ export class WGPUTexture extends ReactiveClass
     /** 纹理描述符 */
     readonly _descriptor: GPUTextureDescriptor;
 
-    // ==================== 私有属性 ====================
     /** GPU设备 */
     private readonly _device: GPUDevice;
     /** 纹理对象 */
@@ -33,7 +31,6 @@ export class WGPUTexture extends ReactiveClass
     /** 响应式纹理对象 */
     private readonly _r_texture: Reactive<Texture>;
 
-    // ==================== 构造函数 ====================
     /**
      * 构造函数
      * @param device GPU设备
@@ -85,7 +82,7 @@ export class WGPUTexture extends ReactiveClass
 
         // 监听纹理变化
         {
-            let preGPUTexture: GPUTexture
+            let preGPUTexture: GPUTexture;
             this.effect(() =>
             {
                 r_this.gpuTexture;
@@ -104,7 +101,6 @@ export class WGPUTexture extends ReactiveClass
         this.effect(() => { r_texture.writeTextures?.concat(); this._r_this.invalid = true; });
     }
 
-    // ==================== 公开函数 ====================
     /**
      * 更新纹理
      * 创建或重新创建WebGPU纹理并处理纹理数据
@@ -171,9 +167,6 @@ export class WGPUTexture extends ReactiveClass
         super.destroy();
     }
 
-    // ==================== 私有函数 ====================
-
-    // ==================== 公开static函数 ====================
     /**
      * 获取纹理实例
      * @param device GPU设备
@@ -211,7 +204,6 @@ export class WGPUTexture extends ReactiveClass
         WGPUTexture._textureMap.get([device, textureLike])?.destroy();
     }
 
-    // ==================== 私有static函数 ====================
     /**
      * 创建WebGPU纹理描述符
      * @param texture 纹理对象
@@ -427,7 +419,6 @@ export class WGPUTexture extends ReactiveClass
         return usage;
     }
 
-    // ==================== 私有static属性 ====================
     /** 纹理维度映射表 */
     private static readonly _dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
         '1d': '1d',
