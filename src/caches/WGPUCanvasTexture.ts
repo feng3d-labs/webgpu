@@ -3,7 +3,7 @@ import { CanvasContext, CanvasTexture, ChainMap } from '@feng3d/render-api';
 
 import { webgpuEvents } from '../eventnames';
 import { ReactiveClass } from '../ReactiveClass';
-import { GPUCanvasContextManager } from './GPUCanvasContextManager';
+import { WGPUCanvasContext } from './GPUCanvasContextManager';
 
 /**
  * WebGPU画布纹理缓存类
@@ -103,17 +103,19 @@ export class WGPUCanvasTexture extends ReactiveClass
      */
     update()
     {
-        if (this.invalid) return;
+        if (!this.invalid) return;
 
         const r_this = reactive(this);
 
         // 如果没有纹理，创建新的纹理
         if (!this.gpuTexture)
         {
-            r_this.gpuTexture = WGPUCanvasTexture._getCanvasGPUTexture(this._device, this._canvasTexture.context);
+            r_this.gpuTexture = WGPUCanvasTexture._getCanvasCurrentGPUTexture(this._device, this._canvasTexture.context);
         }
 
-        r_this.invalid = true;
+        r_this.invalid = false;
+
+        return this;
     }
 
     /**
@@ -161,13 +163,13 @@ export class WGPUCanvasTexture extends ReactiveClass
      * @param canvasContext 画布上下文
      * @returns GPU纹理
      */
-    static _getCanvasGPUTexture(device: GPUDevice, canvasContext: CanvasContext)
+    static _getCanvasCurrentGPUTexture(device: GPUDevice, canvasContext: CanvasContext)
     {
         // 获取GPU画布上下文
-        const context = GPUCanvasContextManager.getGPUCanvasContext(device, canvasContext);
+        const context = WGPUCanvasContext.getInstance(device, canvasContext);
 
         // 获取当前纹理
-        const gpuTexture = context.getCurrentTexture();
+        const gpuTexture = context.gpuCanvasContext.getCurrentTexture();
 
         // 设置纹理标签
         gpuTexture.label = 'GPU画布纹理';
