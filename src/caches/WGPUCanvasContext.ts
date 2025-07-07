@@ -1,7 +1,6 @@
 import { effect, reactive } from '@feng3d/reactivity';
 import { CanvasContext, ChainMap } from '@feng3d/render-api';
-import { CanvasConfiguration } from '../data/CanvasConfiguration';
-import '../data/polyfills/CanvasContext';
+import '../data/polyfills/CanvasContext.ts';
 
 /**
  * WebGPU画布上下文缓存类
@@ -183,19 +182,4 @@ export class WGPUCanvasContext
      * 键为[device, context]组合，确保唯一性
      */
     private static readonly _canvasContextMap = new ChainMap<[device: GPUDevice, context: CanvasContext], WGPUCanvasContext>();
-}
-
-declare module '@feng3d/render-api'
-{
-    /**
-     * @see GPUCanvasContext
-     * @see GPUCanvasContext.configure
-     */
-    export interface CanvasContext
-    {
-        /**
-         * WebGPU画布配置。
-         */
-        readonly configuration?: CanvasConfiguration;
-    }
 }
