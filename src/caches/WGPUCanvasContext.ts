@@ -56,49 +56,41 @@ export class WGPUCanvasContext
 
         const r_this = reactive(this);
 
+        if (!this.canvas)
         {
             const canvasId = this._context.canvasId;
-            let canvas = this.canvas;
-            let gpuCanvasContext = this.gpuCanvasContext;
 
-            if (!canvas)
-            {
-                canvas = typeof canvasId === 'string' ? document.getElementById(canvasId) as HTMLCanvasElement : canvasId;
-                gpuCanvasContext = canvas?.getContext('webgpu') as GPUCanvasContext;
-
-                r_this.canvas = canvas;
-                r_this.gpuCanvasContext = gpuCanvasContext;
-            }
+            r_this.canvas = typeof canvasId === 'string' ? document.getElementById(canvasId) as HTMLCanvasElement : canvasId;
         }
 
+        if (!this.gpuCanvasContext)
         {
-            let gpuCanvasConfiguration = this.gpuCanvasConfiguration;
+            r_this.gpuCanvasContext = this.canvas?.getContext('webgpu') as GPUCanvasContext;
+        }
+
+        if (!this.gpuCanvasConfiguration)
+        {
             const configuration = this._context.configuration;
-            const device = this._device;
-            const gpuCanvasContext = this.gpuCanvasContext;
 
-            if (!gpuCanvasConfiguration)
-            {
-                const format = gpuCanvasConfiguration.format || navigator.gpu.getPreferredCanvasFormat();
+            const format = configuration.format ?? navigator.gpu.getPreferredCanvasFormat();
 
-                // 附加上 GPUTextureUsage.RENDER_ATTACHMENT
-                const usage = (gpuCanvasConfiguration.usage ?? 0)
-                    | GPUTextureUsage.COPY_SRC
-                    | GPUTextureUsage.COPY_DST
-                    | GPUTextureUsage.TEXTURE_BINDING
-                    | GPUTextureUsage.STORAGE_BINDING
-                    | GPUTextureUsage.RENDER_ATTACHMENT;
+            // 附加上 GPUTextureUsage.RENDER_ATTACHMENT
+            const usage = (configuration.usage ?? 0)
+                | GPUTextureUsage.COPY_SRC
+                | GPUTextureUsage.COPY_DST
+                | GPUTextureUsage.TEXTURE_BINDING
+                | GPUTextureUsage.STORAGE_BINDING
+                | GPUTextureUsage.RENDER_ATTACHMENT;
 
-                gpuCanvasConfiguration = {
-                    ...configuration,
-                    device,
-                    usage,
-                    format,
-                };
-                gpuCanvasContext.configure(gpuCanvasConfiguration);
+            const gpuCanvasConfiguration: GPUCanvasConfiguration = {
+                ...configuration,
+                device: this._device,
+                usage,
+                format,
+            };
+            this.gpuCanvasContext.configure(gpuCanvasConfiguration);
 
-                r_this.gpuCanvasConfiguration = gpuCanvasConfiguration;
-            }
+            r_this.gpuCanvasConfiguration = gpuCanvasConfiguration;
         }
 
         r_this.invalid = false;
