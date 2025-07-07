@@ -3,7 +3,7 @@ import { CanvasContext, CanvasTexture, ChainMap } from '@feng3d/render-api';
 
 import { webgpuEvents } from '../eventnames';
 import { ReactiveClass } from '../ReactiveClass';
-import { WGPUCanvasContext } from './GPUCanvasContextManager';
+import { WGPUCanvasContext } from './WGPUCanvasContext';
 
 /**
  * WebGPU画布纹理缓存类
