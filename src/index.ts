@@ -9,7 +9,6 @@ export * from './data/RenderBundle';
 export * from './data/TimestampQuery';
 
 export * from './data/polyfills/Buffer';
-export * from './data/polyfills/CanvasContext';
 export * from './data/polyfills/CommandEncoder';
 export * from './data/polyfills/PrimitiveState';
 export * from './data/polyfills/ReadPixels';
