@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { CanvasContext, CanvasTexture, ChainMap } from '@feng3d/render-api';
+import { CanvasTexture, ChainMap } from '@feng3d/render-api';
 
 import { webgpuEvents } from '../eventnames';
 import { ReactiveClass } from '../ReactiveClass';
@@ -13,6 +13,8 @@ import { WGPUCanvasContext } from './WGPUCanvasContext';
  */
 export class WGPUCanvasTexture extends ReactiveClass
 {
+    readonly wgpuCanvasContext: WGPUCanvasContext;
+
     /**
      * WebGPU纹理对象
      */
@@ -94,6 +96,14 @@ export class WGPUCanvasTexture extends ReactiveClass
                 }
             });
         }
+
+        this.effect(() =>
+        {
+            r_this.wgpuCanvasContext?.invalid;
+
+            r_this.gpuTexture = null;
+            r_this.invalid = true;
+        });
     }
 
     /**
@@ -107,10 +117,22 @@ export class WGPUCanvasTexture extends ReactiveClass
 
         const r_this = reactive(this);
 
+        if (!this.wgpuCanvasContext)
+        {
+            r_this.wgpuCanvasContext = WGPUCanvasContext.getInstance(this._device, this._canvasTexture.context);
+        }
+        this.wgpuCanvasContext.update();
+
         // 如果没有纹理，创建新的纹理
         if (!this.gpuTexture)
         {
-            r_this.gpuTexture = WGPUCanvasTexture._getCanvasCurrentGPUTexture(this._device, this._canvasTexture.context);
+            // 获取当前纹理
+            const gpuTexture = this.wgpuCanvasContext.gpuCanvasContext.getCurrentTexture();
+
+            // 设置纹理标签
+            gpuTexture.label = 'GPU画布纹理';
+
+            r_this.gpuTexture = gpuTexture;
         }
 
         r_this.invalid = false;
@@ -152,29 +174,6 @@ export class WGPUCanvasTexture extends ReactiveClass
     static destroy(device: GPUDevice, canvasTexture: CanvasTexture)
     {
         this._textureMap.get([device, canvasTexture])?.destroy();
-    }
-
-    /**
-     * 获取画布GPU纹理
-     *
-     * 从画布上下文获取当前纹理并设置标签
-     *
-     * @param device GPU设备
-     * @param canvasContext 画布上下文
-     * @returns GPU纹理
-     */
-    static _getCanvasCurrentGPUTexture(device: GPUDevice, canvasContext: CanvasContext)
-    {
-        // 获取GPU画布上下文
-        const context = WGPUCanvasContext.getInstance(device, canvasContext);
-
-        // 获取当前纹理
-        const gpuTexture = context.gpuCanvasContext.getCurrentTexture();
-
-        // 设置纹理标签
-        gpuTexture.label = 'GPU画布纹理';
-
-        return gpuTexture;
     }
 
     /**
