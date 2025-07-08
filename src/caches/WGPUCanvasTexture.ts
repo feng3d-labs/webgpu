@@ -13,6 +13,10 @@ import { WGPUCanvasContext } from './WGPUCanvasContext';
  */
 export class WGPUCanvasTexture extends ReactiveClass
 {
+    /**
+     * WebGPU画布上下文
+     * 管理画布元素、GPU上下文和配置
+     */
     readonly wgpuCanvasContext: WGPUCanvasContext;
 
     /**
