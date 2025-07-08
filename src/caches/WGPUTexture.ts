@@ -185,7 +185,7 @@ export class WGPUTexture extends ReactiveClass
      * @param autoCreate 是否自动创建
      * @returns 纹理实例
      */
-    static getInstance(device: GPUDevice, textureLike: TextureLike, autoCreate = true)
+    static getInstance(device: GPUDevice, textureLike: TextureLike)
     {
         // 处理画布纹理
         if ('context' in textureLike)
@@ -193,11 +193,7 @@ export class WGPUTexture extends ReactiveClass
             return WGPUCanvasTexture.getInstance(device, textureLike);
         }
 
-        let result = this._textureMap.get([device, textureLike]);
-
-        if (!autoCreate) return result;
-
-        return new WGPUTexture(device, textureLike);
+        return this._textureMap.get([device, textureLike]) || new WGPUTexture(device, textureLike);
     }
 
     /**

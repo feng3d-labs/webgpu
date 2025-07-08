@@ -1,15 +1,16 @@
-import { computed, Computed, effect, effectScope, EffectScope, reactive, UnReadonly } from '@feng3d/reactivity';
+import { computed, Computed, effectScope, EffectScope, reactive, UnReadonly } from '@feng3d/reactivity';
 import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
-import { WGPUBuffer } from './caches/WGPUBuffer';
 import { GPUPipelineLayoutManager } from './caches/GPUPipelineLayoutManager';
 import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
-import { WGPUTexture } from './caches/WGPUTexture';
 import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
+import { WGPUBuffer } from './caches/WGPUBuffer';
+import { WGPUTexture } from './caches/WGPUTexture';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
 import { RenderBundle } from './data/RenderBundle';
+import { GDeviceContext } from './internal/GDeviceContext';
 import { RenderBundleCommand } from './internal/RenderBundleCommand';
 import { CommandType, RenderObjectCache } from './internal/RenderObjectCache';
 import { RenderPassFormat } from './internal/RenderPassFormat';
@@ -18,7 +19,6 @@ import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
 import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
-import { GDeviceContext } from './internal/GDeviceContext';
 
 /**
  * WebGPU
@@ -105,7 +105,7 @@ export class WebGPU
     async readPixels(gpuReadPixels: ReadPixels)
     {
         const device = this.device;
-        const gpuTexture = WGPUTexture.getInstance(this.device, gpuReadPixels.texture, false);
+        const gpuTexture = WGPUTexture.getInstance(this.device, gpuReadPixels.texture);
 
         const result = await readPixels(device, {
             ...gpuReadPixels,
