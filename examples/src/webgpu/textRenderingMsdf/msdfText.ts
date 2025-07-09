@@ -4,7 +4,7 @@ import msdfTextWGSL from './msdfText.wgsl';
 
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, RenderPassObject, RenderPipeline, Sampler, Texture } from '@feng3d/render-api';
-import { WGPUBuffer, RenderBundle } from '@feng3d/webgpu';
+import { RenderBundle, WGPUBuffer } from '@feng3d/webgpu';
 
 // The kerning map stores a spare map of character ID pairs with an associated
 // X offset that should be applied to the character spacing when the second
@@ -13,19 +13,19 @@ type KerningMap = Map<number, Map<number, number>>;
 
 interface MsdfChar
 {
-  id: number;
-  index: number;
-  char: string;
-  width: number;
-  height: number;
-  xoffset: number;
-  yofsset: number;
-  xadvance: number;
-  chnl: number;
-  x: number;
-  y: number;
-  page: number;
-  charIndex: number;
+    id: number;
+    index: number;
+    char: string;
+    width: number;
+    height: number;
+    xoffset: number;
+    yofsset: number;
+    xadvance: number;
+    chnl: number;
+    x: number;
+    y: number;
+    page: number;
+    charIndex: number;
 }
 
 export class MsdfFont
@@ -33,11 +33,11 @@ export class MsdfFont
     charCount: number;
     defaultChar: MsdfChar;
     constructor(
-    public material: RenderPipeline,
-    public bindGroup: BindingResources,
-    public lineHeight: number,
-    public chars: { [x: number]: MsdfChar },
-    public kernings: KerningMap,
+        public material: RenderPipeline,
+        public bindGroup: BindingResources,
+        public lineHeight: number,
+        public chars: { [x: number]: MsdfChar },
+        public kernings: KerningMap,
     )
     {
         const charArray = Object.values(chars);
@@ -80,10 +80,10 @@ export class MsdfFont
 
 export interface MsdfTextMeasurements
 {
-  width: number;
-  height: number;
-  lineWidths: number[];
-  printedCharCount: number;
+    width: number;
+    height: number;
+    lineWidths: number[];
+    printedCharCount: number;
 }
 
 export class MsdfText
@@ -92,10 +92,10 @@ export class MsdfText
     private bufferArrayDirty = true;
 
     constructor(
-    private renderBundle: RenderBundle,
-    public measurements: MsdfTextMeasurements,
-    public font: MsdfFont,
-    public textBuffer: Float32Array,
+        private renderBundle: RenderBundle,
+        public measurements: MsdfTextMeasurements,
+        public font: MsdfFont,
+        public textBuffer: Float32Array,
     )
     {
         mat4.identity(this.bufferArray);
@@ -148,9 +148,9 @@ export class MsdfText
 
 export interface MsdfTextFormattingOptions
 {
-  centered?: boolean;
-  pixelScale?: number;
-  color?: [number, number, number, number];
+    centered?: boolean;
+    pixelScale?: number;
+    color?: [number, number, number, number];
 }
 
 export class MsdfTextRenderer
@@ -211,9 +211,11 @@ export class MsdfTextRenderer
         const imageBitmap = await createImageBitmap(await response.blob());
 
         const texture: Texture = {
-            size: [imageBitmap.width, imageBitmap.height],
-            label: `MSDF font texture ${url}`,
-            format: 'rgba8unorm',
+            descriptor: {
+                size: [imageBitmap.width, imageBitmap.height],
+                label: `MSDF font texture ${url}`,
+                format: 'rgba8unorm',
+            },
             sources: [{
                 image: imageBitmap,
             }],
@@ -318,8 +320,8 @@ export class MsdfTextRenderer
                 (textX: number, textY: number, line: number, char: MsdfChar) =>
                 {
                     const lineOffset
-            = measurements.width * -0.5
-            - (measurements.width - measurements.lineWidths[line]) * -0.5;
+                        = measurements.width * -0.5
+                        - (measurements.width - measurements.lineWidths[line]) * -0.5;
 
                     textBuffer[offset] = textX + lineOffset;
                     textBuffer[offset + 1] = textY + measurements.height * 0.5;

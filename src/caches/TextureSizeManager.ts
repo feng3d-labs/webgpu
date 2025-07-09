@@ -32,13 +32,13 @@ export class TextureSizeManager
                 return [element.width, element.height, 1] as TextureSize;
             }
             // 监听
-            const r_texture = reactive(texture);
+            const r_size = reactive(texture.descriptor.size);
 
-            r_texture.size[0];
-            r_texture.size[1];
-            r_texture.size[2];
+            r_size[0];
+            r_size[1];
+            r_size[2];
 
-            return texture.size;
+            return texture.descriptor.size;
         });
         TextureSizeManager.getTextureSizeMap.set(texture, result);
 

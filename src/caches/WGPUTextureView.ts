@@ -115,7 +115,7 @@ export class WGPUTextureView
             r_this.descriptor = {
                 ...this._view,
                 label: this._view.label ?? `${this.wgpuTexture.gpuTexture.label}视图`,
-                dimension: this._view.dimension ?? (this._view.texture as Texture).dimension,
+                dimension: this._view.dimension ?? (this._view.texture as Texture).descriptor?.dimension,
             }
         }
 

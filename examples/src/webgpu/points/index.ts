@@ -61,43 +61,42 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // make pipelines for each combination
     const pipelines = vertModules.map((vertModule) =>
-        fragModules.map((fragModule) =>
-            ({
-                vertex: {
-                    code: vertModule,
-                    buffers: [
-                        {
-                            arrayStride: 3 * 4, // 3 floats, 4 bytes each
-                            stepMode: 'instance',
-                            attributes: [
-                                { shaderLocation: 0, offset: 0, format: 'float32x3' }, // position
-                            ],
-                        },
-                    ],
-                },
-                fragment: {
-                    code: fragModule,
-                    targets: [
-                        {
-                            blend: {
-                                color: {
-                                    srcFactor: 'one',
-                                    dstFactor: 'one-minus-src-alpha',
-                                },
-                                alpha: {
-                                    srcFactor: 'one',
-                                    dstFactor: 'one-minus-src-alpha',
-                                },
+        fragModules.map((fragModule) => ({
+            vertex: {
+                code: vertModule,
+                buffers: [
+                    {
+                        arrayStride: 3 * 4, // 3 floats, 4 bytes each
+                        stepMode: 'instance',
+                        attributes: [
+                            { shaderLocation: 0, offset: 0, format: 'float32x3' }, // position
+                        ],
+                    },
+                ],
+            },
+            fragment: {
+                code: fragModule,
+                targets: [
+                    {
+                        blend: {
+                            color: {
+                                srcFactor: 'one',
+                                dstFactor: 'one-minus-src-alpha',
+                            },
+                            alpha: {
+                                srcFactor: 'one',
+                                dstFactor: 'one-minus-src-alpha',
                             },
                         },
-                    ],
-                },
-                depthStencil: {
-                    depthWriteEnabled: true,
-                    depthCompare: 'less',
-                    format: depthFormat,
-                },
-            } as RenderPipeline),
+                    },
+                ],
+            },
+            depthStencil: {
+                depthWriteEnabled: true,
+                depthCompare: 'less',
+                format: depthFormat,
+            },
+        } as RenderPipeline),
         ),
     );
 
@@ -121,8 +120,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const sampler: Sampler = {};
     const texture: Texture = {
-        size: [ctx.canvas.width, ctx.canvas.height],
-        format: 'rgba8unorm',
+        descriptor: {
+            size: [ctx.canvas.width, ctx.canvas.height],
+            format: 'rgba8unorm',
+        },
         sources: [
             { image: ctx.canvas, flipY: true },
         ],

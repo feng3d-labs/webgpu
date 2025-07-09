@@ -40,8 +40,10 @@ export const createTextureFromImage = (
 ) =>
 {
     const texture: Texture = {
-        size: [bitmap.width, bitmap.height],
-        format: 'rgba8unorm',
+        descriptor: {
+            size: [bitmap.width, bitmap.height],
+            format: 'rgba8unorm',
+        },
         sources: [{ image: bitmap }],
     };
 

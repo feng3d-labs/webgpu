@@ -5,8 +5,8 @@ import { GPUQueue_submit } from '../eventnames';
 import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { WGPUTimestampQuery } from './GPUPassTimestampWritesManager';
 import { GPUTextureFormatManager } from './GPUTextureFormatManager';
-import { WGPUTextureView } from './WGPUTextureView';
 import { TextureSizeManager } from './TextureSizeManager';
+import { WGPUTextureView } from './WGPUTextureView';
 
 declare global
 {
@@ -96,11 +96,12 @@ export class GPURenderPassDescriptorManager
         }
         else
         {
-            reactive(texture.size)[0] = attachmentSize.width;
-            reactive(texture.size)[1] = attachmentSize.height;
-            if (texture.size?.[2])
+            const descriptor = texture.descriptor;
+            reactive(descriptor.size)[0] = attachmentSize.width;
+            reactive(descriptor.size)[1] = attachmentSize.height;
+            if (descriptor.size?.[2])
             {
-                reactive(texture.size)[2] = texture.size[2];
+                reactive(descriptor.size)[2] = descriptor.size[2];
             }
         }
     }
@@ -122,14 +123,14 @@ export class GPURenderPassDescriptorManager
         if (multisampleTextureView) return multisampleTextureView;
 
         // 新增用于解决多重采样的纹理
-        const multisampleTexture: MultisampleTexture = { label: '自动生成多重采样的纹理', sampleCount } as MultisampleTexture;
+        const multisampleTexture: MultisampleTexture = { descriptor: { label: '自动生成多重采样的纹理' }, sampleCount } as MultisampleTexture;
 
         multisampleTextureView = { texture: multisampleTexture };
         effect(() =>
         {
             // 新建的多重采样纹理尺寸与格式与原始纹理同步。
-            reactive(multisampleTexture).size = TextureSizeManager.getTextureSize(texture);
-            reactive(multisampleTexture).format = GPUTextureFormatManager.getGPUTextureFormat(texture);
+            reactive(multisampleTexture.descriptor).size = TextureSizeManager.getTextureSize(texture);
+            reactive(multisampleTexture.descriptor).format = GPUTextureFormatManager.getGPUTextureFormat(texture);
         });
 
         this.getMultisampleTextureViewMap.set(texture, multisampleTextureView);
@@ -195,9 +196,11 @@ export class GPURenderPassDescriptorManager
             if (!view)
             {
                 atuoCreateDepthTexture ??= {
-                    label: `自动生成的深度纹理`,
-                    size: [attachmentSize.width, attachmentSize.height],
-                    format: 'depth24plus',
+                    descriptor: {
+                        label: `自动生成的深度纹理`,
+                        size: [attachmentSize.width, attachmentSize.height],
+                        format: 'depth24plus',
+                    },
                 };
                 atuoCreateDepthTextureView ??= { texture: atuoCreateDepthTexture };
                 //

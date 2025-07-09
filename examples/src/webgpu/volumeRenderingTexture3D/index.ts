@@ -78,9 +78,11 @@ const init = async (canvas: HTMLCanvasElement) =>
         const byteArray = new Uint8Array(decompressedArrayBuffer);
 
         volumeTexture = {
-            dimension: '3d',
-            size: [width, height, depth],
-            format,
+            descriptor: {
+                dimension: '3d',
+                size: [width, height, depth],
+                format,
+            },
             sources: [{
                 __type__: 'TextureDataSource',
                 data: byteArray,

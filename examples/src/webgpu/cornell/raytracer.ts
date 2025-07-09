@@ -50,7 +50,7 @@ export default class Raytracer
             },
         };
 
-        const framebufferSize = this.framebuffer.size;
+        const framebufferSize = this.framebuffer.descriptor.size;
 
         //
         this.passEncoder = {

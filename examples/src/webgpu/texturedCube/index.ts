@@ -26,8 +26,10 @@ const init = async (canvas: HTMLCanvasElement) =>
     await img.decode();
     const imageBitmap = await createImageBitmap(img);
     const cubeTexture: Texture = {
-        size: [imageBitmap.width, imageBitmap.height],
-        format: 'rgba8unorm',
+        descriptor: {
+            size: [imageBitmap.width, imageBitmap.height],
+            format: 'rgba8unorm',
+        },
         sources: [{ image: imageBitmap }],
     };
 

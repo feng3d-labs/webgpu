@@ -21,8 +21,10 @@ const init = async (canvas: HTMLCanvasElement) =>
     // We will copy the frame's rendering results into this texture and
     // sample it on the next frame.
     const cubeTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: presentationFormat,
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: presentationFormat,
+        },
     };
 
     // Create a sampler with linear filtering for smooth interpolation.

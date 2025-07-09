@@ -83,8 +83,10 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'depth24plus',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus',
+        },
     };
 
     const renderPassDescriptor: RenderPassDescriptor = {

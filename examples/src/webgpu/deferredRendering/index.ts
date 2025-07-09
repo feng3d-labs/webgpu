@@ -56,16 +56,22 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // GBuffer texture render targets
     const gBufferTexture2DFloat32: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'rgba32float',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'rgba32float',
+        },
     };
     const gBufferTexture2DFloat16: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'rgba16float',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'rgba16float',
+        },
     };
     const gBufferTextureAlbedo: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'bgra8unorm',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'bgra8unorm',
+        },
     };
     const gBufferTextureViews: TextureView[] = [
         { texture: gBufferTexture2DFloat32 },
@@ -112,8 +118,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'depth24plus',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus',
+        },
     };
 
     const writeGBufferPassDescriptor: RenderPassDescriptor = {

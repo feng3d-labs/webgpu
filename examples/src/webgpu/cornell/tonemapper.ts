@@ -23,7 +23,7 @@ export default class Tonemapper
         output: CanvasTexture,
     )
     {
-        const inputSize = input.size;
+        const inputSize = input.descriptor.size;
 
         this.width = inputSize[0];
         this.height = inputSize[1];

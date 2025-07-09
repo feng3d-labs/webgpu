@@ -1,5 +1,5 @@
-import { BindingResources, CommandEncoder, PassEncoder, Texture } from '@feng3d/render-api';
 import { reactive } from '@feng3d/reactivity';
+import { BindingResources, CommandEncoder, PassEncoder, Texture } from '@feng3d/render-api';
 import { ComputePipeline, WGPUBuffer } from '@feng3d/webgpu';
 
 import Common from './common';
@@ -57,13 +57,15 @@ export default class Radiosity
         this.common = common;
         this.scene = scene;
         this.lightmap = {
-            label: 'Radiosity.lightmap',
-            size: [
-                Radiosity.lightmapWidth,
-                Radiosity.lightmapHeight,
-                scene.quads.length,
-            ],
-            format: Radiosity.lightmapFormat,
+            descriptor: {
+                label: 'Radiosity.lightmap',
+                size: [
+                    Radiosity.lightmapWidth,
+                    Radiosity.lightmapHeight,
+                    scene.quads.length,
+                ],
+                format: Radiosity.lightmapFormat,
+            },
         };
         this.accumulationBuffer = new Uint8Array(Radiosity.lightmapWidth
             * Radiosity.lightmapHeight
@@ -108,7 +110,7 @@ export default class Radiosity
             },
         };
 
-        const lightmapSize = this.lightmap.size;
+        const lightmapSize = this.lightmap.descriptor.size;
 
         this.passEncoders = [{
             __type__: 'ComputePass',

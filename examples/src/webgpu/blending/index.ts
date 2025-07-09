@@ -1,10 +1,10 @@
-import { GUI } from 'dat.gui';
-import { mat4 } from 'wgpu-matrix';
-import texturedQuadWGSL from './texturedQuad.wgsl';
-
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, CanvasContext, Color, RenderObject, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
+import { GUI } from 'dat.gui';
+import { mat4 } from 'wgpu-matrix';
+
+import texturedQuadWGSL from './texturedQuad.wgsl';
 
 declare module '@feng3d/render-api'
 {
@@ -126,8 +126,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         const { flipY, premultipliedAlpha } = options;
         const texture: Texture = {
-            format: 'rgba8unorm',
-            size: [source.width, source.height],
+            descriptor: {
+                format: 'rgba8unorm',
+                size: [source.width, source.height],
+            },
             sources: [{ image: source, flipY, premultipliedAlpha }],
         };
 
@@ -454,8 +456,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     constantFolder.open();
     constantFolder
         .addColor(new GUIColorHelper(constant.color), 'value')
-        .name('color')
-    ;
+        .name('color');
     constantFolder.add(constant, 'alpha', 0, 1);
 
     const clearFolder = gui.addFolder('clear color');
@@ -492,7 +493,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         mat4.scale(
             projectionMatrix,
-            [texture.size[0], texture.size[1], 1],
+            [texture.descriptor.size[0], texture.descriptor.size[1], 1],
             uniforms.matrix,
         );
 

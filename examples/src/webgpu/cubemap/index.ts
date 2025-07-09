@@ -67,9 +67,11 @@ const init = async (canvas: HTMLCanvasElement) =>
         });
 
         cubemapTexture = {
-            size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
-            dimension: 'cube',
-            format: 'rgba8unorm',
+            descriptor: {
+                size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
+                dimension: 'cube',
+                format: 'rgba8unorm',
+            },
             sources: textureSource,
         };
     }

@@ -1,6 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, PassEncoder, RenderObject, RenderPass, RenderPassDescriptor, Submit, Texture } from '@feng3d/render-api';
-import { WGPUBuffer, WebGPU } from '@feng3d/webgpu';
+import { WebGPU, WGPUBuffer } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { Mat4, mat4, quat, vec3 } from 'wgpu-matrix';
 
@@ -190,8 +190,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     animFolder.add(settings, 'speed', 10, 100).step(10);
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'depth24plus',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus',
+        },
     };
 
     const cameraBuffer = new Float32Array(48);

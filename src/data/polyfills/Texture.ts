@@ -48,7 +48,7 @@ declare module '@feng3d/render-api'
      * @see GPUDevice.createTexture
      * @see GPUTextureDescriptor
      */
-    export interface Texture
+    export interface TextureDescriptor
     {
         /**
          * Specifies what view {@link GPUTextureViewDescriptor#format} values will be allowed when calling

@@ -69,8 +69,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'depth24plus',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus',
+        },
     };
 
     // Fetch the image and upload it into a GPUTexture.
@@ -81,8 +83,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const imageBitmap = await createImageBitmap(await response.blob());
 
         cubeTexture = {
-            size: [imageBitmap.width, imageBitmap.height],
-            format: 'rgba8unorm',
+            descriptor: {
+                size: [imageBitmap.width, imageBitmap.height],
+                format: 'rgba8unorm',
+            },
             sources: [{ image: imageBitmap }],
         };
     }

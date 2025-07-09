@@ -65,8 +65,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // Create normal mapping resources and pipeline
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'depth24plus',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus',
+        },
     };
 
     // Fetch the image and upload it into a GPUTexture.

@@ -243,9 +243,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
     const checkerboard: Texture = {
-        format: 'rgba8unorm',
-        size: [kTextureBaseSize, kTextureBaseSize],
-        mipLevelCount: 4,
+        descriptor: {
+            format: 'rgba8unorm',
+            size: [kTextureBaseSize, kTextureBaseSize],
+            mipLevelCount: 4,
+        },
         sources: writeTextures,
     };
 

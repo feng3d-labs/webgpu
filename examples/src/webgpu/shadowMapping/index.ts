@@ -46,8 +46,10 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Create the depth texture for rendering/sampling the shadow map.
     const shadowDepthTexture: Texture = {
-        size: [shadowDepthTextureSize, shadowDepthTextureSize, 1],
-        format: 'depth32float',
+        descriptor: {
+            size: [shadowDepthTextureSize, shadowDepthTextureSize, 1],
+            format: 'depth32float',
+        },
     };
 
     // Create some common descriptors used for both the shadow pipeline
@@ -89,8 +91,10 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'depth24plus-stencil8',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus-stencil8',
+        },
     };
 
     const renderPassDescriptor: RenderPassDescriptor = {

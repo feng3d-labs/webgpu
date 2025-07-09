@@ -26,12 +26,14 @@ export default class Rasterizer
         this.common = common;
         this.scene = scene;
 
-        const framebufferSize = framebuffer.size;
+        const framebufferSize = framebuffer.descriptor.size;
 
         const depthTexture: Texture = {
-            label: 'RasterizerRenderer.depthTexture',
-            size: [framebufferSize[0], framebufferSize[1]],
-            format: 'depth24plus',
+            descriptor: {
+                label: 'RasterizerRenderer.depthTexture',
+                size: [framebufferSize[0], framebufferSize[1]],
+                format: 'depth24plus',
+            },
         };
 
         this.renderPassDescriptor = {

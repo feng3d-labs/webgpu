@@ -169,9 +169,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         canvas.height = canvas.clientHeight * devicePixelRatio;
 
         const depthTexture: Texture = {
-            size: [canvas.width, canvas.height],
-            format: 'depth24plus',
-            label: 'depthTexture',
+            descriptor: {
+                size: [canvas.width, canvas.height],
+                format: 'depth24plus',
+                label: 'depthTexture',
+            },
         };
 
         const depthTextureView: TextureView = {
@@ -339,22 +341,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             passEncoders.push(translucentPassEncoder);
 
             // Composite the opaque and translucent objects
-            const compositePassEncoder: RenderPass
-                = {
-                    descriptor: compositePassDescriptor,
-                    renderPassObjects: [
-                    // Set the scissor to only process a horizontal slice of the frame
-                        {
-                            scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
-                            pipeline: compositePipeline,
-                            bindingResources: {
-                                ...bindingResources,
-                                sliceInfo: sliceInfoBuffer[slice],
-                            },
-                            draw: { __type__: 'DrawVertex', vertexCount: 6 },
-                        },
-                    ],
-                };
+            const compositePassEncoder: RenderPass = {
+                descriptor: compositePassDescriptor,
+                // Set the scissor to only process a horizontal slice of the frame
+                renderPassObjects: [{
+                    scissorRect: { x: scissorX, y: scissorY, width: scissorWidth, height: scissorHeight },
+                    pipeline: compositePipeline,
+                    bindingResources: {
+                        ...bindingResources,
+                        sliceInfo: sliceInfoBuffer[slice],
+                    },
+                    draw: { __type__: 'DrawVertex', vertexCount: 6 },
+                },
+                ],
+            };
 
             passEncoders.push(compositePassEncoder);
         }

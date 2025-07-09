@@ -193,13 +193,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: depthBufferFormat,
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: depthBufferFormat,
+        },
     };
 
     const defaultDepthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: depthBufferFormat,
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: depthBufferFormat,
+        },
     };
 
     const depthPrePassDescriptor: RenderPassDescriptor = {

@@ -30,7 +30,7 @@ export class GPUTextureFormatManager
                 return format;
             }
 
-            return r_texture.format;
+            return r_texture.descriptor.format;
         });
         this.getGPUTextureFormatMap.set(texture, result);
 

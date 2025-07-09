@@ -52,19 +52,21 @@ export class WGPUTexture extends ReactiveClass
 
         // 监听纹理属性变化
         {
+            const r_descriptor = reactive(texture.descriptor);
+
             let preDescriptor: GPUTextureDescriptor;
             this.effect(() =>
             {
                 if (r_this.descriptor)
                 {
-                    r_texture.format;
-                    r_texture.dimension;
-                    r_texture.viewFormats;
-                    r_texture.generateMipmap;
-                    r_texture.mipLevelCount;
-                    r_texture.size[0];
-                    r_texture.size[1];
-                    r_texture.size[2];
+                    r_descriptor.format;
+                    r_descriptor.dimension;
+                    r_descriptor.viewFormats;
+                    r_descriptor.generateMipmap;
+                    r_descriptor.mipLevelCount;
+                    r_descriptor.size[0];
+                    r_descriptor.size[1];
+                    r_descriptor.size[2];
                     (r_texture as MultisampleTexture).sampleCount;
 
                     // 纹理参数变化时，重置纹理对象
@@ -145,7 +147,7 @@ export class WGPUTexture extends ReactiveClass
             WGPUTexture._writeTextures(device, gpuTexture, texture.sources);
 
             // 自动生成mipmap
-            if (texture.generateMipmap)
+            if (texture.descriptor.generateMipmap)
             {
                 generateMipmap(device, gpuTexture);
             }
@@ -218,19 +220,19 @@ export class WGPUTexture extends ReactiveClass
      */
     private static _createGPUTextureDescriptor(texture: Texture)
     {
-        // 获取纹理属性
-        const { format, dimension, viewFormats } = texture;
-        const sampleCount = (texture as MultisampleTexture).sampleCount;
-        let { label, mipLevelCount } = texture;
+        const descriptor = texture.descriptor;
 
-        const size = texture.size;
+        // 获取纹理属性
+        const { format, size, dimension, viewFormats, generateMipmap } = descriptor;
+        const sampleCount = (texture as MultisampleTexture).sampleCount;
+        let { label, mipLevelCount } = descriptor;
 
         console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
 
         const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
 
         // 自动计算mipmap层级数
-        if (texture.generateMipmap && mipLevelCount === undefined)
+        if (generateMipmap && mipLevelCount === undefined)
         {
             const maxSize = Math.max(size[0], size[1]);
 
@@ -246,7 +248,7 @@ export class WGPUTexture extends ReactiveClass
 
         const textureDimension = WGPUTexture._dimensionMap[dimension];
 
-        const descriptor: GPUTextureDescriptor = {
+        const gpuTextureDescriptor: GPUTextureDescriptor = {
             label,
             size,
             mipLevelCount,
@@ -257,7 +259,7 @@ export class WGPUTexture extends ReactiveClass
             viewFormats,
         };
 
-        return descriptor;
+        return gpuTextureDescriptor;
     }
 
     /**

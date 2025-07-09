@@ -13,12 +13,12 @@ const numParticles = 50000;
 const particlePositionOffset = 0;
 const particleColorOffset = 4 * 4;
 const particleInstanceByteSize
-  = 3 * 4 // position
-  + 1 * 4 // lifetime
-  + 4 * 4 // color
-  + 3 * 4 // velocity
-  + 1 * 4 // padding
-  + 0;
+    = 3 * 4 // position
+    + 1 * 4 // lifetime
+    + 4 * 4 // color
+    + 3 * 4 // velocity
+    + 1 * 4 // padding
+    + 0;
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -66,12 +66,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const uniformBufferSize
-    = 4 * 4 * 4 // modelViewProjectionMatrix : mat4x4<f32>
-    + 3 * 4 // right : vec3<f32>
-    + 4 // padding
-    + 3 * 4 // up : vec3<f32>
-    + 4 // padding
-    + 0;
+        = 4 * 4 * 4 // modelViewProjectionMatrix : mat4x4<f32>
+        + 3 * 4 // right : vec3<f32>
+        + 4 // padding
+        + 3 * 4 // up : vec3<f32>
+        + 4 // padding
+        + 0;
     const uniformBuffer = new Uint8Array(uniformBufferSize);
 
     const uniformBindGroup: BindingResources = {
@@ -124,7 +124,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Calculate number of mip levels required to generate the probability map
         while (
             textureWidth < imageBitmap.width
-      || textureHeight < imageBitmap.height
+            || textureHeight < imageBitmap.height
         )
         {
             textureWidth *= 2;
@@ -132,9 +132,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             numMipLevels++;
         }
         texture = {
-            size: [imageBitmap.width, imageBitmap.height],
-            mipLevelCount: numMipLevels,
-            format: 'rgba8unorm',
+            descriptor: {
+                size: [imageBitmap.width, imageBitmap.height],
+                mipLevelCount: numMipLevels,
+                format: 'rgba8unorm',
+            },
             sources: [{ image: imageBitmap }],
         };
     }
@@ -158,9 +160,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         const probabilityMapUBOBufferSize
-      = 1 * 4 // stride
-      + 3 * 4 // padding
-      + 0;
+            = 1 * 4 // stride
+            + 3 * 4 // padding
+            + 0;
         const probabilityMapUBOBuffer = new Uint8Array(probabilityMapUBOBufferSize);
         const bufferA = new Uint8Array(textureWidth * textureHeight * 4);
         const bufferB = new Uint8Array(textureWidth * textureHeight * 4);
@@ -237,10 +239,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const simulationUBOBufferSize
-    = 1 * 4 // deltaTime
-    + 3 * 4 // padding
-    + 4 * 4 // seed
-    + 0;
+        = 1 * 4 // deltaTime
+        + 3 * 4 // padding
+        + 4 * 4 // seed
+        + 0;
     const simulationUBOBuffer = new Uint8Array(simulationUBOBufferSize);
 
     Object.keys(simulationParams).forEach((k) =>

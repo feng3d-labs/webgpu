@@ -43,9 +43,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const webgpu = await new WebGPU().init(undefined, { requiredFeatures });
 
     const framebuffer: Texture = {
-        label: 'framebuffer',
-        size: [canvas.width, canvas.height],
-        format: 'rgba16float',
+        descriptor: {
+            label: 'framebuffer',
+            size: [canvas.width, canvas.height],
+            format: 'rgba16float',
+        },
     };
 
     const scene = new Scene();

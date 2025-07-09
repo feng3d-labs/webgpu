@@ -50,17 +50,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const [srcWidth, srcHeight] = [imageBitmap.width, imageBitmap.height];
     const cubeTexture1: Texture = {
-        size: [imageBitmap.width, imageBitmap.height],
-        format: 'rgba8unorm',
+        descriptor: {
+            size: [imageBitmap.width, imageBitmap.height],
+            format: 'rgba8unorm',
+        },
         sources: [{ image: imageBitmap }],
     };
 
-    const textures: Texture[] = [0, 1].map(() =>
-        ({
+    const textures: Texture[] = [0, 1].map(() => ({
+        descriptor: {
             size: [srcWidth, srcHeight],
             format: 'rgba8unorm',
             usage: GPUTextureUsage.COPY_DST | GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.TEXTURE_BINDING,
-        } as Texture));
+        },
+    } as Texture));
 
     const buffer0 = new Uint32Array([0]);
 

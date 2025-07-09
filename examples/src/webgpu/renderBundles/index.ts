@@ -1,6 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, CanvasContext, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
-import { WGPUBuffer, RenderBundle, WebGPU } from '@feng3d/webgpu';
+import { RenderBundle, WGPUBuffer, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import Stats from 'stats.js';
 import { mat4, vec3 } from 'wgpu-matrix';
@@ -60,8 +60,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: 'depth24plus',
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus',
+        },
     };
 
     const uniformBufferSize = 4 * 16; // 4x4 matrix
@@ -77,8 +79,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
         const imageBitmap = await createImageBitmap(await response.blob());
 
         planetTexture = {
-            size: [imageBitmap.width, imageBitmap.height],
-            format: 'rgba8unorm',
+            descriptor: {
+                size: [imageBitmap.width, imageBitmap.height],
+                format: 'rgba8unorm',
+            },
             sources: [{ image: imageBitmap }],
         };
     }
@@ -92,8 +96,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
         const imageBitmap = await createImageBitmap(await response.blob());
 
         moonTexture = {
-            size: [imageBitmap.width, imageBitmap.height],
-            format: 'rgba8unorm',
+            descriptor: {
+                size: [imageBitmap.width, imageBitmap.height],
+                format: 'rgba8unorm',
+            },
             sources: [{ image: imageBitmap }],
         };
     }

@@ -163,8 +163,10 @@ setBlendConstant().`,
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: depthFormat,
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: depthFormat,
+        },
     };
 
     const uniformBuffer = new Float32Array(16);
