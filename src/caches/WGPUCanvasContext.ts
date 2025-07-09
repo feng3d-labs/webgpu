@@ -130,11 +130,11 @@ export class WGPUCanvasContext
             const configuration = this._context.configuration;
 
             // 获取纹理格式，默认使用设备首选格式
-            const format = configuration.format ?? navigator.gpu.getPreferredCanvasFormat();
+            const format = configuration?.format ?? navigator.gpu.getPreferredCanvasFormat();
 
             // 构建纹理用途标志
             // 附加上 GPUTextureUsage.RENDER_ATTACHMENT
-            const usage = (configuration.usage ?? 0)
+            const usage = (configuration?.usage ?? 0)
                 | GPUTextureUsage.COPY_SRC
                 | GPUTextureUsage.COPY_DST
                 | GPUTextureUsage.TEXTURE_BINDING

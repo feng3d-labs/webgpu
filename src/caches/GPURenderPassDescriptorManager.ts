@@ -349,8 +349,8 @@ export class GPURenderPassDescriptorManager
                 resolveTarget && this.setTextureSize(resolveTarget.texture, descriptor.attachmentSize);
 
                 // 更改纹理尺寸将会销毁重新创建纹理，需要重新获取view。
-                attachment.view = WGPUTextureView.getInstance(device, view).textureView;
-                attachment.resolveTarget = WGPUTextureView.getInstance(device, resolveTarget)?.textureView;
+                attachment.view = WGPUTextureView.getInstance(device, view).update().textureView;
+                attachment.resolveTarget = WGPUTextureView.getInstance(device, resolveTarget)?.update().textureView;
             });
 
             //
