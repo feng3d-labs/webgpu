@@ -2,7 +2,6 @@ import { anyEmitter } from '@feng3d/event';
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
 import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
-import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { WGPUTimestampQuery } from './GPUPassTimestampWritesManager';
 import { GPUTextureFormatManager } from './GPUTextureFormatManager';
 import { TextureSizeManager } from './TextureSizeManager';
@@ -123,7 +122,14 @@ export class GPURenderPassDescriptorManager
         if (multisampleTextureView) return multisampleTextureView;
 
         // 新增用于解决多重采样的纹理
-        const multisampleTexture: MultisampleTexture = { descriptor: { label: '自动生成多重采样的纹理' }, sampleCount } as MultisampleTexture;
+        const multisampleTexture: Texture = {
+            descriptor: {
+                label: '自动生成多重采样的纹理',
+                sampleCount,
+                size: TextureSizeManager.getTextureSize(texture),
+                format: GPUTextureFormatManager.getGPUTextureFormat(texture),
+            },
+        };
 
         multisampleTextureView = { texture: multisampleTexture };
         effect(() =>

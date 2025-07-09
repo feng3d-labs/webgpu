@@ -1,6 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
-import { MultisampleTexture } from '../internal/MultisampleTexture';
 import { ReactiveClass } from '../ReactiveClass';
 import { generateMipmap } from '../utils/generate-mipmap';
 import { WGPUCanvasTexture } from './WGPUCanvasTexture';
@@ -67,7 +66,7 @@ export class WGPUTexture extends ReactiveClass
                     r_descriptor.size[0];
                     r_descriptor.size[1];
                     r_descriptor.size[2];
-                    (r_texture as MultisampleTexture).sampleCount;
+                    r_descriptor.sampleCount;
 
                     // 纹理参数变化时，重置纹理对象
                     if (preDescriptor === this.descriptor)
@@ -223,8 +222,7 @@ export class WGPUTexture extends ReactiveClass
         const descriptor = texture.descriptor;
 
         // 获取纹理属性
-        const { format, size, dimension, viewFormats, generateMipmap } = descriptor;
-        const sampleCount = (texture as MultisampleTexture).sampleCount;
+        const { format, size, dimension, viewFormats, generateMipmap, sampleCount } = descriptor;
         let { label, mipLevelCount } = descriptor;
 
         console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
