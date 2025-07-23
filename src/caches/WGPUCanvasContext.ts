@@ -1,6 +1,7 @@
-import { effect, reactive } from '@feng3d/reactivity';
+import { reactive } from '@feng3d/reactivity';
 import { CanvasContext, ChainMap } from '@feng3d/render-api';
 import '../data/polyfills/CanvasContext.ts';
+import { ReactiveClass } from '../ReactiveClass.js';
 
 /**
  * WebGPU画布上下文缓存类
@@ -8,7 +9,7 @@ import '../data/polyfills/CanvasContext.ts';
  * 负责管理WebGPU画布上下文的创建、配置和更新
  * 提供画布元素、GPU画布上下文和配置的统一管理
  */
-export class WGPUCanvasContext
+export class WGPUCanvasContext extends ReactiveClass
 {
     /**
      * 画布元素
@@ -52,45 +53,16 @@ export class WGPUCanvasContext
      */
     constructor(device: GPUDevice, context: CanvasContext)
     {
+        super();
+
         this._device = device;
         this._context = context;
 
         // 注册到画布上下文映射表
         WGPUCanvasContext._canvasContextMap.set([device, context], this);
 
-        const r_this = reactive(this);
-        const r_context = reactive(context);
-
-        // 监听画布ID变化，重置相关对象
-        effect(() =>
-        {
-            r_context.canvasId;
-
-            // 画布ID变化时，重置画布相关对象
-            r_this.canvas = null;
-            r_this.gpuCanvasContext = null;
-            r_this.invalid = true;
-        });
-
-        // 监听配置变化，重置配置对象
-        effect(() =>
-        {
-            const r_configuration = r_context.configuration;
-            if (r_configuration)
-            {
-                // 监听配置的各个属性变化
-                r_configuration.format;
-                r_configuration.usage;
-                r_configuration.viewFormats?.concat();
-                r_configuration.colorSpace;
-                r_configuration.toneMapping?.mode;
-                r_configuration.alphaMode;
-            }
-
-            // 配置变化时，重置GPU画布配置
-            r_this.gpuCanvasConfiguration = null;
-            r_this.invalid = true;
-        });
+        this.effect(() => this._onCanvasIdChange());
+        this.effect(() => this._onConfigurationChange());
     }
 
     /**
@@ -159,6 +131,46 @@ export class WGPUCanvasContext
         r_this.invalid = false;
 
         return this;
+    }
+
+    /**
+     * 画布ID变化时，重置画布相关对象
+     */
+    private _onCanvasIdChange()
+    {
+        const r_context = reactive(this._context);
+        r_context.canvasId;
+
+        // 画布ID变化时，重置画布相关对象
+        const r_this = reactive(this);
+        r_this.canvas = null;
+        r_this.gpuCanvasContext = null;
+        r_this.invalid = true;
+    }
+
+    /**
+     * 配置变化时，重置配置对象
+     */
+    private _onConfigurationChange()
+    {
+        const r_context = reactive(this._context);
+
+        const r_configuration = r_context.configuration;
+        if (r_configuration)
+        {
+            // 监听配置的各个属性变化
+            r_configuration.format;
+            r_configuration.usage;
+            r_configuration.viewFormats?.concat();
+            r_configuration.colorSpace;
+            r_configuration.toneMapping?.mode;
+            r_configuration.alphaMode;
+        }
+
+        // 配置变化时，重置GPU画布配置
+        const r_this = reactive(this);
+        r_this.gpuCanvasConfiguration = null;
+        r_this.invalid = true;
     }
 
     /**
