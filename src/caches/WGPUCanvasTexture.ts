@@ -51,13 +51,12 @@ export class WGPUCanvasTexture extends ReactiveObject
     {
         super();
 
-        this._device = device;
-        this._canvasTexture = canvasTexture;
-
         // 注册到纹理映射表
         WGPUCanvasTexture._textureMap.set([device, canvasTexture], this);
 
-        this.effect(() => this._onCanvasSizeChanged());
+        this._device = device;
+        this._canvasTexture = canvasTexture;
+
         this.effect(() => this._onPreSubmit());
         this.effect(() => this._onWGPUCanvasContextChanged());
         this.effect(() => this._onGPUTextureChanged());
@@ -69,15 +68,9 @@ export class WGPUCanvasTexture extends ReactiveObject
         reactive(this).gpuTexture = null;
     }
 
-    private _onCanvasSizeChanged()
-    {
-        reactive(this._canvasTexture)._canvasSizeVersion;
-        reactive(this).gpuTexture = null;
-    }
-
     private _onWGPUCanvasContextChanged()
     {
-        reactive(this).wgpuCanvasContext?.invalid;
+        reactive(this).wgpuCanvasContext?.needUpdate;
         reactive(this).gpuTexture = null;
     }
 

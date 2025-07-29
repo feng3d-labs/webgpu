@@ -1,5 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { CanvasContext, ChainMap } from '@feng3d/render-api';
+import { watcher } from '@feng3d/watcher';
 
 import '../data/polyfills/CanvasContext.ts';
 import { ReactiveObject } from '../ReactiveObject';
@@ -31,10 +32,9 @@ export class WGPUCanvasContext extends ReactiveObject
     readonly gpuCanvasConfiguration: GPUCanvasConfiguration;
 
     /**
-     * 是否失效
-     * true表示需要更新，false表示有效
+     * 是否需要更新。
      */
-    readonly invalid: boolean = true;
+    readonly needUpdate: boolean = true;
 
     /**
      * GPU设备
@@ -64,6 +64,8 @@ export class WGPUCanvasContext extends ReactiveObject
 
         this.effect(() => this._onCanvasIdChange());
         this.effect(() => this._onConfigurationChange());
+        this.effect(() => this._onCanvasChanged());
+        this.effect(() => this._onSizeChanged());
     }
 
     /**
@@ -76,7 +78,7 @@ export class WGPUCanvasContext extends ReactiveObject
      */
     update()
     {
-        if (!this.invalid) return this;
+        if (!this.needUpdate) return this;
 
         const r_this = reactive(this);
 
@@ -86,9 +88,7 @@ export class WGPUCanvasContext extends ReactiveObject
             const canvasId = this._context.canvasId;
 
             // 根据canvasId类型获取画布元素
-            r_this.canvas = typeof canvasId === 'string'
-                ? document.getElementById(canvasId) as HTMLCanvasElement
-                : canvasId;
+            r_this.canvas = typeof canvasId === 'string' ? document.getElementById(canvasId) as HTMLCanvasElement : canvasId;
         }
 
         // 获取WebGPU画布上下文
@@ -128,8 +128,7 @@ export class WGPUCanvasContext extends ReactiveObject
             r_this.gpuCanvasConfiguration = gpuCanvasConfiguration;
         }
 
-        // 标记为有效
-        r_this.invalid = false;
+        r_this.needUpdate = false;
 
         return this;
     }
@@ -146,7 +145,7 @@ export class WGPUCanvasContext extends ReactiveObject
         const r_this = reactive(this);
         r_this.canvas = null;
         r_this.gpuCanvasContext = null;
-        r_this.invalid = true;
+        r_this.needUpdate = true;
     }
 
     /**
@@ -171,7 +170,47 @@ export class WGPUCanvasContext extends ReactiveObject
         // 配置变化时，重置GPU画布配置
         const r_this = reactive(this);
         r_this.gpuCanvasConfiguration = null;
-        r_this.invalid = true;
+        r_this.needUpdate = true;
+    }
+
+    private _onCanvasChanged()
+    {
+        reactive(this).canvas;
+
+        if (this._preCanvas)
+        {
+            watcher.unwatch(this._preCanvas, 'width', this._onCanvasWidthChanged);
+            watcher.unwatch(this._preCanvas, 'height', this._onCanvasHeightChanged);
+        }
+
+        this._preCanvas = this.canvas;
+
+        if (this._preCanvas)
+        {
+            watcher.watch(this._preCanvas, 'width', this._onCanvasWidthChanged);
+            watcher.watch(this._preCanvas, 'height', this._onCanvasHeightChanged);
+        }
+    }
+
+    private _preCanvas: HTMLCanvasElement | OffscreenCanvas;
+
+    private _onCanvasWidthChanged()
+    {
+        reactive(this._context).width = this.canvas.width;
+        reactive(this).needUpdate = true;
+    }
+
+    private _onCanvasHeightChanged()
+    {
+        reactive(this._context).height = this.canvas.height;
+        reactive(this).needUpdate = true;
+    }
+
+    private _onSizeChanged()
+    {
+        this.canvas.width = reactive(this._context).width;
+        this.canvas.height = reactive(this._context).height;
+        reactive(this).needUpdate = true;
     }
 
     /**

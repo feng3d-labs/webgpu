@@ -87,11 +87,8 @@ export class GPURenderPassDescriptorManager
         if ('context' in texture)
         {
             texture = texture as CanvasTexture;
-            const element = typeof texture.context.canvasId === 'string' ? document.getElementById(texture.context.canvasId) as HTMLCanvasElement : texture.context.canvasId;
-
-            if (element.width !== attachmentSize.width) element.width = attachmentSize.width;
-            if (element.height !== attachmentSize.height) element.height = attachmentSize.height;
-            reactive(texture)._canvasSizeVersion = ~~texture._canvasSizeVersion + 1;
+            reactive(texture.context).width = attachmentSize.width;
+            reactive(texture.context).height = attachmentSize.height;
         }
         else
         {
