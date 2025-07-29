@@ -1,7 +1,8 @@
 import { reactive } from '@feng3d/reactivity';
 import { CanvasContext, ChainMap } from '@feng3d/render-api';
+
 import '../data/polyfills/CanvasContext.ts';
-import { ReactiveClass } from '../ReactiveClass.js';
+import { ReactiveObject } from '../ReactiveObject';
 
 /**
  * WebGPU画布上下文缓存类
@@ -9,7 +10,7 @@ import { ReactiveClass } from '../ReactiveClass.js';
  * 负责管理WebGPU画布上下文的创建、配置和更新
  * 提供画布元素、GPU画布上下文和配置的统一管理
  */
-export class WGPUCanvasContext extends ReactiveClass
+export class WGPUCanvasContext extends ReactiveObject
 {
     /**
      * 画布元素

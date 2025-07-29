@@ -9,7 +9,7 @@ import { Effect, effect, EffectScope } from '@feng3d/reactivity';
  *
  * 使用方式：
  * ```typescript
- * class MyClass extends ReactiveClass {
+ * class MyClass extends ReactiveObject {
  *   constructor() {
  *     super();
  *
@@ -21,7 +21,7 @@ import { Effect, effect, EffectScope } from '@feng3d/reactivity';
  * }
  * ```
  */
-export class ReactiveClass
+export class ReactiveObject
 {
     /**
      * 副作用作用域
@@ -88,7 +88,7 @@ export class ReactiveClass
      *
      * 使用示例：
      * ```typescript
-     * class MyClass extends ReactiveClass {
+     * class MyClass extends ReactiveObject {
      *   destroy() {
      *     // 执行子类特定的清理逻辑
      *     this.cleanup();

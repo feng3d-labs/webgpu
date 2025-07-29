@@ -2,16 +2,16 @@ import { reactive } from '@feng3d/reactivity';
 import { CanvasTexture, ChainMap } from '@feng3d/render-api';
 
 import { webgpuEvents } from '../eventnames';
-import { ReactiveClass } from '../ReactiveClass';
+import { ReactiveObject } from '../ReactiveObject';
 import { WGPUCanvasContext } from './WGPUCanvasContext';
 
 /**
  * WebGPU画布纹理缓存类
  *
  * 负责管理WebGPU画布纹理的创建、更新和销毁
- * 继承自ReactiveClass，支持响应式属性监听
+ * 继承自 ReactiveObject ，支持响应式属性监听
  */
-export class WGPUCanvasTexture extends ReactiveClass
+export class WGPUCanvasTexture extends ReactiveObject
 {
     /**
      * WebGPU画布上下文

@@ -1,16 +1,16 @@
 import { reactive } from '@feng3d/reactivity';
 import { afterEach, assert, beforeEach, describe, it } from 'vitest';
-import { ReactiveClass } from '../src/ReactiveClass';
+import { ReactiveObject } from '../src/ReactiveObject';
 
-describe('ReactiveClass', () =>
+describe('ReactiveObject', () =>
 {
     describe('基础功能', () =>
     {
-        let reactiveClass: ReactiveClass;
+        let reactiveClass: ReactiveObject;
 
         beforeEach(() =>
         {
-            reactiveClass = new ReactiveClass();
+            reactiveClass = new ReactiveObject();
         });
 
         afterEach(() =>
@@ -66,7 +66,7 @@ describe('ReactiveClass', () =>
 
     describe('继承使用 - 监听自身属性变化', () =>
     {
-        class TestClass extends ReactiveClass
+        class TestClass extends ReactiveObject
         {
             readonly name: string = '';
             readonly age: number = 0;
@@ -259,7 +259,7 @@ describe('ReactiveClass', () =>
     {
         it('应该处理空函数副作用', () =>
         {
-            const reactiveClass = new ReactiveClass();
+            const reactiveClass = new ReactiveObject();
             assert.doesNotThrow(() =>
             {
                 const eff = reactiveClass.effect(() =>
@@ -273,7 +273,7 @@ describe('ReactiveClass', () =>
 
         it('应该支持多次调用destroy', () =>
         {
-            const reactiveClass = new ReactiveClass();
+            const reactiveClass = new ReactiveObject();
 
             // 第一次调用destroy
             reactiveClass.destroy();
@@ -287,7 +287,7 @@ describe('ReactiveClass', () =>
 
         it('销毁后副作用应该停止生效', () =>
         {
-            const reactiveClass = new ReactiveClass();
+            const reactiveClass = new ReactiveObject();
             let callCount = 0;
             const reactiveObj = reactive({ testProp: '' });
 
@@ -319,7 +319,7 @@ describe('ReactiveClass', () =>
 
         it('销毁后创建新的副作用应该失败', () =>
         {
-            const reactiveClass = new ReactiveClass();
+            const reactiveClass = new ReactiveObject();
 
             // 销毁
             reactiveClass.destroy();
@@ -341,7 +341,7 @@ describe('ReactiveClass', () =>
 
         it('继承类销毁后副作用应该停止生效', () =>
         {
-            class TestClass extends ReactiveClass
+            class TestClass extends ReactiveObject
             {
                 readonly value = 0;
                 readonly displayValue = '';

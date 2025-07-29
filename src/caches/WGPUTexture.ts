@@ -1,6 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
-import { ReactiveClass } from '../ReactiveClass';
+import { ReactiveObject } from '../ReactiveObject';
 import { generateMipmap } from '../utils/generate-mipmap';
 import { WGPUCanvasTexture } from './WGPUCanvasTexture';
 
@@ -8,7 +8,7 @@ import { WGPUCanvasTexture } from './WGPUCanvasTexture';
  * WebGPU纹理缓存类
  * 负责管理WebGPU纹理的创建、更新和销毁
  */
-export class WGPUTexture extends ReactiveClass
+export class WGPUTexture extends ReactiveObject
 {
 
     /**
