@@ -25,10 +25,11 @@ export class WGPUCanvasTexture extends ReactiveClass
     readonly gpuTexture: GPUTexture;
 
     /**
-     * 纹理是否失效
-     * true表示需要更新，false表示有效
+     * 是否需要更新。
+     *
+     * 当值为 true 时表示需要更新，当值为 false 时表示无需更新。
      */
-    readonly invalid: boolean = true;
+    readonly needUpdate: boolean = true;
 
     /**
      * GPU设备
@@ -56,59 +57,45 @@ export class WGPUCanvasTexture extends ReactiveClass
         // 注册到纹理映射表
         WGPUCanvasTexture._textureMap.set([device, canvasTexture], this);
 
-        const r_this = reactive(this);
-
-        // 监听画布和事件变化，重置纹理
-        {
-            const r_canvasTexture = reactive(canvasTexture);
-            const r_webgpuEvents = reactive(webgpuEvents);
-
-            let preGPUTexture: GPUTexture;
-            this.effect(() =>
-            {
-                if (!r_this.gpuTexture) return;
-
-                // 监听画布尺寸版本和预提交事件
-                r_webgpuEvents.preSubmit;
-                r_canvasTexture._canvasSizeVersion;
-
-                // 如果纹理没有变化，重置纹理
-                if (preGPUTexture === this.gpuTexture)
-                {
-                    r_this.gpuTexture = null;
-                }
-
-                preGPUTexture = this.gpuTexture;
-            });
-        }
-
-        // 监听纹理变化，管理纹理生命周期
-        {
-            let preGPUTexture: GPUTexture;
-            this.effect(() =>
-            {
-                r_this.gpuTexture;
-
-                // 销毁前一个纹理
-                preGPUTexture?.destroy();
-                preGPUTexture = this.gpuTexture;
-
-                // 如果没有纹理，标记为失效
-                if (!this.gpuTexture)
-                {
-                    r_this.invalid = true;
-                }
-            });
-        }
-
-        this.effect(() =>
-        {
-            r_this.wgpuCanvasContext?.invalid;
-
-            r_this.gpuTexture = null;
-            r_this.invalid = true;
-        });
+        this.effect(() => this._onCanvasSizeChanged());
+        this.effect(() => this._onPreSubmit());
+        this.effect(() => this._onWGPUCanvasContextChanged());
+        this.effect(() => this._onGPUTextureChanged());
     }
+
+    private _onPreSubmit()
+    {
+        reactive(webgpuEvents).preSubmit;
+        reactive(this).gpuTexture = null;
+    }
+
+    private _onCanvasSizeChanged()
+    {
+        reactive(this._canvasTexture)._canvasSizeVersion;
+        reactive(this).gpuTexture = null;
+    }
+
+    private _onWGPUCanvasContextChanged()
+    {
+        reactive(this).wgpuCanvasContext?.invalid;
+        reactive(this).gpuTexture = null;
+    }
+
+    private _onGPUTextureChanged()
+    {
+        const r_this = reactive(this);
+        r_this.gpuTexture;
+
+        this._preGPUTexture?.destroy();
+        this._preGPUTexture = this.gpuTexture;
+
+        if (!this.gpuTexture)
+        {
+            r_this.needUpdate = true;
+        }
+    }
+
+    private _preGPUTexture: GPUTexture;
 
     /**
      * 更新纹理
@@ -117,7 +104,7 @@ export class WGPUCanvasTexture extends ReactiveClass
      */
     update()
     {
-        if (!this.invalid) return;
+        if (!this.needUpdate) return;
 
         const r_this = reactive(this);
 
@@ -139,7 +126,7 @@ export class WGPUCanvasTexture extends ReactiveClass
             r_this.gpuTexture = gpuTexture;
         }
 
-        r_this.invalid = false;
+        r_this.needUpdate = false;
 
         return this;
     }
@@ -151,6 +138,8 @@ export class WGPUCanvasTexture extends ReactiveClass
      */
     destroy()
     {
+        reactive(this).gpuTexture = null;
+
         // 从纹理映射表中移除
         WGPUCanvasTexture._textureMap.delete([this._device, this._canvasTexture]);
 
