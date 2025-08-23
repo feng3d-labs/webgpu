@@ -208,6 +208,8 @@ export class WGPUCanvasContext extends ReactiveObject
 
     private _onSizeChanged()
     {
+        if (!this.canvas) return;
+
         this.canvas.width = reactive(this._context).width;
         this.canvas.height = reactive(this._context).height;
         reactive(this).needUpdate = true;

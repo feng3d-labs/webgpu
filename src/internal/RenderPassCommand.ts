@@ -21,8 +21,6 @@ export class RenderPassCommand
     {
         const r_renderPass = reactive(renderPass);
 
-        this.renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(webgpu.device, renderPass);
-
         effect(() =>
         {
             r_renderPass.descriptor;
@@ -101,7 +99,9 @@ export class RenderPassCommand
 
     run(context: GDeviceContext)
     {
-        const { renderPassDescriptor, commands } = this;
+        const { commands } = this;
+
+        const renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(context.device, this.renderPass);
 
         const commandEncoder = context.gpuCommandEncoder;
 
@@ -114,7 +114,6 @@ export class RenderPassCommand
         renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
     }
 
-    renderPassDescriptor: GPURenderPassDescriptor;
     commands: CommandType[];
 }
 
