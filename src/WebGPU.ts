@@ -1,4 +1,4 @@
-import { computed, Computed, effectScope, EffectScope, reactive, UnReadonly } from '@feng3d/reactivity';
+import { computed, Computed, reactive, UnReadonly } from '@feng3d/reactivity';
 import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
@@ -51,13 +51,9 @@ export class WebGPU
 
     readonly device: GPUDevice;
 
-    readonly effectScope: EffectScope;
-
     constructor(device?: GPUDevice)
     {
         this.device = device;
-
-        this.effectScope = effectScope();
     }
 
     destroy()
@@ -65,8 +61,6 @@ export class WebGPU
         const r_this = reactive(this);
 
         r_this.device = null;
-
-        this.effectScope.stop();
     }
 
     submit(submit: Submit)
