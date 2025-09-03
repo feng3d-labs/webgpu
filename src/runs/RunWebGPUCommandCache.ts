@@ -105,15 +105,15 @@ export class RunWebGPUCommandCache extends RunWebGPU
 
         map.set([renderPassFormat._key, renderObject], _commands.slice(start));
 
-        // 
+        //
         const onchanged = () =>
         {
             map.delete([renderPassFormat._key, renderObject]);
             //
             renderObject._version = ~~renderObject._version + 1;
-            watcher.unwatch(renderObject.pipeline, '_version', onchanged);
-        }
-        watcher.watch(renderObject.pipeline, '_version', onchanged);
+            watcher.unwatch(renderObject.pipeline, "_version", onchanged);
+        };
+        watcher.watch(renderObject.pipeline, "_version", onchanged);
     }
 }
 

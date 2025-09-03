@@ -12,8 +12,6 @@ import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
  */
 export function getIGPUComputePipeline(computePipeline: ComputePipeline): ComputePipeline
 {
-
-
     return computePipeline;
 }
 

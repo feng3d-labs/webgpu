@@ -1,4 +1,4 @@
-import { BlendState,DepthStencilState } from "@feng3d/render-api";
+import { BlendState, DepthStencilState } from "@feng3d/render-api";
 
 import { MultisampleState } from "../MultisampleState";
 

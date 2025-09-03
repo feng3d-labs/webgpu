@@ -1,0 +1,3 @@
+[submodule "packages/render-api"]
+	path = packages/render-api
+	url = https://gitee.com/feng3d/render-api.git

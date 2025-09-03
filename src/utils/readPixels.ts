@@ -21,11 +21,11 @@ export async function readPixels(device: GPUDevice, params: { texture: GPUTextur
     const [width, height] = copySize;
 
     const bytesPerPixel = Texture.getTextureBytesPerPixel(texture.format);
-    const dataConstructor = Texture.getTextureDataConstructor(texture.format);
+    const Cls = Texture.getTextureDataConstructor(texture.format);
 
     const bytesPerRow = width * bytesPerPixel;
     const bufferSize = bytesPerRow * height;
-    const bufferData = new dataConstructor(bufferSize / dataConstructor.BYTES_PER_ELEMENT);
+    const bufferData = new Cls(bufferSize / Cls.BYTES_PER_ELEMENT);
 
     //
     const buffer = device.createBuffer({ size: bufferSize, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });

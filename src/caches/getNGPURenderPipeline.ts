@@ -2,13 +2,12 @@ import { BlendState, DepthStencilState, FragmentState, IIndicesDataTypes, IWrite
 import { watcher } from "@feng3d/watcher";
 import { FunctionInfo, TemplateInfo, TypeInfo } from "wgsl_reflect";
 
-import { gPartial } from "@feng3d/polyfill";
 import { MultisampleState } from "../data/MultisampleState";
-import { IRenderPassFormat } from "../internal/RenderPassFormat";
 import { NFragmentState } from "../internal/NFragmentState";
-import { NRenderPipeline } from "../internal/NRenderPipeline";
 import { NVertexBuffer } from "../internal/NGPUVertexBuffer";
 import { NGPUVertexState } from "../internal/NGPUVertexState";
+import { NRenderPipeline } from "../internal/NRenderPipeline";
+import { IRenderPassFormat } from "../internal/RenderPassFormat";
 import { ChainMap } from "../utils/ChainMap";
 import { getWGSLReflectInfo } from "./getWGSLReflectInfo";
 
@@ -71,7 +70,7 @@ export function getNGPURenderPipeline(renderPipeline: RenderPipeline, renderPass
         renderPipelineMap.delete([renderPipeline, renderPassFormat._key, primitive, vertices, indexFormat]);
         watcher.unwatch(vertexStateResult, "_version", onchanged);
         gpuFragmentState && watcher.unwatch(gpuFragmentState, "_version", onchanged);
-    }
+    };
     watcher.watch(vertexStateResult, "_version", onchanged);
     gpuFragmentState && watcher.watch(gpuFragmentState, "_version", onchanged);
 
@@ -225,7 +224,6 @@ function getNGPUVertexState(vertexState: VertexState, vertices: VertexAttributes
 
     // 解析顶点着色器
     const reflect = getWGSLReflectInfo(code);
-    let vertex: FunctionInfo;
     //
     let entryPoint = vertexState.entryPoint;
     if (!entryPoint)
@@ -234,7 +232,7 @@ function getNGPUVertexState(vertexState: VertexState, vertices: VertexAttributes
         entryPoint = reflect.entry.vertex[0].name;
     }
 
-    vertex = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
+    const vertex = reflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
     console.assert(!!vertex, `WGSL着色器 ${code} 中不存在顶点入口点 ${entryPoint} 。`);
 
     const { vertexBufferLayouts, vertexBuffers } = getNGPUVertexBuffers(vertex, vertices);
@@ -251,7 +249,7 @@ function getNGPUVertexState(vertexState: VertexState, vertices: VertexAttributes
     vertexStateMap.set([vertexState, vertices], result);
 
     // 监听变化
-    const watchpropertys: gPartial<VertexState> = { code: "" };
+    const watchpropertys: VertexState = { code: "" };
     const onchanged = () =>
     {
         vertexStateMap.delete([vertexState, vertices]);
@@ -418,7 +416,7 @@ function getNGPUFragmentState(fragmentState: FragmentState, colorAttachments: re
     fragmentStateMap.set([fragmentState, colorAttachmentsKey], gpuFragmentState);
 
     // 监听变化
-    const watchpropertys: gPartial<FragmentState> = { code: "" };
+    const watchpropertys: FragmentState = { code: "" };
     const onchanged = () =>
     {
         fragmentStateMap.delete([fragmentState, colorAttachmentsKey]);

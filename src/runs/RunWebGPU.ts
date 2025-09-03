@@ -323,7 +323,7 @@ export class RunWebGPU
 
         this.runIndices(device, passEncoder, indices);
 
-        if (draw.__type__ === 'DrawVertex')
+        if (draw.__type__ === "DrawVertex")
         {
             this.runDrawVertex(passEncoder, draw);
         }
