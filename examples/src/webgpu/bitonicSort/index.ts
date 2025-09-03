@@ -1,6 +1,6 @@
 import { Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit, Uniforms } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
-import { ComputePipeline, getIGPUBuffer, ComputePass, TimestampQuery, WebGPU } from "@feng3d/webgpu";
+import { ComputePass, ComputePipeline, getIGPUBuffer, TimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import Stats from "stats.js";
 
@@ -198,25 +198,13 @@ async function init(
         executeStep: false,
         // A function that randomizes the values of each element.
         // When called, all relevant values within the settings object are reset to their defaults at the beginning of a sort with n elements.
-        "Randomize Values": () =>
-        {
-            return;
-        },
+        "Randomize Values": () => { },
         // A function that manually executes a single step of the bitonic sort.
-        "Execute Sort Step": () =>
-        {
-            return;
-        },
+        "Execute Sort Step": () => { },
         // A function that logs the values of each element as an array to the browser's console.
-        "Log Elements": () =>
-        {
-            return;
-        },
+        "Log Elements": () => { },
         // A function that automatically executes each step of the bitonic sort at an interval determined by 'Auto Sort Speed'
-        "Auto Sort": () =>
-        {
-            return;
-        },
+        "Auto Sort": () => { },
         // The speed at which each step of the bitonic sort will be executed after 'Auto Sort' has been called.
         "Auto Sort Speed": 50,
 
@@ -459,11 +447,15 @@ async function init(
                     swappedCellController.setValue(swappedIndex);
                 }
                 break;
-            case "NONE": {
-                swappedIndex = settings["Hovered Cell"];
-                swappedCellController.setValue(swappedIndex);
-            }
+            case "NONE":
+                // eslint-disable-next-line no-lone-blocks
+                {
+                    swappedIndex = settings["Hovered Cell"];
+                    swappedCellController.setValue(swappedIndex);
+                }
+                break;
             default:
+                // eslint-disable-next-line no-lone-blocks
                 {
                     swappedIndex = settings["Hovered Cell"];
                     swappedCellController.setValue(swappedIndex);

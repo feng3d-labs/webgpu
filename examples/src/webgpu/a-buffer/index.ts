@@ -9,7 +9,6 @@ import compositeWGSL from "./composite.wgsl";
 import opaqueWGSL from "./opaque.wgsl";
 import translucentWGSL from "./translucent.wgsl";
 
-
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
     function roundUp(n: number, k: number): number
@@ -198,11 +197,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // To slice up the frame we need to pass the starting fragment y position of the slice.
         // We do this using a uniform buffer with a dynamic offset.
         const sliceInfoBuffer = [];
+        for (let i = 0; i < numSlices; ++i)
         {
-            for (let i = 0; i < numSlices; ++i)
-            {
-                sliceInfoBuffer[i] = { sliceStartY: i * sliceHeight };
-            }
+            sliceInfoBuffer[i] = { sliceStartY: i * sliceHeight };
         }
 
         // `Heads` struct contains the start index of the linked-list of translucent fragments
@@ -371,9 +368,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         return function doDraw()
         {
             // update the uniform buffer
-            {
-                uniforms.modelViewProjectionMatrix = getCameraViewProjMatrix();
-            }
+            uniforms.modelViewProjectionMatrix = getCameraViewProjMatrix();
 
             webgpu.submit(submit);
         };

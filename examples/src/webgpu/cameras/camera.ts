@@ -2,10 +2,11 @@
 // 'wgpu-matrix' library, so produces many temporary vectors and matrices.
 // This is intentional, as this sample prefers readability over performance.
 import { Mat4, Vec3, Vec4, mat4, vec3 } from "wgpu-matrix";
-import Input from "./input";
+import { Input } from "./input";
 
 // Common interface for camera implementations
-export default interface Camera {
+export interface Camera
+{
   // update updates the camera using the user-input and returns the view matrix.
   update(delta_time: number, input: Input): Mat4;
 
@@ -41,67 +42,67 @@ class CameraBase
 
   // Returns the camera matrix
   get matrix()
-{
+  {
     return this.matrix_;
   }
   // Assigns `mat` to the camera matrix
   set matrix(mat: Mat4)
-{
+  {
     mat4.copy(mat, this.matrix_);
   }
 
   // Returns the camera view matrix
   get view()
-{
+  {
     return this.view_;
   }
   // Assigns `mat` to the camera view
   set view(mat: Mat4)
-{
+  {
     mat4.copy(mat, this.view_);
   }
 
   // Returns column vector 0 of the camera matrix
   get right()
-{
+  {
     return this.right_;
   }
   // Assigns `vec` to the first 3 elements of column vector 0 of the camera matrix
   set right(vec: Vec3)
-{
+  {
     vec3.copy(vec, this.right_);
   }
 
   // Returns column vector 1 of the camera matrix
   get up()
-{
+  {
     return this.up_;
   }
   // Assigns `vec` to the first 3 elements of column vector 1 of the camera matrix
   set up(vec: Vec3)
-{
+  {
     vec3.copy(vec, this.up_);
   }
 
   // Returns column vector 2 of the camera matrix
   get back()
-{
+  {
     return this.back_;
   }
   // Assigns `vec` to the first 3 elements of column vector 2 of the camera matrix
   set back(vec: Vec3)
-{
+  {
     vec3.copy(vec, this.back_);
   }
 
   // Returns column vector 3 of the camera matrix
   get position()
-{
+  {
     return this.position_;
   }
   // Assigns `vec` to the first 3 elements of column vector 3 of the camera matrix
   set position(vec: Vec3)
-{
+  {
     vec3.copy(vec, this.position_);
   }
 }
@@ -130,12 +131,12 @@ export class WASDCamera extends CameraBase implements Camera
 
   // Returns velocity vector
   get velocity()
-{
+  {
     return this.velocity_;
   }
   // Assigns `vec` to the velocity vector
   set velocity(vec: Vec3)
-{
+  {
     vec3.copy(vec, this.velocity_);
   }
 
@@ -146,10 +147,10 @@ export class WASDCamera extends CameraBase implements Camera
     // The initial target of the camera
     target?: Vec3;
   })
-{
+  {
     super();
     if (options && (options.position || options.target))
-{
+    {
       const position = options.position ?? vec3.create(0, 0, -5);
       const target = options.target ?? vec3.create(0, 0, 0);
       const back = vec3.normalize(vec3.sub(position, target));
@@ -160,19 +161,19 @@ export class WASDCamera extends CameraBase implements Camera
 
   // Returns the camera matrix
   get matrix()
-{
+  {
     return super.matrix;
   }
 
   // Assigns `mat` to the camera matrix, and recalcuates the camera angles
   set matrix(mat: Mat4)
-{
+  {
     super.matrix = mat;
     this.recalculateAngles(this.back);
   }
 
   update(deltaTime: number, input: Input): Mat4
-{
+  {
     const sign = (positive: boolean, negative: boolean) =>
       (positive ? 1 : 0) - (negative ? 1 : 0);
 
@@ -216,12 +217,12 @@ export class WASDCamera extends CameraBase implements Camera
     // Invert the camera matrix to build the view matrix
     this.view = mat4.invert(this.matrix);
 
-return this.view;
+    return this.view;
   }
 
   // Recalculates the yaw and pitch values from a directional vector
   recalculateAngles(dir: Vec3)
-{
+  {
     this.yaw = Math.atan2(dir[0], dir[2]);
     this.pitch = -Math.asin(dir[1]);
   }
@@ -241,12 +242,12 @@ export class ArcballCamera extends CameraBase implements Camera
 
   // Returns the rotation axis
   get axis()
-{
+  {
     return this.axis_;
   }
   // Assigns `vec` to the rotation axis
   set axis(vec: Vec3)
-{
+  {
     vec3.copy(vec, this.axis_);
   }
 
@@ -266,10 +267,10 @@ export class ArcballCamera extends CameraBase implements Camera
     // The initial position of the camera
     position?: Vec3;
   })
-{
+  {
     super();
     if (options && options.position)
-{
+    {
       this.position = options.position;
       this.distance = vec3.len(this.position);
       this.back = vec3.normalize(this.position);
@@ -280,28 +281,28 @@ export class ArcballCamera extends CameraBase implements Camera
 
   // Returns the camera matrix
   get matrix()
-{
+  {
     return super.matrix;
   }
 
   // Assigns `mat` to the camera matrix, and recalcuates the distance
   set matrix(mat: Mat4)
-{
+  {
     super.matrix = mat;
     this.distance = vec3.len(this.position);
   }
 
   update(deltaTime: number, input: Input): Mat4
-{
+  {
     const epsilon = 0.0000001;
 
     if (input.analog.touching)
-{
+    {
       // Currently being dragged.
       this.angularVelocity = 0;
     }
- else
-{
+    else
+    {
       // Dampen any existing angular velocity
       this.angularVelocity *= Math.pow(1 - this.frictionCoefficient, deltaTime);
     }
@@ -318,7 +319,7 @@ export class ArcballCamera extends CameraBase implements Camera
     const magnitude = vec3.len(crossProduct);
 
     if (magnitude > epsilon)
-{
+    {
       // Normalize the crossProduct to get the rotation axis
       this.axis = vec3.scale(crossProduct, 1 / magnitude);
 
@@ -329,7 +330,7 @@ export class ArcballCamera extends CameraBase implements Camera
     // The rotation around this.axis to apply to the camera matrix this update
     const rotationAngle = this.angularVelocity * deltaTime;
     if (rotationAngle > epsilon)
-{
+    {
       // Rotate the matrix around axis
       // Note: The rotation is not done as a matrix-matrix multiply as the repeated multiplications
       // will quickly introduce substantial error into the matrix.
@@ -340,7 +341,7 @@ export class ArcballCamera extends CameraBase implements Camera
 
     // recalculate `this.position` from `this.back` considering zoom
     if (input.analog.zoom !== 0)
-{
+    {
       this.distance *= 1 + input.analog.zoom * this.zoomSpeed;
     }
     this.position = vec3.scale(this.back, this.distance);
@@ -348,18 +349,18 @@ export class ArcballCamera extends CameraBase implements Camera
     // Invert the camera matrix to build the view matrix
     this.view = mat4.invert(this.matrix);
 
-return this.view;
+    return this.view;
   }
 
   // Assigns `this.right` with the cross product of `this.up` and `this.back`
   recalcuateRight()
-{
+  {
     this.right = vec3.normalize(vec3.cross(this.up, this.back));
   }
 
   // Assigns `this.up` with the cross product of `this.back` and `this.right`
   recalcuateUp()
-{
+  {
     this.up = vec3.normalize(vec3.cross(this.back, this.right));
   }
 }

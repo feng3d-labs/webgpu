@@ -1,5 +1,6 @@
 // Input holds as snapshot of input state
-export default interface Input {
+export interface Input
+{
   // Digital input (e.g keyboard state)
   readonly digital: {
     readonly forward: boolean;
@@ -43,9 +44,9 @@ export function createInputHandler(
   let mouseDown = false;
 
   const setDigital = (e: KeyboardEvent, value: boolean) =>
-{
+  {
     switch (e.code)
-{
+    {
       case "KeyW":
         digital.forward = value;
         e.preventDefault();
@@ -86,18 +87,18 @@ export function createInputHandler(
 
   canvas.style.touchAction = "pinch-zoom";
   canvas.addEventListener("pointerdown", () =>
-{
+  {
     mouseDown = true;
   });
   canvas.addEventListener("pointerup", () =>
-{
+  {
     mouseDown = false;
   });
   canvas.addEventListener("pointermove", (e) =>
-{
+  {
     mouseDown = e.pointerType === "mouse" ? (e.buttons & 1) !== 0 : true;
     if (mouseDown)
-{
+    {
       analog.x += e.movementX;
       analog.y += e.movementY;
     }
@@ -105,10 +106,10 @@ export function createInputHandler(
   canvas.addEventListener(
     "wheel",
     (e) =>
-{
+    {
       mouseDown = (e.buttons & 1) !== 0;
       if (mouseDown)
-{
+      {
         // The scroll value varies substantially between user agents / browsers.
         // Just use the sign.
         analog.zoom += Math.sign(e.deltaY);
@@ -120,7 +121,7 @@ export function createInputHandler(
   );
 
   return () =>
-{
+  {
     const out = {
       digital,
       analog: {
@@ -135,6 +136,6 @@ export function createInputHandler(
     analog.y = 0;
     analog.zoom = 0;
 
-return out;
+    return out;
   };
 }

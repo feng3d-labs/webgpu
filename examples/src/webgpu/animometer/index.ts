@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     ]);
 
     const renderObject: RenderObject = {
-        pipeline: pipeline,
+        pipeline,
         uniforms: {},
         geometry: {
             primitive: {
