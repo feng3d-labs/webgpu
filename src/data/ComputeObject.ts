@@ -1,4 +1,4 @@
-import { Uniforms } from "@feng3d/render-api";
+import { BindingResources } from "@feng3d/render-api";
 import { ComputePipeline } from "./ComputePipeline";
 import { Workgroups } from "./Workgroups";
 
@@ -21,7 +21,7 @@ export interface ComputeObject
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
      */
-    readonly uniforms?: Uniforms;
+    readonly uniforms?: BindingResources;
 
     /**
      * {@link GPUComputePassEncoder.dispatchWorkgroups}

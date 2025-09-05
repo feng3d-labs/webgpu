@@ -1,5 +1,5 @@
 import { anyEmitter } from "@feng3d/event";
-import { BufferBinding, CanvasTexture, Sampler, TextureView, UniformType } from "@feng3d/render-api";
+import { BindingResource, BufferBinding, CanvasTexture, Sampler, TextureView } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { getRealGPUBindGroup } from "../const";
 import { VideoTexture } from "../data/VideoTexture";
@@ -176,7 +176,7 @@ export interface BindGroupEntry
      * The resource to bind, which may be a {@link GPUSampler}, {@link GPUTextureView},
      * {@link GPUExternalTexture}, or {@link GPUBufferBinding}.
      */
-    resource: BindingResource;
+    resource: BindingResource1;
 }
 
-export type BindingResource = Sampler | TextureView | VideoTexture | UniformType;
+export type BindingResource1 = Sampler | TextureView | VideoTexture | BindingResource;

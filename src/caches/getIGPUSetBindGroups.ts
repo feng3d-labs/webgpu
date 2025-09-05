@@ -1,6 +1,6 @@
 import { watcher } from "@feng3d/watcher";
 
-import { BufferBinding, BufferBindingInfo, Uniforms } from "@feng3d/render-api";
+import { BufferBinding, BufferBindingInfo, BindingResources } from "@feng3d/render-api";
 import { getIGPUPipelineLayout, getIGPUShaderKey, IGPUShader } from "../caches/getIGPUPipelineLayout";
 import { BindGroupLayoutDescriptor } from "../internal/PipelineLayoutDescriptor";
 import { ChainMap } from "../utils/ChainMap";
@@ -9,7 +9,7 @@ import { updateBufferBinding } from "../utils/updateBufferBinding";
 import { getIGPUBuffer } from "./getIGPUBuffer";
 import { BindGroupDescriptor, BindGroupEntry } from "./getGPUBindGroup";
 
-export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: Uniforms)
+export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: BindingResources)
 {
     const shaderKey = getIGPUShaderKey(shader);
     //
@@ -29,9 +29,9 @@ export function getIGPUSetBindGroups(shader: IGPUShader, bindingResources: Unifo
     return gpuSetBindGroups;
 }
 
-const bindGroupsMap = new ChainMap<[string, Uniforms], SetBindGroup[]>();
+const bindGroupsMap = new ChainMap<[string, BindingResources], SetBindGroup[]>();
 
-function getSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: Uniforms): SetBindGroup
+function getSetBindGroup(bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources): SetBindGroup
 {
     const map: ChainMap<Array<any>, SetBindGroup> = bindGroupLayout["_bindingResources"] = bindGroupLayout["_bindingResources"] || new ChainMap();
     const subBindingResources = bindGroupLayout.entryNames.map((v) => bindingResources[v]);
