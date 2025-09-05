@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, Uniforms } from "@feng3d/render-api";
+import { BindingResources, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
 import { mat4, vec3 } from "wgpu-matrix";
@@ -164,7 +164,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         depthLayers: undefined,
     };
 
-    const bindingResources: Uniforms = {
+    const bindingResources: BindingResources = {
         spaceTransform,
         mapInfo,
         // Texture bindGroups and bindGroupLayout

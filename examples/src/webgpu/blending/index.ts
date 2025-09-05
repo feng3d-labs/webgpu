@@ -2,7 +2,7 @@ import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 import texturedQuadWGSL from "./texturedQuad.wgsl";
 
-import { BlendComponent, CanvasContext, IRenderPassObject, RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, TextureView, Uniforms } from "@feng3d/render-api";
+import { BindingResources, BlendComponent, CanvasContext, IRenderPassObject, RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, TextureView } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 declare module "@feng3d/render-api"
@@ -167,25 +167,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const srcUniform = { matrix: new Float32Array(16) };
     const dstUniform = { matrix: new Float32Array(16) };
 
-    const srcBindGroupUnpremultipliedAlpha: Uniforms = {
+    const srcBindGroupUnpremultipliedAlpha: BindingResources = {
         ourSampler: sampler,
         ourTexture: { texture: srcTextureUnpremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupUnpremultipliedAlpha: Uniforms = {
+    const dstBindGroupUnpremultipliedAlpha: BindingResources = {
         ourSampler: sampler,
         ourTexture: { texture: dstTextureUnpremultipliedAlpha },
         uni: dstUniform,
     };
 
-    const srcBindGroupPremultipliedAlpha: Uniforms = {
+    const srcBindGroupPremultipliedAlpha: BindingResources = {
         ourSampler: sampler,
         ourTexture: { texture: srcTexturePremultipliedAlpha },
         uni: srcUniform,
     };
 
-    const dstBindGroupPremultipliedAlpha: Uniforms = {
+    const dstBindGroupPremultipliedAlpha: BindingResources = {
         ourSampler: sampler,
         ourTexture: { texture: dstTexturePremultipliedAlpha },
         uni: dstUniform,
@@ -482,7 +482,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
 
         function updateUniforms(
-            uniforms: Uniforms,
+            uniforms: { matrix: Float32Array },
             canvas: HTMLCanvasElement,
             texture: Texture
         )

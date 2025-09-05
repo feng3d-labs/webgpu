@@ -1,4 +1,4 @@
-import { CanvasContext, IPassEncoder, RenderPassDescriptor, RenderPipeline, Submit, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, CanvasContext, IPassEncoder, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 import { mat3, mat4 } from "wgpu-matrix";
 import { modelData } from "./models";
@@ -169,7 +169,7 @@ const init = async () =>
         worldViewProjectionMatrixValue: Float32Array;
         worldMatrixValue: Float32Array;
         uniformValues: Float32Array;
-        bindGroup: Uniforms;
+        bindGroup: BindingResources;
         rotation: number;
         model: Model;
         renderPassDescriptor?: RenderPassDescriptor
@@ -221,7 +221,7 @@ const init = async () =>
         colorValue.set(randColor());
 
         // Make a bind group for this uniform
-        const bindGroup: Uniforms = {
+        const bindGroup: BindingResources = {
             uni: {
                 bufferView: uniformValues,
                 worldViewProjectionMatrix: undefined,

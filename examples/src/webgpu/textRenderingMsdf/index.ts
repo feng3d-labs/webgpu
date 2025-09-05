@@ -1,6 +1,6 @@
 import { mat4, vec3 } from "wgpu-matrix";
 
-import { IRenderPassObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
+import { BindingResources, IRenderPassObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
 import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import basicVertWGSL from "../../shaders/basic.vert.wgsl";
@@ -163,7 +163,7 @@ setBlendConstant().`,
 
     const uniformBuffer = new Float32Array(16);
 
-    const uniformBindGroup: Uniforms = {
+    const uniformBindGroup: BindingResources = {
         uniforms: { bufferView: uniformBuffer },
     };
 

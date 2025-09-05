@@ -1,4 +1,4 @@
-import { Uniforms } from "@feng3d/render-api";
+import { BindingResources } from "@feng3d/render-api";
 import { getIGPUBuffer } from "@feng3d/webgpu";
 
 import { mat4, vec3 } from "wgpu-matrix";
@@ -13,7 +13,7 @@ export default class Common
   readonly wgsl = commonWGSL;
   /** The common uniform buffer bind group and layout */
   readonly uniforms: {
-    bindGroup: Uniforms;
+    bindGroup: BindingResources;
   };
 
   private readonly uniformBuffer: Uint8Array;
@@ -27,7 +27,7 @@ export default class Common
       + 4 * 16 // inv_mvp
       + 4 * 4);
 
-    const bindGroup: Uniforms = {
+    const bindGroup: BindingResources = {
       common_uniforms: {
         bufferView: this.uniformBuffer,
       },

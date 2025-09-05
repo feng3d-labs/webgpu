@@ -1,4 +1,4 @@
-import { Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit, Uniforms } from "@feng3d/render-api";
+import { BindingResources, Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit } from "@feng3d/render-api";
 import { watcher } from "@feng3d/watcher";
 import { ComputePass, ComputePipeline, getIGPUBuffer, TimestampQuery, WebGPU } from "@feng3d/webgpu";
 import { GUI } from "dat.gui";
@@ -271,7 +271,7 @@ async function init(
         bufferView: new Float32Array(4),
     };
 
-    const computeBGCluster: Uniforms = {
+    const computeBGCluster: BindingResources = {
         input_data: elementsInputBuffer,
         data: elementsInputBuffer,
         output_data: elementsOutputBuffer,

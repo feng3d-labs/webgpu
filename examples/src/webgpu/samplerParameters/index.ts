@@ -1,7 +1,7 @@
 import { GUI } from "dat.gui";
 import { mat4 } from "wgpu-matrix";
 
-import { IRenderPassObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, TextureSource, Uniforms } from "@feng3d/render-api";
+import { BindingResources, IRenderPassObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, TextureSource } from "@feng3d/render-api";
 import { getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 import showTextureWGSL from "./showTexture.wgsl";
@@ -304,7 +304,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const renderObjects: IRenderPassObject[] = [];
 
-    const bindingResources0: Uniforms = {
+    const bindingResources0: BindingResources = {
         config: { bufferView: bufConfig },
         matrices: { bufferView: bufMatrices },
         samp: null, // 帧更新中设置
@@ -320,56 +320,56 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         renderObjects.push(
             {
-                viewport: {isYup: false, x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
+                viewport: { isYup: false, x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
                 pipeline: texturedSquarePipeline,
                 uniforms: bindingResources0,
-                geometry:{
+                geometry: {
                     draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
                 }
             }
         );
     }
 
-    const bindingResources1: Uniforms = {
+    const bindingResources1: BindingResources = {
         tex: { texture: checkerboard },
     };
     const kLastViewport = (kViewportGridSize - 1) * kViewportGridStride + 1;
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
-            geometry:{
+            geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
             }
         }
     );
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
-            geometry:{
+            geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
             }
         }
     );
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
-            geometry:{
+            geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
             }
         }
     );
     renderObjects.push(
         {
-            viewport: {isYup: false, x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
+            viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             uniforms: bindingResources1,
-            geometry:{
+            geometry: {
                 draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
             }
         }

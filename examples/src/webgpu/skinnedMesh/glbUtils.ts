@@ -1,7 +1,7 @@
 import { Mat4, mat4, Quatn, Vec3n } from "wgpu-matrix";
 import { Accessor, BufferView, GlTf, Scene } from "./gltf";
 
-import { Buffer, FragmentState, IDraw, PrimitiveState, RenderObject, RenderPipeline, Uniforms, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
+import { BindingResources, Buffer, FragmentState, IDraw, PrimitiveState, RenderObject, RenderPipeline, VertexAttributes, vertexFormatMap, VertexState } from "@feng3d/render-api";
 import { getIGPUBuffer } from "@feng3d/webgpu";
 
 //NOTE: GLTF code is not generally extensible to all gltf models
@@ -441,7 +441,7 @@ export class GLTFPrimitive
         this.renderPipeline = rpDescript;
     }
 
-    render(renderObjects: RenderObject[], bindingResources: Uniforms)
+    render(renderObjects: RenderObject[], bindingResources: BindingResources)
     {
         let draw: IDraw;
         if (this.indices)
@@ -509,7 +509,7 @@ export class GLTFMesh
         }
     }
 
-    render(renderObjects: RenderObject[], bindingResources: Uniforms)
+    render(renderObjects: RenderObject[], bindingResources: BindingResources)
     {
         // We take a pretty simple approach to start. Just loop through all the primitives and
         // call their individual draw methods
@@ -664,7 +664,7 @@ export class GLTFNode
     }
 
     renderDrawables(
-        renderObjects: RenderObject[], bindingResources: Uniforms
+        renderObjects: RenderObject[], bindingResources: BindingResources
     )
     {
         if (this.drawables !== undefined)
@@ -733,7 +733,7 @@ export class GLTFSkin
     // [5, 2, 3] means our joint info is at nodes 5, 2, and 3
     joints: number[];
     // Bind Group for this skin's uniform buffer
-    skinBindGroup: Uniforms;
+    skinBindGroup: BindingResources;
     // Static bindGroupLayout shared across all skins
     // In a larger shader with more properties, certain bind groups
     // would likely have to be combined due to device limitations in the number of bind groups

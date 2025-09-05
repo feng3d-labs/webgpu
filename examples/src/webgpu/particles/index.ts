@@ -7,8 +7,8 @@ import particleWGSL from "./particle.wgsl";
 import probabilityMapWGSL from "./probabilityMap.wgsl";
 import simulateWGSL from "./simulate.wgsl";
 
-import { RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, Uniforms, VertexAttributes } from "@feng3d/render-api";
-import { ComputePipeline, getIGPUBuffer, ComputePass, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
+import { ComputePass, ComputePipeline, getIGPUBuffer, WebGPU } from "@feng3d/webgpu";
 
 const numParticles = 50000;
 const particlePositionOffset = 0;
@@ -74,7 +74,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     + 0;
   const uniformBuffer = new Uint8Array(uniformBufferSize);
 
-  const uniformBindGroup: Uniforms = {
+  const uniformBindGroup: BindingResources = {
     render_params: {
       bufferView: uniformBuffer,
     },
@@ -179,7 +179,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
       const levelWidth = textureWidth >> level;
       const levelHeight = textureHeight >> level;
-      const probabilityMapBindGroup: Uniforms = {
+      const probabilityMapBindGroup: BindingResources = {
         ubo: { bufferView: probabilityMapUBOBuffer },
         buf_in: { bufferView: level & 1 ? bufferA : bufferB },
         buf_out: { bufferView: level & 1 ? bufferB : bufferA },
@@ -250,7 +250,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
       code: simulateWGSL,
     },
   };
-  const computeBindGroup: Uniforms = {
+  const computeBindGroup: BindingResources = {
     sim_params: {
       bufferView: simulationUBOBuffer,
     },
