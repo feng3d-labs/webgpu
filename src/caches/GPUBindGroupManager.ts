@@ -108,11 +108,11 @@ export class GPUBindGroupManager
             GPUBindGroupManager.updateBufferBinding(bufferBinding, type);
             const bufferView = bufferBinding.bufferView;
             //
-            const gbuffer = WGPUBuffer.getBuffer(bufferView);
+            const gbuffer = WGPUBuffer.getOrCreateBuffer(bufferView);
 
             (gbuffer as any).label = gbuffer.label || (`BufferBinding ${type.name}`);
             //
-            const buffer = WGPUBuffer.getInstance(device, gbuffer).gpuBuffer;
+            const buffer = WGPUBuffer.getOrCreateWGPUBuffer(device, gbuffer).gpuBuffer;
 
             const offset = bufferView.byteOffset;
             const size = bufferView.byteLength;
@@ -178,7 +178,7 @@ export class GPUBindGroupManager
             (uniformData as UnReadonly<BufferBinding>).bufferView = new Uint8Array(size);
         }
 
-        const buffer = WGPUBuffer.getBuffer(uniformData.bufferView);
+        const buffer = WGPUBuffer.getOrCreateBuffer(uniformData.bufferView);
         const offset = uniformData.bufferView.byteOffset;
 
         for (let i = 0; i < bufferBindingInfo.items.length; i++)
