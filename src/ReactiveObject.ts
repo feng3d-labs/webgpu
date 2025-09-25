@@ -82,9 +82,9 @@ export class ReactiveObject
      * 销毁响应式类实例
      *
      * 执行清理操作：
-     * 1. 停止所有副作用作用域，防止副作用继续执行
-     * 2. 清理副作用作用域引用，帮助垃圾回收
-     * 3. 防止内存泄漏
+     * 1. 执行所有注册的清理函数
+     * 2. 停止所有副作用作用域，防止副作用继续执行
+     * 3. 清理引用，帮助垃圾回收，防止内存泄漏
      *
      * 重要：
      * - 子类重写此方法时必须调用 super.destroy()
@@ -106,8 +106,8 @@ export class ReactiveObject
      */
     destroy()
     {
-        // 销毁时需要执行的函数
-        this._destroyItems.forEach((item) => item());
+        // 执行所有注册的清理函数
+        this._destroyItems?.forEach((item) => item());
         this._destroyItems = null;
 
         // 停止副作用作用域，这会自动停止所有通过 effect() 创建的副作用
