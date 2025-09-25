@@ -231,7 +231,7 @@ export class WGPUBuffer extends ReactiveObject
      * @param buffer 缓冲区配置对象
      * @returns WGPUBuffer实例
      */
-    static getOrCreateWGPUBuffer(device: GPUDevice, buffer: Buffer)
+    static getInstance(device: GPUDevice, buffer: Buffer)
     {
         // 尝试从缓存中获取现有实例
         let result = WGPUBuffer.getGPUBufferMap.get([device, buffer]);

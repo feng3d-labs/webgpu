@@ -114,7 +114,7 @@ export class WebGPU
     async readBuffer(buffer: Buffer, offset?: GPUSize64, size?: GPUSize64)
     {
         const device = this.device;
-        const gpuBuffer = WGPUBuffer.getOrCreateWGPUBuffer(device, buffer).gpuBuffer;
+        const gpuBuffer = WGPUBuffer.getInstance(device, buffer).gpuBuffer;
 
         await gpuBuffer.mapAsync(GPUMapMode.READ);
 
@@ -420,7 +420,7 @@ export class WebGPU
 
                 (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
-                const gBuffer = WGPUBuffer.getOrCreateWGPUBuffer(device, buffer).gpuBuffer;
+                const gBuffer = WGPUBuffer.getInstance(device, buffer).gpuBuffer;
 
                 renderObjectCache.setVertexBuffer[index] = ['setVertexBuffer', index, gBuffer, offset, size];
             });
@@ -451,7 +451,7 @@ export class WebGPU
 
             (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 
-            const gBuffer = WGPUBuffer.getOrCreateWGPUBuffer(device, buffer);
+            const gBuffer = WGPUBuffer.getInstance(device, buffer);
 
             //
             renderObjectCache.setIndexBuffer = ['setIndexBuffer', gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];

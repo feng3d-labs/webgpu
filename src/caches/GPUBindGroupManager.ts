@@ -112,7 +112,7 @@ export class GPUBindGroupManager
 
             (gbuffer as any).label = gbuffer.label || (`BufferBinding ${type.name}`);
             //
-            const buffer = WGPUBuffer.getOrCreateWGPUBuffer(device, gbuffer).gpuBuffer;
+            const buffer = WGPUBuffer.getInstance(device, gbuffer).gpuBuffer;
 
             const offset = bufferView.byteOffset;
             const size = bufferView.byteLength;

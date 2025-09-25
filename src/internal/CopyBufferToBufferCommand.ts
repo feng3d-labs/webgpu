@@ -14,9 +14,9 @@ export class CopyBufferToBufferCommand
     {
         const device = this.webgpu.device;
 
-        this.source = WGPUBuffer.getOrCreateWGPUBuffer(device, copyBufferToBuffer.source).gpuBuffer;
+        this.source = WGPUBuffer.getInstance(device, copyBufferToBuffer.source).gpuBuffer;
         this.sourceOffset = copyBufferToBuffer.sourceOffset ?? 0;
-        this.destination = WGPUBuffer.getOrCreateWGPUBuffer(device, copyBufferToBuffer.destination).gpuBuffer;
+        this.destination = WGPUBuffer.getInstance(device, copyBufferToBuffer.destination).gpuBuffer;
         this.destinationOffset = copyBufferToBuffer.destinationOffset ?? 0;
         this.size = copyBufferToBuffer.size ?? copyBufferToBuffer.source.size;
     }

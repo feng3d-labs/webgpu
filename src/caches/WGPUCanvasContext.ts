@@ -62,10 +62,10 @@ export class WGPUCanvasContext extends ReactiveObject
         // 注册到画布上下文映射表
         WGPUCanvasContext._canvasContextMap.set([device, context], this);
 
-        this.effect(() => this._onCanvasIdChange());
-        this.effect(() => this._onConfigurationChange());
-        this.effect(() => this._onCanvasChanged());
-        this.effect(() => this._onSizeChanged());
+        this._onCanvasIdChange();
+        this._onConfigurationChange();
+        this._onCanvasChanged();
+        this._onSizeChanged();
     }
 
     /**
@@ -138,81 +138,117 @@ export class WGPUCanvasContext extends ReactiveObject
      */
     private _onCanvasIdChange()
     {
-        const r_context = reactive(this._context);
-        r_context.canvasId;
-
-        // 画布ID变化时，重置画布相关对象
         const r_this = reactive(this);
-        r_this.canvas = null;
-        r_this.gpuCanvasContext = null;
-        r_this.needUpdate = true;
+        const r_context = reactive(this._context);
+
+        this.effect(() =>
+        {
+            r_context.canvasId;
+
+            // 画布ID变化时，重置画布相关对象
+            r_this.canvas = null;
+            r_this.gpuCanvasContext = null;
+            r_this.needUpdate = true;
+        });
+
     }
 
     /**
      * 配置变化时，重置配置对象
-     */
+    */
     private _onConfigurationChange()
     {
+        const r_this = reactive(this);
         const r_context = reactive(this._context);
 
-        const r_configuration = r_context.configuration;
-        if (r_configuration)
+        this.effect(() =>
         {
-            // 监听配置的各个属性变化
-            r_configuration.format;
-            r_configuration.usage;
-            r_configuration.viewFormats?.concat();
-            r_configuration.colorSpace;
-            r_configuration.toneMapping?.mode;
-            r_configuration.alphaMode;
-        }
+            const r_configuration = r_context.configuration;
+            if (r_configuration)
+            {
+                // 监听配置的各个属性变化
+                r_configuration.format;
+                r_configuration.usage;
+                r_configuration.viewFormats?.concat();
+                r_configuration.colorSpace;
+                r_configuration.toneMapping?.mode;
+                r_configuration.alphaMode;
+            }
 
-        // 配置变化时，重置GPU画布配置
-        const r_this = reactive(this);
-        r_this.gpuCanvasConfiguration = null;
-        r_this.needUpdate = true;
+            // 配置变化时，重置GPU画布配置
+            r_this.gpuCanvasConfiguration = null;
+            r_this.needUpdate = true;
+        });
     }
 
     private _onCanvasChanged()
     {
-        reactive(this).canvas;
+        const r_this = reactive(this);
 
-        if (this._preCanvas)
+        const _onWidthChanged = () =>
         {
-            watcher.unwatch(this._preCanvas, 'width', this._onCanvasWidthChanged);
-            watcher.unwatch(this._preCanvas, 'height', this._onCanvasHeightChanged);
+            reactive(this._context).width = this.canvas.width;
+            reactive(this).needUpdate = true;
         }
 
-        this._preCanvas = this.canvas;
-
-        if (this._preCanvas)
+        const _onHeightChanged = () =>
         {
-            watcher.watch(this._preCanvas, 'width', this._onCanvasWidthChanged);
-            watcher.watch(this._preCanvas, 'height', this._onCanvasHeightChanged);
+            reactive(this._context).height = this.canvas.height;
+            reactive(this).needUpdate = true;
         }
-    }
 
-    private _preCanvas: HTMLCanvasElement | OffscreenCanvas;
+        let canvas: HTMLCanvasElement | OffscreenCanvas;
+        this.effect(() =>
+        {
+            r_this.canvas;
 
-    private _onCanvasWidthChanged()
-    {
-        reactive(this._context).width = this.canvas.width;
-        reactive(this).needUpdate = true;
-    }
+            if (canvas)
+            {
+                watcher.unwatch(canvas, 'width', _onWidthChanged);
+                watcher.unwatch(canvas, 'height', _onHeightChanged);
+            }
 
-    private _onCanvasHeightChanged()
-    {
-        reactive(this._context).height = this.canvas.height;
-        reactive(this).needUpdate = true;
+            canvas = this.canvas;
+
+            if (canvas)
+            {
+                watcher.watch(canvas, 'width', _onWidthChanged);
+                watcher.watch(canvas, 'height', _onHeightChanged);
+            }
+        });
+
+        // 注册销毁回调，确保在对象销毁时清理画布相关对象
+        this._destroyItems.push(() =>
+        {
+            if (canvas)
+            {
+                watcher.unwatch(canvas, 'width', _onWidthChanged);
+                watcher.unwatch(canvas, 'height', _onHeightChanged);
+            }
+        });
     }
 
     private _onSizeChanged()
     {
-        if (!this.canvas) return;
+        const context = this._context;
 
-        this.canvas.width = reactive(this._context).width;
-        this.canvas.height = reactive(this._context).height;
-        reactive(this).needUpdate = true;
+        const r_this = reactive(this);
+        const r_context = reactive(context);
+
+        this.effect(() =>
+        {
+            r_this.canvas;
+
+            if (!this.canvas) return;
+
+            //
+            this.canvas.width = r_context.width;
+            this.canvas.height = r_context.height;
+
+            //
+            r_this.needUpdate = true;
+        });
+
     }
 
     /**
