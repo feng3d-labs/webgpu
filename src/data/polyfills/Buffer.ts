@@ -22,7 +22,7 @@ declare module '@feng3d/render-api'
                 | GPUBufferUsage.INDIRECT
                 | GPUBufferUsage.QUERY_RESOLVE 。
 
-         *  注：修改允许缓冲区使用的用途时，会重新创建缓冲区。
+         *  注：初始化GPUBuffer后将无法修改允许缓冲区使用的用途。
          *
          */
         readonly usage?: GPUBufferUsageFlags;
