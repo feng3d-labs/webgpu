@@ -7,32 +7,71 @@ import { ReactiveObject } from '../ReactiveObject';
  */
 export class WGPUBuffer extends ReactiveObject
 {
-    get gpuBuffer()
-    {
-        if (!this._gpuBuffer)
-        {
-            this._gpuBuffer = WGPUBuffer.createGPUBuffer(this._device, this._buffer);
-        }
-        return this._gpuBuffer;
-    }
-    private _gpuBuffer: GPUBuffer;
+    readonly gpuBuffer: GPUBuffer;
 
-    private readonly _device: GPUDevice;
-    private readonly _buffer: Buffer;
-
-    constructor(device: GPUDevice, buffer: Buffer)
+    constructor(private _device: GPUDevice, private _buffer: Buffer)
     {
         super();
-        this._device = device;
-        this._buffer = buffer;
 
-        this._updateWriteBuffers();
-        this._onSizeChange();
-        this._onDataChange();
-        this._onUsageChange();
+        this._createGPUBuffer();
+        this._onWriteBuffers();
     }
 
-    private _updateWriteBuffers()
+    private _createGPUBuffer()
+    {
+        const device = this._device;
+        const buffer = this._buffer;
+
+        const r_this = reactive(this);
+        const r_buffer = reactive(buffer);
+
+        this.effect(() =>
+        {
+            r_buffer.label;
+            r_buffer.size;
+            r_buffer.usage;
+            r_buffer.data;
+
+            const { label, size, usage, data } = this._buffer;
+
+            console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
+
+            // 初始化时存在数据，则使用map方式上传第一次数据。
+            const mappedAtCreation = data !== undefined;
+
+            const gpuBuffer = device.createBuffer({ label, size, usage: usage ?? WGPUBuffer.defaultGPUBufferUsage, mappedAtCreation });
+
+            // 初始化时存在数据，则使用map方式上传第一次数据。
+            if (mappedAtCreation)
+            {
+                const int8Array = ArrayBuffer.isView(data) ? new Int8Array(data.buffer) : new Int8Array(data);
+
+                new Int8Array(gpuBuffer.getMappedRange()).set(int8Array);
+
+                gpuBuffer.unmap();
+            }
+
+            r_this.gpuBuffer = gpuBuffer;
+        });
+
+        // 销毁旧的GPU缓冲区
+        let oldGPUBuffer: GPUBuffer;
+        this.effect(() =>
+        {
+            r_this.gpuBuffer;
+
+            oldGPUBuffer?.destroy();
+            oldGPUBuffer = this.gpuBuffer;
+        });
+
+        // 销毁GPU缓冲区
+        this._destroyItems.push(() =>
+        {
+            r_this.gpuBuffer = null;
+        });
+    }
+
+    private _onWriteBuffers()
     {
         const buffer = this._buffer;
         const device = this._device;
@@ -49,10 +88,10 @@ export class WGPUBuffer extends ReactiveObject
 
             const gpuBuffer = this.gpuBuffer;
 
-            if (!gpuBuffer) return;
+            if (!gpuBuffer || !buffer.writeBuffers) return;
 
             // 处理数据写入GPU缓冲
-            buffer.writeBuffers?.forEach((writeBuffer) =>
+            buffer.writeBuffers.forEach((writeBuffer) =>
             {
                 const bufferOffset = writeBuffer.bufferOffset ?? 0;
                 const data = writeBuffer.data;
@@ -95,54 +134,6 @@ export class WGPUBuffer extends ReactiveObject
 
             // 清空写入数据
             r_buffer.writeBuffers = null;
-        });
-    }
-
-    private _onSizeChange()
-    {
-        const buffer = this._buffer;
-        const r_buffer = reactive(buffer);
-
-        this.effect(() =>
-        {
-            r_buffer.size;
-
-            if (this.gpuBuffer)
-            {
-                console.warn(`初始化GPUBuffer后将无法修改尺寸！`);
-            }
-        });
-    }
-
-    private _onDataChange()
-    {
-        const buffer = this._buffer;
-        const r_buffer = reactive(buffer);
-
-        this.effect(() =>
-        {
-            r_buffer.data;
-
-            if (this.gpuBuffer)
-            {
-                console.warn(`初始化GPUBuffer后将无法直接修改数据，只能通过 {@link writeBuffers} 修改！`);
-            }
-        });
-    }
-
-    private _onUsageChange()
-    {
-        const buffer = this._buffer;
-        const r_buffer = reactive(buffer);
-
-        this.effect(() =>
-        {
-            r_buffer.usage;
-
-            if (this.gpuBuffer)
-            {
-                console.warn(`初始化GPUBuffer后将无法修改允许缓冲区使用的用途！`);
-            }
         });
     }
 
@@ -207,31 +198,4 @@ export class WGPUBuffer extends ReactiveObject
     }
 
     private static readonly getGPUBufferMap = new ChainMap<[device: GPUDevice, buffer: Buffer], WGPUBuffer>();
-
-    static createGPUBuffer(device: GPUDevice, buffer: Buffer)
-    {
-        const { label, size, usage } = buffer;
-
-        console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
-
-        // 初始化时存在数据，则使用map方式上传第一次数据。
-        const mappedAtCreation = buffer.data !== undefined;
-
-        const gpuBuffer = device.createBuffer({ label, size, usage: usage ?? WGPUBuffer.defaultGPUBufferUsage, mappedAtCreation });
-
-        // 初始化时存在数据，则使用map方式上传第一次数据。
-        if (mappedAtCreation)
-        {
-            const bufferData = buffer.data;
-
-            const int8Array = ArrayBuffer.isView(bufferData) ? new Int8Array(bufferData.buffer) : new Int8Array(bufferData);
-
-            new Int8Array(gpuBuffer.getMappedRange()).set(int8Array);
-
-            gpuBuffer.unmap();
-        }
-
-        return gpuBuffer;
-    }
-
 }

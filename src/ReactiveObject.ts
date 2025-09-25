@@ -36,6 +36,11 @@ export class ReactiveObject
     private _effectScope = new EffectScope();
 
     /**
+     * 销毁时需要执行的函数
+     */
+    protected _destroyItems: (() => void)[] = [];
+
+    /**
      * 创建并运行副作用
      *
      * 功能：
@@ -101,10 +106,12 @@ export class ReactiveObject
      */
     destroy()
     {
+        // 销毁时需要执行的函数
+        this._destroyItems.forEach((item) => item());
+        this._destroyItems = null;
+
         // 停止副作用作用域，这会自动停止所有通过 effect() 创建的副作用
         this._effectScope?.stop();
-
-        // 清理引用，帮助垃圾回收
         this._effectScope = null;
     }
 }
