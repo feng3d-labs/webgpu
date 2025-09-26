@@ -70,7 +70,6 @@ export class WGPUCanvasTexture extends ReactiveObject
 
     private _onWGPUCanvasContextChanged()
     {
-        reactive(this).wgpuCanvasContext?.needUpdate;
         reactive(this).gpuTexture = null;
     }
 
@@ -105,7 +104,6 @@ export class WGPUCanvasTexture extends ReactiveObject
         {
             r_this.wgpuCanvasContext = WGPUCanvasContext.getInstance(this._device, this._canvasTexture.context);
         }
-        this.wgpuCanvasContext.update();
 
         // 如果没有纹理，创建新的纹理
         if (!this.gpuTexture)
