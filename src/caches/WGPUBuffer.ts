@@ -14,25 +14,27 @@ export class WGPUBuffer extends ReactiveObject
 
     /**
      * 构造函数
-     * @param _device GPU设备实例
-     * @param _buffer 缓冲区配置对象
+     * @param device GPU设备实例
+     * @param buffer 缓冲区配置对象
      */
-    constructor(private _device: GPUDevice, private _buffer: Buffer)
+    constructor(device: GPUDevice, buffer: Buffer)
     {
         super();
 
-        this._createGPUBuffer();
-        this._onWriteBuffers();
+        this._createGPUBuffer(device, buffer);
+        this._onWriteBuffers(device, buffer);
+
+        //
+        WGPUBuffer.getGPUBufferMap.set([device, buffer], this);
+        this._destroyItems.push(() => { WGPUBuffer.getGPUBufferMap.delete([device, buffer]); });
     }
 
     /**
      * 创建GPU缓冲区
      * 使用响应式系统监听缓冲区配置变化，自动重新创建GPU缓冲区
      */
-    private _createGPUBuffer()
+    private _createGPUBuffer(device: GPUDevice, buffer: Buffer)
     {
-        const device = this._device;
-        const buffer = this._buffer;
 
         const r_this = reactive(this);
         const r_buffer = reactive(buffer);
@@ -46,7 +48,7 @@ export class WGPUBuffer extends ReactiveObject
             r_buffer.usage;
             r_buffer.data;
 
-            const { label, size, usage, data } = this._buffer;
+            const { label, size, usage, data } = buffer;
 
             // 验证缓冲区尺寸必须为4的倍数（WebGPU要求）
             console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
@@ -99,11 +101,8 @@ export class WGPUBuffer extends ReactiveObject
      * 设置缓冲区数据写入监听
      * 监听writeBuffers变化，自动将数据写入GPU缓冲区
      */
-    private _onWriteBuffers()
+    private _onWriteBuffers(device: GPUDevice, buffer: Buffer)
     {
-        const buffer = this._buffer;
-        const device = this._device;
-
         const r_buffer = reactive(buffer);
         const r_this = reactive(this);
 
@@ -196,17 +195,7 @@ export class WGPUBuffer extends ReactiveObject
      */
     static getInstance(device: GPUDevice, buffer: Buffer)
     {
-        // 尝试从缓存中获取现有实例
-        let result = WGPUBuffer.getGPUBufferMap.get([device, buffer]);
-
-        if (result) return result;
-
-        // 创建新实例并缓存
-        result = new WGPUBuffer(device, buffer);
-
-        WGPUBuffer.getGPUBufferMap.set([device, buffer], result);
-
-        return result;
+        return WGPUBuffer.getGPUBufferMap.get([device, buffer]) || new WGPUBuffer(device, buffer);
     }
 
     /** GPU缓冲区实例缓存映射表 */
