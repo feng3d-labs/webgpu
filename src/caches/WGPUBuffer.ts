@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { Buffer, ChainMap } from '@feng3d/render-api';
+import { Buffer } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**
@@ -25,8 +25,14 @@ export class WGPUBuffer extends ReactiveObject
         this._onWriteBuffers(device, buffer);
 
         //
-        WGPUBuffer.getGPUBufferMap.set([device, buffer], this);
-        this._destroyItems.push(() => { WGPUBuffer.getGPUBufferMap.delete([device, buffer]); });
+        this._onMap(device, buffer);
+    }
+
+    private _onMap(device: GPUDevice, buffer: Buffer)
+    {
+        device.buffers ??= new WeakMap<Buffer, WGPUBuffer>();
+        device.buffers.set(buffer, this);
+        this._destroyItems.push(() => { device.buffers.delete(buffer); });
     }
 
     /**
@@ -195,9 +201,14 @@ export class WGPUBuffer extends ReactiveObject
      */
     static getInstance(device: GPUDevice, buffer: Buffer)
     {
-        return WGPUBuffer.getGPUBufferMap.get([device, buffer]) || new WGPUBuffer(device, buffer);
+        return device.buffers?.get(buffer) || new WGPUBuffer(device, buffer);
     }
+}
 
-    /** GPU缓冲区实例缓存映射表 */
-    private static readonly getGPUBufferMap = new ChainMap<[device: GPUDevice, buffer: Buffer], WGPUBuffer>();
+declare global
+{
+    interface GPUDevice
+    {
+        buffers: WeakMap<Buffer, WGPUBuffer>;
+    }
 }

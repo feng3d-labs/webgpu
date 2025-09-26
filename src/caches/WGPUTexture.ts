@@ -206,7 +206,8 @@ export class WGPUTexture extends ReactiveObject
     {
         if ('context' in textureLike)
         {
-            return WGPUCanvasTexture.destroy(device, textureLike);
+            device.canvasTextures?.get(textureLike)?.destroy();
+            return;
         }
 
         WGPUTexture._textureMap.get([device, textureLike])?.destroy();

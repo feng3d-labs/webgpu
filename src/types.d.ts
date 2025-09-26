@@ -1,11 +1,3 @@
-declare global
-{
-  interface HTMLCanvasElement extends HTMLElement
-  {
-    getContext(contextId: 'webgpu'): GPUPresentationContext | null;
-  }
-}
-
 declare module '*.module.css' {
   const styles: { [className: string]: string };
   export default styles;

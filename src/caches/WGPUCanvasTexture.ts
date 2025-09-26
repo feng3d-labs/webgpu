@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { CanvasTexture, ChainMap } from '@feng3d/render-api';
+import { CanvasTexture } from '@feng3d/render-api';
 
 import { webgpuEvents } from '../eventnames';
 import { ReactiveObject } from '../ReactiveObject';
@@ -31,9 +31,15 @@ export class WGPUCanvasTexture extends ReactiveObject
         //
         this._createGPUTexture(device, canvasTexture);
 
-        // 注册到纹理映射表
-        WGPUCanvasTexture._textureMap.set([device, canvasTexture], this);
-        this._destroyItems.push(() => { WGPUCanvasTexture._textureMap.delete([device, canvasTexture]); });
+        //
+        this._onMap(device, canvasTexture);
+    }
+
+    private _onMap(device: GPUDevice, canvasTexture: CanvasTexture)
+    {
+        device.canvasTextures ??= new WeakMap<CanvasTexture, WGPUCanvasTexture>();
+        device.canvasTextures.set(canvasTexture, this);
+        this._destroyItems.push(() => { device.canvasTextures.delete(canvasTexture); });
     }
 
     private _createGPUTexture(device: GPUDevice, canvasTexture: CanvasTexture)
@@ -84,24 +90,14 @@ export class WGPUCanvasTexture extends ReactiveObject
      */
     static getInstance(device: GPUDevice, canvasTexture: CanvasTexture)
     {
-        return this._textureMap.get([device, canvasTexture]) || new WGPUCanvasTexture(device, canvasTexture);
+        return device.canvasTextures?.get(canvasTexture) || new WGPUCanvasTexture(device, canvasTexture);
     }
+}
 
-    /**
-     * 销毁纹理实例
-     *
-     * @param device GPU设备
-     * @param canvasTexture 画布纹理对象
-     */
-    static destroy(device: GPUDevice, canvasTexture: CanvasTexture)
+declare global
+{
+    interface GPUDevice
     {
-        this._textureMap.get([device, canvasTexture])?.destroy();
+        canvasTextures: WeakMap<CanvasTexture, WGPUCanvasTexture>;
     }
-
-    /**
-     * 纹理实例映射表
-     *
-     * 用于缓存和管理纹理实例，避免重复创建
-     */
-    private static readonly _textureMap = new ChainMap<[GPUDevice, CanvasTexture], WGPUCanvasTexture>();
 }
