@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { CanvasContext, ChainMap } from '@feng3d/render-api';
+import { CanvasContext } from '@feng3d/render-api';
 import { watcher } from '@feng3d/watcher';
 
 import '../data/polyfills/CanvasContext.ts';
@@ -45,9 +45,15 @@ export class WGPUCanvasContext extends ReactiveObject
         this._onCanvasChanged(context);
         this._onSizeChanged(context);
 
-        // 注册到画布上下文映射表
-        WGPUCanvasContext._canvasContextMap.set([device, context], this);
-        this.destroyCall(() => { WGPUCanvasContext._canvasContextMap.delete([device, context]); });
+        //
+        this._onMap(device, context);
+    }
+
+    private _onMap(device: GPUDevice, context: CanvasContext)
+    {
+        device.canvasContexts ??= new WeakMap<CanvasContext, WGPUCanvasContext>();
+        device.canvasContexts.set(context, this);
+        this.destroyCall(() => { device.canvasContexts.delete(context); });
     }
 
     /**
@@ -204,14 +210,14 @@ export class WGPUCanvasContext extends ReactiveObject
      */
     static getInstance(device: GPUDevice, context: CanvasContext)
     {
-        return WGPUCanvasContext._canvasContextMap.get([device, context]) || new WGPUCanvasContext(device, context);
+        return device.canvasContexts?.get(context) || new WGPUCanvasContext(device, context);
     }
+}
 
-    /**
-     * 画布上下文实例映射表
-     *
-     * 用于缓存和管理画布上下文实例，避免重复创建
-     * 键为[device, context]组合，确保唯一性
-     */
-    private static readonly _canvasContextMap = new ChainMap<[GPUDevice, CanvasContext], WGPUCanvasContext>();
+declare global
+{
+    interface GPUDevice
+    {
+        canvasContexts: WeakMap<CanvasContext, WGPUCanvasContext>;
+    }
 }
