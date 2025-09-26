@@ -38,7 +38,7 @@ export class ReactiveObject
     /**
      * 销毁时需要执行的函数
      */
-    protected _destroyItems: (() => void)[] = [];
+    private _destroyCallbacks: (() => void)[] = [];
 
     /**
      * 创建并运行副作用
@@ -79,6 +79,15 @@ export class ReactiveObject
     }
 
     /**
+     * 销毁时执行的函数
+     * @param callback 销毁时执行的函数
+     */
+    destroyCall(callback: () => void)
+    {
+        this._destroyCallbacks.push(callback);
+    }
+
+    /**
      * 销毁响应式类实例
      *
      * 执行清理操作：
@@ -107,8 +116,8 @@ export class ReactiveObject
     destroy()
     {
         // 执行所有注册的清理函数
-        this._destroyItems?.forEach((item) => item());
-        this._destroyItems = null;
+        this._destroyCallbacks?.forEach((item) => item());
+        this._destroyCallbacks = null;
 
         // 停止副作用作用域，这会自动停止所有通过 effect() 创建的副作用
         this._effectScope?.stop();

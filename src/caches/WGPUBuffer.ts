@@ -32,7 +32,7 @@ export class WGPUBuffer extends ReactiveObject
     {
         device.buffers ??= new WeakMap<Buffer, WGPUBuffer>();
         device.buffers.set(buffer, this);
-        this._destroyItems.push(() => { device.buffers.delete(buffer); });
+        this.destroyCall(() => { device.buffers.delete(buffer); });
     }
 
     /**
@@ -97,7 +97,7 @@ export class WGPUBuffer extends ReactiveObject
         });
 
         // 注册销毁回调，确保在对象销毁时清理GPU缓冲区
-        this._destroyItems.push(() =>
+        this.destroyCall(() =>
         {
             r_this.gpuBuffer = null;
         });

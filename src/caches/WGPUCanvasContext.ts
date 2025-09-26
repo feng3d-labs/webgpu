@@ -47,7 +47,7 @@ export class WGPUCanvasContext extends ReactiveObject
 
         // 注册到画布上下文映射表
         WGPUCanvasContext._canvasContextMap.set([device, context], this);
-        this._destroyItems.push(() => { WGPUCanvasContext._canvasContextMap.delete([device, context]); });
+        this.destroyCall(() => { WGPUCanvasContext._canvasContextMap.delete([device, context]); });
     }
 
     /**
@@ -165,7 +165,7 @@ export class WGPUCanvasContext extends ReactiveObject
         });
 
         // 注册销毁回调，确保在对象销毁时清理画布相关对象
-        this._destroyItems.push(() =>
+        this.destroyCall(() =>
         {
             if (canvas)
             {

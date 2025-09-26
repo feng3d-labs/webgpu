@@ -39,7 +39,7 @@ export class WGPUCanvasTexture extends ReactiveObject
     {
         device.canvasTextures ??= new WeakMap<CanvasTexture, WGPUCanvasTexture>();
         device.canvasTextures.set(canvasTexture, this);
-        this._destroyItems.push(() => { device.canvasTextures.delete(canvasTexture); });
+        this.destroyCall(() => { device.canvasTextures.delete(canvasTexture); });
     }
 
     private _createGPUTexture(device: GPUDevice, canvasTexture: CanvasTexture)
@@ -78,7 +78,7 @@ export class WGPUCanvasTexture extends ReactiveObject
             r_this.gpuTexture = gpuTexture;
         });
 
-        this._destroyItems.push(destroyGPUTexture);
+        this.destroyCall(destroyGPUTexture);
     }
 
     /**
