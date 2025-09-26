@@ -1,10 +1,10 @@
+import { UnReadonly } from '@feng3d/reactivity';
 import { ChainMap } from '@feng3d/render-api';
 import { ComputePipeline } from '../data/ComputePipeline';
 import { ComputeStage } from '../data/ComputeStage';
 import { GPUPipelineLayoutManager } from './GPUPipelineLayoutManager';
-import { GPUShaderModuleManager } from './GPUShaderModuleManager';
+import { WGPUShaderModule } from './WGPUShaderModule';
 import { WgslReflectManager } from './WgslReflectManager';
-import { UnReadonly } from '@feng3d/reactivity';
 
 export class GPUComputePipelineManager
 {
@@ -41,7 +41,7 @@ export class GPUComputePipelineManager
             layout,
             compute: {
                 ...computeStage,
-                module: GPUShaderModuleManager.getGPUShaderModule(device, computeStage.code),
+                module: WGPUShaderModule.getGPUShaderModule(device, computeStage.code),
             },
         });
         GPUComputePipelineManager._computePipelineMap.set(getGPUComputePipelineKey, pipeline);

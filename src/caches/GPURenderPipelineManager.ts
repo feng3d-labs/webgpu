@@ -5,7 +5,7 @@ import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 import { MultisampleState } from '../data/MultisampleState';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { GPUPipelineLayoutManager } from './GPUPipelineLayoutManager';
-import { GPUShaderModuleManager } from './GPUShaderModuleManager';
+import { WGPUShaderModule } from './WGPUShaderModule';
 import { GPUVertexBufferManager } from './GPUVertexBufferManager';
 import { WgslReflectManager } from './WgslReflectManager';
 
@@ -113,7 +113,7 @@ export class GPURenderPipelineManager
             const vertexBufferLayouts = GPUVertexBufferManager.getGPUVertexBufferLayouts(vertexState, vertices);
 
             const gpuVertexState: GPUVertexState = {
-                module: GPUShaderModuleManager.getGPUShaderModule(device, code),
+                module: WGPUShaderModule.getGPUShaderModule(device, code),
                 entryPoint: entryPoint,
                 buffers: vertexBufferLayouts,
                 constants: this.getConstants(constants),
@@ -435,7 +435,7 @@ export class GPURenderPipelineManager
 
             const { code } = fragmentState;
 
-            r_gpuFragmentState.module = GPUShaderModuleManager.getGPUShaderModule(device, code);
+            r_gpuFragmentState.module = WGPUShaderModule.getGPUShaderModule(device, code);
         });
 
         // 计算入口函数
