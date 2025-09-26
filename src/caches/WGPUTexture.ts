@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
+import { Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { generateMipmap } from '../utils/generate-mipmap';
 import { WGPUCanvasTexture } from './WGPUCanvasTexture';
@@ -10,26 +10,10 @@ import { WGPUCanvasTexture } from './WGPUCanvasTexture';
  */
 export class WGPUTexture extends ReactiveObject
 {
-
-    /**
-     * 纹理描述符
-     */
-    readonly descriptor: GPUTextureDescriptor;
-
     /**
      * WebGPU纹理对象
      */
     readonly gpuTexture: GPUTexture;
-
-    /**
-     * 纹理是否有效
-     */
-    readonly invalid: boolean = true;
-
-    /** GPU设备 */
-    private readonly _device: GPUDevice;
-    /** 纹理对象 */
-    private readonly _texture: Texture;
 
     /**
      * 构造函数
@@ -40,143 +24,117 @@ export class WGPUTexture extends ReactiveObject
     {
         super();
 
-        WGPUTexture._textureMap.set([device, texture], this);
-
-        this._device = device;
-        this._texture = texture;
+        this._onCreateGPUTexture(device, texture);
+        this._onWriteTextures(device, texture);
 
         //
-        const r_this = reactive(this);
-        const r_texture = reactive(this._texture);
-
-        // 监听纹理属性变化
-        {
-            const r_descriptor = reactive(texture.descriptor);
-
-            let preDescriptor: GPUTextureDescriptor;
-            this.effect(() =>
-            {
-                if (r_this.descriptor)
-                {
-                    r_descriptor.format;
-                    r_descriptor.dimension;
-                    r_descriptor.viewFormats;
-                    r_descriptor.generateMipmap;
-                    r_descriptor.mipLevelCount;
-                    r_descriptor.size[0];
-                    r_descriptor.size[1];
-                    r_descriptor.size[2];
-                    r_descriptor.sampleCount;
-
-                    // 纹理参数变化时，重置纹理对象
-                    if (preDescriptor === this.descriptor)
-                    {
-                        r_this.descriptor = null;
-                    }
-                }
-
-                preDescriptor = this.descriptor;
-            });
-
-            this.effect(() =>
-            {
-                r_this.descriptor;
-
-                r_this.gpuTexture = null;
-            });
-        }
-
-        // 监听纹理变化
-        {
-            let preGPUTexture: GPUTexture;
-            this.effect(() =>
-            {
-                r_this.gpuTexture;
-
-                preGPUTexture?.destroy();
-                preGPUTexture = this.gpuTexture;
-
-                if (!this.gpuTexture)
-                {
-                    r_this.invalid = true;
-                }
-            });
-        }
-
-        // 监听写入纹理变化
-        this.effect(() =>
-        {
-            if (r_texture.writeTextures?.length > 0)
-            {
-                r_this.invalid = true;
-            }
-        });
+        this._onMap(device, texture);
     }
 
-    /**
-     * 更新纹理
-     * 创建或重新创建WebGPU纹理并处理纹理数据
-     */
-    update()
+    private _onCreateGPUTexture(device: GPUDevice, texture: Texture)
     {
-        if (!this.invalid) return this;
-
-        const texture = this._texture;
-        const device = this._device;
-
         const r_this = reactive(this);
         const r_texture = reactive(texture);
 
-        let descriptor = this.descriptor;
-
-        // 创建纹理描述符
-        if (!this.descriptor)
+        const destroyGPUTexture = () =>
         {
-            r_this.descriptor = descriptor = WGPUTexture._createGPUTextureDescriptor(texture);
+            this.gpuTexture?.destroy();
+            r_this.gpuTexture = null;
         }
 
-        // 创建WebGPU纹理
-        let gpuTexture = this.gpuTexture;
-        if (!gpuTexture)
+        this.effect(() =>
         {
-            // 创建纹理
-            r_this.gpuTexture = gpuTexture = WGPUTexture._createGPUTexture(device, descriptor);
+            destroyGPUTexture();
 
-            // 初始化纹理内容
+            const r_descriptor = r_texture.descriptor;
+            if (r_descriptor)
+            {
+                r_descriptor.label;
+                r_descriptor.size[0];
+                r_descriptor.size[1];
+                r_descriptor.size[2];
+                r_descriptor.format;
+                r_descriptor.dimension;
+                r_descriptor.viewFormats;
+                r_descriptor.generateMipmap;
+                r_descriptor.mipLevelCount;
+                r_descriptor.sampleCount;
+            }
+            r_texture.sources;
+
+            //
+            const descriptor = texture.descriptor;
+
+            // 获取纹理属性
+            const { format, size, viewFormats, sampleCount } = descriptor;
+
+            console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
+
+            const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
+
+            const mipLevelCount = descriptor.mipLevelCount ?? (descriptor.generateMipmap ? (1 + Math.log2(Math.max(size[0], size[1])) | 0) : 1);
+
+            // 设置标签
+            const label = descriptor.label ?? `GPUTexture ${WGPUTexture._autoIndex++}`;
+            const dimension = WGPUTexture._dimensionMap[descriptor.dimension];
+
+            const gpuTextureDescriptor: GPUTextureDescriptor = {
+                label,
+                size,
+                mipLevelCount,
+                sampleCount,
+                dimension,
+                format,
+                usage,
+                viewFormats,
+            };
+
+            // 检查bgra8unorm格式支持
+            if (descriptor.format === 'bgra8unorm')
+            {
+                console.assert(device.features.has('bgra8unorm-storage'), `当前设备不支持 bgra8unorm 格式！请使用其他格式或者添加 "bgra8unorm-storage" 特性！`);
+            }
+
+            // 创建纹理
+            const gpuTexture = device.createTexture(gpuTextureDescriptor);
+
+            // 初始化纹理数据
             WGPUTexture._writeTextures(device, gpuTexture, texture.sources);
 
             // 自动生成mipmap
-            if (texture.descriptor.generateMipmap)
+            if (descriptor.generateMipmap)
             {
                 generateMipmap(device, gpuTexture);
             }
-        }
 
-        // 写入纹理数据
-        if (texture.writeTextures?.length > 0)
-        {
-            WGPUTexture._writeTextures(device, gpuTexture, texture.writeTextures);
+            r_this.gpuTexture = gpuTexture;
+        });
 
-            r_texture.writeTextures = null;
-        }
-
-        r_this.invalid = false;
-
-        return this;
+        this.destroyCall(destroyGPUTexture);
     }
 
-    /**
-     * 销毁
-     */
-    destroy()
+    private _onWriteTextures(device: GPUDevice, texture: Texture)
     {
-        // 清理纹理
-        reactive(this).gpuTexture = null;
+        const r_this = reactive(this);
+        const r_texture = reactive(texture);
 
-        //
-        WGPUTexture._textureMap.delete([this._device, this._texture]);
+        this.effect(() =>
+        {
+            if (!r_this.gpuTexture) return;
 
-        super.destroy();
+            r_texture.writeTextures;
+
+            WGPUTexture._writeTextures(device, this.gpuTexture, texture.writeTextures);
+
+            r_texture.writeTextures = null;
+        });
+    }
+
+    private _onMap(device: GPUDevice, texture: Texture)
+    {
+        device.textures ??= new WeakMap<TextureLike, WGPUTexture>();
+        device.textures.set(texture, this);
+        this.destroyCall(() => { device.textures.delete(texture); });
     }
 
     /**
@@ -194,7 +152,7 @@ export class WGPUTexture extends ReactiveObject
             return WGPUCanvasTexture.getInstance(device, textureLike);
         }
 
-        return this._textureMap.get([device, textureLike]) || new WGPUTexture(device, textureLike);
+        return device.textures?.get(textureLike) || new WGPUTexture(device, textureLike);
     }
 
     /**
@@ -210,55 +168,7 @@ export class WGPUTexture extends ReactiveObject
             return;
         }
 
-        WGPUTexture._textureMap.get([device, textureLike])?.destroy();
-    }
-
-    /**
-     * 创建WebGPU纹理描述符
-     * @param texture 纹理对象
-     * @returns 纹理描述符
-     */
-    private static _createGPUTextureDescriptor(texture: Texture)
-    {
-        const descriptor = texture.descriptor;
-
-        // 获取纹理属性
-        const { format, size, dimension, viewFormats, generateMipmap, sampleCount } = descriptor;
-        let { label, mipLevelCount } = descriptor;
-
-        console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
-
-        const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
-
-        // 自动计算mipmap层级数
-        if (generateMipmap && mipLevelCount === undefined)
-        {
-            const maxSize = Math.max(size[0], size[1]);
-
-            mipLevelCount = 1 + Math.log2(maxSize) | 0;
-        }
-        mipLevelCount = mipLevelCount ?? 1;
-
-        // 设置标签
-        if (label === undefined)
-        {
-            label = `GPUTexture ${WGPUTexture._autoIndex++}`;
-        }
-
-        const textureDimension = WGPUTexture._dimensionMap[dimension];
-
-        const gpuTextureDescriptor: GPUTextureDescriptor = {
-            label,
-            size,
-            mipLevelCount,
-            sampleCount,
-            dimension: textureDimension,
-            format,
-            usage,
-            viewFormats,
-        };
-
-        return gpuTextureDescriptor;
+        device.textures?.get(textureLike)?.destroy();
     }
 
     /**
@@ -368,27 +278,6 @@ export class WGPUTexture extends ReactiveObject
     }
 
     /**
-     * 创建WebGPU纹理
-     * @param device GPU设备
-     * @param descriptor 纹理描述符
-     * @returns WebGPU纹理
-     */
-    static _createGPUTexture(device: GPUDevice, descriptor: GPUTextureDescriptor)
-    {
-        // 检查bgra8unorm格式支持
-        if (descriptor.format === 'bgra8unorm')
-        {
-            console.assert(!!device, `bgra8unorm 格式需要指定 GPUDevice 设备！`);
-            console.assert(!!device && device.features.has('bgra8unorm-storage'), `当前设备不支持 bgra8unorm 格式！请使用其他格式或者添加 "bgra8unorm-storage" 特性！`);
-        }
-
-        // 创建纹理
-        const gpuTexture = device.createTexture(descriptor);
-
-        return gpuTexture
-    }
-
-    /**
      * 根据纹理格式和采样数确定纹理的使用标志
      *
      * @param format 纹理格式
@@ -439,7 +328,12 @@ export class WGPUTexture extends ReactiveObject
 
     /** 自动索引计数器 */
     private static _autoIndex = 0;
-    /** 纹理实例映射表 */
-    private static readonly _textureMap = new ChainMap<[device: GPUDevice, texture: TextureLike], WGPUTexture>();
 }
 
+declare global
+{
+    interface GPUDevice
+    {
+        textures: WeakMap<TextureLike, WGPUTexture>;
+    }
+}
