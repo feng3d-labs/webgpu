@@ -26,16 +26,6 @@ export class WGPUCanvasContext extends ReactiveObject
     readonly gpuCanvasContext: GPUCanvasContext;
 
     /**
-     * GPU设备
-     */
-    private readonly _device: GPUDevice;
-
-    /**
-     * 画布上下文对象
-     */
-    private readonly _context: CanvasContext;
-
-    /**
      * 画布上下文发生变化，版本号递增。
      */
     readonly version: number = 0;
@@ -43,32 +33,28 @@ export class WGPUCanvasContext extends ReactiveObject
     /**
      * 构造函数
      *
-     * @param device GPU设备
      * @param context 画布上下文对象
      */
     constructor(device: GPUDevice, context: CanvasContext)
     {
         super();
 
-        this._device = device;
-        this._context = context;
+        //
+        this._createGPUCanvasContext(context);
+        this._onConfiguration(device, context);
+        this._onCanvasChanged(context);
+        this._onSizeChanged(context);
 
         // 注册到画布上下文映射表
         WGPUCanvasContext._canvasContextMap.set([device, context], this);
-
-        this._onCanvasIdChange();
-        this._onConfigurationChange();
-        this._onCanvasChanged();
-        this._onSizeChanged();
+        this._destroyItems.push(() => { WGPUCanvasContext._canvasContextMap.delete([device, context]); });
     }
 
     /**
      * 画布ID变化时，重置画布相关对象
      */
-    private _onCanvasIdChange()
+    private _createGPUCanvasContext(context: CanvasContext)
     {
-        const context = this._context;
-
         const r_this = reactive(this);
         const r_context = reactive(context);
 
@@ -90,10 +76,8 @@ export class WGPUCanvasContext extends ReactiveObject
     /**
      * 配置变化时，重置配置对象
     */
-    private _onConfigurationChange()
+    private _onConfiguration(device: GPUDevice, context: CanvasContext)
     {
-        const context = this._context;
-
         const r_this = reactive(this);
         const r_context = reactive(context);
 
@@ -132,7 +116,7 @@ export class WGPUCanvasContext extends ReactiveObject
             // 创建GPU画布配置对象
             const gpuCanvasConfiguration: GPUCanvasConfiguration = {
                 ...configuration,
-                device: this._device,
+                device: device,
                 usage,
                 format,
             };
@@ -145,10 +129,10 @@ export class WGPUCanvasContext extends ReactiveObject
         });
     }
 
-    private _onCanvasChanged()
+    private _onCanvasChanged(context: CanvasContext)
     {
         const r_this = reactive(this);
-        const r_context = reactive(this._context);
+        const r_context = reactive(context);
 
         const _onWidthChanged = () =>
         {
@@ -191,10 +175,8 @@ export class WGPUCanvasContext extends ReactiveObject
         });
     }
 
-    private _onSizeChanged()
+    private _onSizeChanged(context: CanvasContext)
     {
-        const context = this._context;
-
         const r_this = reactive(this);
         const r_context = reactive(context);
 
@@ -231,5 +213,5 @@ export class WGPUCanvasContext extends ReactiveObject
      * 用于缓存和管理画布上下文实例，避免重复创建
      * 键为[device, context]组合，确保唯一性
      */
-    private static readonly _canvasContextMap = new ChainMap<[device: GPUDevice, context: CanvasContext], WGPUCanvasContext>();
+    private static readonly _canvasContextMap = new ChainMap<[GPUDevice, CanvasContext], WGPUCanvasContext>();
 }

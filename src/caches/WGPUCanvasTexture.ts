@@ -21,18 +21,19 @@ export class WGPUCanvasTexture extends ReactiveObject
     /**
      * 构造函数
      *
-     * @param _device GPU设备
-     * @param _canvasTexture 画布纹理对象
+     * @param device GPU设备
+     * @param canvasTexture 画布纹理对象
      */
-    constructor(private readonly _device: GPUDevice, private readonly _canvasTexture: CanvasTexture)
+    constructor(device: GPUDevice, canvasTexture: CanvasTexture)
     {
         super();
 
-        // 注册到纹理映射表
-        WGPUCanvasTexture._textureMap.set([_device, _canvasTexture], this);
-        this._destroyItems.push(() => { WGPUCanvasTexture._textureMap.delete([this._device, this._canvasTexture]); });
+        //
+        this._createGPUTexture(device, canvasTexture);
 
-        this._createGPUTexture(_device, _canvasTexture);
+        // 注册到纹理映射表
+        WGPUCanvasTexture._textureMap.set([device, canvasTexture], this);
+        this._destroyItems.push(() => { WGPUCanvasTexture._textureMap.delete([device, canvasTexture]); });
     }
 
     private _createGPUTexture(device: GPUDevice, canvasTexture: CanvasTexture)
