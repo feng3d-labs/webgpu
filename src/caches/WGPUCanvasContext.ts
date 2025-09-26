@@ -76,7 +76,7 @@ export class WGPUCanvasContext extends ReactiveObject
         this._onConfiguration(device, context);
 
         // 设置画布变化监听
-        this._onCanvasChanged(context);
+        this._onCanvasSizeChanged(context);
 
         // 设置画布尺寸变化监听
         this._onSizeChanged(context);
@@ -215,7 +215,7 @@ export class WGPUCanvasContext extends ReactiveObject
      * 
      * @param context 画布上下文配置对象
      */
-    private _onCanvasChanged(context: CanvasContext)
+    private _onCanvasSizeChanged(context: CanvasContext)
     {
         const r_this = reactive(this);
         const r_context = reactive(context);
@@ -284,6 +284,8 @@ export class WGPUCanvasContext extends ReactiveObject
             // 同步配置中的尺寸到画布元素
             this.canvas.width = r_context.width;
             this.canvas.height = r_context.height;
+
+            r_this.version++;
         });
     }
 

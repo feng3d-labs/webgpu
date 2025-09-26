@@ -1,7 +1,7 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
 import { RenderPassDescriptor } from '@feng3d/render-api';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
-import { GPUTextureFormatManager } from './GPUTextureFormatManager';
+import { WGPUTextureLike } from './WGPUTextureLike';
 
 export class GPURenderPassFormatManager
 {
@@ -11,7 +11,7 @@ export class GPURenderPassFormatManager
      * @param descriptor 渲染通道描述。
      * @returns
      */
-    static getGPURenderPassFormat(descriptor: RenderPassDescriptor): RenderPassFormat
+    static getGPURenderPassFormat(device: GPUDevice, descriptor: RenderPassDescriptor): RenderPassFormat
     {
         let result = this.getGPURenderPassFormatMap.get(descriptor);
 
@@ -29,13 +29,13 @@ export class GPURenderPassFormatManager
             r_descriptor.sampleCount;
 
             // 计算
-            const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => GPUTextureFormatManager.getGPUTextureFormat(v.view.texture));
+            const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => WGPUTextureLike.getInstance(device, v.view?.texture)?.gpuTexture.format);
 
             let depthStencilAttachmentTextureFormat: GPUTextureFormat;
 
             if (descriptor.depthStencilAttachment)
             {
-                depthStencilAttachmentTextureFormat = GPUTextureFormatManager.getGPUTextureFormat(descriptor.depthStencilAttachment.view?.texture) || 'depth24plus';
+                depthStencilAttachmentTextureFormat = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view?.texture)?.gpuTexture.format || 'depth24plus';
             }
 
             const renderPassFormat: RenderPassFormat = {
@@ -47,9 +47,9 @@ export class GPURenderPassFormatManager
 
             // 缓存
             const renderPassFormatKey = `${renderPassFormat.attachmentSize.width},${renderPassFormat.attachmentSize.height
-            }|${renderPassFormat.colorFormats.join('')
-            }|${renderPassFormat.depthStencilFormat
-            }|${renderPassFormat.sampleCount}`;
+                }|${renderPassFormat.colorFormats.join('')
+                }|${renderPassFormat.depthStencilFormat
+                }|${renderPassFormat.sampleCount}`;
             const cache = this.renderPassFormatMap[renderPassFormatKey];
 
             if (cache) return cache;

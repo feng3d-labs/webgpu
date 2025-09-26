@@ -65,6 +65,7 @@ export class WGPUCanvasTexture extends ReactiveObject
 
             //
             const wgpuCanvasContext = WGPUCanvasContext.getInstance(device, context);
+            reactive(wgpuCanvasContext).gpuCanvasContext;
             reactive(wgpuCanvasContext).version;
 
             const gpuCanvasContext = wgpuCanvasContext.gpuCanvasContext;

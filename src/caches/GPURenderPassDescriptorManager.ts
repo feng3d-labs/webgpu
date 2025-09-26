@@ -3,8 +3,8 @@ import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
 import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
 import { WGPUTimestampQuery } from './GPUPassTimestampWritesManager';
-import { GPUTextureFormatManager } from './GPUTextureFormatManager';
 import { TextureSizeManager } from './TextureSizeManager';
+import { WGPUTextureLike } from './WGPUTextureLike';
 import { WGPUTextureView } from './WGPUTextureView';
 
 declare global
@@ -109,7 +109,7 @@ export class GPURenderPassDescriptorManager
      * @param sampleCount 多重采样数量。
      * @returns 用于解决多重采样的纹理视图。
      */
-    private static getMultisampleTextureView(texture: TextureLike, sampleCount: 4)
+    private static getMultisampleTextureView(device: GPUDevice, texture: TextureLike, sampleCount: 4)
     {
         if (sampleCount !== 4) return undefined;
         if (!texture) return undefined;
@@ -123,8 +123,8 @@ export class GPURenderPassDescriptorManager
             descriptor: {
                 label: '自动生成多重采样的纹理',
                 sampleCount,
-                size: TextureSizeManager.getTextureSize(texture),
-                format: GPUTextureFormatManager.getGPUTextureFormat(texture),
+                size: TextureSizeManager.getTextureSize(device, texture),
+                format: WGPUTextureLike.getInstance(device, texture).gpuTexture.format,
             },
         };
 
@@ -132,8 +132,8 @@ export class GPURenderPassDescriptorManager
         effect(() =>
         {
             // 新建的多重采样纹理尺寸与格式与原始纹理同步。
-            reactive(multisampleTexture.descriptor).size = TextureSizeManager.getTextureSize(texture);
-            reactive(multisampleTexture.descriptor).format = GPUTextureFormatManager.getGPUTextureFormat(texture);
+            reactive(multisampleTexture.descriptor).size = TextureSizeManager.getTextureSize(device, texture);
+            reactive(multisampleTexture.descriptor).format = WGPUTextureLike.getInstance(device, texture).gpuTexture.format;
         });
 
         this.getMultisampleTextureViewMap.set(texture, multisampleTextureView);
@@ -158,7 +158,7 @@ export class GPURenderPassDescriptorManager
         // 初始化附件尺寸。
         if (!descriptor.attachmentSize)
         {
-            const textureSize = TextureSizeManager.getTextureSize(depthStencilAttachment.view.texture);
+            const textureSize = TextureSizeManager.getTextureSize(device, depthStencilAttachment.view.texture);
 
             reactive(descriptor).attachmentSize = { width: textureSize[0], height: textureSize[1] };
         }
@@ -299,7 +299,7 @@ export class GPURenderPassDescriptorManager
         // 初始化附件尺寸。
         if (!descriptor.attachmentSize)
         {
-            const textureSize = TextureSizeManager.getTextureSize(renderPassColorAttachment.view.texture);
+            const textureSize = TextureSizeManager.getTextureSize(device, renderPassColorAttachment.view.texture);
 
             reactive(descriptor).attachmentSize = { width: textureSize[0], height: textureSize[1] };
         }
@@ -329,7 +329,7 @@ export class GPURenderPassDescriptorManager
             if (sampleCount)
             {
                 resolveTarget = view;
-                view = this.getMultisampleTextureView(view.texture, sampleCount);
+                view = this.getMultisampleTextureView(device, view.texture, sampleCount);
             }
 
             // 更新纹理尺寸

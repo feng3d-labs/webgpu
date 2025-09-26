@@ -27,7 +27,7 @@ export class RenderPassCommand
 
             const { descriptor } = renderPass;
 
-            reactive(this).renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(descriptor);
+            reactive(this).renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(webgpu.device, descriptor);
         });
 
         effect(() =>
@@ -37,7 +37,7 @@ export class RenderPassCommand
 
             const { descriptor, renderPassObjects } = renderPass;
 
-            const renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(descriptor);
+            const renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(webgpu.device, descriptor);
 
             const renderPassObjectCommands = this.runRenderPassObjects(webgpu, renderPassFormat, renderPassObjects);
             const commands: CommandType[] = [];
