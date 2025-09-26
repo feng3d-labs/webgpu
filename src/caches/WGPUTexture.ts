@@ -4,47 +4,92 @@ import { ReactiveObject } from '../ReactiveObject';
 import { generateMipmap } from '../utils/generate-mipmap';
 
 /**
- * WebGPU纹理缓存类
- * 负责管理WebGPU纹理的创建、更新和销毁
+ * WebGPU纹理缓存管理器
+ * 
+ * 负责管理WebGPU纹理的完整生命周期，包括：
+ * - 纹理的创建和配置
+ * - 响应式监听纹理参数变化
+ * - 自动重新创建纹理当依赖变化时
+ * - 纹理数据的上传和更新
+ * - 多级纹理(mipmap)的自动生成
+ * - 纹理实例的缓存和复用
+ * - 资源清理和内存管理
+ * 
+ * 主要功能：
+ * 1. **响应式更新** - 监听纹理配置变化，自动重新创建纹理
+ * 2. **数据上传** - 支持从图片、缓冲区等多种数据源上传纹理数据
+ * 3. **Mipmap生成** - 自动生成多级纹理，提高渲染质量
+ * 4. **实例缓存** - 使用WeakMap缓存纹理实例，避免重复创建
+ * 5. **资源管理** - 自动处理纹理的创建和销毁
+ * 6. **格式支持** - 智能处理不同纹理格式的使用标志
+ * 
+ * 使用场景：
+ * - 渲染管线中的纹理采样
+ * - 计算着色器中的纹理访问
+ * - 渲染目标纹理(Render Target)
+ * - 深度和模板纹理
+ * - 立方体贴图和纹理数组
  */
 export class WGPUTexture extends ReactiveObject
 {
     /**
      * WebGPU纹理对象
+     * 
+     * 这是实际的GPU纹理实例，用于在渲染管线中存储和访问纹理数据。
+     * 当纹理配置发生变化时，此对象会自动重新创建。
      */
     readonly gpuTexture: GPUTexture;
 
     /**
      * 构造函数
-     * @param device GPU设备
-     * @param texture 纹理对象
+     * 
+     * 创建纹理管理器实例，并设置响应式监听。
+     * 
+     * @param device GPU设备实例，用于创建纹理
+     * @param texture 纹理配置对象，包含纹理参数和数据源
      */
     constructor(device: GPUDevice, texture: Texture)
     {
         super();
 
+        // 设置纹理创建和更新逻辑
         this._onCreateGPUTexture(device, texture);
+
+        // 设置纹理数据写入监听
         this._onWriteTextures(device, texture);
 
-        //
+        // 将实例注册到设备缓存中
         this._onMap(device, texture);
     }
 
+    /**
+     * 设置纹理创建和更新逻辑
+     * 
+     * 使用响应式系统监听纹理配置变化，自动重新创建纹理。
+     * 当纹理参数或数据源发生变化时，会触发纹理的重新创建。
+     * 
+     * @param device GPU设备实例
+     * @param texture 纹理配置对象
+     */
     private _onCreateGPUTexture(device: GPUDevice, texture: Texture)
     {
         const r_this = reactive(this);
         const r_texture = reactive(texture);
 
+        // 定义纹理销毁函数
         const destroyGPUTexture = () =>
         {
             this.gpuTexture?.destroy();
             r_this.gpuTexture = null;
         }
 
+        // 监听纹理配置变化，自动重新创建纹理
         this.effect(() =>
         {
+            // 先销毁旧的纹理
             destroyGPUTexture();
 
+            // 触发响应式依赖，监听纹理描述符的所有属性
             const r_descriptor = r_texture.descriptor;
             if (r_descriptor)
             {
@@ -59,24 +104,30 @@ export class WGPUTexture extends ReactiveObject
                 r_descriptor.mipLevelCount;
                 r_descriptor.sampleCount;
             }
+            // 监听纹理数据源变化
             r_texture.sources;
 
-            //
+            // 获取纹理描述符
             const descriptor = texture.descriptor;
 
-            // 获取纹理属性
+            // 提取纹理属性
             const { format, size, viewFormats, sampleCount } = descriptor;
 
-            console.assert(!!size, `无法从纹理中获取到正确的尺寸！size与source必须设置一个！`, texture);
+            // 验证纹理尺寸必须存在
+            console.assert(!!size, `无法从纹理中获取到正确的尺寸！size必须设置！`, texture);
 
+            // 根据格式和采样数确定使用标志
             const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
 
+            // 计算mip级别数量
             const mipLevelCount = descriptor.mipLevelCount ?? (descriptor.generateMipmap ? (1 + Math.log2(Math.max(size[0], size[1])) | 0) : 1);
 
-            // 设置标签
+            // 生成纹理标签
             const label = descriptor.label ?? `GPUTexture ${WGPUTexture._autoIndex++}`;
+            // 映射纹理维度
             const dimension = WGPUTexture._dimensionMap[descriptor.dimension];
 
+            // 创建GPU纹理描述符
             const gpuTextureDescriptor: GPUTextureDescriptor = {
                 label,
                 size,
@@ -88,108 +139,147 @@ export class WGPUTexture extends ReactiveObject
                 viewFormats,
             };
 
-            // 检查bgra8unorm格式支持
+            // 检查bgra8unorm格式的设备支持
             if (descriptor.format === 'bgra8unorm')
             {
                 console.assert(device.features.has('bgra8unorm-storage'), `当前设备不支持 bgra8unorm 格式！请使用其他格式或者添加 "bgra8unorm-storage" 特性！`);
             }
 
-            // 创建纹理
+            // 创建GPU纹理
             const gpuTexture = device.createTexture(gpuTextureDescriptor);
 
-            // 初始化纹理数据
+            // 上传初始纹理数据
             WGPUTexture._writeTextures(device, gpuTexture, texture.sources);
 
-            // 自动生成mipmap
+            // 如果需要，自动生成多级纹理
             if (descriptor.generateMipmap)
             {
                 generateMipmap(device, gpuTexture);
             }
 
+            // 更新纹理引用
             r_this.gpuTexture = gpuTexture;
         });
 
+        // 注册清理回调，在对象销毁时清理纹理
         this.destroyCall(destroyGPUTexture);
     }
 
+    /**
+     * 设置纹理数据写入监听
+     * 
+     * 监听writeTextures变化，自动将数据写入GPU纹理。
+     * 支持动态更新纹理数据，无需重新创建整个纹理。
+     * 
+     * @param device GPU设备实例
+     * @param texture 纹理配置对象
+     */
     private _onWriteTextures(device: GPUDevice, texture: Texture)
     {
         const r_this = reactive(this);
         const r_texture = reactive(texture);
 
+        // 监听纹理数据写入请求
         this.effect(() =>
         {
+            // 如果GPU纹理不存在，跳过写入
             if (!r_this.gpuTexture) return;
 
+            // 触发响应式依赖，监听writeTextures数组变化
             r_texture.writeTextures;
 
+            // 将数据写入GPU纹理
             WGPUTexture._writeTextures(device, this.gpuTexture, texture.writeTextures);
 
+            // 清空写入数据，避免重复处理
             r_texture.writeTextures = null;
         });
     }
 
+    /**
+     * 将纹理实例注册到设备缓存中
+     * 
+     * 使用WeakMap将纹理配置对象与其实例关联，实现实例缓存和复用。
+     * 当纹理配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
+     * 
+     * @param device GPU设备实例，用于存储缓存映射
+     * @param texture 纹理配置对象，作为缓存的键
+     */
     private _onMap(device: GPUDevice, texture: Texture)
     {
+        // 如果设备还没有纹理缓存，则创建一个新的WeakMap
         device.textures ??= new WeakMap<TextureLike, WGPUTexture>();
+
+        // 将当前实例与纹理配置对象关联
         device.textures.set(texture, this);
+
+        // 注册清理回调，在对象销毁时从缓存中移除
         this.destroyCall(() => { device.textures.delete(texture); });
     }
 
     /**
-     * 获取纹理实例
-     * @param device GPU设备
-     * @param textureLike 纹理对象
-     * @param autoCreate 是否自动创建
+     * 获取或创建纹理实例
+     * 
+     * 使用单例模式管理纹理实例，避免重复创建相同的纹理。
+     * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
+     * 
+     * @param device GPU设备实例
+     * @param textureLike 纹理配置对象
      * @returns 纹理实例
      */
     static getInstance(device: GPUDevice, textureLike: Texture)
     {
+        // 尝试从缓存中获取现有实例，如果不存在则创建新实例
         return device.textures?.get(textureLike) || new WGPUTexture(device, textureLike);
     }
 
     /**
      * 写入纹理数据
-     * @param device GPU设备
-     * @param gpuTexture WebGPU纹理
-     * @param textureSources 纹理数据源
+     * 
+     * 将纹理数据从各种数据源上传到GPU纹理中。
+     * 支持图片数据源和缓冲区数据源两种类型。
+     * 
+     * @param device GPU设备实例
+     * @param gpuTexture 目标WebGPU纹理
+     * @param textureSources 纹理数据源数组
      */
     static _writeTextures(device: GPUDevice, gpuTexture: GPUTexture, textureSources: readonly TextureSource[])
     {
         textureSources?.forEach((v) =>
         {
-            // 处理图片纹理
+            // 处理图片纹理数据源
             const imageSource = v as TextureImageSource;
 
             if (imageSource.image)
             {
                 const { image, flipY, colorSpace, premultipliedAlpha, mipLevel, textureOrigin, aspect } = imageSource;
 
-                // 获取图片尺寸
+                // 获取图片实际尺寸
                 const imageSize = TextureImageSource.getTexImageSourceSize(imageSource.image);
                 const copySize = imageSource.size || imageSize;
 
                 let imageOrigin = imageSource.imageOrigin;
 
-                // 处理Y轴翻转
+                // 处理Y轴翻转，WebGPU的Y轴原点在底部
                 if (flipY)
                 {
                     const x = imageOrigin?.[0] ?? 0;
                     let y = imageOrigin?.[1] ?? 0;
 
+                    // 计算翻转后的Y坐标
                     y = imageSize[1] - y - copySize[1];
 
                     imageOrigin = [x, y];
                 }
 
-                // 设置源信息
+                // 设置图片源信息
                 const gpuSource: GPUCopyExternalImageSourceInfo = {
                     source: image,
                     origin: imageOrigin,
                     flipY,
                 };
 
-                // 设置目标信息
+                // 设置纹理目标信息
                 const gpuDestination: GPUCopyExternalImageDestInfo = {
                     colorSpace,
                     premultipliedAlpha,
@@ -199,7 +289,7 @@ export class WGPUTexture extends ReactiveObject
                     texture: gpuTexture,
                 };
 
-                // 复制图片到纹理
+                // 将图片数据复制到纹理
                 device.queue.copyExternalImageToTexture(
                     gpuSource,
                     gpuDestination,
@@ -209,10 +299,11 @@ export class WGPUTexture extends ReactiveObject
                 return;
             }
 
-            // 处理数据纹理
+            // 处理缓冲区数据源
             const bufferSource = v as TextureDataSource;
             const { data, dataLayout, dataImageOrigin, size, mipLevel, textureOrigin, aspect } = bufferSource;
 
+            // 设置纹理目标信息
             const gpuDestination: GPUTexelCopyTextureInfo = {
                 mipLevel,
                 origin: textureOrigin,
@@ -228,23 +319,24 @@ export class WGPUTexture extends ReactiveObject
             const y = dataImageOrigin?.[1] || 0;
             const depthOrArrayLayers = dataImageOrigin?.[2] || 0;
 
-            // 获取像素字节数
+            // 获取每个像素的字节数
             const bytesPerPixel = Texture.getTextureBytesPerPixel(gpuTexture.format);
 
-            // 计算GPU偏移量
+            // 计算GPU缓冲区中的偏移量
             const gpuOffset
                 = (offset || 0) // 数据偏移
                 + (depthOrArrayLayers || 0) * (width * height * bytesPerPixel) // 数组层偏移
                 + (x + (y * width)) * bytesPerPixel // 像素偏移
                 ;
 
+            // 设置数据布局
             const gpuDataLayout: GPUTexelCopyBufferLayout = {
                 offset: gpuOffset,
                 bytesPerRow: width * bytesPerPixel,
                 rowsPerImage: height,
             };
 
-            // 写入纹理数据
+            // 将缓冲区数据写入纹理
             device.queue.writeTexture(
                 gpuDestination,
                 data,
@@ -256,10 +348,13 @@ export class WGPUTexture extends ReactiveObject
 
     /**
      * 根据纹理格式和采样数确定纹理的使用标志
-     *
+     * 
+     * 智能分析纹理格式和采样数，返回合适的使用标志组合。
+     * 某些特殊格式（如深度纹理、多重采样纹理）不支持存储绑定。
+     * 
      * @param format 纹理格式
      * @param sampleCount 采样数（多重采样时使用）
-     * @returns 纹理使用标志
+     * @returns 纹理使用标志组合
      */
     static _getGPUTextureUsageFlags(format: GPUTextureFormat, sampleCount?: 4): GPUTextureUsageFlags
     {
@@ -274,43 +369,60 @@ export class WGPUTexture extends ReactiveObject
         {
             // 基础使用标志（不包含存储绑定）
             usage = (0
-                | GPUTextureUsage.COPY_SRC
-                | GPUTextureUsage.COPY_DST
-                | GPUTextureUsage.TEXTURE_BINDING
-                | GPUTextureUsage.RENDER_ATTACHMENT);
+                | GPUTextureUsage.COPY_SRC        // 复制源
+                | GPUTextureUsage.COPY_DST        // 复制目标
+                | GPUTextureUsage.TEXTURE_BINDING // 纹理绑定
+                | GPUTextureUsage.RENDER_ATTACHMENT); // 渲染附件
         }
         else
         {
             // 完整使用标志（包含存储绑定）
             usage = (0
-                | GPUTextureUsage.COPY_SRC
-                | GPUTextureUsage.COPY_DST
-                | GPUTextureUsage.TEXTURE_BINDING
-                | GPUTextureUsage.STORAGE_BINDING
-                | GPUTextureUsage.RENDER_ATTACHMENT);
+                | GPUTextureUsage.COPY_SRC        // 复制源
+                | GPUTextureUsage.COPY_DST        // 复制目标
+                | GPUTextureUsage.TEXTURE_BINDING // 纹理绑定
+                | GPUTextureUsage.STORAGE_BINDING // 存储绑定
+                | GPUTextureUsage.RENDER_ATTACHMENT); // 渲染附件
         }
 
         return usage;
     }
 
-    /** 纹理维度映射表 */
+    /** 
+     * 纹理维度映射表
+     * 
+     * 将抽象纹理维度映射到WebGPU的具体维度类型。
+     * 立方体贴图在WebGPU中使用2D维度，立方体贴图数组使用3D维度。
+     */
     private static readonly _dimensionMap: Record<TextureDimension, GPUTextureDimension> = {
-        '1d': '1d',
-        '2d': '2d',
-        '2d-array': '2d',
-        cube: '2d',
-        'cube-array': '3d',
-        '3d': '3d',
+        '1d': '1d',           // 一维纹理
+        '2d': '2d',           // 二维纹理
+        '2d-array': '2d',     // 二维纹理数组
+        cube: '2d',           // 立方体贴图
+        'cube-array': '3d',   // 立方体贴图数组
+        '3d': '3d',           // 三维纹理
     };
 
-    /** 自动索引计数器 */
+    /** 
+     * 自动索引计数器
+     * 
+     * 用于为没有指定标签的纹理生成唯一的标签名称。
+     * 每次创建新纹理时自动递增。
+     */
     private static _autoIndex = 0;
 }
 
+/**
+ * 全局类型声明
+ * 
+ * 扩展GPUDevice接口，添加纹理实例缓存映射。
+ * 这个WeakMap用于缓存纹理实例，避免重复创建相同的纹理。
+ */
 declare global
 {
     interface GPUDevice
     {
+        /** 纹理实例缓存映射表 */
         textures: WeakMap<TextureLike, WGPUTexture>;
     }
 }
