@@ -1,13 +1,13 @@
 import { computed, Computed, effect, reactive, UnReadonly } from '@feng3d/reactivity';
-import { BindingResources, BufferBinding, BufferBindingInfo, ChainMap, Sampler, TextureView } from '@feng3d/render-api';
+import { BindingResources, Buffer, BufferBinding, BufferBindingInfo, ChainMap, Sampler, TextureView } from '@feng3d/render-api';
 import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { VideoTexture } from '../data/VideoTexture';
 import { webgpuEvents } from '../eventnames';
 import { ExternalSampledTextureType } from '../types/TextureType';
-import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
 import { GPUSamplerManager } from './GPUSamplerManager';
+import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { WGPUBuffer } from './WGPUBuffer';
 import { WGPUTextureView } from './WGPUTextureView';
 
@@ -108,7 +108,7 @@ export class GPUBindGroupManager
             GPUBindGroupManager.updateBufferBinding(bufferBinding, type);
             const bufferView = bufferBinding.bufferView;
             //
-            const gbuffer = WGPUBuffer.getOrCreateBuffer(bufferView);
+            const gbuffer = Buffer.fromArrayBuffer(bufferView.buffer);
 
             (gbuffer as any).label = gbuffer.label || (`BufferBinding ${type.name}`);
             //
@@ -178,7 +178,7 @@ export class GPUBindGroupManager
             (uniformData as UnReadonly<BufferBinding>).bufferView = new Uint8Array(size);
         }
 
-        const buffer = WGPUBuffer.getOrCreateBuffer(uniformData.bufferView);
+        const buffer = Buffer.fromArrayBuffer(uniformData.bufferView.buffer);
         const offset = uniformData.bufferView.byteOffset;
 
         for (let i = 0; i < bufferBindingInfo.items.length; i++)

@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { Buffer, ChainMap, TypedArray } from '@feng3d/render-api';
+import { Buffer, ChainMap } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**
@@ -65,11 +65,8 @@ export class WGPUBuffer extends ReactiveObject
             // 如果初始化时存在数据，使用map方式上传数据
             if (mappedAtCreation)
             {
-                // 将数据转换为Int8Array格式
-                const int8Array = ArrayBuffer.isView(data) ? new Int8Array(data.buffer) : new Int8Array(data);
-
                 // 将数据写入映射的内存区域
-                new Int8Array(gpuBuffer.getMappedRange()).set(int8Array);
+                new Int8Array(gpuBuffer.getMappedRange()).set(new Int8Array(data));
 
                 // 取消映射，使数据生效
                 gpuBuffer.unmap();
@@ -137,7 +134,7 @@ export class WGPUBuffer extends ReactiveObject
                 // 处理TypedArray类型的数据
                 if (ArrayBuffer.isView(data))
                 {
-                    const bytesPerElement = (data as Uint8Array).BYTES_PER_ELEMENT;
+                    const bytesPerElement = data.BYTES_PER_ELEMENT;
 
                     arrayBuffer = data.buffer;
                     dataOffsetByte = data.byteOffset + bytesPerElement * dataOffset;
@@ -189,40 +186,6 @@ export class WGPUBuffer extends ReactiveObject
         | GPUBufferUsage.INDIRECT        // 间接绘制缓冲区
         | GPUBufferUsage.QUERY_RESOLVE   // 查询解析缓冲区
         ;
-
-    /**
-     * 从TypedArray创建或获取缓冲区配置
-     * 自动处理缓冲区大小对齐（4字节对齐）
-     * @param bufferSource 源数据数组
-     * @returns 缓冲区配置对象
-     */
-    static getOrCreateBuffer(bufferSource: TypedArray)
-    {
-        let arrayBuffer = bufferSource as ArrayBuffer;
-
-        // 如果是ArrayBufferView，获取其底层的ArrayBuffer
-        if ((bufferSource as ArrayBufferView).buffer)
-        {
-            arrayBuffer = (bufferSource as ArrayBufferView).buffer;
-        }
-
-        // 检查是否已存在对应的缓冲区配置
-        let buffer = this.bufferMap.get(arrayBuffer);
-
-        if (buffer) return buffer;
-
-        // 创建新的缓冲区配置，确保大小为4的倍数
-        buffer = {
-            size: Math.ceil(arrayBuffer.byteLength / 4) * 4,
-            data: bufferSource,
-        };
-        this.bufferMap.set(arrayBuffer, buffer);
-
-        return buffer;
-    }
-
-    /** 缓冲区配置缓存映射表 */
-    private static readonly bufferMap = new WeakMap<ArrayBuffer, Buffer>();
 
     /**
      * 获取或创建WGPUBuffer实例
