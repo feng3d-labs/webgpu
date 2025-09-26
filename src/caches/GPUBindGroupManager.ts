@@ -6,7 +6,7 @@ import { VideoTexture } from '../data/VideoTexture';
 import { webgpuEvents } from '../eventnames';
 import { ExternalSampledTextureType } from '../types/TextureType';
 import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
-import { GPUSamplerManager } from './GPUSamplerManager';
+import { WGPUSampler } from './WGPUSampler';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { WGPUBuffer } from './WGPUBuffer';
 import { WGPUTextureView } from './WGPUTextureView';
@@ -64,7 +64,7 @@ export class GPUBindGroupManager
                 }
                 else
                 {
-                    entry.resource = GPUSamplerManager.getGPUSampler(device, bindingResources[name] as Sampler);
+                    entry.resource = WGPUSampler.getInstance(device, bindingResources[name] as Sampler).gpuSampler;
                 }
 
                 return entry;
