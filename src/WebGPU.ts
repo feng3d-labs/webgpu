@@ -6,7 +6,7 @@ import { GPUPipelineLayoutManager } from './caches/GPUPipelineLayoutManager';
 import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
 import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
 import { WGPUBuffer } from './caches/WGPUBuffer';
-import { WGPUTexture } from './caches/WGPUTexture';
+import { WGPUTextureLike } from './caches/WGPUTextureLike';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
 import { RenderBundle } from './data/RenderBundle';
@@ -76,13 +76,21 @@ export class WebGPU
 
     destoryTexture(texture: TextureLike)
     {
-        WGPUTexture.destroy(this.device, texture);
+        const device = this.device;
+
+        if ('context' in texture)
+        {
+            device.canvasTextures?.get(texture)?.destroy();
+            return;
+        }
+
+        device.textures?.get(texture)?.destroy();
     }
 
     textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })
     {
         const device = this.device;
-        const gpuTexture = WGPUTexture.getInstance(this.device, texture);
+        const gpuTexture = WGPUTextureLike.getInstance(this.device, texture);
 
         textureInvertYPremultiplyAlpha(device, gpuTexture.gpuTexture, options);
     }
@@ -90,8 +98,8 @@ export class WebGPU
     copyDepthTexture(sourceTexture: TextureLike, targetTexture: TextureLike)
     {
         const device = this.device;
-        const gpuSourceTexture = WGPUTexture.getInstance(this.device, sourceTexture);
-        const gpuTargetTexture = WGPUTexture.getInstance(this.device, targetTexture);
+        const gpuSourceTexture = WGPUTextureLike.getInstance(this.device, sourceTexture);
+        const gpuTargetTexture = WGPUTextureLike.getInstance(this.device, targetTexture);
 
         copyDepthTexture(device, gpuSourceTexture.gpuTexture, gpuTargetTexture.gpuTexture);
     }
@@ -99,7 +107,7 @@ export class WebGPU
     async readPixels(gpuReadPixels: ReadPixels)
     {
         const device = this.device;
-        const gpuTexture = WGPUTexture.getInstance(this.device, gpuReadPixels.texture);
+        const gpuTexture = WGPUTextureLike.getInstance(this.device, gpuReadPixels.texture);
 
         const result = await readPixels(device, {
             ...gpuReadPixels,

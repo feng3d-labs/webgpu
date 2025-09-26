@@ -2,6 +2,7 @@ import { effect, reactive } from '@feng3d/reactivity';
 import { ChainMap, Texture, TextureView } from '@feng3d/render-api';
 import { WGPUCanvasTexture } from './WGPUCanvasTexture';
 import { WGPUTexture } from './WGPUTexture';
+import { WGPUTextureLike } from './WGPUTextureLike';
 
 /**
  * WebGPU纹理视图缓存类
@@ -105,7 +106,7 @@ export class WGPUTextureView
         // 获取或更新纹理对象
         if (!this.wgpuTexture)
         {
-            r_this.wgpuTexture = WGPUTexture.getInstance(this._device, this._view.texture);
+            r_this.wgpuTexture = WGPUTextureLike.getInstance(this._device, this._view.texture);
         }
 
         // 创建视图描述符

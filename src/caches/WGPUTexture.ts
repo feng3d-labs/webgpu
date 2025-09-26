@@ -2,7 +2,6 @@ import { reactive } from '@feng3d/reactivity';
 import { Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { generateMipmap } from '../utils/generate-mipmap';
-import { WGPUCanvasTexture } from './WGPUCanvasTexture';
 
 /**
  * WebGPU纹理缓存类
@@ -144,31 +143,9 @@ export class WGPUTexture extends ReactiveObject
      * @param autoCreate 是否自动创建
      * @returns 纹理实例
      */
-    static getInstance(device: GPUDevice, textureLike: TextureLike)
+    static getInstance(device: GPUDevice, textureLike: Texture)
     {
-        // 处理画布纹理
-        if ('context' in textureLike)
-        {
-            return WGPUCanvasTexture.getInstance(device, textureLike);
-        }
-
         return device.textures?.get(textureLike) || new WGPUTexture(device, textureLike);
-    }
-
-    /**
-     * 销毁纹理实例
-     * @param device GPU设备
-     * @param textureLike 纹理对象
-     */
-    static destroy(device: GPUDevice, textureLike: TextureLike)
-    {
-        if ('context' in textureLike)
-        {
-            device.canvasTextures?.get(textureLike)?.destroy();
-            return;
-        }
-
-        device.textures?.get(textureLike)?.destroy();
     }
 
     /**
