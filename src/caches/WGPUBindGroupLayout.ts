@@ -1,27 +1,28 @@
-import { ChainMap } from '@feng3d/render-api';
 import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
 
 export class WGPUBindGroupLayout
 {
-    static getInstance(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor)
+    static getGPUBindGroupLayout(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor)
     {
-        let result = this._gpuBindGroupLayoutMap.get([device, bindGroupLayout]);
+        let gpuBindGroupLayout = device.bindGroupLayouts?.get(bindGroupLayout);
 
-        if (result) return result;
+        if (!gpuBindGroupLayout)
+        {
+            device.bindGroupLayouts ??= new WeakMap();
 
-        result = new WGPUBindGroupLayout(device, bindGroupLayout);
+            gpuBindGroupLayout = device.createBindGroupLayout(bindGroupLayout);
 
-        this._gpuBindGroupLayoutMap.set([device, bindGroupLayout], result);
+            device.bindGroupLayouts.set(bindGroupLayout, gpuBindGroupLayout);
+        }
 
-        return result;
+        return gpuBindGroupLayout;
     }
+}
 
-    private static readonly _gpuBindGroupLayoutMap = new ChainMap<any[], WGPUBindGroupLayout>();
-
-    gpuBindGroupLayout: GPUBindGroupLayout;
-
-    constructor(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor)
+declare global
+{
+    interface GPUDevice
     {
-        this.gpuBindGroupLayout = device.createBindGroupLayout(bindGroupLayout);
+        bindGroupLayouts: WeakMap<BindGroupLayoutDescriptor, GPUBindGroupLayout>;
     }
 }

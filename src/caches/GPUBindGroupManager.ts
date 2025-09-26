@@ -77,9 +77,9 @@ export class GPUBindGroupManager
 
             if (cache) return cache;
 
-            const wGPUBindGroupLayout = WGPUBindGroupLayout.getInstance(device, bindGroupLayout);
+            const gpuBindGroupLayout = WGPUBindGroupLayout.getGPUBindGroupLayout(device, bindGroupLayout);
 
-            gBindGroup = device.createBindGroup({ layout: wGPUBindGroupLayout.gpuBindGroupLayout, entries });
+            gBindGroup = device.createBindGroup({ layout: gpuBindGroupLayout, entries });
 
             GPUBindGroupManager.gpuBindGroupMap.set(gpuBindGroupKey, gBindGroup);
 

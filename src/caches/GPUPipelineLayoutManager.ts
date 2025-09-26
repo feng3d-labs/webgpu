@@ -46,7 +46,7 @@ export class GPUPipelineLayoutManager
 
         const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
         {
-            const gpuBindGroupLayout = WGPUBindGroupLayout.getInstance(device, v).gpuBindGroupLayout;
+            const gpuBindGroupLayout = WGPUBindGroupLayout.getGPUBindGroupLayout(device, v);
 
             return gpuBindGroupLayout;
         });
