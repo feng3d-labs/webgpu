@@ -14,127 +14,64 @@ import { WGPUCanvasContext } from './WGPUCanvasContext';
 export class WGPUCanvasTexture extends ReactiveObject
 {
     /**
-     * WebGPU画布上下文
-     * 管理画布元素、GPU上下文和配置
-     */
-    readonly wgpuCanvasContext: WGPUCanvasContext;
-
-    /**
      * WebGPU纹理对象
      */
     readonly gpuTexture: GPUTexture;
 
     /**
-     * 是否需要更新。
-     *
-     * 当值为 true 时表示需要更新，当值为 false 时表示无需更新。
-     */
-    readonly needUpdate: boolean = true;
-
-    /**
-     * GPU设备
-     */
-    private readonly _device: GPUDevice;
-
-    /**
-     * 画布纹理对象
-     */
-    private readonly _canvasTexture: CanvasTexture;
-
-    /**
      * 构造函数
      *
-     * @param device GPU设备
-     * @param canvasTexture 画布纹理对象
+     * @param _device GPU设备
+     * @param _canvasTexture 画布纹理对象
      */
-    constructor(device: GPUDevice, canvasTexture: CanvasTexture)
+    constructor(private readonly _device: GPUDevice, private readonly _canvasTexture: CanvasTexture)
     {
         super();
 
         // 注册到纹理映射表
-        WGPUCanvasTexture._textureMap.set([device, canvasTexture], this);
+        WGPUCanvasTexture._textureMap.set([_device, _canvasTexture], this);
+        this._destroyItems.push(() => { WGPUCanvasTexture._textureMap.delete([this._device, this._canvasTexture]); });
 
-        this._device = device;
-        this._canvasTexture = canvasTexture;
-
-        this.effect(() => this._onPreSubmit());
-        this.effect(() => this._onWGPUCanvasContextChanged());
-        this.effect(() => this._onGPUTextureChanged());
+        this._createGPUTexture(_device, _canvasTexture);
     }
 
-    private _onPreSubmit()
-    {
-        reactive(webgpuEvents).preSubmit;
-        reactive(this).gpuTexture = null;
-    }
-
-    private _onWGPUCanvasContextChanged()
-    {
-        reactive(this).gpuTexture = null;
-    }
-
-    private _onGPUTextureChanged()
+    private _createGPUTexture(device: GPUDevice, canvasTexture: CanvasTexture)
     {
         const r_this = reactive(this);
-        r_this.gpuTexture;
+        const r_canvasTexture = reactive(canvasTexture);
 
-        this._preGPUTexture?.destroy();
-        this._preGPUTexture = this.gpuTexture;
-
-        if (!this.gpuTexture)
+        const destroyGPUTexture = () =>
         {
-            r_this.needUpdate = true;
-        }
-    }
-
-    private _preGPUTexture: GPUTexture;
-
-    /**
-     * 更新纹理
-     *
-     * 如果纹理失效，重新获取画布纹理
-     */
-    update()
-    {
-        if (!this.needUpdate) return;
-
-        const r_this = reactive(this);
-
-        if (!this.wgpuCanvasContext)
-        {
-            r_this.wgpuCanvasContext = WGPUCanvasContext.getInstance(this._device, this._canvasTexture.context);
+            this.gpuTexture?.destroy();
+            r_this.gpuTexture = null;
         }
 
-        // 如果没有纹理，创建新的纹理
-        if (!this.gpuTexture)
+        this.effect(() =>
         {
+            destroyGPUTexture();
+
+            reactive(webgpuEvents).preSubmit;
+
+            r_canvasTexture.context;
+
+            const context = canvasTexture.context;
+
+            //
+            const wgpuCanvasContext = WGPUCanvasContext.getInstance(device, context);
+            reactive(wgpuCanvasContext).version;
+
+            const gpuCanvasContext = wgpuCanvasContext.gpuCanvasContext;
+
             // 获取当前纹理
-            const gpuTexture = this.wgpuCanvasContext.gpuCanvasContext.getCurrentTexture();
+            const gpuTexture = gpuCanvasContext.getCurrentTexture();
 
             // 设置纹理标签
             gpuTexture.label = 'GPU画布纹理';
 
             r_this.gpuTexture = gpuTexture;
-        }
+        });
 
-        r_this.needUpdate = false;
-
-        return this;
-    }
-
-    /**
-     * 销毁纹理实例
-     *
-     * 清理资源并调用父类销毁方法
-     */
-    destroy()
-    {
-        reactive(this).gpuTexture = null;
-
-        // 从纹理映射表中移除
-        WGPUCanvasTexture._textureMap.delete([this._device, this._canvasTexture]);
-
-        super.destroy();
+        this._destroyItems.push(destroyGPUTexture);
     }
 
     /**

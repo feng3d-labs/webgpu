@@ -107,7 +107,6 @@ export class WGPUTextureView
         {
             r_this.wgpuTexture = WGPUTexture.getInstance(this._device, this._view.texture);
         }
-        this.wgpuTexture.update();
 
         // 创建视图描述符
         if (!this.descriptor)
