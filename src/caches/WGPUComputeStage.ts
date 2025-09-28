@@ -2,10 +2,11 @@ import { reactive } from "@feng3d/reactivity";
 import { ComputeStage } from "../data/ComputeStage";
 import { ReactiveObject } from "../ReactiveObject";
 import { WGPUShaderModule } from "./WGPUShaderModule";
+import { WgslReflectManager } from "./WgslReflectManager";
 
-export class WGPUProgrammableStage extends ReactiveObject
+export class WGPUComputeStage extends ReactiveObject
 {
-    readonly gpuProgrammableStage: GPUProgrammableStage;
+    readonly gpuComputeStage: GPUProgrammableStage;
 
     constructor(device: GPUDevice, programmableStage: ComputeStage)
     {
@@ -15,10 +16,10 @@ export class WGPUProgrammableStage extends ReactiveObject
         this._onMap(device, programmableStage);
     }
 
-    private _createGPUProgrammableStage(device: GPUDevice, programmableStage: ComputeStage)
+    private _createGPUProgrammableStage(device: GPUDevice, computeStage: ComputeStage)
     {
         const r_this = reactive(this);
-        const r_programmableStage = reactive(programmableStage);
+        const r_programmableStage = reactive(computeStage);
 
         this.effect(() =>
         {
@@ -27,8 +28,16 @@ export class WGPUProgrammableStage extends ReactiveObject
             r_programmableStage.constants;
 
             //
-            const { code, entryPoint, constants } = programmableStage;
+            const { code, constants } = computeStage;
             const module = WGPUShaderModule.getGPUShaderModule(device, code);
+
+            //
+            let entryPoint = computeStage.entryPoint;
+            if (!entryPoint)
+            {
+                const reflect = WgslReflectManager.getWGSLReflectInfo(code);
+                entryPoint = reflect.entry.compute[0].name;
+            }
 
             const gpuProgrammableStage: GPUProgrammableStage = {
                 entryPoint,
@@ -36,20 +45,20 @@ export class WGPUProgrammableStage extends ReactiveObject
                 module,
             };
 
-            r_this.gpuProgrammableStage = gpuProgrammableStage;
+            r_this.gpuComputeStage = gpuProgrammableStage;
         });
     }
 
     private _onMap(device: GPUDevice, programmableStage: ComputeStage)
     {
-        device.programmableStages ??= new WeakMap<ComputeStage, WGPUProgrammableStage>();
+        device.programmableStages ??= new WeakMap<ComputeStage, WGPUComputeStage>();
         device.programmableStages.set(programmableStage, this);
         this.destroyCall(() => { device.programmableStages.delete(programmableStage); });
     }
 
     static getInstance(device: GPUDevice, programmableStage: ComputeStage)
     {
-        return device.programmableStages?.get(programmableStage) || new WGPUProgrammableStage(device, programmableStage);
+        return device.programmableStages?.get(programmableStage) || new WGPUComputeStage(device, programmableStage);
     }
 }
 
@@ -57,6 +66,6 @@ declare global
 {
     interface GPUDevice
     {
-        programmableStages: WeakMap<ComputeStage, WGPUProgrammableStage>;
+        programmableStages: WeakMap<ComputeStage, WGPUComputeStage>;
     }
 }
