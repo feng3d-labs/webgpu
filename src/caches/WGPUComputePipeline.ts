@@ -6,12 +6,12 @@ import { GPUPipelineLayoutManager } from './GPUPipelineLayoutManager';
 import { WGPUShaderModule } from './WGPUShaderModule';
 import { WgslReflectManager } from './WgslReflectManager';
 
-export class GPUComputePipelineManager
+export class WGPUComputePipeline
 {
     static getGPUComputePipeline(device: GPUDevice, computePipeline: ComputePipeline)
     {
         const getGPUComputePipelineKey: GetGPUComputePipeline = [device, computePipeline];
-        let pipeline = GPUComputePipelineManager._computePipelineMap.get(getGPUComputePipelineKey);
+        let pipeline = WGPUComputePipeline._computePipelineMap.get(getGPUComputePipelineKey);
 
         if (pipeline) return pipeline;
 
@@ -44,7 +44,7 @@ export class GPUComputePipelineManager
                 module: WGPUShaderModule.getGPUShaderModule(device, computeStage.code),
             },
         });
-        GPUComputePipelineManager._computePipelineMap.set(getGPUComputePipelineKey, pipeline);
+        WGPUComputePipeline._computePipelineMap.set(getGPUComputePipelineKey, pipeline);
 
         return pipeline;
     }

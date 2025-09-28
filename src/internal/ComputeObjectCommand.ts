@@ -1,5 +1,5 @@
 import { GPUBindGroupManager } from '../caches/GPUBindGroupManager';
-import { GPUComputePipelineManager } from '../caches/GPUComputePipelineManager';
+import { WGPUComputePipeline } from '../caches/WGPUComputePipeline';
 import { GPUPipelineLayoutManager } from '../caches/GPUPipelineLayoutManager';
 import { ComputeObject } from '../data/ComputeObject';
 import { WebGPU } from '../WebGPU';
@@ -17,7 +17,7 @@ export class ComputeObjectCommand
         const device = this.webgpu.device;
         const { pipeline, bindingResources, workgroups } = computeObject;
 
-        this.computePipeline = GPUComputePipelineManager.getGPUComputePipeline(device, pipeline);
+        this.computePipeline = WGPUComputePipeline.getGPUComputePipeline(device, pipeline);
 
         // 计算 bindGroups
         this.setBindGroup = [];
