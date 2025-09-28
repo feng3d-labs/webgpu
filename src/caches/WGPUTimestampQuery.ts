@@ -93,7 +93,7 @@ export class WGPUTimestampQuery extends ReactiveObject
                         // (see spec https://gpuweb.github.io/gpuweb/#timestamp)
                         if (elapsedNs >= 0)
                         {
-                            timestampQuery.onQuery(elapsedNs);
+                            reactive(timestampQuery).result = { elapsedNs };
                         }
 
                         resultBuf.unmap();

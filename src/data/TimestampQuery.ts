@@ -11,9 +11,14 @@ export interface TimestampQuery
     readonly isSupports?: boolean;
 
     /**
-     * 获得结果时将调用此回调函数。
-     *
-     * @param elapsedNs 通道运行消耗时长（单位为纳秒）
+     * 通道运行消耗时长（单位为纳秒）。
+     * 
+     * 默认值为`undefined`，在运行时自动赋值。
      */
-    onQuery?(elapsedNs: number): void;
+    readonly result?: {
+        /**
+         * 通道运行消耗时长（单位为纳秒）。
+         */
+        elapsedNs: number;
+    };
 }

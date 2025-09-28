@@ -18,19 +18,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     // NB: Look for 'timestampQueryManager' in this file to locate parts of this
     // snippets that are related to timestamps. Most of the logic is in
     // TimestampQueryManager.ts.
-    const timestampQuery: TimestampQuery = {
-        onQuery: (elapsedNs: number) =>
-        {
-            // Show the last successfully downloaded elapsed time.
-            // Convert from nanoseconds to milliseconds:
-            const elapsedMs = Number(elapsedNs) * 1e-6;
-
-            renderPassDurationCounter.addSample(elapsedMs);
-            perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
-                .getAverage()
-                .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
-        },
-    };
+    const timestampQuery: TimestampQuery = {};
 
     effect(() =>
     {
@@ -44,6 +32,23 @@ const init = async (canvas: HTMLCanvasElement) =>
         {
             perfDisplay.innerHTML = 'Timestamp queries are not supported';
         }
+    });
+
+    effect(() =>
+    {
+        reactive(timestampQuery).result;
+
+        const result = timestampQuery.result;
+        if (result === undefined) return;
+
+        // Show the last successfully downloaded elapsed time.
+        // Convert from nanoseconds to milliseconds:
+        const elapsedMs = Number(result.elapsedNs) * 1e-6;
+
+        renderPassDurationCounter.addSample(elapsedMs);
+        perfDisplay.innerHTML = `Render Pass duration: ${renderPassDurationCounter
+            .getAverage()
+            .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
     });
 
     //
