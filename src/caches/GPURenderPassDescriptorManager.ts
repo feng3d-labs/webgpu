@@ -1,11 +1,10 @@
 import { anyEmitter } from '@feng3d/event';
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
-import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture, TextureLike, TextureView } from '@feng3d/render-api';
+import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
 import { WGPUTimestampQuery } from './GPUPassTimestampWritesManager';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
-import { WGPUTextureLike } from './WGPUTextureLike';
-import { WGPUTextureView } from './WGPUTextureView';
+import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
 
 declare global
 {
@@ -45,11 +44,17 @@ export class GPURenderPassDescriptorManager
             r_descriptor.colorAttachments;
             r_descriptor.depthStencilAttachment;
 
+            //
+            const wGPURenderPassDepthStencilAttachment = WGPURenderPassDepthStencilAttachment.getInstance(device, descriptor.depthStencilAttachment, descriptor);
+            reactive(wGPURenderPassDepthStencilAttachment).gpuRenderPassDepthStencilAttachment;
+
+            const depthStencilAttachment = wGPURenderPassDepthStencilAttachment.gpuRenderPassDepthStencilAttachment;
+
             // 执行
             renderPassDescriptor.label = descriptor.label;
             renderPassDescriptor.maxDrawCount = descriptor.maxDrawCount;
             renderPassDescriptor.colorAttachments = this.getGPURenderPassColorAttachments(device, descriptor);
-            renderPassDescriptor.depthStencilAttachment = this.getGPURenderPassDepthStencilAttachment(device, descriptor);
+            renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
 
             this.setOcclusionQuerySet(device, renderPass, renderPassDescriptor);
         });
@@ -100,109 +105,6 @@ export class GPURenderPassDescriptorManager
                 reactive(descriptor.size)[2] = descriptor.size[2];
             }
         }
-    }
-
-    /**
-     * 获取深度模板附件完整描述。
-     *
-     * @param depthStencilAttachment 深度模板附件描述。
-     * @param colorAttachmentSize 颜色附件尺寸。
-     * @param multisample 多重采样次数。
-     * @returns 深度模板附件完整描述。
-     */
-    private static getGPURenderPassDepthStencilAttachment(device: GPUDevice, descriptor: RenderPassDescriptor)
-    {
-        const depthStencilAttachment = descriptor.depthStencilAttachment;
-
-        if (!depthStencilAttachment) return undefined;
-
-        // 初始化附件尺寸。
-        if (!descriptor.attachmentSize)
-        {
-            const gpuTextureLike = WGPUTextureLike.getInstance(device, depthStencilAttachment.view.texture);
-            const gpuTexture = gpuTextureLike.gpuTexture;
-
-            reactive(descriptor).attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
-        }
-        const attachmentSize = descriptor.attachmentSize;
-
-        // 缓存
-        const getGPURenderPassDepthStencilAttachmentKey: GetGPURenderPassDepthStencilAttachmentKey = [device, depthStencilAttachment];
-        let result = this.getGPURenderPassDepthStencilAttachmentMap.get(getGPURenderPassDepthStencilAttachmentKey);
-
-        if (result) return result.value;
-
-        //
-        let atuoCreateDepthTexture: Texture;
-        let atuoCreateDepthTextureView: TextureView;
-
-        // 避免重复创建，触发反应链。
-        const gpuDepthStencilAttachment: GPURenderPassDepthStencilAttachment = {} as any;
-
-        result = computed(() =>
-        {
-            // 监听
-            const r_depthStencilAttachment = reactive(depthStencilAttachment);
-
-            r_depthStencilAttachment.depthClearValue;
-            r_depthStencilAttachment.depthLoadOp;
-            r_depthStencilAttachment.depthStoreOp;
-            r_depthStencilAttachment.depthReadOnly;
-            r_depthStencilAttachment.stencilClearValue;
-            r_depthStencilAttachment.stencilLoadOp;
-            r_depthStencilAttachment.stencilStoreOp;
-            r_depthStencilAttachment.stencilReadOnly;
-            r_depthStencilAttachment.view;
-
-            // 执行
-            const { depthClearValue, depthLoadOp, depthStoreOp, depthReadOnly, stencilClearValue, stencilLoadOp, stencilStoreOp, stencilReadOnly } = depthStencilAttachment;
-            let view = depthStencilAttachment.view;
-
-            if (!view)
-            {
-                atuoCreateDepthTexture ??= {
-                    descriptor: {
-                        label: `自动生成的深度纹理`,
-                        size: [attachmentSize.width, attachmentSize.height],
-                        format: 'depth24plus',
-                    },
-                };
-                atuoCreateDepthTextureView ??= { texture: atuoCreateDepthTexture };
-                //
-                view = atuoCreateDepthTextureView;
-            }
-
-            // 更新纹理尺寸
-            computed(() =>
-            {
-                // 监听
-                const r_descriptor = reactive(descriptor);
-
-                r_descriptor.attachmentSize.width;
-                r_descriptor.attachmentSize.height;
-
-                // 执行
-                this.setTextureSize(view.texture, descriptor.attachmentSize);
-
-                // 更改纹理尺寸将会销毁重新创建纹理，需要重新获取view。
-                gpuDepthStencilAttachment.view = WGPUTextureView.getInstance(device, view).textureView;
-            }).value;
-
-            //
-            gpuDepthStencilAttachment.depthClearValue = depthClearValue ?? 1;
-            gpuDepthStencilAttachment.depthLoadOp = depthLoadOp;
-            gpuDepthStencilAttachment.depthStoreOp = depthStoreOp;
-            gpuDepthStencilAttachment.depthReadOnly = depthReadOnly;
-            gpuDepthStencilAttachment.stencilClearValue = stencilClearValue ?? 0;
-            gpuDepthStencilAttachment.stencilLoadOp = stencilLoadOp;
-            gpuDepthStencilAttachment.stencilStoreOp = stencilStoreOp;
-            gpuDepthStencilAttachment.stencilReadOnly = stencilReadOnly;
-
-            return gpuDepthStencilAttachment;
-        });
-        this.getGPURenderPassDepthStencilAttachmentMap.set(getGPURenderPassDepthStencilAttachmentKey, result);
-
-        return result.value;
     }
 
     /**
