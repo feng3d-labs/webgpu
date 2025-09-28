@@ -3,12 +3,11 @@ import { BindingResources, Buffer, BufferBinding, BufferBindingInfo, ChainMap, S
 import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { VideoTexture } from '../data/VideoTexture';
-import { webgpuEvents } from '../eventnames';
 import { ExternalSampledTextureType } from '../types/TextureType';
 import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
-import { WGPUSampler } from './WGPUSampler';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { WGPUBuffer } from './WGPUBuffer';
+import { WGPUSampler } from './WGPUSampler';
 import { WGPUTextureView } from './WGPUTextureView';
 
 export class GPUBindGroupManager
@@ -146,7 +145,7 @@ export class GPUBindGroupManager
         result = computed(() =>
         {
             // 在提交前确保收集到正确的外部纹理。
-            reactive(webgpuEvents).preSubmit;
+            reactive(device.queue).preSubmit;
 
             //
             const resource = device.importExternalTexture(videoTexture);

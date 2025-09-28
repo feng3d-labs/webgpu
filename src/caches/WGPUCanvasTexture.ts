@@ -1,7 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { CanvasTexture } from '@feng3d/render-api';
 
-import { webgpuEvents } from '../eventnames';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUCanvasContext } from './WGPUCanvasContext';
 
@@ -57,7 +56,7 @@ export class WGPUCanvasTexture extends ReactiveObject
         {
             destroyGPUTexture();
 
-            reactive(webgpuEvents).preSubmit;
+            reactive(device.queue).preSubmit;
 
             r_canvasTexture.context;
 

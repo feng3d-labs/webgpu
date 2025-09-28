@@ -1,7 +1,5 @@
-import { anyEmitter } from '@feng3d/event';
 import { reactive } from '@feng3d/reactivity';
 import { TimestampQuery } from '../data/TimestampQuery';
-import { GPUQueue_submit } from '../eventnames';
 import { ReactiveObject } from '../ReactiveObject';
 
 declare global
@@ -43,6 +41,8 @@ export class WGPUTimestampQuery extends ReactiveObject
 
         const destroy = () =>
         {
+            querySet.destroy();
+
             resolveBuf?.destroy();
             resultBuf?.destroy();
 
@@ -99,46 +99,35 @@ export class WGPUTimestampQuery extends ReactiveObject
             reactive(this).gpuPassTimestampWrites = timestampWrites;
         });
 
-        const getQueryResult = () =>
-        {
-            if (!needResolve) return;
-
-            needResolve = false;
-
-            if (resultBuf.mapState === 'unmapped')
-            {
-                resultBuf.mapAsync(GPUMapMode.READ).then(() =>
-                {
-                    const timestamps = new BigUint64Array(resultBuf.getMappedRange());
-
-                    // Subtract the begin time from the end time.
-                    // Cast into number. Number can be 9007199254740991 as max integer
-                    // which is 109 days of nano seconds.
-                    const elapsedNs = Number(timestamps[1] - timestamps[0]);
-
-                    // It's possible elapsedNs is negative which means it's invalid
-                    // (see spec https://gpuweb.github.io/gpuweb/#timestamp)
-                    if (elapsedNs >= 0)
-                    {
-                        reactive(timestampQuery).result = { elapsedNs };
-                    }
-
-                    resultBuf.unmap();
-
-                    //
-                    anyEmitter.off(device.queue, GPUQueue_submit, getQueryResult);
-                });
-            }
-        };
-
-        // 监听提交WebGPU事件
-        anyEmitter.on(device.queue, GPUQueue_submit, getQueryResult);
-
         this.effect(() =>
         {
+            reactive(device.queue).afterSubmit;
 
+            if (!resultBuf || resultBuf.mapState !== 'unmapped') return;
 
+            if (!needResolve) return;
 
+            //
+            needResolve = false;
+
+            resultBuf.mapAsync(GPUMapMode.READ).then(() =>
+            {
+                const timestamps = new BigUint64Array(resultBuf.getMappedRange());
+
+                // Subtract the begin time from the end time.
+                // Cast into number. Number can be 9007199254740991 as max integer
+                // which is 109 days of nano seconds.
+                const elapsedNs = Number(timestamps[1] - timestamps[0]);
+
+                // It's possible elapsedNs is negative which means it's invalid
+                // (see spec https://gpuweb.github.io/gpuweb/#timestamp)
+                if (elapsedNs >= 0)
+                {
+                    reactive(timestampQuery).result = { elapsedNs };
+                }
+
+                resultBuf.unmap();
+            });
         });
 
         //
