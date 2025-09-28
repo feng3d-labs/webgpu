@@ -4,6 +4,7 @@ import { GPUPipelineLayoutManager } from '../caches/GPUPipelineLayoutManager';
 import { ComputeObject } from '../data/ComputeObject';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
+import { reactive } from '@feng3d/reactivity';
 
 export class ComputeObjectCommand
 {
@@ -17,7 +18,9 @@ export class ComputeObjectCommand
         const device = this.webgpu.device;
         const { pipeline, bindingResources, workgroups } = computeObject;
 
-        this.computePipeline = WGPUComputePipeline.getGPUComputePipeline(device, pipeline);
+        const wGPUComputePipeline = WGPUComputePipeline.getInstance(device, pipeline);
+        reactive(wGPUComputePipeline).gpuComputePipeline;
+        this.computePipeline = wGPUComputePipeline.gpuComputePipeline;
 
         // 计算 bindGroups
         this.setBindGroup = [];
