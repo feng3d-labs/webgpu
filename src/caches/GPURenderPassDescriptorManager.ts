@@ -2,7 +2,7 @@ import { anyEmitter } from '@feng3d/event';
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
 import { ChainMap, OcclusionQuery, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
-import { WGPUTimestampQuery } from './GPUPassTimestampWritesManager';
+import { WGPUTimestampQuery } from './WGPUTimestampQuery';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
 import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
 

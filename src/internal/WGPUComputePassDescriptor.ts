@@ -1,5 +1,5 @@
 import { effect, reactive } from '@feng3d/reactivity';
-import { WGPUTimestampQuery } from '../caches/GPUPassTimestampWritesManager';
+import { WGPUTimestampQuery } from '../caches/WGPUTimestampQuery';
 import { ComputePass } from '../data/ComputePass';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
