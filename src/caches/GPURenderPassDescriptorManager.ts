@@ -1,6 +1,6 @@
 import { anyEmitter } from '@feng3d/event';
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
-import { CanvasTexture, ChainMap, OcclusionQuery, RenderPass, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, TextureLike, TextureView } from '@feng3d/render-api';
+import { ChainMap, OcclusionQuery, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
 import { WGPUTimestampQuery } from './GPUPassTimestampWritesManager';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
@@ -79,32 +79,6 @@ export class GPURenderPassDescriptorManager
         this.getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptorKey, renderPassDescriptor);
 
         return renderPassDescriptor;
-    }
-
-    /**
-     * 设置纹理尺寸。
-     *
-     * @param texture 纹理描述。
-     * @param attachmentSize 附件尺寸。
-     */
-    private static setTextureSize(texture: TextureLike, attachmentSize: { width: number, height: number })
-    {
-        if ('context' in texture)
-        {
-            texture = texture as CanvasTexture;
-            reactive(texture.context).width = attachmentSize.width;
-            reactive(texture.context).height = attachmentSize.height;
-        }
-        else
-        {
-            const descriptor = texture.descriptor;
-            reactive(descriptor.size)[0] = attachmentSize.width;
-            reactive(descriptor.size)[1] = attachmentSize.height;
-            if (descriptor.size?.[2])
-            {
-                reactive(descriptor.size)[2] = descriptor.size[2];
-            }
-        }
     }
 
     /**
@@ -218,13 +192,8 @@ export class GPURenderPassDescriptorManager
     }
 
     private static readonly getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, GPURenderPassDescriptor>();
-    private static readonly getMultisampleTextureViewMap = new WeakMap<TextureLike, TextureView>();
-    private static readonly getGPURenderPassDepthStencilAttachmentMap = new ChainMap<GetGPURenderPassDepthStencilAttachmentKey, Computed<GPURenderPassDepthStencilAttachment>>();
     private static readonly getIGPURenderPassColorAttachmentsMap = new ChainMap<GetGPURenderPassColorAttachmentsKey, Computed<GPURenderPassColorAttachment[]>>();
-    private static readonly getGPURenderPassColorAttachmentMap = new ChainMap<GetGPURenderPassColorAttachmentKey, GPURenderPassColorAttachment>();
 }
 
 type GetGPURenderPassDescriptorKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
-type GetGPURenderPassDepthStencilAttachmentKey = [device: GPUDevice, depthStencilAttachment: RenderPassDepthStencilAttachment];
 type GetGPURenderPassColorAttachmentsKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
-type GetGPURenderPassColorAttachmentKey = [device: GPUDevice, renderPassColorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor];
