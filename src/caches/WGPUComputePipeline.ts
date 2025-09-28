@@ -3,7 +3,7 @@ import { ComputePipeline } from '../data/ComputePipeline';
 import { ComputeStage } from '../data/ComputeStage';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
-import { WGPUShaderModule } from './WGPUShaderModule';
+import { WGPUProgrammableStage } from './WGPUProgrammableStage';
 import { WgslReflectManager } from './WgslReflectManager';
 
 export class WGPUComputePipeline extends ReactiveObject
@@ -53,12 +53,13 @@ export class WGPUComputePipeline extends ReactiveObject
             reactive(wGPUPipelineLayout).gpuPipelineLayout;
             const layout = wGPUPipelineLayout.gpuPipelineLayout;
 
+            const gpuProgrammableStage = WGPUProgrammableStage.getInstance(device, computeStage);
+            reactive(gpuProgrammableStage).gpuProgrammableStage;
+            const programmableStage = gpuProgrammableStage.gpuProgrammableStage;
+
             const pipeline = device.createComputePipeline({
                 layout,
-                compute: {
-                    ...computeStage,
-                    module: WGPUShaderModule.getGPUShaderModule(device, computeStage.code),
-                },
+                compute: programmableStage,
             });
 
             r_this.gpuComputePipeline = pipeline;
