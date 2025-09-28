@@ -236,9 +236,9 @@ export class GPURenderPassDescriptorManager
             {
                 if (!v) return;
 
-                WGPURenderPassColorAttachment.getInstance(device, v, descriptor);
+                const wGPURenderPassColorAttachment = WGPURenderPassColorAttachment.getInstance(device, v, descriptor);
 
-                const attachment = this.getGPURenderPassColorAttachment(device, v, descriptor);
+                const attachment = wGPURenderPassColorAttachment.gpuRenderPassColorAttachment;
 
                 gpuColorAttachments.push(attachment);
             });
