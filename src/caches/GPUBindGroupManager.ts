@@ -4,7 +4,7 @@ import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from 'wgs
 
 import { VideoTexture } from '../data/VideoTexture';
 import { ExternalSampledTextureType } from '../types/TextureType';
-import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
+import { BindGroupLayoutDescriptor } from './WGPUPipelineLayout';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { WGPUBuffer } from './WGPUBuffer';
 import { WGPUSampler } from './WGPUSampler';

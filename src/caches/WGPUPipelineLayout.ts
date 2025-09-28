@@ -1,4 +1,5 @@
-import { ChainMap } from '@feng3d/render-api';
+import { reactive } from '@feng3d/reactivity';
+import { ReactiveObject } from '../ReactiveObject';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { GPUBindGroupLayoutEntryMap, WgslReflectManager } from './WgslReflectManager';
 
@@ -32,36 +33,49 @@ export interface BindGroupLayoutDescriptor
     label?: string,
 }
 
-export class GPUPipelineLayoutManager
+export class WGPUPipelineLayout extends ReactiveObject
 {
-    static getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
+    readonly gpuPipelineLayout: GPUPipelineLayout;
+
+    constructor(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
     {
-        const pipelineLayout = GPUPipelineLayoutManager.getPipelineLayout(shader);
+        super();
 
-        //
-        const key = [device, pipelineLayout];
-        let gpuPipelineLayout = this._gpuPipelineLayoutMap.get(key);
-
-        if (gpuPipelineLayout) return gpuPipelineLayout;
-
-        const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
-        {
-            const gpuBindGroupLayout = WGPUBindGroupLayout.getGPUBindGroupLayout(device, v);
-
-            return gpuBindGroupLayout;
-        });
-
-        const descriptor: GPUPipelineLayoutDescriptor = {
-            bindGroupLayouts,
-        };
-
-        gpuPipelineLayout = device.createPipelineLayout(descriptor);
-        this._gpuPipelineLayoutMap.set(key, gpuPipelineLayout);
-
-        return gpuPipelineLayout;
+        this._createGPUPipelineLayout(device, shader);
+        this._onMap(device, shader);
     }
 
-    private static readonly _gpuPipelineLayoutMap = new ChainMap<any[], GPUPipelineLayout>();
+    private _createGPUPipelineLayout(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
+    {
+        this.effect(() =>
+        {
+            const pipelineLayout = WGPUPipelineLayout.getPipelineLayout(shader);
+
+            const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
+            {
+                const gpuBindGroupLayout = WGPUBindGroupLayout.getGPUBindGroupLayout(device, v);
+
+                return gpuBindGroupLayout;
+            });
+
+            const descriptor: GPUPipelineLayoutDescriptor = {
+                bindGroupLayouts,
+            };
+
+            const gpuPipelineLayout = device.createPipelineLayout(descriptor);
+
+            reactive(this).gpuPipelineLayout = gpuPipelineLayout;
+        });
+
+        this.destroyCall(() => { reactive(this).gpuPipelineLayout = null; });
+    }
+
+    private _onMap(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
+    {
+        device.pipelineLayouts ??= new WeakMap<{ vertex: string, fragment: string } | { compute: string }, WGPUPipelineLayout>();
+        device.pipelineLayouts.set(shader, this);
+        this.destroyCall(() => { device.pipelineLayouts.delete(shader); });
+    }
 
     /**
      * 从GPU管线中获取管线布局。
@@ -182,4 +196,17 @@ export class GPUPipelineLayoutManager
     private static readonly getGPUPipelineLayoutMap: { [shaderKey: string]: PipelineLayoutDescriptor } = {};
     private static readonly _bindGroupLayoutDescriptor: { [key: string]: BindGroupLayoutDescriptor } = {};
     private static readonly _pipelineLayoutDescriptorMap: { [key: string]: PipelineLayoutDescriptor } = {};
+
+    static getInstance(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
+    {
+        return device.pipelineLayouts?.get(shader) || new WGPUPipelineLayout(device, shader);
+    }
+}
+
+declare global
+{
+    interface GPUDevice
+    {
+        pipelineLayouts: WeakMap<{ vertex: string, fragment: string } | { compute: string }, WGPUPipelineLayout>;
+    }
 }

@@ -2,7 +2,7 @@ import { computed, Computed, reactive, UnReadonly } from '@feng3d/reactivity';
 import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
-import { GPUPipelineLayoutManager } from './caches/GPUPipelineLayoutManager';
+import { WGPUPipelineLayout } from './caches/WGPUPipelineLayout';
 import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
 import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
 import { WGPUBuffer } from './caches/WGPUBuffer';
@@ -384,7 +384,7 @@ export class WebGPU
 
             // 执行
             const { bindingResources } = renderObject;
-            const layout = GPUPipelineLayoutManager.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
+            const layout = WGPUPipelineLayout.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
 
             renderObjectCache.setBindGroup.length = layout.bindGroupLayouts.length;
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>

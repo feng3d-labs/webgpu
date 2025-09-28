@@ -2,7 +2,7 @@ import { reactive, UnReadonly } from '@feng3d/reactivity';
 import { ComputePipeline } from '../data/ComputePipeline';
 import { ComputeStage } from '../data/ComputeStage';
 import { ReactiveObject } from '../ReactiveObject';
-import { GPUPipelineLayoutManager } from './GPUPipelineLayoutManager';
+import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUShaderModule } from './WGPUShaderModule';
 import { WgslReflectManager } from './WgslReflectManager';
 
@@ -49,7 +49,9 @@ export class WGPUComputePipeline extends ReactiveObject
             }
 
             // 从GPU管线中获取管线布局。
-            const layout = GPUPipelineLayoutManager.getGPUPipelineLayout(device, { compute: computePipeline.compute.code });
+            const wGPUPipelineLayout = WGPUPipelineLayout.getInstance(device, { compute: computePipeline.compute.code });
+            reactive(wGPUPipelineLayout).gpuPipelineLayout;
+            const layout = wGPUPipelineLayout.gpuPipelineLayout;
 
             const pipeline = device.createComputePipeline({
                 layout,

@@ -1,4 +1,4 @@
-import { BindGroupLayoutDescriptor } from './GPUPipelineLayoutManager';
+import { BindGroupLayoutDescriptor } from './WGPUPipelineLayout';
 
 export class WGPUBindGroupLayout
 {

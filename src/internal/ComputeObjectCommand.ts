@@ -1,6 +1,6 @@
 import { GPUBindGroupManager } from '../caches/GPUBindGroupManager';
 import { WGPUComputePipeline } from '../caches/WGPUComputePipeline';
-import { GPUPipelineLayoutManager } from '../caches/GPUPipelineLayoutManager';
+import { WGPUPipelineLayout } from '../caches/WGPUPipelineLayout';
 import { ComputeObject } from '../data/ComputeObject';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
@@ -24,7 +24,7 @@ export class ComputeObjectCommand
 
         // 计算 bindGroups
         this.setBindGroup = [];
-        const layout = GPUPipelineLayoutManager.getPipelineLayout({ compute: pipeline.compute.code });
+        const layout = WGPUPipelineLayout.getPipelineLayout({ compute: pipeline.compute.code });
 
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
