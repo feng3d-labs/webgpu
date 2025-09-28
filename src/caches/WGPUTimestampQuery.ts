@@ -1,7 +1,8 @@
 import { anyEmitter } from '@feng3d/event';
-import { ChainMap } from '@feng3d/render-api';
+import { reactive } from '@feng3d/reactivity';
 import { TimestampQuery } from '../data/TimestampQuery';
 import { GPUQueue_submit } from '../eventnames';
+import { ReactiveObject } from '../ReactiveObject';
 
 declare global
 {
@@ -15,17 +16,22 @@ declare global
     }
 }
 
-export class WGPUTimestampQuery
+export class WGPUTimestampQuery extends ReactiveObject
 {
-    public static getGPUPassTimestampWrites(device: GPUDevice, timestampQuery?: TimestampQuery)
+    readonly gpuPassTimestampWrites: GPURenderPassTimestampWrites | GPUComputePassTimestampWrites;
+
+    constructor(device: GPUDevice, timestampQuery?: TimestampQuery)
     {
-        if (!timestampQuery) return;
+        super();
 
-        const getGPUPassTimestampWritesKey: GetGPUPassTimestampWritesKey = [device, timestampQuery];
-        let timestampWrites = this.getGPUPassTimestampWritesMap.get(getGPUPassTimestampWritesKey);
+        this._createGPUPassTimestampWrites(device, timestampQuery);
 
-        if (timestampWrites) return timestampWrites;
+        this._onMap(device, timestampQuery);
 
+    }
+
+    private _createGPUPassTimestampWrites(device: GPUDevice, timestampQuery: TimestampQuery)
+    {
         // 判断是否支持 `timestamp-query`
         if (timestampQuery['isSupports'] === undefined)
         {
@@ -48,13 +54,7 @@ export class WGPUTimestampQuery
         // Create a buffer to map the result back to the CPU
         let resultBuf: GPUBuffer;
 
-        timestampWrites = {
-            querySet,
-            beginningOfPassWriteIndex: 0,
-            endOfPassWriteIndex: 1,
-        };
-
-        timestampWrites.resolve = (commandEncoder: GPUCommandEncoder) =>
+        const resolve = (commandEncoder: GPUCommandEncoder) =>
         {
             resolveBuf = resolveBuf || device.createBuffer({
                 size: 2 * timestampByteSize,
@@ -121,12 +121,33 @@ export class WGPUTimestampQuery
             anyEmitter.on(device.queue, GPUQueue_submit, getQueryResult);
         };
 
-        this.getGPUPassTimestampWritesMap.set(getGPUPassTimestampWritesKey, timestampWrites);
+        const timestampWrites: GPURenderPassTimestampWrites | GPUComputePassTimestampWrites = {
+            querySet,
+            beginningOfPassWriteIndex: 0,
+            endOfPassWriteIndex: 1,
+            resolve,
+        };
 
-        return timestampWrites;
+        reactive(this).gpuPassTimestampWrites = timestampWrites;
     }
 
-    private static readonly getGPUPassTimestampWritesMap = new ChainMap<GetGPUPassTimestampWritesKey, GPURenderPassTimestampWrites | GPUComputePassTimestampWrites>();
+    private _onMap(device: GPUDevice, timestampQuery?: TimestampQuery)
+    {
+        device.timestampQueries ??= new WeakMap<TimestampQuery, WGPUTimestampQuery>();
+        device.timestampQueries.set(timestampQuery, this);
+        this.destroyCall(() => { device.timestampQueries.delete(timestampQuery); });
+    }
+
+    public static getInstance(device: GPUDevice, timestampQuery: TimestampQuery)
+    {
+        return device.timestampQueries?.get(timestampQuery) || new WGPUTimestampQuery(device, timestampQuery);
+    }
 }
 
-type GetGPUPassTimestampWritesKey = [GPUDevice, TimestampQuery];
+declare global
+{
+    interface GPUDevice
+    {
+        timestampQueries: WeakMap<TimestampQuery, WGPUTimestampQuery>;
+    }
+}

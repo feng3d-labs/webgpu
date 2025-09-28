@@ -2,9 +2,9 @@ import { anyEmitter } from '@feng3d/event';
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
 import { ChainMap, OcclusionQuery, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
-import { WGPUTimestampQuery } from './WGPUTimestampQuery';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
 import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
+import { WGPUTimestampQuery } from './WGPUTimestampQuery';
 
 declare global
 {
@@ -68,7 +68,11 @@ export class GPURenderPassDescriptorManager
             // 处理时间戳查询
             if (timestampQuery)
             {
-                renderPassDescriptor.timestampWrites = WGPUTimestampQuery.getGPUPassTimestampWrites(device, timestampQuery);
+                const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, timestampQuery);
+                reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
+                const timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
+
+                renderPassDescriptor.timestampWrites = timestampWrites;
             }
             else
             {
