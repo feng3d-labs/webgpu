@@ -32,19 +32,6 @@ export class WGPUTimestampQuery extends ReactiveObject
 
     private _createGPUPassTimestampWrites(device: GPUDevice, timestampQuery: TimestampQuery)
     {
-        // 判断是否支持 `timestamp-query`
-        if (timestampQuery['isSupports'] === undefined)
-        {
-            timestampQuery['isSupports'] = device.features.has(`timestamp-query`);
-            timestampQuery.onSupports?.(timestampQuery['isSupports']);
-        }
-        if (!timestampQuery['isSupports'])
-        {
-            console.warn(`WebGPU未开启或者不支持 timestamp-query 特性，请确认 WebGPU.init 初始化参数是否正确！`);
-
-            return;
-        }
-
         const querySet = device.createQuerySet({ type: 'timestamp', count: 2 });
 
         // Create a buffer where to store the result of GPU queries
@@ -140,6 +127,19 @@ export class WGPUTimestampQuery extends ReactiveObject
 
     public static getInstance(device: GPUDevice, timestampQuery: TimestampQuery)
     {
+        if (!timestampQuery) return null;
+
+        // 判断是否支持 `timestamp-query`
+        if (timestampQuery.isSupports === undefined)
+        {
+            reactive(timestampQuery).isSupports = device.features.has(`timestamp-query`);
+        }
+        if (!timestampQuery.isSupports)
+        {
+            console.warn(`WebGPU未开启或者不支持 timestamp-query 特性，请确认 WebGPU.init 初始化参数是否正确！`);
+            return null;
+        }
+
         return device.timestampQueries?.get(timestampQuery) || new WGPUTimestampQuery(device, timestampQuery);
     }
 }

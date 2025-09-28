@@ -18,9 +18,9 @@ export class WGPUComputePassDescriptor
 
             const timestampQuery = computePass.descriptor?.timestampQuery;
 
-            if (timestampQuery)
+            const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(webgpu.device, timestampQuery);
+            if (wGPUTimestampQuery)
             {
-                const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(webgpu.device, timestampQuery);
                 reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
                 const timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
 

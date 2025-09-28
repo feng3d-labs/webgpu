@@ -65,10 +65,10 @@ export class GPURenderPassDescriptorManager
 
             const timestampQuery = descriptor.timestampQuery;
 
-            // 处理时间戳查询
-            if (timestampQuery)
+            const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, timestampQuery);
+
+            if (wGPUTimestampQuery)
             {
-                const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, timestampQuery);
                 reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
                 const timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
 

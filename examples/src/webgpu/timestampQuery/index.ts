@@ -1,4 +1,4 @@
-import { reactive } from '@feng3d/reactivity';
+import { effect, reactive } from '@feng3d/reactivity';
 import { CanvasContext, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
 import { TimestampQuery, WebGPU } from '@feng3d/webgpu';
 
@@ -19,13 +19,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     // snippets that are related to timestamps. Most of the logic is in
     // TimestampQueryManager.ts.
     const timestampQuery: TimestampQuery = {
-        onSupports: (isSupports: boolean) =>
-        {
-            if (!isSupports)
-            {
-                perfDisplay.innerHTML = 'Timestamp queries are not supported';
-            }
-        },
         onQuery: (elapsedNs: number) =>
         {
             // Show the last successfully downloaded elapsed time.
@@ -38,6 +31,20 @@ const init = async (canvas: HTMLCanvasElement) =>
                 .toFixed(3)} ms ± ${renderPassDurationCounter.getStddev().toFixed(3)} ms`;
         },
     };
+
+    effect(() =>
+    {
+        reactive(timestampQuery).isSupports;
+
+        const isSupports = timestampQuery.isSupports;
+
+        if (isSupports === undefined) return;
+
+        if (!isSupports)
+        {
+            perfDisplay.innerHTML = 'Timestamp queries are not supported';
+        }
+    });
 
     //
     const devicePixelRatio = window.devicePixelRatio || 1;
