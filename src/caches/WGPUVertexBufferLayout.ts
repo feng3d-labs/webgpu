@@ -1,36 +1,105 @@
-import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from '@feng3d/render-api';
+import { reactive } from '@feng3d/reactivity';
+import { VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from '@feng3d/render-api';
 import { FunctionInfo } from 'wgsl_reflect';
 import { VertexBuffer } from '../internal/VertexBuffer';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
+import { WGPUVertexBuffer } from './WGPUVertexBuffer';
 
+/**
+ * WebGPU顶点缓冲区布局缓存管理器
+ * 
+ * 负责管理WebGPU顶点缓冲区布局的完整生命周期，包括：
+ * - 顶点缓冲区布局的创建和配置
+ * - 响应式监听顶点状态和顶点属性变化
+ * - 自动重新创建顶点缓冲区布局当依赖变化时
+ * - 着色器反射和顶点属性匹配
+ * - 顶点缓冲区布局实例的缓存和复用
+ * - 资源清理和内存管理
+ * 
+ * 主要功能：
+ * 1. **布局管理** - 自动创建和配置GPU顶点缓冲区布局
+ * 2. **着色器反射** - 自动分析顶点着色器，提取输入属性信息
+ * 3. **属性匹配** - 自动匹配顶点属性与着色器输入
+ * 4. **格式验证** - 自动验证顶点数据格式与着色器类型匹配
+ * 5. **响应式更新** - 监听顶点状态和属性变化，自动重新创建
+ * 6. **实例缓存** - 使用嵌套WeakMap缓存布局实例，避免重复创建
+ * 7. **资源管理** - 自动处理顶点缓冲区布局相关资源的清理
+ * 
+ * 使用场景：
+ * - 渲染管线中的顶点数据处理
+ * - 顶点着色器输入属性配置
+ * - 顶点数据格式验证和转换
+ * - 多顶点格式的渲染管理
+ * - 动态顶点属性更新
+ */
 export class WGPUVertexBufferLayout extends ReactiveObject
 {
+    /**
+     * GPU顶点缓冲区布局数组
+     * 
+     * 包含所有顶点缓冲区的布局配置信息，用于GPU渲染管线。
+     * 当顶点状态或顶点属性发生变化时，此数组会自动重新创建。
+     */
     readonly vertexBufferLayouts: GPUVertexBufferLayout[];
+    
+    /**
+     * 顶点缓冲区数组
+     * 
+     * 包含所有顶点缓冲区的数据信息，与vertexBufferLayouts一一对应。
+     * 当顶点状态或顶点属性发生变化时，此数组会自动重新创建。
+     */
     readonly vertexBuffers: VertexBuffer[];
 
+    /**
+     * 构造函数
+     * 
+     * 创建顶点缓冲区布局管理器实例，并设置响应式监听。
+     * 
+     * @param vertexState 顶点状态配置对象，包含着色器代码和参数
+     * @param vertices 顶点属性配置对象，定义顶点数据格式
+     */
     constructor(vertexState: VertexState, vertices: VertexAttributes)
     {
         super();
 
+        // 设置顶点缓冲区布局创建和更新逻辑
         this._onCreateVertexBufferLayout(vertexState, vertices);
 
+        // 将实例注册到缓存中
         this._onMap(vertexState, vertices);
     }
 
+    /**
+     * 将顶点缓冲区布局实例注册到缓存中
+     * 
+     * 使用嵌套WeakMap将顶点状态和顶点属性配置对象与其实例关联，实现实例缓存和复用。
+     * 当顶点状态或顶点属性配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
+     * 
+     * @param vertexState 顶点状态配置对象，作为第一级缓存的键
+     * @param vertices 顶点属性配置对象，作为第二级缓存的键
+     */
     private _onMap(vertexState: VertexState, vertices: VertexAttributes)
     {
+        // 如果顶点状态还没有对应的二级缓存，则创建一个新的WeakMap
         caches.set(vertexState, caches.get(vertexState) || new WeakMap<VertexAttributes, WGPUVertexBufferLayout>());
+        
+        // 将当前实例与顶点属性配置对象关联
         caches.get(vertexState).set(vertices, this);
+        
+        // 注册清理回调，在对象销毁时从缓存中移除
         this.destroyCall(() => { caches.get(vertexState).delete(vertices); });
     }
 
     /**
-     * 从顶点属性信息与顶点数据中获取顶点缓冲区布局数组以及顶点缓冲区数组。
-     *
-     * @param vertices 顶点数据。
-     * @returns 顶点缓冲区布局数组以及顶点缓冲区数组。
+     * 设置顶点缓冲区布局创建和更新逻辑
+     * 
+     * 使用响应式系统监听顶点状态和顶点属性变化，自动重新创建顶点缓冲区布局。
+     * 当顶点状态或顶点属性参数发生变化时，会触发顶点缓冲区布局的重新创建。
+     * 自动处理着色器反射、属性匹配和格式验证。
+     * 
+     * @param vertexState 顶点状态配置对象
+     * @param vertices 顶点属性配置对象
      */
     private _onCreateVertexBufferLayout(vertexState: VertexState, vertices: VertexAttributes)
     {
@@ -38,16 +107,21 @@ export class WGPUVertexBufferLayout extends ReactiveObject
         const r_vertexState = reactive(vertexState);
         const r_vertices = reactive(vertices);
 
+        // 监听顶点状态和顶点属性变化，自动重新创建顶点缓冲区布局
         this.effect(() =>
         {
+            // 触发响应式依赖，监听顶点状态的所有属性
             r_vertexState.code;
             r_vertexState.entryPoint;
 
+            // 获取顶点状态配置
             const { code, entryPoint } = vertexState;
 
+            // 获取着色器反射信息
             const wgslReflect = WGPUShaderReflect.getWGSLReflectInfo(code);
             let vertexEntryFunctionInfo: FunctionInfo;
 
+            // 获取顶点着色器入口函数信息
             if (entryPoint)
             {
                 vertexEntryFunctionInfo = wgslReflect.entry.vertex.filter((v) => v.name === entryPoint)[0];
@@ -57,40 +131,25 @@ export class WGPUVertexBufferLayout extends ReactiveObject
                 vertexEntryFunctionInfo = WGPUShaderReflect.getWGSLReflectInfo(code).entry.vertex[0];
             }
 
-            vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
-            {
-                // 跳过内置属性。
-                if (inputInfo.locationType === 'builtin') return;
-                // 监听每个顶点属性数据。
-                const vertexAttribute = r_vertices[inputInfo.name];
-
-                if (vertexAttribute)
-                {
-                    vertexAttribute.arrayStride;
-                    vertexAttribute.format;
-                    vertexAttribute.offset;
-                    vertexAttribute.stepMode;
-                }
-            });
-
-            // 计算
+            // 初始化顶点缓冲区布局和缓冲区数组
             const vertexBufferLayouts: GPUVertexBufferLayout[] = [];
             const vertexBuffers: VertexBuffer[] = [];
             const bufferIndexMap = new Map<VertexDataTypes, number>();
 
+            // 遍历顶点着色器的所有输入属性
             vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
             {
-                // 跳过内置属性。
+                // 跳过内置属性（如vertex_index、instance_index等）
                 if (inputInfo.locationType === 'builtin') return;
 
                 const shaderLocation = inputInfo.location as number;
                 const attributeName = inputInfo.name;
 
-                //
+                // 获取对应的顶点属性配置
                 const vertexAttribute = vertices[attributeName];
                 console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
 
-                // 监听每个顶点属性数据。
+                // 监听每个顶点属性数据的变化
                 const r_vertexAttribute = reactive(vertexAttribute);
                 r_vertexAttribute.data;
                 r_vertexAttribute.format;
@@ -98,113 +157,93 @@ export class WGPUVertexBufferLayout extends ReactiveObject
                 r_vertexAttribute.arrayStride;
                 r_vertexAttribute.stepMode;
 
-                //
+                // 获取顶点属性配置信息
                 const data = vertexAttribute.data;
                 const attributeOffset = vertexAttribute.offset || 0;
                 let arrayStride = vertexAttribute.arrayStride;
                 const stepMode = vertexAttribute.stepMode ?? 'vertex';
                 const format = vertexAttribute.format;
 
-                // 检查提供的顶点数据格式是否与着色器匹配
+                // 验证顶点数据格式是否与着色器匹配
                 // const wgslType = getWGSLType(v.type);
                 // let possibleFormats = wgslVertexTypeMap[wgslType].possibleFormats;
                 // console.assert(possibleFormats.indexOf(format) !== -1, `顶点${attributeName} 提供的数据格式 ${format} 与着色器中类型 ${wgslType} 不匹配！`);
                 console.assert(data.constructor.name === vertexFormatMap[format].typedArrayConstructor.name,
                     `顶点${attributeName} 提供的数据类型 ${data.constructor.name} 与格式 ${format} 不匹配！请使用 ${data.constructor.name} 来组织数据或者更改数据格式。`);
 
-                // 如果 偏移值大于 单个顶点尺寸，则该值被放入 IGPUVertexBuffer.offset。
+                // 计算单个顶点的字节大小
                 const vertexByteSize = vertexFormatMap[format].byteSize;
 
-                //
+                // 如果没有指定数组步长，则使用单个顶点的字节大小
                 if (!arrayStride)
                 {
                     arrayStride = vertexByteSize;
                 }
+                // 验证偏移量和步长的合理性
                 console.assert(attributeOffset + vertexByteSize <= arrayStride, `offset(${attributeOffset}) + vertexByteSize(${vertexByteSize}) 必须不超出 arrayStride(${arrayStride})。`);
 
+                // 查找或创建对应的顶点缓冲区布局
                 let index = bufferIndexMap.get(data);
                 let gpuVertexBufferLayout: GPUVertexBufferLayout;
 
                 if (index === undefined)
                 {
+                    // 创建新的顶点缓冲区布局
                     index = vertexBufferLayouts.length;
                     bufferIndexMap.set(data, index);
 
-                    vertexBuffers[index] = WGPUVertexBufferLayout.getVertexBuffers(vertexAttribute);
+                    // 获取或创建顶点缓冲区实例
+                    const wgpuVertexBuffer = WGPUVertexBuffer.getInstance(vertexAttribute);
+                    reactive(wgpuVertexBuffer).vertexBuffer;
 
-                    //
-                    gpuVertexBufferLayout = vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [], key: `${stepMode}-${arrayStride}` };
+                    vertexBuffers[index] = wgpuVertexBuffer.vertexBuffer;
+
+                    // 创建GPU顶点缓冲区布局
+                    gpuVertexBufferLayout = vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [] };
                 }
                 else
                 {
+                    // 使用现有的顶点缓冲区布局
                     gpuVertexBufferLayout = vertexBufferLayouts[index];
                     if (__DEV__)
                     {
+                        // 验证同一顶点缓冲区中的步长和步进模式必须相同
                         console.assert(vertexBufferLayouts[index].arrayStride === arrayStride && vertexBufferLayouts[index].stepMode === stepMode, '要求同一顶点缓冲区中 arrayStride 与 stepMode 必须相同。');
                     }
                 }
-
-                (gpuVertexBufferLayout.attributes as Array<GPUVertexAttribute>).push({ shaderLocation, offset: attributeOffset, format });
-                gpuVertexBufferLayout.key += `-[${shaderLocation}, ${attributeOffset}, ${format}]`;
+                // 添加顶点属性到布局中
+                const attributes = gpuVertexBufferLayout.attributes as Array<GPUVertexAttribute>;
+                attributes.push({ shaderLocation, offset: attributeOffset, format });
             });
 
-            // 相同的顶点缓冲区布局合并为一个。
-            const vertexBufferLayoutsKey = vertexBufferLayouts.reduce((prev, cur) => prev + cur.key, '');
 
-            WGPUVertexBufferLayout.vertexBufferLayoutsMap[vertexBufferLayoutsKey] ??= vertexBufferLayouts;
-
-            r_this.vertexBufferLayouts = WGPUVertexBufferLayout.vertexBufferLayoutsMap[vertexBufferLayoutsKey];
+            // 更新顶点缓冲区布局和缓冲区引用
+            r_this.vertexBufferLayouts = vertexBufferLayouts;
             r_this.vertexBuffers = vertexBuffers;
         });
     }
 
-    private static readonly vertexBufferLayoutsMap: Record<string, GPUVertexBufferLayout[]> = {};
-
-    private static getVertexBuffers(vertexAttribute: VertexAttribute)
-    {
-        let result = this.getVertexBuffersMap.get(vertexAttribute);
-
-        if (result) return result.value;
-        const vertexBuffer: VertexBuffer = {} as any;
-        const r_vertexBuffer = reactive(vertexBuffer);
-
-        result = computed(() =>
-        {
-            // 监听
-            reactive(vertexAttribute).data;
-
-            //
-            const data = vertexAttribute.data;
-
-            // 修改数据并通知更新
-            r_vertexBuffer.data = data;
-            r_vertexBuffer.offset = data.byteOffset;
-            r_vertexBuffer.size = data.byteLength;
-
-            return vertexBuffer;
-        });
-        this.getVertexBuffersMap.set(vertexAttribute, result);
-
-        return result.value;
-    }
-
-    private static readonly getVertexBuffersMap = new WeakMap<VertexAttribute, Computed<VertexBuffer>>();
-
+    /**
+     * 获取或创建顶点缓冲区布局实例
+     * 
+     * 使用单例模式管理顶点缓冲区布局实例，避免重复创建相同的布局。
+     * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
+     * 
+     * @param vertexState 顶点状态配置对象
+     * @param vertices 顶点属性配置对象
+     * @returns 顶点缓冲区布局实例
+     */
     static getInstance(vertexState: VertexState, vertices: VertexAttributes)
     {
+        // 尝试从缓存中获取现有实例，如果不存在则创建新实例
         return caches.get(vertexState)?.get(vertices) || new WGPUVertexBufferLayout(vertexState, vertices);
     }
 }
 
-declare global
-{
-    interface GPUVertexBufferLayout
-    {
-        /**
-         * 用于判断是否为相同的顶点缓冲区布局。
-         */
-        key: string;
-    }
-}
-
+/**
+ * 顶点缓冲区布局实例缓存映射表
+ * 
+ * 用于缓存已创建的顶点缓冲区布局实例，避免重复创建相同的布局。
+ * 使用嵌套WeakMap结构，第一级键为顶点状态配置对象，第二级键为顶点属性配置对象。
+ */
 const caches = new WeakMap<VertexState, WeakMap<VertexAttributes, WGPUVertexBufferLayout>>();
