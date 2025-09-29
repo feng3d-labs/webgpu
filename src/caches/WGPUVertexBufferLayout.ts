@@ -4,38 +4,14 @@ import { FunctionInfo } from 'wgsl_reflect';
 import { VertexBuffer } from '../internal/VertexBuffer';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
 
-export class GPUVertexBufferManager
+export class WGPUVertexBufferLayout
 {
-
-    public static getGPUVertexBufferLayouts(vertexState: VertexState, vertices: VertexAttributes)
-    {
-        const result = computed(() =>
-        {
-            const { vertexBufferLayouts } = this.getVertexBuffersBuffers(vertexState, vertices);
-
-            return vertexBufferLayouts;
-        });
-
-        return result.value;
-    }
 
     public static getNVertexBuffers(vertexState: VertexState, vertices: VertexAttributes)
     {
-        let _vertexBuffers: VertexBuffer[];
-        const result = computed(() =>
-        {
-            const { vertexBuffers } = this.getVertexBuffersBuffers(vertexState, vertices);
+        const { vertexBuffers } = this.getVertexBuffersBuffers(vertexState, vertices);
 
-            if (_vertexBuffers && _vertexBuffers.length === vertexBuffers.length && _vertexBuffers.every((v, i) => v === vertexBuffers[i]))
-            {
-                return _vertexBuffers;
-            }
-            _vertexBuffers = vertexBuffers;
-
-            return vertexBuffers;
-        });
-
-        return result.value;
+        return vertexBuffers;
     }
 
     /**
@@ -44,7 +20,7 @@ export class GPUVertexBufferManager
      * @param vertices 顶点数据。
      * @returns 顶点缓冲区布局数组以及顶点缓冲区数组。
      */
-    private static getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttributes)
+    static getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttributes)
     {
         const getVertexBuffersBuffersKey: GetVertexBuffersBuffersKey = [vertexState, vertices];
         let result = this.getVertexBuffersBuffersMap.get(getVertexBuffersBuffersKey);

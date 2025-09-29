@@ -1,9 +1,9 @@
 import { reactive } from "@feng3d/reactivity";
 import { VertexAttributes, VertexState } from "@feng3d/render-api";
 import { ReactiveObject } from "../ReactiveObject";
-import { GPUVertexBufferManager } from "./GPUVertexBufferManager";
 import { WGPUShaderModule } from "./WGPUShaderModule";
 import { WGPUShaderReflect } from "./WGPUShaderReflect";
+import { WGPUVertexBufferLayout } from "./WGPUVertexBufferLayout";
 
 /**
  * WebGPU顶点状态缓存管理器
@@ -98,11 +98,14 @@ export class WGPUVertexState extends ReactiveObject
             }
 
             // 获取顶点缓冲区布局配置
-            const vertexBufferLayouts = GPUVertexBufferManager.getGPUVertexBufferLayouts(vertexState, vertices);
+            const { vertexBufferLayouts } = WGPUVertexBufferLayout.getVertexBuffersBuffers(vertexState, vertices);
+
+            //
+            const module = WGPUShaderModule.getGPUShaderModule(device, code);
 
             // 创建GPU顶点状态配置
             const gpuVertexState: GPUVertexState = {
-                module: WGPUShaderModule.getGPUShaderModule(device, code),
+                module: module,
                 entryPoint: entryPoint,
                 buffers: vertexBufferLayouts,
                 constants: constants,
@@ -130,7 +133,7 @@ export class WGPUVertexState extends ReactiveObject
     {
         // 如果设备还没有顶点状态缓存，则创建一个新的嵌套WeakMap
         device.vertexStates ??= new WeakMap<VertexState, WeakMap<VertexAttributes, WGPUVertexState>>();
-        
+
         // 获取或创建顶点状态对应的二级缓存
         let vertexStates = device.vertexStates.get(vertexState);
         if (!vertexStates)
@@ -138,10 +141,10 @@ export class WGPUVertexState extends ReactiveObject
             vertexStates = new WeakMap<VertexAttributes, WGPUVertexState>();
             device.vertexStates.set(vertexState, vertexStates);
         }
-        
+
         // 将当前实例与顶点属性配置对象关联
         vertexStates.set(vertices, this);
-        
+
         // 注册清理回调，在对象销毁时从缓存中移除
         this.destroyCall(() => { device.vertexStates.get(vertexState).delete(vertices); });
     }

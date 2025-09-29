@@ -4,7 +4,7 @@ import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObje
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
 import { WGPUPipelineLayout } from './caches/WGPUPipelineLayout';
 import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
-import { GPUVertexBufferManager } from './caches/GPUVertexBufferManager';
+import { WGPUVertexBufferLayout } from './caches/WGPUVertexBufferLayout';
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
 import './data/polyfills/RenderObject';
@@ -410,7 +410,7 @@ export class WebGPU
             const { vertices, pipeline } = renderObject;
 
             //
-            const vertexBuffers = GPUVertexBufferManager.getNVertexBuffers(pipeline.vertex, vertices);
+            const vertexBuffers = WGPUVertexBufferLayout.getNVertexBuffers(pipeline.vertex, vertices);
 
             renderObjectCache.setVertexBuffer.length = vertexBuffers?.length ?? 0;
             vertexBuffers?.forEach((vertexBuffer, index) =>
