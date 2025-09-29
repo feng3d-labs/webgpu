@@ -1,10 +1,10 @@
+import { reactive } from '@feng3d/reactivity';
 import { GPUBindGroupManager } from '../caches/GPUBindGroupManager';
 import { WGPUComputePipeline } from '../caches/WGPUComputePipeline';
 import { WGPUPipelineLayout } from '../caches/WGPUPipelineLayout';
 import { ComputeObject } from '../data/ComputeObject';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
-import { reactive } from '@feng3d/reactivity';
 
 export class ComputeObjectCommand
 {

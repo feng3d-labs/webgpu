@@ -1,4 +1,3 @@
-import { reactive } from '@feng3d/reactivity';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { GPUBindGroupLayoutEntryMap, WgslReflectManager } from './WgslReflectManager';
@@ -35,47 +34,6 @@ export interface BindGroupLayoutDescriptor
 
 export class WGPUPipelineLayout extends ReactiveObject
 {
-    readonly gpuPipelineLayout: GPUPipelineLayout;
-
-    constructor(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
-    {
-        super();
-
-        this._createGPUPipelineLayout(device, shader);
-        this._onMap(device, shader);
-    }
-
-    private _createGPUPipelineLayout(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
-    {
-        this.effect(() =>
-        {
-            const pipelineLayout = WGPUPipelineLayout.getPipelineLayout(shader);
-
-            const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
-            {
-                const gpuBindGroupLayout = WGPUBindGroupLayout.getGPUBindGroupLayout(device, v);
-
-                return gpuBindGroupLayout;
-            });
-
-            const descriptor: GPUPipelineLayoutDescriptor = {
-                bindGroupLayouts,
-            };
-
-            const gpuPipelineLayout = device.createPipelineLayout(descriptor);
-
-            reactive(this).gpuPipelineLayout = gpuPipelineLayout;
-        });
-
-        this.destroyCall(() => { reactive(this).gpuPipelineLayout = null; });
-    }
-
-    private _onMap(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
-    {
-        device.pipelineLayouts ??= new WeakMap<{ vertex: string, fragment: string } | { compute: string }, WGPUPipelineLayout>();
-        device.pipelineLayouts.set(shader, this);
-        this.destroyCall(() => { device.pipelineLayouts.delete(shader); });
-    }
 
     /**
      * 从GPU管线中获取管线布局。
@@ -85,22 +43,6 @@ export class WGPUPipelineLayout extends ReactiveObject
      */
     static getPipelineLayout(shader: { vertex: string, fragment: string } | { compute: string })
     {
-        let shaderKey = '';
-
-        if ('compute' in shader)
-        {
-            shaderKey += shader.compute;
-        }
-        else
-        {
-            shaderKey += shader.vertex;
-            if (shader.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n${shader.fragment}`;
-        }
-
-        let gpuPipelineLayout = this.getGPUPipelineLayoutMap[shaderKey];
-
-        if (gpuPipelineLayout) return gpuPipelineLayout;
-
         let entryMap: GPUBindGroupLayoutEntryMap;
 
         if ('compute' in shader)
@@ -178,7 +120,7 @@ export class WGPUPipelineLayout extends ReactiveObject
         // 管线布局描述标识符。
         const pipelineLayoutKey = bindGroupLayouts.map((v, i) => `[${i}: ${v.label}]`).join(',');
 
-        gpuPipelineLayout = this._pipelineLayoutDescriptorMap[pipelineLayoutKey];
+        let gpuPipelineLayout = this._pipelineLayoutDescriptorMap[pipelineLayoutKey];
         if (!gpuPipelineLayout)
         {
             gpuPipelineLayout = this._pipelineLayoutDescriptorMap[pipelineLayoutKey] = {
@@ -188,18 +130,48 @@ export class WGPUPipelineLayout extends ReactiveObject
             gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
         }
 
-        this.getGPUPipelineLayoutMap[shaderKey] = gpuPipelineLayout;
-
         return gpuPipelineLayout;
     }
 
-    private static readonly getGPUPipelineLayoutMap: { [shaderKey: string]: PipelineLayoutDescriptor } = {};
     private static readonly _bindGroupLayoutDescriptor: { [key: string]: BindGroupLayoutDescriptor } = {};
     private static readonly _pipelineLayoutDescriptorMap: { [key: string]: PipelineLayoutDescriptor } = {};
 
-    static getInstance(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
+    static getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
     {
-        return device.pipelineLayouts?.get(shader) || new WGPUPipelineLayout(device, shader);
+        let shaderKey = '';
+
+        if ('compute' in shader)
+        {
+            shaderKey += shader.compute;
+        }
+        else
+        {
+            shaderKey += shader.vertex;
+            if (shader.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n${shader.fragment}`;
+        }
+
+        let gpuPipelineLayout = device.pipelineLayouts?.[shaderKey];
+        if (gpuPipelineLayout) return gpuPipelineLayout;
+
+        const pipelineLayout = WGPUPipelineLayout.getPipelineLayout(shader);
+
+        const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
+        {
+            const gpuBindGroupLayout = WGPUBindGroupLayout.getGPUBindGroupLayout(device, v);
+
+            return gpuBindGroupLayout;
+        });
+
+        const descriptor: GPUPipelineLayoutDescriptor = {
+            bindGroupLayouts,
+        };
+
+        gpuPipelineLayout = device.createPipelineLayout(descriptor);
+
+        device.pipelineLayouts ??= {};
+        device.pipelineLayouts[shaderKey] = gpuPipelineLayout;
+
+        return gpuPipelineLayout;
     }
 }
 
@@ -207,6 +179,6 @@ declare global
 {
     interface GPUDevice
     {
-        pipelineLayouts: WeakMap<{ vertex: string, fragment: string } | { compute: string }, WGPUPipelineLayout>;
+        pipelineLayouts: { [shaderKey: string]: GPUPipelineLayout };
     }
 }

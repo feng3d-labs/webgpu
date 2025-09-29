@@ -4,8 +4,8 @@ import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { MultisampleState } from '../data/MultisampleState';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
-import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { GPUVertexBufferManager } from './GPUVertexBufferManager';
+import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUShaderModule } from './WGPUShaderModule';
 import { WgslReflectManager } from './WgslReflectManager';
 
@@ -54,13 +54,12 @@ export class GPURenderPipelineManager
 
             // 计算
             const { label, vertex, fragment, primitive, depthStencil, multisample } = renderPipeline;
-            const shader = { vertex: vertex.code, fragment: fragment?.code };
             const { colorFormats, depthStencilFormat, sampleCount } = renderPassFormat;
             const gpuVertexState = this.getGPUVertexState(device, vertex, vertices);
 
-            const wGPUPipelineLayout = WGPUPipelineLayout.getInstance(device, shader);
-            reactive(wGPUPipelineLayout).gpuPipelineLayout;
-            const layout = wGPUPipelineLayout.gpuPipelineLayout;
+            //
+            const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
+
             //
             const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
                 label,

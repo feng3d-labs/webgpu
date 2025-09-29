@@ -1,7 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { ComputePipeline } from '../data/ComputePipeline';
 import { ReactiveObject } from '../ReactiveObject';
-import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUShaderModule } from './WGPUShaderModule';
 import { WgslReflectManager } from './WgslReflectManager';
@@ -36,18 +35,7 @@ export class WGPUComputePipeline extends ReactiveObject
             const constants = computeStage.constants;
             let entryPoint = computeStage.entryPoint;
 
-            const pipelineLayout = WGPUPipelineLayout.getPipelineLayout({ compute: code });
-
-            const bindGroupLayouts: GPUBindGroupLayout[] = pipelineLayout.bindGroupLayouts.map((v) =>
-            {
-                const gpuBindGroupLayout = WGPUBindGroupLayout.getGPUBindGroupLayout(device, v);
-
-                return gpuBindGroupLayout;
-            });
-
-            const descriptor: GPUPipelineLayoutDescriptor = { bindGroupLayouts };
-
-            const gpuPipelineLayout = device.createPipelineLayout(descriptor);
+            const gpuPipelineLayout = WGPUPipelineLayout.getGPUPipelineLayout(device, { compute: code });
 
             //
             const module = WGPUShaderModule.getGPUShaderModule(device, code);
