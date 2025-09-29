@@ -4,9 +4,9 @@ import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { MultisampleState } from '../data/MultisampleState';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
-import { GPUVertexBufferManager } from './GPUVertexBufferManager';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUShaderModule } from './WGPUShaderModule';
+import { WGPUVertexState } from './WGPUVertexState';
 import { WgslReflectManager } from './WgslReflectManager';
 
 declare global
@@ -55,7 +55,10 @@ export class GPURenderPipelineManager
             // 计算
             const { label, vertex, fragment, primitive, depthStencil, multisample } = renderPipeline;
             const { colorFormats, depthStencilFormat, sampleCount } = renderPassFormat;
-            const gpuVertexState = this.getGPUVertexState(device, vertex, vertices);
+
+            const wgpuVertexState = WGPUVertexState.getInstance(device, vertex, vertices);
+            reactive(wgpuVertexState).gpuVertexState;
+            const gpuVertexState = wgpuVertexState.gpuVertexState;
 
             //
             const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
@@ -79,98 +82,6 @@ export class GPURenderPipelineManager
 
         return result.value;
     }
-
-    /**
-     * 获取完整的顶点阶段描述与顶点缓冲区列表。
-     *
-     * @param vertexState 顶点阶段信息。
-     * @param vertices 顶点数据。
-     * @returns 完整的顶点阶段描述与顶点缓冲区列表。
-     */
-    private static getGPUVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
-    {
-        const getGPUVertexStateKey: GetGPUVertexStateKey = [device, vertexState, vertices];
-        let result = this.getGPUVertexStateMap.get(getGPUVertexStateKey);
-
-        if (result) return result.value;
-
-        result = computed(() =>
-        {
-            // 监听
-            const r_vertexState = reactive(vertexState);
-
-            r_vertexState.code;
-            r_vertexState.constants;
-            r_vertexState.entryPoint;
-
-            // 计算
-            const { code, constants } = vertexState;
-
-            let entryPoint = vertexState.entryPoint;
-
-            if (!entryPoint)
-            {
-                entryPoint = WgslReflectManager.getWGSLReflectInfo(code).entry.vertex[0].name;
-            }
-
-            const vertexBufferLayouts = GPUVertexBufferManager.getGPUVertexBufferLayouts(vertexState, vertices);
-
-            const gpuVertexState: GPUVertexState = {
-                module: WGPUShaderModule.getGPUShaderModule(device, code),
-                entryPoint: entryPoint,
-                buffers: vertexBufferLayouts,
-                constants: this.getConstants(constants),
-            };
-
-            // 缓存
-            const gpuVertexStateKey: GPUVertexStateKey = [gpuVertexState.module, gpuVertexState.entryPoint, gpuVertexState.buffers, gpuVertexState.constants];
-            const cache = this.gpuVertexStateMap.get(gpuVertexStateKey);
-
-            if (cache) return cache;
-            this.gpuVertexStateMap.set(gpuVertexStateKey, gpuVertexState);
-
-            return gpuVertexState;
-        });
-
-        this.getGPUVertexStateMap.set(getGPUVertexStateKey, result);
-
-        return result.value;
-    }
-
-    private static getConstants(constants: Record<string, number>)
-    {
-        if (!constants) return undefined;
-
-        let result: Computed<Record<string, number>> = this.getConstantsMap.get(constants);
-
-        if (result) return result.value;
-
-        result = computed(() =>
-        {
-            const r_constants = reactive(constants);
-
-            let constantsKey = '';
-
-            for (const key in r_constants)
-            {
-                constantsKey += `${key}:${r_constants[key]},`;
-            }
-
-            if (this.constantsMap[constantsKey])
-            {
-                return this.constantsMap[constantsKey];
-            }
-            this.constantsMap[constantsKey] = constants;
-
-            return constants;
-        });
-        this.getConstantsMap.set(constants, result);
-
-        return result.value;
-    }
-
-    private static readonly constantsMap: { [constantsKey: string]: Record<string, number> } = {};
-    private static readonly getConstantsMap = new WeakMap<Record<string, number>, Computed<Record<string, number>>>();
 
     private static getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndexFormat): GPUPrimitiveState
     {
@@ -487,7 +398,7 @@ export class GPURenderPipelineManager
 
             const constants = fragmentState.constants;
 
-            r_gpuFragmentState.constants = this.getConstants(constants);
+            r_gpuFragmentState.constants = constants;
         });
 
         effect(() =>
@@ -719,8 +630,6 @@ export class GPURenderPipelineManager
     private static readonly getGPUStencilFaceStateMap = new WeakMap<StencilFaceState, Computed<GPUStencilFaceState>>();
 
     private static readonly getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();
-    private static readonly getGPUVertexStateMap = new ChainMap<GetGPUVertexStateKey, Computed<GPUVertexState>>();
-    private static readonly gpuVertexStateMap = new ChainMap<any[], GPUVertexState>();
     private static readonly defaultGPUPrimitiveState: GPUPrimitiveState = { topology: 'triangle-list', cullMode: 'none', frontFace: 'ccw' };
     private static readonly defaultGPUMultisampleState: GPUMultisampleState = { count: 4, mask: 0xFFFFFFFF, alphaToCoverageEnabled: false };
     private static readonly getGPUDepthStencilStateMap = new ChainMap<GetGPUDepthStencilStateKey, Computed<GPUDepthStencilState>>();
