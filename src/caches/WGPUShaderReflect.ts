@@ -21,7 +21,7 @@ declare global
     }
 }
 
-export class WgslReflectManager
+export class WGPUShaderReflect
 {
     /**
      * 从WebGPU着色器代码中获取反射信息。
@@ -31,11 +31,11 @@ export class WgslReflectManager
      */
     static getWGSLReflectInfo(code: string): WgslReflect
     {
-        let reflect = WgslReflectManager.reflectMap[code];
+        let reflect = WGPUShaderReflect.reflectMap[code];
 
         if (reflect) return reflect;
 
-        reflect = WgslReflectManager.reflectMap[code] = new WgslReflect(code);
+        reflect = WGPUShaderReflect.reflectMap[code] = new WgslReflect(code);
 
         return reflect;
     }
@@ -44,11 +44,11 @@ export class WgslReflectManager
 
     static getIGPUBindGroupLayoutEntryMap(code: string): GPUBindGroupLayoutEntryMap
     {
-        if (WgslReflectManager.shaderLayoutMap[code]) return WgslReflectManager.shaderLayoutMap[code];
+        if (WGPUShaderReflect.shaderLayoutMap[code]) return WGPUShaderReflect.shaderLayoutMap[code];
 
-        const entryMap: GPUBindGroupLayoutEntryMap = WgslReflectManager.shaderLayoutMap[code] = {};
+        const entryMap: GPUBindGroupLayoutEntryMap = WGPUShaderReflect.shaderLayoutMap[code] = {};
 
-        const reflect = WgslReflectManager.getWGSLReflectInfo(code);
+        const reflect = WGPUShaderReflect.getWGSLReflectInfo(code);
 
         for (const uniform of reflect.uniforms)
         {
@@ -61,7 +61,7 @@ export class WgslReflectManager
 
             entryMap[name] = {
                 variableInfo: uniform,
-                visibility: WgslReflectManager.Visibility_ALL, binding, buffer: layout,
+                visibility: WGPUShaderReflect.Visibility_ALL, binding, buffer: layout,
                 key: `[${binding}, ${name}, buffer, ${layout.type} , ${layout.minBindingSize}]`,
             };
         }
@@ -83,7 +83,7 @@ export class WgslReflectManager
 
                 entryMap[name] = {
                     variableInfo: storage,
-                    visibility: type === 'storage' ? WgslReflectManager.Visibility_FRAGMENT_COMPUTE : WgslReflectManager.Visibility_ALL, binding, buffer: layout,
+                    visibility: type === 'storage' ? WGPUShaderReflect.Visibility_FRAGMENT_COMPUTE : WGPUShaderReflect.Visibility_ALL, binding, buffer: layout,
                     key: `[${binding}, ${name}, buffer, ${layout.type}]`,
                 };
             }
@@ -107,7 +107,7 @@ export class WgslReflectManager
 
                 entryMap[name] = {
                     variableInfo: storage,
-                    visibility: WgslReflectManager.Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout,
+                    visibility: WGPUShaderReflect.Visibility_FRAGMENT_COMPUTE, binding, storageTexture: layout,
                     key: `[${binding}, ${name}, storageTexture, ${layout.access}, ${layout.format}, ${layout.viewDimension}]`,
                 };
             }
@@ -129,7 +129,7 @@ export class WgslReflectManager
             {
                 entryMap[name] = {
                     variableInfo: texture,
-                    visibility: WgslReflectManager.Visibility_ALL, binding, externalTexture: {},
+                    visibility: WGPUShaderReflect.Visibility_ALL, binding, externalTexture: {},
                     key: `[${binding}, ${name}, externalTexture]`,
                 };
             }
@@ -180,7 +180,7 @@ export class WgslReflectManager
 
                 entryMap[name] = {
                     variableInfo: texture,
-                    visibility: WgslReflectManager.Visibility_ALL, binding, texture: layout,
+                    visibility: WGPUShaderReflect.Visibility_ALL, binding, texture: layout,
                     key: `[${binding}, ${name}, texture, ${layout.sampleType}, ${layout.viewDimension}, ${layout.multisampled}]`,
                 };
             }
@@ -199,7 +199,7 @@ export class WgslReflectManager
 
             entryMap[name] = {
                 variableInfo: sampler,
-                visibility: WgslReflectManager.Visibility_ALL, binding, sampler: layout,
+                visibility: WGPUShaderReflect.Visibility_ALL, binding, sampler: layout,
                 key: `[${binding}, ${name}, sampler, ${layout.type}]`,
             };
         }

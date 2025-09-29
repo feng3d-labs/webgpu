@@ -1,5 +1,5 @@
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
-import { GPUBindGroupLayoutEntryMap, WgslReflectManager } from './WgslReflectManager';
+import { GPUBindGroupLayoutEntryMap, WGPUShaderReflect } from './WGPUShaderReflect';
 
 /**
  * 管线布局描述符接口
@@ -96,17 +96,17 @@ export class WGPUPipelineLayout
         if ('compute' in shader)
         {
             // 计算着色器模式：只分析计算着色器代码
-            entryMap = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(shader.compute);
+            entryMap = WGPUShaderReflect.getIGPUBindGroupLayoutEntryMap(shader.compute);
         }
         else
         {
             // 渲染管线模式：先分析顶点着色器
-            entryMap = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(shader.vertex);
+            entryMap = WGPUShaderReflect.getIGPUBindGroupLayoutEntryMap(shader.vertex);
             
             // 如果存在片段着色器，合并其资源绑定信息
             if ('fragment' in shader)
             {
-                const fragmentEntryMap = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(shader.fragment);
+                const fragmentEntryMap = WGPUShaderReflect.getIGPUBindGroupLayoutEntryMap(shader.fragment);
 
                 // 遍历片段着色器的所有资源
                 for (const resourceName in fragmentEntryMap)

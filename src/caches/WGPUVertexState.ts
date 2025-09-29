@@ -3,7 +3,7 @@ import { VertexAttributes, VertexState } from "@feng3d/render-api";
 import { ReactiveObject } from "../ReactiveObject";
 import { GPUVertexBufferManager } from "./GPUVertexBufferManager";
 import { WGPUShaderModule } from "./WGPUShaderModule";
-import { WgslReflectManager } from "./WgslReflectManager";
+import { WGPUShaderReflect } from "./WGPUShaderReflect";
 
 /**
  * WebGPU顶点状态缓存管理器
@@ -94,7 +94,7 @@ export class WGPUVertexState extends ReactiveObject
             // 如果没有指定入口点，自动检测
             if (!entryPoint)
             {
-                entryPoint = WgslReflectManager.getWGSLReflectInfo(code).entry.vertex[0].name;
+                entryPoint = WGPUShaderReflect.getWGSLReflectInfo(code).entry.vertex[0].name;
             }
 
             // 获取顶点缓冲区布局配置

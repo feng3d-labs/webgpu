@@ -3,7 +3,7 @@ import { ComputePipeline } from '../data/ComputePipeline';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUShaderModule } from './WGPUShaderModule';
-import { WgslReflectManager } from './WgslReflectManager';
+import { WGPUShaderReflect } from './WGPUShaderReflect';
 
 /**
  * WebGPU计算管线缓存管理器
@@ -100,7 +100,7 @@ export class WGPUComputePipeline extends ReactiveObject
             // 如果没有指定入口点，自动检测
             if (!entryPoint)
             {
-                const reflect = WgslReflectManager.getWGSLReflectInfo(code);
+                const reflect = WGPUShaderReflect.getWGSLReflectInfo(code);
                 entryPoint = reflect.entry.compute[0].name;
             }
 

@@ -7,7 +7,7 @@ import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUShaderModule } from './WGPUShaderModule';
 import { WGPUVertexState } from './WGPUVertexState';
-import { WgslReflectManager } from './WgslReflectManager';
+import { WGPUShaderReflect } from './WGPUShaderReflect';
 
 declare global
 {
@@ -368,7 +368,7 @@ export class GPURenderPipelineManager
             }
             else
             {
-                const reflect = WgslReflectManager.getWGSLReflectInfo(code);
+                const reflect = WGPUShaderReflect.getWGSLReflectInfo(code);
                 const fragment = reflect.entry.fragment[0];
 
                 if (fragment)
@@ -465,7 +465,7 @@ export class GPURenderPipelineManager
 
             //
             if (entryPoint) return entryPoint;
-            const reflect = WgslReflectManager.getWGSLReflectInfo(code);
+            const reflect = WGPUShaderReflect.getWGSLReflectInfo(code);
             const fragment = reflect.entry.fragment[0];
 
             console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
