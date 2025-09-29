@@ -98,7 +98,9 @@ export class WGPUVertexState extends ReactiveObject
             }
 
             // 获取顶点缓冲区布局配置
-            const { vertexBufferLayouts } = WGPUVertexBufferLayout.getVertexBuffersBuffers(vertexState, vertices);
+            const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(vertexState, vertices);
+            reactive(wgpuVertexBufferLayout).vertexBufferLayouts;
+            const vertexBufferLayouts = wgpuVertexBufferLayout.vertexBufferLayouts;
 
             //
             const module = WGPUShaderModule.getGPUShaderModule(device, code);

@@ -1,17 +1,29 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from '@feng3d/render-api';
+import { VertexAttribute, VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from '@feng3d/render-api';
 import { FunctionInfo } from 'wgsl_reflect';
 import { VertexBuffer } from '../internal/VertexBuffer';
+import { ReactiveObject } from '../ReactiveObject';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
 
-export class WGPUVertexBufferLayout
+export class WGPUVertexBufferLayout extends ReactiveObject
 {
+    readonly vertexBufferLayouts: GPUVertexBufferLayout[];
+    readonly vertexBuffers: VertexBuffer[];
 
-    public static getNVertexBuffers(vertexState: VertexState, vertices: VertexAttributes)
+    constructor(vertexState: VertexState, vertices: VertexAttributes)
     {
-        const { vertexBuffers } = this.getVertexBuffersBuffers(vertexState, vertices);
+        super();
 
-        return vertexBuffers;
+        this._onCreateVertexBufferLayout(vertexState, vertices);
+
+        this._onMap(vertexState, vertices);
+    }
+
+    private _onMap(vertexState: VertexState, vertices: VertexAttributes)
+    {
+        caches.set(vertexState, caches.get(vertexState) || new WeakMap<VertexAttributes, WGPUVertexBufferLayout>());
+        caches.get(vertexState).set(vertices, this);
+        this.destroyCall(() => { caches.get(vertexState).delete(vertices); });
     }
 
     /**
@@ -20,17 +32,14 @@ export class WGPUVertexBufferLayout
      * @param vertices 顶点数据。
      * @returns 顶点缓冲区布局数组以及顶点缓冲区数组。
      */
-    static getVertexBuffersBuffers(vertexState: VertexState, vertices: VertexAttributes)
+    private _onCreateVertexBufferLayout(vertexState: VertexState, vertices: VertexAttributes)
     {
-        const getVertexBuffersBuffersKey: GetVertexBuffersBuffersKey = [vertexState, vertices];
-        let result = this.getVertexBuffersBuffersMap.get(getVertexBuffersBuffersKey);
+        const r_this = reactive(this);
+        const r_vertexState = reactive(vertexState);
+        const r_vertices = reactive(vertices);
 
-        if (result) return result.value;
-
-        result = computed(() =>
+        this.effect(() =>
         {
-            const r_vertexState = reactive(vertexState);
-
             r_vertexState.code;
             r_vertexState.entryPoint;
 
@@ -47,9 +56,6 @@ export class WGPUVertexBufferLayout
             {
                 vertexEntryFunctionInfo = WGPUShaderReflect.getWGSLReflectInfo(code).entry.vertex[0];
             }
-
-            // 监听
-            const r_vertices = vertices && reactive(vertices);
 
             vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
             {
@@ -80,9 +86,18 @@ export class WGPUVertexBufferLayout
                 const shaderLocation = inputInfo.location as number;
                 const attributeName = inputInfo.name;
 
+                //
                 const vertexAttribute = vertices[attributeName];
-
                 console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
+
+                // 监听每个顶点属性数据。
+                const r_vertexAttribute = reactive(vertexAttribute);
+                r_vertexAttribute.data;
+                r_vertexAttribute.format;
+                r_vertexAttribute.offset;
+                r_vertexAttribute.arrayStride;
+                r_vertexAttribute.stepMode;
+
                 //
                 const data = vertexAttribute.data;
                 const attributeOffset = vertexAttribute.offset || 0;
@@ -115,7 +130,7 @@ export class WGPUVertexBufferLayout
                     index = vertexBufferLayouts.length;
                     bufferIndexMap.set(data, index);
 
-                    vertexBuffers[index] = this.getVertexBuffers(vertexAttribute);
+                    vertexBuffers[index] = WGPUVertexBufferLayout.getVertexBuffers(vertexAttribute);
 
                     //
                     gpuVertexBufferLayout = vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [], key: `${stepMode}-${arrayStride}` };
@@ -136,14 +151,11 @@ export class WGPUVertexBufferLayout
             // 相同的顶点缓冲区布局合并为一个。
             const vertexBufferLayoutsKey = vertexBufferLayouts.reduce((prev, cur) => prev + cur.key, '');
 
-            this.vertexBufferLayoutsMap[vertexBufferLayoutsKey] ??= vertexBufferLayouts;
+            WGPUVertexBufferLayout.vertexBufferLayoutsMap[vertexBufferLayoutsKey] ??= vertexBufferLayouts;
 
-            return { vertexBufferLayouts: this.vertexBufferLayoutsMap[vertexBufferLayoutsKey], vertexBuffers };
+            r_this.vertexBufferLayouts = WGPUVertexBufferLayout.vertexBufferLayoutsMap[vertexBufferLayoutsKey];
+            r_this.vertexBuffers = vertexBuffers;
         });
-
-        this.getVertexBuffersBuffersMap.set(getVertexBuffersBuffersKey, result);
-
-        return result.value;
     }
 
     private static readonly vertexBufferLayoutsMap: Record<string, GPUVertexBufferLayout[]> = {};
@@ -177,7 +189,11 @@ export class WGPUVertexBufferLayout
     }
 
     private static readonly getVertexBuffersMap = new WeakMap<VertexAttribute, Computed<VertexBuffer>>();
-    private static readonly getVertexBuffersBuffersMap = new ChainMap<GetVertexBuffersBuffersKey, Computed<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexBuffers: VertexBuffer[] }>>();
+
+    static getInstance(vertexState: VertexState, vertices: VertexAttributes)
+    {
+        return caches.get(vertexState)?.get(vertices) || new WGPUVertexBufferLayout(vertexState, vertices);
+    }
 }
 
 declare global
@@ -191,4 +207,4 @@ declare global
     }
 }
 
-type GetVertexBuffersBuffersKey = [vertexState: VertexState, vertices: VertexAttributes];
+const caches = new WeakMap<VertexState, WeakMap<VertexAttributes, WGPUVertexBufferLayout>>();

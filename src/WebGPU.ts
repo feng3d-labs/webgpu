@@ -410,7 +410,9 @@ export class WebGPU
             const { vertices, pipeline } = renderObject;
 
             //
-            const vertexBuffers = WGPUVertexBufferLayout.getNVertexBuffers(pipeline.vertex, vertices);
+            const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(pipeline.vertex, vertices);
+            reactive(wgpuVertexBufferLayout).vertexBuffers;
+            const vertexBuffers = wgpuVertexBufferLayout.vertexBuffers;
 
             renderObjectCache.setVertexBuffer.length = vertexBuffers?.length ?? 0;
             vertexBuffers?.forEach((vertexBuffer, index) =>
