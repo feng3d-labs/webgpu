@@ -41,13 +41,24 @@ export class WGPUBuffer extends ReactiveObject
      */
     private _createGPUBuffer(device: GPUDevice, buffer: Buffer)
     {
-
         const r_this = reactive(this);
         const r_buffer = reactive(buffer);
+
+        let gpuBuffer: GPUBuffer;
+
+        const destroy = () =>
+        {
+            r_this.gpuBuffer?.destroy();
+            r_this.gpuBuffer = null;
+        }
 
         // 监听缓冲区配置变化，自动重新创建GPU缓冲区
         this.effect(() =>
         {
+            // 销毁旧的GPU缓冲区
+            gpuBuffer?.destroy();
+            gpuBuffer = null;
+
             // 触发响应式依赖
             r_buffer.label;
             r_buffer.size;
@@ -63,7 +74,7 @@ export class WGPUBuffer extends ReactiveObject
             const mappedAtCreation = data !== undefined;
 
             // 创建GPU缓冲区
-            const gpuBuffer = device.createBuffer({
+            gpuBuffer = device.createBuffer({
                 label,
                 size,
                 usage: usage ?? WGPUBuffer.defaultGPUBufferUsage,
@@ -84,23 +95,8 @@ export class WGPUBuffer extends ReactiveObject
             r_this.gpuBuffer = gpuBuffer;
         });
 
-        // 管理GPU缓冲区的生命周期，自动销毁旧的缓冲区
-        let oldGPUBuffer: GPUBuffer;
-        this.effect(() =>
-        {
-            // 触发响应式依赖
-            r_this.gpuBuffer;
-
-            // 销毁旧的GPU缓冲区
-            oldGPUBuffer?.destroy();
-            oldGPUBuffer = this.gpuBuffer;
-        });
-
         // 注册销毁回调，确保在对象销毁时清理GPU缓冲区
-        this.destroyCall(() =>
-        {
-            r_this.gpuBuffer = null;
-        });
+        this.destroyCall(destroy);
     }
 
     /**

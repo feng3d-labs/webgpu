@@ -234,18 +234,22 @@ export class WGPUCanvasContext extends ReactiveObject
 
         let canvas: HTMLCanvasElement | OffscreenCanvas;
 
-        // 监听画布元素变化，管理尺寸监听器
-        this.effect(() =>
+        const destroy = () =>
         {
-            // 触发响应式依赖，监听画布元素变化
-            r_this.canvas;
-
-            // 如果存在旧的画布，取消其尺寸监听
             if (canvas)
             {
                 watcher.unwatch(canvas, 'width', _onWidthChanged);
                 watcher.unwatch(canvas, 'height', _onHeightChanged);
             }
+        }
+
+        // 监听画布元素变化，管理尺寸监听器
+        this.effect(() =>
+        {
+            destroy();
+
+            // 触发响应式依赖，监听画布元素变化
+            r_this.canvas;
 
             // 更新画布引用
             canvas = this.canvas;
@@ -257,6 +261,8 @@ export class WGPUCanvasContext extends ReactiveObject
                 watcher.watch(canvas, 'height', _onHeightChanged);
             }
         });
+
+        this.destroyCall(destroy);
     }
 
     /**
