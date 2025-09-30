@@ -20,10 +20,6 @@ export class WGPUBlendState extends ReactiveObject
         const r_blend = reactive(blendState);
         this.effect(() =>
         {
-            // 监听
-            r_blend.color;
-            r_blend.alpha;
-
             const color = WGPUBlendState.getGPUBlendComponent(r_blend.color);
             const alpha = WGPUBlendState.getGPUBlendComponent(r_blend.alpha);
 
