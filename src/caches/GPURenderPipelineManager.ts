@@ -2,12 +2,11 @@ import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
 import { BlendComponent, BlendState, ChainMap, ColorTargetState, DepthStencilState, FragmentState, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, VertexState, WGSLVertexType, WriteMask } from '@feng3d/render-api';
 import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
-import { MultisampleState } from '../data/MultisampleState';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
-import { WGPUPipelineLayout } from './WGPUPipelineLayout';
+import { GPUMultisampleState, WGPUMultisampleState } from './WGPUMultisampleState';
 import { WGPUShaderModule } from './WGPUShaderModule';
-import { WGPUVertexState } from './WGPUVertexState';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
+import { WGPUVertexState } from './WGPUVertexState';
 
 declare global
 {
@@ -61,7 +60,12 @@ export class GPURenderPipelineManager
             const gpuVertexState = wgpuVertexState.gpuVertexState;
 
             //
-            const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
+            const layout = GPUMultisampleState.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
+
+            //
+            const wgpuMultisampleState = WGPUMultisampleState.getInstance(multisample, sampleCount);
+            reactive(wgpuMultisampleState).gpuMultisampleState;
+            const gpuMultisampleState = wgpuMultisampleState.gpuMultisampleState;
 
             //
             const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
@@ -71,7 +75,7 @@ export class GPURenderPipelineManager
                 fragment: this.getGPUFragmentState(device, fragment, colorFormats),
                 primitive: this.getGPUPrimitiveState(primitive, indexFormat),
                 depthStencil: this.getGPUDepthStencilState(depthStencil, depthStencilFormat),
-                multisample: this.getGPUMultisampleState(multisample, sampleCount),
+                multisample: gpuMultisampleState,
             };
 
             const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
@@ -108,33 +112,6 @@ export class GPURenderPipelineManager
             };
 
             return gpuPrimitive;
-        });
-
-        return result.value;
-    }
-
-    private static getGPUMultisampleState(multisampleState?: MultisampleState, sampleCount?: 4)
-    {
-        if (!sampleCount) return undefined;
-        if (!multisampleState) return this.defaultGPUMultisampleState;
-
-        const result: Computed<GPUMultisampleState> = multisampleState[`_cache_GPUMultisampleState_${sampleCount}`] ??= computed(() =>
-        {
-            // 监听
-            const r_multisampleState = reactive(multisampleState);
-
-            r_multisampleState.mask;
-            r_multisampleState.alphaToCoverageEnabled;
-
-            // 计算
-            const { mask, alphaToCoverageEnabled } = multisampleState;
-            const gpuMultisampleState: GPUMultisampleState = {
-                count: sampleCount,
-                mask: mask ?? 0xFFFFFFFF,
-                alphaToCoverageEnabled: alphaToCoverageEnabled ?? false,
-            };
-
-            return gpuMultisampleState;
         });
 
         return result.value;
@@ -631,7 +608,6 @@ export class GPURenderPipelineManager
 
     private static readonly getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();
     private static readonly defaultGPUPrimitiveState: GPUPrimitiveState = { topology: 'triangle-list', cullMode: 'none', frontFace: 'ccw' };
-    private static readonly defaultGPUMultisampleState: GPUMultisampleState = { count: 4, mask: 0xFFFFFFFF, alphaToCoverageEnabled: false };
     private static readonly getGPUDepthStencilStateMap = new ChainMap<GetGPUDepthStencilStateKey, Computed<GPUDepthStencilState>>();
     private static readonly gpuDepthStencilStateMap = new ChainMap<GPUDepthStencilStateKey, GPUDepthStencilState>();
     private static readonly defaultGPUDepthStencilStates: Record<GPUTextureFormat, GPUDepthStencilState> = {} as any;
