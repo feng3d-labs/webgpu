@@ -1,9 +1,11 @@
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
-import { BlendComponent, BlendState, ChainMap, ColorTargetState, DepthStencilState, FragmentState, PrimitiveState, RenderPipeline, StencilFaceState, VertexAttributes, VertexState, WGSLVertexType, WriteMask } from '@feng3d/render-api';
+import { BlendComponent, BlendState, ChainMap, ColorTargetState, FragmentState, PrimitiveState, RenderPipeline, VertexAttributes, WGSLVertexType, WriteMask } from '@feng3d/render-api';
 import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { RenderPassFormat } from '../internal/RenderPassFormat';
-import { GPUMultisampleState, WGPUMultisampleState } from './WGPUMultisampleState';
+import { WGPUDepthStencilState } from './WGPUDepthStencilState';
+import { WGPUMultisampleState } from './WGPUMultisampleState';
+import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUShaderModule } from './WGPUShaderModule';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
 import { WGPUVertexState } from './WGPUVertexState';
@@ -60,12 +62,19 @@ export class GPURenderPipelineManager
             const gpuVertexState = wgpuVertexState.gpuVertexState;
 
             //
-            const layout = GPUMultisampleState.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
+            const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
+
+            //
+            const wgpuDepthStencilState = WGPUDepthStencilState.getInstance(depthStencil, depthStencilFormat);
+            reactive(wgpuDepthStencilState).gpuDepthStencilState;
+            const gpuDepthStencilState = wgpuDepthStencilState.gpuDepthStencilState;
 
             //
             const wgpuMultisampleState = WGPUMultisampleState.getInstance(multisample, sampleCount);
             reactive(wgpuMultisampleState).gpuMultisampleState;
             const gpuMultisampleState = wgpuMultisampleState.gpuMultisampleState;
+
+            //
 
             //
             const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
@@ -74,7 +83,7 @@ export class GPURenderPipelineManager
                 vertex: gpuVertexState,
                 fragment: this.getGPUFragmentState(device, fragment, colorFormats),
                 primitive: this.getGPUPrimitiveState(primitive, indexFormat),
-                depthStencil: this.getGPUDepthStencilState(depthStencil, depthStencilFormat),
+                depthStencil: gpuDepthStencilState,
                 multisample: gpuMultisampleState,
             };
 
@@ -113,158 +122,6 @@ export class GPURenderPipelineManager
 
             return gpuPrimitive;
         });
-
-        return result.value;
-    }
-
-    /**
-     * 获取深度模板阶段完整描述。
-     *
-     * @param depthStencil 深度模板阶段描述。
-     * @param depthStencilFormat 深度模板附件纹理格式。
-     * @returns 深度模板阶段完整描述。
-     */
-    private static getGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFormat?: GPUTextureFormat)
-    {
-        if (!depthStencilFormat) return undefined;
-
-        if (!depthStencil) return this.getDefaultGPUDepthStencilState(depthStencilFormat);
-
-        const getGPUDepthStencilStateKey: GetGPUDepthStencilStateKey = [depthStencil, depthStencilFormat];
-        let result = this.getGPUDepthStencilStateMap.get(getGPUDepthStencilStateKey);
-
-        if (result) return result.value;
-
-        result = computed(() =>
-        {
-            // 监听
-            const r_depthStencil = reactive(depthStencil);
-
-            r_depthStencil.depthWriteEnabled;
-            r_depthStencil.depthCompare;
-            r_depthStencil.stencilFront;
-            r_depthStencil.stencilBack;
-            r_depthStencil.stencilReadMask;
-            r_depthStencil.stencilWriteMask;
-            r_depthStencil.depthBias;
-            r_depthStencil.depthBiasSlopeScale;
-            r_depthStencil.depthBiasClamp;
-
-            // 计算
-            const { depthWriteEnabled,
-                depthCompare,
-                stencilFront,
-                stencilBack,
-                stencilReadMask,
-                stencilWriteMask,
-                depthBias,
-                depthBiasSlopeScale,
-                depthBiasClamp,
-            } = depthStencil;
-            const gpuDepthStencilState: GPUDepthStencilState = {
-                format: depthStencilFormat,
-                depthWriteEnabled: depthWriteEnabled ?? true,
-                depthCompare: depthCompare ?? 'less',
-                stencilFront: this.getGPUStencilFaceState(stencilFront),
-                stencilBack: this.getGPUStencilFaceState(stencilBack),
-                stencilReadMask: stencilReadMask ?? 0xFFFFFFFF,
-                stencilWriteMask: stencilWriteMask ?? 0xFFFFFFFF,
-                depthBias: depthBias ?? 0,
-                depthBiasSlopeScale: depthBiasSlopeScale ?? 0,
-                depthBiasClamp: depthBiasClamp ?? 0,
-            };
-
-            // 缓存
-            const gpuDepthStencilStateKey: GPUDepthStencilStateKey = [
-                gpuDepthStencilState.format,
-                gpuDepthStencilState.depthWriteEnabled,
-                gpuDepthStencilState.depthCompare,
-                gpuDepthStencilState.stencilFront,
-                gpuDepthStencilState.stencilBack,
-                gpuDepthStencilState.stencilReadMask,
-                gpuDepthStencilState.stencilWriteMask,
-                gpuDepthStencilState.depthBias,
-                gpuDepthStencilState.depthBiasSlopeScale,
-                gpuDepthStencilState.depthBiasClamp,
-            ];
-            const cache = this.gpuDepthStencilStateMap.get(gpuDepthStencilStateKey);
-
-            if (cache) return cache;
-            this.gpuDepthStencilStateMap.set(gpuDepthStencilStateKey, gpuDepthStencilState);
-
-            //
-            return gpuDepthStencilState;
-        });
-        this.getGPUDepthStencilStateMap.set(getGPUDepthStencilStateKey, result);
-
-        return result.value;
-    }
-
-    /**
-     * 获取片段阶段完整描述。
-     *
-     * @param fragment 片段阶段描述。
-     */
-    private static getDefaultGPUDepthStencilState(depthStencilFormat: GPUTextureFormat)
-    {
-        let result = this.defaultGPUDepthStencilStates[depthStencilFormat];
-
-        if (result) return result;
-
-        result = this.defaultGPUDepthStencilStates[depthStencilFormat] = {
-            format: depthStencilFormat,
-            depthWriteEnabled: true,
-            depthCompare: 'less',
-            stencilFront: {},
-            stencilBack: {},
-            stencilReadMask: 0xFFFFFFFF,
-            stencilWriteMask: 0xFFFFFFFF,
-            depthBias: 0,
-            depthBiasSlopeScale: 0,
-            depthBiasClamp: 0,
-        };
-
-        return result;
-    }
-
-    private static getGPUStencilFaceState(stencilFaceState?: StencilFaceState)
-    {
-        if (!stencilFaceState) return this.defaultGPUStencilFaceState;
-
-        let result = this.getGPUStencilFaceStateMap.get(stencilFaceState);
-
-        if (result) return result.value;
-
-        result = computed(() =>
-        {
-            // 监听
-            const r_stencilFaceState = reactive(stencilFaceState);
-
-            r_stencilFaceState.compare;
-            r_stencilFaceState.failOp;
-            r_stencilFaceState.depthFailOp;
-            r_stencilFaceState.passOp;
-
-            // 计算
-            const { compare, failOp, depthFailOp, passOp } = stencilFaceState;
-            const gpuStencilFaceState: GPUStencilFaceState = {
-                compare: compare ?? 'always',
-                failOp: failOp ?? 'keep',
-                depthFailOp: depthFailOp ?? 'keep',
-                passOp: passOp ?? 'keep',
-            };
-
-            // 缓存
-            const gpuStencilFaceStateKey: GPUStencilFaceStateKey = [gpuStencilFaceState.compare, gpuStencilFaceState.failOp, gpuStencilFaceState.depthFailOp, gpuStencilFaceState.passOp];
-            const cache = this.GPUStencilFaceStateMap.get(gpuStencilFaceStateKey);
-
-            if (cache) return cache;
-            this.GPUStencilFaceStateMap.set(gpuStencilFaceStateKey, gpuStencilFaceState);
-
-            //
-            return gpuStencilFaceState;
-        });
-        this.getGPUStencilFaceStateMap.set(stencilFaceState, result);
 
         return result.value;
     }
@@ -603,15 +460,8 @@ export class GPURenderPipelineManager
 
     private static readonly defaultGPUColorTargetState: Record<GPUTextureFormat, GPUColorTargetState> = {} as any;
 
-    private static readonly defaultGPUStencilFaceState: GPUStencilFaceState = {};
-    private static readonly getGPUStencilFaceStateMap = new WeakMap<StencilFaceState, Computed<GPUStencilFaceState>>();
-
     private static readonly getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();
     private static readonly defaultGPUPrimitiveState: GPUPrimitiveState = { topology: 'triangle-list', cullMode: 'none', frontFace: 'ccw' };
-    private static readonly getGPUDepthStencilStateMap = new ChainMap<GetGPUDepthStencilStateKey, Computed<GPUDepthStencilState>>();
-    private static readonly gpuDepthStencilStateMap = new ChainMap<GPUDepthStencilStateKey, GPUDepthStencilState>();
-    private static readonly defaultGPUDepthStencilStates: Record<GPUTextureFormat, GPUDepthStencilState> = {} as any;
-    private static readonly GPUStencilFaceStateMap = new ChainMap<GPUStencilFaceStateKey, GPUStencilFaceState>();
     private static readonly gpuFragmentStateMap = new ChainMap<GPUFragmentStateKey, GPUFragmentState>();
     private static readonly getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, Computed<GPUFragmentState>>();
     private static readonly getGPUColorTargetStatesMap = new ChainMap<GetGPUColorTargetStatesKey, Computed<GPUColorTargetState[]>>();
@@ -619,11 +469,6 @@ export class GPURenderPipelineManager
 }
 
 type GetGPURenderPipelineKey = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
-type GetGPUVertexStateKey = [device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes];
-type GPUVertexStateKey = [module: GPUShaderModule, entryPoint: string, buffers: Iterable<GPUVertexBufferLayout>, constants: Record<string, number>];
-type GetGPUDepthStencilStateKey = [depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat];
-type GPUDepthStencilStateKey = [format: GPUTextureFormat, depthWriteEnabled: boolean, depthCompare: GPUCompareFunction, stencilFront: GPUStencilFaceState, stencilBack: GPUStencilFaceState, stencilReadMask: number, stencilWriteMask: number, depthBias: number, depthBiasSlopeScale: number, depthBiasClamp: number];
-type GPUStencilFaceStateKey = [compare: GPUCompareFunction, failOp: GPUStencilOperation, depthFailOp: GPUStencilOperation, passOp: GPUStencilOperation];
 type GPUFragmentStateKey = [module: GPUShaderModule, entryPoint: string, targets: Iterable<GPUColorTargetState>, constants: Record<string, number>];
 type GetGPUFragmentStateKey = [device: GPUDevice, fragmentState: FragmentState, colorAttachmentsKey: string];
 type GetGPUColorTargetStatesKey = [targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]];
