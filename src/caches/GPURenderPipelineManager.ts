@@ -1,13 +1,13 @@
-import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
 import { BlendComponent, BlendState, ChainMap, ColorTargetState, FragmentState, RenderPipeline, VertexAttributes, WGSLVertexType, WriteMask } from '@feng3d/render-api';
 import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { WGPUDepthStencilState } from './WGPUDepthStencilState';
+import { WGPUFragmentState } from './WGPUFragmentState';
 import { WGPUMultisampleState } from './WGPUMultisampleState';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUPrimitiveState } from './WGPUPrimitiveState';
-import { WGPUShaderModule } from './WGPUShaderModule';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
 import { WGPUVertexState } from './WGPUVertexState';
 
@@ -58,12 +58,18 @@ export class GPURenderPipelineManager
             const { label, vertex, fragment, primitive, depthStencil, multisample } = renderPipeline;
             const { colorFormats, depthStencilFormat, sampleCount } = renderPassFormat;
 
+            //
+            const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
+
+            //
             const wgpuVertexState = WGPUVertexState.getInstance(device, vertex, vertices);
             reactive(wgpuVertexState).gpuVertexState;
             const gpuVertexState = wgpuVertexState.gpuVertexState;
 
             //
-            const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
+            const wgpuFragmentState = WGPUFragmentState.getInstance(device, fragment, colorFormats);
+            reactive(wgpuFragmentState).gpuFragmentState;
+            const gpuFragmentState = wgpuFragmentState.gpuFragmentState;
 
             //
             const wgpuDepthStencilState = WGPUDepthStencilState.getInstance(depthStencil, depthStencilFormat);
@@ -89,7 +95,7 @@ export class GPURenderPipelineManager
                 label,
                 layout,
                 vertex: gpuVertexState,
-                fragment: this.getGPUFragmentState(device, fragment, colorFormats),
+                fragment: gpuFragmentState,
                 primitive: gpuPrimitiveState,
                 depthStencil: gpuDepthStencilState,
                 multisample: gpuMultisampleState,
@@ -100,218 +106,6 @@ export class GPURenderPipelineManager
             return gpuRenderPipeline;
         });
         this.getGPURenderPipelineMap.set(getGPURenderPipelineKey, result);
-
-        return result.value;
-    }
-
-    private static getGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUTextureFormat)
-    {
-        if (!colorTargetState) return this.getDefaultGPUColorTargetState(format);
-
-        const result: Computed<GPUColorTargetState> = colorTargetState[`_GPUColorTargetState_${format}`] ??= computed(() =>
-        {
-            // 监听
-            const r_colorTargetState = reactive(colorTargetState);
-
-            r_colorTargetState.writeMask;
-            r_colorTargetState.blend;
-
-            // 计算
-            const { writeMask, blend } = colorTargetState;
-            const gpuColorTargetState: GPUColorTargetState = {
-                format,
-                blend: this.getGPUBlendState(blend),
-                writeMask: this.getGPUColorWriteFlags(writeMask),
-            };
-
-            return gpuColorTargetState;
-        });
-
-        return result.value;
-    }
-
-    /**
-     * 获取片段阶段完整描述。
-     *
-     * @param fragmentState 片段简单阶段。
-     * @param colorAttachmentTextureFormats 颜色附件格式。
-     * @returns 片段阶段完整描述。
-     */
-    private static getGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
-    {
-        if (!fragmentState) return undefined;
-
-        const colorAttachmentsKey = colorAttachments.toLocaleString();
-
-        const getGPUFragmentStateKey: GetGPUFragmentStateKey = [device, fragmentState, colorAttachmentsKey];
-        let gpuFragmentStateComputed = this.getGPUFragmentStateMap.get(getGPUFragmentStateKey);
-
-        if (gpuFragmentStateComputed) return gpuFragmentStateComputed.value;
-
-        // 监听
-        const r_fragmentState = reactive(fragmentState);
-
-        const gpuFragmentState: Readonly<GPUFragmentState> = {} as any;
-        const r_gpuFragmentState = reactive(gpuFragmentState);
-
-        // 计算着色器模块
-        effect(() =>
-        {
-            r_fragmentState.code;
-
-            const { code } = fragmentState;
-
-            r_gpuFragmentState.module = WGPUShaderModule.getGPUShaderModule(device, code);
-        });
-
-        // 计算入口函数
-        effect(() =>
-        {
-            r_fragmentState.entryPoint;
-            r_fragmentState.code;
-
-            // 计算
-            const { entryPoint, code } = fragmentState;
-
-            //
-            if (entryPoint)
-            {
-                r_gpuFragmentState.entryPoint = entryPoint;
-            }
-            else
-            {
-                const reflect = WGPUShaderReflect.getWGSLReflectInfo(code);
-                const fragment = reflect.entry.fragment[0];
-
-                if (fragment)
-                {
-                    r_gpuFragmentState.entryPoint = fragment.name;
-                }
-                else
-                {
-                    console.warn(`WGSL着色器 ${code} 中不存在片元入口点。`);
-                }
-            }
-        });
-
-        effect(() =>
-        {
-            // 监听
-            r_fragmentState.targets;
-
-            const targets = r_fragmentState.targets;
-
-            r_gpuFragmentState.targets = this.getGPUColorTargetStates(targets, colorAttachments);
-        });
-
-        effect(() =>
-        {
-            r_fragmentState.constants;
-
-            const constants = fragmentState.constants;
-
-            r_gpuFragmentState.constants = constants;
-        });
-
-        effect(() =>
-        {
-            r_gpuFragmentState.key = JSON.stringify(r_gpuFragmentState);
-        });
-
-        gpuFragmentStateComputed = computed(() =>
-        {
-            const gpuFragmentStateKey: GPUFragmentStateKey = [gpuFragmentState.module, gpuFragmentState.entryPoint, gpuFragmentState.targets, gpuFragmentState.constants];
-            const cache = this.gpuFragmentStateMap.get(gpuFragmentStateKey);
-
-            if (cache) return cache;
-
-            this.gpuFragmentStateMap.set(gpuFragmentStateKey, gpuFragmentState);
-
-            return gpuFragmentState;
-        });
-
-        this.getGPUFragmentStateMap.set(getGPUFragmentStateKey, gpuFragmentStateComputed);
-
-        return gpuFragmentStateComputed.value;
-    }
-
-    private static getGPUColorTargetStates(targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]): GPUColorTargetState[]
-    {
-        if (!targets) return this.getDefaultGPUColorTargetStates(colorAttachments);
-
-        const getGPUColorTargetStatesKey: GetGPUColorTargetStatesKey = [targets, colorAttachments];
-        let result = this.getGPUColorTargetStatesMap.get(getGPUColorTargetStatesKey);
-
-        if (result) return result.value;
-
-        result = computed(() => colorAttachments.map((format, i) =>
-        {
-            if (!format) return undefined;
-
-            // 监听
-            reactive(targets)[i];
-
-            // 计算
-            const gpuColorTargetState = this.getGPUColorTargetState(targets[i], format);
-
-            return gpuColorTargetState;
-        }));
-
-        this.getGPUColorTargetStatesMap.set(getGPUColorTargetStatesKey, result);
-
-        return result.value;
-    }
-
-    private static getEntryPoint(fragmentState: FragmentState)
-    {
-        const result: Computed<string> = fragmentState['_entryPoint'] ??= computed(() =>
-        {
-            // 监听
-            const r_fragmentState = reactive(fragmentState);
-
-            r_fragmentState.entryPoint;
-            r_fragmentState.code;
-
-            // 计算
-            const { entryPoint, code } = fragmentState;
-
-            //
-            if (entryPoint) return entryPoint;
-            const reflect = WGPUShaderReflect.getWGSLReflectInfo(code);
-            const fragment = reflect.entry.fragment[0];
-
-            console.assert(!!fragment, `WGSL着色器 ${code} 中不存在片元入口点。`);
-
-            return fragment.name;
-        });
-
-        return result.value;
-    }
-
-    private static getGPUBlendState(blend?: BlendState): GPUBlendState
-    {
-        if (!blend) return undefined;
-
-        let result: Computed<GPUBlendState> = blend['_GPUBlendState'];
-
-        if (result) return result.value;
-
-        result = blend['_GPUBlendState'] = computed(() =>
-        {
-            // 监听
-            const r_blend = reactive(blend);
-
-            r_blend.color;
-            r_blend.alpha;
-            // 计算
-            const { color, alpha } = blend;
-            const gpuBlend: GPUBlendState = {
-                color: this.getGPUBlendComponent(color),
-                alpha: this.getGPUBlendComponent(alpha),
-            };
-
-            return gpuBlend;
-        });
 
         return result.value;
     }
@@ -339,47 +133,6 @@ export class GPURenderPipelineManager
             };
 
             return gpuBlendComponent;
-        });
-
-        return result.value;
-    }
-
-    private static getGPUColorWriteFlags(writeMask?: WriteMask)
-    {
-        if (!writeMask) return 15;
-
-        const result: Computed<GPUColorWriteFlags> = writeMask['_GPUColorWriteFlags'] ??= computed(() =>
-        {
-            // 监听
-            const r_writeMask = reactive(writeMask);
-
-            r_writeMask[0];
-            r_writeMask[1];
-            r_writeMask[2];
-            r_writeMask[3];
-
-            // 计算
-            const [red, green, blue, alpha] = writeMask;
-            let gpuWriteMask: GPUColorWriteFlags = 0;
-
-            if (red)
-            {
-                gpuWriteMask += 1;
-            }
-            if (green)
-            {
-                gpuWriteMask += 2;
-            }
-            if (blue)
-            {
-                gpuWriteMask += 4;
-            }
-            if (alpha)
-            {
-                gpuWriteMask += 8;
-            }
-
-            return gpuWriteMask;
         });
 
         return result.value;
@@ -421,28 +174,10 @@ export class GPURenderPipelineManager
         return !!(type as TemplateInfo).format;
     }
 
-    private static getDefaultGPUColorTargetState(format: GPUTextureFormat): GPUColorTargetState
-    {
-        this.defaultGPUColorTargetState[format] ??= { format, blend: this.getGPUBlendState(undefined), writeMask: this.getGPUColorWriteFlags(undefined) };
-
-        return this.defaultGPUColorTargetState[format];
-    }
-
-    private static getDefaultGPUColorTargetStates(colorAttachments: readonly GPUTextureFormat[])
-    {
-        this.defaultGPUColorTargetStates[colorAttachments.toString()] ??= colorAttachments.map((format) =>
-            this.getGPUColorTargetState(undefined, format));
-
-        return this.defaultGPUColorTargetStates[colorAttachments.toString()];
-    }
-
-    private static readonly defaultGPUColorTargetState: Record<GPUTextureFormat, GPUColorTargetState> = {} as any;
-
     private static readonly getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();
     private static readonly gpuFragmentStateMap = new ChainMap<GPUFragmentStateKey, GPUFragmentState>();
     private static readonly getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, Computed<GPUFragmentState>>();
     private static readonly getGPUColorTargetStatesMap = new ChainMap<GetGPUColorTargetStatesKey, Computed<GPUColorTargetState[]>>();
-    private static readonly defaultGPUColorTargetStates: { [key: string]: GPUColorTargetState[] } = {};
 }
 
 type GetGPURenderPipelineKey = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
