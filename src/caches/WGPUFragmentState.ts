@@ -41,7 +41,8 @@ export class WGPUFragmentState extends ReactiveObject
                 entryPoint = reflect.entry.fragment[0].name;
             }
 
-            const gpuColorTargetStates = WGPUFragmentState.getDefaultGPUColorTargetStates(colorAttachments);
+            const gpuColorTargetStates: GPUColorTargetState[] = colorAttachments.map((format) => ({ format }));
+
             if (targets)
             {
                 gpuColorTargetStates.length = 0;
@@ -94,15 +95,6 @@ export class WGPUFragmentState extends ReactiveObject
 
     static readonly cacheMap = new WeakMap<FragmentState, WGPUFragmentState>();
     static readonly defaultGPUFragmentState: GPUFragmentState = { module: undefined, entryPoint: undefined, targets: undefined, constants: undefined };
-
-    private static getDefaultGPUColorTargetStates(colorAttachments: readonly GPUTextureFormat[])
-    {
-        this.defaultGPUColorTargetStates[colorAttachments.toString()] ??= colorAttachments.map((format) => this.getGPUColorTargetState(undefined, format));
-
-        return this.defaultGPUColorTargetStates[colorAttachments.toString()];
-    }
-
-    private static readonly defaultGPUColorTargetStates: { [key: string]: GPUColorTargetState[] } = {};
 }
 
 declare global

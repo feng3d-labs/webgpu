@@ -24,7 +24,7 @@ export class WGPUColorTargetState extends ReactiveObject
 
     private _createGPUColorTargetState(colorTargetState: ColorTargetState, format: GPUTextureFormat)
     {
-        if (!colorTargetState) return WGPUColorTargetState.getDefaultGPUColorTargetState(format);
+        if (!colorTargetState) return { format };
 
         const r_this = reactive(this);
         const r_colorTargetState = reactive(colorTargetState);
@@ -56,18 +56,10 @@ export class WGPUColorTargetState extends ReactiveObject
         });
     }
 
-    private static getDefaultGPUColorTargetState(format: GPUTextureFormat): GPUColorTargetState
-    {
-        this.defaultGPUColorTargetState[format] ??= { format, blend: this.getGPUBlendState(undefined), writeMask: this.getGPUColorWriteFlags(undefined) };
-
-        return this.defaultGPUColorTargetState[format];
-    }
-
     static getInstance(colorTargetState: ColorTargetState, format: GPUTextureFormat)
     {
         return this.cacheMap.get(colorTargetState)?.get(format) || new WGPUColorTargetState(colorTargetState, format);
     }
 
     static readonly cacheMap = new WeakMap<ColorTargetState, Map<GPUTextureFormat, WGPUColorTargetState>>();
-    private static readonly defaultGPUColorTargetState: Record<GPUTextureFormat, GPUColorTargetState> = {} as any;
 }

@@ -1,5 +1,5 @@
 import { reactive } from "@feng3d/reactivity";
-import { BlendState } from "@feng3d/render-api";
+import { BlendComponent, BlendState } from "@feng3d/render-api";
 import { ReactiveObject } from "../ReactiveObject";
 
 export class WGPUBlendState extends ReactiveObject
@@ -23,15 +23,34 @@ export class WGPUBlendState extends ReactiveObject
             // 监听
             r_blend.color;
             r_blend.alpha;
+
+            const color = WGPUBlendState.getGPUBlendComponent(r_blend.color);
+            const alpha = WGPUBlendState.getGPUBlendComponent(r_blend.alpha);
+
             // 计算
-            const { color, alpha } = blendState;
             const gpuBlend: GPUBlendState = {
-                color: this.getGPUBlendComponent(color),
-                alpha: this.getGPUBlendComponent(alpha),
+                color: color,
+                alpha: alpha,
             };
 
             r_this.gpuBlendState = gpuBlend;
         });
+    }
+
+    private static getGPUBlendComponent(blendComponent?: BlendComponent): GPUBlendComponent
+    {
+        if (!blendComponent) return { operation: 'add', srcFactor: 'one', dstFactor: 'zero' };
+
+        // 计算
+        const { operation, srcFactor, dstFactor } = blendComponent;
+        // 当 operation 为 max 或 min 时，srcFactor 和 dstFactor 必须为 one。
+        const gpuBlendComponent: GPUBlendComponent = {
+            operation: operation ?? 'add',
+            srcFactor: (operation === 'max' || operation === 'min') ? 'one' : (srcFactor ?? 'one'),
+            dstFactor: (operation === 'max' || operation === 'min') ? 'one' : (dstFactor ?? 'zero'),
+        };
+
+        return gpuBlendComponent;
     }
 
     private _onMap(blendState: BlendState)

@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { BlendComponent, BlendState, ChainMap, ColorTargetState, FragmentState, RenderPipeline, VertexAttributes, WGSLVertexType, WriteMask } from '@feng3d/render-api';
+import { ChainMap, RenderPipeline, VertexAttributes, WGSLVertexType } from '@feng3d/render-api';
 import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { RenderPassFormat } from '../internal/RenderPassFormat';
@@ -8,7 +8,6 @@ import { WGPUFragmentState } from './WGPUFragmentState';
 import { WGPUMultisampleState } from './WGPUMultisampleState';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUPrimitiveState } from './WGPUPrimitiveState';
-import { WGPUShaderReflect } from './WGPUShaderReflect';
 import { WGPUVertexState } from './WGPUVertexState';
 
 declare global
@@ -110,34 +109,6 @@ export class GPURenderPipelineManager
         return result.value;
     }
 
-    private static getGPUBlendComponent(blendComponent?: BlendComponent): GPUBlendComponent
-    {
-        if (!blendComponent) return { operation: 'add', srcFactor: 'one', dstFactor: 'zero' };
-
-        const result: Computed<GPUBlendComponent> = blendComponent['_GPUBlendComponent'] ??= computed(() =>
-        {
-            // 监听
-            const r_blendComponent = reactive(blendComponent);
-
-            r_blendComponent.operation;
-            r_blendComponent.srcFactor;
-            r_blendComponent.dstFactor;
-
-            // 计算
-            const { operation, srcFactor, dstFactor } = blendComponent;
-            // 当 operation 为 max 或 min 时，srcFactor 和 dstFactor 必须为 one。
-            const gpuBlendComponent: GPUBlendComponent = {
-                operation: operation ?? 'add',
-                srcFactor: (operation === 'max' || operation === 'min') ? 'one' : (srcFactor ?? 'one'),
-                dstFactor: (operation === 'max' || operation === 'min') ? 'one' : (dstFactor ?? 'zero'),
-            };
-
-            return gpuBlendComponent;
-        });
-
-        return result.value;
-    }
-
     private static getWGSLType(type: TypeInfo)
     {
         let wgslType = type.name;
@@ -175,12 +146,6 @@ export class GPURenderPipelineManager
     }
 
     private static readonly getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();
-    private static readonly gpuFragmentStateMap = new ChainMap<GPUFragmentStateKey, GPUFragmentState>();
-    private static readonly getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, Computed<GPUFragmentState>>();
-    private static readonly getGPUColorTargetStatesMap = new ChainMap<GetGPUColorTargetStatesKey, Computed<GPUColorTargetState[]>>();
 }
 
 type GetGPURenderPipelineKey = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
-type GPUFragmentStateKey = [module: GPUShaderModule, entryPoint: string, targets: Iterable<GPUColorTargetState>, constants: Record<string, number>];
-type GetGPUFragmentStateKey = [device: GPUDevice, fragmentState: FragmentState, colorAttachmentsKey: string];
-type GetGPUColorTargetStatesKey = [targets: readonly ColorTargetState[], colorAttachments: readonly GPUTextureFormat[]];
