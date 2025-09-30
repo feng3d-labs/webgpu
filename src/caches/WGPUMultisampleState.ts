@@ -47,10 +47,8 @@ export class WGPUMultisampleState extends ReactiveObject
         this.destroyCall(() => { WGPUMultisampleState.cacheMap.delete(multisampleState); });
     }
 
-    static getInstance(multisampleState: MultisampleState, sampleCount: number)
+    static getInstance(multisampleState: MultisampleState)
     {
-        if (!sampleCount) return undefined;
-
         return this.cacheMap.get(multisampleState) || new WGPUMultisampleState(multisampleState);
     }
 

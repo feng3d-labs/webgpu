@@ -1,11 +1,12 @@
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
-import { BlendComponent, BlendState, ChainMap, ColorTargetState, FragmentState, PrimitiveState, RenderPipeline, VertexAttributes, WGSLVertexType, WriteMask } from '@feng3d/render-api';
+import { BlendComponent, BlendState, ChainMap, ColorTargetState, FragmentState, RenderPipeline, VertexAttributes, WGSLVertexType, WriteMask } from '@feng3d/render-api';
 import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { WGPUDepthStencilState } from './WGPUDepthStencilState';
 import { WGPUMultisampleState } from './WGPUMultisampleState';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
+import { WGPUPrimitiveState } from './WGPUPrimitiveState';
 import { WGPUShaderModule } from './WGPUShaderModule';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
 import { WGPUVertexState } from './WGPUVertexState';
@@ -70,11 +71,18 @@ export class GPURenderPipelineManager
             const gpuDepthStencilState = wgpuDepthStencilState.gpuDepthStencilState;
 
             //
-            const wgpuMultisampleState = WGPUMultisampleState.getInstance(multisample, sampleCount);
-            reactive(wgpuMultisampleState).gpuMultisampleState;
-            const gpuMultisampleState = wgpuMultisampleState.gpuMultisampleState;
+            let gpuMultisampleState: GPUMultisampleState = undefined;
+            if (sampleCount)
+            {
+                const wgpuMultisampleState = WGPUMultisampleState.getInstance(multisample);
+                reactive(wgpuMultisampleState).gpuMultisampleState;
+                gpuMultisampleState = wgpuMultisampleState.gpuMultisampleState;
+            }
 
             //
+            const wgpuPrimitiveState = WGPUPrimitiveState.getInstance(primitive, indexFormat);
+            reactive(wgpuPrimitiveState).gpuPrimitiveState;
+            const gpuPrimitiveState = wgpuPrimitiveState.gpuPrimitiveState;
 
             //
             const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
@@ -82,7 +90,7 @@ export class GPURenderPipelineManager
                 layout,
                 vertex: gpuVertexState,
                 fragment: this.getGPUFragmentState(device, fragment, colorFormats),
-                primitive: this.getGPUPrimitiveState(primitive, indexFormat),
+                primitive: gpuPrimitiveState,
                 depthStencil: gpuDepthStencilState,
                 multisample: gpuMultisampleState,
             };
@@ -92,36 +100,6 @@ export class GPURenderPipelineManager
             return gpuRenderPipeline;
         });
         this.getGPURenderPipelineMap.set(getGPURenderPipelineKey, result);
-
-        return result.value;
-    }
-
-    private static getGPUPrimitiveState(primitive?: PrimitiveState, indexFormat?: GPUIndexFormat): GPUPrimitiveState
-    {
-        if (!primitive) return this.defaultGPUPrimitiveState;
-
-        const result: Computed<GPUPrimitiveState> = primitive[`_cache_GPUPrimitiveState_${indexFormat}`] ??= computed(() =>
-        {
-            // 监听
-            const r_primitive = reactive(primitive);
-
-            r_primitive.topology;
-            r_primitive.cullFace;
-            r_primitive.frontFace;
-            r_primitive.unclippedDepth;
-
-            // 计算
-            const { topology, cullFace, frontFace, unclippedDepth } = primitive;
-            const gpuPrimitive: GPUPrimitiveState = {
-                topology: topology ?? 'triangle-list',
-                stripIndexFormat: (topology === 'triangle-strip' || topology === 'line-strip') ? indexFormat : undefined,
-                frontFace: frontFace ?? 'ccw',
-                cullMode: cullFace ?? 'none',
-                unclippedDepth: unclippedDepth ?? false,
-            };
-
-            return gpuPrimitive;
-        });
 
         return result.value;
     }
@@ -461,7 +439,6 @@ export class GPURenderPipelineManager
     private static readonly defaultGPUColorTargetState: Record<GPUTextureFormat, GPUColorTargetState> = {} as any;
 
     private static readonly getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();
-    private static readonly defaultGPUPrimitiveState: GPUPrimitiveState = { topology: 'triangle-list', cullMode: 'none', frontFace: 'ccw' };
     private static readonly gpuFragmentStateMap = new ChainMap<GPUFragmentStateKey, GPUFragmentState>();
     private static readonly getGPUFragmentStateMap = new ChainMap<GetGPUFragmentStateKey, Computed<GPUFragmentState>>();
     private static readonly getGPUColorTargetStatesMap = new ChainMap<GetGPUColorTargetStatesKey, Computed<GPUColorTargetState[]>>();
