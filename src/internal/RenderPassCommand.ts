@@ -1,7 +1,7 @@
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
 import { ChainMap, RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { GPURenderPassDescriptorManager } from '../caches/GPURenderPassDescriptorManager';
-import { GPURenderPassFormatManager } from '../caches/GPURenderPassFormatManager';
+import { WGPURenderPassFormat } from '../caches/WGPURenderPassFormat';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
 import { OcclusionQueryCache } from './OcclusionQueryCache';
@@ -19,6 +19,7 @@ export class RenderPassCommand
 
     constructor(public readonly webgpu: WebGPU, public readonly renderPass: RenderPass)
     {
+        const r_this = reactive(this);
         const r_renderPass = reactive(renderPass);
 
         effect(() =>
@@ -27,7 +28,10 @@ export class RenderPassCommand
 
             const { descriptor } = renderPass;
 
-            reactive(this).renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(webgpu.device, descriptor);
+            const wgpuRenderPassFormat = WGPURenderPassFormat.getInstance(webgpu.device, descriptor);
+            reactive(wgpuRenderPassFormat).renderPassFormat;
+
+            r_this.renderPassFormat = wgpuRenderPassFormat.renderPassFormat;
         });
 
         effect(() =>
@@ -37,7 +41,10 @@ export class RenderPassCommand
 
             const { descriptor, renderPassObjects } = renderPass;
 
-            const renderPassFormat = GPURenderPassFormatManager.getGPURenderPassFormat(webgpu.device, descriptor);
+            const wgpuRenderPassFormat = WGPURenderPassFormat.getInstance(webgpu.device, descriptor);
+            reactive(wgpuRenderPassFormat).renderPassFormat;
+
+            const renderPassFormat = wgpuRenderPassFormat.renderPassFormat;
 
             const renderPassObjectCommands = this.runRenderPassObjects(webgpu, renderPassFormat, renderPassObjects);
             const commands: CommandType[] = [];
