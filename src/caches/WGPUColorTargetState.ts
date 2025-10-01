@@ -1,7 +1,7 @@
-import { reactive } from "@feng3d/reactivity";
-import { ColorTargetState } from "@feng3d/render-api";
-import { ReactiveObject } from "../ReactiveObject";
-import { WGPUBlendState } from "./WGPUBlendState";
+import { reactive } from '@feng3d/reactivity';
+import { ColorTargetState } from '@feng3d/render-api';
+import { ReactiveObject } from '../ReactiveObject';
+import { WGPUBlendState } from './WGPUBlendState';
 
 export class WGPUColorTargetState extends ReactiveObject
 {

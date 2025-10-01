@@ -1,13 +1,13 @@
-import { reactive } from "@feng3d/reactivity";
-import { RenderPassColorAttachment, RenderPassDescriptor, Texture } from "@feng3d/render-api";
-import { ReactiveObject } from "../ReactiveObject";
-import { WGPUTexture } from "./WGPUTexture";
-import { WGPUTextureLike } from "./WGPUTextureLike";
-import { WGPUTextureView } from "./WGPUTextureView";
+import { reactive } from '@feng3d/reactivity';
+import { RenderPassColorAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
+import { ReactiveObject } from '../ReactiveObject';
+import { WGPUTexture } from './WGPUTexture';
+import { WGPUTextureLike } from './WGPUTextureLike';
+import { WGPUTextureView } from './WGPUTextureView';
 
 /**
  * WebGPU渲染通道颜色附件缓存管理器
- * 
+ *
  * 负责管理WebGPU渲染通道颜色附件的完整生命周期，包括：
  * - 颜色附件的创建和配置
  * - 响应式监听颜色附件参数变化
@@ -15,7 +15,7 @@ import { WGPUTextureView } from "./WGPUTextureView";
  * - 多重采样纹理的自动生成和管理
  * - 颜色附件实例的缓存和复用
  * - 资源清理和内存管理
- * 
+ *
  * 主要功能：
  * 1. **颜色附件管理** - 自动创建和配置GPU颜色附件
  * 2. **多重采样支持** - 自动生成多重采样纹理和解析目标，直接管理纹理生命周期
@@ -24,7 +24,7 @@ import { WGPUTextureView } from "./WGPUTextureView";
  * 5. **资源管理** - 自动处理颜色附件和多重采样纹理的清理
  * 6. **尺寸同步** - 自动同步纹理尺寸到渲染通道描述符
  * 7. **生命周期管理** - 统一管理多重采样纹理的创建和销毁
- * 
+ *
  * 使用场景：
  * - 渲染管线中的颜色输出
  * - 多重采样抗锯齿渲染
@@ -36,7 +36,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 {
     /**
      * WebGPU渲染通道颜色附件对象
-     * 
+     *
      * 这是实际的GPU颜色附件实例，用于在渲染通道中指定颜色输出目标。
      * 当颜色附件配置发生变化时，此对象会自动重新创建。
      */
@@ -44,9 +44,9 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 
     /**
      * 构造函数
-     * 
+     *
      * 创建颜色附件管理器实例，并设置响应式监听。
-     * 
+     *
      * @param device GPU设备实例，用于创建颜色附件
      * @param colorAttachment 颜色附件配置对象，包含视图和操作参数
      * @param descriptor 渲染通道描述符，用于获取采样数等参数
@@ -64,12 +64,12 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 
     /**
      * 设置颜色附件创建和更新逻辑
-     * 
+     *
      * 使用响应式系统监听颜色附件配置变化，自动重新创建颜色附件。
      * 当颜色附件参数或渲染通道描述符发生变化时，会触发颜色附件的重新创建。
      * 支持多重采样渲染，自动生成多重采样纹理和解析目标。
      * 直接管理多重采样纹理的生命周期，确保资源正确清理。
-     * 
+     *
      * @param device GPU设备实例
      * @param colorAttachment 颜色附件配置对象
      * @param descriptor 渲染通道描述符
@@ -89,7 +89,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
             // 设置渲染通道的附件尺寸
             reactive(descriptor).attachmentSize = {
                 width: gpuTexture.width,
-                height: gpuTexture.height
+                height: gpuTexture.height,
             };
         }
 
@@ -175,10 +175,10 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 
     /**
      * 将颜色附件实例注册到设备缓存中
-     * 
+     *
      * 使用WeakMap将颜色附件配置对象与其实例关联，实现实例缓存和复用。
      * 当颜色附件配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     * 
+     *
      * @param device GPU设备实例，用于存储缓存映射
      * @param colorAttachment 颜色附件配置对象，作为缓存的键
      */
@@ -196,10 +196,10 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 
     /**
      * 获取或创建颜色附件实例
-     * 
+     *
      * 使用单例模式管理颜色附件实例，避免重复创建相同的颜色附件。
      * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
-     * 
+     *
      * @param device GPU设备实例
      * @param colorAttachment 颜色附件配置对象
      * @param descriptor 渲染通道描述符
@@ -214,7 +214,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 
 /**
  * 全局类型声明
- * 
+ *
  * 扩展GPUDevice接口，添加颜色附件实例缓存映射。
  * 这个WeakMap用于缓存颜色附件实例，避免重复创建相同的颜色附件。
  */

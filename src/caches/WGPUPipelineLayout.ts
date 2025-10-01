@@ -3,7 +3,7 @@ import { GPUBindGroupLayoutEntryMap, WGPUShaderReflect } from './WGPUShaderRefle
 
 /**
  * 管线布局描述符接口
- * 
+ *
  * 定义管线布局的配置信息，包含绑定组布局列表和标识符。
  * 用于描述渲染管线或计算管线的资源绑定结构。
  */
@@ -11,7 +11,7 @@ export interface PipelineLayoutDescriptor
 {
     /**
      * 绑定组布局列表
-     * 
+     *
      * 定义管线中所有绑定组的布局信息，每个绑定组包含一组资源的绑定配置。
      * 这些布局信息决定了着色器如何访问GPU资源。
      */
@@ -19,7 +19,7 @@ export interface PipelineLayoutDescriptor
 
     /**
      * 管线布局标识符
-     * 
+     *
      * 用于唯一标识管线布局的字符串，通常由绑定组布局的标识符组合而成。
      * 用于缓存和复用相同的管线布局，避免重复创建。
      */
@@ -28,7 +28,7 @@ export interface PipelineLayoutDescriptor
 
 /**
  * 绑定组布局描述符接口
- * 
+ *
  * 定义单个绑定组的布局信息，包含该绑定组中所有资源的绑定配置。
  * 每个绑定组对应着色器中的一个@group装饰器。
  */
@@ -36,7 +36,7 @@ export interface BindGroupLayoutDescriptor
 {
     /**
      * 绑定组布局入口列表
-     * 
+     *
      * 定义绑定组中所有资源的绑定信息，包括资源类型、绑定索引等。
      * 在WGSL着色器反射过程中会被引擎自动赋值。
      */
@@ -44,7 +44,7 @@ export interface BindGroupLayoutDescriptor
 
     /**
      * 绑定组布局标识符
-     * 
+     *
      * 用于唯一标识绑定组布局的字符串，通常由入口的键名组合而成。
      * 在WGSL着色器反射过程中会被引擎自动赋值。
      */
@@ -53,14 +53,14 @@ export interface BindGroupLayoutDescriptor
 
 /**
  * WebGPU管线布局缓存管理器
- * 
+ *
  * 负责管理WebGPU管线布局的完整生命周期，包括：
  * - 管线布局的创建和配置
  * - 着色器反射和资源绑定分析
  * - 绑定组布局的自动生成和管理
  * - 管线布局实例的缓存和复用
  * - 资源清理和内存管理
- * 
+ *
  * 主要功能：
  * 1. **着色器反射** - 自动分析WGSL着色器代码，提取资源绑定信息
  * 2. **绑定组管理** - 自动生成和管理绑定组布局
@@ -68,7 +68,7 @@ export interface BindGroupLayoutDescriptor
  * 4. **布局优化** - 自动优化和复用相同的管线布局
  * 5. **实例缓存** - 使用缓存机制避免重复创建相同的管线布局
  * 6. **资源管理** - 自动处理管线布局相关资源的清理
- * 
+ *
  * 使用场景：
  * - 渲染管线的资源绑定配置
  * - 计算管线的资源绑定配置
@@ -80,11 +80,11 @@ export class WGPUPipelineLayout
 {
     /**
      * 从着色器代码中获取管线布局描述符
-     * 
+     *
      * 通过分析WGSL着色器代码，自动提取资源绑定信息并生成管线布局描述符。
      * 支持顶点/片段着色器和计算着色器两种模式。
      * 自动检测和处理资源绑定冲突。
-     * 
+     *
      * @param shader 着色器配置对象，包含顶点/片段着色器或计算着色器代码
      * @returns 管线布局描述符
      */
@@ -102,7 +102,7 @@ export class WGPUPipelineLayout
         {
             // 渲染管线模式：先分析顶点着色器
             entryMap = WGPUShaderReflect.getIGPUBindGroupLayoutEntryMap(shader.vertex);
-            
+
             // 如果存在片段着色器，合并其资源绑定信息
             if ('fragment' in shader)
             {
@@ -140,7 +140,7 @@ export class WGPUPipelineLayout
         {
             const bindGroupLayoutEntry = entryMap[resourceName];
             const { group, binding } = bindGroupLayoutEntry.variableInfo;
-            
+
             // 获取或创建对应绑定组的布局描述符
             const bindGroupLayoutDescriptor = bindGroupLayoutDescriptors[group] ??= { entries: [] };
 
@@ -163,7 +163,7 @@ export class WGPUPipelineLayout
             // 过滤掉undefined元素，确保数组的连续性
             const entries = (descriptor.entries as GPUBindGroupLayoutEntry[]).filter((v) => !!v);
             const label = entries.map((v) => v.key).join(',');
-            
+
             // 检查是否已存在相同的绑定组布局，避免重复创建
             let bindGroupLayout = this._bindGroupLayoutDescriptor[label];
 
@@ -196,15 +196,15 @@ export class WGPUPipelineLayout
 
     /**
      * 绑定组布局描述符缓存映射表
-     * 
+     *
      * 用于缓存已创建的绑定组布局描述符，避免重复创建相同的布局。
      * 键为布局标识符，值为绑定组布局描述符。
      */
     private static readonly _bindGroupLayoutDescriptor: { [key: string]: BindGroupLayoutDescriptor } = {};
-    
+
     /**
      * 管线布局描述符缓存映射表
-     * 
+     *
      * 用于缓存已创建的管线布局描述符，避免重复创建相同的布局。
      * 键为管线布局标识符，值为管线布局描述符。
      */
@@ -212,11 +212,11 @@ export class WGPUPipelineLayout
 
     /**
      * 获取或创建GPU管线布局实例
-     * 
+     *
      * 根据着色器代码获取或创建GPU管线布局实例。
      * 使用缓存机制避免重复创建相同的管线布局。
      * 自动处理着色器反射和绑定组布局的生成。
-     * 
+     *
      * @param device GPU设备实例
      * @param shader 着色器配置对象，包含顶点/片段着色器或计算着色器代码
      * @returns GPU管线布局实例
@@ -271,7 +271,7 @@ export class WGPUPipelineLayout
 
 /**
  * 全局类型声明
- * 
+ *
  * 扩展GPUDevice接口，添加管线布局实例缓存映射。
  * 这个对象用于缓存管线布局实例，避免重复创建相同的管线布局。
  */

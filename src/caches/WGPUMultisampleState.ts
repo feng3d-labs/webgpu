@@ -1,6 +1,6 @@
-import { reactive } from "@feng3d/reactivity";
-import { MultisampleState } from "../data/MultisampleState";
-import { ReactiveObject } from "../ReactiveObject";
+import { reactive } from '@feng3d/reactivity';
+import { MultisampleState } from '../data/MultisampleState';
+import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUMultisampleState extends ReactiveObject
 {
@@ -19,6 +19,7 @@ export class WGPUMultisampleState extends ReactiveObject
         if (!multisampleState)
         {
             reactive(this).gpuMultisampleState = WGPUMultisampleState.defaultGPUMultisampleState;
+
             return;
         }
         const r_multisampleState = reactive(multisampleState);

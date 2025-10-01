@@ -78,7 +78,7 @@ export class WGPUBuffer extends ReactiveObject
                 label,
                 size,
                 usage: usage ?? WGPUBuffer.defaultGPUBufferUsage,
-                mappedAtCreation
+                mappedAtCreation,
             });
 
             // 如果初始化时存在数据，使用map方式上传数据

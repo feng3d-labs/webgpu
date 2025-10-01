@@ -2,10 +2,9 @@ import { reactive } from '@feng3d/reactivity';
 import { TimestampQuery } from '../data/TimestampQuery';
 import { ReactiveObject } from '../ReactiveObject';
 
-
 /**
  * WebGPU时间戳查询缓存管理器
- * 
+ *
  * 负责管理WebGPU时间戳查询的完整生命周期，包括：
  * - 时间戳查询集的创建和配置
  * - 响应式监听时间戳查询参数变化
@@ -13,7 +12,7 @@ import { ReactiveObject } from '../ReactiveObject';
  * - 查询结果缓冲区的管理
  * - 时间戳查询实例的缓存和复用
  * - 资源清理和内存管理
- * 
+ *
  * 主要功能：
  * 1. **时间戳查询管理** - 自动创建和配置GPU时间戳查询集
  * 2. **特性支持检测** - 自动检测设备是否支持timestamp-query特性
@@ -22,7 +21,7 @@ import { ReactiveObject } from '../ReactiveObject';
  * 5. **资源管理** - 自动处理查询集和缓冲区的清理
  * 6. **异步结果处理** - 自动处理查询结果的异步读取和回调
  * 7. **生命周期管理** - 统一管理查询相关资源的创建和销毁
- * 
+ *
  * 使用场景：
  * - 渲染性能测量和分析
  * - GPU命令执行时间统计
@@ -34,7 +33,7 @@ export class WGPUTimestampQuery extends ReactiveObject
 {
     /**
      * WebGPU时间戳查询集对象
-     * 
+     *
      * 这是实际的GPU时间戳查询集实例，用于在渲染通道中记录时间戳。
      * 当时间戳查询配置发生变化时，此对象会自动重新创建。
      */
@@ -42,9 +41,9 @@ export class WGPUTimestampQuery extends ReactiveObject
 
     /**
      * 构造函数
-     * 
+     *
      * 创建时间戳查询管理器实例，并设置响应式监听。
-     * 
+     *
      * @param device GPU设备实例，用于创建时间戳查询
      * @param timestampQuery 时间戳查询配置对象，包含查询参数和回调
      */
@@ -61,12 +60,12 @@ export class WGPUTimestampQuery extends ReactiveObject
 
     /**
      * 设置时间戳查询创建和更新逻辑
-     * 
+     *
      * 使用响应式系统监听时间戳查询配置变化，自动重新创建时间戳查询。
      * 当时间戳查询参数发生变化时，会触发时间戳查询的重新创建。
      * 支持特性检测和异步结果处理。
      * 直接管理查询相关资源的生命周期，确保资源正确清理。
-     * 
+     *
      * @param device GPU设备实例
      * @param timestampQuery 时间戳查询配置对象
      */
@@ -179,10 +178,10 @@ export class WGPUTimestampQuery extends ReactiveObject
 
     /**
      * 将时间戳查询实例注册到设备缓存中
-     * 
+     *
      * 使用WeakMap将时间戳查询配置对象与其实例关联，实现实例缓存和复用。
      * 当时间戳查询配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     * 
+     *
      * @param device GPU设备实例，用于存储缓存映射
      * @param timestampQuery 时间戳查询配置对象，作为缓存的键
      */
@@ -200,11 +199,11 @@ export class WGPUTimestampQuery extends ReactiveObject
 
     /**
      * 获取或创建时间戳查询实例
-     * 
+     *
      * 使用单例模式管理时间戳查询实例，避免重复创建相同的时间戳查询。
      * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
      * 自动检测设备是否支持timestamp-query特性。
-     * 
+     *
      * @param device GPU设备实例
      * @param timestampQuery 时间戳查询配置对象
      * @returns 时间戳查询实例，如果不支持特性则返回null
@@ -224,6 +223,7 @@ export class WGPUTimestampQuery extends ReactiveObject
         if (!timestampQuery.isSupports)
         {
             console.warn(`WebGPU未开启或者不支持 timestamp-query 特性，请确认 WebGPU.init 初始化参数是否正确！`);
+
             return null;
         }
 
@@ -234,7 +234,7 @@ export class WGPUTimestampQuery extends ReactiveObject
 
 /**
  * 全局类型声明
- * 
+ *
  * 扩展GPUDevice接口，添加时间戳查询实例缓存映射。
  * 这个WeakMap用于缓存时间戳查询实例，避免重复创建相同的时间戳查询。
  */
@@ -249,7 +249,7 @@ declare global
 
 /**
  * 全局类型声明
- * 
+ *
  * 扩展WebGPU接口，添加自定义的resolve方法到时间戳写入对象中。
  * 这些方法用于在渲染通道结束后解析时间戳查询结果。
  */

@@ -1,9 +1,9 @@
-import { reactive } from "@feng3d/reactivity";
-import { FragmentState } from "@feng3d/render-api";
-import { ReactiveObject } from "../ReactiveObject";
-import { WGPUColorTargetState } from "./WGPUColorTargetState";
-import { WGPUShaderModule } from "./WGPUShaderModule";
-import { WGPUShaderReflect } from "./WGPUShaderReflect";
+import { reactive } from '@feng3d/reactivity';
+import { FragmentState } from '@feng3d/render-api';
+import { ReactiveObject } from '../ReactiveObject';
+import { WGPUColorTargetState } from './WGPUColorTargetState';
+import { WGPUShaderModule } from './WGPUShaderModule';
+import { WGPUShaderReflect } from './WGPUShaderReflect';
 
 export class WGPUFragmentState extends ReactiveObject
 {

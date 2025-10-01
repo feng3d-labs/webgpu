@@ -47,9 +47,9 @@ export class GPURenderPassFormatManager
 
             // 缓存
             const renderPassFormatKey = `${renderPassFormat.attachmentSize.width},${renderPassFormat.attachmentSize.height
-                }|${renderPassFormat.colorFormats.join('')
-                }|${renderPassFormat.depthStencilFormat
-                }|${renderPassFormat.sampleCount}`;
+            }|${renderPassFormat.colorFormats.join('')
+            }|${renderPassFormat.depthStencilFormat
+            }|${renderPassFormat.sampleCount}`;
             const cache = this.renderPassFormatMap[renderPassFormatKey];
 
             if (cache) return cache;

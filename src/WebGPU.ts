@@ -81,6 +81,7 @@ export class WebGPU
         if ('context' in texture)
         {
             device.canvasTextures?.get(texture)?.destroy();
+
             return;
         }
 

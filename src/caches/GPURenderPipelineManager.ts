@@ -1,6 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, RenderPipeline, VertexAttributes, WGSLVertexType } from '@feng3d/render-api';
-import { TemplateInfo, TypeInfo } from 'wgsl_reflect';
+import { ChainMap, RenderPipeline, VertexAttributes } from '@feng3d/render-api';
 
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { WGPUDepthStencilState } from './WGPUDepthStencilState';
@@ -107,42 +106,6 @@ export class GPURenderPipelineManager
         this.getGPURenderPipelineMap.set(getGPURenderPipelineKey, result);
 
         return result.value;
-    }
-
-    private static getWGSLType(type: TypeInfo)
-    {
-        let wgslType = type.name;
-
-        if (this.isTemplateType(type))
-        {
-            wgslType += `<${type.format.name}>`;
-        }
-        if (this.wgslTypeMap[wgslType])
-        {
-            wgslType = this.wgslTypeMap[wgslType];
-        }
-
-        return wgslType as WGSLVertexType;
-    }
-
-    /**
-     * 别名
-     */
-    private static readonly wgslTypeMap = {
-        vec2u: 'vec2<u32>',
-        vec3u: 'vec3<u32>',
-        vec4u: 'vec4<u32>',
-        vec2i: 'vec2<i32>',
-        vec3i: 'vec3<i32>',
-        vec4i: 'vec4<i32>',
-        vec2f: 'vec2<f32>',
-        vec3f: 'vec3<f32>',
-        vec4f: 'vec4<f32>',
-    };
-
-    private static isTemplateType(type: TypeInfo): type is TemplateInfo
-    {
-        return !!(type as TemplateInfo).format;
     }
 
     private static readonly getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();

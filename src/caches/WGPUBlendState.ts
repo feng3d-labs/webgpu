@@ -1,6 +1,6 @@
-import { reactive } from "@feng3d/reactivity";
-import { BlendComponent, BlendState } from "@feng3d/render-api";
-import { ReactiveObject } from "../ReactiveObject";
+import { reactive } from '@feng3d/reactivity';
+import { BlendComponent, BlendState } from '@feng3d/render-api';
+import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUBlendState extends ReactiveObject
 {

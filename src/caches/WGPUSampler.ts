@@ -82,12 +82,12 @@ export class WGPUSampler extends ReactiveObject
      * GPU采样器默认值。
      */
     static readonly defaultSampler: Sampler = {
-        addressModeU: "repeat",
-        addressModeV: "repeat",
-        addressModeW: "repeat",
-        magFilter: "nearest",
-        minFilter: "nearest",
-        mipmapFilter: "nearest",
+        addressModeU: 'repeat',
+        addressModeV: 'repeat',
+        addressModeW: 'repeat',
+        magFilter: 'nearest',
+        minFilter: 'nearest',
+        mipmapFilter: 'nearest',
         lodMinClamp: 0,
         lodMaxClamp: 16,
         compare: undefined,

@@ -1,13 +1,13 @@
-import { reactive } from "@feng3d/reactivity";
-import { RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture } from "@feng3d/render-api";
-import { ReactiveObject } from "../ReactiveObject";
-import { WGPUTexture } from "./WGPUTexture";
-import { WGPUTextureLike } from "./WGPUTextureLike";
-import { WGPUTextureView } from "./WGPUTextureView";
+import { reactive } from '@feng3d/reactivity';
+import { RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
+import { ReactiveObject } from '../ReactiveObject';
+import { WGPUTexture } from './WGPUTexture';
+import { WGPUTextureLike } from './WGPUTextureLike';
+import { WGPUTextureView } from './WGPUTextureView';
 
 /**
  * WebGPU渲染通道深度模板附件缓存管理器
- * 
+ *
  * 负责管理WebGPU渲染通道深度模板附件的完整生命周期，包括：
  * - 深度模板附件的创建和配置
  * - 响应式监听深度模板附件参数变化
@@ -15,7 +15,7 @@ import { WGPUTextureView } from "./WGPUTextureView";
  * - 自动生成深度纹理的管理
  * - 深度模板附件实例的缓存和复用
  * - 资源清理和内存管理
- * 
+ *
  * 主要功能：
  * 1. **深度模板附件管理** - 自动创建和配置GPU深度模板附件
  * 2. **自动深度纹理生成** - 当未提供深度纹理时自动生成
@@ -24,7 +24,7 @@ import { WGPUTextureView } from "./WGPUTextureView";
  * 5. **资源管理** - 自动处理深度模板附件和自动生成纹理的清理
  * 6. **尺寸同步** - 自动同步纹理尺寸到渲染通道描述符
  * 7. **生命周期管理** - 统一管理自动生成深度纹理的创建和销毁
- * 
+ *
  * 使用场景：
  * - 渲染管线中的深度测试
  * - 模板测试和模板写入
@@ -36,7 +36,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
 {
     /**
      * WebGPU渲染通道深度模板附件对象
-     * 
+     *
      * 这是实际的GPU深度模板附件实例，用于在渲染通道中指定深度和模板测试目标。
      * 当深度模板附件配置发生变化时，此对象会自动重新创建。
      */
@@ -44,9 +44,9 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
 
     /**
      * 构造函数
-     * 
+     *
      * 创建深度模板附件管理器实例，并设置响应式监听。
-     * 
+     *
      * @param device GPU设备实例，用于创建深度模板附件
      * @param depthStencilAttachment 深度模板附件配置对象，包含视图和操作参数
      * @param descriptor 渲染通道描述符，用于获取附件尺寸等参数
@@ -64,12 +64,12 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
 
     /**
      * 设置深度模板附件创建和更新逻辑
-     * 
+     *
      * 使用响应式系统监听深度模板附件配置变化，自动重新创建深度模板附件。
      * 当深度模板附件参数或渲染通道描述符发生变化时，会触发深度模板附件的重新创建。
      * 支持自动生成深度纹理，当未提供深度纹理时自动创建。
      * 直接管理自动生成深度纹理的生命周期，确保资源正确清理。
-     * 
+     *
      * @param device GPU设备实例
      * @param depthStencilAttachment 深度模板附件配置对象
      * @param descriptor 渲染通道描述符
@@ -89,7 +89,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
             // 设置渲染通道的附件尺寸
             reactive(descriptor).attachmentSize = {
                 width: gpuTexture.width,
-                height: gpuTexture.height
+                height: gpuTexture.height,
             };
         }
 
@@ -133,11 +133,11 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
                 stencilClearValue,
                 stencilLoadOp,
                 stencilStoreOp,
-                stencilReadOnly
+                stencilReadOnly,
             } = r_depthStencilAttachment;
 
             let textureView: GPUTextureView;
-            
+
             // 如果提供了深度纹理视图，使用现有的纹理视图
             if (depthStencilAttachment.view)
             {
@@ -192,10 +192,10 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
 
     /**
      * 将深度模板附件实例注册到设备缓存中
-     * 
+     *
      * 使用WeakMap将深度模板附件配置对象与其实例关联，实现实例缓存和复用。
      * 当深度模板附件配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     * 
+     *
      * @param device GPU设备实例，用于存储缓存映射
      * @param depthStencilAttachment 深度模板附件配置对象，作为缓存的键
      */
@@ -213,10 +213,10 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
 
     /**
      * 获取或创建深度模板附件实例
-     * 
+     *
      * 使用单例模式管理深度模板附件实例，避免重复创建相同的深度模板附件。
      * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
-     * 
+     *
      * @param device GPU设备实例
      * @param depthStencilAttachment 深度模板附件配置对象
      * @param descriptor 渲染通道描述符
@@ -231,7 +231,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
 
 /**
  * 全局类型声明
- * 
+ *
  * 扩展GPUDevice接口，添加深度模板附件实例缓存映射。
  * 这个WeakMap用于缓存深度模板附件实例，避免重复创建相同的深度模板附件。
  */

@@ -8,7 +8,7 @@ import { WGPUVertexBuffer } from './WGPUVertexBuffer';
 
 /**
  * WebGPU顶点缓冲区布局缓存管理器
- * 
+ *
  * 负责管理WebGPU顶点缓冲区布局的完整生命周期，包括：
  * - 顶点缓冲区布局的创建和配置
  * - 响应式监听顶点状态和顶点属性变化
@@ -16,7 +16,7 @@ import { WGPUVertexBuffer } from './WGPUVertexBuffer';
  * - 着色器反射和顶点属性匹配
  * - 顶点缓冲区布局实例的缓存和复用
  * - 资源清理和内存管理
- * 
+ *
  * 主要功能：
  * 1. **布局管理** - 自动创建和配置GPU顶点缓冲区布局
  * 2. **着色器反射** - 自动分析顶点着色器，提取输入属性信息
@@ -25,7 +25,7 @@ import { WGPUVertexBuffer } from './WGPUVertexBuffer';
  * 5. **响应式更新** - 监听顶点状态和属性变化，自动重新创建
  * 6. **实例缓存** - 使用嵌套WeakMap缓存布局实例，避免重复创建
  * 7. **资源管理** - 自动处理顶点缓冲区布局相关资源的清理
- * 
+ *
  * 使用场景：
  * - 渲染管线中的顶点数据处理
  * - 顶点着色器输入属性配置
@@ -37,15 +37,15 @@ export class WGPUVertexBufferLayout extends ReactiveObject
 {
     /**
      * GPU顶点缓冲区布局数组
-     * 
+     *
      * 包含所有顶点缓冲区的布局配置信息，用于GPU渲染管线。
      * 当顶点状态或顶点属性发生变化时，此数组会自动重新创建。
      */
     readonly vertexBufferLayouts: GPUVertexBufferLayout[];
-    
+
     /**
      * 顶点缓冲区数组
-     * 
+     *
      * 包含所有顶点缓冲区的数据信息，与vertexBufferLayouts一一对应。
      * 当顶点状态或顶点属性发生变化时，此数组会自动重新创建。
      */
@@ -53,9 +53,9 @@ export class WGPUVertexBufferLayout extends ReactiveObject
 
     /**
      * 构造函数
-     * 
+     *
      * 创建顶点缓冲区布局管理器实例，并设置响应式监听。
-     * 
+     *
      * @param vertexState 顶点状态配置对象，包含着色器代码和参数
      * @param vertices 顶点属性配置对象，定义顶点数据格式
      */
@@ -72,10 +72,10 @@ export class WGPUVertexBufferLayout extends ReactiveObject
 
     /**
      * 将顶点缓冲区布局实例注册到缓存中
-     * 
+     *
      * 使用嵌套WeakMap将顶点状态和顶点属性配置对象与其实例关联，实现实例缓存和复用。
      * 当顶点状态或顶点属性配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     * 
+     *
      * @param vertexState 顶点状态配置对象，作为第一级缓存的键
      * @param vertices 顶点属性配置对象，作为第二级缓存的键
      */
@@ -83,21 +83,21 @@ export class WGPUVertexBufferLayout extends ReactiveObject
     {
         // 如果顶点状态还没有对应的二级缓存，则创建一个新的WeakMap
         caches.set(vertexState, caches.get(vertexState) || new WeakMap<VertexAttributes, WGPUVertexBufferLayout>());
-        
+
         // 将当前实例与顶点属性配置对象关联
         caches.get(vertexState).set(vertices, this);
-        
+
         // 注册清理回调，在对象销毁时从缓存中移除
         this.destroyCall(() => { caches.get(vertexState).delete(vertices); });
     }
 
     /**
      * 设置顶点缓冲区布局创建和更新逻辑
-     * 
+     *
      * 使用响应式系统监听顶点状态和顶点属性变化，自动重新创建顶点缓冲区布局。
      * 当顶点状态或顶点属性参数发生变化时，会触发顶点缓冲区布局的重新创建。
      * 自动处理着色器反射、属性匹配和格式验证。
-     * 
+     *
      * @param vertexState 顶点状态配置对象
      * @param vertices 顶点属性配置对象
      */
@@ -216,7 +216,6 @@ export class WGPUVertexBufferLayout extends ReactiveObject
                 attributes.push({ shaderLocation, offset: attributeOffset, format });
             });
 
-
             // 更新顶点缓冲区布局和缓冲区引用
             r_this.vertexBufferLayouts = vertexBufferLayouts;
             r_this.vertexBuffers = vertexBuffers;
@@ -225,10 +224,10 @@ export class WGPUVertexBufferLayout extends ReactiveObject
 
     /**
      * 获取或创建顶点缓冲区布局实例
-     * 
+     *
      * 使用单例模式管理顶点缓冲区布局实例，避免重复创建相同的布局。
      * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
-     * 
+     *
      * @param vertexState 顶点状态配置对象
      * @param vertices 顶点属性配置对象
      * @returns 顶点缓冲区布局实例
@@ -242,7 +241,7 @@ export class WGPUVertexBufferLayout extends ReactiveObject
 
 /**
  * 顶点缓冲区布局实例缓存映射表
- * 
+ *
  * 用于缓存已创建的顶点缓冲区布局实例，避免重复创建相同的布局。
  * 使用嵌套WeakMap结构，第一级键为顶点状态配置对象，第二级键为顶点属性配置对象。
  */

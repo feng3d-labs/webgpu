@@ -5,7 +5,7 @@ import { generateMipmap } from '../utils/generate-mipmap';
 
 /**
  * WebGPU纹理缓存管理器
- * 
+ *
  * 负责管理WebGPU纹理的完整生命周期，包括：
  * - 纹理的创建和配置
  * - 响应式监听纹理参数变化
@@ -14,7 +14,7 @@ import { generateMipmap } from '../utils/generate-mipmap';
  * - 多级纹理(mipmap)的自动生成
  * - 纹理实例的缓存和复用
  * - 资源清理和内存管理
- * 
+ *
  * 主要功能：
  * 1. **响应式更新** - 监听纹理配置变化，自动重新创建纹理
  * 2. **数据上传** - 支持从图片、缓冲区等多种数据源上传纹理数据
@@ -22,7 +22,7 @@ import { generateMipmap } from '../utils/generate-mipmap';
  * 4. **实例缓存** - 使用WeakMap缓存纹理实例，避免重复创建
  * 5. **资源管理** - 自动处理纹理的创建和销毁
  * 6. **格式支持** - 智能处理不同纹理格式的使用标志
- * 
+ *
  * 使用场景：
  * - 渲染管线中的纹理采样
  * - 计算着色器中的纹理访问
@@ -34,7 +34,7 @@ export class WGPUTexture extends ReactiveObject
 {
     /**
      * WebGPU纹理对象
-     * 
+     *
      * 这是实际的GPU纹理实例，用于在渲染管线中存储和访问纹理数据。
      * 当纹理配置发生变化时，此对象会自动重新创建。
      */
@@ -42,9 +42,9 @@ export class WGPUTexture extends ReactiveObject
 
     /**
      * 构造函数
-     * 
+     *
      * 创建纹理管理器实例，并设置响应式监听。
-     * 
+     *
      * @param device GPU设备实例，用于创建纹理
      * @param texture 纹理配置对象，包含纹理参数和数据源
      */
@@ -64,10 +64,10 @@ export class WGPUTexture extends ReactiveObject
 
     /**
      * 设置纹理创建和更新逻辑
-     * 
+     *
      * 使用响应式系统监听纹理配置变化，自动重新创建纹理。
      * 当纹理参数或数据源发生变化时，会触发纹理的重新创建。
-     * 
+     *
      * @param device GPU设备实例
      * @param texture 纹理配置对象
      */
@@ -167,10 +167,10 @@ export class WGPUTexture extends ReactiveObject
 
     /**
      * 设置纹理数据写入监听
-     * 
+     *
      * 监听writeTextures变化，自动将数据写入GPU纹理。
      * 支持动态更新纹理数据，无需重新创建整个纹理。
-     * 
+     *
      * @param device GPU设备实例
      * @param texture 纹理配置对象
      */
@@ -198,10 +198,10 @@ export class WGPUTexture extends ReactiveObject
 
     /**
      * 将纹理实例注册到设备缓存中
-     * 
+     *
      * 使用WeakMap将纹理配置对象与其实例关联，实现实例缓存和复用。
      * 当纹理配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     * 
+     *
      * @param device GPU设备实例，用于存储缓存映射
      * @param texture 纹理配置对象，作为缓存的键
      */
@@ -219,10 +219,10 @@ export class WGPUTexture extends ReactiveObject
 
     /**
      * 获取或创建纹理实例
-     * 
+     *
      * 使用单例模式管理纹理实例，避免重复创建相同的纹理。
      * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
-     * 
+     *
      * @param device GPU设备实例
      * @param textureLike 纹理配置对象
      * @returns 纹理实例
@@ -235,10 +235,10 @@ export class WGPUTexture extends ReactiveObject
 
     /**
      * 写入纹理数据
-     * 
+     *
      * 将纹理数据从各种数据源上传到GPU纹理中。
      * 支持图片数据源和缓冲区数据源两种类型。
-     * 
+     *
      * @param device GPU设备实例
      * @param gpuTexture 目标WebGPU纹理
      * @param textureSources 纹理数据源数组
@@ -348,10 +348,10 @@ export class WGPUTexture extends ReactiveObject
 
     /**
      * 根据纹理格式和采样数确定纹理的使用标志
-     * 
+     *
      * 智能分析纹理格式和采样数，返回合适的使用标志组合。
      * 某些特殊格式（如深度纹理、多重采样纹理）不支持存储绑定。
-     * 
+     *
      * @param format 纹理格式
      * @param sampleCount 采样数（多重采样时使用）
      * @returns 纹理使用标志组合
@@ -388,9 +388,9 @@ export class WGPUTexture extends ReactiveObject
         return usage;
     }
 
-    /** 
+    /**
      * 纹理维度映射表
-     * 
+     *
      * 将抽象纹理维度映射到WebGPU的具体维度类型。
      * 立方体贴图在WebGPU中使用2D维度，立方体贴图数组使用3D维度。
      */
@@ -403,9 +403,9 @@ export class WGPUTexture extends ReactiveObject
         '3d': '3d',           // 三维纹理
     };
 
-    /** 
+    /**
      * 自动索引计数器
-     * 
+     *
      * 用于为没有指定标签的纹理生成唯一的标签名称。
      * 每次创建新纹理时自动递增。
      */
@@ -414,7 +414,7 @@ export class WGPUTexture extends ReactiveObject
 
 /**
  * 全局类型声明
- * 
+ *
  * 扩展GPUDevice接口，添加纹理实例缓存映射。
  * 这个WeakMap用于缓存纹理实例，避免重复创建相同的纹理。
  */

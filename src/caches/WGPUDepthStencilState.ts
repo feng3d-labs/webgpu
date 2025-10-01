@@ -1,7 +1,7 @@
-import { reactive } from "@feng3d/reactivity";
-import { DepthStencilState } from "@feng3d/render-api";
-import { ReactiveObject } from "../ReactiveObject";
-import { WGPUStencilFaceState } from "./WGPUStencilFaceState";
+import { reactive } from '@feng3d/reactivity';
+import { DepthStencilState } from '@feng3d/render-api';
+import { ReactiveObject } from '../ReactiveObject';
+import { WGPUStencilFaceState } from './WGPUStencilFaceState';
 
 export class WGPUDepthStencilState extends ReactiveObject
 {

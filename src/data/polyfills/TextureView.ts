@@ -22,14 +22,14 @@ declare module '@feng3d/render-api'
         /**
          * The format of the texture view. Must be either the {@link GPUTextureDescriptor#format} of the
          * texture or one of the {@link GPUTextureDescriptor#viewFormats} specified during its creation.
-         * 
+         *
          * 注：修改后将重新创建视图。
          */
         readonly format?: GPUTextureFormat;
 
         /**
          * The dimension to view the texture as.
-         * 
+         *
          * 注：修改后将重新创建视图。
          */
         readonly dimension?: GPUTextureViewDimension;
@@ -41,14 +41,14 @@ declare module '@feng3d/render-api'
          * Note: If the view's {@link GPUTextureViewDescriptor#format} doesn't support all of the
          * texture's {@link GPUTextureDescriptor#usage}s, the default will fail,
          * and the view's {@link GPUTextureViewDescriptor#usage} must be specified explicitly.
-         * 
+         *
          * 注：修改后将重新创建视图。
          */
         readonly usage?: GPUTextureUsageFlags;
 
         /**
          * Which {@link GPUTextureAspect|aspect(s)} of the texture are accessible to the texture view.
-         * 
+         *
          * 注：修改后将重新创建视图。
          */
         readonly aspect?: GPUTextureAspect;
@@ -56,7 +56,7 @@ declare module '@feng3d/render-api'
         /**
          * How many mipmap levels, starting with {@link GPUTextureViewDescriptor#baseMipLevel}, are accessible to
          * the texture view.
-         * 
+         *
          * 注：修改后将重新创建视图。
          */
         readonly mipLevelCount?: GPUIntegerCoordinate;
@@ -64,7 +64,7 @@ declare module '@feng3d/render-api'
         /**
          * How many array layers, starting with {@link GPUTextureViewDescriptor#baseArrayLayer}, are accessible
          * to the texture view.
-         * 
+         *
          * 注：修改后将重新创建视图。
          */
         readonly arrayLayerCount?: GPUIntegerCoordinate;

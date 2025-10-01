@@ -1,7 +1,7 @@
-import { TextureLike } from "@feng3d/render-api";
+import { TextureLike } from '@feng3d/render-api';
 
-import { WGPUCanvasTexture } from "./WGPUCanvasTexture";
-import { WGPUTexture } from "./WGPUTexture";
+import { WGPUCanvasTexture } from './WGPUCanvasTexture';
+import { WGPUTexture } from './WGPUTexture';
 
 export class WGPUTextureLike
 {
