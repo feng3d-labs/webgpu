@@ -3,7 +3,7 @@ import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObje
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
 import { WGPUPipelineLayout } from './caches/WGPUPipelineLayout';
-import { GPURenderPipelineManager } from './caches/GPURenderPipelineManager';
+import { WGPURenderPipeline } from './caches/GPURenderPipelineManager';
 import { WGPUVertexBufferLayout } from './caches/WGPUVertexBufferLayout';
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
@@ -323,7 +323,12 @@ export class WebGPU
             const { pipeline, vertices, indices } = renderObject;
             //
             const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16') : undefined;
-            const gpuRenderPipeline = GPURenderPipelineManager.getGPURenderPipeline(device, pipeline, renderPassFormat, vertices, indexFormat);
+
+            //
+            const wgpuRenderPipeline = WGPURenderPipeline.getInstance(device, pipeline, renderPassFormat, vertices, indexFormat);
+            reactive(wgpuRenderPipeline).gpuRenderPipeline;
+
+            const gpuRenderPipeline = wgpuRenderPipeline.gpuRenderPipeline;
 
             //
             renderObjectCache.setPipeline = ['setPipeline', gpuRenderPipeline];

@@ -1,7 +1,8 @@
-import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { reactive } from '@feng3d/reactivity';
 import { ChainMap, RenderPipeline, VertexAttributes } from '@feng3d/render-api';
 
 import { RenderPassFormat } from '../internal/RenderPassFormat';
+import { ReactiveObject } from '../ReactiveObject';
 import { WGPUDepthStencilState } from './WGPUDepthStencilState';
 import { WGPUFragmentState } from './WGPUFragmentState';
 import { WGPUMultisampleState } from './WGPUMultisampleState';
@@ -9,39 +10,26 @@ import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUPrimitiveState } from './WGPUPrimitiveState';
 import { WGPUVertexState } from './WGPUVertexState';
 
-declare global
+export class WGPURenderPipeline extends ReactiveObject
 {
-    interface GPUFragmentState
+    readonly gpuRenderPipeline: GPURenderPipeline;
+
+    constructor(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
     {
-        /**
-         * 用于区别片段是否相同。
-         */
-        key?: string;
+        super();
+        this._onCreateGPURenderPipeline(device, renderPipeline, renderPassFormat, vertices, indexFormat);
+
+        this._onMap(device, renderPipeline, renderPassFormat, vertices, indexFormat);
     }
-}
 
-export class GPURenderPipelineManager
-{
-    /**
-     * 从渲染管线描述、渲染通道描述以及完整的顶点属性数据映射获得完整的渲染管线描述以及顶点缓冲区数组。
-     *
-     * @param renderPipeline 渲染管线描述。
-     * @param renderPass 渲染通道描述。
-     * @param vertices 顶点属性数据映射。
-     * @returns 完整的渲染管线描述以及顶点缓冲区数组。
-     */
-    static getGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
+    private _onCreateGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
     {
-        const getGPURenderPipelineKey: GetGPURenderPipelineKey = [device, renderPipeline, renderPassFormat, vertices, indexFormat];
-        let result = this.getGPURenderPipelineMap.get(getGPURenderPipelineKey);
+        const r_this = reactive(this);
+        const r_renderPipeline = reactive(renderPipeline);
 
-        if (result) return result.value;
-
-        result = computed(() =>
+        this.effect(() =>
         {
             // 监听
-            const r_renderPipeline = reactive(renderPipeline);
-
             r_renderPipeline.label;
             r_renderPipeline.fragment;
             r_renderPipeline.primitive;
@@ -101,14 +89,29 @@ export class GPURenderPipelineManager
 
             const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
 
-            return gpuRenderPipeline;
+            r_this.gpuRenderPipeline = gpuRenderPipeline;
         });
-        this.getGPURenderPipelineMap.set(getGPURenderPipelineKey, result);
-
-        return result.value;
     }
 
-    private static readonly getGPURenderPipelineMap = new ChainMap<GetGPURenderPipelineKey, Computed<GPURenderPipeline>>();
+    private _onMap(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
+    {
+        device.renderPipelines ??= new ChainMap()
+        device.renderPipelines.set([renderPipeline, renderPassFormat, vertices, indexFormat], this);
+        this.destroyCall(() => { device.renderPipelines.delete([renderPipeline, renderPassFormat, vertices, indexFormat]); });
+    }
+
+    static getInstance(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
+    {
+        return device.renderPipelines?.get([renderPipeline, renderPassFormat, vertices, indexFormat]) || new WGPURenderPipeline(device, renderPipeline, renderPassFormat, vertices, indexFormat);
+    }
 }
 
 type GetGPURenderPipelineKey = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
+
+declare global
+{
+    interface GPUDevice
+    {
+        renderPipelines?: ChainMap<[renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat], WGPURenderPipeline>;
+    }
+}
