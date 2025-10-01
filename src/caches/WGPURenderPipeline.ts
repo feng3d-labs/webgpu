@@ -10,10 +10,35 @@ import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUPrimitiveState } from './WGPUPrimitiveState';
 import { WGPUVertexState } from './WGPUVertexState';
 
+/**
+ * WebGPU渲染管线封装类
+ *
+ * 该类负责将引擎中的RenderPipeline转换为WebGPU所需的GPURenderPipeline对象，
+ * 并提供缓存机制避免重复创建相同的渲染管线对象。
+ *
+ * 渲染管线定义了GPU如何执行图形渲染操作，包括：
+ * - 顶点着色器和片段着色器
+ * - 顶点数据布局
+ * - 图元装配方式
+ * - 深度和模板测试
+ * - 多重采样设置
+ */
 export class WGPURenderPipeline extends ReactiveObject
 {
+    /**
+     * 对应的WebGPU渲染管线对象
+     * 只读属性，当相关参数发生变化时会自动重新创建
+     */
     readonly gpuRenderPipeline: GPURenderPipeline;
 
+    /**
+     * 构造函数
+     * @param device GPU设备对象
+     * @param renderPipeline 原始渲染管线配置
+     * @param renderPassFormat 渲染通道格式
+     * @param vertices 顶点属性
+     * @param indexFormat 索引格式
+     */
     constructor(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
     {
         super();
@@ -22,6 +47,18 @@ export class WGPURenderPipeline extends ReactiveObject
         this._onMap(device, renderPipeline, renderPassFormat, vertices, indexFormat);
     }
 
+    /**
+     * 创建并监听渲染管线变化
+     *
+     * 当renderPipeline中的任何属性发生变化时，会重新创建GPURenderPipeline对象。
+     * 使用响应式系统监听变化，确保渲染管线始终与配置保持同步。
+     *
+     * @param device GPU设备对象
+     * @param renderPipeline 原始渲染管线配置
+     * @param renderPassFormat 渲染通道格式
+     * @param vertices 顶点属性
+     * @param indexFormat 索引格式
+     */
     private _onCreateGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
     {
         const r_this = reactive(this);
@@ -29,7 +66,7 @@ export class WGPURenderPipeline extends ReactiveObject
 
         this.effect(() =>
         {
-            // 监听
+            // 监听渲染管线属性变化
             r_renderPipeline.label;
             r_renderPipeline.fragment;
             r_renderPipeline.primitive;
@@ -44,25 +81,25 @@ export class WGPURenderPipeline extends ReactiveObject
             const { label, vertex, fragment, primitive, depthStencil, multisample } = renderPipeline;
             const { colorFormats, depthStencilFormat, sampleCount } = renderPassFormat;
 
-            //
+            // 创建管线布局
             const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
 
-            //
+            // 创建顶点状态
             const wgpuVertexState = WGPUVertexState.getInstance(device, vertex, vertices);
             reactive(wgpuVertexState).gpuVertexState;
             const gpuVertexState = wgpuVertexState.gpuVertexState;
 
-            //
+            // 创建片段状态
             const wgpuFragmentState = WGPUFragmentState.getInstance(device, fragment, colorFormats);
             reactive(wgpuFragmentState).gpuFragmentState;
             const gpuFragmentState = wgpuFragmentState.gpuFragmentState;
 
-            //
+            // 创建深度模板状态
             const wgpuDepthStencilState = WGPUDepthStencilState.getInstance(depthStencil, depthStencilFormat);
             reactive(wgpuDepthStencilState).gpuDepthStencilState;
             const gpuDepthStencilState = wgpuDepthStencilState.gpuDepthStencilState;
 
-            //
+            // 创建多重采样状态
             let gpuMultisampleState: GPUMultisampleState = undefined;
             if (sampleCount)
             {
@@ -71,12 +108,12 @@ export class WGPURenderPipeline extends ReactiveObject
                 gpuMultisampleState = wgpuMultisampleState.gpuMultisampleState;
             }
 
-            //
+            // 创建图元状态
             const wgpuPrimitiveState = WGPUPrimitiveState.getInstance(primitive, indexFormat);
             reactive(wgpuPrimitiveState).gpuPrimitiveState;
             const gpuPrimitiveState = wgpuPrimitiveState.gpuPrimitiveState;
 
-            //
+            // 构建渲染管线描述符
             const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
                 label,
                 layout,
@@ -87,12 +124,25 @@ export class WGPURenderPipeline extends ReactiveObject
                 multisample: gpuMultisampleState,
             };
 
+            // 创建WebGPU渲染管线
             const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
 
             r_this.gpuRenderPipeline = gpuRenderPipeline;
         });
     }
 
+    /**
+     * 建立渲染管线参数到WGPURenderPipeline实例的映射关系
+     *
+     * 使用ChainMap将参数组合与实例进行映射，避免重复创建相同的渲染管线。
+     * 当实例销毁时，从映射表中移除对应关系。
+     *
+     * @param device GPU设备对象
+     * @param renderPipeline 原始渲染管线配置
+     * @param renderPassFormat 渲染通道格式
+     * @param vertices 顶点属性
+     * @param indexFormat 索引格式
+     */
     private _onMap(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
     {
         device.renderPipelines ??= new ChainMap()
@@ -100,18 +150,35 @@ export class WGPURenderPipeline extends ReactiveObject
         this.destroyCall(() => { device.renderPipelines.delete([renderPipeline, renderPassFormat, vertices, indexFormat]); });
     }
 
+    /**
+     * 获取渲染管线实例
+     *
+     * 根据给定的参数获取对应的WGPURenderPipeline实例，如果不存在则创建新实例。
+     *
+     * @param device GPU设备对象
+     * @param renderPipeline 原始渲染管线配置
+     * @param renderPassFormat 渲染通道格式
+     * @param vertices 顶点属性
+     * @param indexFormat 索引格式
+     * @returns 对应的WGPURenderPipeline实例
+     */
     static getInstance(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
     {
         return device.renderPipelines?.get([renderPipeline, renderPassFormat, vertices, indexFormat]) || new WGPURenderPipeline(device, renderPipeline, renderPassFormat, vertices, indexFormat);
     }
 }
 
-type GetGPURenderPipelineKey = [device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat];
-
 declare global
 {
+    /**
+     * 扩展GPUDevice接口，添加渲染管线缓存映射表
+     */
     interface GPUDevice
     {
+        /**
+         * 渲染管线缓存映射表
+         * 使用ChainMap存储不同参数组合对应的WGPURenderPipeline实例
+         */
         renderPipelines?: ChainMap<[renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat], WGPURenderPipeline>;
     }
 }

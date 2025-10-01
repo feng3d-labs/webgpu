@@ -3,7 +3,7 @@ import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObje
 
 import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
 import { WGPUPipelineLayout } from './caches/WGPUPipelineLayout';
-import { WGPURenderPipeline } from './caches/GPURenderPipelineManager';
+import { WGPURenderPipeline } from './caches/WGPURenderPipeline';
 import { WGPUVertexBufferLayout } from './caches/WGPUVertexBufferLayout';
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
