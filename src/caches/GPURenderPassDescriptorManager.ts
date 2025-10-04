@@ -1,7 +1,6 @@
-import { anyEmitter } from '@feng3d/event';
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
-import { ChainMap, OcclusionQuery, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
-import { GPUQueue_submit } from '../eventnames';
+import { ChainMap, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
+import { WGPUQuerySet } from './WGPUQuerySet';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
 import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
 import { WGPUTimestampQuery } from './WGPUTimestampQuery';
@@ -56,7 +55,10 @@ export class GPURenderPassDescriptorManager
             renderPassDescriptor.colorAttachments = this.getGPURenderPassColorAttachments(device, descriptor);
             renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
 
-            this.setOcclusionQuerySet(device, renderPass, renderPassDescriptor);
+            const wgpuQuerySet = WGPUQuerySet.getInstance(device, renderPass);
+            reactive(wgpuQuerySet).gpuQuerySet;
+
+            renderPassDescriptor.occlusionQuerySet = wgpuQuerySet.gpuQuerySet;
         });
 
         effect(() =>
@@ -128,71 +130,6 @@ export class GPURenderPassDescriptorManager
         this.getIGPURenderPassColorAttachmentsMap.set(getGPURenderPassColorAttachmentsKey, result);
 
         return result.value;
-    }
-
-    private static setOcclusionQuerySet(device: GPUDevice, renderPass: RenderPass, renderPassDescriptor: GPURenderPassDescriptor)
-    {
-        const occlusionQuerys = renderPass.renderPassObjects?.filter((v) => v.__type__ === 'OcclusionQuery') as OcclusionQuery[];
-
-        if (!occlusionQuerys || occlusionQuerys.length === 0) return;
-        renderPassDescriptor.occlusionQuerySet = device.createQuerySet({ type: 'occlusion', count: occlusionQuerys.length });
-        const resolveBuf = device.createBuffer({
-            label: 'resolveBuffer',
-            // Query results are 64bit unsigned integers.
-            size: occlusionQuerys.length * BigUint64Array.BYTES_PER_ELEMENT,
-            usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
-        });
-        const resultBuf = device.createBuffer({
-            label: 'resultBuffer',
-            size: resolveBuf.size,
-            usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
-        });
-
-        //
-        renderPassDescriptor.occlusionQuerySet.resolve = (commandEncoder: GPUCommandEncoder) =>
-        {
-            if (occlusionQuerys.length === 0) return;
-
-            commandEncoder.resolveQuerySet(renderPassDescriptor.occlusionQuerySet, 0, occlusionQuerys.length, resolveBuf, 0);
-
-            if (resultBuf.mapState === 'unmapped')
-            {
-                commandEncoder.copyBufferToBuffer(resolveBuf, 0, resultBuf, 0, resultBuf.size);
-            }
-
-            const getOcclusionQueryResult = () =>
-            {
-                if (resultBuf.mapState === 'unmapped')
-                {
-                    resultBuf.mapAsync(GPUMapMode.READ).then(() =>
-                    {
-                        const bigUint64Array = new BigUint64Array(resultBuf.getMappedRange());
-
-                        const results = bigUint64Array.reduce((pv: number[], cv) =>
-                        {
-                            pv.push(Number(cv));
-
-                            return pv;
-                        }, []);
-
-                        resultBuf.unmap();
-
-                        occlusionQuerys.forEach((v, i) =>
-                        {
-                            v.onQuery?.(results[i]);
-                        });
-
-                        renderPass.onOcclusionQuery?.(occlusionQuerys, results);
-
-                        //
-                        anyEmitter.off(device.queue, GPUQueue_submit, getOcclusionQueryResult);
-                    });
-                }
-            };
-
-            // 监听提交WebGPU事件
-            anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
-        };
     }
 
     private static readonly getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, GPURenderPassDescriptor>();
