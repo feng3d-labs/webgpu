@@ -90,6 +90,10 @@ export class WGPUPipelineLayout
      */
     static getPipelineLayout(shader: { vertex: string, fragment: string } | { compute: string })
     {
+        // 生成着色器的唯一标识符，用于缓存查找
+        const shaderKey = getShaderKey(shader);
+        if (!WGPUPipelineLayout._pipelineLayoutMap.has(shaderKey)) return WGPUPipelineLayout._pipelineLayoutMap.get(shaderKey);
+
         let entryMap: GPUBindGroupLayoutEntryMap;
 
         // 根据着色器类型获取资源绑定信息
@@ -191,8 +195,12 @@ export class WGPUPipelineLayout
             gpuPipelineLayout.bindGroupLayouts = bindGroupLayouts;
         }
 
+        WGPUPipelineLayout._pipelineLayoutMap.set(shaderKey, gpuPipelineLayout);
+
         return gpuPipelineLayout;
     }
+
+    private static _pipelineLayoutMap = new Map<string, PipelineLayoutDescriptor>();
 
     /**
      * 绑定组布局描述符缓存映射表
@@ -224,19 +232,7 @@ export class WGPUPipelineLayout
     static getGPUPipelineLayout(device: GPUDevice, shader: { vertex: string, fragment: string } | { compute: string })
     {
         // 生成着色器的唯一标识符，用于缓存查找
-        let shaderKey = '';
-
-        if ('compute' in shader)
-        {
-            // 计算着色器模式：使用计算着色器代码作为键
-            shaderKey += shader.compute;
-        }
-        else
-        {
-            // 渲染管线模式：组合顶点和片段着色器代码
-            shaderKey += shader.vertex;
-            if (shader.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n${shader.fragment}`;
-        }
+        const shaderKey = getShaderKey(shader);
 
         // 检查设备缓存中是否已存在对应的管线布局
         let gpuPipelineLayout = device.pipelineLayouts?.[shaderKey];
@@ -267,6 +263,26 @@ export class WGPUPipelineLayout
 
         return gpuPipelineLayout;
     }
+}
+
+function getShaderKey(shader: { vertex: string, fragment: string } | { compute: string })
+{
+    // 生成着色器的唯一标识符，用于缓存查找
+    let shaderKey = '';
+
+    if ('compute' in shader)
+    {
+        // 计算着色器模式：使用计算着色器代码作为键
+        shaderKey += shader.compute;
+    }
+    else
+    {
+        // 渲染管线模式：组合顶点和片段着色器代码
+        shaderKey += shader.vertex;
+        if (shader.fragment) shaderKey += `\n// ------顶点与片段着色器分界--------\n${shader.fragment}`;
+    }
+
+    return shaderKey;
 }
 
 /**
