@@ -37,6 +37,7 @@ export default [
             parserOptions: {
                 ecmaVersion: 2021,    // 使用 ES2021 语法
                 sourceType: 'module', // 使用 ES 模块
+                tsconfigRootDir: import.meta.dirname, // 明确指定 tsconfig 根目录
             },
         },
         rules: {
