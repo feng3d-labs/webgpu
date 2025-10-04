@@ -1,6 +1,6 @@
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
 import { ChainMap, RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
-import { GPURenderPassDescriptorManager } from '../caches/GPURenderPassDescriptorManager';
+import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { WGPURenderPassFormat } from '../caches/WGPURenderPassFormat';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
@@ -108,7 +108,9 @@ export class RenderPassCommand
     {
         const { commands } = this;
 
-        const renderPassDescriptor = GPURenderPassDescriptorManager.getGPURenderPassDescriptor(context.device, this.renderPass);
+        const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(context.device, this.renderPass);
+        reactive(wgpuRenderPassDescriptor).gpuRenderPassDescriptor;
+        const renderPassDescriptor = wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
 
         const commandEncoder = context.gpuCommandEncoder;
 

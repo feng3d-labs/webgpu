@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { RenderPassDepthStencilAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
+import { RenderPassDescriptor, Texture } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
 import { WGPUTextureLike } from './WGPUTextureLike';
@@ -51,15 +51,15 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
      * @param depthStencilAttachment 深度模板附件配置对象，包含视图和操作参数
      * @param descriptor 渲染通道描述符，用于获取附件尺寸等参数
      */
-    constructor(device: GPUDevice, depthStencilAttachment: RenderPassDepthStencilAttachment, descriptor: RenderPassDescriptor)
+    constructor(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
         super();
 
         // 设置深度模板附件创建和更新逻辑
-        this._onCreateGPURenderPassDepthStencilAttachment(device, depthStencilAttachment, descriptor);
+        this._onCreateGPURenderPassDepthStencilAttachment(device, descriptor);
 
         // 将实例注册到设备缓存中
-        this._onMap(device, depthStencilAttachment);
+        this._onMap(device, descriptor);
     }
 
     /**
@@ -74,16 +74,15 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
      * @param depthStencilAttachment 深度模板附件配置对象
      * @param descriptor 渲染通道描述符
      */
-    private _onCreateGPURenderPassDepthStencilAttachment(device: GPUDevice, depthStencilAttachment: RenderPassDepthStencilAttachment, descriptor: RenderPassDescriptor)
+    private _onCreateGPURenderPassDepthStencilAttachment(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
         const r_this = reactive(this);
-        const r_depthStencilAttachment = reactive(depthStencilAttachment);
         const r_descriptor = reactive(descriptor);
 
         // 如果渲染通道描述符没有设置附件尺寸，自动从纹理中获取
         if (!descriptor.attachmentSize)
         {
-            const gpuTextureLike = WGPUTextureLike.getInstance(device, depthStencilAttachment.view.texture);
+            const gpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
             const gpuTexture = gpuTextureLike.gpuTexture;
 
             // 设置渲染通道的附件尺寸
@@ -113,6 +112,9 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
             // 先销毁旧的深度模板附件和自动生成的纹理
             destroy();
 
+            //
+            const r_depthStencilAttachment = r_descriptor.depthStencilAttachment;
+
             // 触发响应式依赖，监听深度模板附件的所有属性
             r_depthStencilAttachment.depthClearValue;
             r_depthStencilAttachment.depthLoadOp;
@@ -138,6 +140,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
 
             let textureView: GPUTextureView;
 
+            const depthStencilAttachment = descriptor.depthStencilAttachment;
             // 如果提供了深度纹理视图，使用现有的纹理视图
             if (depthStencilAttachment.view)
             {
@@ -199,16 +202,16 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
      * @param device GPU设备实例，用于存储缓存映射
      * @param depthStencilAttachment 深度模板附件配置对象，作为缓存的键
      */
-    private _onMap(device: GPUDevice, depthStencilAttachment: RenderPassDepthStencilAttachment)
+    private _onMap(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
         // 如果设备还没有深度模板附件缓存，则创建一个新的WeakMap
         device.depthStencilAttachments ??= new WeakMap();
 
         // 将当前实例与深度模板附件配置对象关联
-        device.depthStencilAttachments.set(depthStencilAttachment, this);
+        device.depthStencilAttachments.set(descriptor, this);
 
         // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { device.depthStencilAttachments?.delete(depthStencilAttachment); })
+        this.destroyCall(() => { device.depthStencilAttachments?.delete(descriptor); })
     }
 
     /**
@@ -222,10 +225,10 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
      * @param descriptor 渲染通道描述符
      * @returns 深度模板附件实例
      */
-    static getInstance(device: GPUDevice, depthStencilAttachment: RenderPassDepthStencilAttachment, descriptor: RenderPassDescriptor)
+    static getInstance(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return device.depthStencilAttachments?.get(depthStencilAttachment) || new WGPURenderPassDepthStencilAttachment(device, depthStencilAttachment, descriptor);
+        return device.depthStencilAttachments?.get(descriptor) || new WGPURenderPassDepthStencilAttachment(device, descriptor);
     }
 }
 
@@ -240,6 +243,6 @@ declare global
     interface GPUDevice
     {
         /** 深度模板附件实例缓存映射表 */
-        depthStencilAttachments: WeakMap<RenderPassDepthStencilAttachment, WGPURenderPassDepthStencilAttachment>;
+        depthStencilAttachments: WeakMap<RenderPassDescriptor, WGPURenderPassDepthStencilAttachment>;
     }
 }

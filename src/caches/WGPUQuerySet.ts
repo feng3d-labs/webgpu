@@ -75,8 +75,6 @@ export class WGPUQuerySet extends ReactiveObject
 
             if (!occlusionQuerys || occlusionQuerys.length === 0)
             {
-                r_this.gpuQuerySet = null;
-
                 return;
             }
 

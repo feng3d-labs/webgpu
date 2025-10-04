@@ -1,5 +1,6 @@
 import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
 import { ChainMap, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
+import { ReactiveObject } from '../ReactiveObject';
 import { WGPUQuerySet } from './WGPUQuerySet';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
 import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
@@ -13,78 +14,79 @@ declare global
     }
 }
 
-export class GPURenderPassDescriptorManager
+export class WGPURenderPassDescriptor extends ReactiveObject
 {
-    /**
-     * 获取GPU渲染通道描述。
-     *
-     * @param device GPU设备。
-     * @param descriptor 渲染通道描述。
-     * @returns GPU渲染通道描述。
-     */
-    static getGPURenderPassDescriptor(device: GPUDevice, renderPass: RenderPass): GPURenderPassDescriptor
+    readonly gpuRenderPassDescriptor: GPURenderPassDescriptor;
+
+    constructor(device: GPUDevice, renderPass: RenderPass)
     {
-        const descriptor: RenderPassDescriptor = renderPass.descriptor;
-        // 缓存
-        const getGPURenderPassDescriptorKey: GetGPURenderPassDescriptorKey = [device, descriptor];
-        let renderPassDescriptor = this.getGPURenderPassDescriptorMap.get(getGPURenderPassDescriptorKey);
+        super();
 
-        if (renderPassDescriptor) return renderPassDescriptor;
+        this._onCreate(device, renderPass)
+        this._onMap(device, renderPass);
+    }
 
-        const r_descriptor = reactive(descriptor);
+    private _onCreate(device: GPUDevice, renderPass: RenderPass)
+    {
+        const r_this = reactive(this);
+        const r_renderPass = reactive(renderPass);
 
-        // 避免重复创建，触发反应链。
-        renderPassDescriptor = {} as any;
         effect(() =>
         {
+            r_renderPass.descriptor;
+
+            const descriptor: RenderPassDescriptor = renderPass.descriptor;
+            const r_descriptor = reactive(descriptor);
+
             // 监听
             r_descriptor.label;
             r_descriptor.maxDrawCount;
             r_descriptor.colorAttachments;
             r_descriptor.depthStencilAttachment;
-
-            //
-            const wGPURenderPassDepthStencilAttachment = WGPURenderPassDepthStencilAttachment.getInstance(device, descriptor.depthStencilAttachment, descriptor);
-            reactive(wGPURenderPassDepthStencilAttachment).gpuRenderPassDepthStencilAttachment;
-
-            const depthStencilAttachment = wGPURenderPassDepthStencilAttachment.gpuRenderPassDepthStencilAttachment;
-
-            // 执行
-            renderPassDescriptor.label = descriptor.label;
-            renderPassDescriptor.maxDrawCount = descriptor.maxDrawCount;
-            renderPassDescriptor.colorAttachments = this.getGPURenderPassColorAttachments(device, descriptor);
-            renderPassDescriptor.depthStencilAttachment = depthStencilAttachment;
-
-            const wgpuQuerySet = WGPUQuerySet.getInstance(device, renderPass);
-            reactive(wgpuQuerySet).gpuQuerySet;
-
-            renderPassDescriptor.occlusionQuerySet = wgpuQuerySet.gpuQuerySet;
-        });
-
-        effect(() =>
-        {
             r_descriptor.timestampQuery;
 
+            //
+            const label = descriptor.label;
+            const maxDrawCount = descriptor.maxDrawCount;
+
+            //
+            const colorAttachments = WGPURenderPassDescriptor.getGPURenderPassColorAttachments(device, descriptor);
+
+            //
+            const wGPURenderPassDepthStencilAttachment = WGPURenderPassDepthStencilAttachment.getInstance(device, descriptor);
+            reactive(wGPURenderPassDepthStencilAttachment).gpuRenderPassDepthStencilAttachment;
+            const depthStencilAttachment = wGPURenderPassDepthStencilAttachment.gpuRenderPassDepthStencilAttachment;
+
+            //
+            const wgpuQuerySet = WGPUQuerySet.getInstance(device, renderPass);
+            reactive(wgpuQuerySet).gpuQuerySet;
+            const occlusionQuerySet = wgpuQuerySet.gpuQuerySet;
+
+            //
             const timestampQuery = descriptor.timestampQuery;
-
             const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, timestampQuery);
+            reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
+            const timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
 
-            if (wGPUTimestampQuery)
-            {
-                reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
-                const timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
-
-                renderPassDescriptor.timestampWrites = timestampWrites;
-            }
-            else
-            {
-                delete renderPassDescriptor.timestampWrites;
-            }
+            //
+            r_this.gpuRenderPassDescriptor = {
+                label: label,
+                maxDrawCount: maxDrawCount,
+                colorAttachments: colorAttachments,
+                depthStencilAttachment: depthStencilAttachment,
+                occlusionQuerySet: occlusionQuerySet,
+                timestampWrites: timestampWrites,
+            };
         });
 
-        this.getGPURenderPassDescriptorMap.set(getGPURenderPassDescriptorKey, renderPassDescriptor);
+        this.destroyCall(() => { r_this.gpuRenderPassDescriptor = null; });
+    }
 
-        return renderPassDescriptor;
+    private _onMap(device: GPUDevice, renderPass: RenderPass)
+    {
+        device.renderPassDescriptors ??= new WeakMap();
+        device.renderPassDescriptors.set(renderPass, this);
+        this.destroyCall(() => { device.renderPassDescriptors.delete(renderPass); });
     }
 
     /**
@@ -132,8 +134,20 @@ export class GPURenderPassDescriptorManager
         return result.value;
     }
 
-    private static readonly getGPURenderPassDescriptorMap = new ChainMap<GetGPURenderPassDescriptorKey, GPURenderPassDescriptor>();
     private static readonly getIGPURenderPassColorAttachmentsMap = new ChainMap<GetGPURenderPassColorAttachmentsKey, Computed<GPURenderPassColorAttachment[]>>();
+
+    static getInstance(device: GPUDevice, renderPass: RenderPass)
+    {
+        return device.renderPassDescriptors?.get(renderPass) || new WGPURenderPassDescriptor(device, renderPass);
+    }
+}
+
+declare global
+{
+    interface GPUDevice
+    {
+        renderPassDescriptors: WeakMap<RenderPass, WGPURenderPassDescriptor>;
+    }
 }
 
 type GetGPURenderPassDescriptorKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
