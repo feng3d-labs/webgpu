@@ -1,5 +1,5 @@
-import { computed, Computed, effect, reactive } from '@feng3d/reactivity';
-import { ChainMap, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
+import { effect, reactive } from '@feng3d/reactivity';
+import { RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUQuerySet } from './WGPUQuerySet';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
@@ -41,7 +41,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             // 监听
             r_descriptor.label;
             r_descriptor.maxDrawCount;
-            r_descriptor.colorAttachments;
+            r_descriptor.colorAttachments?.concat();
             r_descriptor.depthStencilAttachment;
             r_descriptor.timestampQuery;
 
@@ -50,7 +50,18 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             const maxDrawCount = descriptor.maxDrawCount;
 
             //
-            const colorAttachments = WGPURenderPassDescriptor.getGPURenderPassColorAttachments(device, descriptor);
+            const gpuColorAttachments: GPURenderPassColorAttachment[] = descriptor.colorAttachments.reduce((pre, v) =>
+            {
+                if (!v) return pre;
+
+                const wgpuRenderPassColorAttachment = WGPURenderPassColorAttachment.getInstance(device, v, descriptor);
+                reactive(wgpuRenderPassColorAttachment).gpuRenderPassColorAttachment;
+                const attachment = wgpuRenderPassColorAttachment.gpuRenderPassColorAttachment;
+
+                pre.push(attachment);
+
+                return pre;
+            }, [])
 
             //
             const wGPURenderPassDepthStencilAttachment = WGPURenderPassDepthStencilAttachment.getInstance(device, descriptor);
@@ -72,7 +83,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             r_this.gpuRenderPassDescriptor = {
                 label: label,
                 maxDrawCount: maxDrawCount,
-                colorAttachments: colorAttachments,
+                colorAttachments: gpuColorAttachments,
                 depthStencilAttachment: depthStencilAttachment,
                 occlusionQuerySet: occlusionQuerySet,
                 timestampWrites: timestampWrites,
@@ -89,53 +100,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         this.destroyCall(() => { device.renderPassDescriptors.delete(renderPass); });
     }
 
-    /**
-     * 获取颜色附件完整描述列表。
-     *
-     * @param colorAttachments 颜色附件描述列表。
-     * @param sampleCount 多重采样次数。
-     * @returns 颜色附件完整描述列表。
-     */
-    private static getGPURenderPassColorAttachments(device: GPUDevice, descriptor: RenderPassDescriptor)
-    {
-        const getGPURenderPassColorAttachmentsKey: GetGPURenderPassColorAttachmentsKey = [device, descriptor];
-        let result = this.getIGPURenderPassColorAttachmentsMap.get(getGPURenderPassColorAttachmentsKey);
-
-        if (result) return result.value;
-
-        const gpuColorAttachments: GPURenderPassColorAttachment[] = [];
-
-        result = computed(() =>
-        {
-            // 监听
-            const r_descriptor = reactive(descriptor);
-
-            r_descriptor.colorAttachments.forEach((v) => v);
-
-            // 执行
-            const { colorAttachments } = descriptor;
-
-            gpuColorAttachments.length = 0;
-            colorAttachments.forEach((v) =>
-            {
-                if (!v) return;
-
-                const wGPURenderPassColorAttachment = WGPURenderPassColorAttachment.getInstance(device, v, descriptor);
-
-                const attachment = wGPURenderPassColorAttachment.gpuRenderPassColorAttachment;
-
-                gpuColorAttachments.push(attachment);
-            });
-
-            return gpuColorAttachments;
-        });
-        this.getIGPURenderPassColorAttachmentsMap.set(getGPURenderPassColorAttachmentsKey, result);
-
-        return result.value;
-    }
-
-    private static readonly getIGPURenderPassColorAttachmentsMap = new ChainMap<GetGPURenderPassColorAttachmentsKey, Computed<GPURenderPassColorAttachment[]>>();
-
     static getInstance(device: GPUDevice, renderPass: RenderPass)
     {
         return device.renderPassDescriptors?.get(renderPass) || new WGPURenderPassDescriptor(device, renderPass);
@@ -149,6 +113,3 @@ declare global
         renderPassDescriptors: WeakMap<RenderPass, WGPURenderPassDescriptor>;
     }
 }
-
-type GetGPURenderPassDescriptorKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
-type GetGPURenderPassColorAttachmentsKey = [device: GPUDevice, descriptor: RenderPassDescriptor];
