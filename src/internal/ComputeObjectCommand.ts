@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { GPUBindGroupManager } from '../caches/GPUBindGroupManager';
+import { WGPUBindGroup } from '../caches/WGPUBindGroup';
 import { WGPUComputePipeline } from '../caches/WGPUComputePipeline';
 import { WGPUPipelineLayout } from '../caches/WGPUPipelineLayout';
 import { ComputeObject } from '../data/ComputeObject';
@@ -28,7 +28,10 @@ export class ComputeObjectCommand
 
         layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
         {
-            const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
+            const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
+            reactive(wgpuBindGroup).gpuBindGroup;
+
+            const gpuBindGroup = wgpuBindGroup.gpuBindGroup;
 
             this.setBindGroup.push([group, gpuBindGroup]);
         });

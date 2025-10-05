@@ -3,26 +3,33 @@ import { BindingResources, Buffer, BufferBinding, BufferBindingInfo, ChainMap, S
 import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
 import { VideoTexture } from '../data/VideoTexture';
+import { ReactiveObject } from '../ReactiveObject';
 import { ExternalSampledTextureType } from '../types/TextureType';
-import { BindGroupLayoutDescriptor } from './WGPUPipelineLayout';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { WGPUBuffer } from './WGPUBuffer';
+import { BindGroupLayoutDescriptor } from './WGPUPipelineLayout';
 import { WGPUSampler } from './WGPUSampler';
 import { WGPUTextureView } from './WGPUTextureView';
 
-export class GPUBindGroupManager
+export class WGPUBindGroup extends ReactiveObject
 {
-    static getGPUBindGroup(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
+    readonly gpuBindGroup: GPUBindGroup
+
+    constructor(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
     {
-        const getGPUBindGroupKey: GetGPUBindGroupKey = [bindGroupLayout, bindingResources];
-        let result = GPUBindGroupManager.getGPUBindGroupMap.get(getGPUBindGroupKey);
+        super();
 
-        if (result) return result.value;
+        this._onCreate(device, bindGroupLayout, bindingResources);
+        this._onMap(device, bindGroupLayout, bindingResources);
+    }
 
-        let gBindGroup: GPUBindGroup;
+    private _onCreate(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
+    {
+        const r_this = reactive(this);
+
         const numberBufferBinding: { [name: string]: number[] } = {};
 
-        result = computed(() =>
+        this.effect(() =>
         {
             const entries = bindGroupLayout.entries.map((v) =>
             {
@@ -51,19 +58,23 @@ export class GPUBindGroupManager
                     }
                     const bufferBinding = resource as BufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
 
-                    entry.resource = GPUBindGroupManager.getGPUBufferBinding(device, bufferBinding, type);
+                    entry.resource = WGPUBindGroup.getGPUBufferBinding(device, bufferBinding, type);
                 }
                 else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
                 {
-                    entry.resource = GPUBindGroupManager.getGPUExternalTexture(device, bindingResources[name] as VideoTexture);
+                    entry.resource = WGPUBindGroup.getGPUExternalTexture(device, bindingResources[name] as VideoTexture);
                 }
                 else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)
                 {
-                    entry.resource = WGPUTextureView.getInstance(device, bindingResources[name] as TextureView).textureView;
+                    const wgpuTextureView = WGPUTextureView.getInstance(device, bindingResources[name] as TextureView);
+                    reactive(wgpuTextureView).textureView;
+                    entry.resource = wgpuTextureView.textureView;
                 }
                 else
                 {
-                    entry.resource = WGPUSampler.getInstance(device, bindingResources[name] as Sampler).gpuSampler;
+                    const wgpuSampler = WGPUSampler.getInstance(device, bindingResources[name] as Sampler);
+                    reactive(wgpuSampler).gpuSampler;
+                    entry.resource = wgpuSampler.gpuSampler;
                 }
 
                 return entry;
@@ -72,27 +83,37 @@ export class GPUBindGroupManager
             //
             const resources = entries.map((v) => v.resource);
             const gpuBindGroupKey: GPUBindGroupKey = [bindGroupLayout, ...resources];
-            const cache = GPUBindGroupManager.gpuBindGroupMap.get(gpuBindGroupKey);
+            let gBindGroup = WGPUBindGroup.gpuBindGroupMap.get(gpuBindGroupKey);
 
-            if (cache) return cache;
+            if (!gBindGroup)
+            {
+                const gpuBindGroupLayout = WGPUBindGroupLayout.getGPUBindGroupLayout(device, bindGroupLayout);
 
-            const gpuBindGroupLayout = WGPUBindGroupLayout.getGPUBindGroupLayout(device, bindGroupLayout);
+                gBindGroup = device.createBindGroup({ layout: gpuBindGroupLayout, entries });
 
-            gBindGroup = device.createBindGroup({ layout: gpuBindGroupLayout, entries });
+                WGPUBindGroup.gpuBindGroupMap.set(gpuBindGroupKey, gBindGroup);
+            }
 
-            GPUBindGroupManager.gpuBindGroupMap.set(gpuBindGroupKey, gBindGroup);
-
-            return gBindGroup;
+            r_this.gpuBindGroup = gBindGroup;
         });
-        GPUBindGroupManager.getGPUBindGroupMap.set(getGPUBindGroupKey, result);
+    }
 
-        return result.value;
+    private _onMap(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
+    {
+        device.bindGroups ??= new ChainMap();
+        device.bindGroups.set([bindGroupLayout, bindingResources], this);
+        this.destroyCall(() => { device.bindGroups.delete([bindGroupLayout, bindingResources]); });
+    }
+
+    static getInstance(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
+    {
+        return device.bindGroups?.get([bindGroupLayout, bindingResources]) || new WGPUBindGroup(device, bindGroupLayout, bindingResources);
     }
 
     private static getGPUBufferBinding(device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo)
     {
         const getGPUBindingResourceKey: GetGPUBindingResourceKey = [device, bufferBinding, type];
-        let result = GPUBindGroupManager.getGPUBindingResourceMap.get(getGPUBindingResourceKey);
+        let result = WGPUBindGroup.getGPUBindingResourceMap.get(getGPUBindingResourceKey);
 
         if (result) return result.value;
 
@@ -104,7 +125,7 @@ export class GPUBindGroupManager
             r_bufferBinding?.bufferView;
 
             // 更新缓冲区绑定的数据。
-            GPUBindGroupManager.updateBufferBinding(bufferBinding, type);
+            WGPUBindGroup.updateBufferBinding(bufferBinding, type);
             const bufferView = bufferBinding.bufferView;
             //
             const gbuffer = Buffer.fromArrayBuffer(bufferView.buffer);
@@ -122,15 +143,15 @@ export class GPUBindGroupManager
                 size,
             };
             const gpuBufferBindingKey: GPUBufferBindingKey = [buffer, offset, size];
-            const cache = GPUBindGroupManager.gpuBufferBindingMap.get(gpuBufferBindingKey);
+            const cache = WGPUBindGroup.gpuBufferBindingMap.get(gpuBufferBindingKey);
 
             if (cache) return cache;
-            GPUBindGroupManager.gpuBufferBindingMap.set(gpuBufferBindingKey, gpuBufferBinding);
+            WGPUBindGroup.gpuBufferBindingMap.set(gpuBufferBindingKey, gpuBufferBinding);
 
             return gpuBufferBinding;
         });
 
-        GPUBindGroupManager.getGPUBindingResourceMap.set(getGPUBindingResourceKey, result);
+        WGPUBindGroup.getGPUBindingResourceMap.set(getGPUBindingResourceKey, result);
 
         return result.value;
     }
@@ -138,7 +159,7 @@ export class GPUBindGroupManager
     private static getGPUExternalTexture(device: GPUDevice, videoTexture: VideoTexture)
     {
         const getGPUExternalTextureKey: GetGPUExternalTextureKey = [device, videoTexture];
-        let result = GPUBindGroupManager.getGPUExternalTextureMap.get(getGPUExternalTextureKey);
+        let result = WGPUBindGroup.getGPUExternalTextureMap.get(getGPUExternalTextureKey);
 
         if (result) return result.value;
 
@@ -152,7 +173,7 @@ export class GPUBindGroupManager
 
             return resource;
         });
-        GPUBindGroupManager.getGPUExternalTextureMap.set(getGPUExternalTextureKey, result);
+        WGPUBindGroup.getGPUExternalTextureMap.set(getGPUExternalTextureKey, result);
 
         return result.value;
     }
@@ -166,7 +187,7 @@ export class GPUBindGroupManager
      */
     private static updateBufferBinding(uniformData: BufferBinding, type: TypeInfo)
     {
-        const bufferBindingInfo = GPUBindGroupManager.getBufferBindingInfo(type);
+        const bufferBindingInfo = WGPUBindGroup.getBufferBindingInfo(type);
 
         const size = bufferBindingInfo.size;
         // 是否存在默认值。
@@ -237,12 +258,12 @@ export class GPUBindGroupManager
      */
     private static getBufferBindingInfo(type: TypeInfo)
     {
-        let result = GPUBindGroupManager.bufferBindingInfoMap.get(type);
+        let result = WGPUBindGroup.bufferBindingInfoMap.get(type);
 
         if (result) return result;
-        result = GPUBindGroupManager._getBufferBindingInfo(type);
+        result = WGPUBindGroup._getBufferBindingInfo(type);
 
-        GPUBindGroupManager.bufferBindingInfoMap.set(type, result);
+        WGPUBindGroup.bufferBindingInfoMap.set(type, result);
 
         return result;
     }
@@ -266,7 +287,7 @@ export class GPUBindGroupManager
             {
                 const memberInfo = structInfo.members[i];
 
-                GPUBindGroupManager._getBufferBindingInfo(memberInfo.type, paths.concat(memberInfo.name), offset + memberInfo.offset, bufferBindingInfo);
+                WGPUBindGroup._getBufferBindingInfo(memberInfo.type, paths.concat(memberInfo.name), offset + memberInfo.offset, bufferBindingInfo);
             }
         }
         else if (type.isArray)
@@ -275,7 +296,7 @@ export class GPUBindGroupManager
 
             for (let i = 0; i < arrayInfo.count; i++)
             {
-                GPUBindGroupManager._getBufferBindingInfo(arrayInfo.format, paths.concat(`${i}`), offset + i * arrayInfo.format.size, bufferBindingInfo);
+                WGPUBindGroup._getBufferBindingInfo(arrayInfo.format, paths.concat(`${i}`), offset + i * arrayInfo.format.size, bufferBindingInfo);
             }
         }
         else if (type.isTemplate)
@@ -287,7 +308,7 @@ export class GPUBindGroupManager
                 paths: paths.concat(),
                 offset,
                 size: templateInfo.size,
-                Cls: GPUBindGroupManager.getTemplateDataCls(templateFormatName as any),
+                Cls: WGPUBindGroup.getTemplateDataCls(templateFormatName as any),
             });
         }
         else
@@ -296,7 +317,7 @@ export class GPUBindGroupManager
                 paths: paths.concat(),
                 offset,
                 size: type.size,
-                Cls: GPUBindGroupManager.getBaseTypeDataCls(type.name),
+                Cls: WGPUBindGroup.getBaseTypeDataCls(type.name),
             });
         }
 
@@ -305,9 +326,9 @@ export class GPUBindGroupManager
 
     private static getBaseTypeDataCls(baseTypeName: string)
     {
-        const dataCls = GPUBindGroupManager.baseTypeDataCls[baseTypeName];
+        const dataCls = WGPUBindGroup.baseTypeDataCls[baseTypeName];
 
-        console.assert(!!dataCls, `baseTypeName必须为以下值 ${Object.keys(GPUBindGroupManager.baseTypeDataCls)}`);
+        console.assert(!!dataCls, `baseTypeName必须为以下值 ${Object.keys(WGPUBindGroup.baseTypeDataCls)}`);
 
         return dataCls;
     }
@@ -354,9 +375,9 @@ export class GPUBindGroupManager
 
     private static getTemplateDataCls(templateFormatName: 'i32' | 'u32' | 'f32' | 'f16')
     {
-        const dataCls = GPUBindGroupManager.templateFormatDataCls[templateFormatName];
+        const dataCls = WGPUBindGroup.templateFormatDataCls[templateFormatName];
 
-        console.assert(!!dataCls, `templateFormatName必须为以下值 ${Object.keys(GPUBindGroupManager.templateFormatDataCls)}`);
+        console.assert(!!dataCls, `templateFormatName必须为以下值 ${Object.keys(WGPUBindGroup.templateFormatDataCls)}`);
 
         return dataCls;
     }
@@ -382,3 +403,11 @@ type GPUBufferBindingKey = [buffer: GPUBuffer, offset: number, size: number];
 type GetGPUBindingResourceKey = [device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo];
 type GetGPUExternalTextureKey = [device: GPUDevice, videoTexture: VideoTexture];
 type DataCls = Float32ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Int16ArrayConstructor;
+
+declare global
+{
+    interface GPUDevice
+    {
+        bindGroups: ChainMap<[bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources], WGPUBindGroup>;
+    }
+}

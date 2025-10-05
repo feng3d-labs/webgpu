@@ -1,12 +1,12 @@
 import { computed, Computed, reactive, UnReadonly } from '@feng3d/reactivity';
 import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
 
-import { GPUBindGroupManager } from './caches/GPUBindGroupManager';
+import { WGPUBindGroup } from './caches/WGPUBindGroup';
+import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUPipelineLayout } from './caches/WGPUPipelineLayout';
 import { WGPURenderPipeline } from './caches/WGPURenderPipeline';
-import { WGPUVertexBufferLayout } from './caches/WGPUVertexBufferLayout';
-import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
+import { WGPUVertexBufferLayout } from './caches/WGPUVertexBufferLayout';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
 import { RenderBundle } from './data/RenderBundle';
@@ -395,7 +395,10 @@ export class WebGPU
             renderObjectCache.setBindGroup.length = layout.bindGroupLayouts.length;
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
             {
-                const gpuBindGroup: GPUBindGroup = GPUBindGroupManager.getGPUBindGroup(device, bindGroupLayout, bindingResources);
+                const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
+                reactive(wgpuBindGroup).gpuBindGroup;
+
+                const gpuBindGroup = wgpuBindGroup.gpuBindGroup;
 
                 renderObjectCache.setBindGroup[group] = ['setBindGroup', group, gpuBindGroup];
             });
