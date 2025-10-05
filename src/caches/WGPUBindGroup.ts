@@ -1,16 +1,10 @@
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, BufferBinding, ChainMap, Sampler, TextureView } from '@feng3d/render-api';
-import { ResourceType } from 'wgsl_reflect';
+import { BindingResources, ChainMap } from '@feng3d/render-api';
 
-import { VideoTexture } from '../data/VideoTexture';
 import { ReactiveObject } from '../ReactiveObject';
-import { ExternalSampledTextureType } from '../types/TextureType';
+import { WGPUBindGroupEntry } from './WGPUBindGroupEntry';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
-import { WGPUBufferBinding } from './WGPUBufferBinding';
-import { WGPUExternalTexture } from './WGPUExternalTexture';
 import { BindGroupLayoutDescriptor } from './WGPUPipelineLayout';
-import { WGPUSampler } from './WGPUSampler';
-import { WGPUTextureView } from './WGPUTextureView';
 
 export class WGPUBindGroup extends ReactiveObject
 {
@@ -27,61 +21,15 @@ export class WGPUBindGroup extends ReactiveObject
     private _onCreate(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
     {
         const r_this = reactive(this);
-        const r_bindingResources = reactive(bindingResources);
-
-        const numberBufferBinding: { [name: string]: number[] } = {};
 
         this.effect(() =>
         {
             const entries = bindGroupLayout.entries.map((v) =>
             {
-                const { name, type, resourceType, binding } = v.variableInfo;
+                const wgpuBindGroupEntry = WGPUBindGroupEntry.getInstance(device, v, bindingResources);
+                reactive(wgpuBindGroupEntry).gpuBindGroupEntry;
 
-                // 监听
-                r_bindingResources[name];
-
-                // 执行
-                const entry: GPUBindGroupEntry = { binding, resource: null };
-
-                //
-                if (resourceType === ResourceType.Uniform || resourceType === ResourceType.Storage)
-                {
-                    // 执行
-                    let resource = bindingResources[name];
-
-                    // 当值为number时，将其视为一个数组。
-                    if (typeof resource === 'number')
-                    {
-                        numberBufferBinding[name] ??= [];
-                        numberBufferBinding[name][0] = resource;
-                        resource = numberBufferBinding[name];
-                    }
-                    const bufferBinding = resource as BufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
-
-                    const wgpuBufferBinding = WGPUBufferBinding.getInstance(device, bufferBinding, type);
-                    reactive(wgpuBufferBinding).gpuBufferBinding;
-                    entry.resource = wgpuBufferBinding.gpuBufferBinding;
-                }
-                else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
-                {
-                    const wgpuExternalTexture = WGPUExternalTexture.getInstance(device, bindingResources[name] as VideoTexture);
-                    reactive(wgpuExternalTexture).gpuExternalTexture;
-                    entry.resource = wgpuExternalTexture.gpuExternalTexture;
-                }
-                else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)
-                {
-                    const wgpuTextureView = WGPUTextureView.getInstance(device, bindingResources[name] as TextureView);
-                    reactive(wgpuTextureView).textureView;
-                    entry.resource = wgpuTextureView.textureView;
-                }
-                else
-                {
-                    const wgpuSampler = WGPUSampler.getInstance(device, bindingResources[name] as Sampler);
-                    reactive(wgpuSampler).gpuSampler;
-                    entry.resource = wgpuSampler.gpuSampler;
-                }
-
-                return entry;
+                return wgpuBindGroupEntry.gpuBindGroupEntry;
             });
 
             //
