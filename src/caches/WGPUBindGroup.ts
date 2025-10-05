@@ -7,6 +7,7 @@ import { ReactiveObject } from '../ReactiveObject';
 import { ExternalSampledTextureType } from '../types/TextureType';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { WGPUBuffer } from './WGPUBuffer';
+import { WGPUExternalTexture } from './WGPUExternalTexture';
 import { BindGroupLayoutDescriptor } from './WGPUPipelineLayout';
 import { WGPUSampler } from './WGPUSampler';
 import { WGPUTextureView } from './WGPUTextureView';
@@ -62,7 +63,9 @@ export class WGPUBindGroup extends ReactiveObject
                 }
                 else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
                 {
-                    entry.resource = WGPUBindGroup.getGPUExternalTexture(device, bindingResources[name] as VideoTexture);
+                    const wgpuExternalTexture = WGPUExternalTexture.getInstance(device, bindingResources[name] as VideoTexture);
+                    reactive(wgpuExternalTexture).gpuExternalTexture;
+                    entry.resource = wgpuExternalTexture.gpuExternalTexture;
                 }
                 else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)
                 {
@@ -152,28 +155,6 @@ export class WGPUBindGroup extends ReactiveObject
         });
 
         WGPUBindGroup.getGPUBindingResourceMap.set(getGPUBindingResourceKey, result);
-
-        return result.value;
-    }
-
-    private static getGPUExternalTexture(device: GPUDevice, videoTexture: VideoTexture)
-    {
-        const getGPUExternalTextureKey: GetGPUExternalTextureKey = [device, videoTexture];
-        let result = WGPUBindGroup.getGPUExternalTextureMap.get(getGPUExternalTextureKey);
-
-        if (result) return result.value;
-
-        result = computed(() =>
-        {
-            // 在提交前确保收集到正确的外部纹理。
-            reactive(device.queue).preSubmit;
-
-            //
-            const resource = device.importExternalTexture(videoTexture);
-
-            return resource;
-        });
-        WGPUBindGroup.getGPUExternalTextureMap.set(getGPUExternalTextureKey, result);
 
         return result.value;
     }
