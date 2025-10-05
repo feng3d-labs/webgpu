@@ -1,4 +1,4 @@
-import { computed, Computed, effect, reactive, UnReadonly } from '@feng3d/reactivity';
+import { Computed, effect, reactive, UnReadonly } from '@feng3d/reactivity';
 import { BindingResources, Buffer, BufferBinding, BufferBindingInfo, ChainMap, Sampler, TextureView } from '@feng3d/render-api';
 import { ArrayInfo, ResourceType, StructInfo, TemplateInfo, TypeInfo } from 'wgsl_reflect';
 
@@ -6,7 +6,7 @@ import { VideoTexture } from '../data/VideoTexture';
 import { ReactiveObject } from '../ReactiveObject';
 import { ExternalSampledTextureType } from '../types/TextureType';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
-import { WGPUBuffer } from './WGPUBuffer';
+import { WGPUBufferBinding } from './WGPUBufferBinding';
 import { WGPUExternalTexture } from './WGPUExternalTexture';
 import { BindGroupLayoutDescriptor } from './WGPUPipelineLayout';
 import { WGPUSampler } from './WGPUSampler';
@@ -27,6 +27,7 @@ export class WGPUBindGroup extends ReactiveObject
     private _onCreate(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
     {
         const r_this = reactive(this);
+        const r_bindingResources = reactive(bindingResources);
 
         const numberBufferBinding: { [name: string]: number[] } = {};
 
@@ -37,8 +38,6 @@ export class WGPUBindGroup extends ReactiveObject
                 const { name, type, resourceType, binding } = v.variableInfo;
 
                 // 监听
-                const r_bindingResources = reactive(bindingResources);
-
                 r_bindingResources[name];
 
                 // 执行
@@ -59,7 +58,9 @@ export class WGPUBindGroup extends ReactiveObject
                     }
                     const bufferBinding = resource as BufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
 
-                    entry.resource = WGPUBindGroup.getGPUBufferBinding(device, bufferBinding, type);
+                    const wgpuBufferBinding = WGPUBufferBinding.getInstance(device, bufferBinding, type);
+                    reactive(wgpuBufferBinding).gpuBufferBinding;
+                    entry.resource = wgpuBufferBinding.gpuBufferBinding;
                 }
                 else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
                 {
@@ -113,52 +114,6 @@ export class WGPUBindGroup extends ReactiveObject
         return device.bindGroups?.get([bindGroupLayout, bindingResources]) || new WGPUBindGroup(device, bindGroupLayout, bindingResources);
     }
 
-    private static getGPUBufferBinding(device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo)
-    {
-        const getGPUBindingResourceKey: GetGPUBindingResourceKey = [device, bufferBinding, type];
-        let result = WGPUBindGroup.getGPUBindingResourceMap.get(getGPUBindingResourceKey);
-
-        if (result) return result.value;
-
-        result = computed(() =>
-        {
-            // 监听
-            const r_bufferBinding = reactive(bufferBinding);
-
-            r_bufferBinding?.bufferView;
-
-            // 更新缓冲区绑定的数据。
-            WGPUBindGroup.updateBufferBinding(bufferBinding, type);
-            const bufferView = bufferBinding.bufferView;
-            //
-            const gbuffer = Buffer.fromArrayBuffer(bufferView.buffer);
-
-            (gbuffer as any).label = gbuffer.label || (`BufferBinding ${type.name}`);
-            //
-            const buffer = WGPUBuffer.getInstance(device, gbuffer).gpuBuffer;
-
-            const offset = bufferView.byteOffset;
-            const size = bufferView.byteLength;
-
-            const gpuBufferBinding: GPUBufferBinding = {
-                buffer,
-                offset,
-                size,
-            };
-            const gpuBufferBindingKey: GPUBufferBindingKey = [buffer, offset, size];
-            const cache = WGPUBindGroup.gpuBufferBindingMap.get(gpuBufferBindingKey);
-
-            if (cache) return cache;
-            WGPUBindGroup.gpuBufferBindingMap.set(gpuBufferBindingKey, gpuBufferBinding);
-
-            return gpuBufferBinding;
-        });
-
-        WGPUBindGroup.getGPUBindingResourceMap.set(getGPUBindingResourceKey, result);
-
-        return result.value;
-    }
-
     /**
      * 初始化缓冲区绑定。
      *
@@ -166,7 +121,7 @@ export class WGPUBindGroup extends ReactiveObject
      * @param uniformData
      * @returns
      */
-    private static updateBufferBinding(uniformData: BufferBinding, type: TypeInfo)
+    static updateBufferBinding(uniformData: BufferBinding, type: TypeInfo)
     {
         const bufferBindingInfo = WGPUBindGroup.getBufferBindingInfo(type);
 
