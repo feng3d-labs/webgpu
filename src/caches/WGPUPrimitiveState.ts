@@ -52,9 +52,9 @@ export class WGPUPrimitiveState extends ReactiveObject
 
     static getInstance(primitive: PrimitiveState, indexFormat: GPUIndexFormat)
     {
-        return this.cacheMap.get(primitive).get(indexFormat) || new WGPUPrimitiveState(primitive, indexFormat);
+        return this.cacheMap.get(primitive)?.get(indexFormat) || new WGPUPrimitiveState(primitive, indexFormat);
     }
 
-    private static readonly cacheMap = new WeakMap<PrimitiveState, Map<GPUIndexFormat, WGPUPrimitiveState>>();
+    private static readonly cacheMap = new Map<PrimitiveState, Map<GPUIndexFormat, WGPUPrimitiveState>>();
     private static readonly defaultGPUPrimitiveState: GPUPrimitiveState = { topology: 'triangle-list', cullMode: 'none', frontFace: 'ccw' };
 }

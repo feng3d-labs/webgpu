@@ -56,19 +56,54 @@ export class WGPURenderPassFormat extends ReactiveObject
             r_descriptor.sampleCount;
 
             // 计算颜色附件的纹理格式
-            const colorAttachmentTextureFormats = descriptor.colorAttachments.map((v) => WGPUTextureLike.getInstance(device, v.view?.texture)?.gpuTexture.format);
+            const colorAttachmentTextureFormats: GPUTextureFormat[] = [];
+
+            const attachmentSize = { ...descriptor.attachmentSize };
+
+            descriptor.colorAttachments.forEach((v) =>
+            {
+                const wgpuTextureLike = WGPUTextureLike.getInstance(device, v.view?.texture);
+                // reactive(wgpuTextureLike).gpuTexture;
+                const gpuTexture = wgpuTextureLike.gpuTexture;
+
+                colorAttachmentTextureFormats.push(gpuTexture.format);
+
+                if (attachmentSize.width === undefined)
+                {
+                    attachmentSize.width = gpuTexture.width;
+                }
+
+                if (attachmentSize.height === undefined)
+                {
+                    attachmentSize.height = gpuTexture.height;
+                }
+            });
 
             // 计算深度模板附件的纹理格式
             let depthStencilAttachmentTextureFormat: GPUTextureFormat;
 
             if (descriptor.depthStencilAttachment)
             {
-                depthStencilAttachmentTextureFormat = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view?.texture)?.gpuTexture.format || 'depth24plus';
+                const wgpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
+                // reactive(wgpuTextureLike).gpuTexture;
+                const gpuTexture = wgpuTextureLike.gpuTexture;
+
+                //
+                depthStencilAttachmentTextureFormat = gpuTexture.format;
+
+                if (attachmentSize.width === undefined)
+                {
+                    attachmentSize.width = gpuTexture.width;
+                }
+                if (attachmentSize.height === undefined)
+                {
+                    attachmentSize.height = gpuTexture.height;
+                }
             }
 
             // 构建渲染通道格式对象
             const renderPassFormat: RenderPassFormat = {
-                attachmentSize: descriptor.attachmentSize,
+                attachmentSize: attachmentSize,
                 colorFormats: colorAttachmentTextureFormats,
                 depthStencilFormat: depthStencilAttachmentTextureFormat,
                 sampleCount: descriptor.sampleCount,

@@ -92,7 +92,7 @@ export class WGPUPipelineLayout
     {
         // 生成着色器的唯一标识符，用于缓存查找
         const shaderKey = getShaderKey(shader);
-        if (!WGPUPipelineLayout._pipelineLayoutMap.has(shaderKey)) return WGPUPipelineLayout._pipelineLayoutMap.get(shaderKey);
+        if (WGPUPipelineLayout._pipelineLayoutMap.has(shaderKey)) return WGPUPipelineLayout._pipelineLayoutMap.get(shaderKey);
 
         let entryMap: GPUBindGroupLayoutEntryMap;
 

@@ -96,8 +96,8 @@ export class WGPURenderPipeline extends ReactiveObject
 
             // 创建深度模板状态
             const wgpuDepthStencilState = WGPUDepthStencilState.getInstance(depthStencil, depthStencilFormat);
-            reactive(wgpuDepthStencilState).gpuDepthStencilState;
-            const gpuDepthStencilState = wgpuDepthStencilState.gpuDepthStencilState;
+            wgpuDepthStencilState && reactive(wgpuDepthStencilState).gpuDepthStencilState;
+            const gpuDepthStencilState = wgpuDepthStencilState?.gpuDepthStencilState;
 
             // 创建多重采样状态
             let gpuMultisampleState: GPUMultisampleState = undefined;

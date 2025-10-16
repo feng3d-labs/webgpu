@@ -203,7 +203,7 @@ export class WGPUCanvasContext extends ReactiveObject
             gpuCanvasContext.configure(gpuCanvasConfiguration);
 
             // 递增版本号，表示配置已更新
-            r_this.version++;
+            r_this.version = this.version + 1;
         });
     }
 
@@ -288,10 +288,16 @@ export class WGPUCanvasContext extends ReactiveObject
             if (!this.canvas) return;
 
             // 同步配置中的尺寸到画布元素
-            this.canvas.width = r_context.width;
-            this.canvas.height = r_context.height;
+            if (r_context.width)
+            {
+                this.canvas.width = context.width;
+            }
+            if (r_context.height)
+            {
+                this.canvas.height = context.height;
+            }
 
-            r_this.version++;
+            r_this.version = this.version + 1;
         });
     }
 
