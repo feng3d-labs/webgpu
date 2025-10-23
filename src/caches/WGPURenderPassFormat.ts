@@ -82,7 +82,7 @@ export class WGPURenderPassFormat extends ReactiveObject
             // 计算深度模板附件的纹理格式
             let depthStencilAttachmentTextureFormat: GPUTextureFormat;
 
-            if (descriptor.depthStencilAttachment)
+            if (descriptor.depthStencilAttachment?.view?.texture)
             {
                 const wgpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
                 // reactive(wgpuTextureLike).gpuTexture;
