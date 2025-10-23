@@ -46,16 +46,8 @@ export class WGPUCanvasTexture extends ReactiveObject
         const r_this = reactive(this);
         const r_canvasTexture = reactive(canvasTexture);
 
-        const destroyGPUTexture = () =>
-        {
-            this.gpuTexture?.destroy();
-            r_this.gpuTexture = null;
-        }
-
         this.effect(() =>
         {
-            destroyGPUTexture();
-
             reactive(device.queue).preSubmit;
 
             r_canvasTexture.context;
@@ -75,10 +67,15 @@ export class WGPUCanvasTexture extends ReactiveObject
             // 设置纹理标签
             gpuTexture.label = 'GPU画布纹理';
 
+            this.gpuTexture?.destroy();
             r_this.gpuTexture = gpuTexture;
         });
 
-        this.destroyCall(destroyGPUTexture);
+        this.destroyCall(() =>
+        {
+            this.gpuTexture?.destroy();
+            r_this.gpuTexture = null;
+        });
     }
 
     /**

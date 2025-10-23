@@ -53,7 +53,7 @@ export class WGPUMultisampleState extends ReactiveObject
         return this.cacheMap.get(multisampleState) || new WGPUMultisampleState(multisampleState);
     }
 
-    static readonly cacheMap = new WeakMap<MultisampleState, WGPUMultisampleState>();
+    static readonly cacheMap = new Map<MultisampleState, WGPUMultisampleState>();
     static readonly defaultGPUMultisampleState: GPUMultisampleState = { count: 4, mask: 0xFFFFFFFF, alphaToCoverageEnabled: false };
 }
 

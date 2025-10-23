@@ -82,7 +82,7 @@ export class WGPUVertexBufferLayout extends ReactiveObject
     private _onMap(vertexState: VertexState, vertices: VertexAttributes)
     {
         // 如果顶点状态还没有对应的二级缓存，则创建一个新的WeakMap
-        caches.set(vertexState, caches.get(vertexState) || new WeakMap<VertexAttributes, WGPUVertexBufferLayout>());
+        caches.set(vertexState, caches.get(vertexState) || new Map<VertexAttributes, WGPUVertexBufferLayout>());
 
         // 将当前实例与顶点属性配置对象关联
         caches.get(vertexState).set(vertices, this);
@@ -245,4 +245,4 @@ export class WGPUVertexBufferLayout extends ReactiveObject
  * 用于缓存已创建的顶点缓冲区布局实例，避免重复创建相同的布局。
  * 使用嵌套WeakMap结构，第一级键为顶点状态配置对象，第二级键为顶点属性配置对象。
  */
-const caches = new WeakMap<VertexState, WeakMap<VertexAttributes, WGPUVertexBufferLayout>>();
+const caches = new WeakMap<VertexState, Map<VertexAttributes, WGPUVertexBufferLayout>>();

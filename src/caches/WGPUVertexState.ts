@@ -97,11 +97,6 @@ export class WGPUVertexState extends ReactiveObject
                 entryPoint = WGPUShaderReflect.getWGSLReflectInfo(code).entry.vertex[0].name;
             }
 
-            // 获取顶点缓冲区布局配置
-            const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(vertexState, vertices);
-            reactive(wgpuVertexBufferLayout).vertexBufferLayouts;
-            const vertexBufferLayouts = wgpuVertexBufferLayout.vertexBufferLayouts;
-
             //
             const module = WGPUShaderModule.getGPUShaderModule(device, code);
 
@@ -109,9 +104,16 @@ export class WGPUVertexState extends ReactiveObject
             const gpuVertexState: GPUVertexState = {
                 module: module,
                 entryPoint: entryPoint,
-                buffers: vertexBufferLayouts,
                 constants: constants,
             };
+
+            if (vertices)
+            {
+                // 获取顶点缓冲区布局配置
+                const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(vertexState, vertices);
+                reactive(wgpuVertexBufferLayout).vertexBufferLayouts;
+                gpuVertexState.buffers = wgpuVertexBufferLayout.vertexBufferLayouts;
+            }
 
             // 更新顶点状态引用
             r_this.gpuVertexState = gpuVertexState;
@@ -134,13 +136,13 @@ export class WGPUVertexState extends ReactiveObject
     private _onMap(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
     {
         // 如果设备还没有顶点状态缓存，则创建一个新的嵌套WeakMap
-        device.vertexStates ??= new WeakMap<VertexState, WeakMap<VertexAttributes, WGPUVertexState>>();
+        device.vertexStates ??= new WeakMap<VertexState, Map<VertexAttributes, WGPUVertexState>>();
 
         // 获取或创建顶点状态对应的二级缓存
         let vertexStates = device.vertexStates.get(vertexState);
         if (!vertexStates)
         {
-            vertexStates = new WeakMap<VertexAttributes, WGPUVertexState>();
+            vertexStates = new Map<VertexAttributes, WGPUVertexState>();
             device.vertexStates.set(vertexState, vertexStates);
         }
 
@@ -181,6 +183,6 @@ declare global
     interface GPUDevice
     {
         /** 顶点状态实例缓存映射表，嵌套WeakMap结构 */
-        vertexStates: WeakMap<VertexState, WeakMap<VertexAttributes, WGPUVertexState>>;
+        vertexStates: WeakMap<VertexState, Map<VertexAttributes, WGPUVertexState>>;
     }
 }
