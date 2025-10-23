@@ -95,23 +95,9 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
         // 自动生成的深度纹理实例，用于管理深度纹理的生命周期
         let autoCreateDepthTexture: WGPUTexture;
 
-        // 定义销毁函数，用于清理自动生成的深度纹理和深度模板附件
-        const destroy = () =>
-        {
-            // 销毁自动生成的深度纹理
-            autoCreateDepthTexture?.destroy();
-            autoCreateDepthTexture = null;
-
-            // 清空深度模板附件引用
-            r_this.gpuRenderPassDepthStencilAttachment = null;
-        }
-
         // 监听深度模板附件配置变化，自动重新创建深度模板附件
         this.effect(() =>
         {
-            // 先销毁旧的深度模板附件和自动生成的纹理
-            destroy();
-
             //
             const r_depthStencilAttachment = r_descriptor.depthStencilAttachment;
             if (!r_depthStencilAttachment)
@@ -119,38 +105,15 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
                 r_this.gpuRenderPassDepthStencilAttachment = null;
                 return;
             }
-
-            // 触发响应式依赖，监听深度模板附件的所有属性
-            r_depthStencilAttachment.depthClearValue;
-            r_depthStencilAttachment.depthLoadOp;
-            r_depthStencilAttachment.depthStoreOp;
-            r_depthStencilAttachment.depthReadOnly;
-            r_depthStencilAttachment.stencilClearValue;
-            r_depthStencilAttachment.stencilLoadOp;
-            r_depthStencilAttachment.stencilStoreOp;
-            r_depthStencilAttachment.stencilReadOnly;
-            r_depthStencilAttachment.view;
-
-            // 获取深度模板附件配置
-            const {
-                depthClearValue,
-                depthLoadOp,
-                depthStoreOp,
-                depthReadOnly,
-                stencilClearValue,
-                stencilLoadOp,
-                stencilStoreOp,
-                stencilReadOnly,
-            } = r_depthStencilAttachment;
+            const depthStencilAttachment = descriptor.depthStencilAttachment;
 
             let textureView: GPUTextureView;
 
-            const depthStencilAttachment = descriptor.depthStencilAttachment;
             // 如果提供了深度纹理视图，使用现有的纹理视图
-            if (depthStencilAttachment.view)
+            if (r_depthStencilAttachment.view)
             {
                 // 获取深度纹理视图实例
-                const wGPUTextureView = WGPUTextureView.getInstance(device, depthStencilAttachment.view);
+                const wGPUTextureView = WGPUTextureView.getInstance(device, descriptor.depthStencilAttachment.view);
                 reactive(wGPUTextureView).textureView;
 
                 textureView = wGPUTextureView.textureView;
@@ -171,6 +134,8 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
                     },
                 };
 
+                // 删除旧的深度纹理
+                autoCreateDepthTexture?.destroy();
                 // 创建自动生成的深度纹理实例，直接管理其生命周期
                 autoCreateDepthTexture = WGPUTexture.getInstance(device, autoDepthTexture);
                 // 直接从GPU纹理创建视图，避免额外的纹理视图缓存
@@ -180,22 +145,56 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
             // 创建深度模板附件配置
             const gpuRenderPassDepthStencilAttachment: GPURenderPassDepthStencilAttachment = {
                 view: textureView,
-                depthClearValue: depthClearValue ?? 1,
-                depthLoadOp,
-                depthStoreOp,
-                depthReadOnly,
-                stencilClearValue: stencilClearValue ?? 0,
-                stencilLoadOp,
-                stencilStoreOp,
-                stencilReadOnly,
             };
+
+            gpuRenderPassDepthStencilAttachment.depthClearValue = r_depthStencilAttachment.depthClearValue ?? 1;
+
+            if (r_depthStencilAttachment.depthLoadOp)
+            {
+                gpuRenderPassDepthStencilAttachment.depthLoadOp = depthStencilAttachment.depthLoadOp;
+            }
+
+            if (r_depthStencilAttachment.depthStoreOp)
+            {
+                gpuRenderPassDepthStencilAttachment.depthStoreOp = depthStencilAttachment.depthStoreOp;
+            }
+
+            if (r_depthStencilAttachment.depthReadOnly)
+            {
+                gpuRenderPassDepthStencilAttachment.depthReadOnly = depthStencilAttachment.depthReadOnly;
+            }
+
+            gpuRenderPassDepthStencilAttachment.stencilClearValue = r_depthStencilAttachment.stencilClearValue ?? 0;
+
+            if (r_depthStencilAttachment.stencilLoadOp)
+            {
+                gpuRenderPassDepthStencilAttachment.stencilLoadOp = depthStencilAttachment.stencilLoadOp;
+            }
+
+            if (r_depthStencilAttachment.stencilStoreOp)
+            {
+                gpuRenderPassDepthStencilAttachment.stencilStoreOp = depthStencilAttachment.stencilStoreOp;
+            }
+
+            if (r_depthStencilAttachment.stencilReadOnly)
+            {
+                gpuRenderPassDepthStencilAttachment.stencilReadOnly = depthStencilAttachment.stencilReadOnly;
+            }
 
             // 更新深度模板附件引用
             r_this.gpuRenderPassDepthStencilAttachment = gpuRenderPassDepthStencilAttachment;
         });
 
         // 注册销毁回调，确保在对象销毁时清理自动生成的深度纹理
-        this.destroyCall(destroy);
+        this.destroyCall(() =>
+        {
+            // 销毁自动生成的深度纹理
+            autoCreateDepthTexture?.destroy();
+            autoCreateDepthTexture = null;
+
+            // 清空深度模板附件引用
+            r_this.gpuRenderPassDepthStencilAttachment = null;
+        });
     }
 
     /**
