@@ -65,7 +65,7 @@ export class WGPUCanvasTexture extends ReactiveObject
             const gpuTexture = gpuCanvasContext.getCurrentTexture();
 
             // 设置纹理标签
-            gpuTexture.label = 'GPU画布纹理';
+            gpuTexture.label = `GPU画布纹理-${id++}`;
 
             this.gpuTexture?.destroy();
             r_this.gpuTexture = gpuTexture;
@@ -98,3 +98,5 @@ declare global
         canvasTextures: WeakMap<CanvasTexture, WGPUCanvasTexture>;
     }
 }
+
+let id = 0;

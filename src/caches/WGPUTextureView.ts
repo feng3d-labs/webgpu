@@ -71,38 +71,36 @@ export class WGPUTextureView extends ReactiveObject
         // 监听纹理视图配置变化，自动重新创建纹理视图
         this.effect(() =>
         {
-            // 触发响应式依赖，监听所有纹理视图参数
-            r_view.label;
-            r_view.texture;
-            r_view.baseMipLevel;
-            r_view.baseArrayLayer;
-            r_view.format;
-            r_view.dimension;
-            r_view.usage;
-            r_view.aspect;
-            r_view.mipLevelCount;
-            r_view.arrayLayerCount;
-
             // 获取底层纹理的WebGPU纹理实例
-            const texture = view.texture;
-            const wgpuTexture = WGPUTextureLike.getInstance(device, texture);
-
-            // 监听底层纹理变化，确保纹理视图与纹理保持同步
+            r_view.texture
+            const wgpuTexture = WGPUTextureLike.getInstance(device, view.texture);
             reactive(wgpuTexture).gpuTexture;
-
-            // 获取实际的GPU纹理对象
             const gpuTexture = wgpuTexture.gpuTexture;
 
             // 生成纹理视图标签，如果没有指定则使用纹理标签
-            const label = view.label ?? `${gpuTexture.label}视图`;
+            const label = r_view.label ?? `${gpuTexture.label}视图`;
             // 如果没有指定维度，则从纹理描述符中获取
-            const dimension = view.dimension ?? (view.texture as Texture).descriptor?.dimension;
+            const dimension = r_view.dimension ?? (r_view.texture as Texture).descriptor?.dimension;
+
+            const baseMipLevel = r_view.baseMipLevel;
+            const baseArrayLayer = r_view.baseArrayLayer;
+            const format = r_view.format;
+            const usage = r_view.usage;
+            const aspect = r_view.aspect;
+            const mipLevelCount = r_view.mipLevelCount;
+            const arrayLayerCount = r_view.arrayLayerCount;
 
             // 创建纹理视图描述符
             const descriptor: GPUTextureViewDescriptor = {
-                ...view,
                 label,
                 dimension,
+                baseMipLevel,
+                baseArrayLayer,
+                format,
+                usage,
+                aspect,
+                mipLevelCount,
+                arrayLayerCount,
             }
 
             // 创建新的纹理视图
