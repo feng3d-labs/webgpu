@@ -114,6 +114,11 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
 
             //
             const r_depthStencilAttachment = r_descriptor.depthStencilAttachment;
+            if (!r_depthStencilAttachment)
+            {
+                r_this.gpuRenderPassDepthStencilAttachment = null;
+                return;
+            }
 
             // 触发响应式依赖，监听深度模板附件的所有属性
             r_depthStencilAttachment.depthClearValue;

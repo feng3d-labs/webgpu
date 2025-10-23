@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { RenderPassColorAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
+import { defaultRenderPassColorAttachment, RenderPassColorAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
 import { WGPUTextureLike } from './WGPUTextureLike';
@@ -113,34 +113,38 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
             // 触发响应式依赖，监听颜色附件的所有属性
             r_colorAttachment.view;
             r_colorAttachment.storeOp;
-            r_colorAttachment.depthSlice;
             r_colorAttachment.clearValue?.concat();
             r_colorAttachment.loadOp;
 
-            // 获取颜色附件配置
-            const { view, depthSlice, clearValue, loadOp, storeOp } = r_colorAttachment;
-
             // 获取纹理视图实例
-            const wGPUTextureView = WGPUTextureView.getInstance(device, view);
+            const wGPUTextureView = WGPUTextureView.getInstance(device, colorAttachment.view);
             reactive(wGPUTextureView).textureView;
 
             const textureView = wGPUTextureView.textureView;
 
+            const clearValue = colorAttachment.clearValue ?? defaultRenderPassColorAttachment.clearValue;
+            const loadOp = colorAttachment.loadOp ?? defaultRenderPassColorAttachment.loadOp;
+            const storeOp = colorAttachment.storeOp ?? defaultRenderPassColorAttachment.storeOp;
+
             // 创建基础颜色附件配置
             const gpuRenderPassColorAttachment: GPURenderPassColorAttachment = {
                 view: textureView,
-                depthSlice,
                 clearValue,
                 loadOp,
                 storeOp,
             };
+
+            if (r_colorAttachment.depthSlice)
+            {
+                gpuRenderPassColorAttachment.depthSlice = colorAttachment.depthSlice;
+            }
 
             // 检查是否需要多重采样
             const sampleCount = r_descriptor.sampleCount;
             if (sampleCount)
             {
                 // 获取原始纹理信息
-                const wgpuTexture = WGPUTextureLike.getInstance(device, view.texture);
+                const wgpuTexture = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
                 reactive(wgpuTexture).gpuTexture;
 
                 const gpuTexture = wgpuTexture.gpuTexture;

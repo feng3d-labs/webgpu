@@ -40,14 +40,10 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
             // 监听
             r_descriptor.label;
-            r_descriptor.maxDrawCount;
             r_descriptor.colorAttachments?.concat();
-            r_descriptor.depthStencilAttachment;
-            r_descriptor.timestampQuery;
 
             //
             const label = descriptor.label;
-            const maxDrawCount = descriptor.maxDrawCount;
 
             //
             const gpuColorAttachments: GPURenderPassColorAttachment[] = descriptor.colorAttachments.reduce((pre, v) =>
@@ -64,30 +60,46 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             }, [])
 
             //
-            const wGPURenderPassDepthStencilAttachment = WGPURenderPassDepthStencilAttachment.getInstance(device, descriptor);
-            reactive(wGPURenderPassDepthStencilAttachment).gpuRenderPassDepthStencilAttachment;
-            const depthStencilAttachment = wGPURenderPassDepthStencilAttachment.gpuRenderPassDepthStencilAttachment;
+            const gpuRenderPassDescriptor: GPURenderPassDescriptor = {
+                label: label,
+                colorAttachments: gpuColorAttachments,
+            };
 
             //
             const wgpuQuerySet = WGPUQuerySet.getInstance(device, renderPass);
             reactive(wgpuQuerySet).gpuQuerySet;
-            const occlusionQuerySet = wgpuQuerySet.gpuQuerySet;
+            if (wgpuQuerySet.gpuQuerySet)
+            {
+                gpuRenderPassDescriptor.occlusionQuerySet = wgpuQuerySet.gpuQuerySet;
+            }
+
+            r_descriptor.timestampQuery;
+            if (descriptor.timestampQuery)
+            {
+                const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, descriptor.timestampQuery);
+                wGPUTimestampQuery && reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
+                gpuRenderPassDescriptor.timestampWrites = wGPUTimestampQuery?.gpuPassTimestampWrites;
+            }
 
             //
-            const timestampQuery = descriptor.timestampQuery;
-            const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, timestampQuery);
-            reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
-            const timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
+            r_descriptor.depthStencilAttachment;
+            if (descriptor.depthStencilAttachment)
+            {
+                //
+                const wGPURenderPassDepthStencilAttachment = WGPURenderPassDepthStencilAttachment.getInstance(device, descriptor);
+                reactive(wGPURenderPassDepthStencilAttachment).gpuRenderPassDepthStencilAttachment;
+                gpuRenderPassDescriptor.depthStencilAttachment = wGPURenderPassDepthStencilAttachment.gpuRenderPassDepthStencilAttachment;
+            }
 
             //
-            r_this.gpuRenderPassDescriptor = {
-                label: label,
-                maxDrawCount: maxDrawCount,
-                colorAttachments: gpuColorAttachments,
-                depthStencilAttachment: depthStencilAttachment,
-                occlusionQuerySet: occlusionQuerySet,
-                timestampWrites: timestampWrites,
-            };
+            r_descriptor.maxDrawCount;
+            if (r_descriptor.maxDrawCount !== undefined)
+            {
+                gpuRenderPassDescriptor.maxDrawCount = descriptor.maxDrawCount;
+            }
+
+            //
+            r_this.gpuRenderPassDescriptor = gpuRenderPassDescriptor;
         });
 
         this.destroyCall(() => { r_this.gpuRenderPassDescriptor = null; });
