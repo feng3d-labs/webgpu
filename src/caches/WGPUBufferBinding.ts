@@ -31,7 +31,7 @@ export class WGPUBufferBinding extends ReactiveObject
             updateBufferBinding(bufferBinding, type);
             const bufferView = bufferBinding.bufferView;
             //
-            const gbuffer = Buffer.fromArrayBuffer(bufferView.buffer);
+            const gbuffer = Buffer.getBuffer(bufferView.buffer);
 
             (gbuffer as any).label = gbuffer.label || (`BufferBinding ${type.name}`);
             //
@@ -91,7 +91,7 @@ function updateBufferBinding(uniformData: BufferBinding, type: TypeInfo)
         (uniformData as UnReadonly<BufferBinding>).bufferView = new Uint8Array(size);
     }
 
-    const buffer = Buffer.fromArrayBuffer(uniformData.bufferView.buffer);
+    const buffer = Buffer.getBuffer(uniformData.bufferView.buffer);
     const offset = uniformData.bufferView.byteOffset;
 
     for (let i = 0; i < bufferBindingInfo.items.length; i++)

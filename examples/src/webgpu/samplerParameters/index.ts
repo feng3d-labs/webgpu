@@ -1,6 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureSource } from '@feng3d/render-api';
-import { WGPUBuffer, WebGPU } from '@feng3d/webgpu';
+import { BindingResources, Buffer, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureSource } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
@@ -51,13 +51,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             Number(config.highlightFlange),
         ]);
 
-        if (WGPUBuffer.getBuffer(bufConfig).writeBuffers)
+        if (Buffer.getBuffer(bufConfig).writeBuffers)
         {
-            WGPUBuffer.getBuffer(bufConfig).writeBuffers.push({ bufferOffset: 64, data });
+            Buffer.getBuffer(bufConfig).writeBuffers.push({ bufferOffset: 64, data });
         }
         else
         {
-            reactive(WGPUBuffer.getBuffer(bufConfig)).writeBuffers = [{ bufferOffset: 64, data }];
+            reactive(Buffer.getBuffer(bufConfig)).writeBuffers = [{ bufferOffset: 64, data }];
         }
     };
 
@@ -275,7 +275,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     );
     const bufConfig = new Uint8Array(128);
 
-    reactive(WGPUBuffer.getBuffer(bufConfig)).writeBuffers = [{ data: viewProj }];
+    reactive(Buffer.getBuffer(bufConfig)).writeBuffers = [{ data: viewProj }];
 
     const bufMatrices = kMatrices;
 

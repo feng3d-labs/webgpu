@@ -1,6 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources } from '@feng3d/render-api';
-import { WGPUBuffer } from '@feng3d/webgpu';
+import { BindingResources, Buffer } from '@feng3d/render-api';
 
 import { mat4, vec3 } from 'wgpu-matrix';
 import commonWGSL from './common.wgsl';
@@ -14,8 +13,8 @@ export default class Common
     readonly wgsl = commonWGSL;
     /** The common uniform buffer bind group and layout */
     readonly uniforms: {
-    bindGroup: BindingResources;
-  };
+        bindGroup: BindingResources;
+    };
 
     private readonly uniformBuffer: Uint8Array;
 
@@ -24,9 +23,9 @@ export default class Common
     constructor(quads: Float32Array)
     {
         this.uniformBuffer = new Uint8Array(0 //
-      + 4 * 16 // mvp
-      + 4 * 16 // inv_mvp
-      + 4 * 4);
+            + 4 * 16 // mvp
+            + 4 * 16 // inv_mvp
+            + 4 * 4);
 
         const bindGroup: BindingResources = {
             common_uniforms: {
@@ -79,7 +78,7 @@ export default class Common
         uniformDataU32[33] = 0xffffffff * Math.random();
         uniformDataU32[34] = 0xffffffff * Math.random();
 
-        reactive(WGPUBuffer.getBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
+        reactive(Buffer.getBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
 
         this.frame++;
     }

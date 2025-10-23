@@ -435,7 +435,7 @@ export class WebGPU
 
                 // 执行
                 const { data, offset, size } = vertexBuffer;
-                const buffer = Buffer.fromArrayBuffer(data.buffer);
+                const buffer = Buffer.getBuffer(data);
 
                 (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
 
@@ -466,7 +466,7 @@ export class WebGPU
 
             const device = this.device;
 
-            const buffer = Buffer.fromArrayBuffer(indices.buffer);
+            const buffer = Buffer.getBuffer(indices.buffer);
 
             (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
 

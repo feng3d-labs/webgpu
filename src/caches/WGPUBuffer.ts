@@ -128,7 +128,7 @@ export class WGPUBuffer extends ReactiveObject
                 const dataOffset = writeBuffer.dataOffset ?? 0;      // 数据偏移量
                 const size = writeBuffer.size;                       // 写入大小
 
-                let arrayBuffer: ArrayBuffer;
+                let arrayBuffer: ArrayBuffer | SharedArrayBuffer;
                 let dataOffsetByte: number;
                 let sizeByte: number;
 

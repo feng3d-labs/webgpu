@@ -1,6 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
-import { BufferBinding, CanvasContext, PassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/render-api';
-import { WGPUBuffer, WebGPU } from '@feng3d/webgpu';
+import { Buffer, BufferBinding, CanvasContext, PassEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4, vec3 } from 'wgpu-matrix';
 
@@ -307,8 +307,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // initialize the heads buffer
             passEncoders.push({
                 __type__: 'CopyBufferToBuffer',
-                source: WGPUBuffer.getBuffer(headsInitBuffer),
-                destination: WGPUBuffer.getBuffer(headsBuffer.bufferView),
+                source: Buffer.getBuffer(headsInitBuffer),
+                destination: Buffer.getBuffer(headsBuffer.bufferView),
             });
 
             const scissorX = 0;

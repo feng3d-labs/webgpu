@@ -1,4 +1,4 @@
-import { reactive } from '@feng3d/reactivity';
+import { effect, reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit } from '@feng3d/render-api';
 import { ComputePass, ComputePipeline, WGPUBuffer, TimestampQuery, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
@@ -103,35 +103,40 @@ async function init(
     const maxInvocationsX = webgpu.device.limits.maxComputeWorkgroupSizeX;
 
     // Handle timestamp query stuff
-    const querySet: TimestampQuery = {
-        onQuery: (elapsedNs) =>
+    const querySet: TimestampQuery = {};
+
+    effect(() =>
+    {
+        reactive(querySet).result;
+
+        const result = querySet.result;
+        if (result === undefined) return;
+
+        // Calculate new step, sort, and average sort times
+        const newStepTime = result.elapsedNs / 1000000;
+        const newSortTime = settings.sortTime + newStepTime;
+
+        // Apply calculated times to settings object as both number and 'ms' appended string
+        settings.stepTime = newStepTime;
+        settings.sortTime = newSortTime;
+        stepTimeController.setValue(`${newStepTime.toFixed(5)}ms`);
+        sortTimeController.setValue(`${newSortTime.toFixed(5)}ms`);
+        // Calculate new average sort upon end of final execution step of a full bitonic sort.
+        if (highestBlockHeight === settings['Total Elements'] * 2)
         {
-            // Calculate new step, sort, and average sort times
-            const newStepTime = elapsedNs / 1000000;
-            const newSortTime = settings.sortTime + newStepTime;
+            // Lock off access to this larger if block..not best architected solution but eh
+            highestBlockHeight *= 2;
+            settings.configToCompleteSwapsMap[settings.configKey].time
+                += newSortTime;
+            const averageSortTime
+                = settings.configToCompleteSwapsMap[settings.configKey].time
+                / settings.configToCompleteSwapsMap[settings.configKey].sorts;
 
-            // Apply calculated times to settings object as both number and 'ms' appended string
-            settings.stepTime = newStepTime;
-            settings.sortTime = newSortTime;
-            stepTimeController.setValue(`${newStepTime.toFixed(5)}ms`);
-            sortTimeController.setValue(`${newSortTime.toFixed(5)}ms`);
-            // Calculate new average sort upon end of final execution step of a full bitonic sort.
-            if (highestBlockHeight === settings['Total Elements'] * 2)
-            {
-                // Lock off access to this larger if block..not best architected solution but eh
-                highestBlockHeight *= 2;
-                settings.configToCompleteSwapsMap[settings.configKey].time
-                    += newSortTime;
-                const averageSortTime
-                    = settings.configToCompleteSwapsMap[settings.configKey].time
-                    / settings.configToCompleteSwapsMap[settings.configKey].sorts;
-
-                averageSortTimeController.setValue(
-                    `${averageSortTime.toFixed(5)}ms`,
-                );
-            }
-        },
-    };
+            averageSortTimeController.setValue(
+                `${averageSortTime.toFixed(5)}ms`,
+            );
+        }
+    });
 
     const totalElementOptions = [];
     const maxElements = maxInvocationsX * 32;
@@ -726,7 +731,7 @@ async function init(
     {
         // Write elements buffer
 
-        let iGPUBuffer = WGPUBuffer.getBuffer(elementsInputBuffer.bufferView);
+        let iGPUBuffer = Buffer.getBuffer(elementsInputBuffer.bufferView);
         let writeBuffers = iGPUBuffer.writeBuffers || [];
 
         writeBuffers.push({ data: elements });
@@ -741,7 +746,7 @@ async function init(
             settings['Next Swap Span'],
         ]);
 
-        iGPUBuffer = WGPUBuffer.getBuffer(computeUniformsBuffer.bufferView);
+        iGPUBuffer = Buffer.getBuffer(computeUniformsBuffer.bufferView);
         writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: dims });
         writeBuffers.push({ bufferOffset: 8, data: stepDetails });
@@ -822,7 +827,7 @@ async function init(
             commandEncoder.passEncoders.push(
                 {
                     __type__: 'CopyBufferToBuffer',
-                    source: WGPUBuffer.getBuffer(elementsOutputBuffer.bufferView),
+                    source: Buffer.getBuffer(elementsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: elementsStagingBuffer,
                     destinationOffset: 0,
@@ -830,7 +835,7 @@ async function init(
                 },
                 {
                     __type__: 'CopyBufferToBuffer',
-                    source: WGPUBuffer.getBuffer(atomicSwapsOutputBuffer.bufferView),
+                    source: Buffer.getBuffer(atomicSwapsOutputBuffer.bufferView),
                     sourceOffset: 0,
                     destination: atomicSwapsStagingBuffer,
                     destinationOffset: 0,

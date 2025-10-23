@@ -1,6 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
-import { ComputePass, ComputePipeline, WGPUBuffer, WebGPU } from '@feng3d/webgpu';
+import { BindingResources, Buffer, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
+import { ComputePass, ComputePipeline, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4, vec3 } from 'wgpu-matrix';
 
@@ -167,7 +167,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const bufferA = new Uint8Array(textureWidth * textureHeight * 4);
         const bufferB = new Uint8Array(textureWidth * textureHeight * 4);
 
-        reactive(WGPUBuffer.getBuffer(probabilityMapUBOBuffer)).writeBuffers = [{ data: new Int32Array([textureWidth]) }];
+        reactive(Buffer.getBuffer(probabilityMapUBOBuffer)).writeBuffers = [{ data: new Int32Array([textureWidth]) }];
 
         const passEncoders: ComputePass[] = [];
 
@@ -304,7 +304,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     function frame()
     {
-        reactive(WGPUBuffer.getBuffer(simulationUBOBuffer)).writeBuffers = [{
+        reactive(Buffer.getBuffer(simulationUBOBuffer)).writeBuffers = [{
             data: new Float32Array([
                 simulationParams.simulate ? simulationParams.deltaTime : 0.0,
                 0.0,
@@ -323,7 +323,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         mat4.multiply(projection, view, mvp);
 
         // prettier-ignore
-        reactive(WGPUBuffer.getBuffer(uniformBuffer)).writeBuffers = [{
+        reactive(Buffer.getBuffer(uniformBuffer)).writeBuffers = [{
             data: new Float32Array([
                 // modelViewProjectionMatrix
                 mvp[0], mvp[1], mvp[2], mvp[3],

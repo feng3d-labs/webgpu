@@ -292,7 +292,7 @@ export class GLTFBufferView
         const buf: Buffer = {
             size: alignTo(this.view.byteLength, 4),
             usage: this.usage,
-            data: this.view,
+            data: this.view.buffer,
         };
 
         this.gpuBuffer = buf;
@@ -608,7 +608,7 @@ export class GLTFNode
     test = 0;
     skin?: GLTFSkin;
     private nodeTransformBindGroup = {
-        node_uniforms: { world_matrix: new Float32Array(16) },
+        node_uniforms: { world_matrix: new Float32Array(16) as Float32Array },
     };
 
     constructor(
@@ -793,7 +793,7 @@ export class GLTFSkin
         const globalWorldInverse = mat4.inverse(
             nodes[currentNodeIndex].worldMatrix,
         );
-        const gpuBuffer = WGPUBuffer.getBuffer(this.jointMatricesUniformBuffer);
+        const gpuBuffer = Buffer.getBuffer(this.jointMatricesUniformBuffer);
         const writeBuffers = gpuBuffer.writeBuffers || [];
 
         for (let j = 0; j < this.joints.length; j++)
