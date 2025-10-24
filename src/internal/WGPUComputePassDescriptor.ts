@@ -6,30 +6,27 @@ import { GDeviceContext } from './GDeviceContext';
 
 export class WGPUComputePassDescriptor
 {
-    descriptor: GPUComputePassDescriptor;
+    readonly descriptor: GPUComputePassDescriptor;
 
     constructor(webgpu: WebGPU, computePass: ComputePass)
     {
+        const r_this = reactive(this);
         const r_computePass = reactive(computePass);
 
         effect(() =>
         {
-            r_computePass.descriptor?.timestampQuery;
+            const descriptor: GPUComputePassDescriptor = {};
 
-            const timestampQuery = computePass.descriptor?.timestampQuery;
-
-            const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(webgpu.device, timestampQuery);
-            if (wGPUTimestampQuery)
+            if (r_computePass.descriptor?.timestampQuery)
             {
+                const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(webgpu.device, computePass.descriptor.timestampQuery);
                 reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
                 const timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
 
-                this.descriptor.timestampWrites = timestampWrites;
+                descriptor.timestampWrites = timestampWrites;
             }
-            else
-            {
-                delete this.descriptor.timestampWrites;
-            }
+
+            r_this.descriptor = descriptor;
         });
     }
 

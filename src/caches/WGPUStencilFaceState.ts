@@ -54,6 +54,6 @@ export class WGPUStencilFaceState extends ReactiveObject
         return this.cacheMap.get(stencilFaceState) || new WGPUStencilFaceState(stencilFaceState);
     }
 
-    static readonly cacheMap = new WeakMap<StencilFaceState, WGPUStencilFaceState>();
+    static readonly cacheMap = new Map<StencilFaceState, WGPUStencilFaceState>();
     static readonly defaultGPUStencilFaceState: GPUStencilFaceState = {};
 }
