@@ -1,45 +1,61 @@
-import { CopyTextureToTexture } from '@feng3d/render-api';
+import { CopyTextureToTexture, TextureSize } from '@feng3d/render-api';
 import { WGPUTextureLike } from '../caches/WGPUTextureLike';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
+import { reactive } from '@feng3d/reactivity';
+import { ReactiveObject } from '../ReactiveObject';
 
-export class CopyTextureToTextureCommand
+export class CopyTextureToTextureCommand extends ReactiveObject
 {
     static getInstance(webgpu: WebGPU, passEncoder: CopyTextureToTexture)
     {
         return new CopyTextureToTextureCommand(webgpu, passEncoder);
     }
 
-    constructor(public readonly webgpu: WebGPU, public readonly copyTextureToTexture: CopyTextureToTexture)
+    constructor(webgpu: WebGPU, copyTextureToTexture: CopyTextureToTexture)
     {
-        const sourceTexture = WGPUTextureLike.getInstance(this.webgpu.device, copyTextureToTexture.source.texture);
-        const destinationTexture = WGPUTextureLike.getInstance(this.webgpu.device, copyTextureToTexture.destination.texture);
-
-        this.source = {
-            ...copyTextureToTexture.source,
-            texture: sourceTexture.gpuTexture,
-        };
-
-        this.destination = {
-            ...copyTextureToTexture.destination,
-            texture: destinationTexture.gpuTexture,
-        };
-
-        this.copySize = copyTextureToTexture.copySize;
+        super();
+        this._onCreate(webgpu, copyTextureToTexture);
     }
 
-    run(context: GDeviceContext)
+    private _onCreate(webgpu: WebGPU, copyTextureToTexture: CopyTextureToTexture)
     {
-        const { source, destination, copySize } = this;
+        let source: GPUTexelCopyTextureInfo;
+        let destination: GPUTexelCopyTextureInfo;
+        let copySize: TextureSize;
 
-        context.gpuCommandEncoder.copyTextureToTexture(
-            source,
-            destination,
-            copySize,
-        );
+        this.effect(() =>
+        {
+            const sourceTexture = WGPUTextureLike.getInstance(webgpu.device, copyTextureToTexture.source.texture);
+            reactive(sourceTexture).gpuTexture;
+            const gpuSourceTexture = sourceTexture.gpuTexture;
+
+            const destinationTexture = WGPUTextureLike.getInstance(webgpu.device, copyTextureToTexture.destination.texture);
+            reactive(destinationTexture).gpuTexture;
+            const gpuDestinationTexture = destinationTexture.gpuTexture;
+
+            source = {
+                ...copyTextureToTexture.source,
+                texture: gpuSourceTexture,
+            };
+
+            destination = {
+                ...copyTextureToTexture.destination,
+                texture: gpuDestinationTexture,
+            };
+
+            copySize = copyTextureToTexture.copySize;
+        });
+
+        this.run = (context: GDeviceContext) =>
+        {
+            context.gpuCommandEncoder.copyTextureToTexture(
+                source,
+                destination,
+                copySize,
+            );
+        }
     }
 
-    source: GPUImageCopyTexture;
-    destination: GPUImageCopyTexture;
-    copySize: GPUExtent3DStrict;
+    run: (context: GDeviceContext) => void;
 }
