@@ -31,26 +31,26 @@ export class WGPUColorTargetState extends ReactiveObject
 
         this.effect(() =>
         {
-            // 监听
-            r_colorTargetState.blend;
-            //
-            const blend = colorTargetState.blend;
-            const wgpuBlendState = WGPUBlendState.getInstance(blend);
-            reactive(wgpuBlendState).gpuBlendState;
-            const gpuBlendState = wgpuBlendState.gpuBlendState;
-
-            // 监听
-            r_colorTargetState.writeMask?.concat();
-            //
-            const writeMask = colorTargetState.writeMask ?? [true, true, true, true];
-            let gpuWriteMask: GPUColorWriteFlags = (writeMask[0] ? 1 : 0) + (writeMask[1] ? 2 : 0) + (writeMask[2] ? 4 : 0) + (writeMask[3] ? 8 : 0);
-
             // 计算
-            const gpuColorTargetState: GPUColorTargetState = {
-                format,
-                blend: gpuBlendState,
-                writeMask: gpuWriteMask,
-            };
+            const gpuColorTargetState: GPUColorTargetState = { format };
+
+            if (r_colorTargetState.blend)
+            {
+                const wgpuBlendState = WGPUBlendState.getInstance(colorTargetState.blend);
+                reactive(wgpuBlendState).gpuBlendState;
+                gpuColorTargetState.blend = wgpuBlendState.gpuBlendState;
+            }
+
+            if (r_colorTargetState.writeMask)
+            {
+                //
+                const red: boolean = r_colorTargetState.writeMask?.[0] ?? true;
+                const green: boolean = r_colorTargetState.writeMask?.[1] ?? true;
+                const blue: boolean = r_colorTargetState.writeMask?.[2] ?? true;
+                const alpha: boolean = r_colorTargetState.writeMask?.[3] ?? true;
+
+                gpuColorTargetState.writeMask = (red ? 1 : 0) + (green ? 2 : 0) + (blue ? 4 : 0) + (alpha ? 8 : 0);
+            }
 
             r_this.gpuColorTargetState = gpuColorTargetState;
         });
