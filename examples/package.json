@@ -27,6 +27,7 @@
     "dat.gui": "^0.7.9",
     "gl-matrix": "^3.4.3",
     "teapot": "^1.0.0",
+    "webgpu_recorder": "^1.2.3",
     "wgpu-matrix": "^3.4.0"
   }
 }

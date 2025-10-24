@@ -1,6 +1,11 @@
 import { Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
+import { WebGPURecorder } from "webgpu_recorder/webgpu_recorder.js";
+
+new WebGPURecorder({frames: 1}); // Create and start the WebGPU Recorder
+
+
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
@@ -54,7 +59,15 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    webgpu.submit(submit); // 提交GPU执行
+    function frame()
+    {
+        webgpu.submit(submit);
+        requestAnimationFrame(frame);
+    }
+    
+    requestAnimationFrame(frame);
+
+    // webgpu.submit(submit); // 提交GPU执行
 };
 
 let webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
