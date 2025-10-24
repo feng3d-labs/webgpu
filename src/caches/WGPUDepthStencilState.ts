@@ -17,12 +17,15 @@ export class WGPUDepthStencilState extends ReactiveObject
 
     private _createGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat)
     {
+        const r_this = reactive(this);
+
         if (!depthStencil)
         {
-            return WGPUDepthStencilState.getDefaultGPUDepthStencilState(depthStencilFormat);
+            r_this.gpuDepthStencilState = WGPUDepthStencilState.getDefaultGPUDepthStencilState(depthStencilFormat);
+            return;
+
         }
 
-        const r_this = reactive(this);
         const r_depthStencil = reactive(depthStencil);
 
         this.effect(() =>
@@ -118,6 +121,6 @@ export class WGPUDepthStencilState extends ReactiveObject
         return this.cacheMap.get(depthStencil) || new WGPUDepthStencilState(depthStencil, depthStencilFormat);
     }
 
-    static readonly cacheMap = new WeakMap<DepthStencilState, WGPUDepthStencilState>();
+    static readonly cacheMap = new Map<DepthStencilState, WGPUDepthStencilState>();
     private static readonly defaultGPUDepthStencilStates: Record<GPUTextureFormat, GPUDepthStencilState> = {} as any;
 }

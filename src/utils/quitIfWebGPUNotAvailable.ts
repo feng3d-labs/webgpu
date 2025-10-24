@@ -100,7 +100,7 @@ const fail = (() =>
     {
         if (!output) output = createErrorOutput();
 
-        output.show(message);
+        // output.show(message);
         throw new Error(message);
     };
 })();

@@ -100,6 +100,12 @@ export class WGPURenderPassFormat extends ReactiveObject
                     attachmentSize.height = gpuTexture.height;
                 }
             }
+            // 如果存在深度模板附件但没有指定view，则使用默认格式depth24plus
+            // 这与WGPURenderPassDepthStencilAttachment中自动创建深度纹理的逻辑保持一致
+            else if (descriptor.depthStencilAttachment)
+            {
+                depthStencilAttachmentTextureFormat = 'depth24plus';
+            }
 
             // 构建渲染通道格式对象
             const renderPassFormat: RenderPassFormat = {

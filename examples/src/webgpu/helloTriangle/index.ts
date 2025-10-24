@@ -1,11 +1,6 @@
 import { Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
-import { WebGPURecorder } from "webgpu_recorder/webgpu_recorder.js";
-
-new WebGPURecorder({frames: 1}); // Create and start the WebGPU Recorder
-
-
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
