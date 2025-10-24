@@ -26,12 +26,21 @@ export class WGPUExternalTexture extends ReactiveObject
             r_queue.preSubmit;
 
             //
-            r_videoTexture.label;
-            r_videoTexture.source;
-            r_videoTexture.colorSpace;
+            const label = r_videoTexture.label ?? `GPUExternalTexture ${_autoIndex++}`;
 
             //
-            r_this.gpuExternalTexture = device.importExternalTexture(videoTexture);
+            r_videoTexture.source;
+            const source = videoTexture.source;
+
+            const descriptor: GPUExternalTextureDescriptor = { label, source };
+
+            if (r_videoTexture.colorSpace)
+            {
+                descriptor.colorSpace = r_videoTexture.colorSpace;
+            }
+
+            //
+            r_this.gpuExternalTexture = device.importExternalTexture(descriptor);
         });
 
         this.destroyCall(() => { r_this.gpuExternalTexture = null; })
@@ -57,3 +66,5 @@ declare global
         externalTextures?: WeakMap<VideoTexture, WGPUExternalTexture>;
     }
 }
+
+let _autoIndex = 0;

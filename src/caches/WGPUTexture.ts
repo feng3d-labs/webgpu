@@ -86,9 +86,6 @@ export class WGPUTexture extends ReactiveObject
         // 监听纹理配置变化，自动重新创建纹理
         this.effect(() =>
         {
-            // 先销毁旧的纹理
-            destroyGPUTexture();
-
             // 触发响应式依赖，监听纹理描述符的所有属性
             const r_descriptor = r_texture.descriptor;
             if (r_descriptor)
@@ -156,6 +153,8 @@ export class WGPUTexture extends ReactiveObject
             {
                 generateMipmap(device, gpuTexture);
             }
+
+            this.gpuTexture?.destroy();
 
             // 更新纹理引用
             r_this.gpuTexture = gpuTexture;
@@ -339,7 +338,7 @@ export class WGPUTexture extends ReactiveObject
             // 将缓冲区数据写入纹理
             device.queue.writeTexture(
                 gpuDestination,
-                data,
+                data as any,
                 gpuDataLayout,
                 size,
             );
