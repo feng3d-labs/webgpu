@@ -1,3 +1,7 @@
+import { WebGPURecorder } from "webgpu_recorder/webgpu_recorder.js";
+
+new WebGPURecorder(); // Create and start the WebGPU Recorder
+
 import { GUI } from 'dat.gui';
 
 import Common from './common';

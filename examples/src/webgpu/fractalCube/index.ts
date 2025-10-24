@@ -1,7 +1,3 @@
-import { WebGPURecorder } from "webgpu_recorder/webgpu_recorder.js";
-
-new WebGPURecorder({frames: 1}); // Create and start the WebGPU Recorder
-
 import { reactive } from '@feng3d/reactivity';
 import { BufferBinding, CanvasContext, CopyTextureToTexture, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';

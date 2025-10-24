@@ -5,8 +5,9 @@ import { WGPUPipelineLayout } from '../caches/WGPUPipelineLayout';
 import { ComputeObject } from '../data/ComputeObject';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
+import { ReactiveObject } from '../ReactiveObject';
 
-export class ComputeObjectCommand
+export class ComputeObjectCommand extends ReactiveObject
 {
     static getInstance(webgpu: WebGPU, computeObject: ComputeObject)
     {
@@ -15,28 +16,36 @@ export class ComputeObjectCommand
 
     constructor(public readonly webgpu: WebGPU, public readonly computeObject: ComputeObject)
     {
+        super();
+
         const device = this.webgpu.device;
-        const { pipeline, bindingResources, workgroups } = computeObject;
+        const r_computeObject = reactive(computeObject);
 
-        const wGPUComputePipeline = WGPUComputePipeline.getInstance(device, pipeline);
-        reactive(wGPUComputePipeline).gpuComputePipeline;
-        this.computePipeline = wGPUComputePipeline.gpuComputePipeline;
-
-        // 计算 bindGroups
-        this.setBindGroup = [];
-        const layout = WGPUPipelineLayout.getPipelineLayout({ compute: pipeline.compute.code });
-
-        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+        this.effect(() =>
         {
-            const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
-            reactive(wgpuBindGroup).gpuBindGroup;
+            r_computeObject.pipeline;
+            const wGPUComputePipeline = WGPUComputePipeline.getInstance(device, computeObject.pipeline);
+            reactive(wGPUComputePipeline).gpuComputePipeline;
+            this.computePipeline = wGPUComputePipeline.gpuComputePipeline;
 
-            const gpuBindGroup = wgpuBindGroup.gpuBindGroup;
+            // 计算 bindGroups
+            this.setBindGroup = [];
+            const layout = WGPUPipelineLayout.getPipelineLayout({ compute: r_computeObject.pipeline.compute.code });
 
-            this.setBindGroup.push([group, gpuBindGroup]);
+            r_computeObject.bindingResources;
+            layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+            {
+                const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, computeObject.bindingResources);
+                reactive(wgpuBindGroup).gpuBindGroup;
+
+                const gpuBindGroup = wgpuBindGroup.gpuBindGroup;
+
+                this.setBindGroup.push([group, gpuBindGroup]);
+            });
+
+            this.dispatchWorkgroups = [r_computeObject.workgroups.workgroupCountX, r_computeObject.workgroups.workgroupCountY, r_computeObject.workgroups.workgroupCountZ];
         });
 
-        this.dispatchWorkgroups = [workgroups.workgroupCountX, workgroups.workgroupCountY, workgroups.workgroupCountZ];
     }
 
     run(context: GDeviceContext)
