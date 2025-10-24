@@ -64,6 +64,8 @@ export class WGPUCanvasTexture extends ReactiveObject
             // 获取当前纹理
             const gpuTexture = gpuCanvasContext.getCurrentTexture();
 
+            if (gpuTexture === this.gpuTexture) return;
+
             // 设置纹理标签
             gpuTexture.label = `GPU画布纹理-${id++}`;
 
