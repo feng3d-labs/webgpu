@@ -67,62 +67,58 @@ export class WGPURenderPipeline extends ReactiveObject
         this.effect(() =>
         {
             // 监听渲染管线属性变化
-            r_renderPipeline.label;
-            r_renderPipeline.fragment;
-            r_renderPipeline.primitive;
-            r_renderPipeline.depthStencil;
-            // r_renderPipeline.vertex
-            r_renderPipeline.vertex.code;
-            // r_renderPipeline.fragment
-            r_renderPipeline.fragment?.code;
-            r_renderPipeline.multisample;
+            const label = r_renderPipeline.label;
 
             // 计算
-            const { label, vertex, fragment, primitive, depthStencil, multisample } = renderPipeline;
             const { colorFormats, depthStencilFormat, sampleCount } = renderPassFormat;
 
             // 创建管线布局
-            const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: vertex.code, fragment: fragment?.code });
+            const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: r_renderPipeline.vertex.code, fragment: r_renderPipeline.fragment?.code });
 
             // 创建顶点状态
-            const wgpuVertexState = WGPUVertexState.getInstance(device, vertex, vertices);
+            r_renderPipeline.vertex;
+            const wgpuVertexState = WGPUVertexState.getInstance(device, renderPipeline.vertex, vertices);
             reactive(wgpuVertexState).gpuVertexState;
             const gpuVertexState = wgpuVertexState.gpuVertexState;
-
-            // 创建片段状态
-            const wgpuFragmentState = WGPUFragmentState.getInstance(device, fragment, colorFormats);
-            reactive(wgpuFragmentState).gpuFragmentState;
-            const gpuFragmentState = wgpuFragmentState.gpuFragmentState;
-
-            // 创建深度模板状态
-            const wgpuDepthStencilState = WGPUDepthStencilState.getInstance(depthStencil, depthStencilFormat);
-            wgpuDepthStencilState && reactive(wgpuDepthStencilState).gpuDepthStencilState;
-            const gpuDepthStencilState = wgpuDepthStencilState?.gpuDepthStencilState;
-
-            // 创建多重采样状态
-            let gpuMultisampleState: GPUMultisampleState = undefined;
-            if (sampleCount)
-            {
-                const wgpuMultisampleState = WGPUMultisampleState.getInstance(multisample);
-                reactive(wgpuMultisampleState).gpuMultisampleState;
-                gpuMultisampleState = wgpuMultisampleState.gpuMultisampleState;
-            }
-
-            // 创建图元状态
-            const wgpuPrimitiveState = WGPUPrimitiveState.getInstance(primitive, indexFormat);
-            reactive(wgpuPrimitiveState).gpuPrimitiveState;
-            const gpuPrimitiveState = wgpuPrimitiveState.gpuPrimitiveState;
 
             // 构建渲染管线描述符
             const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
                 label,
                 layout,
                 vertex: gpuVertexState,
-                fragment: gpuFragmentState,
-                primitive: gpuPrimitiveState,
-                depthStencil: gpuDepthStencilState,
-                multisample: gpuMultisampleState,
             };
+
+            // 创建片段状态
+            if (r_renderPipeline.fragment)
+            {
+                const wgpuFragmentState = WGPUFragmentState.getInstance(device, renderPipeline.fragment, colorFormats);
+                reactive(wgpuFragmentState).gpuFragmentState;
+                gpuRenderPipelineDescriptor.fragment = wgpuFragmentState.gpuFragmentState;
+            }
+
+            if (r_renderPipeline.primitive)
+            {
+                // 创建图元状态
+                const wgpuPrimitiveState = WGPUPrimitiveState.getInstance(renderPipeline.primitive, indexFormat);
+                reactive(wgpuPrimitiveState).gpuPrimitiveState;
+                gpuRenderPipelineDescriptor.primitive = wgpuPrimitiveState.gpuPrimitiveState;
+            }
+
+            if (r_renderPipeline.depthStencil || depthStencilFormat)
+            {
+                // 创建深度模板状态
+                const wgpuDepthStencilState = WGPUDepthStencilState.getInstance(renderPipeline.depthStencil, depthStencilFormat);
+                reactive(wgpuDepthStencilState).gpuDepthStencilState;
+                gpuRenderPipelineDescriptor.depthStencil = wgpuDepthStencilState?.gpuDepthStencilState;
+            }
+
+            // 创建多重采样状态
+            if (r_renderPipeline.multisample || sampleCount)
+            {
+                const wgpuMultisampleState = WGPUMultisampleState.getInstance(renderPipeline.multisample);
+                reactive(wgpuMultisampleState).gpuMultisampleState;
+                gpuRenderPipelineDescriptor.multisample = wgpuMultisampleState.gpuMultisampleState;
+            }
 
             // 创建WebGPU渲染管线
             const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
