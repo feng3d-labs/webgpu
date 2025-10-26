@@ -5,7 +5,7 @@ import { WGPURenderPassFormat } from '../caches/WGPURenderPassFormat';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
 import { OcclusionQueryCache } from './OcclusionQueryCache';
-import { CommandType, RenderObjectCache, RenderPassObjectCommand, runCommands } from './RenderObjectCache';
+import { CommandType, WGPURenderObject, RenderPassObjectCommand, runCommands } from './WGPURenderObject';
 import { RenderPassFormat } from './RenderPassFormat';
 
 export class RenderPassCommand
@@ -33,7 +33,7 @@ export class RenderPassCommand
 
             const renderPassObjectCommands = this.runRenderPassObjects(webgpu, renderPassFormat, renderPassObjects);
             const commands: CommandType[] = [];
-            const state = new RenderObjectCache();
+            const state = new WGPURenderObject();
 
             renderPassObjectCommands?.forEach((command) =>
             {

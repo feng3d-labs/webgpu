@@ -1,5 +1,3 @@
-import { ChainMap } from '@feng3d/render-api';
-
 export type CommandType =
     | [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]
     | [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate]
@@ -16,7 +14,7 @@ export type CommandType =
     | [func: 'endOcclusionQuery']
     ;
 
-export class RenderObjectCache implements RenderPassObjectCommand
+export class WGPURenderObject implements RenderPassObjectCommand
 {
     setViewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
     setScissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
@@ -29,7 +27,7 @@ export class RenderObjectCache implements RenderPassObjectCommand
     draw: [func: 'draw', vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32];
     drawIndexed: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
 
-    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache)
+    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObject)
     {
         const { setViewport, setScissorRect, setPipeline, setBlendConstant, setStencilReference, setBindGroup, setVertexBuffer, setIndexBuffer, draw, drawIndexed } = this;
 
@@ -85,7 +83,7 @@ export class RenderObjectCache implements RenderPassObjectCommand
 
 export interface RenderPassObjectCommand
 {
-    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache): void;
+    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObject): void;
 }
 
 export interface PassEncoderCommand
@@ -109,5 +107,3 @@ export function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURen
         }
     }
 }
-
-const commandMap = new ChainMap<CommandType, CommandType>();

@@ -12,7 +12,7 @@ import './data/polyfills/RenderPass';
 import { RenderBundle } from './data/RenderBundle';
 import { GDeviceContext } from './internal/GDeviceContext';
 import { RenderBundleCommand } from './internal/RenderBundleCommand';
-import { CommandType, RenderObjectCache } from './internal/RenderObjectCache';
+import { CommandType, WGPURenderObject } from './internal/WGPURenderObject';
 import { RenderPassFormat } from './internal/RenderPassFormat';
 import { SubmitCommand } from './internal/SubmitCommand';
 import { copyDepthTexture } from './utils/copyDepthTexture';
@@ -161,7 +161,7 @@ export class WebGPU
 
             //
             const commands: CommandType[] = [];
-            const state = new RenderObjectCache();
+            const state = new WGPURenderObject();
 
             renderObjectCaches.forEach((renderObjectCache) =>
             {
@@ -221,7 +221,7 @@ export class WebGPU
             return result.value;
         }
 
-        const renderObjectCache = new RenderObjectCache();
+        const renderObjectCache = new WGPURenderObject();
 
         result = computed(() =>
         {
@@ -240,7 +240,7 @@ export class WebGPU
         return result.value;
     }
 
-    protected runviewport(renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: RenderObjectCache)
+    protected runviewport(renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: WGPURenderObject)
     {
         const r_renderObject = reactive(renderObject);
         const r_renderPassFormat = reactive(renderPassFormat);
@@ -275,7 +275,7 @@ export class WebGPU
         }).value;
     }
 
-    protected runScissorRect(renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: RenderObjectCache)
+    protected runScissorRect(renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: WGPURenderObject)
     {
         const r_renderObject = reactive(renderObject);
         const r_renderPassFormat = reactive(renderPassFormat);
@@ -307,7 +307,7 @@ export class WebGPU
         }).value;
     }
 
-    protected runRenderPipeline(renderPassFormat: RenderPassFormat, renderObject: RenderObject, renderObjectCache: RenderObjectCache)
+    protected runRenderPipeline(renderPassFormat: RenderPassFormat, renderObject: RenderObject, renderObjectCache: WGPURenderObject)
     {
         const device = this.device;
         const r_renderObject = reactive(renderObject);
@@ -339,7 +339,7 @@ export class WebGPU
         }).value;
     }
 
-    protected runStencilReference(pipeline: RenderPipeline, renderObjectCache: RenderObjectCache)
+    protected runStencilReference(pipeline: RenderPipeline, renderObjectCache: WGPURenderObject)
     {
         const r_pipeline = reactive(pipeline);
 
@@ -358,7 +358,7 @@ export class WebGPU
         }).value;
     }
 
-    protected runBlendConstant(pipeline: RenderPipeline, renderObjectCache: RenderObjectCache)
+    protected runBlendConstant(pipeline: RenderPipeline, renderObjectCache: WGPURenderObject)
     {
         const r_pipeline = reactive(pipeline);
 
@@ -378,7 +378,7 @@ export class WebGPU
         }).value;
     }
 
-    protected runBindingResources(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
+    protected runBindingResources(renderObject: RenderObject, renderObjectCache: WGPURenderObject)
     {
         const device = this.device;
         const r_renderObject = reactive(renderObject);
@@ -405,7 +405,7 @@ export class WebGPU
         }).value;
     }
 
-    protected runVertexAttributes(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
+    protected runVertexAttributes(renderObject: RenderObject, renderObjectCache: WGPURenderObject)
     {
         const device = this.device;
         const r_renderObject = reactive(renderObject);
@@ -446,7 +446,7 @@ export class WebGPU
         }).value;
     }
 
-    protected runIndices(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
+    protected runIndices(renderObject: RenderObject, renderObjectCache: WGPURenderObject)
     {
         const r_renderObject = reactive(renderObject);
 
@@ -477,7 +477,7 @@ export class WebGPU
         }).value;
     }
 
-    protected runDraw(renderObject: RenderObject, renderObjectCache: RenderObjectCache)
+    protected runDraw(renderObject: RenderObject, renderObjectCache: WGPURenderObject)
     {
         computed(() =>
         {
@@ -496,7 +496,7 @@ export class WebGPU
         }).value;
     }
 
-    private _renderObjectCachesMap = new ChainMap<RenderObjectCachesKey, Computed<RenderObjectCache[]>>();
+    private _renderObjectCachesMap = new ChainMap<RenderObjectCachesKey, Computed<WGPURenderObject[]>>();
 }
 
 let autoIndex = 0;
@@ -543,6 +543,6 @@ type GPURenderBundleKey = [renderBundle: RenderBundle, renderPassFormat: RenderP
 const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, Computed<RenderBundleCommand>>();
 
 type RenderObjectCacheKey = [device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat];
-const renderObjectCacheMap = new ChainMap<RenderObjectCacheKey, Computed<RenderObjectCache>>();
+const renderObjectCacheMap = new ChainMap<RenderObjectCacheKey, Computed<WGPURenderObject>>();
 
 type RenderObjectCachesKey = [renderObjects: readonly RenderObject[], renderPassFormat: RenderPassFormat];

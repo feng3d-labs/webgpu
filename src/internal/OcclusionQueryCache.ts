@@ -1,6 +1,6 @@
 import { OcclusionQuery } from '@feng3d/render-api';
 import { WebGPU } from '../WebGPU';
-import { CommandType, RenderObjectCache, RenderPassObjectCommand } from './RenderObjectCache';
+import { CommandType, WGPURenderObject, RenderPassObjectCommand } from './WGPURenderObject';
 import { RenderPassFormat } from './RenderPassFormat';
 
 export class OcclusionQueryCache implements RenderPassObjectCommand
@@ -18,9 +18,9 @@ export class OcclusionQueryCache implements RenderPassObjectCommand
     }
 
     queryIndex: number;
-    renderObjectCaches: RenderObjectCache[];
+    renderObjectCaches: WGPURenderObject[];
 
-    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache)
+    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObject)
     {
         commands.push(['beginOcclusionQuery', this.queryIndex]);
         for (let i = 0, len = this.renderObjectCaches.length; i < len; i++)

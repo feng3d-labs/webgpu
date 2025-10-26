@@ -1,11 +1,11 @@
-import { CommandType, RenderObjectCache, RenderPassObjectCommand, runCommands } from './RenderObjectCache';
+import { CommandType, WGPURenderObject, RenderPassObjectCommand, runCommands } from './WGPURenderObject';
 
 export class RenderBundleCommand implements RenderPassObjectCommand
 {
     gpuRenderBundle: GPURenderBundle;
     descriptor: GPURenderBundleEncoderDescriptor;
     bundleCommands: CommandType[];
-    run(device: GPUDevice, commands: CommandType[], state: RenderObjectCache): void
+    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObject): void
     {
         if (!this.gpuRenderBundle)
         {
