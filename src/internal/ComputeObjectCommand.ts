@@ -9,16 +9,15 @@ import { ReactiveObject } from '../ReactiveObject';
 
 export class ComputeObjectCommand extends ReactiveObject
 {
-    static getInstance(webgpu: WebGPU, computeObject: ComputeObject)
+    static getInstance(device: GPUDevice, computeObject: ComputeObject)
     {
-        return new ComputeObjectCommand(webgpu, computeObject);
+        return new ComputeObjectCommand(device, computeObject);
     }
 
-    constructor(public readonly webgpu: WebGPU, public readonly computeObject: ComputeObject)
+    constructor(public readonly device: GPUDevice, public readonly computeObject: ComputeObject)
     {
         super();
 
-        const device = this.webgpu.device;
         const r_computeObject = reactive(computeObject);
 
         this.effect(() =>

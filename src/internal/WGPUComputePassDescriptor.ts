@@ -1,14 +1,13 @@
 import { effect, reactive } from '@feng3d/reactivity';
 import { WGPUTimestampQuery } from '../caches/WGPUTimestampQuery';
 import { ComputePass } from '../data/ComputePass';
-import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
 
 export class WGPUComputePassDescriptor
 {
     readonly descriptor: GPUComputePassDescriptor;
 
-    constructor(webgpu: WebGPU, computePass: ComputePass)
+    constructor(device: GPUDevice, computePass: ComputePass)
     {
         const r_this = reactive(this);
         const r_computePass = reactive(computePass);
@@ -19,7 +18,7 @@ export class WGPUComputePassDescriptor
 
             if (r_computePass.descriptor?.timestampQuery)
             {
-                const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(webgpu.device, computePass.descriptor.timestampQuery);
+                const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, computePass.descriptor.timestampQuery);
                 reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
                 const timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
 

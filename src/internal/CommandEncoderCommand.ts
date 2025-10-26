@@ -1,11 +1,11 @@
 import { CommandEncoder, RenderPass } from '@feng3d/render-api';
 
 import { WebGPU } from '../WebGPU';
-import { ComputePassCommand } from './ComputePassCommand';
-import { WGPUCopyBufferToBuffer } from './WGPUCopyBufferToBuffer';
 import { CopyTextureToTextureCommand } from './CopyTextureToTextureCommand';
-import { RenderPassCommand } from './RenderPassCommand';
 import { GDeviceContext } from './GDeviceContext';
+import { RenderPassCommand } from './RenderPassCommand';
+import { WGPUComputePass } from './WGPUComputePass';
+import { WGPUCopyBufferToBuffer } from './WGPUCopyBufferToBuffer';
 
 export class CommandEncoderCommand
 {
@@ -32,7 +32,7 @@ export class CommandEncoderCommand
             }
             else if (passEncoder.__type__ === 'ComputePass')
             {
-                const computePassCommand = ComputePassCommand.getInstance(this.webgpu, passEncoder);
+                const computePassCommand = WGPUComputePass.getInstance(this.webgpu.device, passEncoder);
 
                 return computePassCommand;
             }
@@ -64,5 +64,5 @@ export class CommandEncoderCommand
         return context.gpuCommandEncoder.finish();
     }
 
-    passEncoders: (RenderPassCommand | ComputePassCommand | CopyTextureToTextureCommand | WGPUCopyBufferToBuffer)[];
+    passEncoders: (RenderPassCommand | WGPUComputePass | CopyTextureToTextureCommand | WGPUCopyBufferToBuffer)[];
 }
