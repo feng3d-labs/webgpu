@@ -1,20 +1,16 @@
-import { computed, Computed, reactive, UnReadonly } from '@feng3d/reactivity';
-import { BlendState, Buffer, ChainMap, DepthStencilState, ReadPixels, RenderObject, RenderPipeline, Submit, TextureLike } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { Buffer, ChainMap, ReadPixels, RenderObject, Submit, TextureLike } from '@feng3d/render-api';
 
-import { WGPUBindGroup } from './caches/WGPUBindGroup';
 import { WGPUBuffer } from './caches/WGPUBuffer';
-import { WGPUPipelineLayout } from './caches/WGPUPipelineLayout';
-import { WGPURenderPipeline } from './caches/WGPURenderPipeline';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
-import { WGPUVertexBufferLayout } from './caches/WGPUVertexBufferLayout';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
 import { RenderBundle } from './data/RenderBundle';
 import { GDeviceContext } from './internal/GDeviceContext';
 import { RenderBundleCommand } from './internal/RenderBundleCommand';
-import { CommandType, WGPURenderObject } from './internal/WGPURenderObject';
 import { RenderPassFormat } from './internal/RenderPassFormat';
 import { SubmitCommand } from './internal/SubmitCommand';
+import { CommandType, WGPURenderObject, WGPURenderObjectState } from './internal/WGPURenderObject';
 import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
@@ -161,7 +157,7 @@ export class WebGPU
 
             //
             const commands: CommandType[] = [];
-            const state = new WGPURenderObject();
+            const state = new WGPURenderObjectState();
 
             renderObjectCaches.forEach((renderObjectCache) =>
             {
@@ -193,7 +189,7 @@ export class WebGPU
         {
             //
             const renderObjectCaches = renderObjects.map((element) =>
-                this.runRenderObject(renderPassFormat, element as RenderObject));
+                WGPURenderObject.getInstance(this.device, element as RenderObject, renderPassFormat));
 
             return renderObjectCaches;
         });
@@ -202,347 +198,10 @@ export class WebGPU
         return result.value;
     }
 
-    /**
-     * 执行渲染对象。
-     *
-     * @param device GPU设备。
-     * @param passEncoder 渲染通道编码器。
-     * @param renderObject 渲染对象。
-     * @param renderPass 渲染通道。
-     */
-    runRenderObject(renderPassFormat: RenderPassFormat, renderObject: RenderObject)
-    {
-        const device = this.device;
-        const renderObjectCacheKey: RenderObjectCacheKey = [device, renderObject, renderPassFormat];
-        let result = renderObjectCacheMap.get(renderObjectCacheKey);
-
-        if (result)
-        {
-            return result.value;
-        }
-
-        const renderObjectCache = new WGPURenderObject();
-
-        result = computed(() =>
-        {
-            this.runviewport(renderObject, renderPassFormat, renderObjectCache);
-            this.runScissorRect(renderObject, renderPassFormat, renderObjectCache);
-            this.runRenderPipeline(renderPassFormat, renderObject, renderObjectCache);
-            this.runBindingResources(renderObject, renderObjectCache);
-            this.runVertexAttributes(renderObject, renderObjectCache);
-            this.runIndices(renderObject, renderObjectCache);
-            this.runDraw(renderObject, renderObjectCache);
-
-            return renderObjectCache;
-        });
-        renderObjectCacheMap.set(renderObjectCacheKey, result);
-
-        return result.value;
-    }
-
-    protected runviewport(renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: WGPURenderObject)
-    {
-        const r_renderObject = reactive(renderObject);
-        const r_renderPassFormat = reactive(renderPassFormat);
-
-        computed(() =>
-        {
-            const attachmentSize = r_renderPassFormat.attachmentSize;
-            const viewport = r_renderObject.viewport;
-
-            if (viewport)
-            {
-                const isYup = viewport.isYup ?? true;
-                const x = viewport.x ?? 0;
-                let y = viewport.y ?? 0;
-                const width = viewport.width;
-                const height = viewport.height;
-                const minDepth = viewport.minDepth ?? 0;
-                const maxDepth = viewport.maxDepth ?? 1;
-
-                if (isYup)
-                {
-                    y = attachmentSize.height - y - height;
-                }
-                //
-                renderObjectCache.setViewport = ['setViewport', x, y, width, height, minDepth, maxDepth];
-            }
-            else
-            {
-                //
-                renderObjectCache.setViewport = ['setViewport', 0, 0, attachmentSize.width, attachmentSize.height, 0, 1];
-            }
-        }).value;
-    }
-
-    protected runScissorRect(renderObject: RenderObject, renderPassFormat: RenderPassFormat, renderObjectCache: WGPURenderObject)
-    {
-        const r_renderObject = reactive(renderObject);
-        const r_renderPassFormat = reactive(renderPassFormat);
-
-        computed(() =>
-        {
-            const attachmentSize = r_renderPassFormat.attachmentSize;
-            const scissorRect = r_renderObject.scissorRect;
-
-            if (scissorRect)
-            {
-                const isYup = scissorRect.isYup ?? true;
-                const x = scissorRect.x ?? 0;
-                let y = scissorRect.y ?? 0;
-                const width = scissorRect.width;
-                const height = scissorRect.height;
-
-                if (isYup)
-                {
-                    y = attachmentSize.height - y - height;
-                }
-
-                renderObjectCache.setScissorRect = ['setScissorRect', x, y, width, height];
-            }
-            else
-            {
-                renderObjectCache.setScissorRect = ['setScissorRect', 0, 0, attachmentSize.width, attachmentSize.height];
-            }
-        }).value;
-    }
-
-    protected runRenderPipeline(renderPassFormat: RenderPassFormat, renderObject: RenderObject, renderObjectCache: WGPURenderObject)
-    {
-        const device = this.device;
-        const r_renderObject = reactive(renderObject);
-
-        computed(() =>
-        {
-            // 监听
-            r_renderObject.pipeline;
-            r_renderObject.vertices;
-            r_renderObject.indices;
-
-            //
-            const { pipeline, vertices, indices } = renderObject;
-            //
-            const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16') : undefined;
-
-            //
-            const wgpuRenderPipeline = WGPURenderPipeline.getInstance(device, pipeline, renderPassFormat, vertices, indexFormat);
-            reactive(wgpuRenderPipeline).gpuRenderPipeline;
-
-            const gpuRenderPipeline = wgpuRenderPipeline.gpuRenderPipeline;
-
-            //
-            renderObjectCache.setPipeline = ['setPipeline', gpuRenderPipeline];
-
-            //
-            this.runStencilReference(pipeline, renderObjectCache);
-            this.runBlendConstant(pipeline, renderObjectCache);
-        }).value;
-    }
-
-    protected runStencilReference(pipeline: RenderPipeline, renderObjectCache: WGPURenderObject)
-    {
-        const r_pipeline = reactive(pipeline);
-
-        computed(() =>
-        {
-            const stencilReference = getStencilReference(r_pipeline.depthStencil);
-
-            if (stencilReference === undefined)
-            {
-                renderObjectCache.setStencilReference = null;
-
-                return;
-            }
-
-            renderObjectCache.setStencilReference = ['setStencilReference', stencilReference];
-        }).value;
-    }
-
-    protected runBlendConstant(pipeline: RenderPipeline, renderObjectCache: WGPURenderObject)
-    {
-        const r_pipeline = reactive(pipeline);
-
-        computed(() =>
-        {
-            //
-            const blendConstantColor = BlendState.getBlendConstantColor(r_pipeline.fragment?.targets?.[0]?.blend);
-
-            if (blendConstantColor === undefined)
-            {
-                renderObjectCache.setBlendConstant = null;
-
-                return;
-            }
-
-            renderObjectCache.setBlendConstant = ['setBlendConstant', blendConstantColor];
-        }).value;
-    }
-
-    protected runBindingResources(renderObject: RenderObject, renderObjectCache: WGPURenderObject)
-    {
-        const device = this.device;
-        const r_renderObject = reactive(renderObject);
-
-        computed(() =>
-        {
-            // 监听
-            r_renderObject.bindingResources;
-
-            // 执行
-            const { bindingResources } = renderObject;
-            const layout = WGPUPipelineLayout.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
-
-            renderObjectCache.setBindGroup.length = layout.bindGroupLayouts.length;
-            layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
-            {
-                const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
-                reactive(wgpuBindGroup).gpuBindGroup;
-
-                const gpuBindGroup = wgpuBindGroup.gpuBindGroup;
-
-                renderObjectCache.setBindGroup[group] = ['setBindGroup', group, gpuBindGroup];
-            });
-        }).value;
-    }
-
-    protected runVertexAttributes(renderObject: RenderObject, renderObjectCache: WGPURenderObject)
-    {
-        const device = this.device;
-        const r_renderObject = reactive(renderObject);
-
-        computed(() =>
-        {
-            // 监听
-            r_renderObject.vertices;
-            r_renderObject.pipeline.vertex;
-
-            const { vertices, pipeline } = renderObject;
-
-            //
-            const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(pipeline.vertex, vertices);
-            reactive(wgpuVertexBufferLayout).vertexBuffers;
-            const vertexBuffers = wgpuVertexBufferLayout.vertexBuffers;
-
-            renderObjectCache.setVertexBuffer.length = vertexBuffers?.length ?? 0;
-            vertexBuffers?.forEach((vertexBuffer, index) =>
-            {
-                // 监听
-                const r_vertexBuffer = reactive(vertexBuffer);
-
-                r_vertexBuffer.data;
-                r_vertexBuffer.offset;
-                r_vertexBuffer.size;
-
-                // 执行
-                const { data, offset, size } = vertexBuffer;
-                const buffer = Buffer.getBuffer(data);
-
-                (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
-
-                const gBuffer = WGPUBuffer.getInstance(device, buffer).gpuBuffer;
-
-                renderObjectCache.setVertexBuffer[index] = ['setVertexBuffer', index, gBuffer, offset, size];
-            });
-        }).value;
-    }
-
-    protected runIndices(renderObject: RenderObject, renderObjectCache: WGPURenderObject)
-    {
-        const r_renderObject = reactive(renderObject);
-
-        computed(() =>
-        {
-            // 监听
-            r_renderObject.indices;
-
-            const { indices } = renderObject;
-
-            if (!indices)
-            {
-                renderObjectCache.setIndexBuffer = null;
-
-                return;
-            }
-
-            const device = this.device;
-
-            const buffer = Buffer.getBuffer(indices.buffer);
-
-            (buffer as UnReadonly<Buffer>).label = buffer.label || (`顶点索引 ${autoIndex++}`);
-
-            const gBuffer = WGPUBuffer.getInstance(device, buffer);
-
-            //
-            renderObjectCache.setIndexBuffer = ['setIndexBuffer', gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
-        }).value;
-    }
-
-    protected runDraw(renderObject: RenderObject, renderObjectCache: WGPURenderObject)
-    {
-        computed(() =>
-        {
-            const { draw } = reactive(renderObject);
-
-            renderObjectCache.draw = null;
-            renderObjectCache.drawIndexed = null;
-            if (draw.__type__ === 'DrawVertex')
-            {
-                renderObjectCache.draw = ['draw', draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance];
-            }
-            else
-            {
-                renderObjectCache.drawIndexed = ['drawIndexed', draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance];
-            }
-        }).value;
-    }
-
     private _renderObjectCachesMap = new ChainMap<RenderObjectCachesKey, Computed<WGPURenderObject[]>>();
-}
-
-let autoIndex = 0;
-let autoVertexIndex = 0;
-
-/**
- * 如果任意模板测试结果使用了 "replace" 运算，则需要再渲染前设置 `stencilReference` 值。
- *
- * @param depthStencil
- * @returns
- */
-function getStencilReference(depthStencil?: DepthStencilState)
-{
-    if (!depthStencil) return undefined;
-
-    const { stencilFront, stencilBack } = depthStencil;
-
-    // 如果开启了模板测试，则需要设置模板索引值
-    let stencilReference: number;
-
-    if (stencilFront)
-    {
-        const { failOp, depthFailOp, passOp } = stencilFront;
-
-        if (failOp === 'replace' || depthFailOp === 'replace' || passOp === 'replace')
-        {
-            stencilReference = depthStencil?.stencilReference ?? 0;
-        }
-    }
-    if (stencilBack)
-    {
-        const { failOp, depthFailOp, passOp } = stencilBack;
-
-        if (failOp === 'replace' || depthFailOp === 'replace' || passOp === 'replace')
-        {
-            stencilReference = depthStencil?.stencilReference ?? 0;
-        }
-    }
-
-    return stencilReference;
 }
 
 type GPURenderBundleKey = [renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
 const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, Computed<RenderBundleCommand>>();
-
-type RenderObjectCacheKey = [device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat];
-const renderObjectCacheMap = new ChainMap<RenderObjectCacheKey, Computed<WGPURenderObject>>();
 
 type RenderObjectCachesKey = [renderObjects: readonly RenderObject[], renderPassFormat: RenderPassFormat];

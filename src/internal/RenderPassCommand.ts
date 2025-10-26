@@ -5,8 +5,8 @@ import { WGPURenderPassFormat } from '../caches/WGPURenderPassFormat';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
 import { OcclusionQueryCache } from './OcclusionQueryCache';
-import { CommandType, WGPURenderObject, RenderPassObjectCommand, runCommands } from './WGPURenderObject';
 import { RenderPassFormat } from './RenderPassFormat';
+import { CommandType, RenderPassObjectCommand, runCommands, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
 
 export class RenderPassCommand
 {
@@ -33,7 +33,7 @@ export class RenderPassCommand
 
             const renderPassObjectCommands = this.runRenderPassObjects(webgpu, renderPassFormat, renderPassObjects);
             const commands: CommandType[] = [];
-            const state = new WGPURenderObject();
+            const state = new WGPURenderObjectState();
 
             renderPassObjectCommands?.forEach((command) =>
             {
@@ -55,13 +55,11 @@ export class RenderPassCommand
             let queryIndex = 0;
             const renderPassObjectCommands: RenderPassObjectCommand[] = renderPassObjects?.map((element) =>
             {
-                if (!element.__type__)
+                if (!element.__type__ || element.__type__ === 'RenderObject')
                 {
-                    return webgpu.runRenderObject(renderPassFormat, element as RenderObject);
-                }
-                if (element.__type__ === 'RenderObject')
-                {
-                    return webgpu.runRenderObject(renderPassFormat, element);
+                    const wgpuRenderObject = WGPURenderObject.getInstance(webgpu.device, element as RenderObject, renderPassFormat);
+
+                    return wgpuRenderObject;
                 }
                 if (element.__type__ === 'RenderBundle')
                 {
