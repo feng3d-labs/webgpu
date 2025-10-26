@@ -2,8 +2,8 @@ import { reactive } from '@feng3d/reactivity';
 import { WGPUTimestampQuery } from '../caches/WGPUTimestampQuery';
 import { ComputePass } from '../data/ComputePass';
 import { ReactiveObject } from '../ReactiveObject';
-import { ComputeObjectCommand } from './ComputeObjectCommand';
 import { GDeviceContext } from './GDeviceContext';
+import { WGPUComputeObject } from './WGPUComputeObject';
 
 export class WGPUComputePass extends ReactiveObject
 {
@@ -19,7 +19,7 @@ export class WGPUComputePass extends ReactiveObject
 
     private _onCreate(device: GPUDevice, computePass: ComputePass)
     {
-        let computeObjectCommands: ComputeObjectCommand[];
+        let computeObjectCommands: WGPUComputeObject[];
 
         const descriptor: GPUComputePassDescriptor = {};
 
@@ -33,7 +33,7 @@ export class WGPUComputePass extends ReactiveObject
                 descriptor.timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
             }
 
-            computeObjectCommands = computePass.computeObjects.map((computeObject) => ComputeObjectCommand.getInstance(device, computeObject));
+            computeObjectCommands = computePass.computeObjects.map((computeObject) => WGPUComputeObject.getInstance(device, computeObject));
         });
 
         this.run = (context: GDeviceContext) =>
