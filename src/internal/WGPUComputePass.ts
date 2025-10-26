@@ -1,9 +1,9 @@
 import { reactive } from '@feng3d/reactivity';
+import { WGPUTimestampQuery } from '../caches/WGPUTimestampQuery';
 import { ComputePass } from '../data/ComputePass';
 import { ReactiveObject } from '../ReactiveObject';
 import { ComputeObjectCommand } from './ComputeObjectCommand';
 import { GDeviceContext } from './GDeviceContext';
-import { WGPUComputePassDescriptor } from './WGPUComputePassDescriptor';
 
 export class WGPUComputePass extends ReactiveObject
 {
@@ -19,14 +19,19 @@ export class WGPUComputePass extends ReactiveObject
 
     private _onCreate(device: GPUDevice, computePass: ComputePass)
     {
-
-        let wgpuComputePassDescriptor: WGPUComputePassDescriptor;
         let computeObjectCommands: ComputeObjectCommand[];
 
+        const descriptor: GPUComputePassDescriptor = {};
+
+        const r_computePass = reactive(computePass);
         this.effect(() =>
         {
-            wgpuComputePassDescriptor = new WGPUComputePassDescriptor(device, computePass);
-            reactive(wgpuComputePassDescriptor).descriptor;
+            if (r_computePass.descriptor?.timestampQuery)
+            {
+                const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, computePass.descriptor.timestampQuery);
+                reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
+                descriptor.timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
+            }
 
             computeObjectCommands = computePass.computeObjects.map((computeObject) => ComputeObjectCommand.getInstance(device, computeObject));
         });
@@ -34,11 +39,15 @@ export class WGPUComputePass extends ReactiveObject
         this.run = (context: GDeviceContext) =>
         {
             //
-            wgpuComputePassDescriptor.run(context);
+            context.passEncoder = context.gpuCommandEncoder.beginComputePass(descriptor);
 
             computeObjectCommands.forEach((command) => command.run(context));
 
-            wgpuComputePassDescriptor.end(context);
+            context.passEncoder.end();
+            context.passEncoder = null;
+
+            // 处理时间戳查询
+            descriptor.timestampWrites?.resolve(context.gpuCommandEncoder);
         }
     }
 

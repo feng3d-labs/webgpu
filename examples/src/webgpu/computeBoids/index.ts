@@ -126,20 +126,21 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     let t = 0;
 
+    const submits: Submit[] = [0, 1].map((i) =>
+    {
+        return {
+            commandEncoders: [{
+                passEncoders: [
+                    { __type__: 'ComputePass', computeObjects: [[computeObject0, computeObject1][i]] },
+                    { descriptor: renderPass, renderPassObjects: [[renderObject, renderObject1][(i + 1) % 2]] },
+                ],
+            }],
+        };
+    });
+
     function frame()
     {
-        const data: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { __type__: 'ComputePass', computeObjects: [[computeObject0, computeObject1][t % 2]] },
-                        { descriptor: renderPass, renderPassObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
-                    ],
-                },
-            ],
-        };
-
-        webgpu.submit(data);
+        webgpu.submit(submits[t % 2]);
 
         ++t;
 
