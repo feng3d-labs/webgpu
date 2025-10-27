@@ -1,23 +1,19 @@
 import { reactive } from '@feng3d/reactivity';
 import { CopyBufferToBuffer } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
-import { WebGPU } from '../WebGPU';
 import { WGPUBuffer } from '../caches/WGPUBuffer';
 import { GDeviceContext } from './GDeviceContext';
 
 export class WGPUCopyBufferToBuffer extends ReactiveObject
 {
-    static getInstance(webgpu: WebGPU, copyBufferToBuffer: CopyBufferToBuffer)
-    {
-        return new WGPUCopyBufferToBuffer(webgpu, copyBufferToBuffer);
-    }
+    run: (context: GDeviceContext) => void;
 
-    constructor(webgpu: WebGPU, copyBufferToBuffer: CopyBufferToBuffer)
+    constructor(device: GPUDevice, copyBufferToBuffer: CopyBufferToBuffer)
     {
         super();
 
-        this._onCreate(webgpu.device, copyBufferToBuffer);
-        this._onMap(webgpu.device, copyBufferToBuffer);
+        this._onCreate(device, copyBufferToBuffer);
+        this._onMap(device, copyBufferToBuffer);
     }
 
     private _onCreate(device: GPUDevice, copyBufferToBuffer: CopyBufferToBuffer)
@@ -65,7 +61,10 @@ export class WGPUCopyBufferToBuffer extends ReactiveObject
         this.destroyCall(() => { device.copyBufferToBuffers.delete(copyBufferToBuffer); });
     }
 
-    run: (context: GDeviceContext) => void;
+    static getInstance(device: GPUDevice, copyBufferToBuffer: CopyBufferToBuffer)
+    {
+        return device.copyBufferToBuffers?.get(copyBufferToBuffer) || new WGPUCopyBufferToBuffer(device, copyBufferToBuffer);
+    }
 }
 
 declare global

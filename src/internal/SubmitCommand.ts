@@ -3,7 +3,7 @@ import { reactive } from '@feng3d/reactivity';
 import { Submit } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
 import { WebGPU } from '../WebGPU';
-import { CommandEncoderCommand } from './CommandEncoderCommand';
+import { WGPUCommandEncoder } from './WGPUCommandEncoder';
 import { GDeviceContext } from './GDeviceContext';
 
 export class SubmitCommand
@@ -17,7 +17,7 @@ export class SubmitCommand
     {
         this.commandBuffers = submit.commandEncoders.map((v) =>
         {
-            const commandEncoderCommand = CommandEncoderCommand.getInstance(this.webgpu, v);
+            const commandEncoderCommand = WGPUCommandEncoder.getInstance(this.webgpu.device, v);
 
             return commandEncoderCommand;
         });
@@ -39,7 +39,7 @@ export class SubmitCommand
         anyEmitter.emit(device.queue, GPUQueue_submit);
     }
 
-    commandBuffers: CommandEncoderCommand[];
+    commandBuffers: WGPUCommandEncoder[];
 }
 
 declare global
