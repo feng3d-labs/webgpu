@@ -25,25 +25,24 @@ export class WGPURenderPass extends ReactiveObject
 
         this.effect(() =>
         {
-            r_renderPass.renderPassObjects;
             r_renderPass.descriptor;
 
-            const { descriptor, renderPassObjects } = renderPass;
+            const { descriptor } = renderPass;
 
             const wgpuRenderPassFormat = WGPURenderPassFormat.getInstance(device, descriptor);
             reactive(wgpuRenderPassFormat).renderPassFormat;
 
             const renderPassFormat = wgpuRenderPassFormat.renderPassFormat;
 
-            const commands: CommandType[] = [];
-
-            if (renderPassObjects)
+            if (r_renderPass.renderPassObjects)
             {
+                const commands: CommandType[] = [];
                 const state = new WGPURenderObjectState();
                 let queryIndex = 0;
-                for (let i = 0, len = renderPassObjects.length; i < len; i++)
+
+                r_renderPass.renderPassObjects.concat();
+                renderPass.renderPassObjects.forEach((element) =>
                 {
-                    const element = renderPassObjects[i];
                     if (!element.__type__ || element.__type__ === 'RenderObject')
                     {
                         const wgpuRenderObject = WGPURenderObject.getInstance(device, element as RenderObject, renderPassFormat);
@@ -67,10 +66,14 @@ export class WGPURenderPass extends ReactiveObject
                     {
                         throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
                     }
-                }
-            }
+                });
 
-            this.commands = commands;
+                this.commands = commands;
+            }
+            else
+            {
+                this.commands = [];
+            }
         });
     }
 

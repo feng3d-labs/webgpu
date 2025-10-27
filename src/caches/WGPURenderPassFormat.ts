@@ -49,24 +49,25 @@ export class WGPURenderPassFormat extends ReactiveObject
         this.effect(() =>
         {
             // 监听描述符中的相关属性变化
-            r_descriptor.attachmentSize?.width;
-            r_descriptor.attachmentSize?.height;
             r_descriptor.colorAttachments?.map((v) => v.view.texture);
             r_descriptor.depthStencilAttachment?.view?.texture;
             r_descriptor.sampleCount;
 
+            //
+            const attachmentSize = { width: r_descriptor.attachmentSize?.width, height: r_descriptor.attachmentSize?.height };
+
             // 计算颜色附件的纹理格式
-            const colorAttachmentTextureFormats: GPUTextureFormat[] = [];
+            const colorFormats: GPUTextureFormat[] = [];
 
-            const attachmentSize = { ...descriptor.attachmentSize };
-
+            //
+            r_descriptor.colorAttachments.concat();
             descriptor.colorAttachments.forEach((v) =>
             {
                 const wgpuTextureLike = WGPUTextureLike.getInstance(device, v.view?.texture);
                 // reactive(wgpuTextureLike).gpuTexture;
                 const gpuTexture = wgpuTextureLike.gpuTexture;
 
-                colorAttachmentTextureFormats.push(gpuTexture.format);
+                colorFormats.push(gpuTexture.format);
 
                 if (attachmentSize.width === undefined)
                 {
@@ -80,7 +81,7 @@ export class WGPURenderPassFormat extends ReactiveObject
             });
 
             // 计算深度模板附件的纹理格式
-            let depthStencilAttachmentTextureFormat: GPUTextureFormat;
+            let depthStencilFormat: GPUTextureFormat;
 
             if (descriptor.depthStencilAttachment?.view?.texture)
             {
@@ -89,7 +90,7 @@ export class WGPURenderPassFormat extends ReactiveObject
                 const gpuTexture = wgpuTextureLike.gpuTexture;
 
                 //
-                depthStencilAttachmentTextureFormat = gpuTexture.format;
+                depthStencilFormat = gpuTexture.format;
 
                 if (attachmentSize.width === undefined)
                 {
@@ -104,14 +105,14 @@ export class WGPURenderPassFormat extends ReactiveObject
             // 这与WGPURenderPassDepthStencilAttachment中自动创建深度纹理的逻辑保持一致
             else if (descriptor.depthStencilAttachment)
             {
-                depthStencilAttachmentTextureFormat = 'depth24plus';
+                depthStencilFormat = 'depth24plus';
             }
 
             // 构建渲染通道格式对象
             const renderPassFormat: RenderPassFormat = {
                 attachmentSize: attachmentSize,
-                colorFormats: colorAttachmentTextureFormats,
-                depthStencilFormat: depthStencilAttachmentTextureFormat,
+                colorFormats: colorFormats,
+                depthStencilFormat: depthStencilFormat,
                 sampleCount: descriptor.sampleCount,
             };
 
