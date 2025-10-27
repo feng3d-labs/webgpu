@@ -28,18 +28,18 @@ const init = async (canvas: HTMLCanvasElement) =>
         draw: { __type__: 'DrawVertex', vertexCount: 3 },
     };
 
+    const data: Submit = {
+        commandEncoders: [
+            {
+                passEncoders: [
+                    { descriptor: renderPassDescriptor, renderPassObjects: [renderObject] },
+                ],
+            },
+        ],
+    };
+
     function frame()
     {
-        const data: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPassDescriptor, renderPassObjects: [renderObject] },
-                    ],
-                },
-            ],
-        };
-
         webgpu.submit(data);
 
         requestAnimationFrame(frame);

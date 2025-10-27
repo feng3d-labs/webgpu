@@ -23,6 +23,11 @@ import { Effect, effect, EffectScope } from '@feng3d/reactivity';
  */
 export class ReactiveObject
 {
+    constructor()
+    {
+        console.log(this.constructor.name, map[this.constructor.name] = (map[this.constructor.name] || 0) + 1);
+    }
+
     /**
      * 副作用作用域
      *
@@ -124,3 +129,5 @@ export class ReactiveObject
         this._effectScope = null;
     }
 }
+
+const map: { [key: string]: number } = {};
