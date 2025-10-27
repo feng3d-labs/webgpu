@@ -165,4 +165,19 @@ declare global
         /** 纹理视图实例缓存映射表 */
         textureViews: WeakMap<TextureView, WGPUTextureView>;
     }
+
+    interface GPUTextureView
+    {
+        texture: GPUTexture;
+    }
 }
+
+((createView: (descriptor: GPUTextureViewDescriptor) => GPUTextureView) =>
+{
+    GPUTexture.prototype.createView = function (this: GPUTexture, descriptor: GPUTextureViewDescriptor): GPUTextureView
+    {
+        const textureView: GPUTextureView = createView.call(this, descriptor);
+        textureView.texture = this;
+        return textureView;
+    }
+})(GPUTexture.prototype.createView);

@@ -1,7 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
 import { RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
-import { WGPURenderPassFormat } from '../caches/WGPURenderPassFormat';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
 import { WGPURenderBundle } from './WGPURenderBundle';
@@ -9,6 +8,7 @@ import { CommandType, runCommands, WGPURenderObject, WGPURenderObjectState } fro
 
 export class WGPURenderPass extends ReactiveObject
 {
+    renderPassDescriptor: GPURenderPassDescriptor;
     commands: CommandType[];
 
     constructor(device: GPUDevice, public readonly renderPass: RenderPass)
@@ -27,12 +27,11 @@ export class WGPURenderPass extends ReactiveObject
         {
             r_renderPass.descriptor;
 
-            const { descriptor } = renderPass;
+            const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, this.renderPass);
+            reactive(wgpuRenderPassDescriptor).gpuRenderPassDescriptor;
+            this.renderPassDescriptor = wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
 
-            const wgpuRenderPassFormat = WGPURenderPassFormat.getInstance(device, descriptor);
-            reactive(wgpuRenderPassFormat).renderPassFormat;
-
-            const renderPassFormat = wgpuRenderPassFormat.renderPassFormat;
+            const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
 
             if (r_renderPass.renderPassObjects)
             {
@@ -79,11 +78,7 @@ export class WGPURenderPass extends ReactiveObject
 
     run(device: GPUDevice, commandEncoder: GPUCommandEncoder)
     {
-        const { commands } = this;
-
-        const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, this.renderPass);
-        reactive(wgpuRenderPassDescriptor).gpuRenderPassDescriptor;
-        const renderPassDescriptor = wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
+        const { commands, renderPassDescriptor } = this;
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
