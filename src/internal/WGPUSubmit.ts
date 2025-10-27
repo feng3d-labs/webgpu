@@ -2,24 +2,37 @@ import { anyEmitter } from '@feng3d/event';
 import { reactive } from '@feng3d/reactivity';
 import { Submit } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
+import { ReactiveObject } from '../ReactiveObject';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
 import { WGPUCommandEncoder } from './WGPUCommandEncoder';
 
-export class WGPUSubmit
+export class WGPUSubmit extends ReactiveObject
 {
-    static getInstance(webgpu: WebGPU, submit: Submit)
-    {
-        return new WGPUSubmit(webgpu, submit);
-    }
+    commandBuffers: WGPUCommandEncoder[];
 
     constructor(public readonly webgpu: WebGPU, public readonly submit: Submit)
     {
-        this.commandBuffers = submit.commandEncoders.map((v) =>
-        {
-            const commandEncoderCommand = WGPUCommandEncoder.getInstance(this.webgpu.device, v);
+        super();
 
-            return commandEncoderCommand;
+        this._onCreate(webgpu.device, submit);
+        this._onMap(webgpu.device, submit);
+    }
+
+    private _onCreate(device: GPUDevice, submit: Submit)
+    {
+        const r_submit = reactive(submit);
+
+        this.effect(() =>
+        {
+            r_submit.commandEncoders.concat();
+
+            this.commandBuffers = submit.commandEncoders.map((v) =>
+            {
+                const commandEncoderCommand = WGPUCommandEncoder.getInstance(device, v);
+
+                return commandEncoderCommand;
+            });
         });
     }
 
@@ -39,11 +52,26 @@ export class WGPUSubmit
         anyEmitter.emit(device.queue, GPUQueue_submit);
     }
 
-    commandBuffers: WGPUCommandEncoder[];
+    private _onMap(device: GPUDevice, submit: Submit)
+    {
+        device.submitCommands ??= new WeakMap<Submit, WGPUSubmit>();
+        device.submitCommands.set(submit, this);
+        this.destroyCall(() => { device.submitCommands.delete(submit); });
+    }
+
+    static getInstance(webgpu: WebGPU, submit: Submit)
+    {
+        return webgpu.device.submitCommands?.get(submit) || new WGPUSubmit(webgpu, submit);
+    }
 }
 
 declare global
 {
+    interface GPUDevice
+    {
+        submitCommands: WeakMap<Submit, WGPUSubmit>;
+    }
+
     interface GPUQueue
     {
         preSubmit: number;
