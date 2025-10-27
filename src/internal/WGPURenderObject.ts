@@ -177,28 +177,27 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
 
             //
             const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(pipeline.vertex, vertices);
-            reactive(wgpuVertexBufferLayout).vertexBuffers;
-            const vertexBuffers = wgpuVertexBufferLayout.vertexBuffers;
+            reactive(wgpuVertexBufferLayout).vertexDatas;
+            const vertexDatas = wgpuVertexBufferLayout.vertexDatas;
 
-            this.setVertexBuffer.length = vertexBuffers?.length ?? 0;
-            vertexBuffers?.forEach((vertexBuffer, index) =>
+            this.setVertexBuffer.length = vertexDatas?.length ?? 0;
+            vertexDatas?.forEach((data, index) =>
             {
-                // 监听
-                const r_vertexBuffer = reactive(vertexBuffer);
-
-                r_vertexBuffer.data;
-                r_vertexBuffer.offset;
-                r_vertexBuffer.size;
-
                 // 执行
-                const { data, offset, size } = vertexBuffer;
-                const buffer = Buffer.getBuffer(data);
+                const offset = data.byteOffset;
+                const size = data.byteLength;
+                const buffer = Buffer.getBuffer(data.buffer);
 
-                (buffer as any).label = buffer.label || (`顶点属性 ${autoVertexIndex++}`);
+                if (!buffer.label)
+                {
+                    reactive(buffer).label = (`顶点数据 ${autoVertexIndex++}`);
+                }
 
-                const gBuffer = WGPUBuffer.getInstance(device, buffer).gpuBuffer;
+                const wgpuBuffer = WGPUBuffer.getInstance(device, buffer);
+                reactive(wgpuBuffer).gpuBuffer;
+                const gpuBuffer = wgpuBuffer.gpuBuffer;
 
-                this.setVertexBuffer[index] = ['setVertexBuffer', index, gBuffer, offset, size];
+                this.setVertexBuffer[index] = ['setVertexBuffer', index, gpuBuffer, offset, size];
             });
 
             // 监听
@@ -207,7 +206,6 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
             if (!indices)
             {
                 this.setIndexBuffer = null;
-
             }
             else
             {

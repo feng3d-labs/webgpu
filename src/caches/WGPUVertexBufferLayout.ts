@@ -1,10 +1,8 @@
 import { reactive } from '@feng3d/reactivity';
-import { VertexAttributes, VertexDataTypes, vertexFormatMap, VertexState } from '@feng3d/render-api';
+import { VertexAttributes, VertexData, vertexFormatMap, VertexState } from '@feng3d/render-api';
 import { FunctionInfo } from 'wgsl_reflect';
-import { VertexBuffer } from '../internal/VertexBuffer';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
-import { WGPUVertexBuffer } from './WGPUVertexBuffer';
 
 /**
  * WebGPU顶点缓冲区布局缓存管理器
@@ -44,12 +42,12 @@ export class WGPUVertexBufferLayout extends ReactiveObject
     readonly vertexBufferLayouts: GPUVertexBufferLayout[];
 
     /**
-     * 顶点缓冲区数组
+     * 顶点数据数组
      *
-     * 包含所有顶点缓冲区的数据信息，与vertexBufferLayouts一一对应。
+     * 包含所有顶点数据，与vertexBufferLayouts 中的布局一一对应。
      * 当顶点状态或顶点属性发生变化时，此数组会自动重新创建。
      */
-    readonly vertexBuffers: VertexBuffer[];
+    readonly vertexDatas: VertexData[];
 
     /**
      * 构造函数
@@ -133,8 +131,8 @@ export class WGPUVertexBufferLayout extends ReactiveObject
 
             // 初始化顶点缓冲区布局和缓冲区数组
             const vertexBufferLayouts: GPUVertexBufferLayout[] = [];
-            const vertexBuffers: VertexBuffer[] = [];
-            const bufferIndexMap = new Map<VertexDataTypes, number>();
+            const vertexDatas: VertexData[] = [];
+            const bufferIndexMap = new Map<VertexData, number>();
 
             // 遍历顶点着色器的所有输入属性
             vertexEntryFunctionInfo.inputs.forEach((inputInfo) =>
@@ -193,10 +191,7 @@ export class WGPUVertexBufferLayout extends ReactiveObject
                     bufferIndexMap.set(data, index);
 
                     // 获取或创建顶点缓冲区实例
-                    const wgpuVertexBuffer = WGPUVertexBuffer.getInstance(vertexAttribute);
-                    reactive(wgpuVertexBuffer).vertexBuffer;
-
-                    vertexBuffers[index] = wgpuVertexBuffer.vertexBuffer;
+                    vertexDatas[index] = vertexAttribute.data;
 
                     // 创建GPU顶点缓冲区布局
                     gpuVertexBufferLayout = vertexBufferLayouts[index] = { stepMode, arrayStride, attributes: [] };
@@ -218,7 +213,7 @@ export class WGPUVertexBufferLayout extends ReactiveObject
 
             // 更新顶点缓冲区布局和缓冲区引用
             r_this.vertexBufferLayouts = vertexBufferLayouts;
-            r_this.vertexBuffers = vertexBuffers;
+            r_this.vertexDatas = vertexDatas;
         });
     }
 

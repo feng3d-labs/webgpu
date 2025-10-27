@@ -58,9 +58,9 @@ export class WebGPU
     {
         const device = this.device;
 
-        const submitCommand = WGPUSubmit.getInstance(device, submit);
+        const wgpuSubmit = WGPUSubmit.getInstance(device, submit);
 
-        submitCommand.run(device);
+        wgpuSubmit.run(device);
     }
 
     destoryTexture(texture: TextureLike)
