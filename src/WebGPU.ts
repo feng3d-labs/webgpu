@@ -1,16 +1,12 @@
-import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { Buffer, ChainMap, ReadPixels, Submit, TextureLike } from '@feng3d/render-api';
+import { reactive } from '@feng3d/reactivity';
+import { Buffer, ReadPixels, Submit, TextureLike } from '@feng3d/render-api';
 
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
-import { RenderBundle } from './data/RenderBundle';
 import { GDeviceContext } from './internal/GDeviceContext';
-import { RenderBundleCommand } from './internal/RenderBundleCommand';
-import { RenderPassFormat } from './internal/RenderPassFormat';
 import { SubmitCommand } from './internal/SubmitCommand';
-import { CommandType, WGPURenderObject, WGPURenderObjectState } from './internal/WGPURenderObject';
 import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
@@ -129,55 +125,4 @@ export class WebGPU
 
         return result;
     }
-
-    runRenderBundle(renderPassFormat: RenderPassFormat, renderBundleObject: RenderBundle)
-    {
-        const gpuRenderBundleKey: GPURenderBundleKey = [renderBundleObject, renderPassFormat];
-        let result = gpuRenderBundleMap.get(gpuRenderBundleKey);
-
-        if (result) return result.value;
-
-        const renderBundleCommand = new RenderBundleCommand();
-
-        result = computed(() =>
-        {
-            // 监听
-            const r_renderBundleObject = reactive(renderBundleObject);
-
-            r_renderBundleObject.renderObjects;
-            r_renderBundleObject.descriptor?.depthReadOnly;
-            r_renderBundleObject.descriptor?.stencilReadOnly;
-
-            // 执行
-            const descriptor: GPURenderBundleEncoderDescriptor = { ...renderBundleObject.descriptor, ...renderPassFormat };
-
-            renderBundleCommand.descriptor = descriptor;
-
-            //
-            const commands: CommandType[] = [];
-            const state = new WGPURenderObjectState();
-
-            renderBundleObject.renderObjects.forEach((renderObject) =>
-            {
-                const wgpuRenderObject = WGPURenderObject.getInstance(this.device, renderObject, renderPassFormat);
-
-                wgpuRenderObject.run(undefined, commands, state);
-            });
-
-            renderBundleCommand.bundleCommands = commands.filter((command) => (
-                command[0] !== 'setViewport'
-                && command[0] !== 'setScissorRect'
-                && command[0] !== 'setBlendConstant'
-                && command[0] !== 'setStencilReference'
-            ));
-
-            return renderBundleCommand;
-        });
-        gpuRenderBundleMap.set(gpuRenderBundleKey, result);
-
-        return result.value;
-    }
 }
-
-type GPURenderBundleKey = [renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
-const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, Computed<RenderBundleCommand>>();

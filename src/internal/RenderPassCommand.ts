@@ -6,6 +6,7 @@ import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
 import { RenderPassFormat } from './RenderPassFormat';
 import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
+import { WGPURenderBundle } from './WGPURenderBundle';
 import { CommandType, RenderPassObjectCommand, runCommands, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
 
 export class RenderPassCommand
@@ -63,7 +64,9 @@ export class RenderPassCommand
                 }
                 if (element.__type__ === 'RenderBundle')
                 {
-                    return webgpu.runRenderBundle(renderPassFormat, element);
+                    const wgpuRenderBundle = WGPURenderBundle.getInstance(webgpu.device, element, renderPassFormat);
+
+                    return wgpuRenderBundle;
                 }
                 if (element.__type__ === 'OcclusionQuery')
                 {
