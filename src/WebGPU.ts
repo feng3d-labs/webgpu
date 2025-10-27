@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { Buffer, ChainMap, ReadPixels, RenderObject, Submit, TextureLike } from '@feng3d/render-api';
+import { Buffer, ChainMap, ReadPixels, Submit, TextureLike } from '@feng3d/render-api';
 
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
@@ -153,15 +153,15 @@ export class WebGPU
 
             renderBundleCommand.descriptor = descriptor;
 
-            const renderObjectCaches = this.runRenderObjects(renderPassFormat, renderBundleObject.renderObjects);
-
             //
             const commands: CommandType[] = [];
             const state = new WGPURenderObjectState();
 
-            renderObjectCaches.forEach((renderObjectCache) =>
+            renderBundleObject.renderObjects.forEach((renderObject) =>
             {
-                renderObjectCache.run(undefined, commands, state);
+                const wgpuRenderObject = WGPURenderObject.getInstance(this.device, renderObject, renderPassFormat);
+
+                wgpuRenderObject.run(undefined, commands, state);
             });
 
             renderBundleCommand.bundleCommands = commands.filter((command) => (
@@ -177,31 +177,7 @@ export class WebGPU
 
         return result.value;
     }
-
-    runRenderObjects(renderPassFormat: RenderPassFormat, renderObjects: readonly RenderObject[])
-    {
-        const renderObjectCachesKey: RenderObjectCachesKey = [renderObjects, renderPassFormat];
-        let result = this._renderObjectCachesMap.get(renderObjectCachesKey);
-
-        if (result) return result.value;
-
-        result = computed(() =>
-        {
-            //
-            const renderObjectCaches = renderObjects.map((element) =>
-                WGPURenderObject.getInstance(this.device, element as RenderObject, renderPassFormat));
-
-            return renderObjectCaches;
-        });
-        this._renderObjectCachesMap.set(renderObjectCachesKey, result);
-
-        return result.value;
-    }
-
-    private _renderObjectCachesMap = new ChainMap<RenderObjectCachesKey, Computed<WGPURenderObject[]>>();
 }
 
 type GPURenderBundleKey = [renderBundle: RenderBundle, renderPassFormat: RenderPassFormat];
 const gpuRenderBundleMap = new ChainMap<GPURenderBundleKey, Computed<RenderBundleCommand>>();
-
-type RenderObjectCachesKey = [renderObjects: readonly RenderObject[], renderPassFormat: RenderPassFormat];

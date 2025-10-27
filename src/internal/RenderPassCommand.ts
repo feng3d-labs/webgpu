@@ -4,8 +4,8 @@ import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { WGPURenderPassFormat } from '../caches/WGPURenderPassFormat';
 import { WebGPU } from '../WebGPU';
 import { GDeviceContext } from './GDeviceContext';
-import { OcclusionQueryCache } from './OcclusionQueryCache';
 import { RenderPassFormat } from './RenderPassFormat';
+import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
 import { CommandType, RenderPassObjectCommand, runCommands, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
 
 export class RenderPassCommand
@@ -67,11 +67,11 @@ export class RenderPassCommand
                 }
                 if (element.__type__ === 'OcclusionQuery')
                 {
-                    const occlusionQueryCache = OcclusionQueryCache.getInstance(webgpu, renderPassFormat, element);
+                    const wgpuOcclusionQuery = WGPUOcclusionQuery.getInstance(webgpu.device, renderPassFormat, element);
 
-                    occlusionQueryCache.queryIndex = queryIndex++;
+                    wgpuOcclusionQuery.queryIndex = queryIndex++;
 
-                    return occlusionQueryCache;
+                    return wgpuOcclusionQuery;
                 }
 
                 throw `未处理 ${(element as RenderPassObject).__type__} 类型的渲染通道对象！`;
