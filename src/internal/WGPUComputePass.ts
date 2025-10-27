@@ -2,12 +2,11 @@ import { reactive } from '@feng3d/reactivity';
 import { WGPUTimestampQuery } from '../caches/WGPUTimestampQuery';
 import { ComputePass } from '../data/ComputePass';
 import { ReactiveObject } from '../ReactiveObject';
-import { GDeviceContext } from './GDeviceContext';
 import { WGPUComputeObject } from './WGPUComputeObject';
 
 export class WGPUComputePass extends ReactiveObject
 {
-    run: (context: GDeviceContext) => void;
+    run: (device: GPUDevice, commandEncoder: GPUCommandEncoder) => void;
 
     constructor(device: GPUDevice, computePass: ComputePass)
     {
@@ -36,18 +35,17 @@ export class WGPUComputePass extends ReactiveObject
             computeObjectCommands = computePass.computeObjects.map((computeObject) => WGPUComputeObject.getInstance(device, computeObject));
         });
 
-        this.run = (context: GDeviceContext) =>
+        this.run = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
         {
             //
-            context.passEncoder = context.gpuCommandEncoder.beginComputePass(descriptor);
+            const passEncoder = commandEncoder.beginComputePass(descriptor);
 
-            computeObjectCommands.forEach((command) => command.run(context));
+            computeObjectCommands.forEach((command) => command.run(device, passEncoder));
 
-            context.passEncoder.end();
-            context.passEncoder = null;
+            passEncoder.end();
 
             // 处理时间戳查询
-            descriptor.timestampWrites?.resolve(context.gpuCommandEncoder);
+            descriptor.timestampWrites?.resolve(commandEncoder);
         }
     }
 

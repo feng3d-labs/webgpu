@@ -5,7 +5,6 @@ import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
-import { GDeviceContext } from './internal/GDeviceContext';
 import { WGPUSubmit } from './internal/WGPUSubmit';
 import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
@@ -59,11 +58,9 @@ export class WebGPU
     {
         const device = this.device;
 
-        const submitCommand = WGPUSubmit.getInstance(this, submit);
+        const submitCommand = WGPUSubmit.getInstance(device, submit);
 
-        const context = GDeviceContext.getInstance(device);
-
-        submitCommand.run(context);
+        submitCommand.run(device);
     }
 
     destoryTexture(texture: TextureLike)

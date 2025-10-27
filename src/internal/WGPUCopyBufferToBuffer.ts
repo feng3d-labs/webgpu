@@ -2,11 +2,10 @@ import { reactive } from '@feng3d/reactivity';
 import { CopyBufferToBuffer } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUBuffer } from '../caches/WGPUBuffer';
-import { GDeviceContext } from './GDeviceContext';
 
 export class WGPUCopyBufferToBuffer extends ReactiveObject
 {
-    run: (context: GDeviceContext) => void;
+    run: (device: GPUDevice, commandEncoder: GPUCommandEncoder) => void;
 
     constructor(device: GPUDevice, copyBufferToBuffer: CopyBufferToBuffer)
     {
@@ -46,11 +45,9 @@ export class WGPUCopyBufferToBuffer extends ReactiveObject
             size = copyBufferToBuffer.size ?? source.size;
         });
 
-        this.run = (context: GDeviceContext) =>
+        this.run = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
         {
-            context.gpuCommandEncoder.copyBufferToBuffer(
-                source, sourceOffset, destination, destinationOffset, size,
-            );
+            commandEncoder.copyBufferToBuffer(source, sourceOffset, destination, destinationOffset, size);
         }
     }
 

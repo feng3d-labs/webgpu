@@ -3,7 +3,6 @@ import { RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { WGPURenderPassFormat } from '../caches/WGPURenderPassFormat';
 import { ReactiveObject } from '../ReactiveObject';
-import { GDeviceContext } from './GDeviceContext';
 import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
 import { WGPURenderBundle } from './WGPURenderBundle';
 import { CommandType, runCommands, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
@@ -75,15 +74,13 @@ export class WGPURenderPass extends ReactiveObject
         });
     }
 
-    run(context: GDeviceContext)
+    run(device: GPUDevice, commandEncoder: GPUCommandEncoder)
     {
         const { commands } = this;
 
-        const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(context.device, this.renderPass);
+        const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, this.renderPass);
         reactive(wgpuRenderPassDescriptor).gpuRenderPassDescriptor;
         const renderPassDescriptor = wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
-
-        const commandEncoder = context.gpuCommandEncoder;
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 

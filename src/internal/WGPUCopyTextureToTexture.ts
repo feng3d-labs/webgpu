@@ -2,11 +2,10 @@ import { reactive } from '@feng3d/reactivity';
 import { CopyTextureToTexture, TextureSize } from '@feng3d/render-api';
 import { WGPUTextureLike } from '../caches/WGPUTextureLike';
 import { ReactiveObject } from '../ReactiveObject';
-import { GDeviceContext } from './GDeviceContext';
 
 export class WGPUCopyTextureToTexture extends ReactiveObject
 {
-    run: (context: GDeviceContext) => void;
+    run: (device: GPUDevice, commandEncoder: GPUCommandEncoder) => void;
 
     constructor(device: GPUDevice, copyTextureToTexture: CopyTextureToTexture)
     {
@@ -44,13 +43,9 @@ export class WGPUCopyTextureToTexture extends ReactiveObject
             copySize = copyTextureToTexture.copySize;
         });
 
-        this.run = (context: GDeviceContext) =>
+        this.run = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
         {
-            context.gpuCommandEncoder.copyTextureToTexture(
-                source,
-                destination,
-                copySize,
-            );
+            commandEncoder.copyTextureToTexture(source, destination, copySize);
         }
     }
 

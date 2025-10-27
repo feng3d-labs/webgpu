@@ -2,7 +2,6 @@ import { CommandEncoder, RenderPass } from '@feng3d/render-api';
 
 import { reactive } from '@feng3d/reactivity';
 import { ReactiveObject } from '../ReactiveObject';
-import { GDeviceContext } from './GDeviceContext';
 import { WGPUComputePass } from './WGPUComputePass';
 import { WGPUCopyBufferToBuffer } from './WGPUCopyBufferToBuffer';
 import { WGPUCopyTextureToTexture } from './WGPUCopyTextureToTexture';
@@ -62,13 +61,13 @@ export class WGPUCommandEncoder extends ReactiveObject
         });
     }
 
-    run(context: GDeviceContext)
+    run(device: GPUDevice)
     {
-        context.gpuCommandEncoder = context.device.createCommandEncoder();
+        const gpuCommandEncoder = device.createCommandEncoder();
 
-        this.passEncoders.forEach((passEncoder) => passEncoder.run(context));
+        this.passEncoders.forEach((passEncoder) => passEncoder.run(device, gpuCommandEncoder));
 
-        return context.gpuCommandEncoder.finish();
+        return gpuCommandEncoder.finish();
     }
 
     private _onMap(device: GPUDevice, commandEncoder: CommandEncoder)

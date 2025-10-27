@@ -4,11 +4,10 @@ import { WGPUComputePipeline } from '../caches/WGPUComputePipeline';
 import { WGPUPipelineLayout } from '../caches/WGPUPipelineLayout';
 import { ComputeObject } from '../data/ComputeObject';
 import { ReactiveObject } from '../ReactiveObject';
-import { GDeviceContext } from './GDeviceContext';
 
 export class WGPUComputeObject extends ReactiveObject
 {
-    run: (context: GDeviceContext) => void;
+    run: (device: GPUDevice, commandEncoder: GPUComputePassEncoder) => void;
 
     constructor(device: GPUDevice, computeObject: ComputeObject)
     {
@@ -51,18 +50,16 @@ export class WGPUComputeObject extends ReactiveObject
             dispatchWorkgroups = [r_computeObject.workgroups.workgroupCountX, r_computeObject.workgroups.workgroupCountY, r_computeObject.workgroups.workgroupCountZ];
         });
 
-        this.run = (context: GDeviceContext) =>
+        this.run = (device: GPUDevice, commandEncoder: GPUComputePassEncoder) =>
         {
-            const passEncoder = context.passEncoder;
-
-            passEncoder.setPipeline(computePipeline);
+            commandEncoder.setPipeline(computePipeline);
             setBindGroup.forEach(([index, bindGroup]) =>
             {
-                passEncoder.setBindGroup(index, bindGroup);
+                commandEncoder.setBindGroup(index, bindGroup);
             });
             const [workgroupCountX, workgroupCountY, workgroupCountZ] = dispatchWorkgroups;
 
-            passEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
+            commandEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
         }
     }
 
