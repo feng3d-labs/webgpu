@@ -134,12 +134,23 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             r_this.gpuRenderPassDescriptor = gpuRenderPassDescriptor;
 
             // 构建渲染通道格式对象
-            const renderPassFormat: RenderPassFormat = {
-                attachmentSize: attachmentSize,
-                colorFormats: colorFormats,
-                depthStencilFormat: depthStencilFormat,
-                sampleCount: r_descriptor.sampleCount,
-            };
+            let renderPassFormat: RenderPassFormat
+
+            const renderPassFormatKey = [attachmentSize.width, attachmentSize.height, ...colorFormats, depthStencilFormat, descriptor.sampleCount].join(',');
+            if (renderPassFormatCache[renderPassFormatKey])
+            {
+                renderPassFormat = renderPassFormatCache[renderPassFormatKey];
+            }
+            else
+            {
+                renderPassFormat = {
+                    attachmentSize: attachmentSize,
+                    colorFormats: colorFormats,
+                    depthStencilFormat: depthStencilFormat,
+                    sampleCount: r_descriptor.sampleCount,
+                };
+                renderPassFormatCache[renderPassFormatKey] = renderPassFormat;
+            }
 
             r_this.renderPassFormat = renderPassFormat;
         });
@@ -167,3 +178,5 @@ declare global
         renderPassDescriptors: WeakMap<RenderPass, WGPURenderPassDescriptor>;
     }
 }
+
+const renderPassFormatCache: { [key: string]: RenderPassFormat } = {}

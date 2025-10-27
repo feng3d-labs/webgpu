@@ -56,6 +56,7 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
         super();
 
         this._onCreate(device, renderObject, renderPassFormat);
+        this._onMap(device, renderObject, renderPassFormat);
     }
 
     private _onCreate(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
@@ -289,6 +290,13 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
         }
         draw && commands.push(draw);
         drawIndexed && commands.push(drawIndexed);
+    }
+
+    private _onMap(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
+    {
+        device.renderObjects ??= new ChainMap();
+        device.renderObjects.set([renderObject, renderPassFormat], this);
+        this.destroyCall(() => { device.renderObjects.delete([renderObject, renderPassFormat]); });
     }
 
     static getInstance(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
