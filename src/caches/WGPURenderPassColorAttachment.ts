@@ -56,7 +56,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
         super();
 
         // 设置颜色附件创建和更新逻辑
-        this._onCreateGPURenderPassColorAttachment(device, colorAttachment, descriptor);
+        this._onCreate(device, colorAttachment, descriptor);
 
         // 将实例注册到设备缓存中
         this._onMap(device, colorAttachment);
@@ -74,7 +74,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
      * @param colorAttachment 颜色附件配置对象
      * @param descriptor 渲染通道描述符
      */
-    private _onCreateGPURenderPassColorAttachment(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor)
+    private _onCreate(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor)
     {
         const r_this = reactive(this);
         const r_colorAttachment = reactive(colorAttachment);
@@ -83,14 +83,16 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
         // 如果渲染通道描述符没有设置附件尺寸，自动从纹理中获取
         if (!descriptor.attachmentSize)
         {
-            const gpuTextureLike = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
-            const gpuTexture = gpuTextureLike.gpuTexture;
-
-            // 设置渲染通道的附件尺寸
-            reactive(descriptor).attachmentSize = {
-                width: gpuTexture.width,
-                height: gpuTexture.height,
-            };
+            if (colorAttachment.view.texture)
+            {
+                const gpuTextureLike = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
+                const gpuTexture = gpuTextureLike.gpuTexture;
+                reactive(descriptor).attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
+            }
+            else
+            {
+                throw new Error('渲染通道描述符没有设置附件尺寸，也无法从颜色附件与深度模板附件中获取附件尺寸');
+            }
         }
 
         // 多重采样纹理实例，用于管理多重采样纹理的生命周期

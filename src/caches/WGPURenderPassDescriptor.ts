@@ -5,7 +5,6 @@ import { ReactiveObject } from '../ReactiveObject';
 import { WGPUQuerySet } from './WGPUQuerySet';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
 import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
-import { WGPUTextureLike } from './WGPUTextureLike';
 import { WGPUTimestampQuery } from './WGPUTimestampQuery';
 
 declare global
@@ -31,8 +30,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass)
     {
-        this._initAttachmentSize(device, renderPass);
-
         const r_this = reactive(this);
         const r_renderPass = reactive(renderPass);
 
@@ -164,41 +161,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         });
 
         this.destroyCall(() => { r_this.gpuRenderPassDescriptor = null; });
-    }
-
-    private _initAttachmentSize(device: GPUDevice, renderPass: RenderPass)
-    {
-        const r_renderPass = reactive(renderPass);
-
-        this.effect(() =>
-        {
-            r_renderPass.descriptor;
-
-            const descriptor = renderPass.descriptor;
-            if (!descriptor.attachmentSize)
-            {
-                for (let i = 0; i < descriptor.colorAttachments.length; i++)
-                {
-                    const colorAttachment = descriptor.colorAttachments[i];
-                    if (!colorAttachment) continue;
-                    const wGPUTextureLike = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
-                    const gpuTexture = wGPUTextureLike.gpuTexture;
-
-                    reactive(descriptor).attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
-                    return;
-                }
-
-                if (descriptor.depthStencilAttachment)
-                {
-                    const wGPUTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
-                    const gpuTexture = wGPUTextureLike.gpuTexture;
-                    reactive(descriptor).attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
-                    return;
-                }
-
-                throw new Error('渲染通道描述符没有设置附件尺寸，无法初始化附件尺寸');
-            }
-        });
     }
 
     private _onMap(device: GPUDevice, renderPass: RenderPass)
