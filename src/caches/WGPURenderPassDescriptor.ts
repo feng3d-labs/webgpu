@@ -5,6 +5,7 @@ import { ReactiveObject } from '../ReactiveObject';
 import { WGPUQuerySet } from './WGPUQuerySet';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
 import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
+import { WGPUTextureLike } from './WGPUTextureLike';
 import { WGPUTimestampQuery } from './WGPUTimestampQuery';
 
 declare global
@@ -30,6 +31,8 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass)
     {
+        this._initAttachmentSize(device, renderPass);
+
         const r_this = reactive(this);
         const r_renderPass = reactive(renderPass);
 
@@ -39,11 +42,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
             const descriptor: RenderPassDescriptor = renderPass.descriptor;
             const r_descriptor = reactive(descriptor);
-
-            //
-            const attachmentSize = { width: r_descriptor.attachmentSize?.width, height: r_descriptor.attachmentSize?.height };
-            // 计算颜色附件的纹理格式
-            const colorFormats: GPUTextureFormat[] = [];
 
             //
             const label = r_descriptor.label;
@@ -57,20 +55,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
                 const wgpuRenderPassColorAttachment = WGPURenderPassColorAttachment.getInstance(device, v, descriptor);
                 reactive(wgpuRenderPassColorAttachment).gpuRenderPassColorAttachment;
                 const attachment = wgpuRenderPassColorAttachment.gpuRenderPassColorAttachment;
-
-                const gpuTexture = attachment.view.texture;
-
-                colorFormats.push(gpuTexture.format);
-
-                if (attachmentSize.width === undefined)
-                {
-                    attachmentSize.width = gpuTexture.width;
-                }
-
-                if (attachmentSize.height === undefined)
-                {
-                    attachmentSize.height = gpuTexture.height;
-                }
 
                 pre.push(attachment);
 
@@ -112,15 +96,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
                 //
                 depthStencilFormat = gpuTexture.format;
-
-                if (attachmentSize.width === undefined)
-                {
-                    attachmentSize.width = gpuTexture.width;
-                }
-                if (attachmentSize.height === undefined)
-                {
-                    attachmentSize.height = gpuTexture.height;
-                }
             }
 
             //
@@ -132,11 +107,40 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
             //
             r_this.gpuRenderPassDescriptor = gpuRenderPassDescriptor;
+        });
+
+        this.effect(() =>
+        {
+            r_this.gpuRenderPassDescriptor;
+
+            const gpuRenderPassDescriptor = this.gpuRenderPassDescriptor;
+
+            let attachmentSize: { width: number, height: number } = null;
+            const colorFormats: GPUTextureFormat[] = [];
+            let sampleCount: number;
+
+            const colorAttachments = Array.from(gpuRenderPassDescriptor.colorAttachments);
+            for (let i = 0; i < colorAttachments.length; i++)
+            {
+                const colorAttachment = colorAttachments[i];
+                const gpuTexture = colorAttachment.view.texture;
+                colorFormats.push(gpuTexture.format);
+
+                if (!attachmentSize)
+                {
+                    attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
+                }
+                if (colorAttachment.resolveTarget)
+                {
+                    sampleCount = gpuTexture.sampleCount;
+                }
+            }
+            const depthStencilFormat = gpuRenderPassDescriptor.depthStencilAttachment?.view.texture.format;
 
             // 构建渲染通道格式对象
             let renderPassFormat: RenderPassFormat
 
-            const renderPassFormatKey = [attachmentSize.width, attachmentSize.height, ...colorFormats, depthStencilFormat, descriptor.sampleCount].join(',');
+            const renderPassFormatKey = [attachmentSize.width, attachmentSize.height, ...colorFormats, depthStencilFormat, sampleCount].join(',');
             if (renderPassFormatCache[renderPassFormatKey])
             {
                 renderPassFormat = renderPassFormatCache[renderPassFormatKey];
@@ -147,15 +151,54 @@ export class WGPURenderPassDescriptor extends ReactiveObject
                     attachmentSize: attachmentSize,
                     colorFormats: colorFormats,
                     depthStencilFormat: depthStencilFormat,
-                    sampleCount: r_descriptor.sampleCount,
+                    sampleCount: sampleCount as 4,
                 };
                 renderPassFormatCache[renderPassFormatKey] = renderPassFormat;
             }
 
-            r_this.renderPassFormat = renderPassFormat;
+            if (renderPassFormat !== this.renderPassFormat)
+            {
+                r_this.renderPassFormat = renderPassFormat;
+            }
+
         });
 
         this.destroyCall(() => { r_this.gpuRenderPassDescriptor = null; });
+    }
+
+    private _initAttachmentSize(device: GPUDevice, renderPass: RenderPass)
+    {
+        const r_renderPass = reactive(renderPass);
+
+        this.effect(() =>
+        {
+            r_renderPass.descriptor;
+
+            const descriptor = renderPass.descriptor;
+            if (!descriptor.attachmentSize)
+            {
+                for (let i = 0; i < descriptor.colorAttachments.length; i++)
+                {
+                    const colorAttachment = descriptor.colorAttachments[i];
+                    if (!colorAttachment) continue;
+                    const wGPUTextureLike = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
+                    const gpuTexture = wGPUTextureLike.gpuTexture;
+
+                    reactive(descriptor).attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
+                    return;
+                }
+
+                if (descriptor.depthStencilAttachment)
+                {
+                    const wGPUTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
+                    const gpuTexture = wGPUTextureLike.gpuTexture;
+                    reactive(descriptor).attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
+                    return;
+                }
+
+                throw new Error('渲染通道描述符没有设置附件尺寸，无法初始化附件尺寸');
+            }
+        });
     }
 
     private _onMap(device: GPUDevice, renderPass: RenderPass)

@@ -2,14 +2,16 @@ import { reactive } from '@feng3d/reactivity';
 import { RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { ReactiveObject } from '../ReactiveObject';
+import { RenderPassFormat } from './RenderPassFormat';
 import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
 import { WGPURenderBundle } from './WGPURenderBundle';
 import { CommandType, runCommands, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
 
 export class WGPURenderPass extends ReactiveObject
 {
-    renderPassDescriptor: GPURenderPassDescriptor;
-    commands: CommandType[];
+    readonly renderPassDescriptor: GPURenderPassDescriptor;
+    readonly renderPassFormat: RenderPassFormat;
+    readonly commands: CommandType[];
 
     constructor(device: GPUDevice, public readonly renderPass: RenderPass)
     {
@@ -21,17 +23,22 @@ export class WGPURenderPass extends ReactiveObject
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass)
     {
+        const r_this = reactive(this);
         const r_renderPass = reactive(renderPass);
 
         this.effect(() =>
         {
-            r_renderPass.descriptor;
-
             const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, this.renderPass);
             reactive(wgpuRenderPassDescriptor).gpuRenderPassDescriptor;
-            this.renderPassDescriptor = wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
+            r_this.renderPassDescriptor = wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
 
-            const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
+            r_this.renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
+        });
+
+        this.effect(() =>
+        {
+            r_this.renderPassFormat;
+            const renderPassFormat = r_this.renderPassFormat;
 
             if (r_renderPass.renderPassObjects)
             {
@@ -67,11 +74,11 @@ export class WGPURenderPass extends ReactiveObject
                     }
                 });
 
-                this.commands = commands;
+                r_this.commands = commands;
             }
             else
             {
-                this.commands = [];
+                r_this.commands = null;
             }
         });
     }
@@ -82,7 +89,10 @@ export class WGPURenderPass extends ReactiveObject
 
         const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
-        runCommands(passEncoder, commands);
+        if (commands)
+        {
+            runCommands(passEncoder, commands);
+        }
         passEncoder.end();
 
         renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
