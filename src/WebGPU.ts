@@ -6,7 +6,7 @@ import { WGPUTextureLike } from './caches/WGPUTextureLike';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
 import { GDeviceContext } from './internal/GDeviceContext';
-import { SubmitCommand } from './internal/SubmitCommand';
+import { WGPUSubmit } from './internal/WGPUSubmit';
 import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
@@ -59,7 +59,7 @@ export class WebGPU
     {
         const device = this.device;
 
-        const submitCommand = SubmitCommand.getInstance(this, submit);
+        const submitCommand = WGPUSubmit.getInstance(this, submit);
 
         const context = GDeviceContext.getInstance(device);
 

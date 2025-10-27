@@ -3,14 +3,14 @@ import { reactive } from '@feng3d/reactivity';
 import { Submit } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
 import { WebGPU } from '../WebGPU';
-import { WGPUCommandEncoder } from './WGPUCommandEncoder';
 import { GDeviceContext } from './GDeviceContext';
+import { WGPUCommandEncoder } from './WGPUCommandEncoder';
 
-export class SubmitCommand
+export class WGPUSubmit
 {
     static getInstance(webgpu: WebGPU, submit: Submit)
     {
-        return new SubmitCommand(webgpu, submit);
+        return new WGPUSubmit(webgpu, submit);
     }
 
     constructor(public readonly webgpu: WebGPU, public readonly submit: Submit)
