@@ -48,11 +48,6 @@ export class WGPURenderPassFormat extends ReactiveObject
 
         this.effect(() =>
         {
-            // 监听描述符中的相关属性变化
-            r_descriptor.colorAttachments?.map((v) => v.view.texture);
-            r_descriptor.depthStencilAttachment?.view?.texture;
-            r_descriptor.sampleCount;
-
             //
             const attachmentSize = { width: r_descriptor.attachmentSize?.width, height: r_descriptor.attachmentSize?.height };
 
@@ -63,7 +58,8 @@ export class WGPURenderPassFormat extends ReactiveObject
             r_descriptor.colorAttachments.concat();
             descriptor.colorAttachments.forEach((v) =>
             {
-                const wgpuTextureLike = WGPUTextureLike.getInstance(device, v.view?.texture);
+                reactive(v).view.texture;
+                const wgpuTextureLike = WGPUTextureLike.getInstance(device, v.view.texture);
                 // reactive(wgpuTextureLike).gpuTexture;
                 const gpuTexture = wgpuTextureLike.gpuTexture;
 
@@ -83,7 +79,7 @@ export class WGPURenderPassFormat extends ReactiveObject
             // 计算深度模板附件的纹理格式
             let depthStencilFormat: GPUTextureFormat;
 
-            if (descriptor.depthStencilAttachment?.view?.texture)
+            if (r_descriptor.depthStencilAttachment?.view?.texture)
             {
                 const wgpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
                 // reactive(wgpuTextureLike).gpuTexture;
@@ -101,10 +97,10 @@ export class WGPURenderPassFormat extends ReactiveObject
                     attachmentSize.height = gpuTexture.height;
                 }
             }
-            // 如果存在深度模板附件但没有指定view，则使用默认格式depth24plus
-            // 这与WGPURenderPassDepthStencilAttachment中自动创建深度纹理的逻辑保持一致
             else if (descriptor.depthStencilAttachment)
             {
+                // 如果存在深度模板附件但没有指定view，则使用默认格式depth24plus
+                // 这与WGPURenderPassDepthStencilAttachment中自动创建深度纹理的逻辑保持一致
                 depthStencilFormat = 'depth24plus';
             }
 
@@ -113,7 +109,7 @@ export class WGPURenderPassFormat extends ReactiveObject
                 attachmentSize: attachmentSize,
                 colorFormats: colorFormats,
                 depthStencilFormat: depthStencilFormat,
-                sampleCount: descriptor.sampleCount,
+                sampleCount: r_descriptor.sampleCount,
             };
 
             r_this.renderPassFormat = renderPassFormat;
