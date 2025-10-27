@@ -2,7 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { ChainMap, OcclusionQuery } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { RenderPassFormat } from './RenderPassFormat';
-import { CommandType, RenderPassObjectCommand, WGPURenderObject } from './WGPURenderObject';
+import { CommandType, RenderPassObjectCommand, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
 
 export class WGPUOcclusionQuery extends ReactiveObject implements RenderPassObjectCommand
 {
@@ -31,7 +31,7 @@ export class WGPUOcclusionQuery extends ReactiveObject implements RenderPassObje
         });
     }
 
-    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObject)
+    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState)
     {
         commands.push(['beginOcclusionQuery', this.queryIndex]);
         for (let i = 0, len = this.wgpuRenderObjects.length; i < len; i++)

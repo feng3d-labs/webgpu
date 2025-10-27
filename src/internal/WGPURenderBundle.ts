@@ -64,7 +64,7 @@ export class WGPURenderBundle extends ReactiveObject implements RenderPassObject
         this.destroyCall(() => { device.renderBundles.delete([renderBundle, renderPassFormat]); });
     }
 
-    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObject): void
+    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState): void
     {
         if (!this.gpuRenderBundle)
         {
