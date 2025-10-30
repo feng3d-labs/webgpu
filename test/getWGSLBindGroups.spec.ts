@@ -1,11 +1,11 @@
 import { assert, describe, it } from 'vitest';
-import { WgslReflectManager } from '../src/caches/WgslReflectManager';
+import { WGPUShaderReflect } from '../src/caches/WGPUShaderReflect';
 
 describe('test', () =>
 {
     it('getWGSLBindGroups', () =>
     {
-        const result = WgslReflectManager.getIGPUBindGroupLayoutEntryMap(`
+        const result = WGPUShaderReflect.getIGPUBindGroupLayoutEntryMap(`
         override shadowDepthTextureSize: f32 = 1024.0;
 
 struct Scene {
