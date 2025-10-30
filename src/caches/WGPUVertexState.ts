@@ -51,7 +51,6 @@ export class WGPUVertexState extends ReactiveObject
         let result = device.vertexStates.get([vertexState, vertices]);
         if (result) return result.value;
 
-        const r_this = reactive(this);
         const r_vertexState = reactive(vertexState);
 
         // 监听顶点状态配置变化，自动重新创建顶点状态
