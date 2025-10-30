@@ -3,7 +3,8 @@ import { Buffer } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**
- * WebGPU缓冲区管理器。
+ * WebGPU缓冲区管理器
+ *
  * 负责管理GPU缓冲区的创建、数据写入和生命周期管理。
  * 使用响应式系统自动处理缓冲区更新和数据同步。
  */
@@ -14,6 +15,7 @@ export class WGPUBuffer extends ReactiveObject
 
     /**
      * 构造函数
+     *
      * @param device GPU设备实例
      * @param buffer 缓冲区配置对象
      */
@@ -24,7 +26,7 @@ export class WGPUBuffer extends ReactiveObject
         this._createGPUBuffer(device, buffer);
         this._onWriteBuffers(device, buffer);
 
-        //
+        // 将实例注册到设备缓存中
         this._onMap(device, buffer);
     }
 
@@ -37,7 +39,8 @@ export class WGPUBuffer extends ReactiveObject
 
     /**
      * 创建GPU缓冲区
-     * 使用响应式系统监听缓冲区配置变化，自动重新创建GPU缓冲区
+     *
+     * 使用响应式系统监听缓冲区配置变化，自动重新创建GPU缓冲区。
      */
     private _createGPUBuffer(device: GPUDevice, buffer: Buffer)
     {
@@ -101,7 +104,8 @@ export class WGPUBuffer extends ReactiveObject
 
     /**
      * 设置缓冲区数据写入监听
-     * 监听writeBuffers变化，自动将数据写入GPU缓冲区
+     *
+     * 监听writeBuffers变化，自动将数据写入GPU缓冲区。
      */
     private _onWriteBuffers(device: GPUDevice, buffer: Buffer)
     {
@@ -172,8 +176,9 @@ export class WGPUBuffer extends ReactiveObject
 
     /**
      * 默认GPU缓冲区使用标志
-     * 包含除CPU与GPU数据交换外的所有常用缓冲区用途
-     * 注意：不包含MAP_READ和MAP_WRITE，这些需要特殊处理
+     *
+     * 包含除CPU与GPU数据交换外的所有常用缓冲区用途。
+     * 注意：不包含MAP_READ和MAP_WRITE，这些需要特殊处理。
      */
     static readonly defaultGPUBufferUsage = 0
         // | GPUBufferUsage.MAP_READ      // CPU读取GPU数据
@@ -190,7 +195,9 @@ export class WGPUBuffer extends ReactiveObject
 
     /**
      * 获取或创建WGPUBuffer实例
-     * 使用设备+缓冲区的组合作为缓存键，避免重复创建
+     *
+     * 使用设备+缓冲区的组合作为缓存键，避免重复创建。
+     *
      * @param device GPU设备实例
      * @param buffer 缓冲区配置对象
      * @returns WGPUBuffer实例
@@ -205,6 +212,7 @@ declare global
 {
     interface GPUDevice
     {
+        /** 缓冲区实例缓存映射表 */
         buffers: WeakMap<Buffer, WGPUBuffer>;
     }
 }
