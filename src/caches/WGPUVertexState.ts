@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { VertexAttributes, VertexState } from '@feng3d/render-api';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, VertexAttributes, VertexState } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUShaderModule } from './WGPUShaderModule';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
@@ -35,51 +35,27 @@ import { WGPUVertexBufferLayout } from './WGPUVertexBufferLayout';
 export class WGPUVertexState extends ReactiveObject
 {
     /**
-     * WebGPU顶点状态对象
+     * 获取或创建顶点状态实例
      *
-     * 这是实际的GPU顶点状态实例，用于定义顶点着色器的执行配置。
-     * 当顶点状态配置发生变化时，此对象会自动重新创建。
-     */
-    readonly gpuVertexState: GPUVertexState;
-
-    /**
-     * 构造函数
-     *
-     * 创建顶点状态管理器实例，并设置响应式监听。
-     *
-     * @param device GPU设备实例，用于创建顶点状态
-     * @param vertexState 顶点状态配置对象，包含着色器代码和参数
-     * @param vertices 顶点属性配置对象，定义顶点数据格式
-     */
-    constructor(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
-    {
-        super();
-
-        // 设置顶点状态创建和更新逻辑
-        this._onCreateVertexState(device, vertexState, vertices);
-
-        // 将实例注册到设备缓存中
-        this._onMap(device, vertexState, vertices);
-    }
-
-    /**
-     * 设置顶点状态创建和更新逻辑
-     *
-     * 使用响应式系统监听顶点状态配置变化，自动重新创建顶点状态。
-     * 当顶点状态参数发生变化时，会触发顶点状态的重新创建。
-     * 自动处理着色器模块、缓冲区布局和入口点的管理。
+     * 使用单例模式管理顶点状态实例，避免重复创建相同的顶点状态。
+     * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
      *
      * @param device GPU设备实例
      * @param vertexState 顶点状态配置对象
      * @param vertices 顶点属性配置对象
+     * @returns 顶点状态实例
      */
-    private _onCreateVertexState(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
+    static getInstance(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
     {
+        device.vertexStates ??= new ChainMap();
+        let result = device.vertexStates.get([vertexState, vertices]);
+        if (result) return result.value;
+
         const r_this = reactive(this);
         const r_vertexState = reactive(vertexState);
 
         // 监听顶点状态配置变化，自动重新创建顶点状态
-        this.effect(() =>
+        result = computed(() =>
         {
             // 触发响应式依赖，监听顶点状态的所有属性
             r_vertexState.code;
@@ -116,58 +92,13 @@ export class WGPUVertexState extends ReactiveObject
             }
 
             // 更新顶点状态引用
-            r_this.gpuVertexState = gpuVertexState;
+            return gpuVertexState;
         });
 
-        // 注册销毁回调，确保在对象销毁时清理顶点状态
-        this.destroyCall(() => { r_this.gpuVertexState = null; });
-    }
+        device.vertexStates.set([vertexState, vertices], result);
 
-    /**
-     * 将顶点状态实例注册到设备缓存中
-     *
-     * 使用嵌套WeakMap将顶点状态和顶点属性配置对象与其实例关联，实现实例缓存和复用。
-     * 当顶点状态或顶点属性配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     *
-     * @param device GPU设备实例，用于存储缓存映射
-     * @param vertexState 顶点状态配置对象，作为第一级缓存的键
-     * @param vertices 顶点属性配置对象，作为第二级缓存的键
-     */
-    private _onMap(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
-    {
-        // 如果设备还没有顶点状态缓存，则创建一个新的嵌套WeakMap
-        device.vertexStates ??= new WeakMap<VertexState, Map<VertexAttributes, WGPUVertexState>>();
-
-        // 获取或创建顶点状态对应的二级缓存
-        let vertexStates = device.vertexStates.get(vertexState);
-        if (!vertexStates)
-        {
-            vertexStates = new Map<VertexAttributes, WGPUVertexState>();
-            device.vertexStates.set(vertexState, vertexStates);
-        }
-
-        // 将当前实例与顶点属性配置对象关联
-        vertexStates.set(vertices, this);
-
-        // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { device.vertexStates.get(vertexState).delete(vertices); });
-    }
-
-    /**
-     * 获取或创建顶点状态实例
-     *
-     * 使用单例模式管理顶点状态实例，避免重复创建相同的顶点状态。
-     * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
-     *
-     * @param device GPU设备实例
-     * @param vertexState 顶点状态配置对象
-     * @param vertices 顶点属性配置对象
-     * @returns 顶点状态实例
-     */
-    static getInstance(device: GPUDevice, vertexState: VertexState, vertices: VertexAttributes)
-    {
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return device.vertexStates?.get(vertexState)?.get(vertices) || new WGPUVertexState(device, vertexState, vertices);
+        return result.value;
     }
 }
 
@@ -183,6 +114,6 @@ declare global
     interface GPUDevice
     {
         /** 顶点状态实例缓存映射表，嵌套WeakMap结构 */
-        vertexStates: WeakMap<VertexState, Map<VertexAttributes, WGPUVertexState>>;
+        vertexStates: ChainMap<[vertexState: VertexState, vertices: VertexAttributes], Computed<GPUVertexState>>;
     }
 }

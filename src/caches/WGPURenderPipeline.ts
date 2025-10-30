@@ -77,9 +77,7 @@ export class WGPURenderPipeline extends ReactiveObject
 
             // 创建顶点状态
             r_renderPipeline.vertex;
-            const wgpuVertexState = WGPUVertexState.getInstance(device, renderPipeline.vertex, vertices);
-            reactive(wgpuVertexState).gpuVertexState;
-            const gpuVertexState = wgpuVertexState.gpuVertexState;
+            const gpuVertexState = WGPUVertexState.getInstance(device, renderPipeline.vertex, vertices);
 
             // 构建渲染管线描述符
             const gpuRenderPipelineDescriptor: GPURenderPipelineDescriptor = {
