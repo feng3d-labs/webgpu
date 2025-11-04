@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
+import { ChainMap, RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
@@ -15,7 +15,9 @@ export class WGPURenderPass extends ReactiveObject
         super();
 
         this._onCreate(device, renderPass);
-        this._onMap(device, renderPass);
+        //
+        WGPURenderPass.map.set([device, renderPass], this);
+        this.destroyCall(() => { WGPURenderPass.map.delete([device, renderPass]); });
     }
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass)
@@ -102,23 +104,9 @@ export class WGPURenderPass extends ReactiveObject
         renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
     }
 
-    private _onMap(device: GPUDevice, renderPass: RenderPass)
-    {
-        device.renderPasses ??= new WeakMap<RenderPass, WGPURenderPass>();
-        device.renderPasses.set(renderPass, this);
-        this.destroyCall(() => { device.renderPasses.delete(renderPass); });
-    }
-
     static getInstance(device: GPUDevice, renderPass: RenderPass)
     {
-        return device.renderPasses?.get(renderPass) || new WGPURenderPass(device, renderPass);
+        return this.map.get([device, renderPass]) || new WGPURenderPass(device, renderPass);
     }
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        renderPasses: WeakMap<RenderPass, WGPURenderPass>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, RenderPass], WGPURenderPass>();
 }
