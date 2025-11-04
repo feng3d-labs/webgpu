@@ -8,7 +8,7 @@ import { WGPUFragmentState } from './WGPUFragmentState';
 import { WGPUMultisampleState } from './WGPUMultisampleState';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
 import { WGPUPrimitiveState } from './WGPUPrimitiveState';
-import { getGPUVertexState } from './WGPUVertexState';
+import { getGPUVertexState } from './getGPUVertexState';
 
 /**
  * WebGPU渲染管线封装类
