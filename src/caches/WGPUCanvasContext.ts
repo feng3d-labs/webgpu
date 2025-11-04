@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { CanvasContext } from '@feng3d/render-api';
+import { Computed, computed, reactive, ref } from '@feng3d/reactivity';
+import { CanvasContext, ChainMap } from '@feng3d/render-api';
 import { watcher } from '@feng3d/watcher';
 
 import '../data/polyfills/CanvasContext.ts';
@@ -39,7 +39,8 @@ export class WGPUCanvasContext extends ReactiveObject
      * 可以是HTMLCanvasElement（用于DOM渲染）或OffscreenCanvas（用于离屏渲染）。
      * 当canvasId变化时，此元素会自动更新。
      */
-    readonly canvas: HTMLCanvasElement | OffscreenCanvas;
+    get canvas() { return this._computedCanvas.value; }
+    private _computedCanvas: Computed<HTMLCanvasElement | OffscreenCanvas>;
 
     /**
      * WebGPU画布上下文
@@ -47,7 +48,8 @@ export class WGPUCanvasContext extends ReactiveObject
      * 用于与GPU进行交互的画布上下文对象，提供纹理获取和渲染功能。
      * 当画布元素变化时，此上下文会自动重新创建。
      */
-    readonly gpuCanvasContext: GPUCanvasContext;
+    get gpuCanvasContext() { return this._computedGpuCanvasContext.value; }
+    private _computedGpuCanvasContext: Computed<GPUCanvasContext>;
 
     /**
      * 画布上下文版本号
@@ -55,7 +57,8 @@ export class WGPUCanvasContext extends ReactiveObject
      * 当画布上下文配置发生变化时，版本号会自动递增。
      * 可用于检测画布上下文是否需要重新获取纹理。
      */
-    readonly version: number = 0;
+    get version() { return this._versionRef.value; }
+    private _versionRef = ref(0);
 
     /**
      * 构造函数
@@ -70,40 +73,11 @@ export class WGPUCanvasContext extends ReactiveObject
         super();
 
         // 设置画布元素和GPU上下文创建逻辑
-        this._createGPUCanvasContext(context);
+        this._onCreate(device, context);
 
-        // 设置画布配置监听
-        this._onConfiguration(device, context);
-
-        // 设置画布变化监听
-        this._onCanvasSizeChanged(context);
-
-        // 设置画布尺寸变化监听
-        this._onSizeChanged(context);
-
-        // 将实例注册到设备缓存中
-        this._onMap(device, context);
-    }
-
-    /**
-     * 将画布上下文实例注册到设备缓存中
-     *
-     * 使用WeakMap将画布上下文配置对象与其实例关联，实现实例缓存和复用。
-     * 当画布上下文配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     *
-     * @param device GPU设备实例，用于存储缓存映射
-     * @param context 画布上下文配置对象，作为缓存的键
-     */
-    private _onMap(device: GPUDevice, context: CanvasContext)
-    {
-        // 如果设备还没有画布上下文缓存，则创建一个新的WeakMap
-        device.canvasContexts ??= new WeakMap<CanvasContext, WGPUCanvasContext>();
-
-        // 将当前实例与画布上下文配置对象关联
-        device.canvasContexts.set(context, this);
-
-        // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { device.canvasContexts.delete(context); });
+        //
+        WGPUCanvasContext.map.set([device, context], this);
+        this.destroyCall(() => { WGPUCanvasContext.map.delete([device, context]); });
     }
 
     /**
@@ -114,13 +88,11 @@ export class WGPUCanvasContext extends ReactiveObject
      *
      * @param context 画布上下文配置对象
      */
-    private _createGPUCanvasContext(context: CanvasContext)
+    private _onCreate(device: GPUDevice, context: CanvasContext)
     {
-        const r_this = reactive(this);
         const r_context = reactive(context);
 
-        // 监听画布ID变化，自动创建画布元素和GPU上下文
-        this.effect(() =>
+        this._computedCanvas = computed(() =>
         {
             // 触发响应式依赖，监听canvasId变化
             r_context.canvasId;
@@ -132,16 +104,31 @@ export class WGPUCanvasContext extends ReactiveObject
                 ? document.getElementById(canvasId) as HTMLCanvasElement
                 : canvasId;
 
-            // 获取WebGPU画布上下文
-            const gpuCanvasContext = canvas?.getContext('webgpu') as GPUCanvasContext;
-
-            // 更新画布元素和GPU上下文引用
-            r_this.canvas = canvas;
-            r_this.gpuCanvasContext = gpuCanvasContext;
+            return canvas;
         });
 
-        // 销毁时，清空画布元素和GPU上下文引用
-        this.destroyCall(() => { r_this.canvas = null; r_this.gpuCanvasContext = null; });
+        let offCanvasSizeChanged: () => void;
+
+        // 监听画布ID变化，自动创建画布元素和GPU上下文
+        this._computedGpuCanvasContext = computed(() =>
+        {
+            const canvas = this._computedCanvas.value
+            const gpuCanvasContext = canvas?.getContext('webgpu') as GPUCanvasContext;
+
+            // 设置画布配置监听
+            this._onConfiguration(device, gpuCanvasContext, context);
+
+            // 设置画布变化监听
+            offCanvasSizeChanged?.();
+            offCanvasSizeChanged = this._onCanvasSizeChanged(canvas);
+
+            return gpuCanvasContext;
+        });
+
+        this.destroyCall(() =>
+        {
+            offCanvasSizeChanged?.();
+        });
     }
 
     /**
@@ -153,18 +140,13 @@ export class WGPUCanvasContext extends ReactiveObject
      * @param device GPU设备实例
      * @param context 画布上下文配置对象
      */
-    private _onConfiguration(device: GPUDevice, context: CanvasContext)
+    private _onConfiguration(device: GPUDevice, gpuCanvasContext: GPUCanvasContext, context: CanvasContext)
     {
-        const r_this = reactive(this);
         const r_context = reactive(context);
 
         // 监听画布配置变化，自动重新配置GPU画布上下文
-        this.effect(() =>
+        computed(() =>
         {
-            // 如果GPU画布上下文不存在，跳过配置
-            if (!r_this.gpuCanvasContext) return;
-            const gpuCanvasContext = this.gpuCanvasContext;
-
             // 触发响应式依赖，监听配置的各个属性变化
             const r_configuration = r_context.configuration;
             if (r_configuration)
@@ -202,9 +184,8 @@ export class WGPUCanvasContext extends ReactiveObject
             // 配置GPU画布上下文
             gpuCanvasContext.configure(gpuCanvasConfiguration);
 
-            // 递增版本号，表示配置已更新
-            r_this.version = this.version + 1;
-        });
+            this._versionRef.value++;
+        }).value;
     }
 
     /**
@@ -215,90 +196,21 @@ export class WGPUCanvasContext extends ReactiveObject
      *
      * @param context 画布上下文配置对象
      */
-    private _onCanvasSizeChanged(context: CanvasContext)
+    private _onCanvasSizeChanged(canvas: HTMLCanvasElement | OffscreenCanvas)
     {
-        const r_this = reactive(this);
-        const r_context = reactive(context);
-
-        // 定义画布宽度变化回调
-        const _onWidthChanged = () =>
+        const _onChanged = () =>
         {
-            r_context.width = canvas.width;
+            this._versionRef.value++;
         }
 
-        // 定义画布高度变化回调
-        const _onHeightChanged = () =>
+        watcher.watch(canvas, 'width', _onChanged);
+        watcher.watch(canvas, 'height', _onChanged);
+
+        return () =>
         {
-            r_context.height = canvas.height;
+            watcher.unwatch(canvas, 'width', _onChanged);
+            watcher.unwatch(canvas, 'height', _onChanged);
         }
-
-        let canvas: HTMLCanvasElement | OffscreenCanvas;
-
-        const destroy = () =>
-        {
-            if (canvas)
-            {
-                watcher.unwatch(canvas, 'width', _onWidthChanged);
-                watcher.unwatch(canvas, 'height', _onHeightChanged);
-            }
-        }
-
-        // 监听画布元素变化，管理尺寸监听器
-        this.effect(() =>
-        {
-            destroy();
-
-            // 触发响应式依赖，监听画布元素变化
-            r_this.canvas;
-
-            // 更新画布引用
-            canvas = this.canvas;
-
-            // 如果存在新的画布，注册尺寸监听
-            if (canvas)
-            {
-                watcher.watch(canvas, 'width', _onWidthChanged);
-                watcher.watch(canvas, 'height', _onHeightChanged);
-            }
-        });
-
-        this.destroyCall(destroy);
-    }
-
-    /**
-     * 设置画布尺寸变化监听
-     *
-     * 监听配置对象中的尺寸变化，自动更新画布元素的尺寸。
-     * 当width或height配置发生变化时，会同步到实际的画布元素上。
-     *
-     * @param context 画布上下文配置对象
-     */
-    private _onSizeChanged(context: CanvasContext)
-    {
-        const r_this = reactive(this);
-        const r_context = reactive(context);
-
-        // 监听画布尺寸配置变化，自动更新画布元素尺寸
-        this.effect(() =>
-        {
-            // 触发响应式依赖，监听画布元素和尺寸配置
-            r_this.canvas;
-
-            // 如果画布不存在，跳过尺寸更新
-            if (!this.canvas) return;
-
-            // 同步配置中的尺寸到画布元素
-            if (r_context.width)
-            {
-                this.canvas.width = context.width;
-            }
-            if (r_context.height)
-            {
-                this.canvas.height = context.height;
-            }
-
-            r_this.version = this.version + 1;
-        });
     }
 
     /**
@@ -314,21 +226,7 @@ export class WGPUCanvasContext extends ReactiveObject
     static getInstance(device: GPUDevice, context: CanvasContext)
     {
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return device.canvasContexts?.get(context) || new WGPUCanvasContext(device, context);
+        return this.map.get([device, context]) || new WGPUCanvasContext(device, context);
     }
-}
-
-/**
- * 全局类型声明
- *
- * 扩展GPUDevice接口，添加画布上下文实例缓存映射。
- * 这个WeakMap用于缓存画布上下文实例，避免重复创建相同的画布上下文。
- */
-declare global
-{
-    interface GPUDevice
-    {
-        /** 画布上下文实例缓存映射表 */
-        canvasContexts: WeakMap<CanvasContext, WGPUCanvasContext>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, CanvasContext], WGPUCanvasContext>();
 }

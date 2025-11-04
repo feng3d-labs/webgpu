@@ -1,4 +1,4 @@
-import { effect, reactive, UnReadonly } from '@feng3d/reactivity';
+import { computed, Computed, reactive, UnReadonly } from '@feng3d/reactivity';
 import { Buffer, BufferBinding, BufferBindingInfo, ChainMap } from '@feng3d/render-api';
 import { ArrayInfo, StructInfo, TemplateInfo, TypeInfo } from 'wgsl_reflect';
 import { ReactiveObject } from '../ReactiveObject';
@@ -6,22 +6,24 @@ import { WGPUBuffer } from './WGPUBuffer';
 
 export class WGPUBufferBinding extends ReactiveObject
 {
-    readonly gpuBufferBinding: GPUBufferBinding;
+    get gpuBufferBinding() { return this._computedGpuBufferBinding.value; }
+    private _computedGpuBufferBinding: Computed<GPUBufferBinding>;
 
     constructor(device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo)
     {
         super();
 
         this._onCreate(device, bufferBinding, type);
-        this._onMap(device, bufferBinding, type);
+        //
+        WGPUBufferBinding.map.set([device, bufferBinding, type], this);
+        this.destroyCall(() => { WGPUBufferBinding.map.delete([device, bufferBinding, type]); });
     }
 
     private _onCreate(device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo)
     {
-        const r_this = reactive(this);
         const r_bufferBinding = reactive(bufferBinding);
 
-        this.effect(() =>
+        this._computedGpuBufferBinding = computed(() =>
         {
             // 监听
 
@@ -46,30 +48,17 @@ export class WGPUBufferBinding extends ReactiveObject
                 size,
             };
 
-            r_this.gpuBufferBinding = gpuBufferBinding;
+            return gpuBufferBinding;
         });
-    }
-
-    private _onMap(device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo)
-    {
-        device.bufferBindings ??= new ChainMap();
-        device.bufferBindings.set([device, bufferBinding, type], this);
-        this.destroyCall(() => { device.bufferBindings.delete([device, bufferBinding, type]); });
     }
 
     static getInstance(device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo)
     {
-        return device.bufferBindings?.get([device, bufferBinding, type]) || new WGPUBufferBinding(device, bufferBinding, type);
+        return this.map.get([device, bufferBinding, type]) || new WGPUBufferBinding(device, bufferBinding, type);
     }
+    private static readonly map = new ChainMap<[GPUDevice, BufferBinding, TypeInfo], WGPUBufferBinding>();
 }
 
-declare global
-{
-    interface GPUDevice
-    {
-        bufferBindings: ChainMap<[device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo], WGPUBufferBinding>;
-    }
-}
 
 /**
  * 初始化缓冲区绑定。
@@ -99,7 +88,7 @@ function updateBufferBinding(uniformData: BufferBinding, type: TypeInfo)
         const { paths, offset: itemInfoOffset, size: itemInfoSize, Cls } = bufferBindingInfo.items[i];
 
         // 更新数据
-        effect(() =>
+        computed(() =>
         {
             let value: any = uniformData;
             let r_value: any = reactive(uniformData); // 监听
@@ -139,7 +128,7 @@ function updateBufferBinding(uniformData: BufferBinding, type: TypeInfo)
 
             writeBuffers.push({ bufferOffset: offset + itemInfoOffset, data: data.buffer, dataOffset: data.byteOffset, size: Math.min(itemInfoSize, data.byteLength) });
             reactive(buffer).writeBuffers = writeBuffers;
-        });
+        }).value;
     }
 }
 

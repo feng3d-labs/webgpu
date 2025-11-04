@@ -34,7 +34,10 @@ const init = async (canvas: HTMLCanvasElement) =>
         const currentWidth = canvas.clientWidth * devicePixelRatio;
         const currentHeight = canvas.clientHeight * devicePixelRatio;
 
-        reactive(renderPassDescriptor).attachmentSize = { width: currentWidth, height: currentHeight };
+        canvas.width = currentWidth;
+        canvas.height = currentHeight;
+
+        // reactive(renderPassDescriptor).attachmentSize = { width: currentWidth, height: currentHeight };
 
         const data: Submit = {
             commandEncoders: [

@@ -57,7 +57,6 @@ export class WGPUBindGroupEntry extends ReactiveObject
 
                 //
                 const wgpuBufferBinding = WGPUBufferBinding.getInstance(device, bufferBinding, type);
-                reactive(wgpuBufferBinding).gpuBufferBinding;
                 entry.resource = wgpuBufferBinding.gpuBufferBinding;
             }
             else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
