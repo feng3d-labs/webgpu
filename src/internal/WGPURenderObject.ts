@@ -195,7 +195,6 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
                 }
 
                 const wgpuBuffer = WGPUBuffer.getInstance(device, buffer);
-                reactive(wgpuBuffer).gpuBuffer;
                 const gpuBuffer = wgpuBuffer.gpuBuffer;
 
                 this.setVertexBuffer[index] = ['setVertexBuffer', index, gpuBuffer, offset, size];

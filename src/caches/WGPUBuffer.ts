@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { Buffer } from '@feng3d/render-api';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { Buffer, ChainMap } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**
@@ -9,8 +9,9 @@ import { ReactiveObject } from '../ReactiveObject';
  */
 export class WGPUBuffer extends ReactiveObject
 {
-    /** GPU缓冲区实例 */
-    readonly gpuBuffer: GPUBuffer;
+    get gpuBuffer() { return this._computed.value; }
+
+    private _computed: Computed<GPUBuffer>;
 
     /**
      * 构造函数
@@ -21,44 +22,26 @@ export class WGPUBuffer extends ReactiveObject
     {
         super();
 
-        this._createGPUBuffer(device, buffer);
-        this._onWriteBuffers(device, buffer);
+        this._onCreate(device, buffer);
 
         //
-        this._onMap(device, buffer);
-    }
-
-    private _onMap(device: GPUDevice, buffer: Buffer)
-    {
-        device.buffers ??= new WeakMap<Buffer, WGPUBuffer>();
-        device.buffers.set(buffer, this);
-        this.destroyCall(() => { device.buffers.delete(buffer); });
+        WGPUBuffer.map.set([device, buffer], this);
+        this.destroyCall(() => { WGPUBuffer.map.delete([device, buffer]); });
     }
 
     /**
      * 创建GPU缓冲区
      * 使用响应式系统监听缓冲区配置变化，自动重新创建GPU缓冲区
      */
-    private _createGPUBuffer(device: GPUDevice, buffer: Buffer)
+    private _onCreate(device: GPUDevice, buffer: Buffer)
     {
-        const r_this = reactive(this);
         const r_buffer = reactive(buffer);
 
         let gpuBuffer: GPUBuffer;
 
-        const destroy = () =>
-        {
-            r_this.gpuBuffer?.destroy();
-            r_this.gpuBuffer = null;
-        }
-
         // 监听缓冲区配置变化，自动重新创建GPU缓冲区
-        this.effect(() =>
+        this._computed = computed(() =>
         {
-            // 销毁旧的GPU缓冲区
-            gpuBuffer?.destroy();
-            gpuBuffer = null;
-
             // 触发响应式依赖
             r_buffer.label;
             r_buffer.size;
@@ -72,6 +55,9 @@ export class WGPUBuffer extends ReactiveObject
 
             // 如果初始化时存在数据，则使用mappedAtCreation方式上传数据
             const mappedAtCreation = data !== undefined;
+
+            // 销毁旧的GPU缓冲区
+            gpuBuffer?.destroy();
 
             // 创建GPU缓冲区
             gpuBuffer = device.createBuffer({
@@ -91,34 +77,36 @@ export class WGPUBuffer extends ReactiveObject
                 gpuBuffer.unmap();
             }
 
+            this._onWriteBuffers(device, gpuBuffer, buffer);
+
             // 更新GPU缓冲区引用
-            r_this.gpuBuffer = gpuBuffer;
+            return gpuBuffer;
         });
 
         // 注册销毁回调，确保在对象销毁时清理GPU缓冲区
-        this.destroyCall(destroy);
+        this.destroyCall(() =>
+        {
+            gpuBuffer?.destroy();
+            this._computed = null;
+        });
     }
 
     /**
      * 设置缓冲区数据写入监听
      * 监听writeBuffers变化，自动将数据写入GPU缓冲区
      */
-    private _onWriteBuffers(device: GPUDevice, buffer: Buffer)
+    private _onWriteBuffers(device: GPUDevice, gpuBuffer: GPUBuffer, buffer: Buffer)
     {
         const r_buffer = reactive(buffer);
-        const r_this = reactive(this);
 
         // 监听数据写入请求
-        this.effect(() =>
+        computed(() =>
         {
             // 触发响应式依赖，监听writeBuffers数组变化
             r_buffer.writeBuffers?.forEach(() => { });
-            r_this.gpuBuffer;
-
-            const gpuBuffer = this.gpuBuffer;
 
             // 如果GPU缓冲区不存在或没有写入数据，则跳过
-            if (!gpuBuffer || !buffer.writeBuffers) return;
+            if (!buffer.writeBuffers) return;
 
             // 处理每个数据写入请求
             buffer.writeBuffers.forEach((writeBuffer) =>
@@ -167,7 +155,7 @@ export class WGPUBuffer extends ReactiveObject
 
             // 清空写入数据，避免重复处理
             r_buffer.writeBuffers = null;
-        });
+        }).value;
     }
 
     /**
@@ -197,14 +185,8 @@ export class WGPUBuffer extends ReactiveObject
      */
     static getInstance(device: GPUDevice, buffer: Buffer)
     {
-        return device.buffers?.get(buffer) || new WGPUBuffer(device, buffer);
+        return this.map.get([device, buffer]) || new WGPUBuffer(device, buffer);
     }
-}
 
-declare global
-{
-    interface GPUDevice
-    {
-        buffers: WeakMap<Buffer, WGPUBuffer>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, Buffer], WGPUBuffer>();
 }
