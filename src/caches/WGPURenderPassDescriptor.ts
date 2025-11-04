@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUQuerySet } from './WGPUQuerySet';
@@ -17,15 +17,20 @@ declare global
 
 export class WGPURenderPassDescriptor extends ReactiveObject
 {
-    readonly gpuRenderPassDescriptor: GPURenderPassDescriptor;
-    readonly renderPassFormat: RenderPassFormat;
+    get gpuRenderPassDescriptor() { return this._computedGpuRenderPassDescriptor.value; }
+    get renderPassFormat() { return this._computedRenderPassFormat.value; }
+
+    private _computedGpuRenderPassDescriptor: Computed<GPURenderPassDescriptor>;
+    private _computedRenderPassFormat: Computed<RenderPassFormat>;
 
     constructor(device: GPUDevice, renderPass: RenderPass)
     {
         super();
 
         this._onCreate(device, renderPass)
-        this._onMap(device, renderPass);
+        //
+        WGPURenderPassDescriptor.map.set([device, renderPass], this);
+        this.destroyCall(() => { WGPURenderPassDescriptor.map.delete([device, renderPass]); });
     }
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass)
@@ -33,7 +38,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         const r_this = reactive(this);
         const r_renderPass = reactive(renderPass);
 
-        this.effect(() =>
+        this._computedGpuRenderPassDescriptor = computed(() =>
         {
             r_renderPass.descriptor;
 
@@ -103,10 +108,10 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             }
 
             //
-            r_this.gpuRenderPassDescriptor = gpuRenderPassDescriptor;
+            return gpuRenderPassDescriptor;
         });
 
-        this.effect(() =>
+        this._computedRenderPassFormat = computed(() =>
         {
             r_this.gpuRenderPassDescriptor;
 
@@ -153,35 +158,17 @@ export class WGPURenderPassDescriptor extends ReactiveObject
                 renderPassFormatCache[renderPassFormatKey] = renderPassFormat;
             }
 
-            if (renderPassFormat !== this.renderPassFormat)
-            {
-                r_this.renderPassFormat = renderPassFormat;
-            }
-
+            return renderPassFormat;
         });
 
-        this.destroyCall(() => { r_this.gpuRenderPassDescriptor = null; });
-    }
-
-    private _onMap(device: GPUDevice, renderPass: RenderPass)
-    {
-        device.renderPassDescriptors ??= new WeakMap();
-        device.renderPassDescriptors.set(renderPass, this);
-        this.destroyCall(() => { device.renderPassDescriptors.delete(renderPass); });
+        this.destroyCall(() => { this._computedGpuRenderPassDescriptor = null; this._computedRenderPassFormat = null; });
     }
 
     static getInstance(device: GPUDevice, renderPass: RenderPass)
     {
-        return device.renderPassDescriptors?.get(renderPass) || new WGPURenderPassDescriptor(device, renderPass);
+        return this.map.get([device, renderPass]) || new WGPURenderPassDescriptor(device, renderPass);
     }
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        renderPassDescriptors: WeakMap<RenderPass, WGPURenderPassDescriptor>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, RenderPass], WGPURenderPassDescriptor>();
 }
 
 const renderPassFormatCache: { [key: string]: RenderPassFormat } = {}

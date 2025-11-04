@@ -25,7 +25,7 @@ export class ReactiveObject
 {
     constructor()
     {
-        console.log(this.constructor.name, map[this.constructor.name] = (map[this.constructor.name] || 0) + 1);
+        // console.log(this.constructor.name, map[this.constructor.name] = (map[this.constructor.name] || 0) + 1);
     }
 
     /**
