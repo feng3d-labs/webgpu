@@ -7,14 +7,6 @@ import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
 import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
 import { WGPUTimestampQuery } from './WGPUTimestampQuery';
 
-declare global
-{
-    interface GPUQuerySet
-    {
-        resolve(commandEncoder: GPUCommandEncoder): void;
-    }
-}
-
 export class WGPURenderPassDescriptor extends ReactiveObject
 {
     get gpuRenderPassDescriptor() { return this._computedGpuRenderPassDescriptor.value; }
@@ -71,7 +63,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
             //
             const wgpuQuerySet = WGPUQuerySet.getInstance(device, renderPass);
-            reactive(wgpuQuerySet).gpuQuerySet;
             if (wgpuQuerySet.gpuQuerySet)
             {
                 gpuRenderPassDescriptor.occlusionQuerySet = wgpuQuerySet.gpuQuerySet;

@@ -1,39 +1,32 @@
 import { anyEmitter } from '@feng3d/event';
-import { reactive } from '@feng3d/reactivity';
-import { OcclusionQuery, RenderPass } from '@feng3d/render-api';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, OcclusionQuery, RenderPass } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUQuerySet extends ReactiveObject
 {
-    readonly gpuQuerySet: GPUQuerySet
+    get gpuQuerySet() { return this._computedGpuQuerySet.value; }
+    private _computedGpuQuerySet: Computed<GPUQuerySet>;
 
     constructor(device: GPUDevice, renderPass: RenderPass)
     {
         super();
 
         this._onCreate(device, renderPass);
-        this._onMap(device, renderPass);
+        //
+        WGPUQuerySet.map.set([device, renderPass], this);
+        this.destroyCall(() => { WGPUQuerySet.map.delete([device, renderPass]); });
     }
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass)
     {
         const r_renderPass = reactive(renderPass);
-        const r_this = reactive(this);
 
         let occlusionQuerys: OcclusionQuery[];
         let occlusionQuerySet: GPUQuerySet
         let resultBuf: GPUBuffer;
         let resolveBuf: GPUBuffer
-
-        const destroy = () =>
-        {
-            occlusionQuerySet?.destroy();
-            resolveBuf?.destroy();
-            resultBuf?.destroy();
-
-            r_this.gpuQuerySet = null;
-        };
 
         const getOcclusionQueryResult = () =>
         {
@@ -65,10 +58,8 @@ export class WGPUQuerySet extends ReactiveObject
             }
         };
 
-        this.effect(() =>
+        this._computedGpuQuerySet = computed(() =>
         {
-            destroy();
-
             r_renderPass?.renderPassObjects?.concat();
 
             occlusionQuerys = renderPass.renderPassObjects?.filter((v) => v.__type__ === 'OcclusionQuery') as OcclusionQuery[];
@@ -78,13 +69,20 @@ export class WGPUQuerySet extends ReactiveObject
                 return;
             }
 
+            occlusionQuerySet?.destroy();
             occlusionQuerySet = device.createQuerySet({ type: 'occlusion', count: occlusionQuerys.length });
+
+            //
+            resolveBuf?.destroy();
             resolveBuf = device.createBuffer({
                 label: 'resolveBuffer',
                 // Query results are 64bit unsigned integers.
                 size: occlusionQuerys.length * BigUint64Array.BYTES_PER_ELEMENT,
                 usage: GPUBufferUsage.QUERY_RESOLVE | GPUBufferUsage.COPY_SRC,
             });
+
+            //
+            resultBuf?.destroy();
             resultBuf = device.createBuffer({
                 label: 'resultBuffer',
                 size: resolveBuf.size,
@@ -107,29 +105,31 @@ export class WGPUQuerySet extends ReactiveObject
                 anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
             };
 
-            r_this.gpuQuerySet = occlusionQuerySet;
+            return occlusionQuerySet;
         });
 
-        this.destroyCall(destroy);
-    }
+        this.destroyCall(() =>
+        {
+            occlusionQuerySet?.destroy();
+            resolveBuf?.destroy();
+            resultBuf?.destroy();
 
-    private _onMap(device: GPUDevice, renderPass: RenderPass)
-    {
-        device.querySets ??= new WeakMap<RenderPass, WGPUQuerySet>();
-        device.querySets.set(renderPass, this);
-        this.destroyCall(() => { device.querySets.delete(renderPass); });
+            this._computedGpuQuerySet = null;
+        });
     }
 
     static getInstance(device: GPUDevice, renderPass: RenderPass)
     {
-        return device.querySets?.get(renderPass) || new WGPUQuerySet(device, renderPass);
+        return this.map.get([device, renderPass]) || new WGPUQuerySet(device, renderPass);
     }
+
+    private static readonly map = new ChainMap<[GPUDevice, RenderPass], WGPUQuerySet>();
 }
 
 declare global
 {
-    interface GPUDevice
+    interface GPUQuerySet
     {
-        querySets: WeakMap<RenderPass, WGPUQuerySet>;
+        resolve(commandEncoder: GPUCommandEncoder): void;
     }
 }
