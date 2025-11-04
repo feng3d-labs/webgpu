@@ -165,11 +165,8 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
             {
                 const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
-                reactive(wgpuBindGroup).gpuBindGroup;
 
-                const gpuBindGroup = wgpuBindGroup.gpuBindGroup;
-
-                this.setBindGroup[group] = ['setBindGroup', group, gpuBindGroup];
+                this.setBindGroup[group] = ['setBindGroup', group, wgpuBindGroup.gpuBindGroup];
             });
 
             // 监听

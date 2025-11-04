@@ -40,11 +40,8 @@ export class WGPUComputeObject extends ReactiveObject
             layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
             {
                 const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, computeObject.bindingResources);
-                reactive(wgpuBindGroup).gpuBindGroup;
 
-                const gpuBindGroup = wgpuBindGroup.gpuBindGroup;
-
-                setBindGroup.push([group, gpuBindGroup]);
+                setBindGroup.push([group, wgpuBindGroup.gpuBindGroup]);
             });
 
             dispatchWorkgroups = [r_computeObject.workgroups.workgroupCountX, r_computeObject.workgroups.workgroupCountY, r_computeObject.workgroups.workgroupCountZ];

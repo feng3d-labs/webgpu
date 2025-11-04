@@ -1,4 +1,4 @@
-import { reactive } from '@feng3d/reactivity';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
 import { BindingResources, ChainMap } from '@feng3d/render-api';
 
 import { ReactiveObject } from '../ReactiveObject';
@@ -8,21 +8,22 @@ import { BindGroupLayoutDescriptor } from './WGPUPipelineLayout';
 
 export class WGPUBindGroup extends ReactiveObject
 {
-    readonly gpuBindGroup: GPUBindGroup
+    get gpuBindGroup() { return this._computedGpuBindGroup.value; }
+    private _computedGpuBindGroup: Computed<GPUBindGroup>;
 
     constructor(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
     {
         super();
 
         this._onCreate(device, bindGroupLayout, bindingResources);
-        this._onMap(device, bindGroupLayout, bindingResources);
+        //
+        WGPUBindGroup.map.set([device, bindGroupLayout, bindingResources], this);
+        this.destroyCall(() => { WGPUBindGroup.map.delete([device, bindGroupLayout, bindingResources]); });
     }
 
     private _onCreate(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
     {
-        const r_this = reactive(this);
-
-        this.effect(() =>
+        this._computedGpuBindGroup = computed(() =>
         {
             const entries = bindGroupLayout.entries.map((v) =>
             {
@@ -34,7 +35,7 @@ export class WGPUBindGroup extends ReactiveObject
 
             //
             const resources = entries.map((v) => v.resource);
-            const gpuBindGroupKey: GPUBindGroupKey = [bindGroupLayout, ...resources];
+            const gpuBindGroupKey = [bindGroupLayout, ...resources];
             let gBindGroup = WGPUBindGroup.gpuBindGroupMap.get(gpuBindGroupKey);
 
             if (!gBindGroup)
@@ -46,31 +47,15 @@ export class WGPUBindGroup extends ReactiveObject
                 WGPUBindGroup.gpuBindGroupMap.set(gpuBindGroupKey, gBindGroup);
             }
 
-            r_this.gpuBindGroup = gBindGroup;
+            return gBindGroup;
         });
-    }
-
-    private _onMap(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
-    {
-        device.bindGroups ??= new ChainMap();
-        device.bindGroups.set([bindGroupLayout, bindingResources], this);
-        this.destroyCall(() => { device.bindGroups.delete([bindGroupLayout, bindingResources]); });
     }
 
     static getInstance(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
     {
-        return device.bindGroups?.get([bindGroupLayout, bindingResources]) || new WGPUBindGroup(device, bindGroupLayout, bindingResources);
+        return this.map.get([device, bindGroupLayout, bindingResources]) || new WGPUBindGroup(device, bindGroupLayout, bindingResources);
     }
 
-    private static readonly gpuBindGroupMap = new ChainMap<GPUBindGroupKey, GPUBindGroup>();
-}
-
-type GPUBindGroupKey = [bindGroupLayout: BindGroupLayoutDescriptor, ...resources: GPUBindingResource[]];
-
-declare global
-{
-    interface GPUDevice
-    {
-        bindGroups: ChainMap<[bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources], WGPUBindGroup>;
-    }
+    private static readonly gpuBindGroupMap = new ChainMap<any, GPUBindGroup>();
+    private static readonly map = new ChainMap<[GPUDevice, BindGroupLayoutDescriptor, BindingResources], WGPUBindGroup>();
 }
