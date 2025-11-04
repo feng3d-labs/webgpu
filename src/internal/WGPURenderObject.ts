@@ -1,7 +1,7 @@
 import { reactive } from '@feng3d/reactivity';
 import { BlendState, Buffer, ChainMap, DepthStencilState, RenderObject } from '@feng3d/render-api';
 import { WGPUBindGroup } from '../caches/WGPUBindGroup';
-import { WGPUBuffer } from '../caches/WGPUBuffer';
+import { getGPUBuffer } from '../caches/getGPUBuffer';
 import { WGPUPipelineLayout } from '../caches/WGPUPipelineLayout';
 import { WGPURenderPipeline } from '../caches/WGPURenderPipeline';
 import { WGPUVertexBufferLayout } from '../caches/WGPUVertexBufferLayout';
@@ -194,11 +194,8 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
                     reactive(buffer).label = (`顶点数据 ${autoVertexIndex++}`);
                 }
 
-                const wgpuBuffer = WGPUBuffer.getInstance(device, buffer);
-                reactive(wgpuBuffer).gpuBuffer;
-                const gpuBuffer = wgpuBuffer.gpuBuffer;
-
-                this.setVertexBuffer[index] = ['setVertexBuffer', index, gpuBuffer, offset, size];
+                const wgpuBuffer = getGPUBuffer(device, buffer);
+                this.setVertexBuffer[index] = ['setVertexBuffer', index, wgpuBuffer, offset, size];
             });
 
             // 监听
@@ -217,10 +214,10 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
                     reactive(buffer).label = (`顶点索引 ${autoIndex++}`);
                 }
 
-                const gBuffer = WGPUBuffer.getInstance(device, buffer);
+                const gpuBuffer = getGPUBuffer(device, buffer);
 
                 //
-                this.setIndexBuffer = ['setIndexBuffer', gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
+                this.setIndexBuffer = ['setIndexBuffer', gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
             }
 
             const { draw } = reactive(renderObject);

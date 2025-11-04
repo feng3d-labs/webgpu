@@ -1,6 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, FragmentState, IDraw, PrimitiveState, RenderObject, RenderPipeline, VertexAttributes, VertexFormat, vertexFormatMap, VertexState } from '@feng3d/render-api';
-import { WGPUBuffer } from '@feng3d/webgpu';
 import { Mat4, mat4, Quatn, Vec3n } from 'wgpu-matrix';
 
 import { Accessor, BufferView, GlTf, Scene } from './gltf';

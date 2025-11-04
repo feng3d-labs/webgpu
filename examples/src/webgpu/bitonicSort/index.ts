@@ -1,6 +1,6 @@
 import { effect, reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit } from '@feng3d/render-api';
-import { ComputePass, ComputePipeline, WGPUBuffer, TimestampQuery, WebGPU } from '@feng3d/webgpu';
+import { ComputePass, ComputePipeline, TimestampQuery, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 
 import atomicToZero from './atomicToZero.wgsl';
