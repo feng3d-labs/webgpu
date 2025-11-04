@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { BlendComponent, BlendState } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { BlendComponent, BlendState, ChainMap } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**
@@ -14,7 +14,8 @@ export class WGPUBlendState extends ReactiveObject
      * 对应的WebGPU混合状态对象
      * 只读属性，当原始BlendState发生变化时会自动更新
      */
-    readonly gpuBlendState: GPUBlendState;
+    get gpuBlendState() { return this._computedGpuBlendState.value; }
+    private _computedGpuBlendState: Computed<GPUBlendState>;
 
     /**
      * 构造函数
@@ -24,19 +25,20 @@ export class WGPUBlendState extends ReactiveObject
     {
         super();
 
-        this._createGPUBlendState(blendState);
-        this._onMap(blendState);
+        this._onCreate(blendState);
+        //
+        WGPUBlendState.map.set([blendState], this);
+        this.destroyCall(() => { WGPUBlendState.map.delete([blendState]); });
     }
 
     /**
      * 创建并监听混合状态变化
      * @param blendState 原始混合状态对象
      */
-    private _createGPUBlendState(blendState: BlendState)
+    private _onCreate(blendState: BlendState)
     {
-        const r_this = reactive(this);
         const r_blend = reactive(blendState);
-        this.effect(() =>
+        this._computedGpuBlendState = computed(() =>
         {
             const color = WGPUBlendState.getGPUBlendComponent(r_blend.color);
             const alpha = WGPUBlendState.getGPUBlendComponent(r_blend.alpha);
@@ -47,7 +49,7 @@ export class WGPUBlendState extends ReactiveObject
                 alpha: alpha,
             };
 
-            r_this.gpuBlendState = gpuBlend;
+            return gpuBlend;
         });
     }
 
@@ -74,16 +76,6 @@ export class WGPUBlendState extends ReactiveObject
     }
 
     /**
-     * 建立BlendState到WGPUBlendState的映射关系
-     * @param blendState 原始混合状态对象
-     */
-    private _onMap(blendState: BlendState)
-    {
-        WGPUBlendState.cacheMap.set(blendState, this);
-        this.destroyCall(() => { WGPUBlendState.cacheMap.delete(blendState); });
-    }
-
-    /**
      * 获取BlendState对应的WGPUBlendState实例
      * @param blendState 原始混合状态对象
      * @returns 对应的WGPUBlendState实例，如果传入为空则返回undefined
@@ -92,12 +84,12 @@ export class WGPUBlendState extends ReactiveObject
     {
         if (!blendState) return undefined;
 
-        return this.cacheMap.get(blendState) || new WGPUBlendState(blendState);
+        return this.map.get([blendState]) || new WGPUBlendState(blendState);
     }
 
     /**
      * BlendState到WGPUBlendState的缓存映射表
      * 使用WeakMap避免内存泄漏
      */
-    static readonly cacheMap = new WeakMap<BlendState, WGPUBlendState>();
+    static readonly map = new ChainMap<[BlendState], WGPUBlendState>();
 }

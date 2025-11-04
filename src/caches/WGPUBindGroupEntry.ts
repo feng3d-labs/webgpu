@@ -1,4 +1,4 @@
-import { reactive } from '@feng3d/reactivity';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
 import { BindingResources, BufferBinding, ChainMap, Sampler, TextureView } from '@feng3d/render-api';
 import { ResourceType } from 'wgsl_reflect';
 import { VideoTexture } from '../data/VideoTexture';
@@ -11,26 +11,28 @@ import { WGPUTextureView } from './WGPUTextureView';
 
 export class WGPUBindGroupEntry extends ReactiveObject
 {
-    readonly gpuBindGroupEntry: GPUBindGroupEntry;
+    get gpuBindGroupEntry() { return this._computedGpuBindGroupEntry.value; }
+    private _computedGpuBindGroupEntry: Computed<GPUBindGroupEntry>;
 
     constructor(device: GPUDevice, bindGroupLayout: GPUBindGroupLayoutEntry, bindingResources: BindingResources)
     {
         super();
 
         this._onCreate(device, bindGroupLayout, bindingResources);
-        this._onMap(device, bindGroupLayout, bindingResources);
+        //
+        WGPUBindGroupEntry.map.set([device, bindGroupLayout, bindingResources], this);
+        this.destroyCall(() => { WGPUBindGroupEntry.map.delete([device, bindGroupLayout, bindingResources]); });
     }
 
     private _onCreate(device: GPUDevice, v: GPUBindGroupLayoutEntry, bindingResources: BindingResources)
     {
-        const r_this = reactive(this);
         const r_bindingResources = reactive(bindingResources);
 
         const { name, type, resourceType, binding } = v.variableInfo;
 
         const numberBufferBinding = [0];
 
-        this.effect(() =>
+        this._computedGpuBindGroupEntry = computed(() =>
         {
 
             // 监听
@@ -77,29 +79,15 @@ export class WGPUBindGroupEntry extends ReactiveObject
                 entry.resource = wgpuSampler.gpuSampler;
             }
 
-            r_this.gpuBindGroupEntry = entry;
+            return entry;
         });
 
-        this.destroyCall(() => { r_this.gpuBindGroupEntry = null; });
-    }
-
-    private _onMap(device: GPUDevice, bindGroupLayout: GPUBindGroupLayoutEntry, bindingResources: BindingResources)
-    {
-        device.bindGroupEntrys ??= new ChainMap();
-        device.bindGroupEntrys.set([bindGroupLayout, bindingResources], this);
-        this.destroyCall(() => { device.bindGroupEntrys.delete([bindGroupLayout, bindingResources]); });
+        this.destroyCall(() => { this._computedGpuBindGroupEntry = null; });
     }
 
     static getInstance(device: GPUDevice, bindGroupLayout: GPUBindGroupLayoutEntry, bindingResources: BindingResources)
     {
-        return device.bindGroupEntrys?.get([bindGroupLayout, bindingResources]) || new WGPUBindGroupEntry(device, bindGroupLayout, bindingResources);
+        return this.map.get([device, bindGroupLayout, bindingResources]) || new WGPUBindGroupEntry(device, bindGroupLayout, bindingResources);
     }
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        bindGroupEntrys: ChainMap<[GPUBindGroupLayoutEntry, BindingResources], WGPUBindGroupEntry>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, GPUBindGroupLayoutEntry, BindingResources], WGPUBindGroupEntry>();
 }

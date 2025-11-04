@@ -1,4 +1,4 @@
-import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { Computed, computed } from '@feng3d/reactivity';
 import { BindingResources, ChainMap } from '@feng3d/render-api';
 
 import { ReactiveObject } from '../ReactiveObject';
@@ -28,7 +28,6 @@ export class WGPUBindGroup extends ReactiveObject
             const entries = bindGroupLayout.entries.map((v) =>
             {
                 const wgpuBindGroupEntry = WGPUBindGroupEntry.getInstance(device, v, bindingResources);
-                reactive(wgpuBindGroupEntry).gpuBindGroupEntry;
 
                 return wgpuBindGroupEntry.gpuBindGroupEntry;
             });

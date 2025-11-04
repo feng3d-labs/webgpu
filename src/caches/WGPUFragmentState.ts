@@ -58,7 +58,6 @@ export class WGPUFragmentState extends ReactiveObject
                     reactive(targets)[i];
 
                     const wgpuColorTargetState = WGPUColorTargetState.getInstance(targets[i], format);
-                    reactive(wgpuColorTargetState).gpuColorTargetState;
                     const gpuColorTargetState = wgpuColorTargetState.gpuColorTargetState;
 
                     gpuColorTargetStates.push(gpuColorTargetState);
