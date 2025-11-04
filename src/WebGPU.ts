@@ -1,7 +1,7 @@
 import { reactive } from '@feng3d/reactivity';
 import { Buffer, ReadPixels, Submit, TextureLike } from '@feng3d/render-api';
 
-import { getGPUBuffer } from './caches/getGPUBuffer';
+import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
 import './data/polyfills/RenderObject';
 import './data/polyfills/RenderPass';
@@ -112,7 +112,7 @@ export class WebGPU
     async readBuffer(buffer: Buffer, offset?: GPUSize64, size?: GPUSize64)
     {
         const device = this.device;
-        const gpuBuffer = getGPUBuffer(device, buffer);
+        const gpuBuffer = WGPUBuffer.getInstance(device, buffer).gpuBuffer;
 
         await gpuBuffer.mapAsync(GPUMapMode.READ);
 

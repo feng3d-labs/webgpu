@@ -23,5 +23,5 @@ export * from './data/polyfills/Uniforms';
 
 export * from './types/VertexFormat';
 
-export * from './caches/getGPUBuffer';
+export * from './caches/WGPUBuffer';
 

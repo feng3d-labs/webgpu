@@ -2,7 +2,7 @@ import { effect, reactive, UnReadonly } from '@feng3d/reactivity';
 import { Buffer, BufferBinding, BufferBindingInfo, ChainMap } from '@feng3d/render-api';
 import { ArrayInfo, StructInfo, TemplateInfo, TypeInfo } from 'wgsl_reflect';
 import { ReactiveObject } from '../ReactiveObject';
-import { getGPUBuffer } from './getGPUBuffer';
+import { WGPUBuffer } from './WGPUBuffer';
 
 export class WGPUBufferBinding extends ReactiveObject
 {
@@ -35,7 +35,7 @@ export class WGPUBufferBinding extends ReactiveObject
 
             (gbuffer as any).label = gbuffer.label || (`BufferBinding ${type.name}`);
             //
-            const buffer = getGPUBuffer(device, gbuffer);
+            const buffer = WGPUBuffer.getInstance(device, gbuffer).gpuBuffer;
 
             const offset = bufferView.byteOffset;
             const size = bufferView.byteLength;

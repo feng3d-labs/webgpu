@@ -1,6 +1,7 @@
+import { reactive } from '@feng3d/reactivity';
 import { CopyBufferToBuffer } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
-import { getGPUBuffer } from '../caches/getGPUBuffer';
+import { WGPUBuffer } from '../caches/WGPUBuffer';
 
 export class WGPUCopyBufferToBuffer extends ReactiveObject
 {
@@ -25,13 +26,17 @@ export class WGPUCopyBufferToBuffer extends ReactiveObject
         this.effect(() =>
         {
             //
-            source = getGPUBuffer(device, copyBufferToBuffer.source);
+            const sourceBuffer = WGPUBuffer.getInstance(device, copyBufferToBuffer.source);
+            reactive(sourceBuffer).gpuBuffer;
+            source = sourceBuffer.gpuBuffer;
 
             //
             sourceOffset = copyBufferToBuffer.sourceOffset ?? 0;
 
             //
-            destination = getGPUBuffer(device, copyBufferToBuffer.destination);
+            const destinationBuffer = WGPUBuffer.getInstance(device, copyBufferToBuffer.destination);
+            reactive(destinationBuffer).gpuBuffer;
+            destination = destinationBuffer.gpuBuffer;
 
             //
             destinationOffset = copyBufferToBuffer.destinationOffset ?? 0;
