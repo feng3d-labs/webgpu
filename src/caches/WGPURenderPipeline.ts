@@ -92,7 +92,6 @@ export class WGPURenderPipeline extends ReactiveObject
             if (r_renderPipeline.fragment)
             {
                 const wgpuFragmentState = WGPUFragmentState.getInstance(device, renderPipeline.fragment, colorFormats);
-                reactive(wgpuFragmentState).gpuFragmentState;
                 gpuRenderPipelineDescriptor.fragment = wgpuFragmentState.gpuFragmentState;
             }
 

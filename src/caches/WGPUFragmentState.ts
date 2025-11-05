@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { FragmentState } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, FragmentState } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUColorTargetState } from './WGPUColorTargetState';
 import { WGPUShaderModule } from './WGPUShaderModule';
@@ -7,26 +7,28 @@ import { WGPUShaderReflect } from './WGPUShaderReflect';
 
 export class WGPUFragmentState extends ReactiveObject
 {
-    readonly gpuFragmentState: GPUFragmentState;
+    get gpuFragmentState() { return this._computedGpuFragmentState.value; }
+    private _computedGpuFragmentState: Computed<GPUFragmentState>;
 
     constructor(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
     {
         super();
 
-        this._createGPUFragmentState(device, fragmentState, colorAttachments);
-        this._onMap(device, fragmentState, colorAttachments);
+        this._onCreate(device, fragmentState, colorAttachments);
+        //
+        WGPUFragmentState.map.set([device, fragmentState, colorAttachments], this);
+        this.destroyCall(() => { WGPUFragmentState.map.delete([device, fragmentState, colorAttachments]); });
     }
 
-    private _createGPUFragmentState(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
+    private _onCreate(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
     {
-        const r_this = reactive(this);
         const r_fragmentState = reactive(fragmentState);
 
-        this.effect(() =>
+        this._computedGpuFragmentState = computed(() =>
         {
             r_fragmentState.code;
             r_fragmentState.entryPoint;
-            r_fragmentState.targets;
+            r_fragmentState.targets?.concat();
             r_fragmentState.constants;
 
             const { code, targets, constants } = fragmentState;
@@ -41,11 +43,11 @@ export class WGPUFragmentState extends ReactiveObject
                 entryPoint = reflect.entry.fragment[0].name;
             }
 
-            const gpuColorTargetStates: GPUColorTargetState[] = colorAttachments.map((format) => ({ format }));
+            let gpuColorTargetStates: GPUColorTargetState[];
 
             if (targets)
             {
-                gpuColorTargetStates.length = 0;
+                gpuColorTargetStates = [];
 
                 for (let i = 0; i < colorAttachments.length; i++)
                 {
@@ -55,13 +57,14 @@ export class WGPUFragmentState extends ReactiveObject
                         gpuColorTargetStates.push(undefined)
                         continue;
                     }
-                    reactive(targets)[i];
 
                     const wgpuColorTargetState = WGPUColorTargetState.getInstance(targets[i], format);
-                    const gpuColorTargetState = wgpuColorTargetState.gpuColorTargetState;
-
-                    gpuColorTargetStates.push(gpuColorTargetState);
+                    gpuColorTargetStates.push(wgpuColorTargetState.gpuColorTargetState);
                 }
+            }
+            else
+            {
+                gpuColorTargetStates = colorAttachments.map((format) => ({ format }));
             }
 
             const gpuFragmentState: GPUFragmentState = {
@@ -71,35 +74,16 @@ export class WGPUFragmentState extends ReactiveObject
                 constants,
             };
 
-            r_this.gpuFragmentState = gpuFragmentState;
+            return gpuFragmentState;
         });
 
-        this.destroyCall(() => { r_this.gpuFragmentState = null; });
-    }
-
-    private _onMap(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
-    {
-        device.fragmentStates ??= new WeakMap<FragmentState, Map<string, WGPUFragmentState>>();
-        device.fragmentStates.set(fragmentState, device.fragmentStates.get(fragmentState) || new Map<string, WGPUFragmentState>());
-        device.fragmentStates.get(fragmentState).set(colorAttachments.toString(), this);
-        this.destroyCall(() => { device.fragmentStates.get(fragmentState).delete(colorAttachments.toString()); });
     }
 
     static getInstance(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
     {
         if (!fragmentState) return undefined;
 
-        return device.fragmentStates?.get(fragmentState)?.get(colorAttachments.toString()) || new WGPUFragmentState(device, fragmentState, colorAttachments);
+        return WGPUFragmentState.map.get([device, fragmentState, colorAttachments]) || new WGPUFragmentState(device, fragmentState, colorAttachments);
     }
-
-    static readonly cacheMap = new WeakMap<FragmentState, WGPUFragmentState>();
-    static readonly defaultGPUFragmentState: GPUFragmentState = { module: undefined, entryPoint: undefined, targets: undefined, constants: undefined };
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        fragmentStates: WeakMap<FragmentState, Map<string, WGPUFragmentState>>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, FragmentState, readonly GPUTextureFormat[]], WGPUFragmentState>();
 }

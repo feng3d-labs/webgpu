@@ -62,7 +62,6 @@ export class WGPUBindGroupEntry extends ReactiveObject
             else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
             {
                 const wgpuExternalTexture = WGPUExternalTexture.getInstance(device, bindingResources[name] as VideoTexture);
-                reactive(wgpuExternalTexture).gpuExternalTexture;
                 entry.resource = wgpuExternalTexture.gpuExternalTexture;
             }
             else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)

@@ -1,26 +1,29 @@
-import { reactive } from '@feng3d/reactivity';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap } from '@feng3d/render-api';
 import { VideoTexture } from '../data/VideoTexture';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUExternalTexture extends ReactiveObject
 {
-    readonly gpuExternalTexture: GPUExternalTexture;
+    get gpuExternalTexture() { return this._computedGpuExternalTexture.value; }
+    private _computedGpuExternalTexture: Computed<GPUExternalTexture>;
 
     constructor(device: GPUDevice, videoTexture: VideoTexture)
     {
         super();
 
         this._onCreate(device, videoTexture);
-        this._onMap(device, videoTexture);
+        //
+        WGPUExternalTexture.map.set([device, videoTexture], this);
+        this.destroyCall(() => { WGPUExternalTexture.map.delete([device, videoTexture]); });
     }
 
     private _onCreate(device: GPUDevice, videoTexture: VideoTexture)
     {
-        const r_this = reactive(this);
         const r_queue = reactive(device.queue);
         const r_videoTexture = reactive(videoTexture);
 
-        this.effect(() =>
+        this._computedGpuExternalTexture = computed(() =>
         {
             // 在提交前确保收集到正确的外部纹理。
             r_queue.preSubmit;
@@ -40,31 +43,18 @@ export class WGPUExternalTexture extends ReactiveObject
             }
 
             //
-            r_this.gpuExternalTexture = device.importExternalTexture(descriptor);
+            const gpuExternalTexture = device.importExternalTexture(descriptor);
+
+            return gpuExternalTexture;
         });
-
-        this.destroyCall(() => { r_this.gpuExternalTexture = null; })
-    }
-
-    private _onMap(device: GPUDevice, videoTexture: VideoTexture)
-    {
-        device.externalTextures ??= new WeakMap<VideoTexture, WGPUExternalTexture>();
-        device.externalTextures.set(videoTexture, this);
-        this.destroyCall(() => { device.externalTextures.delete(videoTexture); });
     }
 
     static getInstance(device: GPUDevice, videoTexture: VideoTexture)
     {
-        return device.externalTextures?.get(videoTexture) || new WGPUExternalTexture(device, videoTexture);
+        return WGPUExternalTexture.map.get([device, videoTexture]) || new WGPUExternalTexture(device, videoTexture);
     }
-}
 
-declare global
-{
-    interface GPUDevice
-    {
-        externalTextures?: WeakMap<VideoTexture, WGPUExternalTexture>;
-    }
+    static readonly map = new ChainMap<[GPUDevice, VideoTexture], WGPUExternalTexture>();
 }
 
 let _autoIndex = 0;
