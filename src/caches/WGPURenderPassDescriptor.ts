@@ -97,19 +97,11 @@ export class WGPURenderPassDescriptor extends ReactiveObject
                 gpuRenderPassDescriptor.timestampWrites = wGPUTimestampQuery?.gpuPassTimestampWrites;
             }
 
-            // 计算深度模板附件的纹理格式
-            let depthStencilFormat: GPUTextureFormat;
             //
             const wGPURenderPassDepthStencilAttachment = WGPURenderPassDepthStencilAttachment.getInstance(device, descriptor);
-            reactive(wGPURenderPassDepthStencilAttachment).gpuRenderPassDepthStencilAttachment;
             if (wGPURenderPassDepthStencilAttachment.gpuRenderPassDepthStencilAttachment)
             {
                 gpuRenderPassDescriptor.depthStencilAttachment = wGPURenderPassDepthStencilAttachment.gpuRenderPassDepthStencilAttachment;
-
-                const gpuTexture = gpuRenderPassDescriptor.depthStencilAttachment.view.texture;
-
-                //
-                depthStencilFormat = gpuTexture.format;
             }
 
             //

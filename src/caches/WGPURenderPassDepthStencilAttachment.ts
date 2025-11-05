@@ -1,8 +1,10 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, RenderPassDescriptor, Texture } from '@feng3d/render-api';
+import { ChainMap, defaultRenderPassDepthStencilAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
 import { WGPUTextureView } from './WGPUTextureView';
+
+import "../data/polyfills/RenderPassDepthStencilAttachment";
 
 /**
  * WebGPU渲染通道深度模板附件缓存管理器
@@ -77,6 +79,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
     private _onCreate(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
         const r_descriptor = reactive(descriptor);
+        const r_default = reactive(defaultRenderPassDepthStencilAttachment);
 
         // 自动生成的深度纹理实例，用于管理深度纹理的生命周期
         let autoCreateDepthTexture: WGPUTexture;
@@ -90,8 +93,6 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
             {
                 return null;
             }
-            const depthStencilAttachment = descriptor.depthStencilAttachment;
-
             let textureView: GPUTextureView;
 
             // 如果提供了深度纹理视图，使用现有的纹理视图
@@ -130,44 +131,15 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
             // 创建深度模板附件配置
             const gpuRenderPassDepthStencilAttachment: GPURenderPassDepthStencilAttachment = {
                 view: textureView,
+                depthClearValue: r_depthStencilAttachment.depthClearValue ?? r_default.depthClearValue,
+                depthLoadOp: r_depthStencilAttachment.depthLoadOp ?? r_default.depthLoadOp,
+                stencilClearValue: r_depthStencilAttachment.stencilClearValue ?? r_default.stencilClearValue,
+                stencilLoadOp: r_depthStencilAttachment.stencilLoadOp ?? r_default.stencilLoadOp,
+                depthStoreOp: r_depthStencilAttachment.depthStoreOp ?? r_default.depthStoreOp,
+                depthReadOnly: r_depthStencilAttachment.depthReadOnly ?? r_default.depthReadOnly,
+                stencilStoreOp: r_depthStencilAttachment.stencilStoreOp ?? r_default.stencilStoreOp,
+                stencilReadOnly: r_depthStencilAttachment.stencilReadOnly ?? r_default.stencilReadOnly,
             };
-
-            gpuRenderPassDepthStencilAttachment.depthClearValue = r_depthStencilAttachment.depthClearValue ?? 1;
-
-            if (r_depthStencilAttachment.depthLoadOp)
-            {
-                gpuRenderPassDepthStencilAttachment.depthLoadOp = depthStencilAttachment.depthLoadOp;
-            }
-
-            if (r_depthStencilAttachment.depthStoreOp)
-            {
-                gpuRenderPassDepthStencilAttachment.depthStoreOp = depthStencilAttachment.depthStoreOp;
-            }
-
-            if (r_depthStencilAttachment.depthReadOnly)
-            {
-                gpuRenderPassDepthStencilAttachment.depthReadOnly = depthStencilAttachment.depthReadOnly;
-            }
-
-            if (r_depthStencilAttachment.stencilClearValue)
-            {
-                gpuRenderPassDepthStencilAttachment.stencilClearValue = depthStencilAttachment.stencilClearValue;
-            }
-
-            if (r_depthStencilAttachment.stencilLoadOp)
-            {
-                gpuRenderPassDepthStencilAttachment.stencilLoadOp = depthStencilAttachment.stencilLoadOp;
-            }
-
-            if (r_depthStencilAttachment.stencilStoreOp)
-            {
-                gpuRenderPassDepthStencilAttachment.stencilStoreOp = depthStencilAttachment.stencilStoreOp;
-            }
-
-            if (r_depthStencilAttachment.stencilReadOnly)
-            {
-                gpuRenderPassDepthStencilAttachment.stencilReadOnly = depthStencilAttachment.stencilReadOnly;
-            }
 
             // 更新深度模板附件引用
             return gpuRenderPassDepthStencilAttachment;
