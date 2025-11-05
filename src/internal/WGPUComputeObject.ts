@@ -1,4 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
+import { computed, reactive } from '@feng3d/reactivity';
+import { ChainMap } from '@feng3d/render-api';
 import { WGPUBindGroup } from '../caches/WGPUBindGroup';
 import { WGPUComputePipeline } from '../caches/WGPUComputePipeline';
 import { WGPUPipelineLayout } from '../caches/WGPUPipelineLayout';
@@ -14,25 +15,27 @@ export class WGPUComputeObject extends ReactiveObject
         super();
 
         this._onCreate(device, computeObject);
-        this._onMap(device, computeObject);
+        //
+        WGPUComputeObject.map.set([device, computeObject], this);
+        this.destroyCall(() => { WGPUComputeObject.map.delete([device, computeObject]); });
     }
 
     private _onCreate(device: GPUDevice, computeObject: ComputeObject)
     {
         const r_computeObject = reactive(computeObject);
 
-        let computePipeline: GPUComputePipeline;
-        let setBindGroup: [index: GPUIndex32, bindGroup: GPUBindGroup][];
-        let dispatchWorkgroups: [workgroupCountX: GPUSize32, workgroupCountY?: GPUSize32, workgroupCountZ?: GPUSize32];
-
-        this.effect(() =>
+        const computedComputePipeline = computed(() =>
         {
             r_computeObject.pipeline;
             const wGPUComputePipeline = WGPUComputePipeline.getInstance(device, computeObject.pipeline);
-            computePipeline = wGPUComputePipeline.gpuComputePipeline;
+            const computePipeline = wGPUComputePipeline.gpuComputePipeline;
 
+            return computePipeline;
+        })
+        const computedSetBindGroup = computed(() =>
+        {
             // 计算 bindGroups
-            setBindGroup = [];
+            const setBindGroup: [index: GPUIndex32, bindGroup: GPUBindGroup][] = [];
             const layout = WGPUPipelineLayout.getPipelineLayout({ compute: r_computeObject.pipeline.compute.code });
 
             r_computeObject.bindingResources;
@@ -43,39 +46,44 @@ export class WGPUComputeObject extends ReactiveObject
                 setBindGroup.push([group, wgpuBindGroup.gpuBindGroup]);
             });
 
-            dispatchWorkgroups = [r_computeObject.workgroups.workgroupCountX, r_computeObject.workgroups.workgroupCountY, r_computeObject.workgroups.workgroupCountZ];
+            return setBindGroup;
+        });
+
+        const computedDispatchWorkgroups = computed(() =>
+        {
+            const dispatchWorkgroups: [workgroupCountX: GPUSize32, workgroupCountY?: GPUSize32, workgroupCountZ?: GPUSize32] = [r_computeObject.workgroups.workgroupCountX];
+
+            if (r_computeObject.workgroups.workgroupCountY)
+            {
+                dispatchWorkgroups[1] = r_computeObject.workgroups.workgroupCountY;
+            }
+            if (r_computeObject.workgroups.workgroupCountZ)
+            {
+                dispatchWorkgroups[2] = r_computeObject.workgroups.workgroupCountZ;
+            }
+
+            return dispatchWorkgroups;
         });
 
         this.run = (device: GPUDevice, commandEncoder: GPUComputePassEncoder) =>
         {
+            const computePipeline = computedComputePipeline.value;
             commandEncoder.setPipeline(computePipeline);
+
+            const setBindGroup = computedSetBindGroup.value;
             setBindGroup.forEach(([index, bindGroup]) =>
             {
                 commandEncoder.setBindGroup(index, bindGroup);
             });
-            const [workgroupCountX, workgroupCountY, workgroupCountZ] = dispatchWorkgroups;
 
-            commandEncoder.dispatchWorkgroups(workgroupCountX, workgroupCountY, workgroupCountZ);
+            const dispatchWorkgroups = computedDispatchWorkgroups.value;
+            commandEncoder.dispatchWorkgroups(...dispatchWorkgroups);
         }
-    }
-
-    private _onMap(device: GPUDevice, computeObject: ComputeObject)
-    {
-        device.computeObjectCommands ??= new WeakMap<ComputeObject, WGPUComputeObject>();
-        device.computeObjectCommands.set(computeObject, this);
-        this.destroyCall(() => { device.computeObjectCommands.delete(computeObject); });
     }
 
     static getInstance(device: GPUDevice, computeObject: ComputeObject)
     {
-        return device.computeObjectCommands?.get(computeObject) || new WGPUComputeObject(device, computeObject);
+        return this.map.get([device, computeObject]) || new WGPUComputeObject(device, computeObject);
     }
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        computeObjectCommands: WeakMap<ComputeObject, WGPUComputeObject>;
-    }
+    static readonly map = new ChainMap<[GPUDevice, ComputeObject], WGPUComputeObject>();
 }
