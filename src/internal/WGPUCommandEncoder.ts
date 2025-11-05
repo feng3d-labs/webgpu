@@ -1,6 +1,6 @@
-import { CommandEncoder, RenderPass } from '@feng3d/render-api';
+import { ChainMap, CommandEncoder, RenderPass } from '@feng3d/render-api';
 
-import { reactive } from '@feng3d/reactivity';
+import { computed, reactive } from '@feng3d/reactivity';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUComputePass } from './WGPUComputePass';
 import { WGPUCopyBufferToBuffer } from './WGPUCopyBufferToBuffer';
@@ -9,25 +9,27 @@ import { WGPURenderPass } from './WGPURenderPass';
 
 export class WGPUCommandEncoder extends ReactiveObject
 {
-    passEncoders: (WGPURenderPass | WGPUComputePass | WGPUCopyTextureToTexture | WGPUCopyBufferToBuffer)[];
+    run: (device: GPUDevice) => GPUCommandBuffer;
 
     constructor(device: GPUDevice, commandEncoder: CommandEncoder)
     {
         super();
 
         this._onCreate(device, commandEncoder);
-        this._onMap(device, commandEncoder);
+        //
+        WGPUCommandEncoder.map.set([device, commandEncoder], this);
+        this.destroyCall(() => { WGPUCommandEncoder.map.delete([device, commandEncoder]); });
     }
 
     private _onCreate(device: GPUDevice, commandEncoder: CommandEncoder)
     {
         const r_commandEncoder = reactive(commandEncoder);
 
-        this.effect(() =>
+        const computedPassEncoders = computed(() =>
         {
             r_commandEncoder.passEncoders.concat();
 
-            this.passEncoders = commandEncoder.passEncoders.map((passEncoder) =>
+            const passEncoders = commandEncoder.passEncoders.map((passEncoder) =>
             {
                 if (!passEncoder.__type__ || passEncoder.__type__ === 'RenderPass')
                 {
@@ -58,35 +60,25 @@ export class WGPUCommandEncoder extends ReactiveObject
 
                 return null;
             });
+
+            return passEncoders;
         });
-    }
 
-    run(device: GPUDevice)
-    {
-        const gpuCommandEncoder = device.createCommandEncoder();
+        this.run = (device: GPUDevice) =>
+        {
+            const passEncoders = computedPassEncoders.value;
 
-        this.passEncoders.forEach((passEncoder) => passEncoder.run(device, gpuCommandEncoder));
+            const gpuCommandEncoder = device.createCommandEncoder();
 
-        return gpuCommandEncoder.finish();
-    }
+            passEncoders.forEach((passEncoder) => passEncoder.run(device, gpuCommandEncoder));
 
-    private _onMap(device: GPUDevice, commandEncoder: CommandEncoder)
-    {
-        device.commandEncoderCommands ??= new WeakMap<CommandEncoder, WGPUCommandEncoder>();
-        device.commandEncoderCommands.set(commandEncoder, this);
-        this.destroyCall(() => { device.commandEncoderCommands.delete(commandEncoder); });
+            return gpuCommandEncoder.finish();
+        };
     }
 
     static getInstance(device: GPUDevice, commandEncoder: CommandEncoder)
     {
-        return device.commandEncoderCommands?.get(commandEncoder) || new WGPUCommandEncoder(device, commandEncoder);
+        return this.map.get([device, commandEncoder]) || new WGPUCommandEncoder(device, commandEncoder);
     }
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        commandEncoderCommands: WeakMap<CommandEncoder, WGPUCommandEncoder>;
-    }
+    static readonly map = new ChainMap<[GPUDevice, CommandEncoder], WGPUCommandEncoder>();
 }
