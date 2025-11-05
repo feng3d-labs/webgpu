@@ -1,28 +1,30 @@
-import { reactive } from '@feng3d/reactivity';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
 import { StencilFaceState } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUStencilFaceState extends ReactiveObject
 {
-    readonly gpuStencilFaceState: GPUStencilFaceState;
+    get gpuStencilFaceState() { return this._computedGpuStencilFaceState.value; }
+    private _computedGpuStencilFaceState: Computed<GPUStencilFaceState>;
 
     constructor(stencilFaceState: StencilFaceState)
     {
         super();
 
-        this._createGPUStencilFaceState(stencilFaceState);
-        this._onMap(stencilFaceState);
+        this._onCreate(stencilFaceState);
+        //
+        WGPUStencilFaceState.map.set(stencilFaceState, this);
+        this.destroyCall(() => { WGPUStencilFaceState.map.delete(stencilFaceState); });
     }
 
-    private _createGPUStencilFaceState(stencilFaceState: StencilFaceState)
+    private _onCreate(stencilFaceState: StencilFaceState)
     {
-        if (!stencilFaceState) return WGPUStencilFaceState.defaultGPUStencilFaceState;
-
-        const r_this = reactive(this);
         const r_stencilFaceState = reactive(stencilFaceState);
 
-        this.effect(() =>
+        this._computedGpuStencilFaceState = computed(() =>
         {
+            if (!stencilFaceState) return WGPUStencilFaceState.defaultGPUStencilFaceState;
+
             // 监听
             r_stencilFaceState.compare;
             r_stencilFaceState.failOp;
@@ -39,21 +41,15 @@ export class WGPUStencilFaceState extends ReactiveObject
             };
 
             //
-            r_this.gpuStencilFaceState = gpuStencilFaceState;
+            return gpuStencilFaceState;
         });
-    }
-
-    private _onMap(stencilFaceState: StencilFaceState)
-    {
-        WGPUStencilFaceState.cacheMap.set(stencilFaceState, this);
-        this.destroyCall(() => { WGPUStencilFaceState.cacheMap.delete(stencilFaceState); });
     }
 
     static getInstance(stencilFaceState: StencilFaceState)
     {
-        return this.cacheMap.get(stencilFaceState) || new WGPUStencilFaceState(stencilFaceState);
+        return this.map.get(stencilFaceState) || new WGPUStencilFaceState(stencilFaceState);
     }
 
-    static readonly cacheMap = new Map<StencilFaceState, WGPUStencilFaceState>();
+    static readonly map = new Map<StencilFaceState, WGPUStencilFaceState>();
     static readonly defaultGPUStencilFaceState: GPUStencilFaceState = {};
 }

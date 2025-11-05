@@ -51,12 +51,10 @@ export class WGPUDepthStencilState extends ReactiveObject
 
                 //
                 const wgpuStencilFront = WGPUStencilFaceState.getInstance(stencilFront);
-                reactive(wgpuStencilFront).gpuStencilFaceState;
                 const gpuStencilFront = wgpuStencilFront.gpuStencilFaceState;
 
                 //
                 const wgpuStencilBack = WGPUStencilFaceState.getInstance(stencilBack);
-                reactive(wgpuStencilBack).gpuStencilFaceState;
                 const gpuStencilBack = wgpuStencilBack.gpuStencilFaceState;
 
                 //
