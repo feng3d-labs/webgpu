@@ -114,7 +114,6 @@ export class WGPURenderPipeline extends ReactiveObject
             if (r_renderPipeline.multisample || sampleCount)
             {
                 const wgpuMultisampleState = WGPUMultisampleState.getInstance(renderPipeline.multisample);
-                reactive(wgpuMultisampleState).gpuMultisampleState;
                 gpuRenderPipelineDescriptor.multisample = wgpuMultisampleState.gpuMultisampleState;
             }
 
