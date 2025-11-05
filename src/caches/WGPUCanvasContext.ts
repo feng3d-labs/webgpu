@@ -1,4 +1,4 @@
-import { Computed, computed, reactive, ref } from '@feng3d/reactivity';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
 import { CanvasContext, ChainMap } from '@feng3d/render-api';
 import { watcher } from '@feng3d/watcher';
 
@@ -57,8 +57,8 @@ export class WGPUCanvasContext extends ReactiveObject
      * 当画布上下文配置发生变化时，版本号会自动递增。
      * 可用于检测画布上下文是否需要重新获取纹理。
      */
-    get version() { return this._versionRef.value; }
-    private _versionRef = ref(0);
+    get version() { return this._computedVersion.value; }
+    private _computedVersion: Computed<number>;
 
     /**
      * 构造函数
@@ -109,6 +109,9 @@ export class WGPUCanvasContext extends ReactiveObject
 
         let offCanvasSizeChanged: () => void;
 
+        const versionObject = { version: 0 };
+        const r_versionObject = reactive(versionObject);
+
         // 监听画布ID变化，自动创建画布元素和GPU上下文
         this._computedGpuCanvasContext = computed(() =>
         {
@@ -116,13 +119,18 @@ export class WGPUCanvasContext extends ReactiveObject
             const gpuCanvasContext = canvas?.getContext('webgpu') as GPUCanvasContext;
 
             // 设置画布配置监听
-            this._onConfiguration(device, gpuCanvasContext, context);
+            this._onConfiguration(device, gpuCanvasContext, context, versionObject);
 
             // 设置画布变化监听
             offCanvasSizeChanged?.();
-            offCanvasSizeChanged = this._onCanvasSizeChanged(canvas);
+            offCanvasSizeChanged = this._onCanvasSizeChanged(canvas, versionObject);
 
             return gpuCanvasContext;
+        });
+
+        this._computedVersion = computed(() =>
+        {
+            return r_versionObject.version;
         });
 
         this.destroyCall(() =>
@@ -140,9 +148,10 @@ export class WGPUCanvasContext extends ReactiveObject
      * @param device GPU设备实例
      * @param context 画布上下文配置对象
      */
-    private _onConfiguration(device: GPUDevice, gpuCanvasContext: GPUCanvasContext, context: CanvasContext)
+    private _onConfiguration(device: GPUDevice, gpuCanvasContext: GPUCanvasContext, context: CanvasContext, versionObject: { version: number })
     {
         const r_context = reactive(context);
+        const r_versionObject = reactive(versionObject);
 
         // 监听画布配置变化，自动重新配置GPU画布上下文
         computed(() =>
@@ -184,7 +193,8 @@ export class WGPUCanvasContext extends ReactiveObject
             // 配置GPU画布上下文
             gpuCanvasContext.configure(gpuCanvasConfiguration);
 
-            this._versionRef.value++;
+            //
+            r_versionObject.version = versionObject.version + 1;
         }).value;
     }
 
@@ -196,11 +206,13 @@ export class WGPUCanvasContext extends ReactiveObject
      *
      * @param context 画布上下文配置对象
      */
-    private _onCanvasSizeChanged(canvas: HTMLCanvasElement | OffscreenCanvas)
+    private _onCanvasSizeChanged(canvas: HTMLCanvasElement | OffscreenCanvas, versionObject: { version: number })
     {
+        const r_versionObject = reactive(versionObject);
+
         const _onChanged = () =>
         {
-            this._versionRef.value++;
+            r_versionObject.version = versionObject.version + 1;
         }
 
         watcher.watch(canvas, 'width', _onChanged);
