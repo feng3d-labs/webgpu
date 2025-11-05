@@ -1,4 +1,4 @@
-import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { computed, reactive } from '@feng3d/reactivity';
 import { ChainMap, RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { ReactiveObject } from '../ReactiveObject';
@@ -8,8 +8,6 @@ import { CommandType, runCommands, WGPURenderObject, WGPURenderObjectState } fro
 
 export class WGPURenderPass extends ReactiveObject
 {
-    private _computed: Computed<{ commands: CommandType[]; renderPassDescriptor: GPURenderPassDescriptor }>;
-
     constructor(device: GPUDevice, public readonly renderPass: RenderPass)
     {
         super();
@@ -24,18 +22,11 @@ export class WGPURenderPass extends ReactiveObject
     {
         const r_renderPass = reactive(renderPass);
 
-        const computedRenderPassDescriptor = computed(() =>
-        {
-            const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, renderPass);
-            reactive(wgpuRenderPassDescriptor).gpuRenderPassDescriptor;
-
-            return wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
-        });
+        const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, renderPass);
 
         const computedCommands = computed(() =>
         {
             const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, renderPass);
-            reactive(wgpuRenderPassDescriptor).gpuRenderPassDescriptor;
 
             const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
 
@@ -79,30 +70,25 @@ export class WGPURenderPass extends ReactiveObject
             return null;
         });
 
-        this._computed = computed(() =>
+        this.run = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
         {
-            return {
-                commands: computedCommands.value,
-                renderPassDescriptor: computedRenderPassDescriptor.value,
-            };
-        });
-    }
+            const commands = computedCommands.value;
+            const renderPassDescriptor = wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
 
-    run(device: GPUDevice, commandEncoder: GPUCommandEncoder)
-    {
-        const { commands, renderPassDescriptor } = this._computed.value;
+            const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
-        const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
+            if (commands)
+            {
+                runCommands(passEncoder, commands);
+            }
+            passEncoder.end();
 
-        if (commands)
-        {
-            runCommands(passEncoder, commands);
+            renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
+            renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
         }
-        passEncoder.end();
-
-        renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
-        renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
     }
+
+    run: (device: GPUDevice, commandEncoder: GPUCommandEncoder) => void;
 
     static getInstance(device: GPUDevice, renderPass: RenderPass)
     {

@@ -28,7 +28,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass)
     {
-        const r_this = reactive(this);
         const r_renderPass = reactive(renderPass);
 
         this._computedGpuRenderPassDescriptor = computed(() =>
@@ -117,8 +116,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
         this._computedRenderPassFormat = computed(() =>
         {
-            r_this.gpuRenderPassDescriptor;
-
             const gpuRenderPassDescriptor = this.gpuRenderPassDescriptor;
 
             let attachmentSize: { width: number, height: number } = null;
@@ -164,8 +161,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
             return renderPassFormat;
         });
-
-        this.destroyCall(() => { this._computedGpuRenderPassDescriptor = null; this._computedRenderPassFormat = null; });
     }
 
     static getInstance(device: GPUDevice, renderPass: RenderPass)
