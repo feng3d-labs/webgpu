@@ -173,7 +173,6 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
 
             //
             const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(pipeline.vertex, vertices);
-            reactive(wgpuVertexBufferLayout).vertexDatas;
             const vertexDatas = wgpuVertexBufferLayout.vertexDatas;
 
             this.setVertexBuffer.length = vertexDatas?.length ?? 0;

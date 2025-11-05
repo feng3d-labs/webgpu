@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { VertexAttributes, VertexData, vertexFormatMap, VertexState } from '@feng3d/render-api';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, VertexAttributes, VertexData, vertexFormatMap, VertexState } from '@feng3d/render-api';
 import { FunctionInfo } from 'wgsl_reflect';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUShaderReflect } from './WGPUShaderReflect';
@@ -39,7 +39,7 @@ export class WGPUVertexBufferLayout extends ReactiveObject
      * 包含所有顶点缓冲区的布局配置信息，用于GPU渲染管线。
      * 当顶点状态或顶点属性发生变化时，此数组会自动重新创建。
      */
-    readonly vertexBufferLayouts: GPUVertexBufferLayout[];
+    get vertexBufferLayouts() { return this._computedGpuVertexBufferLayouts.value.vertexBufferLayouts; }
 
     /**
      * 顶点数据数组
@@ -47,7 +47,9 @@ export class WGPUVertexBufferLayout extends ReactiveObject
      * 包含所有顶点数据，与vertexBufferLayouts 中的布局一一对应。
      * 当顶点状态或顶点属性发生变化时，此数组会自动重新创建。
      */
-    readonly vertexDatas: VertexData[];
+    get vertexDatas() { return this._computedGpuVertexBufferLayouts.value.vertexDatas; }
+
+    private _computedGpuVertexBufferLayouts: Computed<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexDatas: VertexData[] }>;
 
     /**
      * 构造函数
@@ -62,31 +64,11 @@ export class WGPUVertexBufferLayout extends ReactiveObject
         super();
 
         // 设置顶点缓冲区布局创建和更新逻辑
-        this._onCreateVertexBufferLayout(vertexState, vertices);
+        this._onCreate(vertexState, vertices);
 
-        // 将实例注册到缓存中
-        this._onMap(vertexState, vertices);
-    }
-
-    /**
-     * 将顶点缓冲区布局实例注册到缓存中
-     *
-     * 使用嵌套WeakMap将顶点状态和顶点属性配置对象与其实例关联，实现实例缓存和复用。
-     * 当顶点状态或顶点属性配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     *
-     * @param vertexState 顶点状态配置对象，作为第一级缓存的键
-     * @param vertices 顶点属性配置对象，作为第二级缓存的键
-     */
-    private _onMap(vertexState: VertexState, vertices: VertexAttributes)
-    {
-        // 如果顶点状态还没有对应的二级缓存，则创建一个新的WeakMap
-        caches.set(vertexState, caches.get(vertexState) || new Map<VertexAttributes, WGPUVertexBufferLayout>());
-
-        // 将当前实例与顶点属性配置对象关联
-        caches.get(vertexState).set(vertices, this);
-
-        // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { caches.get(vertexState).delete(vertices); });
+        //
+        WGPUVertexBufferLayout.map.set([vertexState, vertices], this);
+        this.destroyCall(() => { WGPUVertexBufferLayout.map.delete([vertexState, vertices]); });
     }
 
     /**
@@ -99,14 +81,13 @@ export class WGPUVertexBufferLayout extends ReactiveObject
      * @param vertexState 顶点状态配置对象
      * @param vertices 顶点属性配置对象
      */
-    private _onCreateVertexBufferLayout(vertexState: VertexState, vertices: VertexAttributes)
+    private _onCreate(vertexState: VertexState, vertices: VertexAttributes)
     {
         const r_this = reactive(this);
         const r_vertexState = reactive(vertexState);
-        const r_vertices = reactive(vertices);
 
         // 监听顶点状态和顶点属性变化，自动重新创建顶点缓冲区布局
-        this.effect(() =>
+        this._computedGpuVertexBufferLayouts = computed(() =>
         {
             // 触发响应式依赖，监听顶点状态的所有属性
             r_vertexState.code;
@@ -212,8 +193,7 @@ export class WGPUVertexBufferLayout extends ReactiveObject
             });
 
             // 更新顶点缓冲区布局和缓冲区引用
-            r_this.vertexBufferLayouts = vertexBufferLayouts;
-            r_this.vertexDatas = vertexDatas;
+            return { vertexBufferLayouts, vertexDatas };
         });
     }
 
@@ -230,14 +210,7 @@ export class WGPUVertexBufferLayout extends ReactiveObject
     static getInstance(vertexState: VertexState, vertices: VertexAttributes)
     {
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return caches.get(vertexState)?.get(vertices) || new WGPUVertexBufferLayout(vertexState, vertices);
+        return this.map.get([vertexState, vertices]) || new WGPUVertexBufferLayout(vertexState, vertices);
     }
+    static readonly map = new ChainMap<[VertexState, VertexAttributes], WGPUVertexBufferLayout>();
 }
-
-/**
- * 顶点缓冲区布局实例缓存映射表
- *
- * 用于缓存已创建的顶点缓冲区布局实例，避免重复创建相同的布局。
- * 使用嵌套WeakMap结构，第一级键为顶点状态配置对象，第二级键为顶点属性配置对象。
- */
-const caches = new WeakMap<VertexState, Map<VertexAttributes, WGPUVertexBufferLayout>>();
