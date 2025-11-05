@@ -1,4 +1,4 @@
-import { CopyBufferToBuffer } from '@feng3d/render-api';
+import { ChainMap, CopyBufferToBuffer } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUBuffer } from '../caches/WGPUBuffer';
 
@@ -11,61 +11,40 @@ export class WGPUCopyBufferToBuffer extends ReactiveObject
         super();
 
         this._onCreate(device, copyBufferToBuffer);
-        this._onMap(device, copyBufferToBuffer);
+        //
+        WGPUCopyBufferToBuffer.map.set([device, copyBufferToBuffer], this);
+        this.destroyCall(() => { WGPUCopyBufferToBuffer.map.delete([device, copyBufferToBuffer]); });
     }
 
     private _onCreate(device: GPUDevice, copyBufferToBuffer: CopyBufferToBuffer)
     {
-        let source: GPUBuffer;
-        let sourceOffset: number;
-        let destination: GPUBuffer;
-        let destinationOffset: number;
-        let size: number;
-
-        this.effect(() =>
+        this.run = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
         {
             //
             const sourceBuffer = WGPUBuffer.getInstance(device, copyBufferToBuffer.source);
-            source = sourceBuffer.gpuBuffer;
+            const source = sourceBuffer.gpuBuffer;
 
             //
-            sourceOffset = copyBufferToBuffer.sourceOffset ?? 0;
+            const sourceOffset = copyBufferToBuffer.sourceOffset ?? 0;
 
             //
             const destinationBuffer = WGPUBuffer.getInstance(device, copyBufferToBuffer.destination);
-            destination = destinationBuffer.gpuBuffer;
+            const destination = destinationBuffer.gpuBuffer;
 
             //
-            destinationOffset = copyBufferToBuffer.destinationOffset ?? 0;
+            const destinationOffset = copyBufferToBuffer.destinationOffset ?? 0;
 
             //
-            size = copyBufferToBuffer.size ?? source.size;
-        });
+            const size = copyBufferToBuffer.size ?? source.size;
 
-        this.run = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
-        {
             commandEncoder.copyBufferToBuffer(source, sourceOffset, destination, destinationOffset, size);
         }
     }
 
-    private _onMap(device: GPUDevice, copyBufferToBuffer: CopyBufferToBuffer)
-    {
-        device.copyBufferToBuffers ??= new WeakMap<CopyBufferToBuffer, WGPUCopyBufferToBuffer>();
-        device.copyBufferToBuffers.set(copyBufferToBuffer, this);
-        this.destroyCall(() => { device.copyBufferToBuffers.delete(copyBufferToBuffer); });
-    }
-
     static getInstance(device: GPUDevice, copyBufferToBuffer: CopyBufferToBuffer)
     {
-        return device.copyBufferToBuffers?.get(copyBufferToBuffer) || new WGPUCopyBufferToBuffer(device, copyBufferToBuffer);
+        return this.map.get([device, copyBufferToBuffer]) || new WGPUCopyBufferToBuffer(device, copyBufferToBuffer);
     }
+    static readonly map = new ChainMap<[GPUDevice, CopyBufferToBuffer], WGPUCopyBufferToBuffer>();
 
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        copyBufferToBuffers: WeakMap<CopyBufferToBuffer, WGPUCopyBufferToBuffer>;
-    }
 }

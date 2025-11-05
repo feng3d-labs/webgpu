@@ -1,5 +1,4 @@
-import { reactive } from '@feng3d/reactivity';
-import { CopyTextureToTexture, TextureSize } from '@feng3d/render-api';
+import { ChainMap, CopyTextureToTexture } from '@feng3d/render-api';
 import { WGPUTextureLike } from '../caches/WGPUTextureLike';
 import { ReactiveObject } from '../ReactiveObject';
 
@@ -11,16 +10,14 @@ export class WGPUCopyTextureToTexture extends ReactiveObject
     {
         super();
         this._onCreate(device, copyTextureToTexture);
-        this._onMap(device, copyTextureToTexture);
+        //
+        WGPUCopyTextureToTexture.map.set([device, copyTextureToTexture], this);
+        this.destroyCall(() => { WGPUCopyTextureToTexture.map.delete([device, copyTextureToTexture]); });
     }
 
     private _onCreate(device: GPUDevice, copyTextureToTexture: CopyTextureToTexture)
     {
-        let source: GPUTexelCopyTextureInfo;
-        let destination: GPUTexelCopyTextureInfo;
-        let copySize: TextureSize;
-
-        this.effect(() =>
+        this.run = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
         {
             const sourceTexture = WGPUTextureLike.getInstance(device, copyTextureToTexture.source.texture);
             const gpuSourceTexture = sourceTexture.gpuTexture;
@@ -28,42 +25,23 @@ export class WGPUCopyTextureToTexture extends ReactiveObject
             const destinationTexture = WGPUTextureLike.getInstance(device, copyTextureToTexture.destination.texture);
             const gpuDestinationTexture = destinationTexture.gpuTexture;
 
-            source = {
+            const source: GPUTexelCopyTextureInfo = {
                 ...copyTextureToTexture.source,
                 texture: gpuSourceTexture,
             };
 
-            destination = {
+            const destination: GPUTexelCopyTextureInfo = {
                 ...copyTextureToTexture.destination,
                 texture: gpuDestinationTexture,
             };
 
-            copySize = copyTextureToTexture.copySize;
-        });
-
-        this.run = (device: GPUDevice, commandEncoder: GPUCommandEncoder) =>
-        {
-            commandEncoder.copyTextureToTexture(source, destination, copySize);
+            commandEncoder.copyTextureToTexture(source, destination, copyTextureToTexture.copySize);
         }
-    }
-
-    private _onMap(device: GPUDevice, copyTextureToTexture: CopyTextureToTexture)
-    {
-        device.copyTextureToTextures ??= new WeakMap<CopyTextureToTexture, WGPUCopyTextureToTexture>();
-        device.copyTextureToTextures.set(copyTextureToTexture, this);
-        this.destroyCall(() => { device.copyTextureToTextures.delete(copyTextureToTexture); });
     }
 
     static getInstance(device: GPUDevice, copyTextureToTexture: CopyTextureToTexture)
     {
-        return device.copyTextureToTextures?.get(copyTextureToTexture) || new WGPUCopyTextureToTexture(device, copyTextureToTexture);
+        return this.map.get([device, copyTextureToTexture]) || new WGPUCopyTextureToTexture(device, copyTextureToTexture);
     }
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        copyTextureToTextures: WeakMap<CopyTextureToTexture, WGPUCopyTextureToTexture>;
-    }
+    static readonly map = new ChainMap<[GPUDevice, CopyTextureToTexture], WGPUCopyTextureToTexture>();
 }

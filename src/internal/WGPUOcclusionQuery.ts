@@ -1,4 +1,3 @@
-import { reactive } from '@feng3d/reactivity';
 import { ChainMap, OcclusionQuery } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { RenderPassFormat } from './RenderPassFormat';
@@ -6,58 +5,39 @@ import { CommandType, RenderPassObjectCommand, WGPURenderObject, WGPURenderObjec
 
 export class WGPUOcclusionQuery extends ReactiveObject implements RenderPassObjectCommand
 {
+    run: (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) => void;
+
     queryIndex: number;
-    wgpuRenderObjects: WGPURenderObject[];
 
     constructor(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery)
     {
         super();
 
         this._onCreate(device, renderPassFormat, occlusionQuery);
-        this._onMap(device, renderPassFormat, occlusionQuery);
+        //
+        WGPUOcclusionQuery.map.set([device, renderPassFormat, occlusionQuery], this);
+        this.destroyCall(() => { WGPUOcclusionQuery.map.delete([device, renderPassFormat, occlusionQuery]); });
     }
 
     private _onCreate(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery)
     {
-        const r_renderOcclusionQueryObject = reactive(occlusionQuery);
-        this.effect(() =>
+        this.run = (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) =>
         {
-            r_renderOcclusionQueryObject.renderObjects.concat();
+            commands.push(['beginOcclusionQuery', this.queryIndex]);
 
-            const renderObjects = occlusionQuery.renderObjects;
+            occlusionQuery.renderObjects.forEach((renderObject) =>
+            {
+                const wgpuRenderObject = WGPURenderObject.getInstance(device, renderObject, renderPassFormat);
+                wgpuRenderObject.run(undefined, commands, state);
+            });
 
-            this.wgpuRenderObjects = renderObjects.map((element) =>
-                WGPURenderObject.getInstance(device, element, renderPassFormat));
-        });
-    }
-
-    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState)
-    {
-        commands.push(['beginOcclusionQuery', this.queryIndex]);
-        for (let i = 0, len = this.wgpuRenderObjects.length; i < len; i++)
-        {
-            this.wgpuRenderObjects[i].run(undefined, commands, state);
-        }
-        commands.push(['endOcclusionQuery']);
-    }
-
-    private _onMap(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery)
-    {
-        device.occlusionQueryCaches ??= new ChainMap();
-        device.occlusionQueryCaches.set([renderPassFormat, occlusionQuery], this);
-        this.destroyCall(() => { device.occlusionQueryCaches.delete([renderPassFormat, occlusionQuery]); });
+            commands.push(['endOcclusionQuery']);
+        };
     }
 
     static getInstance(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery)
     {
-        return device.occlusionQueryCaches?.get([renderPassFormat, occlusionQuery]) || new WGPUOcclusionQuery(device, renderPassFormat, occlusionQuery);
+        return this.map.get([device, renderPassFormat, occlusionQuery]) || new WGPUOcclusionQuery(device, renderPassFormat, occlusionQuery);
     }
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        occlusionQueryCaches: ChainMap<[renderPassFormat: RenderPassFormat, renderOcclusionQueryObject: OcclusionQuery], WGPUOcclusionQuery>;
-    }
+    static readonly map = new ChainMap<[GPUDevice, RenderPassFormat, OcclusionQuery], WGPUOcclusionQuery>();
 }
