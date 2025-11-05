@@ -28,7 +28,6 @@ export class WGPUComputePass extends ReactiveObject
             if (r_computePass.descriptor?.timestampQuery)
             {
                 const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, computePass.descriptor.timestampQuery);
-                reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
                 descriptor.timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
             }
 

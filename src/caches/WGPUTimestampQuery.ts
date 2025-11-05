@@ -1,4 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { ChainMap } from '@feng3d/render-api';
 import { TimestampQuery } from '../data/TimestampQuery';
 import { ReactiveObject } from '../ReactiveObject';
 
@@ -37,7 +38,8 @@ export class WGPUTimestampQuery extends ReactiveObject
      * 这是实际的GPU时间戳查询集实例，用于在渲染通道中记录时间戳。
      * 当时间戳查询配置发生变化时，此对象会自动重新创建。
      */
-    readonly gpuPassTimestampWrites: GPURenderPassTimestampWrites | GPUComputePassTimestampWrites;
+    get gpuPassTimestampWrites() { return this._computedGpuPassTimestampWrites.value; }
+    private _computedGpuPassTimestampWrites: Computed<GPURenderPassTimestampWrites | GPUComputePassTimestampWrites>;
 
     /**
      * 构造函数
@@ -52,10 +54,11 @@ export class WGPUTimestampQuery extends ReactiveObject
         super();
 
         // 设置时间戳查询创建和更新逻辑
-        this._createGPUPassTimestampWrites(device, timestampQuery);
+        this._onCreate(device, timestampQuery);
 
-        // 将实例注册到设备缓存中
-        this._onMap(device, timestampQuery);
+        //
+        WGPUTimestampQuery.map.set([device, timestampQuery], this);
+        this.destroyCall(() => { WGPUTimestampQuery.map.delete([device, timestampQuery]); });
     }
 
     /**
@@ -69,7 +72,7 @@ export class WGPUTimestampQuery extends ReactiveObject
      * @param device GPU设备实例
      * @param timestampQuery 时间戳查询配置对象
      */
-    private _createGPUPassTimestampWrites(device: GPUDevice, timestampQuery: TimestampQuery)
+    private _onCreate(device: GPUDevice, timestampQuery: TimestampQuery)
     {
         // 创建时间戳查询集
         const querySet = device.createQuerySet({ type: 'timestamp', count: 2 });
@@ -86,20 +89,6 @@ export class WGPUTimestampQuery extends ReactiveObject
             size: resolveBuf.size,
             usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
         });
-
-        // 定义销毁函数，用于清理查询相关资源
-        const destroy = () =>
-        {
-            // 销毁查询集
-            querySet.destroy();
-
-            // 销毁缓冲区
-            resolveBuf.destroy();
-            resultBuf.destroy();
-
-            // 清空时间戳查询引用
-            reactive(this).gpuPassTimestampWrites = null;
-        };
 
         // 标记是否需要解析查询结果
         let needResolve = false;
@@ -120,7 +109,7 @@ export class WGPUTimestampQuery extends ReactiveObject
         };
 
         // 监听时间戳查询配置变化，自动重新创建时间戳查询
-        this.effect(() =>
+        this._computedGpuPassTimestampWrites = computed(() =>
         {
             // 创建时间戳查询写入配置
             const timestampWrites: GPURenderPassTimestampWrites | GPUComputePassTimestampWrites = {
@@ -131,7 +120,7 @@ export class WGPUTimestampQuery extends ReactiveObject
             };
 
             // 更新时间戳查询引用
-            reactive(this).gpuPassTimestampWrites = timestampWrites;
+            return timestampWrites;
         });
 
         // 监听GPU队列提交事件，处理查询结果
@@ -173,28 +162,12 @@ export class WGPUTimestampQuery extends ReactiveObject
         });
 
         // 注册销毁回调，确保在对象销毁时清理查询相关资源
-        this.destroyCall(destroy);
-    }
-
-    /**
-     * 将时间戳查询实例注册到设备缓存中
-     *
-     * 使用WeakMap将时间戳查询配置对象与其实例关联，实现实例缓存和复用。
-     * 当时间戳查询配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     *
-     * @param device GPU设备实例，用于存储缓存映射
-     * @param timestampQuery 时间戳查询配置对象，作为缓存的键
-     */
-    private _onMap(device: GPUDevice, timestampQuery?: TimestampQuery)
-    {
-        // 如果设备还没有时间戳查询缓存，则创建一个新的WeakMap
-        device.timestampQueries ??= new WeakMap<TimestampQuery, WGPUTimestampQuery>();
-
-        // 将当前实例与时间戳查询配置对象关联
-        device.timestampQueries.set(timestampQuery, this);
-
-        // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { device.timestampQueries.delete(timestampQuery); });
+        this.destroyCall(() =>
+        {
+            querySet.destroy();
+            resolveBuf.destroy();
+            resultBuf.destroy();
+        });
     }
 
     /**
@@ -228,23 +201,9 @@ export class WGPUTimestampQuery extends ReactiveObject
         }
 
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return device.timestampQueries?.get(timestampQuery) || new WGPUTimestampQuery(device, timestampQuery);
+        return this.map.get([device, timestampQuery]) || new WGPUTimestampQuery(device, timestampQuery);
     }
-}
-
-/**
- * 全局类型声明
- *
- * 扩展GPUDevice接口，添加时间戳查询实例缓存映射。
- * 这个WeakMap用于缓存时间戳查询实例，避免重复创建相同的时间戳查询。
- */
-declare global
-{
-    interface GPUDevice
-    {
-        /** 时间戳查询实例缓存映射表 */
-        timestampQueries: WeakMap<TimestampQuery, WGPUTimestampQuery>;
-    }
+    static readonly map = new ChainMap<[GPUDevice, TimestampQuery], WGPUTimestampQuery>();
 }
 
 /**

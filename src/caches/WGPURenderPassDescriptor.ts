@@ -92,7 +92,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             if (descriptor.timestampQuery)
             {
                 const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, descriptor.timestampQuery);
-                wGPUTimestampQuery && reactive(wGPUTimestampQuery).gpuPassTimestampWrites;
                 gpuRenderPassDescriptor.timestampWrites = wGPUTimestampQuery?.gpuPassTimestampWrites;
             }
 
