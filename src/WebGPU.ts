@@ -65,16 +65,7 @@ export class WebGPU
 
     destoryTexture(texture: TextureLike)
     {
-        const device = this.device;
-
-        if ('context' in texture)
-        {
-            device.canvasTextures?.get(texture)?.destroy();
-
-            return;
-        }
-
-        device.textures?.get(texture)?.destroy();
+        WGPUTextureLike.getInstance(this.device, texture).destroy();
     }
 
     textureInvertYPremultiplyAlpha(texture: TextureLike, options: { invertY?: boolean, premultiplyAlpha?: boolean })

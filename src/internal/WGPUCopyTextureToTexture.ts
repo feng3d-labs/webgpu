@@ -23,11 +23,9 @@ export class WGPUCopyTextureToTexture extends ReactiveObject
         this.effect(() =>
         {
             const sourceTexture = WGPUTextureLike.getInstance(device, copyTextureToTexture.source.texture);
-            reactive(sourceTexture).gpuTexture;
             const gpuSourceTexture = sourceTexture.gpuTexture;
 
             const destinationTexture = WGPUTextureLike.getInstance(device, copyTextureToTexture.destination.texture);
-            reactive(destinationTexture).gpuTexture;
             const gpuDestinationTexture = destinationTexture.gpuTexture;
 
             source = {

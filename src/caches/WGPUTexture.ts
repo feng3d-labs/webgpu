@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureLike, TextureSource } from '@feng3d/render-api';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureSource } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { generateMipmap } from '../utils/generate-mipmap';
 
@@ -38,7 +38,8 @@ export class WGPUTexture extends ReactiveObject
      * 这是实际的GPU纹理实例，用于在渲染管线中存储和访问纹理数据。
      * 当纹理配置发生变化时，此对象会自动重新创建。
      */
-    readonly gpuTexture: GPUTexture;
+    get gpuTexture() { return this._computedGpuTexture.value; }
+    private _computedGpuTexture: Computed<GPUTexture>;
 
     /**
      * 构造函数
@@ -53,13 +54,11 @@ export class WGPUTexture extends ReactiveObject
         super();
 
         // 设置纹理创建和更新逻辑
-        this._onCreateGPUTexture(device, texture);
+        this._onCreate(device, texture);
 
-        // 设置纹理数据写入监听
-        this._onWriteTextures(device, texture);
-
-        // 将实例注册到设备缓存中
-        this._onMap(device, texture);
+        //
+        WGPUTexture.map.set([device, texture], this);
+        this.destroyCall(() => { WGPUTexture.map.delete([device, texture]); });
     }
 
     /**
@@ -71,20 +70,15 @@ export class WGPUTexture extends ReactiveObject
      * @param device GPU设备实例
      * @param texture 纹理配置对象
      */
-    private _onCreateGPUTexture(device: GPUDevice, texture: Texture)
+    private _onCreate(device: GPUDevice, texture: Texture)
     {
         const r_this = reactive(this);
         const r_texture = reactive(texture);
 
-        // 定义纹理销毁函数
-        const destroyGPUTexture = () =>
-        {
-            this.gpuTexture?.destroy();
-            r_this.gpuTexture = null;
-        }
+        let gpuTexture: GPUTexture;
 
         // 监听纹理配置变化，自动重新创建纹理
-        this.effect(() =>
+        this._computedGpuTexture = computed(() =>
         {
             // 触发响应式依赖，监听纹理描述符的所有属性
             const r_descriptor = r_texture.descriptor;
@@ -143,7 +137,8 @@ export class WGPUTexture extends ReactiveObject
             }
 
             // 创建GPU纹理
-            const gpuTexture = device.createTexture(gpuTextureDescriptor);
+            gpuTexture?.destroy();
+            gpuTexture = device.createTexture(gpuTextureDescriptor);
 
             // 上传初始纹理数据
             WGPUTexture._writeTextures(device, gpuTexture, texture.sources);
@@ -154,14 +149,17 @@ export class WGPUTexture extends ReactiveObject
                 generateMipmap(device, gpuTexture);
             }
 
-            this.gpuTexture?.destroy();
+            // 设置纹理数据写入监听
+            this._onWriteTextures(device, gpuTexture, texture);
 
-            // 更新纹理引用
-            r_this.gpuTexture = gpuTexture;
+            return gpuTexture;
         });
 
         // 注册清理回调，在对象销毁时清理纹理
-        this.destroyCall(destroyGPUTexture);
+        this.destroyCall(() =>
+        {
+            gpuTexture?.destroy();
+        });
     }
 
     /**
@@ -173,47 +171,22 @@ export class WGPUTexture extends ReactiveObject
      * @param device GPU设备实例
      * @param texture 纹理配置对象
      */
-    private _onWriteTextures(device: GPUDevice, texture: Texture)
+    private _onWriteTextures(device: GPUDevice, gpuTexture: GPUTexture, texture: Texture)
     {
-        const r_this = reactive(this);
         const r_texture = reactive(texture);
 
         // 监听纹理数据写入请求
-        this.effect(() =>
+        computed(() =>
         {
-            // 如果GPU纹理不存在，跳过写入
-            if (!r_this.gpuTexture) return;
-
             // 触发响应式依赖，监听writeTextures数组变化
             r_texture.writeTextures;
 
             // 将数据写入GPU纹理
-            WGPUTexture._writeTextures(device, this.gpuTexture, texture.writeTextures);
+            WGPUTexture._writeTextures(device, gpuTexture, texture.writeTextures);
 
             // 清空写入数据，避免重复处理
             r_texture.writeTextures = null;
-        });
-    }
-
-    /**
-     * 将纹理实例注册到设备缓存中
-     *
-     * 使用WeakMap将纹理配置对象与其实例关联，实现实例缓存和复用。
-     * 当纹理配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     *
-     * @param device GPU设备实例，用于存储缓存映射
-     * @param texture 纹理配置对象，作为缓存的键
-     */
-    private _onMap(device: GPUDevice, texture: Texture)
-    {
-        // 如果设备还没有纹理缓存，则创建一个新的WeakMap
-        device.textures ??= new WeakMap<TextureLike, WGPUTexture>();
-
-        // 将当前实例与纹理配置对象关联
-        device.textures.set(texture, this);
-
-        // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { device.textures.delete(texture); });
+        }).value;
     }
 
     /**
@@ -223,14 +196,15 @@ export class WGPUTexture extends ReactiveObject
      * 如果缓存中已存在对应的实例，则直接返回；否则创建新实例并缓存。
      *
      * @param device GPU设备实例
-     * @param textureLike 纹理配置对象
+     * @param texture 纹理配置对象
      * @returns 纹理实例
      */
-    static getInstance(device: GPUDevice, textureLike: Texture)
+    static getInstance(device: GPUDevice, texture: Texture)
     {
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return device.textures?.get(textureLike) || new WGPUTexture(device, textureLike);
+        return this.map.get([device, texture]) || new WGPUTexture(device, texture);
     }
+    private static readonly map = new ChainMap<[GPUDevice, Texture], WGPUTexture>();
 
     /**
      * 写入纹理数据
@@ -409,19 +383,4 @@ export class WGPUTexture extends ReactiveObject
      * 每次创建新纹理时自动递增。
      */
     private static _autoIndex = 0;
-}
-
-/**
- * 全局类型声明
- *
- * 扩展GPUDevice接口，添加纹理实例缓存映射。
- * 这个WeakMap用于缓存纹理实例，避免重复创建相同的纹理。
- */
-declare global
-{
-    interface GPUDevice
-    {
-        /** 纹理实例缓存映射表 */
-        textures: WeakMap<TextureLike, WGPUTexture>;
-    }
 }

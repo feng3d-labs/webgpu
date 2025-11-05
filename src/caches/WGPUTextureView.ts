@@ -74,7 +74,6 @@ export class WGPUTextureView extends ReactiveObject
             // 获取底层纹理的WebGPU纹理实例
             r_view.texture
             const wgpuTexture = WGPUTextureLike.getInstance(device, view.texture);
-            reactive(wgpuTexture).gpuTexture;
             const gpuTexture = wgpuTexture.gpuTexture;
 
             // 生成纹理视图标签，如果没有指定则使用纹理标签
