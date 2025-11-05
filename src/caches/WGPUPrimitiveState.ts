@@ -1,28 +1,33 @@
-import { reactive } from '@feng3d/reactivity';
-import { PrimitiveState } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, PrimitiveState } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUPrimitiveState extends ReactiveObject
 {
-    readonly gpuPrimitiveState: GPUPrimitiveState;
+    get gpuPrimitiveState() { return this._computedGpuPrimitiveState.value; }
+    private _computedGpuPrimitiveState: Computed<GPUPrimitiveState>;
 
     constructor(primitive: PrimitiveState, indexFormat: GPUIndexFormat)
     {
         super();
 
-        this._onCreateGPUPrimitiveState(primitive, indexFormat);
-        this._onMap(primitive, indexFormat);
+        this._onCreate(primitive, indexFormat);
+        //
+        WGPUPrimitiveState.map.set([primitive, indexFormat], this);
+        this.destroyCall(() => { WGPUPrimitiveState.map.delete([primitive, indexFormat]); });
     }
 
-    private _onCreateGPUPrimitiveState(primitive: PrimitiveState, indexFormat: GPUIndexFormat)
+    private _onCreate(primitive: PrimitiveState, indexFormat: GPUIndexFormat)
     {
-        if (!primitive) return WGPUPrimitiveState.defaultGPUPrimitiveState;
 
-        const r_this = reactive(this);
-        const r_primitive = reactive(primitive);
-
-        this.effect(() =>
+        this._computedGpuPrimitiveState = computed(() =>
         {
+            if (!primitive)
+            {
+                return WGPUPrimitiveState.defaultGPUPrimitiveState;
+            }
+            const r_primitive = reactive(primitive);
+
             // 监听
             r_primitive.topology;
             r_primitive.cullFace;
@@ -39,22 +44,15 @@ export class WGPUPrimitiveState extends ReactiveObject
                 unclippedDepth: unclippedDepth ?? false,
             };
 
-            r_this.gpuPrimitiveState = gpuPrimitive;
+            return gpuPrimitive;
         });
-    }
-
-    private _onMap(primitive: PrimitiveState, indexFormat: GPUIndexFormat)
-    {
-        WGPUPrimitiveState.cacheMap.set(primitive, new Map<GPUIndexFormat, WGPUPrimitiveState>());
-        WGPUPrimitiveState.cacheMap.get(primitive).set(indexFormat, this);
-        this.destroyCall(() => { WGPUPrimitiveState.cacheMap.get(primitive).delete(indexFormat); });
     }
 
     static getInstance(primitive: PrimitiveState, indexFormat: GPUIndexFormat)
     {
-        return this.cacheMap.get(primitive)?.get(indexFormat) || new WGPUPrimitiveState(primitive, indexFormat);
+        return this.map.get([primitive, indexFormat]) || new WGPUPrimitiveState(primitive, indexFormat);
     }
 
-    private static readonly cacheMap = new Map<PrimitiveState, Map<GPUIndexFormat, WGPUPrimitiveState>>();
+    private static readonly map = new ChainMap<[PrimitiveState, GPUIndexFormat], WGPUPrimitiveState>();
     private static readonly defaultGPUPrimitiveState: GPUPrimitiveState = { topology: 'triangle-list', cullMode: 'none', frontFace: 'ccw' };
 }

@@ -99,7 +99,6 @@ export class WGPURenderPipeline extends ReactiveObject
             {
                 // 创建图元状态
                 const wgpuPrimitiveState = WGPUPrimitiveState.getInstance(renderPipeline.primitive, indexFormat);
-                reactive(wgpuPrimitiveState).gpuPrimitiveState;
                 gpuRenderPipelineDescriptor.primitive = wgpuPrimitiveState.gpuPrimitiveState;
             }
 
