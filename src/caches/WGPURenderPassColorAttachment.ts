@@ -147,8 +147,6 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
             {
                 // 获取原始纹理信息
                 const wgpuTexture = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
-                reactive(wgpuTexture).gpuTexture;
-
                 const gpuTexture = wgpuTexture.gpuTexture;
 
                 // 创建多重采样纹理配置

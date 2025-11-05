@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { CanvasTexture } from '@feng3d/render-api';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { CanvasTexture, ChainMap } from '@feng3d/render-api';
 
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUCanvasContext } from './WGPUCanvasContext';
@@ -15,7 +15,8 @@ export class WGPUCanvasTexture extends ReactiveObject
     /**
      * WebGPU纹理对象
      */
-    readonly gpuTexture: GPUTexture;
+    get gpuTexture() { return this._computedGpuTexture.value; }
+    private _computedGpuTexture: Computed<GPUTexture>;
 
     /**
      * 构造函数
@@ -28,25 +29,20 @@ export class WGPUCanvasTexture extends ReactiveObject
         super();
 
         //
-        this._createGPUTexture(device, canvasTexture);
+        this._onCreate(device, canvasTexture);
 
         //
-        this._onMap(device, canvasTexture);
+        WGPUCanvasTexture.map.set([device, canvasTexture], this);
+        this.destroyCall(() => { WGPUCanvasTexture.map.delete([device, canvasTexture]); });
     }
 
-    private _onMap(device: GPUDevice, canvasTexture: CanvasTexture)
-    {
-        device.canvasTextures ??= new WeakMap<CanvasTexture, WGPUCanvasTexture>();
-        device.canvasTextures.set(canvasTexture, this);
-        this.destroyCall(() => { device.canvasTextures.delete(canvasTexture); });
-    }
-
-    private _createGPUTexture(device: GPUDevice, canvasTexture: CanvasTexture)
+    private _onCreate(device: GPUDevice, canvasTexture: CanvasTexture)
     {
         const r_this = reactive(this);
         const r_canvasTexture = reactive(canvasTexture);
 
-        this.effect(() =>
+        let oldGpuTexture: GPUTexture;
+        this._computedGpuTexture = computed(() =>
         {
             reactive(device.queue).preSubmit;
 
@@ -64,19 +60,14 @@ export class WGPUCanvasTexture extends ReactiveObject
             // 获取当前纹理
             const gpuTexture = gpuCanvasContext.getCurrentTexture();
 
-            if (gpuTexture === this.gpuTexture) return;
+            if (gpuTexture === oldGpuTexture) return gpuTexture;
 
             // 设置纹理标签
             gpuTexture.label = `GPU画布纹理-${id++}`;
 
-            this.gpuTexture?.destroy();
-            r_this.gpuTexture = gpuTexture;
-        });
+            oldGpuTexture = gpuTexture;
 
-        this.destroyCall(() =>
-        {
-            this.gpuTexture?.destroy();
-            r_this.gpuTexture = null;
+            return gpuTexture;
         });
     }
 
@@ -89,16 +80,11 @@ export class WGPUCanvasTexture extends ReactiveObject
      */
     static getInstance(device: GPUDevice, canvasTexture: CanvasTexture)
     {
-        return device.canvasTextures?.get(canvasTexture) || new WGPUCanvasTexture(device, canvasTexture);
+        return this.map.get([device, canvasTexture]) || new WGPUCanvasTexture(device, canvasTexture);
     }
+
+    private static readonly map = new ChainMap<[GPUDevice, CanvasTexture], WGPUCanvasTexture>();
 }
 
-declare global
-{
-    interface GPUDevice
-    {
-        canvasTextures: WeakMap<CanvasTexture, WGPUCanvasTexture>;
-    }
-}
 
 let id = 0;
