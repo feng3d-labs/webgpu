@@ -1,4 +1,4 @@
-import { defaultRenderPassDepthStencilAttachment } from '@feng3d/render-api';
+import '@feng3d/render-api';
 
 declare module '@feng3d/render-api'
 {
@@ -50,10 +50,3 @@ declare module '@feng3d/render-api'
         readonly stencilReadOnly?: boolean;
     }
 }
-
-Object.assign(defaultRenderPassDepthStencilAttachment, {
-    depthStoreOp: 'store',
-    depthReadOnly: false,
-    stencilStoreOp: 'store',
-    stencilReadOnly: false,
-});
