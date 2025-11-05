@@ -1,4 +1,4 @@
-import { reactive } from '@feng3d/reactivity';
+import { computed, reactive } from '@feng3d/reactivity';
 import { ChainMap } from '@feng3d/render-api';
 import { RenderBundle } from '../data/RenderBundle';
 import { ReactiveObject } from '../ReactiveObject';
@@ -7,34 +7,34 @@ import { CommandType, RenderPassObjectCommand, runCommands, WGPURenderObject, WG
 
 export class WGPURenderBundle extends ReactiveObject implements RenderPassObjectCommand
 {
-    gpuRenderBundle: GPURenderBundle;
-    descriptor: GPURenderBundleEncoderDescriptor;
-    bundleCommands: CommandType[];
-
     constructor(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat)
     {
         super();
 
         this._onCreate(device, renderBundle, renderPassFormat);
-        this._onMap(device, renderBundle, renderPassFormat);
+        //
+        WGPURenderBundle.map.set([device, renderBundle, renderPassFormat], this);
+        this.destroyCall(() => { WGPURenderBundle.map.delete([device, renderBundle, renderPassFormat]); });
     }
 
     private _onCreate(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat)
     {
-
         // 监听
         const r_renderBundleObject = reactive(renderBundle);
 
-        this.effect(() =>
+        const computedDescriptor = computed(() =>
         {
-            r_renderBundleObject.renderObjects;
             r_renderBundleObject.descriptor?.depthReadOnly;
             r_renderBundleObject.descriptor?.stencilReadOnly;
 
             // 执行
             const descriptor: GPURenderBundleEncoderDescriptor = { ...renderBundle.descriptor, ...renderPassFormat };
+            return descriptor;
+        });
 
-            this.descriptor = descriptor;
+        const computedBundleCommands = computed(() =>
+        {
+            r_renderBundleObject.renderObjects.concat();
 
             //
             const commands: CommandType[] = [];
@@ -47,48 +47,39 @@ export class WGPURenderBundle extends ReactiveObject implements RenderPassObject
                 wgpuRenderObject.run(undefined, commands, state);
             });
 
-            this.bundleCommands = commands.filter((command) => (
+            const bundleCommands = commands.filter((command) => (
                 command[0] !== 'setViewport'
                 && command[0] !== 'setScissorRect'
                 && command[0] !== 'setBlendConstant'
                 && command[0] !== 'setStencilReference'
             ));
+
+            return bundleCommands;
         });
 
-    }
-
-    private _onMap(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat)
-    {
-        device.renderBundles ??= new ChainMap();
-        device.renderBundles.set([renderBundle, renderPassFormat], this);
-        this.destroyCall(() => { device.renderBundles.delete([renderBundle, renderPassFormat]); });
-    }
-
-    run(device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState): void
-    {
-        if (!this.gpuRenderBundle)
+        const computedGpuRenderBundle = computed(() =>
         {
             //
-            const renderBundleEncoder = device.createRenderBundleEncoder(this.descriptor);
+            const renderBundleEncoder = device.createRenderBundleEncoder(computedDescriptor.value);
 
-            runCommands(renderBundleEncoder, this.bundleCommands);
+            runCommands(renderBundleEncoder, computedBundleCommands.value);
 
-            this.gpuRenderBundle = renderBundleEncoder.finish();
+            const gpuRenderBundle = renderBundleEncoder.finish();
+
+            return gpuRenderBundle;
+        });
+
+        this.run = (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) =>
+        {
+            commands.push(['executeBundles', [computedGpuRenderBundle.value]]);
         }
-
-        commands.push(['executeBundles', [this.gpuRenderBundle]]);
     }
+
+    run: (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) => void;
 
     static getInstance(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat)
     {
-        return device.renderBundles?.get([renderBundle, renderPassFormat]) || new WGPURenderBundle(device, renderBundle, renderPassFormat);
+        return this.map.get([device, renderBundle, renderPassFormat]) || new WGPURenderBundle(device, renderBundle, renderPassFormat);
     }
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        renderBundles: ChainMap<[renderBundle: RenderBundle, renderPassFormat: RenderPassFormat], WGPURenderBundle>;
-    }
+    static readonly map = new ChainMap<[GPUDevice, RenderBundle, RenderPassFormat], WGPURenderBundle>();
 }
