@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { Texture, TextureView } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, Texture, TextureView } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTextureLike } from './WGPUTextureLike';
 
@@ -33,7 +33,8 @@ export class WGPUTextureView extends ReactiveObject
      * 这是实际的GPU纹理视图实例，用于在渲染管线中访问纹理数据。
      * 当纹理视图配置发生变化时，此对象会自动重新创建。
      */
-    readonly textureView: GPUTextureView;
+    get textureView() { return this._computedTextureView.value; }
+    private _computedTextureView: Computed<GPUTextureView>;
 
     /**
      * 构造函数
@@ -48,10 +49,10 @@ export class WGPUTextureView extends ReactiveObject
         super();
 
         // 设置纹理视图创建和更新逻辑
-        this._onCreateTextureView(device, view);
-
-        // 将实例注册到设备缓存中
-        this._onMap(device, view);
+        this._onCreate(device, view);
+        //
+        WGPUTextureView.map.set([device, view], this);
+        this.destroyCall(() => { WGPUTextureView.map.delete([device, view]); });
     }
 
     /**
@@ -63,13 +64,12 @@ export class WGPUTextureView extends ReactiveObject
      * @param device GPU设备实例
      * @param view 纹理视图配置对象
      */
-    private _onCreateTextureView(device: GPUDevice, view: TextureView)
+    private _onCreate(device: GPUDevice, view: TextureView)
     {
-        const r_this = reactive(this);
         const r_view = reactive(view);
 
         // 监听纹理视图配置变化，自动重新创建纹理视图
-        this.effect(() =>
+        this._computedTextureView = computed(() =>
         {
             // 获取底层纹理的WebGPU纹理实例
             r_view.texture
@@ -103,32 +103,10 @@ export class WGPUTextureView extends ReactiveObject
             }
 
             // 创建新的纹理视图
-            r_this.textureView = gpuTexture.createView(descriptor);
+            const gpuTextureView = gpuTexture.createView(descriptor);
+
+            return gpuTextureView;
         });
-
-        // 注册清理回调，在对象销毁时清理纹理视图引用
-        this.destroyCall(() => { r_this.textureView = null; });
-    }
-
-    /**
-     * 将纹理视图实例注册到设备缓存中
-     *
-     * 使用WeakMap将纹理视图配置对象与其实例关联，实现实例缓存和复用。
-     * 当纹理视图配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     *
-     * @param device GPU设备实例，用于存储缓存映射
-     * @param view 纹理视图配置对象，作为缓存的键
-     */
-    private _onMap(device: GPUDevice, view: TextureView)
-    {
-        // 如果设备还没有纹理视图缓存，则创建一个新的WeakMap
-        device.textureViews ??= new WeakMap<TextureView, WGPUTextureView>();
-
-        // 将当前实例与纹理视图配置对象关联
-        device.textureViews.set(view, this);
-
-        // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { device.textureViews.delete(view); });
     }
 
     /**
@@ -147,8 +125,10 @@ export class WGPUTextureView extends ReactiveObject
         if (!view) return undefined;
 
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return device.textureViews?.get(view) || new WGPUTextureView(device, view);
+        return this.map.get([device, view]) || new WGPUTextureView(device, view);
     }
+
+    private static readonly map = new ChainMap<[GPUDevice, TextureView], WGPUTextureView>();
 }
 
 /**
@@ -159,12 +139,6 @@ export class WGPUTextureView extends ReactiveObject
  */
 declare global
 {
-    interface GPUDevice
-    {
-        /** 纹理视图实例缓存映射表 */
-        textureViews: WeakMap<TextureView, WGPUTextureView>;
-    }
-
     interface GPUTextureView
     {
         texture: GPUTexture;

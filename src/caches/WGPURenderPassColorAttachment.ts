@@ -94,8 +94,6 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 
             // 获取纹理视图实例
             const wGPUTextureView = WGPUTextureView.getInstance(device, colorAttachment.view);
-            reactive(wGPUTextureView).textureView;
-
             const textureView = wGPUTextureView.textureView;
 
             const clearValue = colorAttachment.clearValue ?? defaultRenderPassColorAttachment.clearValue;

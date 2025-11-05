@@ -67,7 +67,6 @@ export class WGPUBindGroupEntry extends ReactiveObject
             else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)
             {
                 const wgpuTextureView = WGPUTextureView.getInstance(device, bindingResources[name] as TextureView);
-                reactive(wgpuTextureView).textureView;
                 entry.resource = wgpuTextureView.textureView;
             }
             else

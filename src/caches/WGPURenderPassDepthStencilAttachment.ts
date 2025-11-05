@@ -102,8 +102,6 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
             {
                 // 获取深度纹理视图实例
                 const wGPUTextureView = WGPUTextureView.getInstance(device, descriptor.depthStencilAttachment.view);
-                reactive(wGPUTextureView).textureView;
-
                 textureView = wGPUTextureView.textureView;
             }
             // 如果没有提供深度纹理视图，自动生成一个
