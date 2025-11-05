@@ -1,3 +1,4 @@
+import { ChainMap } from '@feng3d/render-api';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { GPUBindGroupLayoutEntryMap, WGPUShaderReflect } from './WGPUShaderReflect';
 
@@ -235,7 +236,7 @@ export class WGPUPipelineLayout
         const shaderKey = getShaderKey(shader);
 
         // 检查设备缓存中是否已存在对应的管线布局
-        let gpuPipelineLayout = device.pipelineLayouts?.[shaderKey];
+        let gpuPipelineLayout = WGPUPipelineLayout.map.get([device, shaderKey]);
         if (gpuPipelineLayout) return gpuPipelineLayout;
 
         // 获取管线布局描述符
@@ -258,11 +259,11 @@ export class WGPUPipelineLayout
         gpuPipelineLayout = device.createPipelineLayout(descriptor);
 
         // 将管线布局实例缓存到设备中
-        device.pipelineLayouts ??= {};
-        device.pipelineLayouts[shaderKey] = gpuPipelineLayout;
+        WGPUPipelineLayout.map.set([device, shaderKey], gpuPipelineLayout);
 
         return gpuPipelineLayout;
     }
+    private static readonly map = new ChainMap<[GPUDevice, string], GPUPipelineLayout>();
 }
 
 function getShaderKey(shader: { vertex: string, fragment: string } | { compute: string })
@@ -283,19 +284,4 @@ function getShaderKey(shader: { vertex: string, fragment: string } | { compute: 
     }
 
     return shaderKey;
-}
-
-/**
- * 全局类型声明
- *
- * 扩展GPUDevice接口，添加管线布局实例缓存映射。
- * 这个对象用于缓存管线布局实例，避免重复创建相同的管线布局。
- */
-declare global
-{
-    interface GPUDevice
-    {
-        /** 管线布局实例缓存映射表，键为着色器代码，值为管线布局实例 */
-        pipelineLayouts: { [shaderKey: string]: GPUPipelineLayout };
-    }
 }
