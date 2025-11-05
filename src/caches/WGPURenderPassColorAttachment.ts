@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { defaultRenderPassColorAttachment, RenderPassColorAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, defaultRenderPassColorAttachment, RenderPassColorAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
 import { WGPUTextureLike } from './WGPUTextureLike';
@@ -40,7 +40,8 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
      * 这是实际的GPU颜色附件实例，用于在渲染通道中指定颜色输出目标。
      * 当颜色附件配置发生变化时，此对象会自动重新创建。
      */
-    readonly gpuRenderPassColorAttachment: GPURenderPassColorAttachment;
+    get gpuRenderPassColorAttachment() { return this._computedGpuRenderPassColorAttachment.value; }
+    private _computedGpuRenderPassColorAttachment: Computed<GPURenderPassColorAttachment>;
 
     /**
      * 构造函数
@@ -57,9 +58,9 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 
         // 设置颜色附件创建和更新逻辑
         this._onCreate(device, colorAttachment, descriptor);
-
-        // 将实例注册到设备缓存中
-        this._onMap(device, colorAttachment);
+        //
+        WGPURenderPassColorAttachment.map.set([device, colorAttachment, descriptor], this);
+        this.destroyCall(() => { WGPURenderPassColorAttachment.map.delete([device, colorAttachment, descriptor]); })
     }
 
     /**
@@ -76,7 +77,6 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
      */
     private _onCreate(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor)
     {
-        const r_this = reactive(this);
         const r_colorAttachment = reactive(colorAttachment);
         const r_descriptor = reactive(descriptor);
 
@@ -98,19 +98,8 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
         // 多重采样纹理实例，用于管理多重采样纹理的生命周期
         let multisampleGPUTexture: WGPUTexture;
 
-        // 定义销毁函数，用于清理多重采样纹理和颜色附件
-        const destroy = () =>
-        {
-            // 销毁多重采样纹理
-            multisampleGPUTexture?.destroy();
-            multisampleGPUTexture = null;
-
-            // 清空颜色附件引用
-            r_this.gpuRenderPassColorAttachment = null;
-        }
-
         // 监听颜色附件配置变化，自动重新创建颜色附件
-        this.effect(() =>
+        this._computedGpuRenderPassColorAttachment = computed(() =>
         {
             // 触发响应式依赖，监听颜色附件的所有属性
             r_colorAttachment.view;
@@ -160,6 +149,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
                 };
 
                 // 创建多重采样纹理实例，直接管理其生命周期
+                multisampleGPUTexture?.destroy();
                 multisampleGPUTexture = WGPUTexture.getInstance(device, multisampleTexture);
                 // 直接从GPU纹理创建视图，避免额外的纹理视图缓存
                 const multisampleTextureView = multisampleGPUTexture.gpuTexture.createView();
@@ -170,32 +160,14 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
             }
 
             // 更新颜色附件引用
-            r_this.gpuRenderPassColorAttachment = gpuRenderPassColorAttachment;
+            return gpuRenderPassColorAttachment;
         });
 
         // 注册销毁回调，确保在对象销毁时清理多重采样纹理
-        this.destroyCall(destroy);
-    }
-
-    /**
-     * 将颜色附件实例注册到设备缓存中
-     *
-     * 使用WeakMap将颜色附件配置对象与其实例关联，实现实例缓存和复用。
-     * 当颜色附件配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     *
-     * @param device GPU设备实例，用于存储缓存映射
-     * @param colorAttachment 颜色附件配置对象，作为缓存的键
-     */
-    private _onMap(device: GPUDevice, colorAttachment: RenderPassColorAttachment)
-    {
-        // 如果设备还没有颜色附件缓存，则创建一个新的WeakMap
-        device.colorAttachments ??= new WeakMap();
-
-        // 将当前实例与颜色附件配置对象关联
-        device.colorAttachments.set(colorAttachment, this);
-
-        // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { device.colorAttachments?.delete(colorAttachment); })
+        this.destroyCall(() =>
+        {
+            multisampleGPUTexture?.destroy();
+        });
     }
 
     /**
@@ -212,21 +184,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
     static getInstance(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor)
     {
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return device.colorAttachments?.get(colorAttachment) || new WGPURenderPassColorAttachment(device, colorAttachment, descriptor);
+        return this.map.get([device, colorAttachment, descriptor]) || new WGPURenderPassColorAttachment(device, colorAttachment, descriptor);
     }
-}
-
-/**
- * 全局类型声明
- *
- * 扩展GPUDevice接口，添加颜色附件实例缓存映射。
- * 这个WeakMap用于缓存颜色附件实例，避免重复创建相同的颜色附件。
- */
-declare global
-{
-    interface GPUDevice
-    {
-        /** 颜色附件实例缓存映射表 */
-        colorAttachments: WeakMap<RenderPassColorAttachment, WGPURenderPassColorAttachment>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, RenderPassColorAttachment, RenderPassDescriptor], WGPURenderPassColorAttachment>();
 }

@@ -10,9 +10,9 @@ import { WGPUTimestampQuery } from './WGPUTimestampQuery';
 export class WGPURenderPassDescriptor extends ReactiveObject
 {
     get gpuRenderPassDescriptor() { return this._computedGpuRenderPassDescriptor.value; }
-    get renderPassFormat() { return this._computedRenderPassFormat.value; }
-
     private _computedGpuRenderPassDescriptor: Computed<GPURenderPassDescriptor>;
+
+    get renderPassFormat() { return this._computedRenderPassFormat.value; }
     private _computedRenderPassFormat: Computed<RenderPassFormat>;
 
     constructor(device: GPUDevice, renderPass: RenderPass)
@@ -42,18 +42,17 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
             //
             r_descriptor.colorAttachments?.concat();
-            const gpuColorAttachments: GPURenderPassColorAttachment[] = descriptor.colorAttachments.reduce((pre, v) =>
+            const gpuColorAttachments = descriptor.colorAttachments.reduce((pre: GPURenderPassColorAttachment[], v) =>
             {
                 if (!v) return pre;
 
                 const wgpuRenderPassColorAttachment = WGPURenderPassColorAttachment.getInstance(device, v, descriptor);
-                reactive(wgpuRenderPassColorAttachment).gpuRenderPassColorAttachment;
                 const attachment = wgpuRenderPassColorAttachment.gpuRenderPassColorAttachment;
 
                 pre.push(attachment);
 
                 return pre;
-            }, [])
+            }, []);
 
             //
             const gpuRenderPassDescriptor: GPURenderPassDescriptor = {
