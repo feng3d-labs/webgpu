@@ -1,4 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap } from '@feng3d/render-api';
 import { ComputePipeline } from '../data/ComputePipeline';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';
@@ -40,7 +41,8 @@ export class WGPUComputePipeline extends ReactiveObject
      * 这是实际的GPU计算管线实例，用于执行计算着色器。
      * 当计算管线配置发生变化时，此对象会自动重新创建。
      */
-    readonly gpuComputePipeline: GPUComputePipeline;
+    get gpuComputePipeline() { return this._computedGpuComputePipeline.value; }
+    private _computedGpuComputePipeline: Computed<GPUComputePipeline>;
 
     /**
      * 构造函数
@@ -55,10 +57,11 @@ export class WGPUComputePipeline extends ReactiveObject
         super();
 
         // 设置计算管线创建和更新逻辑
-        this._createGPUComputePipeline(device, computePipeline);
+        this._onCreate(device, computePipeline);
 
-        // 将实例注册到设备缓存中
-        this._onMap(device, computePipeline);
+        //
+        WGPUComputePipeline.map.set([device, computePipeline], this);
+        this.destroyCall(() => { WGPUComputePipeline.map.delete([device, computePipeline]); });
     }
 
     /**
@@ -71,13 +74,12 @@ export class WGPUComputePipeline extends ReactiveObject
      * @param device GPU设备实例
      * @param computePipeline 计算管线配置对象
      */
-    private _createGPUComputePipeline(device: GPUDevice, computePipeline: ComputePipeline)
+    private _onCreate(device: GPUDevice, computePipeline: ComputePipeline)
     {
-        const r_this = reactive(this);
         const r_computePipeline = reactive(computePipeline);
 
         // 监听计算管线配置变化，自动重新创建计算管线
-        this.effect(() =>
+        this._computedGpuComputePipeline = computed(() =>
         {
             // 触发响应式依赖，监听计算管线的所有属性
             r_computePipeline.label;
@@ -112,35 +114,14 @@ export class WGPUComputePipeline extends ReactiveObject
             };
 
             // 创建计算管线
-            const pipeline = device.createComputePipeline({
+            const gpuComputePipeline = device.createComputePipeline({
                 layout: gpuPipelineLayout,
                 compute: gpuComputeStage,
             });
 
             // 更新计算管线引用
-            r_this.gpuComputePipeline = pipeline;
+            return gpuComputePipeline;
         });
-    }
-
-    /**
-     * 将计算管线实例注册到设备缓存中
-     *
-     * 使用WeakMap将计算管线配置对象与其实例关联，实现实例缓存和复用。
-     * 当计算管线配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     *
-     * @param device GPU设备实例，用于存储缓存映射
-     * @param computePipeline 计算管线配置对象，作为缓存的键
-     */
-    private _onMap(device: GPUDevice, computePipeline: ComputePipeline)
-    {
-        // 如果设备还没有计算管线缓存，则创建一个新的WeakMap
-        device.computePipelines ??= new WeakMap<ComputePipeline, WGPUComputePipeline>();
-
-        // 将当前实例与计算管线配置对象关联
-        device.computePipelines.set(computePipeline, this);
-
-        // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { device.computePipelines.delete(computePipeline); });
     }
 
     /**
@@ -156,21 +137,8 @@ export class WGPUComputePipeline extends ReactiveObject
     static getInstance(device: GPUDevice, computePipeline: ComputePipeline)
     {
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return device.computePipelines?.get(computePipeline) || new WGPUComputePipeline(device, computePipeline);
+        return WGPUComputePipeline.map.get([device, computePipeline]) || new WGPUComputePipeline(device, computePipeline);
     }
-}
 
-/**
- * 全局类型声明
- *
- * 扩展GPUDevice接口，添加计算管线实例缓存映射。
- * 这个WeakMap用于缓存计算管线实例，避免重复创建相同的计算管线。
- */
-declare global
-{
-    interface GPUDevice
-    {
-        /** 计算管线实例缓存映射表 */
-        computePipelines: WeakMap<ComputePipeline, WGPUComputePipeline>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, ComputePipeline], WGPUComputePipeline>();
 }

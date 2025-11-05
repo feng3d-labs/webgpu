@@ -29,7 +29,6 @@ export class WGPUComputeObject extends ReactiveObject
         {
             r_computeObject.pipeline;
             const wGPUComputePipeline = WGPUComputePipeline.getInstance(device, computeObject.pipeline);
-            reactive(wGPUComputePipeline).gpuComputePipeline;
             computePipeline = wGPUComputePipeline.gpuComputePipeline;
 
             // 计算 bindGroups
