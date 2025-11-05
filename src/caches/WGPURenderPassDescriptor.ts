@@ -5,6 +5,7 @@ import { ReactiveObject } from '../ReactiveObject';
 import { WGPUQuerySet } from './WGPUQuerySet';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
 import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
+import { WGPUTextureLike } from './WGPUTextureLike';
 import { WGPUTimestampQuery } from './WGPUTimestampQuery';
 
 export class WGPURenderPassDescriptor extends ReactiveObject
@@ -36,6 +37,27 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
             const descriptor: RenderPassDescriptor = renderPass.descriptor;
             const r_descriptor = reactive(descriptor);
+
+            // 如果渲染通道描述符没有设置附件尺寸，自动从纹理中获取
+            if (!descriptor.attachmentSize)
+            {
+                for (const colorAttachment of descriptor.colorAttachments)
+                {
+                    if (colorAttachment.view.texture)
+                    {
+                        const gpuTextureLike = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
+                        const gpuTexture = gpuTextureLike.gpuTexture;
+                        r_descriptor.attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
+                        break;
+                    }
+                }
+                if (!descriptor.attachmentSize)
+                {
+                    const gpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
+                    const gpuTexture = gpuTextureLike.gpuTexture;
+                    r_descriptor.attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
+                }
+            }
 
             //
             const label = r_descriptor.label;

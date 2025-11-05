@@ -80,21 +80,6 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
         const r_colorAttachment = reactive(colorAttachment);
         const r_descriptor = reactive(descriptor);
 
-        // 如果渲染通道描述符没有设置附件尺寸，自动从纹理中获取
-        if (!descriptor.attachmentSize)
-        {
-            if (colorAttachment.view.texture)
-            {
-                const gpuTextureLike = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
-                const gpuTexture = gpuTextureLike.gpuTexture;
-                reactive(descriptor).attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
-            }
-            else
-            {
-                throw new Error('渲染通道描述符没有设置附件尺寸，也无法从颜色附件与深度模板附件中获取附件尺寸');
-            }
-        }
-
         // 多重采样纹理实例，用于管理多重采样纹理的生命周期
         let multisampleGPUTexture: WGPUTexture;
 

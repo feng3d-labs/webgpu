@@ -79,19 +79,6 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
         const r_this = reactive(this);
         const r_descriptor = reactive(descriptor);
 
-        // 如果渲染通道描述符没有设置附件尺寸，自动从纹理中获取
-        if (!descriptor.attachmentSize)
-        {
-            const gpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
-            const gpuTexture = gpuTextureLike.gpuTexture;
-
-            // 设置渲染通道的附件尺寸
-            reactive(descriptor).attachmentSize = {
-                width: gpuTexture.width,
-                height: gpuTexture.height,
-            };
-        }
-
         // 自动生成的深度纹理实例，用于管理深度纹理的生命周期
         let autoCreateDepthTexture: WGPUTexture;
 
