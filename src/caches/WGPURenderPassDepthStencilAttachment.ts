@@ -1,8 +1,7 @@
-import { reactive } from '@feng3d/reactivity';
-import { RenderPassDescriptor, Texture } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, RenderPassDescriptor, Texture } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
-import { WGPUTextureLike } from './WGPUTextureLike';
 import { WGPUTextureView } from './WGPUTextureView';
 
 /**
@@ -40,7 +39,8 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
      * 这是实际的GPU深度模板附件实例，用于在渲染通道中指定深度和模板测试目标。
      * 当深度模板附件配置发生变化时，此对象会自动重新创建。
      */
-    readonly gpuRenderPassDepthStencilAttachment: GPURenderPassDepthStencilAttachment;
+    get gpuRenderPassDepthStencilAttachment() { return this._computedGpuRenderPassDepthStencilAttachment.value; }
+    private _computedGpuRenderPassDepthStencilAttachment: Computed<GPURenderPassDepthStencilAttachment>;
 
     /**
      * 构造函数
@@ -57,9 +57,9 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
 
         // 设置深度模板附件创建和更新逻辑
         this._onCreate(device, descriptor);
-
-        // 将实例注册到设备缓存中
-        this._onMap(device, descriptor);
+        //
+        WGPURenderPassDepthStencilAttachment.map.set([device, descriptor], this);
+        this.destroyCall(() => { WGPURenderPassDepthStencilAttachment.map.delete([device, descriptor]); })
     }
 
     /**
@@ -76,21 +76,19 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
      */
     private _onCreate(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
-        const r_this = reactive(this);
         const r_descriptor = reactive(descriptor);
 
         // 自动生成的深度纹理实例，用于管理深度纹理的生命周期
         let autoCreateDepthTexture: WGPUTexture;
 
         // 监听深度模板附件配置变化，自动重新创建深度模板附件
-        this.effect(() =>
+        this._computedGpuRenderPassDepthStencilAttachment = computed(() =>
         {
             //
             const r_depthStencilAttachment = r_descriptor.depthStencilAttachment;
             if (!r_depthStencilAttachment)
             {
-                r_this.gpuRenderPassDepthStencilAttachment = null;
-                return;
+                return null;
             }
             const depthStencilAttachment = descriptor.depthStencilAttachment;
 
@@ -151,7 +149,10 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
                 gpuRenderPassDepthStencilAttachment.depthReadOnly = depthStencilAttachment.depthReadOnly;
             }
 
-            gpuRenderPassDepthStencilAttachment.stencilClearValue = r_depthStencilAttachment.stencilClearValue ?? 0;
+            if (r_depthStencilAttachment.stencilClearValue)
+            {
+                gpuRenderPassDepthStencilAttachment.stencilClearValue = depthStencilAttachment.stencilClearValue;
+            }
 
             if (r_depthStencilAttachment.stencilLoadOp)
             {
@@ -169,7 +170,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
             }
 
             // 更新深度模板附件引用
-            r_this.gpuRenderPassDepthStencilAttachment = gpuRenderPassDepthStencilAttachment;
+            return gpuRenderPassDepthStencilAttachment;
         });
 
         // 注册销毁回调，确保在对象销毁时清理自动生成的深度纹理
@@ -177,32 +178,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
         {
             // 销毁自动生成的深度纹理
             autoCreateDepthTexture?.destroy();
-            autoCreateDepthTexture = null;
-
-            // 清空深度模板附件引用
-            r_this.gpuRenderPassDepthStencilAttachment = null;
         });
-    }
-
-    /**
-     * 将深度模板附件实例注册到设备缓存中
-     *
-     * 使用WeakMap将深度模板附件配置对象与其实例关联，实现实例缓存和复用。
-     * 当深度模板附件配置对象被垃圾回收时，WeakMap会自动清理对应的缓存条目。
-     *
-     * @param device GPU设备实例，用于存储缓存映射
-     * @param depthStencilAttachment 深度模板附件配置对象，作为缓存的键
-     */
-    private _onMap(device: GPUDevice, descriptor: RenderPassDescriptor)
-    {
-        // 如果设备还没有深度模板附件缓存，则创建一个新的WeakMap
-        device.depthStencilAttachments ??= new WeakMap();
-
-        // 将当前实例与深度模板附件配置对象关联
-        device.depthStencilAttachments.set(descriptor, this);
-
-        // 注册清理回调，在对象销毁时从缓存中移除
-        this.destroyCall(() => { device.depthStencilAttachments?.delete(descriptor); })
     }
 
     /**
@@ -219,21 +195,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
     static getInstance(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return device.depthStencilAttachments?.get(descriptor) || new WGPURenderPassDepthStencilAttachment(device, descriptor);
+        return this.map.get([device, descriptor]) || new WGPURenderPassDepthStencilAttachment(device, descriptor);
     }
-}
-
-/**
- * 全局类型声明
- *
- * 扩展GPUDevice接口，添加深度模板附件实例缓存映射。
- * 这个WeakMap用于缓存深度模板附件实例，避免重复创建相同的深度模板附件。
- */
-declare global
-{
-    interface GPUDevice
-    {
-        /** 深度模板附件实例缓存映射表 */
-        depthStencilAttachments: WeakMap<RenderPassDescriptor, WGPURenderPassDepthStencilAttachment>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, RenderPassDescriptor], WGPURenderPassDepthStencilAttachment>();
 }
