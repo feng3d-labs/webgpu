@@ -1,26 +1,28 @@
-import { reactive } from '@feng3d/reactivity';
-import { Sampler } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, Sampler } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUSampler extends ReactiveObject
 {
-    readonly gpuSampler: GPUSampler;
+    get gpuSampler() { return this._computedGpuSampler.value; }
+    private _computedGpuSampler: Computed<GPUSampler>;
 
     constructor(device: GPUDevice, sampler: Sampler)
     {
         super();
 
-        this._createGPUSampler(device, sampler);
+        this._onCreate(device, sampler);
 
-        this._onMap(device, sampler);
+        //
+        WGPUSampler.map.set([device, sampler], this);
+        this.destroyCall(() => { WGPUSampler.map.delete([device, sampler]); });
     }
 
-    private _createGPUSampler(device: GPUDevice, sampler: Sampler)
+    private _onCreate(device: GPUDevice, sampler: Sampler)
     {
-        const r_this = reactive(this);
         const r_sampler = reactive(sampler);
 
-        this.effect(() =>
+        this._computedGpuSampler = computed(() =>
         {
             const r_defaultSampler = reactive(WGPUSampler).defaultSampler;
 
@@ -38,7 +40,7 @@ export class WGPUSampler extends ReactiveObject
             const maxAnisotropy = (minFilter === 'linear' && magFilter === 'linear' && mipmapFilter === 'linear') ? r_sampler.maxAnisotropy : r_defaultSampler.maxAnisotropy;
 
             //
-            const gSampler = device.createSampler({
+            const gpuSampler = device.createSampler({
                 label,
                 addressModeU,
                 addressModeV,
@@ -53,17 +55,8 @@ export class WGPUSampler extends ReactiveObject
             });
 
             //
-            r_this.gpuSampler = gSampler;
+            return gpuSampler;
         });
-
-        this.destroyCall(() => { r_this.gpuSampler = null; });
-    }
-
-    private _onMap(device: GPUDevice, sampler: Sampler)
-    {
-        device.samplers ??= new WeakMap<Sampler, WGPUSampler>();
-        device.samplers.set(sampler, this);
-        this.destroyCall(() => { device.samplers.delete(sampler); });
     }
 
     /**
@@ -75,8 +68,9 @@ export class WGPUSampler extends ReactiveObject
      */
     static getInstance(device: GPUDevice, sampler: Sampler)
     {
-        return device.samplers?.get(sampler) || new WGPUSampler(device, sampler);
+        return this.map.get([device, sampler]) || new WGPUSampler(device, sampler);
     }
+    private static readonly map = new ChainMap<[GPUDevice, Sampler], WGPUSampler>();
 
     /**
      * GPU采样器默认值。
@@ -93,12 +87,4 @@ export class WGPUSampler extends ReactiveObject
         compare: undefined,
         maxAnisotropy: 1,
     };
-}
-
-declare global
-{
-    interface GPUDevice
-    {
-        samplers: WeakMap<Sampler, WGPUSampler>;
-    }
 }

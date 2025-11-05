@@ -1,3 +1,5 @@
+import { ChainMap } from "@feng3d/render-api";
+
 /**
  * GPU着色器模块管理器。
  */
@@ -12,27 +14,23 @@ export class WGPUShaderModule
      */
     static getGPUShaderModule(device: GPUDevice, code: string)
     {
-        if (device.shaderModules?.[code]) return device.shaderModules[code];
+        let gpuShaderModule = this.map.get([device, code]);
+        if (gpuShaderModule) return gpuShaderModule;
 
-        device.shaderModules ??= {};
+        gpuShaderModule = device.createShaderModule({ code });
 
-        const gpuShaderModule = device.createShaderModule({ code });
-        device.shaderModules[code] = gpuShaderModule;
-
-        gpuShaderModule.getCompilationInfo().then((compilationInfo) => {
-            compilationInfo.messages.forEach((message) => {
+        gpuShaderModule.getCompilationInfo().then((compilationInfo) =>
+        {
+            compilationInfo.messages.forEach((message) =>
+            {
                 console.log(message);
             });
         });
 
+        this.map.set([device, code], gpuShaderModule);
+
         return gpuShaderModule;
     }
-}
 
-declare global
-{
-    interface GPUDevice
-    {
-        shaderModules: { [code: string]: GPUShaderModule };
-    }
+    private static readonly map = new ChainMap<[GPUDevice, string], GPUShaderModule>();
 }

@@ -1,4 +1,4 @@
-import { reactive } from '@feng3d/reactivity';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
 import { ChainMap, RenderPipeline, VertexAttributes } from '@feng3d/render-api';
 
 import { RenderPassFormat } from '../internal/RenderPassFormat';
@@ -29,7 +29,8 @@ export class WGPURenderPipeline extends ReactiveObject
      * 对应的WebGPU渲染管线对象
      * 只读属性，当相关参数发生变化时会自动重新创建
      */
-    readonly gpuRenderPipeline: GPURenderPipeline;
+    get gpuRenderPipeline() { return this._computedGpuRenderPipeline.value; }
+    private _computedGpuRenderPipeline: Computed<GPURenderPipeline>;
 
     /**
      * 构造函数
@@ -42,9 +43,10 @@ export class WGPURenderPipeline extends ReactiveObject
     constructor(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
     {
         super();
-        this._onCreateGPURenderPipeline(device, renderPipeline, renderPassFormat, vertices, indexFormat);
+        this._onCreate(device, renderPipeline, renderPassFormat, vertices, indexFormat);
 
-        this._onMap(device, renderPipeline, renderPassFormat, vertices, indexFormat);
+        WGPURenderPipeline.map.set([device, renderPipeline, renderPassFormat, vertices, indexFormat], this);
+        this.destroyCall(() => { WGPURenderPipeline.map.delete([device, renderPipeline, renderPassFormat, vertices, indexFormat]); });
     }
 
     /**
@@ -59,12 +61,11 @@ export class WGPURenderPipeline extends ReactiveObject
      * @param vertices 顶点属性
      * @param indexFormat 索引格式
      */
-    private _onCreateGPURenderPipeline(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
+    private _onCreate(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
     {
-        const r_this = reactive(this);
         const r_renderPipeline = reactive(renderPipeline);
 
-        this.effect(() =>
+        this._computedGpuRenderPipeline = computed(() =>
         {
             // 监听渲染管线属性变化
             const label = r_renderPipeline.label;
@@ -119,27 +120,8 @@ export class WGPURenderPipeline extends ReactiveObject
             // 创建WebGPU渲染管线
             const gpuRenderPipeline = device.createRenderPipeline(gpuRenderPipelineDescriptor);
 
-            r_this.gpuRenderPipeline = gpuRenderPipeline;
+            return gpuRenderPipeline;
         });
-    }
-
-    /**
-     * 建立渲染管线参数到WGPURenderPipeline实例的映射关系
-     *
-     * 使用ChainMap将参数组合与实例进行映射，避免重复创建相同的渲染管线。
-     * 当实例销毁时，从映射表中移除对应关系。
-     *
-     * @param device GPU设备对象
-     * @param renderPipeline 原始渲染管线配置
-     * @param renderPassFormat 渲染通道格式
-     * @param vertices 顶点属性
-     * @param indexFormat 索引格式
-     */
-    private _onMap(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
-    {
-        device.renderPipelines ??= new ChainMap()
-        device.renderPipelines.set([renderPipeline, renderPassFormat, vertices, indexFormat], this);
-        this.destroyCall(() => { device.renderPipelines.delete([renderPipeline, renderPassFormat, vertices, indexFormat]); });
     }
 
     /**
@@ -156,21 +138,7 @@ export class WGPURenderPipeline extends ReactiveObject
      */
     static getInstance(device: GPUDevice, renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat)
     {
-        return device.renderPipelines?.get([renderPipeline, renderPassFormat, vertices, indexFormat]) || new WGPURenderPipeline(device, renderPipeline, renderPassFormat, vertices, indexFormat);
+        return this.map.get([device, renderPipeline, renderPassFormat, vertices, indexFormat]) || new WGPURenderPipeline(device, renderPipeline, renderPassFormat, vertices, indexFormat);
     }
-}
-
-declare global
-{
-    /**
-     * 扩展GPUDevice接口，添加渲染管线缓存映射表
-     */
-    interface GPUDevice
-    {
-        /**
-         * 渲染管线缓存映射表
-         * 使用ChainMap存储不同参数组合对应的WGPURenderPipeline实例
-         */
-        renderPipelines?: ChainMap<[renderPipeline: RenderPipeline, renderPassFormat: RenderPassFormat, vertices: VertexAttributes, indexFormat: GPUIndexFormat], WGPURenderPipeline>;
-    }
+    private static readonly map = new ChainMap<[GPUDevice, RenderPipeline, RenderPassFormat, VertexAttributes, GPUIndexFormat], WGPURenderPipeline>();
 }

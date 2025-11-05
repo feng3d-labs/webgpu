@@ -125,8 +125,6 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
 
             //
             const wgpuRenderPipeline = WGPURenderPipeline.getInstance(device, pipeline, renderPassFormat, vertices, indexFormat);
-            reactive(wgpuRenderPipeline).gpuRenderPipeline;
-
             const gpuRenderPipeline = wgpuRenderPipeline.gpuRenderPipeline;
 
             //

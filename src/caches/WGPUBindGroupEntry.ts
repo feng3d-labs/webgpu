@@ -73,7 +73,6 @@ export class WGPUBindGroupEntry extends ReactiveObject
             else
             {
                 const wgpuSampler = WGPUSampler.getInstance(device, bindingResources[name] as Sampler);
-                reactive(wgpuSampler).gpuSampler;
                 entry.resource = wgpuSampler.gpuSampler;
             }
 
