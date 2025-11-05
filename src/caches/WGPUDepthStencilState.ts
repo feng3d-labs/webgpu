@@ -1,83 +1,82 @@
-import { reactive } from '@feng3d/reactivity';
-import { DepthStencilState } from '@feng3d/render-api';
+import { computed, Computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, DepthStencilState } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUStencilFaceState } from './WGPUStencilFaceState';
 
 export class WGPUDepthStencilState extends ReactiveObject
 {
-    readonly gpuDepthStencilState: GPUDepthStencilState;
+    get gpuDepthStencilState() { return this._computedGpuDepthStencilState.value; }
+    private _computedGpuDepthStencilState: Computed<GPUDepthStencilState>;
 
     constructor(depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat)
     {
         super();
 
-        this._createGPUDepthStencilState(depthStencil, depthStencilFormat);
-        this._onMap(depthStencil);
+        this._onCreate(depthStencil, depthStencilFormat);
+
+        //
+        WGPUDepthStencilState.map.set([depthStencil, depthStencilFormat], this);
+        this.destroyCall(() => { WGPUDepthStencilState.map.delete([depthStencil, depthStencilFormat]); });
     }
 
-    private _createGPUDepthStencilState(depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat)
+    private _onCreate(depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat)
     {
-        const r_this = reactive(this);
-
-        if (!depthStencil)
+        this._computedGpuDepthStencilState = computed(() =>
         {
-            r_this.gpuDepthStencilState = WGPUDepthStencilState.getDefaultGPUDepthStencilState(depthStencilFormat);
-            return;
+            if (depthStencil)
+            {
+                // 监听
+                const r_depthStencil = reactive(depthStencil);
+                r_depthStencil.depthWriteEnabled;
+                r_depthStencil.depthCompare;
+                r_depthStencil.stencilFront;
+                r_depthStencil.stencilBack;
+                r_depthStencil.stencilReadMask;
+                r_depthStencil.stencilWriteMask;
+                r_depthStencil.depthBias;
+                r_depthStencil.depthBiasSlopeScale;
+                r_depthStencil.depthBiasClamp;
 
-        }
+                // 计算
+                const { depthWriteEnabled,
+                    depthCompare,
+                    stencilFront,
+                    stencilBack,
+                    stencilReadMask,
+                    stencilWriteMask,
+                    depthBias,
+                    depthBiasSlopeScale,
+                    depthBiasClamp,
+                } = depthStencil;
 
-        const r_depthStencil = reactive(depthStencil);
+                //
+                const wgpuStencilFront = WGPUStencilFaceState.getInstance(stencilFront);
+                reactive(wgpuStencilFront).gpuStencilFaceState;
+                const gpuStencilFront = wgpuStencilFront.gpuStencilFaceState;
 
-        this.effect(() =>
-        {
-            // 监听
-            r_depthStencil.depthWriteEnabled;
-            r_depthStencil.depthCompare;
-            r_depthStencil.stencilFront;
-            r_depthStencil.stencilBack;
-            r_depthStencil.stencilReadMask;
-            r_depthStencil.stencilWriteMask;
-            r_depthStencil.depthBias;
-            r_depthStencil.depthBiasSlopeScale;
-            r_depthStencil.depthBiasClamp;
+                //
+                const wgpuStencilBack = WGPUStencilFaceState.getInstance(stencilBack);
+                reactive(wgpuStencilBack).gpuStencilFaceState;
+                const gpuStencilBack = wgpuStencilBack.gpuStencilFaceState;
 
-            // 计算
-            const { depthWriteEnabled,
-                depthCompare,
-                stencilFront,
-                stencilBack,
-                stencilReadMask,
-                stencilWriteMask,
-                depthBias,
-                depthBiasSlopeScale,
-                depthBiasClamp,
-            } = depthStencil;
+                //
+                const gpuDepthStencilState: GPUDepthStencilState = {
+                    format: depthStencilFormat,
+                    depthWriteEnabled: depthWriteEnabled ?? true,
+                    depthCompare: depthCompare ?? 'less',
+                    stencilFront: gpuStencilFront,
+                    stencilBack: gpuStencilBack,
+                    stencilReadMask: stencilReadMask ?? 0xFFFFFFFF,
+                    stencilWriteMask: stencilWriteMask ?? 0xFFFFFFFF,
+                    depthBias: depthBias ?? 0,
+                    depthBiasSlopeScale: depthBiasSlopeScale ?? 0,
+                    depthBiasClamp: depthBiasClamp ?? 0,
+                };
 
-            //
-            const wgpuStencilFront = WGPUStencilFaceState.getInstance(stencilFront);
-            reactive(wgpuStencilFront).gpuStencilFaceState;
-            const gpuStencilFront = wgpuStencilFront.gpuStencilFaceState;
+                return gpuDepthStencilState;
+            }
 
-            //
-            const wgpuStencilBack = WGPUStencilFaceState.getInstance(stencilBack);
-            reactive(wgpuStencilBack).gpuStencilFaceState;
-            const gpuStencilBack = wgpuStencilBack.gpuStencilFaceState;
-
-            //
-            const gpuDepthStencilState: GPUDepthStencilState = {
-                format: depthStencilFormat,
-                depthWriteEnabled: depthWriteEnabled ?? true,
-                depthCompare: depthCompare ?? 'less',
-                stencilFront: gpuStencilFront,
-                stencilBack: gpuStencilBack,
-                stencilReadMask: stencilReadMask ?? 0xFFFFFFFF,
-                stencilWriteMask: stencilWriteMask ?? 0xFFFFFFFF,
-                depthBias: depthBias ?? 0,
-                depthBiasSlopeScale: depthBiasSlopeScale ?? 0,
-                depthBiasClamp: depthBiasClamp ?? 0,
-            };
-
-            r_this.gpuDepthStencilState = gpuDepthStencilState;
+            return WGPUDepthStencilState.getDefaultGPUDepthStencilState(depthStencilFormat);
         });
     }
 
@@ -108,19 +107,13 @@ export class WGPUDepthStencilState extends ReactiveObject
         return result;
     }
 
-    private _onMap(depthStencil: DepthStencilState)
-    {
-        WGPUDepthStencilState.cacheMap.set(depthStencil, this);
-        this.destroyCall(() => { WGPUDepthStencilState.cacheMap.delete(depthStencil); });
-    }
-
     static getInstance(depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat)
     {
         if (!depthStencilFormat) return undefined;
 
-        return this.cacheMap.get(depthStencil) || new WGPUDepthStencilState(depthStencil, depthStencilFormat);
+        return WGPUDepthStencilState.map.get([depthStencil, depthStencilFormat]) || new WGPUDepthStencilState(depthStencil, depthStencilFormat);
     }
 
-    static readonly cacheMap = new Map<DepthStencilState, WGPUDepthStencilState>();
+    static readonly map = new ChainMap<[DepthStencilState, GPUTextureFormat], WGPUDepthStencilState>();
     private static readonly defaultGPUDepthStencilStates: Record<GPUTextureFormat, GPUDepthStencilState> = {} as any;
 }

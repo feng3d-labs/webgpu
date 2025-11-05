@@ -108,7 +108,6 @@ export class WGPURenderPipeline extends ReactiveObject
             {
                 // 创建深度模板状态
                 const wgpuDepthStencilState = WGPUDepthStencilState.getInstance(renderPipeline.depthStencil, depthStencilFormat);
-                reactive(wgpuDepthStencilState).gpuDepthStencilState;
                 gpuRenderPipelineDescriptor.depthStencil = wgpuDepthStencilState?.gpuDepthStencilState;
             }
 
