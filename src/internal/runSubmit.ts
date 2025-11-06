@@ -2,7 +2,7 @@ import { anyEmitter } from '@feng3d/event';
 import { reactive } from '@feng3d/reactivity';
 import { Submit } from '@feng3d/render-api';
 import { GPUQueue_submit } from '../eventnames';
-import { WGPUCommandEncoder } from './WGPUCommandEncoder';
+import { runCommandEncoder } from './runCommandEncoder';
 
 export function runSubmit(device: GPUDevice, submit: Submit)
 {
@@ -10,9 +10,7 @@ export function runSubmit(device: GPUDevice, submit: Submit)
 
     const commandBuffers = submit.commandEncoders.map((v) =>
     {
-        const commandEncoderCommand = WGPUCommandEncoder.getInstance(device, v);
-
-        return commandEncoderCommand.run(device);
+        return runCommandEncoder(device, v);
     });
 
     device.queue.submit(commandBuffers);
