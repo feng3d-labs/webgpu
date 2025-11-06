@@ -1,5 +1,5 @@
 import { computed, reactive } from '@feng3d/reactivity';
-import { BlendState, Buffer, ChainMap, DepthStencilState, DrawIndexed, DrawVertex, RenderObject } from '@feng3d/render-api';
+import { BlendState, Buffer, ChainMap, DrawIndexed, DrawVertex, getStencilReference, RenderObject } from '@feng3d/render-api';
 import { WGPUBindGroup } from '../caches/WGPUBindGroup';
 import { WGPUBuffer } from '../caches/WGPUBuffer';
 import { WGPUPipelineLayout } from '../caches/WGPUPipelineLayout';
@@ -411,42 +411,6 @@ export function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURen
     }
 }
 
-/**
- * 如果任意模板测试结果使用了 "replace" 运算，则需要再渲染前设置 `stencilReference` 值。
- *
- * @param depthStencil
- * @returns
- */
-function getStencilReference(depthStencil?: DepthStencilState)
-{
-    if (!depthStencil) return undefined;
-
-    const { stencilFront, stencilBack } = depthStencil;
-
-    // 如果开启了模板测试，则需要设置模板索引值
-    let stencilReference: number;
-
-    if (stencilFront)
-    {
-        const { failOp, depthFailOp, passOp } = stencilFront;
-
-        if (failOp === 'replace' || depthFailOp === 'replace' || passOp === 'replace')
-        {
-            stencilReference = depthStencil?.stencilReference ?? 0;
-        }
-    }
-    if (stencilBack)
-    {
-        const { failOp, depthFailOp, passOp } = stencilBack;
-
-        if (failOp === 'replace' || depthFailOp === 'replace' || passOp === 'replace')
-        {
-            stencilReference = depthStencil?.stencilReference ?? 0;
-        }
-    }
-
-    return stencilReference;
-}
 
 let autoVertexIndex = 0;
 let autoIndex = 0;
