@@ -1,13 +1,11 @@
 import { ChainMap, OcclusionQuery } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { RenderPassFormat } from './RenderPassFormat';
-import { CommandType, RenderPassObjectCommand, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
+import { CommandType, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
 
-export class WGPUOcclusionQuery extends ReactiveObject implements RenderPassObjectCommand
+export class WGPUOcclusionQuery extends ReactiveObject
 {
-    run: (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) => void;
-
-    queryIndex: number;
+    run: (device: GPUDevice, commands: CommandType[], queryIndex: number, state: WGPURenderObjectState) => void;
 
     constructor(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery)
     {
@@ -21,9 +19,9 @@ export class WGPUOcclusionQuery extends ReactiveObject implements RenderPassObje
 
     private _onCreate(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery)
     {
-        this.run = (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) =>
+        this.run = (device: GPUDevice, commands: CommandType[], queryIndex: number, state: WGPURenderObjectState) =>
         {
-            commands.push(['beginOcclusionQuery', this.queryIndex]);
+            commands.push(['beginOcclusionQuery', queryIndex]);
 
             occlusionQuery.renderObjects.forEach((renderObject) =>
             {
