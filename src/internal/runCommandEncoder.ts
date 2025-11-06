@@ -1,8 +1,8 @@
-import { CommandEncoder, RenderPass } from '@feng3d/render-api';
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, RenderPass } from '@feng3d/render-api';
 
+import { runCopyBufferToBuffer } from './runCopyBufferToBuffer';
+import { runCopyTextureToTexture } from './runCopyTextureToTexture';
 import { WGPUComputePass } from './WGPUComputePass';
-import { WGPUCopyBufferToBuffer } from './WGPUCopyBufferToBuffer';
-import { WGPUCopyTextureToTexture } from './WGPUCopyTextureToTexture';
 import { WGPURenderPass } from './WGPURenderPass';
 
 export function runCommandEncoder(device: GPUDevice, commandEncoder: CommandEncoder)
@@ -29,18 +29,13 @@ export function runCommandEncoder(device: GPUDevice, commandEncoder: CommandEnco
         }
         if (passEncoder.__type__ === 'CopyTextureToTexture')
         {
-            const wgpuCopyTextureToTexture = WGPUCopyTextureToTexture.getInstance(device, passEncoder);
-
-            wgpuCopyTextureToTexture.run(device, gpuCommandEncoder);
+            runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder as CopyTextureToTexture);
 
             return;
         }
         if (passEncoder.__type__ === 'CopyBufferToBuffer')
         {
-            const wgpuCopyBufferToBuffer = WGPUCopyBufferToBuffer.getInstance(device, passEncoder);
-
-            wgpuCopyBufferToBuffer.run(device, gpuCommandEncoder);
-
+            runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder as CopyBufferToBuffer);
             return;
         }
 
