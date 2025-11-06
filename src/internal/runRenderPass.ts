@@ -2,7 +2,7 @@ import { RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
 import { WGPURenderBundle } from './WGPURenderBundle';
-import { CommandType, runCommands, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
+import { runCommands, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
 {
@@ -13,8 +13,8 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
 
     const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
 
-    const commands: CommandType[] = [];
-    const state = new WGPURenderObjectState();
+    const state = new WGPURenderObjectState(passEncoder);
+    const commands = state.commands;
     let queryIndex = 0;
 
     renderPass.renderPassObjects.forEach((element) =>

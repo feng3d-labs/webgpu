@@ -1,5 +1,5 @@
 import { computed, reactive } from '@feng3d/reactivity';
-import { BlendState, Buffer, ChainMap, DepthStencilState, RenderObject } from '@feng3d/render-api';
+import { BlendState, Buffer, ChainMap, DepthStencilState, DrawIndexed, DrawVertex, RenderObject } from '@feng3d/render-api';
 import { WGPUBindGroup } from '../caches/WGPUBindGroup';
 import { WGPUBuffer } from '../caches/WGPUBuffer';
 import { WGPUPipelineLayout } from '../caches/WGPUPipelineLayout';
@@ -26,16 +26,112 @@ export type CommandType =
 
 export class WGPURenderObjectState
 {
-    setViewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
-    setScissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
-    setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline];
-    setBlendConstant: [func: 'setBlendConstant', color: GPUColor];
-    setStencilReference: [func: 'setStencilReference', reference: GPUStencilValue];
-    setBindGroup: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
-    setVertexBuffer: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
-    setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
-    draw: [func: 'draw', vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32];
-    drawIndexed: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
+    commands: CommandType[] = [];
+    _setViewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
+    _setScissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
+    _setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline];
+    _setBlendConstant: [func: 'setBlendConstant', color: GPUColor];
+    _setStencilReference: [func: 'setStencilReference', reference: GPUStencilValue];
+    _setBindGroup: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
+    _setVertexBuffer: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
+    _setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
+    _drawIndexed: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
+
+    constructor(private passEncoder: GPURenderPassEncoder)
+    {
+
+    }
+
+    setViewport(viewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number])
+    {
+        if (this._setViewport !== viewport && viewport)
+        {
+            this.commands.push(viewport);
+            this._setViewport = viewport;
+        }
+    }
+
+    setScissorRect(scissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate])
+    {
+        if (this._setScissorRect !== scissorRect && scissorRect)
+        {
+            this.commands.push(scissorRect);
+            this._setScissorRect = scissorRect;
+        }
+    }
+
+    setBlendConstant(blendConstant: [func: 'setBlendConstant', color: GPUColor])
+    {
+        if (this._setBlendConstant !== blendConstant && blendConstant)
+        {
+            this.commands.push(blendConstant);
+            this._setBlendConstant = blendConstant;
+        }
+    }
+
+    setStencilReference(stencilReference: [func: 'setStencilReference', reference: GPUStencilValue])
+    {
+        if (this._setStencilReference !== stencilReference && stencilReference)
+        {
+            this.commands.push(stencilReference);
+            this._setStencilReference = stencilReference;
+        }
+    }
+
+    setPipeline(pipeline: [func: 'setPipeline', pipeline: GPURenderPipeline])
+    {
+        if (this._setPipeline !== pipeline && pipeline)
+        {
+            this.commands.push(pipeline);
+            this._setPipeline = pipeline;
+        }
+    }
+
+    setBindGroup(bindGroups: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][])
+    {
+        for (let i = 0, len = bindGroups.length; i < len; i++)
+        {
+            if (this._setBindGroup[i] !== bindGroups[i])
+            {
+                this.commands.push(bindGroups[i]);
+                this._setBindGroup[i] = bindGroups[i];
+            }
+        }
+    }
+
+    setVertexBuffer(vertexBuffers: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][])
+    {
+        for (let i = 0, len = vertexBuffers.length; i < len; i++)
+        {
+            if (this._setVertexBuffer[i] !== vertexBuffers[i])
+            {
+                this.commands.push(vertexBuffers[i]);
+                this._setVertexBuffer[i] = vertexBuffers[i];
+            }
+        }
+    }
+
+    setIndexBuffer(indexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64])
+    {
+        if (this._setIndexBuffer !== indexBuffer && indexBuffer)
+        {
+            this.commands.push(indexBuffer);
+            this._setIndexBuffer = indexBuffer;
+        }
+    }
+
+    draw(draw: DrawVertex | DrawIndexed)
+    {
+        //
+        if (draw.__type__ === 'DrawVertex')
+        {
+            this.commands.push(['draw', draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]);
+        }
+        else
+        {
+            this.commands.push(['drawIndexed', draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance]);
+        }
+    }
 }
 
 export class WGPURenderObject extends ReactiveObject implements RenderPassObjectCommand
@@ -259,77 +355,23 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
 
         this.run = (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) =>
         {
-            const setViewport = computedSetViewport.value;
-            if (state.setViewport !== setViewport && setViewport)
-            {
-                commands.push(setViewport);
-                state.setViewport = setViewport;
-            }
+            state.setViewport(computedSetViewport.value);
 
-            const setScissorRect = computedSetScissorRect.value;
-            if (state.setScissorRect !== setScissorRect && setScissorRect)
-            {
-                commands.push(setScissorRect);
-                state.setScissorRect = setScissorRect;
-            }
+            state.setScissorRect(computedSetScissorRect.value);
 
-            const setBlendConstant = computedSetBlendConstant.value;
-            if (state.setBlendConstant !== setBlendConstant && setBlendConstant)
-            {
-                commands.push(setBlendConstant);
-                state.setBlendConstant = setBlendConstant;
-            }
+            state.setBlendConstant(computedSetBlendConstant.value);
 
-            const setStencilReference = computedSetStencilReference.value;
-            if (state.setStencilReference !== setStencilReference && setStencilReference)
-            {
-                commands.push(setStencilReference);
-            }
-            const setPipeline = computedSetPipeline.value;
-            if (state.setPipeline !== setPipeline)
-            {
-                commands.push(setPipeline);
-                state.setPipeline = setPipeline;
-            }
+            state.setStencilReference(computedSetStencilReference.value);
 
-            const setBindGroup = computedSetBindGroup.value;
-            for (let i = 0, len = setBindGroup.length; i < len; i++)
-            {
-                if (state.setBindGroup[i] !== setBindGroup[i] && setBindGroup[i])
-                {
-                    commands.push(setBindGroup[i]);
-                    state.setBindGroup[i] = setBindGroup[i];
-                }
-            }
+            state.setPipeline(computedSetPipeline.value);
 
-            const setVertexBuffer = computedSetVertexBuffer.value;
-            for (let i = 0, len = setVertexBuffer.length; i < len; i++)
-            {
-                if (state.setVertexBuffer[i] !== setVertexBuffer[i])
-                {
-                    commands.push(setVertexBuffer[i]);
-                    state.setVertexBuffer[i] = setVertexBuffer[i];
-                }
-            }
+            state.setBindGroup(computedSetBindGroup.value);
 
-            const setIndexBuffer = computedSetIndexBuffer.value;
-            if (state.setIndexBuffer !== setIndexBuffer && setIndexBuffer)
-            {
-                commands.push(setIndexBuffer);
-                state.setIndexBuffer = setIndexBuffer;
-            }
+            state.setVertexBuffer(computedSetVertexBuffer.value);
 
-            const draw = renderObject.draw;
+            state.setIndexBuffer(computedSetIndexBuffer.value);
 
-            //
-            if (draw.__type__ === 'DrawVertex')
-            {
-                commands.push(['draw', draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]);
-            }
-            else
-            {
-                commands.push(['drawIndexed', draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance]);
-            }
+            state.draw(renderObject.draw);
         };
     }
 
