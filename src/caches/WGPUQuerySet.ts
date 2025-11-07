@@ -1,7 +1,5 @@
-import { anyEmitter } from '@feng3d/event';
 import { Computed, computed, reactive } from '@feng3d/reactivity';
 import { ChainMap, OcclusionQuery, RenderPass } from '@feng3d/render-api';
-import { GPUQueue_submit } from '../eventnames';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUQuerySet extends ReactiveObject
@@ -28,8 +26,13 @@ export class WGPUQuerySet extends ReactiveObject
         let resultBuf: GPUBuffer;
         let resolveBuf: GPUBuffer
 
-        const getOcclusionQueryResult = () =>
+        let needQueryResult = false;
+        this.effect(() =>
         {
+            reactive(device.queue).afterSubmit;
+
+            if (!needQueryResult) return;
+
             if (resultBuf.mapState === 'unmapped')
             {
                 resultBuf.mapAsync(GPUMapMode.READ).then(() =>
@@ -53,10 +56,10 @@ export class WGPUQuerySet extends ReactiveObject
                     renderPass.onOcclusionQuery?.(occlusionQuerys, results);
 
                     //
-                    anyEmitter.off(device.queue, GPUQueue_submit, getOcclusionQueryResult);
+                    needQueryResult = false;
                 });
             }
-        };
+        });
 
         this._computedGpuQuerySet = computed(() =>
         {
@@ -101,8 +104,7 @@ export class WGPUQuerySet extends ReactiveObject
                     commandEncoder.copyBufferToBuffer(resolveBuf, 0, resultBuf, 0, resultBuf.size);
                 }
 
-                // 监听提交WebGPU事件
-                anyEmitter.on(device.queue, GPUQueue_submit, getOcclusionQueryResult);
+                needQueryResult = true;
             };
 
             return occlusionQuerySet;
