@@ -7,7 +7,7 @@ export function getSetIndexBuffer(device: GPUDevice, renderObject: RenderObject)
     const r_renderObject = reactive(renderObject);
     return computed(() =>
     {
-        let setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
+        let setIndexBuffer: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
         // 监听
         r_renderObject.indices;
 
@@ -16,7 +16,7 @@ export function getSetIndexBuffer(device: GPUDevice, renderObject: RenderObject)
 
         if (!indices)
         {
-            setIndexBuffer = null;
+            setIndexBuffer = undefined;
         }
         else
         {
@@ -30,7 +30,7 @@ export function getSetIndexBuffer(device: GPUDevice, renderObject: RenderObject)
             const gBuffer = WGPUBuffer.getInstance(device, buffer);
 
             //
-            setIndexBuffer = ['setIndexBuffer', gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
+            setIndexBuffer = [gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
         }
 
         return setIndexBuffer;

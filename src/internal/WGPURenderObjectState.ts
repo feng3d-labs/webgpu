@@ -27,7 +27,7 @@ export class WGPURenderObjectState
     _setStencilReference: number | undefined;
     _setBindGroup: GPUBindGroup[] = [];
     _setVertexBuffer: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
-    _setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
+    _setIndexBuffer: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
     _drawIndexed: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
 
     constructor(private passEncoder: GPURenderPassEncoder, private renderPassFormat: RenderPassFormat)
@@ -124,11 +124,13 @@ export class WGPURenderObjectState
         }
     }
 
-    setIndexBuffer(indexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64])
+    setIndexBuffer(indexBuffer: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64])
     {
-        if (this._setIndexBuffer !== indexBuffer && indexBuffer)
+        if (indexBuffer === undefined) return;
+
+        if (!this._setIndexBuffer || this._setIndexBuffer[0] !== indexBuffer[0] || this._setIndexBuffer[1] !== indexBuffer[1] || this._setIndexBuffer[2] !== indexBuffer[2] || this._setIndexBuffer[3] !== indexBuffer[3])
         {
-            this.commands.push(indexBuffer);
+            this.commands.push(['setIndexBuffer', indexBuffer[0], indexBuffer[1], indexBuffer[2], indexBuffer[3]]);
             this._setIndexBuffer = indexBuffer;
         }
     }

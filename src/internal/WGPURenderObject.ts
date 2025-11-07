@@ -1,4 +1,4 @@
-import { ChainMap, DrawIndexed, DrawVertex, RenderObject } from '@feng3d/render-api';
+import { ChainMap, RenderObject } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { getSetBindGroup } from './renderobject/getSetBindGroup';
 import { getSetBlendConstant } from './renderobject/getSetBlendConstant';
