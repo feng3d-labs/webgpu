@@ -1,8 +1,7 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
+import { ChainMap, RenderPassDescriptor } from '@feng3d/render-api';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { ReactiveObject } from '../ReactiveObject';
-import { WGPUQuerySet } from './WGPUQuerySet';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
 import { WGPURenderPassDepthStencilAttachment } from './WGPURenderPassDepthStencilAttachment';
 import { WGPUTextureLike } from './WGPUTextureLike';
@@ -16,48 +15,43 @@ export class WGPURenderPassDescriptor extends ReactiveObject
     get renderPassFormat() { return this._computedRenderPassFormat.value; }
     private _computedRenderPassFormat: Computed<RenderPassFormat>;
 
-    constructor(device: GPUDevice, renderPass: RenderPass)
+    constructor(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
         super();
 
-        this._onCreate(device, renderPass)
+        this._onCreate(device, descriptor)
         //
-        WGPURenderPassDescriptor.map.set([device, renderPass], this);
-        this.destroyCall(() => { WGPURenderPassDescriptor.map.delete([device, renderPass]); });
+        WGPURenderPassDescriptor.map.set([device, descriptor], this);
+        this.destroyCall(() => { WGPURenderPassDescriptor.map.delete([device, descriptor]); });
     }
 
-    private _onCreate(device: GPUDevice, renderPass: RenderPass)
+    private _onCreate(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
-        const r_renderPass = reactive(renderPass);
+        const r_descriptor = reactive(descriptor);
+
+        // 如果渲染通道描述符没有设置附件尺寸，自动从纹理中获取
+        if (!descriptor.attachmentSize)
+        {
+            for (const colorAttachment of descriptor.colorAttachments)
+            {
+                if (colorAttachment.view.texture)
+                {
+                    const gpuTextureLike = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
+                    const gpuTexture = gpuTextureLike.gpuTexture;
+                    r_descriptor.attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
+                    break;
+                }
+            }
+            if (!descriptor.attachmentSize)
+            {
+                const gpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
+                const gpuTexture = gpuTextureLike.gpuTexture;
+                r_descriptor.attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
+            }
+        }
 
         this._computedGpuRenderPassDescriptor = computed(() =>
         {
-            r_renderPass.descriptor;
-
-            const descriptor: RenderPassDescriptor = renderPass.descriptor;
-            const r_descriptor = reactive(descriptor);
-
-            // 如果渲染通道描述符没有设置附件尺寸，自动从纹理中获取
-            if (!descriptor.attachmentSize)
-            {
-                for (const colorAttachment of descriptor.colorAttachments)
-                {
-                    if (colorAttachment.view.texture)
-                    {
-                        const gpuTextureLike = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
-                        const gpuTexture = gpuTextureLike.gpuTexture;
-                        r_descriptor.attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
-                        break;
-                    }
-                }
-                if (!descriptor.attachmentSize)
-                {
-                    const gpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
-                    const gpuTexture = gpuTextureLike.gpuTexture;
-                    r_descriptor.attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
-                }
-            }
-
             //
             const label = r_descriptor.label;
 
@@ -80,13 +74,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
                 label: label,
                 colorAttachments: gpuColorAttachments,
             };
-
-            //
-            const wgpuQuerySet = WGPUQuerySet.getInstance(device, renderPass);
-            if (wgpuQuerySet.gpuQuerySet)
-            {
-                gpuRenderPassDescriptor.occlusionQuerySet = wgpuQuerySet.gpuQuerySet;
-            }
 
             r_descriptor.timestampQuery;
             if (descriptor.timestampQuery)
@@ -117,9 +104,8 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         {
             const gpuRenderPassDescriptor = this.gpuRenderPassDescriptor;
 
-            r_renderPass.descriptor.attachmentSize;
-            const width = r_renderPass.descriptor.attachmentSize.width;
-            const height = r_renderPass.descriptor.attachmentSize.height;
+            const width = r_descriptor.attachmentSize.width;
+            const height = r_descriptor.attachmentSize.height;
 
             const colorFormats: GPUTextureFormat[] = [];
             let sampleCount: number;
@@ -149,7 +135,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             else
             {
                 renderPassFormat = {
-                    attachmentSize: renderPass.descriptor.attachmentSize,
+                    attachmentSize: descriptor.attachmentSize,
                     colorFormats: colorFormats,
                     depthStencilFormat: depthStencilFormat,
                     sampleCount: sampleCount as 4,
@@ -161,11 +147,11 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         });
     }
 
-    static getInstance(device: GPUDevice, renderPass: RenderPass)
+    static getInstance(device: GPUDevice, descriptor: RenderPassDescriptor)
     {
-        return this.map.get([device, renderPass]) || new WGPURenderPassDescriptor(device, renderPass);
+        return this.map.get([device, descriptor]) || new WGPURenderPassDescriptor(device, descriptor);
     }
-    private static readonly map = new ChainMap<[GPUDevice, RenderPass], WGPURenderPassDescriptor>();
+    private static readonly map = new ChainMap<[GPUDevice, RenderPassDescriptor], WGPURenderPassDescriptor>();
 }
 
 const renderPassFormatCache: { [key: string]: RenderPassFormat } = {}

@@ -1,4 +1,5 @@
 import { RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
+import { WGPUQuerySet } from '../caches/WGPUQuerySet';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
 import { WGPURenderBundle } from './WGPURenderBundle';
@@ -7,8 +8,15 @@ import { runCommands, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
 {
-    const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, renderPass);
+    const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, renderPass.descriptor);
     const renderPassDescriptor = wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
+
+    //
+    const wgpuQuerySet = WGPUQuerySet.getInstance(device, renderPass);
+    if (wgpuQuerySet.gpuQuerySet)
+    {
+        renderPassDescriptor.occlusionQuerySet = wgpuQuerySet.gpuQuerySet;
+    }
 
     const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
