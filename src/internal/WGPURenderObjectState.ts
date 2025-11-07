@@ -1,4 +1,5 @@
-import { DrawVertex, DrawIndexed } from "@feng3d/render-api";
+import { DrawIndexed, DrawVertex } from "@feng3d/render-api";
+import { RenderPassFormat } from "./RenderPassFormat";
 
 export type CommandType =
     | [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]
@@ -19,7 +20,7 @@ export type CommandType =
 export class WGPURenderObjectState
 {
     commands: CommandType[] = [];
-    _setViewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
+    _setViewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number] | undefined;
     _setScissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
     _setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline];
     _setBlendConstant: [func: 'setBlendConstant', color: GPUColor];
@@ -29,18 +30,25 @@ export class WGPURenderObjectState
     _setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
     _drawIndexed: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
 
-    constructor(private passEncoder: GPURenderPassEncoder)
+    constructor(private passEncoder: GPURenderPassEncoder, private renderPassFormat: RenderPassFormat)
     {
 
     }
 
-    setViewport(viewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number])
+    setViewport(viewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number])
     {
-        if (this._setViewport !== viewport && viewport)
+        const currentViewport = this._setViewport;
+        if (viewport === currentViewport || (viewport && currentViewport && viewport[0] === currentViewport[0] && viewport[1] === currentViewport[1] && viewport[2] === currentViewport[2] && viewport[3] === currentViewport[3] && viewport[4] === currentViewport[4] && viewport[5] === currentViewport[5])) return;
+
+        if (viewport)
         {
-            this.commands.push(viewport);
-            this._setViewport = viewport;
+            this.commands.push(['setViewport', viewport[0], viewport[1], viewport[2], viewport[3], viewport[4], viewport[5]]);
         }
+        else
+        {
+            this.commands.push(['setViewport', 0, 0, this.renderPassFormat.attachmentSize.width, this.renderPassFormat.attachmentSize.height, 0, 1]);
+        }
+        this._setViewport = viewport;
     }
 
     setScissorRect(scissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate])

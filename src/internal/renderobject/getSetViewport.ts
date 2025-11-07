@@ -11,7 +11,7 @@ export function getSetViewport(renderPassFormat: RenderPassFormat, renderObject:
         const attachmentSize = r_renderPassFormat.attachmentSize;
         const viewport = r_renderObject.viewport;
 
-        let setViewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
+        let setViewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number] | undefined;
 
         if (viewport)
         {
@@ -27,13 +27,20 @@ export function getSetViewport(renderPassFormat: RenderPassFormat, renderObject:
             {
                 y = attachmentSize.height - y - height;
             }
-            //
-            setViewport = ['setViewport', x, y, width, height, minDepth, maxDepth];
+
+            if (x === 0 && y === 0 && width === attachmentSize.width && height === attachmentSize.height && minDepth === 0 && maxDepth === 1)
+            {
+                setViewport = undefined;
+            }
+            else
+            {
+                setViewport = [x, y, width, height, minDepth, maxDepth];
+            }
         }
         else
         {
             //
-            setViewport = ['setViewport', 0, 0, attachmentSize.width, attachmentSize.height, 0, 1];
+            setViewport = undefined;
         }
 
         return setViewport;

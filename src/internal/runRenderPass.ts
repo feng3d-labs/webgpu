@@ -14,7 +14,7 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
 
     const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
 
-    const state = new WGPURenderObjectState(passEncoder);
+    const state = new WGPURenderObjectState(passEncoder, renderPassFormat);
     const commands = state.commands;
     let queryIndex = 0;
 

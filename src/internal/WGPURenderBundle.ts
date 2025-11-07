@@ -39,7 +39,7 @@ export class WGPURenderBundle extends ReactiveObject implements RenderPassObject
 
             //
             const commands: CommandType[] = [];
-            const state = new WGPURenderObjectState(null);
+            const state = new WGPURenderObjectState(null, renderPassFormat);
 
             renderBundle.renderObjects.forEach((renderObject) =>
             {
