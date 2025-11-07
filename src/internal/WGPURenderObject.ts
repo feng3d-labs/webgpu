@@ -1,3 +1,4 @@
+import { computed, reactive } from '@feng3d/reactivity';
 import { ChainMap, RenderObject } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { getSetBindGroup } from './renderobject/getSetBindGroup';
@@ -25,41 +26,59 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
 
     private _onCreate(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
     {
-        const computedSetViewport = getSetViewport(renderPassFormat, renderObject);
+        const r_renderObject = reactive(renderObject);
+        const renderObjectCommands = computed(() =>
+        {
+            const computedSetViewport = getSetViewport(renderPassFormat, renderObject);
 
-        const computedSetScissorRect = getSetScissorRect(renderPassFormat, renderObject);
+            const computedSetScissorRect = getSetScissorRect(renderPassFormat, renderObject);
 
-        const computedSetPipeline = getSetPipeline(device, renderObject, renderPassFormat);
+            const computedSetPipeline = getSetPipeline(device, renderObject, renderPassFormat);
 
-        const computedSetStencilReference = getSetStencilReference(renderObject);
+            const computedSetStencilReference = getSetStencilReference(renderObject);
 
-        const computedSetBlendConstant = getSetBlendConstant(renderObject);
+            const computedSetBlendConstant = getSetBlendConstant(renderObject);
 
-        const computedSetBindGroup = getSetBindGroup(device, renderObject);
+            const computedSetBindGroup = getSetBindGroup(device, renderObject);
 
-        const computedSetVertexBuffer = getSetVertexBuffer(device, renderObject);
+            const computedSetVertexBuffer = getSetVertexBuffer(device, renderObject);
 
-        const computedSetIndexBuffer = getSetIndexBuffer(device, renderObject);
+            const computedSetIndexBuffer = getSetIndexBuffer(device, renderObject);
+
+            return {
+                viewport: computedSetViewport.value,
+                scissorRect: computedSetScissorRect.value,
+                pipeline: computedSetPipeline.value,
+                stencilReference: computedSetStencilReference.value,
+                blendConstant: computedSetBlendConstant.value,
+                bindGroup: computedSetBindGroup.value,
+                vertexBuffer: computedSetVertexBuffer.value,
+                indexBuffer: computedSetIndexBuffer.value,
+                draw: r_renderObject.draw,
+            };
+        });
 
         this.run = (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) =>
         {
-            state.setViewport(computedSetViewport.value);
+            const { viewport, scissorRect, pipeline, stencilReference, blendConstant, bindGroup, vertexBuffer, indexBuffer, draw } = renderObjectCommands.value;
 
-            state.setScissorRect(computedSetScissorRect.value);
+            state.setViewport(viewport);
 
-            state.setBlendConstant(computedSetBlendConstant.value);
+            state.setScissorRect(scissorRect);
 
-            state.setStencilReference(computedSetStencilReference.value);
+            state.setBlendConstant(blendConstant);
 
-            state.setPipeline(computedSetPipeline.value);
+            state.setStencilReference(stencilReference);
 
-            state.setBindGroup(computedSetBindGroup.value);
+            state.setPipeline(pipeline);
 
-            state.setVertexBuffer(computedSetVertexBuffer.value);
+            state.setBindGroup(bindGroup);
 
-            state.setIndexBuffer(computedSetIndexBuffer.value);
+            state.setVertexBuffer(vertexBuffer);
 
-            state.draw(renderObject.draw);
+            state.setIndexBuffer(indexBuffer);
+
+            state.draw(draw);
         };
     }
 

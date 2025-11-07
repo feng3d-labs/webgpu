@@ -32,7 +32,7 @@ export class WGPURenderObjectState
 
     private _computedDefaultViewport: Computed<[x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]>;
     private _computedDefaultScissorRect: Computed<[x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate]>;
-    constructor(private passEncoder: GPURenderPassEncoder, private renderPassFormat: RenderPassFormat)
+    constructor(private passEncoder: GPURenderPassEncoder, renderPassFormat: RenderPassFormat)
     {
         const r_renderPassFormat = reactive(renderPassFormat);
         this._computedDefaultViewport = computed(() =>
