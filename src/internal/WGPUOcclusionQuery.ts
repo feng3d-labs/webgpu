@@ -1,7 +1,8 @@
 import { ChainMap, OcclusionQuery } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { RenderPassFormat } from './RenderPassFormat';
-import { CommandType, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
+import { WGPURenderObject } from './WGPURenderObject';
+import { CommandType, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export class WGPUOcclusionQuery extends ReactiveObject
 {

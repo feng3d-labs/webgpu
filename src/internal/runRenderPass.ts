@@ -2,7 +2,8 @@ import { RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
 import { WGPURenderBundle } from './WGPURenderBundle';
-import { runCommands, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
+import { WGPURenderObject } from './WGPURenderObject';
+import { runCommands, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
 {

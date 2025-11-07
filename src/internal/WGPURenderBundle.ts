@@ -3,7 +3,8 @@ import { ChainMap } from '@feng3d/render-api';
 import { RenderBundle } from '../data/RenderBundle';
 import { ReactiveObject } from '../ReactiveObject';
 import { RenderPassFormat } from './RenderPassFormat';
-import { CommandType, RenderPassObjectCommand, runCommands, WGPURenderObject, WGPURenderObjectState } from './WGPURenderObject';
+import { RenderPassObjectCommand, WGPURenderObject } from './WGPURenderObject';
+import { CommandType, runCommands, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export class WGPURenderBundle extends ReactiveObject implements RenderPassObjectCommand
 {
