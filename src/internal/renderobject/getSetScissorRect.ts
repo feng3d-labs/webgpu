@@ -10,7 +10,7 @@ export function getSetScissorRect(renderPassFormat: RenderPassFormat, renderObje
     {
         const attachmentSize = r_renderPassFormat.attachmentSize;
 
-        let setScissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
+        let setScissorRect: [x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate] | undefined;
         const scissorRect = r_renderObject.scissorRect;
         if (scissorRect)
         {
@@ -25,11 +25,18 @@ export function getSetScissorRect(renderPassFormat: RenderPassFormat, renderObje
                 y = attachmentSize.height - y - height;
             }
 
-            setScissorRect = ['setScissorRect', x, y, width, height];
+            if (x === 0 && y === 0 && width === attachmentSize.width && height === attachmentSize.height)
+            {
+                setScissorRect = undefined;
+            }
+            else
+            {
+                setScissorRect = [x, y, width, height];
+            }
         }
         else
         {
-            setScissorRect = ['setScissorRect', 0, 0, attachmentSize.width, attachmentSize.height];
+            setScissorRect = undefined;
         }
 
         return setScissorRect;

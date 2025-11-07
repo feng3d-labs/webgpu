@@ -1,4 +1,4 @@
-import { DrawIndexed, DrawVertex } from "@feng3d/render-api";
+import { Color, DrawIndexed, DrawVertex } from "@feng3d/render-api";
 import { RenderPassFormat } from "./RenderPassFormat";
 
 export type CommandType =
@@ -21,9 +21,9 @@ export class WGPURenderObjectState
 {
     commands: CommandType[] = [];
     _setViewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number] | undefined;
-    _setScissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
+    _setScissorRect: [x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate] | undefined;
+    _setBlendConstant: Color | undefined;
     _setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline];
-    _setBlendConstant: [func: 'setBlendConstant', color: GPUColor];
     _setStencilReference: [func: 'setStencilReference', reference: GPUStencilValue];
     _setBindGroup: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
     _setVertexBuffer: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
@@ -51,20 +51,28 @@ export class WGPURenderObjectState
         this._setViewport = viewport;
     }
 
-    setScissorRect(scissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate])
+    setScissorRect(scissorRect: [x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate] | undefined)
     {
-        if (this._setScissorRect !== scissorRect && scissorRect)
+        const currentScissorRect = this._setScissorRect;
+        if (scissorRect === currentScissorRect || (scissorRect && currentScissorRect && scissorRect[0] === currentScissorRect[0] && scissorRect[1] === currentScissorRect[1] && scissorRect[2] === currentScissorRect[2] && scissorRect[3] === currentScissorRect[3])) return;
+        if (scissorRect)
         {
-            this.commands.push(scissorRect);
-            this._setScissorRect = scissorRect;
+            this.commands.push(['setScissorRect', scissorRect[0], scissorRect[1], scissorRect[2], scissorRect[3]]);
         }
+        else
+        {
+            this.commands.push(['setScissorRect', 0, 0, this.renderPassFormat.attachmentSize.width, this.renderPassFormat.attachmentSize.height]);
+        }
+        this._setScissorRect = scissorRect;
     }
 
-    setBlendConstant(blendConstant: [func: 'setBlendConstant', color: GPUColor])
+    setBlendConstant(blendConstant: Color | undefined)
     {
-        if (this._setBlendConstant !== blendConstant && blendConstant)
+        const currentBlendConstant = this._setBlendConstant;
+        if (blendConstant === currentBlendConstant || (blendConstant && currentBlendConstant && blendConstant[0] === currentBlendConstant[0] && blendConstant[1] === currentBlendConstant[1] && blendConstant[2] === currentBlendConstant[2] && blendConstant[3] === currentBlendConstant[3])) return;
+        if (blendConstant)
         {
-            this.commands.push(blendConstant);
+            this.commands.push(['setBlendConstant', blendConstant]);
             this._setBlendConstant = blendConstant;
         }
     }
