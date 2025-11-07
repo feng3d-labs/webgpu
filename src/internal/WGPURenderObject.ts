@@ -148,210 +148,21 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
 
     private _onCreate(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
     {
-        const r_renderObject = reactive(renderObject);
-        const r_renderPassFormat = reactive(renderPassFormat);
+        const computedSetViewport = getSetViewport(renderPassFormat, renderObject);
 
-        const computedSetViewport = computed(() =>
-        {
-            const attachmentSize = r_renderPassFormat.attachmentSize;
-            const viewport = r_renderObject.viewport;
+        const computedSetScissorRect = getSetScissorRect(renderPassFormat, renderObject);
 
-            let setViewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
+        const computedSetPipeline = getSetPipeline(device, renderObject, renderPassFormat);
 
-            if (viewport)
-            {
-                const isYup = viewport.isYup ?? true;
-                const x = viewport.x ?? 0;
-                let y = viewport.y ?? 0;
-                const width = viewport.width;
-                const height = viewport.height;
-                const minDepth = viewport.minDepth ?? 0;
-                const maxDepth = viewport.maxDepth ?? 1;
+        const computedSetStencilReference = getSetStencilReference(renderObject);
 
-                if (isYup)
-                {
-                    y = attachmentSize.height - y - height;
-                }
-                //
-                setViewport = ['setViewport', x, y, width, height, minDepth, maxDepth];
-            }
-            else
-            {
-                //
-                setViewport = ['setViewport', 0, 0, attachmentSize.width, attachmentSize.height, 0, 1];
-            }
+        const computedSetBlendConstant = getSetBlendConstant(renderObject);
 
-            return setViewport;
-        });
+        const computedSetBindGroup = getSetBindGroup(device, renderObject);
 
-        const computedSetScissorRect = computed(() =>
-        {
-            const attachmentSize = r_renderPassFormat.attachmentSize;
+        const computedSetVertexBuffer = getSetVertexBuffer(device, renderObject);
 
-            let setScissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
-            const scissorRect = r_renderObject.scissorRect;
-            if (scissorRect)
-            {
-                const isYup = scissorRect.isYup ?? true;
-                const x = scissorRect.x ?? 0;
-                let y = scissorRect.y ?? 0;
-                const width = scissorRect.width;
-                const height = scissorRect.height;
-
-                if (isYup)
-                {
-                    y = attachmentSize.height - y - height;
-                }
-
-                setScissorRect = ['setScissorRect', x, y, width, height];
-            }
-            else
-            {
-                setScissorRect = ['setScissorRect', 0, 0, attachmentSize.width, attachmentSize.height];
-            }
-
-            return setScissorRect;
-        });
-
-        const computedSetPipeline = computed(() =>
-        {
-            r_renderObject.pipeline;
-            r_renderObject.vertices;
-            r_renderObject.indices;
-            //
-            const { pipeline, vertices, indices } = renderObject;
-            //
-            const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16') : undefined;
-
-            //
-            const wgpuRenderPipeline = WGPURenderPipeline.getInstance(device, pipeline, renderPassFormat, vertices, indexFormat);
-            const gpuRenderPipeline = wgpuRenderPipeline.gpuRenderPipeline;
-
-            //
-            const setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline] = ['setPipeline', gpuRenderPipeline];
-
-            return setPipeline;
-        });
-
-        const computedSetStencilReference = computed(() =>
-        {
-            let setStencilReference: [func: 'setStencilReference', reference: GPUStencilValue];
-            //
-            const stencilReference = getStencilReference(r_renderObject.pipeline.depthStencil);
-            if (stencilReference === undefined)
-            {
-                setStencilReference = null;
-            }
-            else
-            {
-                setStencilReference = ['setStencilReference', stencilReference];
-            }
-
-            return setStencilReference;
-        });
-
-        const computedSetBlendConstant = computed(() =>
-        {
-            let setBlendConstant: [func: 'setBlendConstant', color: GPUColor];
-            //
-            const blendConstantColor = BlendState.getBlendConstantColor(r_renderObject.pipeline.fragment?.targets?.[0]?.blend);
-            if (blendConstantColor === undefined)
-            {
-                setBlendConstant = null;
-            }
-            else
-            {
-                setBlendConstant = ['setBlendConstant', blendConstantColor];
-            }
-
-            return setBlendConstant;
-        });
-
-        const computedSetBindGroup = computed(() =>
-        {
-            // 监听
-            r_renderObject.bindingResources;
-
-            // 执行
-            const { bindingResources } = renderObject;
-            const layout = WGPUPipelineLayout.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
-
-            const setBindGroup: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
-            layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
-            {
-                const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
-
-                setBindGroup[group] = ['setBindGroup', group, wgpuBindGroup.gpuBindGroup];
-            });
-
-            return setBindGroup;
-        });
-
-        const computedSetVertexBuffer = computed(() =>
-        {
-            // 监听
-            r_renderObject.vertices;
-            r_renderObject.pipeline.vertex;
-
-            //
-            const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(renderObject.pipeline.vertex, renderObject.vertices);
-            const vertexDatas = wgpuVertexBufferLayout.vertexDatas;
-
-            const setVertexBuffer: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
-            vertexDatas?.forEach((data, index) =>
-            {
-                // 执行
-                const offset = data.byteOffset;
-                const size = data.byteLength;
-                const buffer = Buffer.getBuffer(data.buffer);
-
-                if (!buffer.label)
-                {
-                    reactive(buffer).label = (`顶点数据 ${autoVertexIndex++}`);
-                }
-
-                const wgpuBuffer = WGPUBuffer.getInstance(device, buffer);
-                const gpuBuffer = wgpuBuffer.gpuBuffer;
-
-                setVertexBuffer[index] = ['setVertexBuffer', index, gpuBuffer, offset, size];
-            });
-
-            return setVertexBuffer;
-        });
-
-        const computedSetIndexBuffer = computed(() =>
-        {
-            let setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
-            // 监听
-            r_renderObject.indices;
-
-            //
-            const { indices } = renderObject;
-
-            // 监听
-            r_renderObject.indices;
-
-            if (!indices)
-            {
-                setIndexBuffer = null;
-            }
-            else
-            {
-                const buffer = Buffer.getBuffer(indices.buffer);
-
-                if (!buffer.label)
-                {
-                    reactive(buffer).label = (`顶点索引 ${autoIndex++}`);
-                }
-
-                const gBuffer = WGPUBuffer.getInstance(device, buffer);
-
-                //
-                setIndexBuffer = ['setIndexBuffer', gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
-            }
-
-            return setIndexBuffer;
-        });
+        const computedSetIndexBuffer = getSetIndexBuffer(device, renderObject);
 
         this.run = (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) =>
         {
@@ -411,6 +222,238 @@ export function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURen
     }
 }
 
-
 let autoVertexIndex = 0;
 let autoIndex = 0;
+
+export function getSetViewport(renderPassFormat: RenderPassFormat, renderObject: RenderObject)
+{
+    const r_renderPassFormat = reactive(renderPassFormat);
+    const r_renderObject = reactive(renderObject);
+    return computed(() =>
+    {
+        const attachmentSize = r_renderPassFormat.attachmentSize;
+        const viewport = r_renderObject.viewport;
+
+        let setViewport: [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number];
+
+        if (viewport)
+        {
+            const isYup = viewport.isYup ?? true;
+            const x = viewport.x ?? 0;
+            let y = viewport.y ?? 0;
+            const width = viewport.width;
+            const height = viewport.height;
+            const minDepth = viewport.minDepth ?? 0;
+            const maxDepth = viewport.maxDepth ?? 1;
+
+            if (isYup)
+            {
+                y = attachmentSize.height - y - height;
+            }
+            //
+            setViewport = ['setViewport', x, y, width, height, minDepth, maxDepth];
+        }
+        else
+        {
+            //
+            setViewport = ['setViewport', 0, 0, attachmentSize.width, attachmentSize.height, 0, 1];
+        }
+
+        return setViewport;
+    });
+}
+
+export function getSetScissorRect(renderPassFormat: RenderPassFormat, renderObject: RenderObject)
+{
+    const r_renderPassFormat = reactive(renderPassFormat);
+    const r_renderObject = reactive(renderObject);
+    return computed(() =>
+    {
+        const attachmentSize = r_renderPassFormat.attachmentSize;
+
+        let setScissorRect: [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate];
+        const scissorRect = r_renderObject.scissorRect;
+        if (scissorRect)
+        {
+            const isYup = scissorRect.isYup ?? true;
+            const x = scissorRect.x ?? 0;
+            let y = scissorRect.y ?? 0;
+            const width = scissorRect.width;
+            const height = scissorRect.height;
+
+            if (isYup)
+            {
+                y = attachmentSize.height - y - height;
+            }
+
+            setScissorRect = ['setScissorRect', x, y, width, height];
+        }
+        else
+        {
+            setScissorRect = ['setScissorRect', 0, 0, attachmentSize.width, attachmentSize.height];
+        }
+
+        return setScissorRect;
+    });
+}
+
+export function getSetPipeline(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
+{
+    const r_renderObject = reactive(renderObject);
+    return computed(() =>
+    {
+        r_renderObject.pipeline;
+        r_renderObject.vertices;
+        r_renderObject.indices;
+        //
+        const { pipeline, vertices, indices } = renderObject;
+        //
+        const indexFormat: GPUIndexFormat = indices ? (indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16') : undefined;
+
+        //
+        const wgpuRenderPipeline = WGPURenderPipeline.getInstance(device, pipeline, renderPassFormat, vertices, indexFormat);
+        const gpuRenderPipeline = wgpuRenderPipeline.gpuRenderPipeline;
+
+        //
+        const setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline] = ['setPipeline', gpuRenderPipeline];
+
+        return setPipeline;
+    });
+}
+
+export function getSetStencilReference(renderObject: RenderObject)
+{
+    const r_renderObject = reactive(renderObject);
+    return computed(() =>
+    {
+        let setStencilReference: [func: 'setStencilReference', reference: GPUStencilValue];
+        //
+        const stencilReference = getStencilReference(r_renderObject.pipeline.depthStencil);
+        if (stencilReference === undefined)
+        {
+            setStencilReference = null;
+        }
+        else
+        {
+            setStencilReference = ['setStencilReference', stencilReference];
+        }
+
+        return setStencilReference;
+    });
+}
+
+export function getSetBlendConstant(renderObject: RenderObject)
+{
+    const r_renderObject = reactive(renderObject);
+    return computed(() =>
+    {
+        let setBlendConstant: [func: 'setBlendConstant', color: GPUColor];
+        //
+        const blendConstantColor = BlendState.getBlendConstantColor(r_renderObject.pipeline.fragment?.targets?.[0]?.blend);
+        if (blendConstantColor === undefined)
+        {
+            setBlendConstant = null;
+        }
+        else
+        {
+            setBlendConstant = ['setBlendConstant', blendConstantColor];
+        }
+
+        return setBlendConstant;
+    });
+}
+
+export function getSetBindGroup(device: GPUDevice, renderObject: RenderObject)
+{
+    const r_renderObject = reactive(renderObject);
+    return computed(() =>
+    {
+        // 监听
+        r_renderObject.bindingResources;
+
+        // 执行
+        const { bindingResources } = renderObject;
+        const layout = WGPUPipelineLayout.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
+
+        const setBindGroup: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
+        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+        {
+            const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
+
+            setBindGroup[group] = ['setBindGroup', group, wgpuBindGroup.gpuBindGroup];
+        });
+
+        return setBindGroup;
+    });
+}
+
+export function getSetVertexBuffer(device: GPUDevice, renderObject: RenderObject)
+{
+    const r_renderObject = reactive(renderObject);
+    return computed(() =>
+    {
+        // 监听
+        r_renderObject.vertices;
+        r_renderObject.pipeline.vertex;
+
+        //
+        const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(renderObject.pipeline.vertex, renderObject.vertices);
+        const vertexDatas = wgpuVertexBufferLayout.vertexDatas;
+
+        const setVertexBuffer: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
+        vertexDatas?.forEach((data, index) =>
+        {
+            // 执行
+            const offset = data.byteOffset;
+            const size = data.byteLength;
+            const buffer = Buffer.getBuffer(data.buffer);
+
+            if (!buffer.label)
+            {
+                reactive(buffer).label = (`顶点数据 ${autoVertexIndex++}`);
+            }
+
+            const wgpuBuffer = WGPUBuffer.getInstance(device, buffer);
+            const gpuBuffer = wgpuBuffer.gpuBuffer;
+
+            setVertexBuffer[index] = ['setVertexBuffer', index, gpuBuffer, offset, size];
+        });
+
+        return setVertexBuffer;
+    });
+}
+
+export function getSetIndexBuffer(device: GPUDevice, renderObject: RenderObject)
+{
+    const r_renderObject = reactive(renderObject);
+    return computed(() =>
+    {
+        let setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
+        // 监听
+        r_renderObject.indices;
+
+        //
+        const { indices } = renderObject;
+
+        if (!indices)
+        {
+            setIndexBuffer = null;
+        }
+        else
+        {
+            const buffer = Buffer.getBuffer(indices.buffer);
+
+            if (!buffer.label)
+            {
+                reactive(buffer).label = (`顶点索引 ${autoIndex++}`);
+            }
+
+            const gBuffer = WGPUBuffer.getInstance(device, buffer);
+
+            //
+            setIndexBuffer = ['setIndexBuffer', gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
+        }
+
+        return setIndexBuffer;
+    });
+}
