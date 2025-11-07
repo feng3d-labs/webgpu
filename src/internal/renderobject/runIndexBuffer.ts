@@ -1,0 +1,26 @@
+import { computed, reactive } from "@feng3d/reactivity";
+import { Buffer, RenderObject } from "@feng3d/render-api";
+import { WGPUBuffer } from "../../caches/WGPUBuffer";
+import { WGPURenderObjectState } from "../WGPURenderObjectState";
+
+export function runIndexBuffer(renderObject: RenderObject, state: WGPURenderObjectState, device: GPUDevice)
+{
+    const r_renderObject = reactive(renderObject);
+    r_renderObject.indices;
+
+    const { indices } = renderObject;
+    if (indices)
+    {
+        const buffer = Buffer.getBuffer(indices.buffer);
+
+        if (!buffer.label)
+        {
+            reactive(buffer).label = (`顶点索引 ${autoIndex++}`);
+        }
+
+        const gBuffer = WGPUBuffer.getInstance(device, buffer);
+
+        state.setIndexBuffer([gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength]);
+    }
+}
+let autoIndex = 0;

@@ -1,14 +1,14 @@
-import { computed, reactive } from '@feng3d/reactivity';
+import { reactive } from '@feng3d/reactivity';
 import { ChainMap, RenderObject } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
-import { getSetBindGroup } from './renderobject/getSetBindGroup';
-import { getSetBlendConstant } from './renderobject/getSetBlendConstant';
-import { getSetIndexBuffer } from './renderobject/getSetIndexBuffer';
-import { getSetPipeline } from './renderobject/getSetPipeline';
-import { getSetScissorRect } from './renderobject/getSetScissorRect';
-import { getSetStencilReference } from './renderobject/getSetStencilReference';
-import { getSetVertexBuffer } from './renderobject/getSetVertexBuffer';
-import { getSetViewport } from './renderobject/getSetViewport';
+import { runBindGroup } from './renderobject/runBindGroup';
+import { runBlendConstant } from './renderobject/runBlendConstant';
+import { runIndexBuffer } from './renderobject/runIndexBuffer';
+import { runPipeline } from './renderobject/runPipeline';
+import { runScissorRect } from './renderobject/runScissorRect';
+import { runStencilReference } from './renderobject/runStencilReference';
+import { runVertexBuffer } from './renderobject/runVertexBuffer';
+import { runViewport } from './renderobject/runViewport';
 import { RenderPassFormat } from './RenderPassFormat';
 import { CommandType, WGPURenderObjectState } from './WGPURenderObjectState';
 
@@ -27,58 +27,26 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
     private _onCreate(renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
         const r_renderObject = reactive(renderObject);
-        const renderObjectCommands = computed(() =>
-        {
-            const computedSetViewport = getSetViewport(renderObject);
-
-            const computedSetScissorRect = getSetScissorRect(renderObject);
-
-            const computedSetPipeline = getSetPipeline(renderObject);
-
-            const computedSetStencilReference = getSetStencilReference(renderObject);
-
-            const computedSetBlendConstant = getSetBlendConstant(renderObject);
-
-            const computedSetBindGroup = getSetBindGroup(renderObject);
-
-            const computedSetVertexBuffer = getSetVertexBuffer(renderObject);
-
-            const computedSetIndexBuffer = getSetIndexBuffer(renderObject);
-
-            return {
-                viewport: computedSetViewport.value,
-                scissorRect: computedSetScissorRect.value,
-                pipeline: computedSetPipeline.value,
-                stencilReference: computedSetStencilReference.value,
-                blendConstant: computedSetBlendConstant.value,
-                bindGroup: computedSetBindGroup.value,
-                vertexBuffer: computedSetVertexBuffer.value,
-                indexBuffer: computedSetIndexBuffer.value,
-                draw: r_renderObject.draw,
-            };
-        });
 
         this.run = (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) =>
         {
-            const { viewport, scissorRect, pipeline, stencilReference, blendConstant, bindGroup, vertexBuffer, indexBuffer, draw } = renderObjectCommands.value;
+            runViewport(renderObject, state, attachmentSize);
 
-            viewport(state, attachmentSize);
+            runScissorRect(renderObject, state, attachmentSize);
 
-            scissorRect(state, attachmentSize);
+            runBlendConstant(renderObject, state);
 
-            blendConstant(state);
+            runStencilReference(renderObject, state);
 
-            stencilReference(state);
+            runPipeline(renderObject, state, device, renderPassFormat);
 
-            pipeline(state, device, renderPassFormat);
+            runBindGroup(renderObject, state, device);
 
-            bindGroup(state, device);
+            runVertexBuffer(renderObject, state, device);
 
-            vertexBuffer(state, device);
+            runIndexBuffer(renderObject, state, device);
 
-            indexBuffer(state, device);
-
-            state.draw(draw);
+            state.draw(r_renderObject.draw);
         };
     }
 
