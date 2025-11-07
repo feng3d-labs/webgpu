@@ -15,14 +15,12 @@ export function getSetBindGroup(device: GPUDevice, renderObject: RenderObject)
         const { bindingResources } = renderObject;
         const layout = WGPUPipelineLayout.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
 
-        const setBindGroup: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
-        layout.bindGroupLayouts.forEach((bindGroupLayout, group) =>
+        const bindGroups = layout.bindGroupLayouts.map(bindGroupLayout =>
         {
             const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
-
-            setBindGroup[group] = ['setBindGroup', group, wgpuBindGroup.gpuBindGroup];
+            return wgpuBindGroup.gpuBindGroup;
         });
 
-        return setBindGroup;
+        return bindGroups;
     });
 }

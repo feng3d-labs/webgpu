@@ -25,8 +25,8 @@ export class WGPURenderObjectState
     _setBlendConstant: Color | undefined;
     _setPipeline: GPURenderPipeline;
     _setStencilReference: number | undefined;
-    _setBindGroup: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
-    _setVertexBuffer: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
+    _setBindGroup: GPUBindGroup[] = [];
+    _setVertexBuffer: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
     _setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
     _drawIndexed: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
 
@@ -96,26 +96,30 @@ export class WGPURenderObjectState
         this._setPipeline = pipeline;
     }
 
-    setBindGroup(bindGroups: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][])
+    setBindGroup(bindGroups: GPUBindGroup[])
     {
         for (let i = 0, len = bindGroups.length; i < len; i++)
         {
             if (this._setBindGroup[i] !== bindGroups[i])
             {
-                this.commands.push(bindGroups[i]);
+                this.commands.push(['setBindGroup', i, bindGroups[i]]);
                 this._setBindGroup[i] = bindGroups[i];
             }
         }
     }
 
-    setVertexBuffer(vertexBuffers: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][])
+    setVertexBuffer(vertexBuffers: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][])
     {
+        if (vertexBuffers === undefined) return;
+
         for (let i = 0, len = vertexBuffers.length; i < len; i++)
         {
-            if (this._setVertexBuffer[i] !== vertexBuffers[i])
+            const currentVertexBuffer = this._setVertexBuffer[i];
+            const vertexBuffer = vertexBuffers[i];
+            if (!currentVertexBuffer || currentVertexBuffer[0] !== vertexBuffer[0] || currentVertexBuffer[1] !== vertexBuffer[1] || currentVertexBuffer[2] !== vertexBuffer[2])
             {
-                this.commands.push(vertexBuffers[i]);
-                this._setVertexBuffer[i] = vertexBuffers[i];
+                this.commands.push(['setVertexBuffer', i, vertexBuffer[0], vertexBuffer[1], vertexBuffer[2]]);
+                this._setVertexBuffer[i] = vertexBuffer;
             }
         }
     }
