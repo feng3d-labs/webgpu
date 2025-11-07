@@ -23,16 +23,6 @@ export class WGPURenderBundle extends ReactiveObject
         // 监听
         const r_renderBundleObject = reactive(renderBundle);
 
-        const computedDescriptor = computed(() =>
-        {
-            r_renderBundleObject.descriptor?.depthReadOnly;
-            r_renderBundleObject.descriptor?.stencilReadOnly;
-
-            // 执行
-            const descriptor: GPURenderBundleEncoderDescriptor = { ...renderBundle.descriptor, ...renderPassFormat };
-            return descriptor;
-        });
-
         const computedBundleCommands = computed(() =>
         {
             r_renderBundleObject.renderObjects.concat();
@@ -58,8 +48,26 @@ export class WGPURenderBundle extends ReactiveObject
 
         const computedGpuRenderBundle = computed(() =>
         {
+            // 执行
+            const descriptor: GPURenderBundleEncoderDescriptor = { colorFormats: renderPassFormat.colorFormats };
+            if (renderPassFormat.depthStencilFormat)
+            {
+                descriptor.depthStencilFormat = renderPassFormat.depthStencilFormat;
+            }
+            if (renderPassFormat.sampleCount)
+            {
+                descriptor.sampleCount = renderPassFormat.sampleCount;
+            }
+            if (r_renderBundleObject.descriptor?.depthReadOnly)
+            {
+                descriptor.depthReadOnly = true;
+            }
+            if (r_renderBundleObject.descriptor?.stencilReadOnly)
+            {
+                descriptor.stencilReadOnly = true;
+            }
             //
-            const renderBundleEncoder = device.createRenderBundleEncoder(computedDescriptor.value);
+            const renderBundleEncoder = device.createRenderBundleEncoder(descriptor);
 
             runCommands(renderBundleEncoder, computedBundleCommands.value);
 
