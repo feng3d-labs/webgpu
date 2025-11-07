@@ -21,8 +21,9 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
     const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
     const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
+    const attachmentSize = renderPass.descriptor.attachmentSize;
 
-    const state = new WGPURenderObjectState(passEncoder, renderPassFormat);
+    const state = new WGPURenderObjectState(passEncoder, renderPassFormat, attachmentSize);
     const commands = state.commands;
     let queryIndex = 0;
 
@@ -30,19 +31,19 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
     {
         if (!element.__type__ || element.__type__ === 'RenderObject')
         {
-            const wgpuRenderObject = WGPURenderObject.getInstance(device, element as RenderObject, renderPassFormat);
+            const wgpuRenderObject = WGPURenderObject.getInstance(device, element as RenderObject, renderPassFormat, attachmentSize);
 
             wgpuRenderObject.run(device, commands, state);
         }
         else if (element.__type__ === 'RenderBundle')
         {
-            const wgpuRenderBundle = WGPURenderBundle.getInstance(device, element, renderPassFormat);
+            const wgpuRenderBundle = WGPURenderBundle.getInstance(device, element, renderPassFormat, attachmentSize);
 
             wgpuRenderBundle.run(device, commands, state);
         }
         else if (element.__type__ === 'OcclusionQuery')
         {
-            const wgpuOcclusionQuery = WGPUOcclusionQuery.getInstance(device, renderPassFormat, element);
+            const wgpuOcclusionQuery = WGPUOcclusionQuery.getInstance(device, renderPassFormat, element, attachmentSize);
 
             wgpuOcclusionQuery.run(device, commands, queryIndex++, state);
         }

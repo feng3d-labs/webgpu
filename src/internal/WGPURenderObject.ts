@@ -14,24 +14,24 @@ import { CommandType, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export class WGPURenderObject extends ReactiveObject implements RenderPassObjectCommand
 {
-    constructor(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
+    constructor(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
         super();
 
-        this._onCreate(device, renderObject, renderPassFormat);
+        this._onCreate(device, renderObject, renderPassFormat, attachmentSize);
         //
         WGPURenderObject.map.set([device, renderObject, renderPassFormat], this);
         this.destroyCall(() => { WGPURenderObject.map.delete([device, renderObject, renderPassFormat]); });
     }
 
-    private _onCreate(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
+    private _onCreate(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
         const r_renderObject = reactive(renderObject);
         const renderObjectCommands = computed(() =>
         {
-            const computedSetViewport = getSetViewport(renderPassFormat, renderObject);
+            const computedSetViewport = getSetViewport(renderObject, attachmentSize);
 
-            const computedSetScissorRect = getSetScissorRect(renderPassFormat, renderObject);
+            const computedSetScissorRect = getSetScissorRect(renderObject, attachmentSize);
 
             const computedSetPipeline = getSetPipeline(device, renderObject, renderPassFormat);
 
@@ -84,9 +84,9 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
 
     run: (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) => void;
 
-    static getInstance(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat)
+    static getInstance(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
-        return this.map.get([device, renderObject, renderPassFormat]) || new WGPURenderObject(device, renderObject, renderPassFormat);
+        return this.map.get([device, renderObject, renderPassFormat]) || new WGPURenderObject(device, renderObject, renderPassFormat, attachmentSize);
     }
     static readonly map = new ChainMap<[GPUDevice, RenderObject, RenderPassFormat], WGPURenderObject>();
 }

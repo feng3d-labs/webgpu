@@ -1,15 +1,11 @@
 import { computed, reactive } from "@feng3d/reactivity";
 import { RenderObject } from "@feng3d/render-api";
-import { RenderPassFormat } from "../RenderPassFormat";
 
-export function getSetScissorRect(renderPassFormat: RenderPassFormat, renderObject: RenderObject)
+export function getSetScissorRect(renderObject: RenderObject, attachmentSize: { readonly width: number, readonly height: number })
 {
-    const r_renderPassFormat = reactive(renderPassFormat);
     const r_renderObject = reactive(renderObject);
     return computed(() =>
     {
-        const attachmentSize = r_renderPassFormat.attachmentSize;
-
         let setScissorRect: [x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate] | undefined;
         const scissorRect = r_renderObject.scissorRect;
         if (scissorRect)

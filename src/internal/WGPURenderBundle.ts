@@ -8,17 +8,17 @@ import { CommandType, runCommands, WGPURenderObjectState } from './WGPURenderObj
 
 export class WGPURenderBundle extends ReactiveObject implements RenderPassObjectCommand
 {
-    constructor(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat)
+    constructor(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
         super();
 
-        this._onCreate(device, renderBundle, renderPassFormat);
+        this._onCreate(device, renderBundle, renderPassFormat, attachmentSize);
         //
         WGPURenderBundle.map.set([device, renderBundle, renderPassFormat], this);
         this.destroyCall(() => { WGPURenderBundle.map.delete([device, renderBundle, renderPassFormat]); });
     }
 
-    private _onCreate(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat)
+    private _onCreate(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
         // 监听
         const r_renderBundleObject = reactive(renderBundle);
@@ -39,11 +39,11 @@ export class WGPURenderBundle extends ReactiveObject implements RenderPassObject
 
             //
             const commands: CommandType[] = [];
-            const state = new WGPURenderObjectState(null, renderPassFormat);
+            const state = new WGPURenderObjectState(null, renderPassFormat, attachmentSize);
 
             renderBundle.renderObjects.forEach((renderObject) =>
             {
-                const wgpuRenderObject = WGPURenderObject.getInstance(device, renderObject, renderPassFormat);
+                const wgpuRenderObject = WGPURenderObject.getInstance(device, renderObject, renderPassFormat, attachmentSize);
 
                 wgpuRenderObject.run(undefined, commands, state);
             });
@@ -78,9 +78,9 @@ export class WGPURenderBundle extends ReactiveObject implements RenderPassObject
 
     run: (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) => void;
 
-    static getInstance(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat)
+    static getInstance(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
-        return this.map.get([device, renderBundle, renderPassFormat]) || new WGPURenderBundle(device, renderBundle, renderPassFormat);
+        return this.map.get([device, renderBundle, renderPassFormat]) || new WGPURenderBundle(device, renderBundle, renderPassFormat, attachmentSize);
     }
     static readonly map = new ChainMap<[GPUDevice, RenderBundle, RenderPassFormat], WGPURenderBundle>();
 }

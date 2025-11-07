@@ -8,17 +8,17 @@ export class WGPUOcclusionQuery extends ReactiveObject
 {
     run: (device: GPUDevice, commands: CommandType[], queryIndex: number, state: WGPURenderObjectState) => void;
 
-    constructor(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery)
+    constructor(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery, attachmentSize: { readonly width: number, readonly height: number })
     {
         super();
 
-        this._onCreate(device, renderPassFormat, occlusionQuery);
+        this._onCreate(device, renderPassFormat, occlusionQuery, attachmentSize);
         //
         WGPUOcclusionQuery.map.set([device, renderPassFormat, occlusionQuery], this);
         this.destroyCall(() => { WGPUOcclusionQuery.map.delete([device, renderPassFormat, occlusionQuery]); });
     }
 
-    private _onCreate(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery)
+    private _onCreate(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery, attachmentSize: { readonly width: number, readonly height: number })
     {
         this.run = (device: GPUDevice, commands: CommandType[], queryIndex: number, state: WGPURenderObjectState) =>
         {
@@ -26,7 +26,7 @@ export class WGPUOcclusionQuery extends ReactiveObject
 
             occlusionQuery.renderObjects.forEach((renderObject) =>
             {
-                const wgpuRenderObject = WGPURenderObject.getInstance(device, renderObject, renderPassFormat);
+                const wgpuRenderObject = WGPURenderObject.getInstance(device, renderObject, renderPassFormat, attachmentSize);
                 wgpuRenderObject.run(undefined, commands, state);
             });
 
@@ -34,9 +34,9 @@ export class WGPUOcclusionQuery extends ReactiveObject
         };
     }
 
-    static getInstance(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery)
+    static getInstance(device: GPUDevice, renderPassFormat: RenderPassFormat, occlusionQuery: OcclusionQuery, attachmentSize: { readonly width: number, readonly height: number })
     {
-        return this.map.get([device, renderPassFormat, occlusionQuery]) || new WGPUOcclusionQuery(device, renderPassFormat, occlusionQuery);
+        return this.map.get([device, renderPassFormat, occlusionQuery]) || new WGPUOcclusionQuery(device, renderPassFormat, occlusionQuery, attachmentSize);
     }
     static readonly map = new ChainMap<[GPUDevice, RenderPassFormat, OcclusionQuery], WGPUOcclusionQuery>();
 }

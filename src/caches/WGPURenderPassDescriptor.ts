@@ -119,8 +119,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
         this._computedRenderPassFormat = computed(() =>
         {
-            const width = r_descriptor.attachmentSize.width;
-            const height = r_descriptor.attachmentSize.height;
             let sampleCount: number = r_descriptor.sampleCount;
 
             const colorFormats: GPUTextureFormat[] = [];
@@ -142,7 +140,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             // 构建渲染通道格式对象
             let renderPassFormat: RenderPassFormat
 
-            const renderPassFormatKey = [width, height, ...colorFormats, depthStencilFormat, sampleCount].join(',');
+            const renderPassFormatKey = [...colorFormats, depthStencilFormat, sampleCount].join(',');
             if (renderPassFormatCache[renderPassFormatKey])
             {
                 renderPassFormat = renderPassFormatCache[renderPassFormatKey];
@@ -150,7 +148,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             else
             {
                 renderPassFormat = {
-                    attachmentSize: descriptor.attachmentSize,
                     colorFormats: colorFormats,
                     depthStencilFormat: depthStencilFormat,
                     sampleCount: sampleCount as 4,

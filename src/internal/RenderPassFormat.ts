@@ -5,7 +5,6 @@
  */
 export interface RenderPassFormat extends GPURenderPassLayout
 {
-    readonly attachmentSize: { readonly width: number, readonly height: number }
     readonly colorFormats: readonly GPUTextureFormat[],
     readonly depthStencilFormat: GPUTextureFormat,
     readonly sampleCount?: 4

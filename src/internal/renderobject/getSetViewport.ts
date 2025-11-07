@@ -2,13 +2,11 @@ import { computed, reactive } from "@feng3d/reactivity";
 import { RenderObject } from "@feng3d/render-api";
 import { RenderPassFormat } from "../RenderPassFormat";
 
-export function getSetViewport(renderPassFormat: RenderPassFormat, renderObject: RenderObject)
+export function getSetViewport(renderObject: RenderObject, attachmentSize: { readonly width: number, readonly height: number })
 {
-    const r_renderPassFormat = reactive(renderPassFormat);
     const r_renderObject = reactive(renderObject);
     return computed(() =>
     {
-        const attachmentSize = r_renderPassFormat.attachmentSize;
         const viewport = r_renderObject.viewport;
 
         let setViewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number] | undefined;
