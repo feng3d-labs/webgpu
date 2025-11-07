@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, RenderPassDescriptor } from '@feng3d/render-api';
+import { ChainMap, RenderPassColorAttachment, RenderPassDescriptor } from '@feng3d/render-api';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
@@ -100,29 +100,44 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             return gpuRenderPassDescriptor;
         });
 
+        const getAttachmentFormat = (attachment: RenderPassColorAttachment) =>
+        {
+            const r_attachment = reactive(attachment);
+            return computed(() =>
+            {
+                r_attachment.view.texture;
+
+                const texture = attachment.view.texture;
+
+                const wGPUTextureLike = WGPUTextureLike.getInstance(device, texture);
+                const gpuTexture = wGPUTextureLike.gpuTexture;
+
+
+                return gpuTexture.format;
+            }).value;
+        }
+
         this._computedRenderPassFormat = computed(() =>
         {
-            const gpuRenderPassDescriptor = this.gpuRenderPassDescriptor;
-
             const width = r_descriptor.attachmentSize.width;
             const height = r_descriptor.attachmentSize.height;
+            let sampleCount: number = r_descriptor.sampleCount;
 
             const colorFormats: GPUTextureFormat[] = [];
-            let sampleCount: number;
 
-            const colorAttachments = Array.from(gpuRenderPassDescriptor.colorAttachments);
+            r_descriptor.colorAttachments?.concat();
+            const colorAttachments = descriptor.colorAttachments;
             for (let i = 0; i < colorAttachments.length; i++)
             {
-                const colorAttachment = colorAttachments[i];
-                const gpuTexture = colorAttachment.view.texture;
-                colorFormats.push(gpuTexture.format);
-
-                if (colorAttachment.resolveTarget)
-                {
-                    sampleCount = gpuTexture.sampleCount;
-                }
+                const format = getAttachmentFormat(colorAttachments[i]);
+                colorFormats.push(format);
             }
-            const depthStencilFormat = gpuRenderPassDescriptor.depthStencilAttachment?.view.texture.format;
+
+            let depthStencilFormat: GPUTextureFormat;
+            if (r_descriptor.depthStencilAttachment?.view.texture)
+            {
+                depthStencilFormat = WGPUTextureLike.getInstance(device, r_descriptor.depthStencilAttachment?.view.texture)?.gpuTexture.format;
+            }
 
             // 构建渲染通道格式对象
             let renderPassFormat: RenderPassFormat
