@@ -23,8 +23,8 @@ export class WGPURenderObjectState
     _setViewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number] | undefined;
     _setScissorRect: [x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate] | undefined;
     _setBlendConstant: Color | undefined;
-    _setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline];
-    _setStencilReference: [func: 'setStencilReference', reference: GPUStencilValue];
+    _setPipeline: GPURenderPipeline;
+    _setStencilReference: number | undefined;
     _setBindGroup: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][] = [];
     _setVertexBuffer: [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
     _setIndexBuffer: [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
@@ -68,31 +68,32 @@ export class WGPURenderObjectState
 
     setBlendConstant(blendConstant: Color | undefined)
     {
+        if (blendConstant === undefined) return;
         const currentBlendConstant = this._setBlendConstant;
         if (blendConstant === currentBlendConstant || (blendConstant && currentBlendConstant && blendConstant[0] === currentBlendConstant[0] && blendConstant[1] === currentBlendConstant[1] && blendConstant[2] === currentBlendConstant[2] && blendConstant[3] === currentBlendConstant[3])) return;
-        if (blendConstant)
-        {
-            this.commands.push(['setBlendConstant', blendConstant]);
-            this._setBlendConstant = blendConstant;
-        }
+
+        this.commands.push(['setBlendConstant', blendConstant]);
+        this._setBlendConstant = blendConstant;
     }
 
-    setStencilReference(stencilReference: [func: 'setStencilReference', reference: GPUStencilValue])
+    setStencilReference(stencilReference: number | undefined)
     {
-        if (this._setStencilReference !== stencilReference && stencilReference)
-        {
-            this.commands.push(stencilReference);
-            this._setStencilReference = stencilReference;
-        }
+        if (stencilReference === undefined) return;
+
+        if (stencilReference === this._setStencilReference) return;
+
+        this.commands.push(['setStencilReference', stencilReference]);
+        this._setStencilReference = stencilReference;
     }
 
-    setPipeline(pipeline: [func: 'setPipeline', pipeline: GPURenderPipeline])
+    setPipeline(pipeline: GPURenderPipeline)
     {
-        if (this._setPipeline !== pipeline && pipeline)
-        {
-            this.commands.push(pipeline);
-            this._setPipeline = pipeline;
-        }
+        if (pipeline === undefined) return;
+
+        if (pipeline === this._setPipeline) return;
+
+        this.commands.push(['setPipeline', pipeline]);
+        this._setPipeline = pipeline;
     }
 
     setBindGroup(bindGroups: [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup][])

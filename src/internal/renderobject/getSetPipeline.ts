@@ -20,9 +20,6 @@ export function getSetPipeline(device: GPUDevice, renderObject: RenderObject, re
         const wgpuRenderPipeline = WGPURenderPipeline.getInstance(device, pipeline, renderPassFormat, vertices, indexFormat);
         const gpuRenderPipeline = wgpuRenderPipeline.gpuRenderPipeline;
 
-        //
-        const setPipeline: [func: 'setPipeline', pipeline: GPURenderPipeline] = ['setPipeline', gpuRenderPipeline];
-
-        return setPipeline;
+        return gpuRenderPipeline;
     });
 }
