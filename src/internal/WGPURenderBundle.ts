@@ -28,7 +28,6 @@ export class WGPURenderBundle extends ReactiveObject
             r_renderBundleObject.renderObjects.concat();
 
             //
-            const commands: CommandType[] = [];
             const state = new WGPURenderObjectState(null, renderPassFormat, attachmentSize);
 
             renderBundle.renderObjects.forEach((renderObject) =>
@@ -36,7 +35,7 @@ export class WGPURenderBundle extends ReactiveObject
                 runRenderObject(device, renderPassFormat, attachmentSize, renderObject, state);
             });
 
-            const bundleCommands = commands.filter((command) => (
+            const bundleCommands = state.commands.filter((command) => (
                 command[0] !== 'setViewport'
                 && command[0] !== 'setScissorRect'
                 && command[0] !== 'setBlendConstant'
@@ -89,4 +88,10 @@ export class WGPURenderBundle extends ReactiveObject
         return this.map.get([device, renderBundle, renderPassFormat]) || new WGPURenderBundle(device, renderBundle, renderPassFormat, attachmentSize);
     }
     static readonly map = new ChainMap<[GPUDevice, RenderBundle, RenderPassFormat], WGPURenderBundle>();
+}
+
+export function runRenderBundle(device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
+{
+    const wgpuRenderBundle = WGPURenderBundle.getInstance(device, renderBundle, renderPassFormat, attachmentSize);
+    wgpuRenderBundle.run(device, commands, state);
 }

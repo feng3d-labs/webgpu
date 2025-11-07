@@ -1,9 +1,10 @@
 import { RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { WGPUQuerySet } from '../caches/WGPUQuerySet';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
-import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
-import { WGPURenderBundle } from './WGPURenderBundle';
+import { RenderBundle } from '../data/RenderBundle';
 import { runRenderObject } from './runRenderObject';
+import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
+import { runRenderBundle } from './WGPURenderBundle';
 import { runCommands, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
@@ -35,9 +36,7 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
         }
         else if (element.__type__ === 'RenderBundle')
         {
-            const wgpuRenderBundle = WGPURenderBundle.getInstance(device, element, renderPassFormat, attachmentSize);
-
-            wgpuRenderBundle.run(device, commands, state);
+            runRenderBundle(device, commands, state, element as RenderBundle, renderPassFormat, attachmentSize);
         }
         else if (element.__type__ === 'OcclusionQuery')
         {
