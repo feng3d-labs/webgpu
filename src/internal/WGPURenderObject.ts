@@ -209,15 +209,40 @@ export function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURen
 {
     for (let i = 0, n = commands.length; i < n; i++)
     {
-        const command = commands[i];
+        const command = commands[i] as [func: string, ...args: any[]];
 
-        if (command[0] === 'setBindGroup')
+        switch (command.length)
         {
-            renderBundleEncoder.setBindGroup(command[1], command[2]);
-        }
-        else
-        {
-            renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5], command[6]);
+            case 1:
+                renderBundleEncoder[command[0]]();
+                break;
+            case 2:
+                renderBundleEncoder[command[0]](command[1]);
+                break;
+            case 3:
+                renderBundleEncoder[command[0]](command[1], command[2]);
+                break;
+            case 4:
+                renderBundleEncoder[command[0]](command[1], command[2], command[3]);
+                break;
+            case 5:
+                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4]);
+                break;
+            case 6:
+                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5]);
+                break;
+            case 7:
+                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5], command[6]);
+                break;
+            case 8:
+                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5], command[6], command[7]);
+                break;
+            case 9:
+                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5], command[6], command[7], command[8]);
+                break;
+            default:
+                console.error(`未处理命令 ${command}`);
+                break;
         }
     }
 }
