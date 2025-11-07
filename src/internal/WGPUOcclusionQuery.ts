@@ -1,7 +1,7 @@
 import { ChainMap, OcclusionQuery } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { RenderPassFormat } from './RenderPassFormat';
-import { WGPURenderObject } from './WGPURenderObject';
+import { runRenderObject } from './runRenderObject';
 import { CommandType, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export class WGPUOcclusionQuery extends ReactiveObject
@@ -26,8 +26,7 @@ export class WGPUOcclusionQuery extends ReactiveObject
 
             occlusionQuery.renderObjects.forEach((renderObject) =>
             {
-                const wgpuRenderObject = WGPURenderObject.getInstance(renderObject, renderPassFormat, attachmentSize);
-                wgpuRenderObject.run(undefined, commands, state);
+                runRenderObject(device, renderPassFormat, attachmentSize, renderObject, state);
             });
 
             commands.push(['endOcclusionQuery']);

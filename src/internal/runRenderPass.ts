@@ -3,7 +3,7 @@ import { WGPUQuerySet } from '../caches/WGPUQuerySet';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { WGPUOcclusionQuery } from './WGPUOcclusionQuery';
 import { WGPURenderBundle } from './WGPURenderBundle';
-import { WGPURenderObject } from './WGPURenderObject';
+import { runRenderObject } from './runRenderObject';
 import { runCommands, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
@@ -31,9 +31,7 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
     {
         if (!element.__type__ || element.__type__ === 'RenderObject')
         {
-            const wgpuRenderObject = WGPURenderObject.getInstance(element as RenderObject, renderPassFormat, attachmentSize);
-
-            wgpuRenderObject.run(device, commands, state);
+            runRenderObject(device, renderPassFormat, attachmentSize, element as RenderObject, state);
         }
         else if (element.__type__ === 'RenderBundle')
         {

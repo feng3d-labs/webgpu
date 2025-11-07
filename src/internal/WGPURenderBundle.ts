@@ -3,10 +3,10 @@ import { ChainMap } from '@feng3d/render-api';
 import { RenderBundle } from '../data/RenderBundle';
 import { ReactiveObject } from '../ReactiveObject';
 import { RenderPassFormat } from './RenderPassFormat';
-import { RenderPassObjectCommand, WGPURenderObject } from './WGPURenderObject';
+import { runRenderObject } from './runRenderObject';
 import { CommandType, runCommands, WGPURenderObjectState } from './WGPURenderObjectState';
 
-export class WGPURenderBundle extends ReactiveObject implements RenderPassObjectCommand
+export class WGPURenderBundle extends ReactiveObject
 {
     constructor(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
@@ -43,9 +43,7 @@ export class WGPURenderBundle extends ReactiveObject implements RenderPassObject
 
             renderBundle.renderObjects.forEach((renderObject) =>
             {
-                const wgpuRenderObject = WGPURenderObject.getInstance(renderObject, renderPassFormat, attachmentSize);
-
-                wgpuRenderObject.run(undefined, commands, state);
+                runRenderObject(device, renderPassFormat, attachmentSize, renderObject, state);
             });
 
             const bundleCommands = commands.filter((command) => (
