@@ -72,7 +72,7 @@ export class WGPURenderBundle extends ReactiveObject implements RenderPassObject
 
         this.run = (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) =>
         {
-            commands.push(['executeBundles', [computedGpuRenderBundle.value]]);
+            commands.push(['executeBundles', [[computedGpuRenderBundle.value]]]);
         }
     }
 

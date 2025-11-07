@@ -22,7 +22,7 @@ export class WGPUOcclusionQuery extends ReactiveObject
     {
         this.run = (device: GPUDevice, commands: CommandType[], queryIndex: number, state: WGPURenderObjectState) =>
         {
-            commands.push(['beginOcclusionQuery', queryIndex]);
+            commands.push(['beginOcclusionQuery', [queryIndex]]);
 
             occlusionQuery.renderObjects.forEach((renderObject) =>
             {

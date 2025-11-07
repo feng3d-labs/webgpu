@@ -1,19 +1,20 @@
+import { Computed, computed, reactive } from "@feng3d/reactivity";
 import { Color, DrawIndexed, DrawVertex } from "@feng3d/render-api";
 import { RenderPassFormat } from "./RenderPassFormat";
 
 export type CommandType =
-    | [func: 'setViewport', x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]
-    | [func: 'setScissorRect', x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate]
-    | [func: 'setPipeline', pipeline: GPURenderPipeline]
-    | [func: 'setBindGroup', index: number, bindGroup: GPUBindGroup]
-    | [func: 'setVertexBuffer', slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64]
-    | [func: 'setIndexBuffer', buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64]
-    | [func: 'draw', vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32]
-    | [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32]
-    | [func: 'setBlendConstant', color: GPUColor]
-    | [func: 'setStencilReference', reference: GPUStencilValue]
-    | [func: 'executeBundles', bundles: GPURenderBundle[]]
-    | [func: 'beginOcclusionQuery', queryIndex: GPUSize32]
+    | [func: 'setViewport', args: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]]
+    | [func: 'setScissorRect', args: [x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate]]
+    | [func: 'setPipeline', args: [pipeline: GPURenderPipeline]]
+    | [func: 'setBindGroup', args: [index: number, bindGroup: GPUBindGroup]]
+    | [func: 'setVertexBuffer', args: [slot: GPUIndex32, buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64]]
+    | [func: 'setIndexBuffer', args: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64]]
+    | [func: 'draw', args: [vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32]]
+    | [func: 'drawIndexed', args: [indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32]]
+    | [func: 'setBlendConstant', args: [color: GPUColor]]
+    | [func: 'setStencilReference', args: [reference: GPUStencilValue]]
+    | [func: 'executeBundles', args: [bundles: GPURenderBundle[]]]
+    | [func: 'beginOcclusionQuery', args: [queryIndex: GPUSize32]]
     | [func: 'endOcclusionQuery']
     ;
 
@@ -28,25 +29,34 @@ export class WGPURenderObjectState
     _setBindGroup: GPUBindGroup[] = [];
     _setVertexBuffer: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
     _setIndexBuffer: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
-    _drawIndexed: [func: 'drawIndexed', indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32];
 
+    private _computedDefaultViewport: Computed<[x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]>;
+    private _computedDefaultScissorRect: Computed<[x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate]>;
     constructor(private passEncoder: GPURenderPassEncoder, private renderPassFormat: RenderPassFormat)
     {
+        const r_renderPassFormat = reactive(renderPassFormat);
+        this._computedDefaultViewport = computed(() =>
+        {
+            return [0, 0, r_renderPassFormat.attachmentSize.width, r_renderPassFormat.attachmentSize.height, 0, 1];
+        })
 
+        this._computedDefaultScissorRect = computed(() =>
+        {
+            return [0, 0, r_renderPassFormat.attachmentSize.width, r_renderPassFormat.attachmentSize.height];
+        })
     }
 
     setViewport(viewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number])
     {
         const currentViewport = this._setViewport;
         if (viewport === currentViewport || (viewport && currentViewport && viewport[0] === currentViewport[0] && viewport[1] === currentViewport[1] && viewport[2] === currentViewport[2] && viewport[3] === currentViewport[3] && viewport[4] === currentViewport[4] && viewport[5] === currentViewport[5])) return;
-
         if (viewport)
         {
-            this.commands.push(['setViewport', viewport[0], viewport[1], viewport[2], viewport[3], viewport[4], viewport[5]]);
+            this.commands.push(['setViewport', viewport]);
         }
         else
         {
-            this.commands.push(['setViewport', 0, 0, this.renderPassFormat.attachmentSize.width, this.renderPassFormat.attachmentSize.height, 0, 1]);
+            this.commands.push(['setViewport', this._computedDefaultViewport.value]);
         }
         this._setViewport = viewport;
     }
@@ -57,11 +67,11 @@ export class WGPURenderObjectState
         if (scissorRect === currentScissorRect || (scissorRect && currentScissorRect && scissorRect[0] === currentScissorRect[0] && scissorRect[1] === currentScissorRect[1] && scissorRect[2] === currentScissorRect[2] && scissorRect[3] === currentScissorRect[3])) return;
         if (scissorRect)
         {
-            this.commands.push(['setScissorRect', scissorRect[0], scissorRect[1], scissorRect[2], scissorRect[3]]);
+            this.commands.push(['setScissorRect', scissorRect]);
         }
         else
         {
-            this.commands.push(['setScissorRect', 0, 0, this.renderPassFormat.attachmentSize.width, this.renderPassFormat.attachmentSize.height]);
+            this.commands.push(['setScissorRect', this._computedDefaultScissorRect.value]);
         }
         this._setScissorRect = scissorRect;
     }
@@ -72,7 +82,7 @@ export class WGPURenderObjectState
         const currentBlendConstant = this._setBlendConstant;
         if (blendConstant === currentBlendConstant || (blendConstant && currentBlendConstant && blendConstant[0] === currentBlendConstant[0] && blendConstant[1] === currentBlendConstant[1] && blendConstant[2] === currentBlendConstant[2] && blendConstant[3] === currentBlendConstant[3])) return;
 
-        this.commands.push(['setBlendConstant', blendConstant]);
+        this.commands.push(['setBlendConstant', [blendConstant]]);
         this._setBlendConstant = blendConstant;
     }
 
@@ -82,7 +92,7 @@ export class WGPURenderObjectState
 
         if (stencilReference === this._setStencilReference) return;
 
-        this.commands.push(['setStencilReference', stencilReference]);
+        this.commands.push(['setStencilReference', [stencilReference]]);
         this._setStencilReference = stencilReference;
     }
 
@@ -92,7 +102,7 @@ export class WGPURenderObjectState
 
         if (pipeline === this._setPipeline) return;
 
-        this.commands.push(['setPipeline', pipeline]);
+        this.commands.push(['setPipeline', [pipeline]]);
         this._setPipeline = pipeline;
     }
 
@@ -102,7 +112,7 @@ export class WGPURenderObjectState
         {
             if (this._setBindGroup[i] !== bindGroups[i])
             {
-                this.commands.push(['setBindGroup', i, bindGroups[i]]);
+                this.commands.push(['setBindGroup', [i, bindGroups[i]]]);
                 this._setBindGroup[i] = bindGroups[i];
             }
         }
@@ -118,7 +128,7 @@ export class WGPURenderObjectState
             const vertexBuffer = vertexBuffers[i];
             if (!currentVertexBuffer || currentVertexBuffer[0] !== vertexBuffer[0] || currentVertexBuffer[1] !== vertexBuffer[1] || currentVertexBuffer[2] !== vertexBuffer[2])
             {
-                this.commands.push(['setVertexBuffer', i, vertexBuffer[0], vertexBuffer[1], vertexBuffer[2]]);
+                this.commands.push(['setVertexBuffer', [i, vertexBuffer[0], vertexBuffer[1], vertexBuffer[2]]]);
                 this._setVertexBuffer[i] = vertexBuffer;
             }
         }
@@ -130,7 +140,7 @@ export class WGPURenderObjectState
 
         if (!this._setIndexBuffer || this._setIndexBuffer[0] !== indexBuffer[0] || this._setIndexBuffer[1] !== indexBuffer[1] || this._setIndexBuffer[2] !== indexBuffer[2] || this._setIndexBuffer[3] !== indexBuffer[3])
         {
-            this.commands.push(['setIndexBuffer', indexBuffer[0], indexBuffer[1], indexBuffer[2], indexBuffer[3]]);
+            this.commands.push(['setIndexBuffer', [indexBuffer[0], indexBuffer[1], indexBuffer[2], indexBuffer[3]]]);
             this._setIndexBuffer = indexBuffer;
         }
     }
@@ -140,11 +150,11 @@ export class WGPURenderObjectState
         //
         if (draw.__type__ === 'DrawVertex')
         {
-            this.commands.push(['draw', draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]);
+            this.commands.push(['draw', [draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]]);
         }
         else
         {
-            this.commands.push(['drawIndexed', draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance]);
+            this.commands.push(['drawIndexed', [draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance]]);
         }
     }
 }
@@ -153,40 +163,8 @@ export function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURen
 {
     for (let i = 0, n = commands.length; i < n; i++)
     {
-        const command = commands[i] as [func: string, ...args: any[]];
+        const [func, args] = commands[i];
 
-        switch (command.length)
-        {
-            case 1:
-                renderBundleEncoder[command[0]]();
-                break;
-            case 2:
-                renderBundleEncoder[command[0]](command[1]);
-                break;
-            case 3:
-                renderBundleEncoder[command[0]](command[1], command[2]);
-                break;
-            case 4:
-                renderBundleEncoder[command[0]](command[1], command[2], command[3]);
-                break;
-            case 5:
-                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4]);
-                break;
-            case 6:
-                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5]);
-                break;
-            case 7:
-                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5], command[6]);
-                break;
-            case 8:
-                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5], command[6], command[7]);
-                break;
-            case 9:
-                renderBundleEncoder[command[0]](command[1], command[2], command[3], command[4], command[5], command[6], command[7], command[8]);
-                break;
-            default:
-                console.error(`未处理命令 ${command}`);
-                break;
-        }
+        (renderBundleEncoder[func] as Function).apply(renderBundleEncoder, args);
     }
 }
