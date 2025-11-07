@@ -1,46 +1,44 @@
 import { computed, reactive } from "@feng3d/reactivity";
 import { RenderObject } from "@feng3d/render-api";
-import { RenderPassFormat } from "../RenderPassFormat";
+import { WGPURenderObjectState } from "../WGPURenderObjectState";
 
-export function getSetViewport(renderObject: RenderObject, attachmentSize: { readonly width: number, readonly height: number })
+export function getSetViewport(renderObject: RenderObject)
 {
     const r_renderObject = reactive(renderObject);
     return computed(() =>
     {
         const viewport = r_renderObject.viewport;
 
-        let setViewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number] | undefined;
-
-        if (viewport)
+        return (state: WGPURenderObjectState, attachmentSize: { readonly width: number, readonly height: number }) =>
         {
-            const isYup = viewport.isYup ?? true;
-            const x = viewport.x ?? 0;
-            let y = viewport.y ?? 0;
-            const width = viewport.width;
-            const height = viewport.height;
-            const minDepth = viewport.minDepth ?? 0;
-            const maxDepth = viewport.maxDepth ?? 1;
-
-            if (isYup)
+            if (viewport)
             {
-                y = attachmentSize.height - y - height;
-            }
+                const isYup = viewport.isYup ?? true;
+                const x = viewport.x ?? 0;
+                let y = viewport.y ?? 0;
+                const width = viewport.width;
+                const height = viewport.height;
+                const minDepth = viewport.minDepth ?? 0;
+                const maxDepth = viewport.maxDepth ?? 1;
 
-            if (x === 0 && y === 0 && width === attachmentSize.width && height === attachmentSize.height && minDepth === 0 && maxDepth === 1)
-            {
-                setViewport = undefined;
+                if (isYup)
+                {
+                    y = attachmentSize.height - y - height;
+                }
+
+                if (x === 0 && y === 0 && width === attachmentSize.width && height === attachmentSize.height && minDepth === 0 && maxDepth === 1)
+                {
+                    state.setViewport(undefined);
+                }
+                else
+                {
+                    state.setViewport([x, y, width, height, minDepth, maxDepth]);
+                }
             }
             else
             {
-                setViewport = [x, y, width, height, minDepth, maxDepth];
+                state.setViewport(undefined);
             }
-        }
-        else
-        {
-            //
-            setViewport = undefined;
-        }
-
-        return setViewport;
+        };
     });
 }

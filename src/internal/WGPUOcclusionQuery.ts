@@ -26,7 +26,7 @@ export class WGPUOcclusionQuery extends ReactiveObject
 
             occlusionQuery.renderObjects.forEach((renderObject) =>
             {
-                const wgpuRenderObject = WGPURenderObject.getInstance(device, renderObject, renderPassFormat, attachmentSize);
+                const wgpuRenderObject = WGPURenderObject.getInstance(renderObject, renderPassFormat, attachmentSize);
                 wgpuRenderObject.run(undefined, commands, state);
             });
 

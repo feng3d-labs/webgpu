@@ -1,39 +1,35 @@
 import { computed, reactive } from "@feng3d/reactivity";
 import { Buffer, RenderObject } from "@feng3d/render-api";
 import { WGPUBuffer } from "../../caches/WGPUBuffer";
+import { WGPURenderObjectState } from "../WGPURenderObjectState";
 
-export function getSetIndexBuffer(device: GPUDevice, renderObject: RenderObject)
+export function getSetIndexBuffer(renderObject: RenderObject)
 {
     const r_renderObject = reactive(renderObject);
     return computed(() =>
     {
-        let setIndexBuffer: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
-        // 监听
-        r_renderObject.indices;
-
-        //
-        const { indices } = renderObject;
-
-        if (!indices)
+        return (state: WGPURenderObjectState, device: GPUDevice) =>
         {
-            setIndexBuffer = undefined;
-        }
-        else
-        {
-            const buffer = Buffer.getBuffer(indices.buffer);
-
-            if (!buffer.label)
-            {
-                reactive(buffer).label = (`顶点索引 ${autoIndex++}`);
-            }
-
-            const gBuffer = WGPUBuffer.getInstance(device, buffer);
+            // 监听
+            r_renderObject.indices;
 
             //
-            setIndexBuffer = [gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength];
-        }
+            const { indices } = renderObject;
 
-        return setIndexBuffer;
+            if (indices)
+            {
+                const buffer = Buffer.getBuffer(indices.buffer);
+
+                if (!buffer.label)
+                {
+                    reactive(buffer).label = (`顶点索引 ${autoIndex++}`);
+                }
+
+                const gBuffer = WGPUBuffer.getInstance(device, buffer);
+
+                state.setIndexBuffer([gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength]);
+            }
+        };
     });
 }
 let autoIndex = 0;

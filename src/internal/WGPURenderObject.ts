@@ -14,36 +14,36 @@ import { CommandType, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export class WGPURenderObject extends ReactiveObject implements RenderPassObjectCommand
 {
-    constructor(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
+    constructor(renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
         super();
 
-        this._onCreate(device, renderObject, renderPassFormat, attachmentSize);
+        this._onCreate(renderObject, renderPassFormat, attachmentSize);
         //
-        WGPURenderObject.map.set([device, renderObject, renderPassFormat], this);
-        this.destroyCall(() => { WGPURenderObject.map.delete([device, renderObject, renderPassFormat]); });
+        WGPURenderObject.map.set([renderObject, renderPassFormat], this);
+        this.destroyCall(() => { WGPURenderObject.map.delete([renderObject, renderPassFormat]); });
     }
 
-    private _onCreate(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
+    private _onCreate(renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
         const r_renderObject = reactive(renderObject);
         const renderObjectCommands = computed(() =>
         {
-            const computedSetViewport = getSetViewport(renderObject, attachmentSize);
+            const computedSetViewport = getSetViewport(renderObject);
 
-            const computedSetScissorRect = getSetScissorRect(renderObject, attachmentSize);
+            const computedSetScissorRect = getSetScissorRect(renderObject);
 
-            const computedSetPipeline = getSetPipeline(device, renderObject, renderPassFormat);
+            const computedSetPipeline = getSetPipeline(renderObject);
 
             const computedSetStencilReference = getSetStencilReference(renderObject);
 
             const computedSetBlendConstant = getSetBlendConstant(renderObject);
 
-            const computedSetBindGroup = getSetBindGroup(device, renderObject);
+            const computedSetBindGroup = getSetBindGroup(renderObject);
 
-            const computedSetVertexBuffer = getSetVertexBuffer(device, renderObject);
+            const computedSetVertexBuffer = getSetVertexBuffer(renderObject);
 
-            const computedSetIndexBuffer = getSetIndexBuffer(device, renderObject);
+            const computedSetIndexBuffer = getSetIndexBuffer(renderObject);
 
             return {
                 viewport: computedSetViewport.value,
@@ -62,21 +62,21 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
         {
             const { viewport, scissorRect, pipeline, stencilReference, blendConstant, bindGroup, vertexBuffer, indexBuffer, draw } = renderObjectCommands.value;
 
-            state.setViewport(viewport);
+            viewport(state, attachmentSize);
 
-            state.setScissorRect(scissorRect);
+            scissorRect(state, attachmentSize);
 
-            state.setBlendConstant(blendConstant);
+            blendConstant(state);
 
-            state.setStencilReference(stencilReference);
+            stencilReference(state);
 
-            state.setPipeline(pipeline);
+            pipeline(state, device, renderPassFormat);
 
-            state.setBindGroup(bindGroup);
+            bindGroup(state, device);
 
-            state.setVertexBuffer(vertexBuffer);
+            vertexBuffer(state, device);
 
-            state.setIndexBuffer(indexBuffer);
+            indexBuffer(state, device);
 
             state.draw(draw);
         };
@@ -84,11 +84,11 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
 
     run: (device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState) => void;
 
-    static getInstance(device: GPUDevice, renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
+    static getInstance(renderObject: RenderObject, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
     {
-        return this.map.get([device, renderObject, renderPassFormat]) || new WGPURenderObject(device, renderObject, renderPassFormat, attachmentSize);
+        return this.map.get([renderObject, renderPassFormat]) || new WGPURenderObject(renderObject, renderPassFormat, attachmentSize);
     }
-    static readonly map = new ChainMap<[GPUDevice, RenderObject, RenderPassFormat], WGPURenderObject>();
+    static readonly map = new ChainMap<[RenderObject, RenderPassFormat], WGPURenderObject>();
 }
 
 export interface RenderPassObjectCommand

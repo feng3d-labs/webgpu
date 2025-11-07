@@ -2,39 +2,42 @@ import { computed, reactive } from "@feng3d/reactivity";
 import { Buffer, RenderObject } from "@feng3d/render-api";
 import { WGPUBuffer } from "../../caches/WGPUBuffer";
 import { WGPUVertexBufferLayout } from "../../caches/WGPUVertexBufferLayout";
+import { WGPURenderObjectState } from "../WGPURenderObjectState";
 
-export function getSetVertexBuffer(device: GPUDevice, renderObject: RenderObject)
+export function getSetVertexBuffer(renderObject: RenderObject)
 {
     const r_renderObject = reactive(renderObject);
     return computed(() =>
     {
-        // 监听
-        r_renderObject.vertices;
-        r_renderObject.pipeline.vertex;
-
-        //
-        const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(renderObject.pipeline.vertex, renderObject.vertices);
-        const vertexDatas = wgpuVertexBufferLayout.vertexDatas;
-
-        const vertexBuffers: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = vertexDatas?.map((data) =>
+        return (state: WGPURenderObjectState, device: GPUDevice) =>
         {
-            // 执行
-            const offset = data.byteOffset;
-            const size = data.byteLength;
-            const buffer = Buffer.getBuffer(data.buffer);
+            // 监听
+            r_renderObject.vertices;
+            r_renderObject.pipeline.vertex;
 
-            if (!buffer.label)
+            //
+            const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(renderObject.pipeline.vertex, renderObject.vertices);
+            const vertexDatas = wgpuVertexBufferLayout.vertexDatas;
+
+            const vertexBuffers: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = vertexDatas?.map((data) =>
             {
-                reactive(buffer).label = (`顶点数据 ${autoVertexIndex++}`);
-            }
+                // 执行
+                const offset = data.byteOffset;
+                const size = data.byteLength;
+                const buffer = Buffer.getBuffer(data.buffer);
 
-            const wgpuBuffer = WGPUBuffer.getInstance(device, buffer);
-            const gpuBuffer = wgpuBuffer.gpuBuffer;
+                if (!buffer.label)
+                {
+                    reactive(buffer).label = (`顶点数据 ${autoVertexIndex++}`);
+                }
 
-            return [gpuBuffer, offset, size];
-        });
+                const wgpuBuffer = WGPUBuffer.getInstance(device, buffer);
+                const gpuBuffer = wgpuBuffer.gpuBuffer;
 
-        return vertexBuffers;
+                return [gpuBuffer, offset, size];
+            });
+            state.setVertexBuffer(vertexBuffers);
+        };
     });
 }
 let autoVertexIndex = 0;

@@ -43,7 +43,7 @@ export class WGPURenderBundle extends ReactiveObject implements RenderPassObject
 
             renderBundle.renderObjects.forEach((renderObject) =>
             {
-                const wgpuRenderObject = WGPURenderObject.getInstance(device, renderObject, renderPassFormat, attachmentSize);
+                const wgpuRenderObject = WGPURenderObject.getInstance(renderObject, renderPassFormat, attachmentSize);
 
                 wgpuRenderObject.run(undefined, commands, state);
             });

@@ -120,6 +120,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         this._computedRenderPassFormat = computed(() =>
         {
             let sampleCount: number = r_descriptor.sampleCount;
+            const gpuRenderPassDescriptor = this._computedGpuRenderPassDescriptor.value;
 
             const colorFormats: GPUTextureFormat[] = [];
 
@@ -131,11 +132,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
                 colorFormats.push(format);
             }
 
-            let depthStencilFormat: GPUTextureFormat;
-            if (r_descriptor.depthStencilAttachment?.view.texture)
-            {
-                depthStencilFormat = WGPUTextureLike.getInstance(device, r_descriptor.depthStencilAttachment?.view.texture)?.gpuTexture.format;
-            }
+            const depthStencilFormat: GPUTextureFormat = gpuRenderPassDescriptor.depthStencilAttachment?.view?.texture.format;
 
             // 构建渲染通道格式对象
             let renderPassFormat: RenderPassFormat

@@ -31,7 +31,7 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
     {
         if (!element.__type__ || element.__type__ === 'RenderObject')
         {
-            const wgpuRenderObject = WGPURenderObject.getInstance(device, element as RenderObject, renderPassFormat, attachmentSize);
+            const wgpuRenderObject = WGPURenderObject.getInstance(element as RenderObject, renderPassFormat, attachmentSize);
 
             wgpuRenderObject.run(device, commands, state);
         }

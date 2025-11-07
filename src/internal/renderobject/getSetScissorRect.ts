@@ -1,40 +1,42 @@
 import { computed, reactive } from "@feng3d/reactivity";
 import { RenderObject } from "@feng3d/render-api";
+import { WGPURenderObjectState } from "../WGPURenderObjectState";
 
-export function getSetScissorRect(renderObject: RenderObject, attachmentSize: { readonly width: number, readonly height: number })
+export function getSetScissorRect(renderObject: RenderObject)
 {
     const r_renderObject = reactive(renderObject);
     return computed(() =>
     {
-        let setScissorRect: [x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate] | undefined;
         const scissorRect = r_renderObject.scissorRect;
-        if (scissorRect)
+
+        return (state: WGPURenderObjectState, attachmentSize: { readonly width: number, readonly height: number }) =>
         {
-            const isYup = scissorRect.isYup ?? true;
-            const x = scissorRect.x ?? 0;
-            let y = scissorRect.y ?? 0;
-            const width = scissorRect.width;
-            const height = scissorRect.height;
-
-            if (isYup)
+            if (scissorRect)
             {
-                y = attachmentSize.height - y - height;
-            }
+                const isYup = scissorRect.isYup ?? true;
+                const x = scissorRect.x ?? 0;
+                let y = scissorRect.y ?? 0;
+                const width = scissorRect.width;
+                const height = scissorRect.height;
 
-            if (x === 0 && y === 0 && width === attachmentSize.width && height === attachmentSize.height)
-            {
-                setScissorRect = undefined;
+                if (isYup)
+                {
+                    y = attachmentSize.height - y - height;
+                }
+
+                if (x === 0 && y === 0 && width === attachmentSize.width && height === attachmentSize.height)
+                {
+                    state.setScissorRect(undefined);
+                }
+                else
+                {
+                    state.setScissorRect([x, y, width, height]);
+                }
             }
             else
             {
-                setScissorRect = [x, y, width, height];
+                state.setScissorRect(undefined);
             }
-        }
-        else
-        {
-            setScissorRect = undefined;
-        }
-
-        return setScissorRect;
+        };
     });
 }
