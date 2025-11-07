@@ -77,10 +77,20 @@ export class WGPUBuffer extends ReactiveObject
                 gpuBuffer.unmap();
             }
 
-            this._onWriteBuffers(device, gpuBuffer, buffer);
+            WGPUBuffer._writeBuffers(device, gpuBuffer, buffer);
 
             // 更新GPU缓冲区引用
             return gpuBuffer;
+        });
+
+        this.effect(() =>
+        {
+            // 触发响应式依赖，监听writeBuffers数组变化
+            r_buffer.writeBuffers?.forEach(() => { });
+
+            if (!gpuBuffer) return;
+
+            WGPUBuffer._writeBuffers(device, gpuBuffer, buffer);
         });
 
         // 注册销毁回调，确保在对象销毁时清理GPU缓冲区
@@ -91,71 +101,58 @@ export class WGPUBuffer extends ReactiveObject
         });
     }
 
-    /**
-     * 设置缓冲区数据写入监听
-     * 监听writeBuffers变化，自动将数据写入GPU缓冲区
-     */
-    private _onWriteBuffers(device: GPUDevice, gpuBuffer: GPUBuffer, buffer: Buffer)
+    private static _writeBuffers(device: GPUDevice, gpuBuffer: GPUBuffer, buffer: Buffer)
     {
-        const r_buffer = reactive(buffer);
+        // 如果GPU缓冲区不存在或没有写入数据，则跳过
+        if (!buffer.writeBuffers) return;
 
-        // 监听数据写入请求
-        computed(() =>
+        // 处理每个数据写入请求
+        buffer.writeBuffers.forEach((writeBuffer) =>
         {
-            // 触发响应式依赖，监听writeBuffers数组变化
-            r_buffer.writeBuffers?.forEach(() => { });
+            const bufferOffset = writeBuffer.bufferOffset ?? 0;  // 缓冲区偏移量
+            const data = writeBuffer.data;                       // 要写入的数据
+            const dataOffset = writeBuffer.dataOffset ?? 0;      // 数据偏移量
+            const size = writeBuffer.size;                       // 写入大小
 
-            // 如果GPU缓冲区不存在或没有写入数据，则跳过
-            if (!buffer.writeBuffers) return;
+            let arrayBuffer: ArrayBuffer | SharedArrayBuffer;
+            let dataOffsetByte: number;
+            let sizeByte: number;
 
-            // 处理每个数据写入请求
-            buffer.writeBuffers.forEach((writeBuffer) =>
+            // 处理TypedArray类型的数据
+            if (ArrayBuffer.isView(data))
             {
-                const bufferOffset = writeBuffer.bufferOffset ?? 0;  // 缓冲区偏移量
-                const data = writeBuffer.data;                       // 要写入的数据
-                const dataOffset = writeBuffer.dataOffset ?? 0;      // 数据偏移量
-                const size = writeBuffer.size;                       // 写入大小
+                const bytesPerElement = data.BYTES_PER_ELEMENT;
 
-                let arrayBuffer: ArrayBuffer | SharedArrayBuffer;
-                let dataOffsetByte: number;
-                let sizeByte: number;
+                arrayBuffer = data.buffer;
+                dataOffsetByte = data.byteOffset + bytesPerElement * dataOffset;
+                sizeByte = size ? (bytesPerElement * size) : data.byteLength;
+            }
+            // 处理ArrayBuffer类型的数据
+            else
+            {
+                arrayBuffer = data;
+                dataOffsetByte = dataOffset ?? 0;
+                sizeByte = size ?? (data.byteLength - dataOffsetByte);
+            }
 
-                // 处理TypedArray类型的数据
-                if (ArrayBuffer.isView(data))
-                {
-                    const bytesPerElement = data.BYTES_PER_ELEMENT;
+            // 验证数据范围，防止越界
+            console.assert(sizeByte <= arrayBuffer.byteLength - dataOffsetByte, `上传的尺寸超出数据范围！`);
 
-                    arrayBuffer = data.buffer;
-                    dataOffsetByte = data.byteOffset + bytesPerElement * dataOffset;
-                    sizeByte = size ? (bytesPerElement * size) : data.byteLength;
-                }
-                // 处理ArrayBuffer类型的数据
-                else
-                {
-                    arrayBuffer = data;
-                    dataOffsetByte = dataOffset ?? 0;
-                    sizeByte = size ?? (data.byteLength - dataOffsetByte);
-                }
+            // 验证写入数据长度必须为4的倍数（WebGPU要求）
+            console.assert(sizeByte % 4 === 0, `写入数据长度不是4的倍数！`);
 
-                // 验证数据范围，防止越界
-                console.assert(sizeByte <= arrayBuffer.byteLength - dataOffsetByte, `上传的尺寸超出数据范围！`);
+            // 将数据写入GPU缓冲区
+            device.queue.writeBuffer(
+                gpuBuffer,
+                bufferOffset,
+                arrayBuffer,
+                dataOffsetByte,
+                sizeByte,
+            );
+        });
 
-                // 验证写入数据长度必须为4的倍数（WebGPU要求）
-                console.assert(sizeByte % 4 === 0, `写入数据长度不是4的倍数！`);
-
-                // 将数据写入GPU缓冲区
-                device.queue.writeBuffer(
-                    gpuBuffer,
-                    bufferOffset,
-                    arrayBuffer,
-                    dataOffsetByte,
-                    sizeByte,
-                );
-            });
-
-            // 清空写入数据，避免重复处理
-            r_buffer.writeBuffers = null;
-        }).value;
+        // 清空写入数据，避免重复处理
+        reactive(buffer).writeBuffers = null;
     }
 
     /**
