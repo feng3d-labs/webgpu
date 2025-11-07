@@ -80,67 +80,110 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
         const r_colorAttachment = reactive(colorAttachment);
         const r_descriptor = reactive(descriptor);
 
-        // 多重采样纹理实例，用于管理多重采样纹理的生命周期
-        let multisampleGPUTexture: WGPUTexture;
+        const gpuRenderPassColorAttachment: GPURenderPassColorAttachment = {} as any;
 
-        // 监听颜色附件配置变化，自动重新创建颜色附件
-        this._computedGpuRenderPassColorAttachment = computed(() =>
+        const computedLoadOp = computed(() =>
         {
-            // 触发响应式依赖，监听颜色附件的所有属性
-            r_colorAttachment.view;
-            r_colorAttachment.storeOp;
-            r_colorAttachment.clearValue?.concat();
             r_colorAttachment.loadOp;
+
+            gpuRenderPassColorAttachment.loadOp = colorAttachment.loadOp ?? defaultRenderPassColorAttachment.loadOp;
+        });
+
+        const computedClearValue = computed(() =>
+        {
+            r_colorAttachment.clearValue;
+
+            gpuRenderPassColorAttachment.clearValue = colorAttachment.clearValue ?? defaultRenderPassColorAttachment.clearValue;
+        });
+
+        const computedStoreOp = computed(() =>
+        {
+            r_colorAttachment.storeOp;
+
+            gpuRenderPassColorAttachment.storeOp = colorAttachment.storeOp ?? defaultRenderPassColorAttachment.storeOp;
+        });
+
+        const computedDepthSlice = computed(() =>
+        {
+            if (r_colorAttachment.depthSlice)
+            {
+                gpuRenderPassColorAttachment.depthSlice = colorAttachment.depthSlice;
+            }
+            else
+            {
+                delete gpuRenderPassColorAttachment.depthSlice;
+            }
+        });
+
+        const computedView = computed(() =>
+        {
+            r_colorAttachment.view;
 
             // 获取纹理视图实例
             const wGPUTextureView = WGPUTextureView.getInstance(device, colorAttachment.view);
             const textureView = wGPUTextureView.textureView;
 
-            const clearValue = colorAttachment.clearValue ?? defaultRenderPassColorAttachment.clearValue;
-            const loadOp = colorAttachment.loadOp ?? defaultRenderPassColorAttachment.loadOp;
-            const storeOp = colorAttachment.storeOp ?? defaultRenderPassColorAttachment.storeOp;
-
-            // 创建基础颜色附件配置
-            const gpuRenderPassColorAttachment: GPURenderPassColorAttachment = {
-                view: textureView,
-                clearValue,
-                loadOp,
-                storeOp,
-            };
-
-            if (r_colorAttachment.depthSlice)
-            {
-                gpuRenderPassColorAttachment.depthSlice = colorAttachment.depthSlice;
-            }
-
-            // 检查是否需要多重采样
             const sampleCount = r_descriptor.sampleCount;
             if (sampleCount)
             {
-                // 获取原始纹理信息
-                const wgpuTexture = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
-                const gpuTexture = wgpuTexture.gpuTexture;
-
-                // 创建多重采样纹理配置
-                const multisampleTexture: Texture = {
-                    descriptor: {
-                        label: '自动生成多重采样的纹理',
-                        sampleCount,
-                        size: [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers],
-                        format: gpuTexture.format,
-                    },
-                };
-
-                // 创建多重采样纹理实例，直接管理其生命周期
-                multisampleGPUTexture?.destroy();
-                multisampleGPUTexture = WGPUTexture.getInstance(device, multisampleTexture);
-                // 直接从GPU纹理创建视图，避免额外的纹理视图缓存
-                const multisampleTextureView = multisampleGPUTexture.gpuTexture.createView();
-
-                // 设置多重采样配置
-                gpuRenderPassColorAttachment.view = multisampleTextureView;        // 多重采样纹理作为渲染目标
-                gpuRenderPassColorAttachment.resolveTarget = textureView;          // 原始纹理作为解析目标
+                gpuRenderPassColorAttachment.resolveTarget = textureView;
             }
+            else
+            {
+                gpuRenderPassColorAttachment.view = textureView;
+            }
+        });
+
+        // 多重采样纹理实例，用于管理多重采样纹理的生命周期
+        let multisampleGPUTexture: WGPUTexture;
+        let multisampleTextureKey: string;
+        const computedMultisampleTexture = computed(() =>
+        {
+            // 检查是否需要多重采样
+            const sampleCount = r_descriptor.sampleCount;
+            if (!sampleCount)
+            {
+                gpuRenderPassColorAttachment.resolveTarget = undefined;
+                return;
+            }
+
+            // 获取原始纹理信息
+            const wgpuTexture = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
+            const gpuTexture = wgpuTexture.gpuTexture;
+
+            const key = [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers, gpuTexture.format, sampleCount].join(',');
+            if (multisampleTextureKey === key) return;
+            multisampleTextureKey = key;
+
+            // 创建多重采样纹理配置
+            const multisampleTexture: Texture = {
+                descriptor: {
+                    label: '自动生成多重采样的纹理 ' + key,
+                    sampleCount,
+                    size: [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers],
+                    format: gpuTexture.format,
+                },
+            };
+
+            // 创建多重采样纹理实例，直接管理其生命周期
+            multisampleGPUTexture?.destroy();
+            multisampleGPUTexture = WGPUTexture.getInstance(device, multisampleTexture);
+            // 直接从GPU纹理创建视图，避免额外的纹理视图缓存
+            const multisampleTextureView = multisampleGPUTexture.gpuTexture.createView();
+
+            // 设置多重采样配置
+            gpuRenderPassColorAttachment.view = multisampleTextureView;        // 多重采样纹理作为渲染目标
+        });
+
+        // 监听颜色附件配置变化，自动重新创建颜色附件
+        this._computedGpuRenderPassColorAttachment = computed(() =>
+        {
+            computedLoadOp.value;
+            computedClearValue.value;
+            computedStoreOp.value;
+            computedDepthSlice.value;
+            computedView.value;
+            computedMultisampleTexture.value;
 
             // 更新颜色附件引用
             return gpuRenderPassColorAttachment;
