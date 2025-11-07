@@ -13,11 +13,10 @@ export function runBindGroup(renderObject: RenderObject, state: WGPURenderObject
     const { bindingResources } = renderObject;
     const layout = WGPUPipelineLayout.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
 
-    const bindGroups = layout.bindGroupLayouts.map(bindGroupLayout =>
+    layout.bindGroupLayouts.forEach((bindGroupLayout, index) =>
     {
         const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
 
-        return wgpuBindGroup.gpuBindGroup;
+        state.setBindGroup(index, wgpuBindGroup.gpuBindGroup);
     });
-    state.setBindGroup(bindGroups);
 }

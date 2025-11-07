@@ -11,6 +11,7 @@ import { runVertexBuffer } from './renderobject/runVertexBuffer';
 import { runViewport } from './renderobject/runViewport';
 import { RenderPassFormat } from './RenderPassFormat';
 import { CommandType, WGPURenderObjectState } from './WGPURenderObjectState';
+import { runDraw } from './renderobject/runDraw';
 
 export class WGPURenderObject extends ReactiveObject implements RenderPassObjectCommand
 {
@@ -46,7 +47,7 @@ export class WGPURenderObject extends ReactiveObject implements RenderPassObject
 
             runIndexBuffer(renderObject, state, device);
 
-            state.draw(r_renderObject.draw);
+            runDraw(renderObject, state);
         };
     }
 

@@ -13,7 +13,7 @@ export function runVertexBuffer(renderObject: RenderObject, state: WGPURenderObj
     const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(renderObject.pipeline.vertex, renderObject.vertices);
     const vertexDatas = wgpuVertexBufferLayout.vertexDatas;
 
-    const vertexBuffers: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = vertexDatas?.map((data) =>
+    vertexDatas?.forEach((data, index) =>
     {
         // 执行
         const offset = data.byteOffset;
@@ -28,8 +28,7 @@ export function runVertexBuffer(renderObject: RenderObject, state: WGPURenderObj
         const wgpuBuffer = WGPUBuffer.getInstance(device, buffer);
         const gpuBuffer = wgpuBuffer.gpuBuffer;
 
-        return [gpuBuffer, offset, size];
+        state.setVertexBuffer(index, gpuBuffer, offset, size);
     });
-    state.setVertexBuffer(vertexBuffers);
 }
 let autoVertexIndex = 0;

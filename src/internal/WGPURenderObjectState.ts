@@ -46,34 +46,22 @@ export class WGPURenderObjectState
         })
     }
 
-    setViewport(viewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number])
+    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number)
     {
         const currentViewport = this._setViewport;
-        if (viewport === currentViewport || (viewport && currentViewport && viewport[0] === currentViewport[0] && viewport[1] === currentViewport[1] && viewport[2] === currentViewport[2] && viewport[3] === currentViewport[3] && viewport[4] === currentViewport[4] && viewport[5] === currentViewport[5])) return;
-        if (viewport)
-        {
-            this.commands.push(['setViewport', viewport]);
-        }
-        else
-        {
-            this.commands.push(['setViewport', this._computedDefaultViewport.value]);
-        }
-        this._setViewport = viewport;
+        if (currentViewport && x === currentViewport[0] && y === currentViewport[1] && width === currentViewport[2] && height === currentViewport[3] && minDepth === currentViewport[4] && maxDepth === currentViewport[5]) return;
+
+        this.commands.push(['setViewport', [x, y, width, height, minDepth, maxDepth]]);
+        this._setViewport = [x, y, width, height, minDepth, maxDepth];
     }
 
-    setScissorRect(scissorRect: [x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate] | undefined)
+    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate)
     {
         const currentScissorRect = this._setScissorRect;
-        if (scissorRect === currentScissorRect || (scissorRect && currentScissorRect && scissorRect[0] === currentScissorRect[0] && scissorRect[1] === currentScissorRect[1] && scissorRect[2] === currentScissorRect[2] && scissorRect[3] === currentScissorRect[3])) return;
-        if (scissorRect)
-        {
-            this.commands.push(['setScissorRect', scissorRect]);
-        }
-        else
-        {
-            this.commands.push(['setScissorRect', this._computedDefaultScissorRect.value]);
-        }
-        this._setScissorRect = scissorRect;
+        if (currentScissorRect && x === currentScissorRect[0] && y === currentScissorRect[1] && width === currentScissorRect[2] && height === currentScissorRect[3]) return;
+
+        this.commands.push(['setScissorRect', [x, y, width, height]]);
+        this._setScissorRect = [x, y, width, height];
     }
 
     setBlendConstant(blendConstant: Color | undefined)
@@ -106,56 +94,42 @@ export class WGPURenderObjectState
         this._setPipeline = pipeline;
     }
 
-    setBindGroup(bindGroups: GPUBindGroup[])
+    setBindGroup(i: GPUIndex32, bindGroup: GPUBindGroup)
     {
-        for (let i = 0, len = bindGroups.length; i < len; i++)
+        if (this._setBindGroup[i] !== bindGroup)
         {
-            if (this._setBindGroup[i] !== bindGroups[i])
-            {
-                this.commands.push(['setBindGroup', [i, bindGroups[i]]]);
-                this._setBindGroup[i] = bindGroups[i];
-            }
+            this.commands.push(['setBindGroup', [i, bindGroup]]);
+            this._setBindGroup[i] = bindGroup;
         }
     }
 
-    setVertexBuffer(vertexBuffers: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][])
+    setVertexBuffer(i: GPUIndex32, buffer: GPUBuffer | null | undefined, offset?: GPUSize64, size?: GPUSize64)
     {
-        if (vertexBuffers === undefined) return;
-
-        for (let i = 0, len = vertexBuffers.length; i < len; i++)
+        const currentVertexBuffer = this._setVertexBuffer[i];
+        if (!currentVertexBuffer || currentVertexBuffer[0] !== buffer || currentVertexBuffer[1] !== offset || currentVertexBuffer[2] !== size)
         {
-            const currentVertexBuffer = this._setVertexBuffer[i];
-            const vertexBuffer = vertexBuffers[i];
-            if (!currentVertexBuffer || currentVertexBuffer[0] !== vertexBuffer[0] || currentVertexBuffer[1] !== vertexBuffer[1] || currentVertexBuffer[2] !== vertexBuffer[2])
-            {
-                this.commands.push(['setVertexBuffer', [i, vertexBuffer[0], vertexBuffer[1], vertexBuffer[2]]]);
-                this._setVertexBuffer[i] = vertexBuffer;
-            }
+            this.commands.push(['setVertexBuffer', [i, buffer, offset, size]]);
+            this._setVertexBuffer[i] = [buffer, offset, size];
         }
     }
 
-    setIndexBuffer(indexBuffer: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64])
+    setIndexBuffer(buffer: GPUBuffer | null | undefined, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64)
     {
-        if (indexBuffer === undefined) return;
-
-        if (!this._setIndexBuffer || this._setIndexBuffer[0] !== indexBuffer[0] || this._setIndexBuffer[1] !== indexBuffer[1] || this._setIndexBuffer[2] !== indexBuffer[2] || this._setIndexBuffer[3] !== indexBuffer[3])
+        if (!this._setIndexBuffer || this._setIndexBuffer[0] !== buffer || this._setIndexBuffer[1] !== indexFormat || this._setIndexBuffer[2] !== offset || this._setIndexBuffer[3] !== size)
         {
-            this.commands.push(['setIndexBuffer', [indexBuffer[0], indexBuffer[1], indexBuffer[2], indexBuffer[3]]]);
-            this._setIndexBuffer = indexBuffer;
+            this.commands.push(['setIndexBuffer', [buffer, indexFormat, offset, size]]);
+            this._setIndexBuffer = [buffer, indexFormat, offset, size];
         }
     }
 
-    draw(draw: DrawVertex | DrawIndexed)
+    draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32)
     {
-        //
-        if (draw.__type__ === 'DrawVertex')
-        {
-            this.commands.push(['draw', [draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance]]);
-        }
-        else
-        {
-            this.commands.push(['drawIndexed', [draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance]]);
-        }
+        this.commands.push(['draw', [vertexCount, instanceCount, firstVertex, firstInstance]]);
+    }
+
+    drawIndexed(indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32)
+    {
+        this.commands.push(['drawIndexed', [indexCount, instanceCount, firstIndex, baseVertex, firstInstance]]);
     }
 }
 

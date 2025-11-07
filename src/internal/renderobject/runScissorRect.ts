@@ -19,17 +19,10 @@ export function runScissorRect(renderObject: RenderObject, state: WGPURenderObje
             y = attachmentSize.height - y - height;
         }
 
-        if (x === 0 && y === 0 && width === attachmentSize.width && height === attachmentSize.height)
-        {
-            state.setScissorRect(undefined);
-        }
-        else
-        {
-            state.setScissorRect([x, y, width, height]);
-        }
+        state.setScissorRect(x, y, width, height);
     }
     else
     {
-        state.setScissorRect(undefined);
+        state.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
     }
 }

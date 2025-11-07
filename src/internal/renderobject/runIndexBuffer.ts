@@ -1,4 +1,4 @@
-import { computed, reactive } from "@feng3d/reactivity";
+import { reactive } from "@feng3d/reactivity";
 import { Buffer, RenderObject } from "@feng3d/render-api";
 import { WGPUBuffer } from "../../caches/WGPUBuffer";
 import { WGPURenderObjectState } from "../WGPURenderObjectState";
@@ -20,7 +20,7 @@ export function runIndexBuffer(renderObject: RenderObject, state: WGPURenderObje
 
         const gBuffer = WGPUBuffer.getInstance(device, buffer);
 
-        state.setIndexBuffer([gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength]);
+        state.setIndexBuffer(gBuffer.gpuBuffer, indices.BYTES_PER_ELEMENT === 4 ? 'uint32' : 'uint16', indices.byteOffset, indices.byteLength);
     }
 }
 let autoIndex = 0;

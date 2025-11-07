@@ -22,17 +22,10 @@ export function runViewport(renderObject: RenderObject, state: WGPURenderObjectS
             y = attachmentSize.height - y - height;
         }
 
-        if (x === 0 && y === 0 && width === attachmentSize.width && height === attachmentSize.height && minDepth === 0 && maxDepth === 1)
-        {
-            state.setViewport(undefined);
-        }
-        else
-        {
-            state.setViewport([x, y, width, height, minDepth, maxDepth]);
-        }
+        state.setViewport(x, y, width, height, minDepth, maxDepth);
     }
     else
     {
-        state.setViewport(undefined);
+        state.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
     }
 }
