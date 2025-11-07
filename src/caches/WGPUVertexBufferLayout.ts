@@ -212,5 +212,6 @@ export class WGPUVertexBufferLayout extends ReactiveObject
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
         return this.map.get([vertexState, vertices]) || new WGPUVertexBufferLayout(vertexState, vertices);
     }
+
     static readonly map = new ChainMap<[VertexState, VertexAttributes], WGPUVertexBufferLayout>();
 }

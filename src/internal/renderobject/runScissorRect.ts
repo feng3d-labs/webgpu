@@ -1,6 +1,6 @@
-import { reactive } from "@feng3d/reactivity";
-import { RenderObject } from "@feng3d/render-api";
-import { WGPURenderObjectState } from "../WGPURenderObjectState";
+import { reactive } from '@feng3d/reactivity';
+import { RenderObject } from '@feng3d/render-api';
+import { WGPURenderObjectState } from '../WGPURenderObjectState';
 
 export function runScissorRect(renderObject: RenderObject, state: WGPURenderObjectState, attachmentSize: { readonly width: number, readonly height: number })
 {

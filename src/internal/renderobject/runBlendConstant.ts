@@ -1,6 +1,6 @@
-import { reactive } from "@feng3d/reactivity";
-import { BlendState, RenderObject } from "@feng3d/render-api";
-import { WGPURenderObjectState } from "../WGPURenderObjectState";
+import { reactive } from '@feng3d/reactivity';
+import { BlendState, RenderObject } from '@feng3d/render-api';
+import { WGPURenderObjectState } from '../WGPURenderObjectState';
 
 export function runBlendConstant(renderObject: RenderObject, state: WGPURenderObjectState)
 {

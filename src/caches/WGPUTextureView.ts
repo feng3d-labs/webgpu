@@ -151,6 +151,7 @@ declare global
     {
         const textureView: GPUTextureView = createView.call(this, descriptor);
         textureView.texture = this;
+
         return textureView;
     }
 })(GPUTexture.prototype.createView);

@@ -85,5 +85,6 @@ export class WGPUBindGroupEntry extends ReactiveObject
     {
         return this.map.get([device, bindGroupLayout, bindingResources]) || new WGPUBindGroupEntry(device, bindGroupLayout, bindingResources);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, GPUBindGroupLayoutEntry, BindingResources], WGPUBindGroupEntry>();
 }

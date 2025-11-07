@@ -1,8 +1,8 @@
-import { reactive } from "@feng3d/reactivity";
-import { Buffer, RenderObject } from "@feng3d/render-api";
-import { WGPUBuffer } from "../../caches/WGPUBuffer";
-import { WGPUVertexBufferLayout } from "../../caches/WGPUVertexBufferLayout";
-import { WGPURenderObjectState } from "../WGPURenderObjectState";
+import { reactive } from '@feng3d/reactivity';
+import { Buffer, RenderObject } from '@feng3d/render-api';
+import { WGPUBuffer } from '../../caches/WGPUBuffer';
+import { WGPUVertexBufferLayout } from '../../caches/WGPUVertexBufferLayout';
+import { WGPURenderObjectState } from '../WGPURenderObjectState';
 
 export function runVertexBuffer(renderObject: RenderObject, state: WGPURenderObjectState, device: GPUDevice)
 {

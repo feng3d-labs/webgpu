@@ -4,7 +4,7 @@ import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
 import { WGPUTextureView } from './WGPUTextureView';
 
-import "../data/polyfills/RenderPassDepthStencilAttachment";
+import '../data/polyfills/RenderPassDepthStencilAttachment';
 
 /**
  * WebGPU渲染通道深度模板附件缓存管理器
@@ -198,5 +198,6 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
         return this.map.get([device, descriptor]) || new WGPURenderPassDepthStencilAttachment(device, descriptor);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, RenderPassDescriptor], WGPURenderPassDepthStencilAttachment>();
 }

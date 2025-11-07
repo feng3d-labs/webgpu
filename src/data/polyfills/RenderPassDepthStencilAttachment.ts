@@ -20,7 +20,7 @@ declare module '@feng3d/render-api'
         /**
          * The store operation to perform on {@link GPURenderPassDepthStencilAttachment#view}'s
          * depth component after executing the render pass.
-         * 
+         *
          * 默认 `"store"` 。
          */
         readonly depthStoreOp?: GPUStoreOp;
@@ -28,7 +28,7 @@ declare module '@feng3d/render-api'
         /**
          * Indicates that the depth component of {@link GPURenderPassDepthStencilAttachment#view}
          * is read only.
-         * 
+         *
          * 默认 `false` 。
          */
         readonly depthReadOnly?: boolean;
@@ -36,7 +36,7 @@ declare module '@feng3d/render-api'
         /**
          * The store operation to perform on {@link GPURenderPassDepthStencilAttachment#view}'s
          * stencil component after executing the render pass.
-         * 
+         *
          * 默认 `"store"` 。
          */
         readonly stencilStoreOp?: GPUStoreOp;
@@ -44,7 +44,7 @@ declare module '@feng3d/render-api'
         /**
          * Indicates that the stencil component of {@link GPURenderPassDepthStencilAttachment#view}
          * is read only.
-         * 
+         *
          * 默认 `false` 。
          */
         readonly stencilReadOnly?: boolean;

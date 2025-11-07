@@ -263,6 +263,7 @@ export class WGPUPipelineLayout
 
         return gpuPipelineLayout;
     }
+
     private static readonly map = new ChainMap<[GPUDevice, string], GPUPipelineLayout>();
 }
 

@@ -59,7 +59,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         webgpu.submit(submit);
         requestAnimationFrame(frame);
     }
-    
+
     requestAnimationFrame(frame);
 
     // webgpu.submit(submit); // 提交GPU执行

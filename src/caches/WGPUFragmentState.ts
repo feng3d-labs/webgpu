@@ -85,5 +85,6 @@ export class WGPUFragmentState extends ReactiveObject
 
         return WGPUFragmentState.map.get([device, fragmentState, colorAttachments]) || new WGPUFragmentState(device, fragmentState, colorAttachments);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, FragmentState, readonly GPUTextureFormat[]], WGPUFragmentState>();
 }

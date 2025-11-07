@@ -86,5 +86,4 @@ export class WGPUCanvasTexture extends ReactiveObject
     private static readonly map = new ChainMap<[GPUDevice, CanvasTexture], WGPUCanvasTexture>();
 }
 
-
 let id = 0;

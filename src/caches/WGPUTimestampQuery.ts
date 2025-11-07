@@ -203,6 +203,7 @@ export class WGPUTimestampQuery extends ReactiveObject
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
         return this.map.get([device, timestampQuery]) || new WGPUTimestampQuery(device, timestampQuery);
     }
+
     static readonly map = new ChainMap<[GPUDevice, TimestampQuery], WGPUTimestampQuery>();
 }
 

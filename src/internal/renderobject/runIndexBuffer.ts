@@ -1,7 +1,7 @@
-import { reactive } from "@feng3d/reactivity";
-import { Buffer, RenderObject } from "@feng3d/render-api";
-import { WGPUBuffer } from "../../caches/WGPUBuffer";
-import { WGPURenderObjectState } from "../WGPURenderObjectState";
+import { reactive } from '@feng3d/reactivity';
+import { Buffer, RenderObject } from '@feng3d/render-api';
+import { WGPUBuffer } from '../../caches/WGPUBuffer';
+import { WGPURenderObjectState } from '../WGPURenderObjectState';
 
 export function runIndexBuffer(renderObject: RenderObject, state: WGPURenderObjectState, device: GPUDevice)
 {

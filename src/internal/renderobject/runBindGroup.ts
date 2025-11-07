@@ -1,8 +1,8 @@
-import { reactive } from "@feng3d/reactivity";
-import { RenderObject } from "@feng3d/render-api";
-import { WGPUBindGroup } from "../../caches/WGPUBindGroup";
-import { WGPUPipelineLayout } from "../../caches/WGPUPipelineLayout";
-import { WGPURenderObjectState } from "../WGPURenderObjectState";
+import { reactive } from '@feng3d/reactivity';
+import { RenderObject } from '@feng3d/render-api';
+import { WGPUBindGroup } from '../../caches/WGPUBindGroup';
+import { WGPUPipelineLayout } from '../../caches/WGPUPipelineLayout';
+import { WGPURenderObjectState } from '../WGPURenderObjectState';
 
 export function runBindGroup(renderObject: RenderObject, state: WGPURenderObjectState, device: GPUDevice)
 {

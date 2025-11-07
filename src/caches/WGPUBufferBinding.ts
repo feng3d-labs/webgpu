@@ -56,9 +56,9 @@ export class WGPUBufferBinding extends ReactiveObject
     {
         return this.map.get([device, bufferBinding, type]) || new WGPUBufferBinding(device, bufferBinding, type);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, BufferBinding, TypeInfo], WGPUBufferBinding>();
 }
-
 
 /**
  * 初始化缓冲区绑定。

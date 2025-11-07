@@ -139,5 +139,6 @@ export class WGPURenderPipeline extends ReactiveObject
     {
         return this.map.get([device, renderPipeline, renderPassFormat, vertices, indexFormat]) || new WGPURenderPipeline(device, renderPipeline, renderPassFormat, vertices, indexFormat);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, RenderPipeline, RenderPassFormat, VertexAttributes, GPUIndexFormat], WGPURenderPipeline>();
 }

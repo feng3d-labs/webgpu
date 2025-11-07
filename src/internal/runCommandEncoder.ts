@@ -33,6 +33,7 @@ export function runCommandEncoder(device: GPUDevice, commandEncoder: CommandEnco
         if (passEncoder.__type__ === 'CopyBufferToBuffer')
         {
             runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder as CopyBufferToBuffer);
+
             return;
         }
 

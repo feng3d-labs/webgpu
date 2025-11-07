@@ -1,10 +1,10 @@
-import { Computed, computed, reactive } from "@feng3d/reactivity";
-import { ChainMap } from "@feng3d/render-api";
-import { RenderBundle } from "../data/RenderBundle";
-import { RenderPassFormat } from "../internal/RenderPassFormat";
-import { runRenderObject } from "../internal/runRenderObject";
-import { WGPURenderObjectState, runCommands } from "../internal/WGPURenderObjectState";
-import { ReactiveObject } from "../ReactiveObject";
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { ChainMap } from '@feng3d/render-api';
+import { RenderBundle } from '../data/RenderBundle';
+import { RenderPassFormat } from '../internal/RenderPassFormat';
+import { runRenderObject } from '../internal/runRenderObject';
+import { WGPURenderObjectState, runCommands } from '../internal/WGPURenderObjectState';
+import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPURenderBundle extends ReactiveObject
 {

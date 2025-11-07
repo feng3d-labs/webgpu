@@ -85,5 +85,6 @@ export class WGPUComputeObject extends ReactiveObject
     {
         return this.map.get([device, computeObject]) || new WGPUComputeObject(device, computeObject);
     }
+
     static readonly map = new ChainMap<[GPUDevice, ComputeObject], WGPUComputeObject>();
 }

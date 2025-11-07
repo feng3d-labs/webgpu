@@ -1,8 +1,8 @@
-import { reactive } from "@feng3d/reactivity";
-import { RenderObject } from "@feng3d/render-api";
-import { WGPURenderObjectState } from "../WGPURenderObjectState";
+import { reactive } from '@feng3d/reactivity';
+import { RenderObject } from '@feng3d/render-api';
+import { WGPURenderObjectState } from '../WGPURenderObjectState';
 
-export function runViewport(renderObject: RenderObject, state: WGPURenderObjectState, attachmentSize: { readonly width: number, readonly height: number }) 
+export function runViewport(renderObject: RenderObject, state: WGPURenderObjectState, attachmentSize: { readonly width: number, readonly height: number })
 {
     const r_renderObject = reactive(renderObject);
     const viewport = r_renderObject.viewport;

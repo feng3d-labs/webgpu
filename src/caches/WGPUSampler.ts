@@ -70,6 +70,7 @@ export class WGPUSampler extends ReactiveObject
     {
         return this.map.get([device, sampler]) || new WGPUSampler(device, sampler);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, Sampler], WGPUSampler>();
 
     /**

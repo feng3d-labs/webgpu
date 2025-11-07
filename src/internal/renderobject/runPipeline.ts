@@ -1,8 +1,8 @@
-import { computed, reactive } from "@feng3d/reactivity";
-import { RenderObject } from "@feng3d/render-api";
-import { WGPURenderPipeline } from "../../caches/WGPURenderPipeline";
-import { RenderPassFormat } from "../RenderPassFormat";
-import { WGPURenderObjectState } from "../WGPURenderObjectState";
+import { computed, reactive } from '@feng3d/reactivity';
+import { RenderObject } from '@feng3d/render-api';
+import { WGPURenderPipeline } from '../../caches/WGPURenderPipeline';
+import { RenderPassFormat } from '../RenderPassFormat';
+import { WGPURenderObjectState } from '../WGPURenderObjectState';
 
 export function runPipeline(renderObject: RenderObject, state: WGPURenderObjectState, device: GPUDevice, renderPassFormat: RenderPassFormat)
 {

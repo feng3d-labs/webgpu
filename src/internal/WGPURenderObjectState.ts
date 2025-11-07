@@ -1,6 +1,6 @@
-import { Computed, computed, reactive } from "@feng3d/reactivity";
-import { Color, DrawIndexed, DrawVertex } from "@feng3d/render-api";
-import { RenderPassFormat } from "./RenderPassFormat";
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { Color, DrawIndexed, DrawVertex } from '@feng3d/render-api';
+import { RenderPassFormat } from './RenderPassFormat';
 
 export type CommandType =
     | [func: 'setViewport', args: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]]

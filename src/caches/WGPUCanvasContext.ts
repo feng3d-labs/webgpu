@@ -240,5 +240,6 @@ export class WGPUCanvasContext extends ReactiveObject
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
         return this.map.get([device, context]) || new WGPUCanvasContext(device, context);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, CanvasContext], WGPUCanvasContext>();
 }

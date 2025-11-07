@@ -144,6 +144,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
             if (!sampleCount)
             {
                 gpuRenderPassColorAttachment.resolveTarget = undefined;
+
                 return;
             }
 
@@ -212,5 +213,6 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
         return this.map.get([device, colorAttachment, descriptor]) || new WGPURenderPassColorAttachment(device, colorAttachment, descriptor);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, RenderPassColorAttachment, RenderPassDescriptor], WGPURenderPassColorAttachment>();
 }

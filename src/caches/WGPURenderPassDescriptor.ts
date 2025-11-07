@@ -103,6 +103,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         const getAttachmentFormat = (attachment: RenderPassColorAttachment) =>
         {
             const r_attachment = reactive(attachment);
+
             return computed(() =>
             {
                 r_attachment.view.texture;
@@ -111,7 +112,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
                 const wGPUTextureLike = WGPUTextureLike.getInstance(device, texture);
                 const gpuTexture = wGPUTextureLike.gpuTexture;
-
 
                 return gpuTexture.format;
             }).value;
@@ -160,6 +160,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
     {
         return this.map.get([device, descriptor]) || new WGPURenderPassDescriptor(device, descriptor);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, RenderPassDescriptor], WGPURenderPassDescriptor>();
 }
 

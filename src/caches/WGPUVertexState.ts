@@ -136,5 +136,6 @@ export class WGPUVertexState extends ReactiveObject
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
         return this.map.get([device, vertexState, vertices]) || new WGPUVertexState(device, vertexState, vertices);
     }
+
     static readonly map = new ChainMap<[GPUDevice, VertexState, VertexAttributes], WGPUVertexState>();
 }

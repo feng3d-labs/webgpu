@@ -37,5 +37,6 @@ export class WGPUOcclusionQuery extends ReactiveObject
     {
         return this.map.get([device, renderPassFormat, occlusionQuery]) || new WGPUOcclusionQuery(device, renderPassFormat, occlusionQuery, attachmentSize);
     }
+
     static readonly map = new ChainMap<[GPUDevice, RenderPassFormat, OcclusionQuery], WGPUOcclusionQuery>();
 }
