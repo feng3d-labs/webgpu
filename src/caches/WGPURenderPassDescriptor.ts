@@ -117,7 +117,10 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         {
             const gpuRenderPassDescriptor = this.gpuRenderPassDescriptor;
 
-            let attachmentSize: { width: number, height: number } = null;
+            r_renderPass.descriptor.attachmentSize;
+            const width = r_renderPass.descriptor.attachmentSize.width;
+            const height = r_renderPass.descriptor.attachmentSize.height;
+
             const colorFormats: GPUTextureFormat[] = [];
             let sampleCount: number;
 
@@ -128,10 +131,6 @@ export class WGPURenderPassDescriptor extends ReactiveObject
                 const gpuTexture = colorAttachment.view.texture;
                 colorFormats.push(gpuTexture.format);
 
-                if (!attachmentSize)
-                {
-                    attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
-                }
                 if (colorAttachment.resolveTarget)
                 {
                     sampleCount = gpuTexture.sampleCount;
@@ -142,7 +141,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             // 构建渲染通道格式对象
             let renderPassFormat: RenderPassFormat
 
-            const renderPassFormatKey = [attachmentSize.width, attachmentSize.height, ...colorFormats, depthStencilFormat, sampleCount].join(',');
+            const renderPassFormatKey = [width, height, ...colorFormats, depthStencilFormat, sampleCount].join(',');
             if (renderPassFormatCache[renderPassFormatKey])
             {
                 renderPassFormat = renderPassFormatCache[renderPassFormatKey];
@@ -150,7 +149,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             else
             {
                 renderPassFormat = {
-                    attachmentSize: attachmentSize,
+                    attachmentSize: renderPass.descriptor.attachmentSize,
                     colorFormats: colorFormats,
                     depthStencilFormat: depthStencilFormat,
                     sampleCount: sampleCount as 4,
