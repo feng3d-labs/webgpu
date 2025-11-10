@@ -38,9 +38,9 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniformBuffer = new ArrayBuffer(uniformBufferSize);
 
-    const uniforms: BufferBinding = {
+    const uniforms = {
         bufferView: new Uint8Array(uniformBuffer, 0, matrixSize),
-        modelViewProjectionMatrix: null, // 在帧循环中设置
+        value: { modelViewProjectionMatrix: null as Float32Array }, // 在帧循环中设置
     };
 
     const renderObject: RenderObject = {
@@ -60,9 +60,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount },
     };
 
-    const uniforms1: BufferBinding = {
+    const uniforms1 = {
         bufferView: new Uint8Array(uniformBuffer, offset, matrixSize),
-        modelViewProjectionMatrix: null, // 在帧循环中设置
+        value: { modelViewProjectionMatrix: null as Float32Array }, // 在帧循环中设置
     };
 
     const renderObject1: RenderObject = {
@@ -135,8 +135,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         updateTransformationMatrix();
 
         // 使用 subarray 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
-        reactive(uniforms).modelViewProjectionMatrix = modelViewProjectionMatrix1.subarray();
-        reactive(uniforms1).modelViewProjectionMatrix = modelViewProjectionMatrix2.subarray();
+        reactive(uniforms.value).modelViewProjectionMatrix = modelViewProjectionMatrix1.subarray();
+        reactive(uniforms1.value).modelViewProjectionMatrix = modelViewProjectionMatrix2.subarray();
 
         webgpu.submit(data);
 

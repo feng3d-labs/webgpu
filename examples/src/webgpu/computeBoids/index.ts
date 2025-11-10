@@ -58,7 +58,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             compute: { code: updateSpritesWGSL },
         },
         bindingResources: {
-            params: simParams,
+            params: { value: simParams },
             particlesA: {
                 bufferView: particleBuffers[0],
             },

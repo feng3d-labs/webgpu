@@ -69,7 +69,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         uv: { data: cubeVertexArray, format: 'float32x2', offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
-    const uniforms = { modelViewProjectionMatrix: null };
+    const uniforms = { value: { modelViewProjectionMatrix: null as Float32Array } };
 
     const pipeline: RenderPipeline = {
         vertex: {
@@ -170,7 +170,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         const transformationMatrix = getTransformationMatrix();
 
-        reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
+        reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
 
         webgpu.submit(submit);
 

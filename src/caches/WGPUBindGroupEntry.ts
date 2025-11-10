@@ -30,8 +30,6 @@ export class WGPUBindGroupEntry extends ReactiveObject
 
         const { name, type, resourceType, binding } = v.variableInfo;
 
-        const numberBufferBinding = [0];
-
         this._computedGpuBindGroupEntry = computed(() =>
         {
 
@@ -45,15 +43,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
             if (resourceType === ResourceType.Uniform || resourceType === ResourceType.Storage)
             {
                 // 执行
-                let resource = bindingResources[name];
-
-                // 当值为number时，将其视为一个数组。
-                if (typeof resource === 'number')
-                {
-                    numberBufferBinding[0] = resource;
-                    resource = numberBufferBinding;
-                }
-                const bufferBinding = resource as BufferBinding; // 值为number且不断改变时将可能会产生无数细碎gpu缓冲区。
+                const bufferBinding = bindingResources[name] as BufferBinding;
 
                 //
                 const wgpuBufferBinding = WGPUBufferBinding.getInstance(device, bufferBinding, type);

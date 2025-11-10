@@ -608,7 +608,7 @@ export class GLTFNode
     test = 0;
     skin?: GLTFSkin;
     private nodeTransformBindGroup = {
-        node_uniforms: { world_matrix: new Float32Array(16) as Float32Array },
+        node_uniforms: { value: { world_matrix: new Float32Array(16) as Float32Array } },
     };
 
     constructor(
@@ -656,7 +656,7 @@ export class GLTFNode
         }
         const worldMatrix = this.worldMatrix;
 
-        this.nodeTransformBindGroup.node_uniforms.world_matrix = worldMatrix;
+        reactive(this.nodeTransformBindGroup.node_uniforms.value).world_matrix = worldMatrix;
 
         for (const child of this.children)
         {

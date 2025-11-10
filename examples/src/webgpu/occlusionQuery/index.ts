@@ -56,9 +56,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             id,
             position: position.map((v) => v * 10),
             uni: {
-                color: color,
-                worldViewProjectionMatrix: mat4.create(),
-                worldMatrix: mat4.create(),
+                value: {
+                    color: color,
+                    worldViewProjectionMatrix: mat4.create(),
+                    worldMatrix: mat4.create(),
+                },
             },
         };
     });
@@ -224,8 +226,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
 
-                reactive(uni).worldViewProjectionMatrix = worldViewProjection;
-                reactive(uni).worldMatrix = worldInverseTranspose;
+                reactive(uni.value).worldViewProjectionMatrix = worldViewProjection;
+                reactive(uni.value).worldMatrix = worldInverseTranspose;
             },
         );
 

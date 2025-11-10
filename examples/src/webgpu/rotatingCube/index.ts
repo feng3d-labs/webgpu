@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { BufferBinding, RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
+import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
 
@@ -30,8 +30,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
-    const uniforms: BufferBinding = {
-        modelViewProjectionMatrix: new Float32Array(16),
+    const uniforms = {
+        value: { modelViewProjectionMatrix: new Float32Array(16) as Float32Array },
     };
 
     const renderObject: RenderObject = {
@@ -94,7 +94,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const transformationMatrix = getTransformationMatrix();
 
         // 更新uniforms
-        reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
+        reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
 
         webgpu.submit(data);
 

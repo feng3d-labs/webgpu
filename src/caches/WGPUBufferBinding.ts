@@ -75,6 +75,8 @@ export class WGPUBufferBinding extends ReactiveObject
         const buffer = Buffer.getBuffer(bufferBinding.bufferView.buffer);
         const offset = bufferBinding.bufferView.byteOffset;
 
+        const r_bufferBinding = reactive(bufferBinding);
+
         for (let i = 0; i < bufferBindingInfo.items.length; i++)
         {
             const { paths, offset: itemInfoOffset, size: itemInfoSize, Cls } = bufferBindingInfo.items[i];
@@ -82,8 +84,10 @@ export class WGPUBufferBinding extends ReactiveObject
             // 更新数据
             this.effect(() =>
             {
-                let value: any = bufferBinding;
-                let r_value: any = reactive(bufferBinding); // 监听
+                let value: any = bufferBinding.value;
+                let r_value: any = r_bufferBinding.value; // 监听
+
+                if (value === undefined) return;
 
                 for (let i = 0; i < paths.length; i++)
                 {

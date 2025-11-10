@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { RenderObject, Submit } from '@feng3d/render-api';
+import { BufferBinding, RenderObject, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -36,7 +36,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         indices: new Uint16Array([0, 1, 2]), // 顶点索引数据
         draw: { __type__: 'DrawIndexed', indexCount: 3 }, // 绘制命令
-        bindingResources: { color: [1, 0, 0, 0] as any }, // Uniform 颜色值。
+        bindingResources: { color: { value: [1, 0, 0, 0] } as BufferBinding }, // Uniform 颜色值。
     };
 
     const submit: Submit = { // 一次GPU提交
@@ -97,7 +97,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 }
                 `;
 
-        reactive(renderObject.bindingResources).color = [0, 1, 0, 1];
+        reactive(renderObject.bindingResources.color as BufferBinding).value = [0, 1, 0, 1];
     };
 };
 

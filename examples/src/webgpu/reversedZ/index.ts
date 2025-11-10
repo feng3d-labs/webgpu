@@ -313,14 +313,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     const uniforms = {
-        modelMatrix: mvpMatricesData,
+        value: { modelMatrix: mvpMatricesData },
     };
 
     const camera0 = {
-        viewProjectionMatrix: cameraMatrixBuffer,
+        value: { viewProjectionMatrix: cameraMatrixBuffer as Float32Array },
     };
     const camera1 = {
-        viewProjectionMatrix: cameraMatrixReversedDepthBuffer,
+        value: { viewProjectionMatrix: cameraMatrixReversedDepthBuffer as Float32Array },
     };
 
     const uniformBindGroups: BindingResources[] = [
@@ -348,8 +348,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         viewProjectionMatrix,
     );
 
-    camera0.viewProjectionMatrix = viewProjectionMatrix;
-    camera1.viewProjectionMatrix = reversedRangeViewProjectionMatrix;
+    camera0.value.viewProjectionMatrix = viewProjectionMatrix;
+    camera1.value.viewProjectionMatrix = reversedRangeViewProjectionMatrix;
 
     const tmpMat4 = mat4.create();
 

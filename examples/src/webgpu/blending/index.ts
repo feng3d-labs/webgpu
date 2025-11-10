@@ -175,8 +175,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     // }
     // const srcUniform = makeUniformBufferAndValues();
     // const dstUniform = makeUniformBufferAndValues();
-    const srcUniform = { matrix: new Float32Array(16) };
-    const dstUniform = { matrix: new Float32Array(16) };
+    const srcUniform = { value: { matrix: new Float32Array(16) } };
+    const dstUniform = { value: { matrix: new Float32Array(16) } };
 
     const srcBindGroupUnpremultipliedAlpha: BindingResources = {
         ourSampler: sampler,
@@ -497,7 +497,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             uniforms.matrix,
         );
 
-        uniforms.matrix = new Float32Array(uniforms.matrix);
+        reactive(uniforms).matrix = new Float32Array(uniforms.matrix);
     }
 
     const ro: RenderObject = {
@@ -552,8 +552,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         reactive(constantColor)[2] = constant.color[2];
         reactive(constantColor)[3] = constant.alpha;
 
-        updateUniforms(srcUniform, canvas, srcTexture);
-        updateUniforms(dstUniform, canvas, dstTexture);
+        updateUniforms(srcUniform.value, canvas, srcTexture);
+        updateUniforms(dstUniform.value, canvas, dstTexture);
 
         webgpu.submit(submit);
 

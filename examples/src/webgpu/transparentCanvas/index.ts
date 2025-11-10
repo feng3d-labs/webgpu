@@ -57,7 +57,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const uniformBindGroup = {
-        uniforms: { modelViewProjectionMatrix: undefined },
+        uniforms: { value: { modelViewProjectionMatrix: undefined } },
     };
 
     const renderPassDescriptor: RenderPassDescriptor = {
@@ -118,7 +118,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     function frame()
     {
-        reactive(uniformBindGroup.uniforms).modelViewProjectionMatrix = getTransformationMatrix().slice();
+        reactive(uniformBindGroup.uniforms.value).modelViewProjectionMatrix = getTransformationMatrix().slice();
 
         webgpu.submit(submit);
 

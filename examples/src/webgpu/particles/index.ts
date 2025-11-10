@@ -261,8 +261,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         },
         data: {
             bufferView: particlesBuffer,
-            offset: 0,
-            size: numParticles * particleInstanceByteSize,
         },
         texture: { texture },
     };

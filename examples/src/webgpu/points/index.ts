@@ -131,9 +131,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const bindingResources = {
         uni: {
-            matrix: undefined,
-            resolution: undefined,
-            size: undefined,
+            value: {
+                matrix: undefined,
+                resolution: undefined,
+                size: undefined,
+            }
         },
         s: sampler,
         t: { texture },
@@ -195,7 +197,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         reactive(ro).pipeline = pipelines[fixedSize ? 1 : 0][textured ? 1 : 0];
 
         // Set the size in the uniform values
-        reactive(bindingResources.uni).size = size;
+        reactive(bindingResources.uni.value).size = size;
 
         const fov = (90 * Math.PI) / 180;
         const aspect = canvas.clientWidth / canvas.clientHeight;
@@ -211,10 +213,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         mat4.rotateY(viewProjection, time, matrixValue);
         mat4.rotateX(matrixValue, time * 0.1, matrixValue);
         // Copy the uniform values to the GPU
-        reactive(bindingResources.uni).matrix = matrixValue;
+        reactive(bindingResources.uni.value).matrix = matrixValue;
 
         // Update the resolution in the uniform values
-        reactive(bindingResources.uni).resolution = [canvas.width, canvas.height];
+        reactive(bindingResources.uni.value).resolution = [canvas.width, canvas.height];
 
         webgpu.submit(submit);
 

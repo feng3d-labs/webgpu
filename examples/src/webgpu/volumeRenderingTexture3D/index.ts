@@ -44,7 +44,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const uniformBuffer = {
-        inverseModelViewProjectionMatrix: new Float32Array(16),
+        inverseModelViewProjectionMatrix: new Float32Array(16) as Float32Array,
     };
 
     // Fetch the image and upload it into a GPUTexture.
@@ -101,7 +101,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const uniformBindGroup: BindingResources = {
-        uniforms: uniformBuffer,
+        uniforms: { value: uniformBuffer },
         mySampler: sampler,
         myTexture: { texture: volumeTexture },
     };

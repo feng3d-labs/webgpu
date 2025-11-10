@@ -228,10 +228,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
     );
     const modelViewProjectionMatrix = mat4.create();
 
+    const uniforms = {
+        value: { viewProjectionMatrix: modelViewProjectionMatrix as Float32Array },
+    };
+
     const frameBindGroup: BindingResources = {
-        uniforms: {
-            bufferView: uniformBuffer,
-        },
+        uniforms: uniforms,
     };
 
     function getTransformationMatrix()
@@ -354,7 +356,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
 
         const transformationMatrix = getTransformationMatrix();
 
-        reactive(Buffer.getBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
+        reactive(uniforms.value).viewProjectionMatrix = transformationMatrix.subarray();
 
         webgpu.submit(submit);
 

@@ -89,7 +89,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const time = {
         bufferView: new Float32Array(uniformBuffer.buffer, timeOffset, 1),
-        value: 0,
+        value: { value: 0 },
     };
 
     const renderObjects0: RenderObject[] = [];
@@ -157,7 +157,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
             uniformTime[0] = (timestamp - startTime) / 1000;
 
-            reactive(time).value = uniformTime[0];
+            reactive(time.value).value = uniformTime[0];
 
             if (settings.renderBundles)
             {

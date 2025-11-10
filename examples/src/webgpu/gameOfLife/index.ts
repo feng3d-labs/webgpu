@@ -104,8 +104,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const uniformBindGroup: BindingResources = {
             size: {
                 bufferView: sizeBuffer,
-                offset: 0,
-                size: 2 * Uint32Array.BYTES_PER_ELEMENT,
             },
         };
 

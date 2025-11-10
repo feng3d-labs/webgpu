@@ -185,8 +185,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     const bindingResources: BindingResources = {
-        spaceTransform,
-        mapInfo,
+        spaceTransform: { value: spaceTransform },
+        mapInfo: { value: mapInfo },
         // Texture bindGroups and bindGroupLayout
         textureSampler: sampler,
         albedoTexture: { texture: woodAlbedoTexture },

@@ -23,7 +23,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const bindGroup: BindingResources = {
-        uni,
+        uni: { value: uni },
     };
 
     const settings = {

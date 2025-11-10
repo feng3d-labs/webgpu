@@ -50,11 +50,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         16 * Float32Array.BYTES_PER_ELEMENT + 2 * Uint32Array.BYTES_PER_ELEMENT,
         16,
     );
-    const uniforms: BufferBinding = {
+    const uniforms = {
         bufferView: new Uint8Array(uniformsSize),
-        modelViewProjectionMatrix: undefined,
-        maxStorableFragments: undefined,
-        targetWidth: undefined,
+        value: { modelViewProjectionMatrix: undefined, maxStorableFragments: undefined, targetWidth: undefined },
     };
 
     const opaquePipeline: RenderPipeline = {
@@ -224,8 +222,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // * data : array<u32>
         const headsBuffer: BufferBinding = {
             bufferView: new Uint32Array(1 + canvas.width * sliceHeight),
-            numFragments: undefined,
-            data: undefined,
+            value: { numFragments: undefined, data: undefined },
         };
 
         const headsInitBuffer = new Uint32Array(1 + canvas.width * sliceHeight);
@@ -233,11 +230,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         headsInitBuffer.fill(0xffffffff);
 
         const bindingResources = {
-            uniforms,
+            uniforms: uniforms,
             heads: headsBuffer,
             linkedList: linkedListBuffer,
             opaqueDepthTexture: depthTextureView,
-            sliceInfo: { sliceStartY: undefined },
+            sliceInfo: { value: { sliceStartY: undefined } },
         };
 
         const opaquePassDescriptor: RenderPassDescriptor = {
@@ -366,14 +363,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         // update the uniform buffer
-        reactive(uniforms).maxStorableFragments = averageLayersPerFragment * canvas.width * sliceHeight;
-        reactive(uniforms).targetWidth = canvas.width;
+        reactive(uniforms.value).maxStorableFragments = averageLayersPerFragment * canvas.width * sliceHeight;
+        reactive(uniforms.value).targetWidth = canvas.width;
 
         return function doDraw()
         {
             // update the uniform buffer
             {
-                reactive(uniforms).modelViewProjectionMatrix = getCameraViewProjMatrix();
+                reactive(uniforms.value).modelViewProjectionMatrix = getCameraViewProjMatrix();
             }
 
             webgpu.submit(submit);

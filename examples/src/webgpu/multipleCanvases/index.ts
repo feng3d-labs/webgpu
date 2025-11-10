@@ -216,12 +216,14 @@ const init = async () =>
         colorValue.set(randColor());
 
         // Make a bind group for this uniform
-        const bindGroup: BindingResources = {
+        const bindGroup = {
             uni: {
                 bufferView: uniformValues,
-                worldViewProjectionMatrix: undefined,
-                worldMatrix: undefined,
-                color: undefined,
+                value: {
+                    worldViewProjectionMatrix: undefined,
+                    worldMatrix: undefined,
+                    color: undefined,
+                },
             },
         };
         // device.createBindGroup({

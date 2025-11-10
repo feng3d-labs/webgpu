@@ -132,9 +132,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     type ObjectInfo = {
         uniformBuffer: {
-            worldViewProjectionMatrix?: Float32Array;
-            worldMatrix?: Float32Array;
-            color?: number[];
+            value: {
+                worldViewProjectionMatrix?: Float32Array;
+                worldMatrix?: Float32Array;
+                color?: number[];
+            };
         };
         lineUniformValues: Float32Array;
         lineUniformBuffer: {
@@ -158,11 +160,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // for our uniforms.
         const uniformValues = new Float32Array(16 + 16 + 4);
         const uniformBuffer: {
-            worldViewProjectionMatrix?: Float32Array;
-            worldMatrix?: Float32Array;
-            color?: number[];
+            value: {
+                worldViewProjectionMatrix?: Float32Array;
+                worldMatrix?: Float32Array;
+                color?: number[];
+            };
         } = {
-            color: randColor(),
+            value: {
+                color: randColor(),
+            },
         };
 
         const model = randElement(models);
@@ -325,13 +331,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 );
                 mat4.rotateX(world, time * 0.53 + i, world);
 
-                const worldViewProjectionMatrixValue = uniformBuffer.worldViewProjectionMatrix || new Float32Array(16);
+                const worldViewProjectionMatrixValue = uniformBuffer.value.worldViewProjectionMatrix || new Float32Array(16);
 
                 mat4.multiply(viewProjection, world, worldViewProjectionMatrixValue);
 
                 // Upload our uniform values.
-                reactive(uniformBuffer).worldViewProjectionMatrix = worldViewProjectionMatrixValue.subarray();
-                reactive(uniformBuffer).worldMatrix = world;
+                reactive(uniformBuffer.value).worldViewProjectionMatrix = worldViewProjectionMatrixValue.subarray();
+                reactive(uniformBuffer.value).worldMatrix = world;
 
                 if (settings.models)
                 {

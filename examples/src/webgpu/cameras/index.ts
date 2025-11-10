@@ -99,7 +99,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const bindingResources = {
         uniforms: {
-            modelViewProjectionMatrix: new Float32Array(16),
+           value: { modelViewProjectionMatrix: new Float32Array(16)},
         },
         mySampler: sampler,
         myTexture: { texture: cubeTexture },
@@ -166,7 +166,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         const modelViewProjection = getModelViewProjectionMatrix(deltaTime);
 
-        reactive(bindingResources.uniforms).modelViewProjectionMatrix = new Float32Array(modelViewProjection); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+        reactive(bindingResources.uniforms.value).modelViewProjectionMatrix = new Float32Array(modelViewProjection); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
         webgpu.submit(data);
 

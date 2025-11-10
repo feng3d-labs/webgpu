@@ -54,7 +54,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const uniforms = {
-        modelViewProjectionMatrix: new Float32Array(16) as Float32Array,
+        value: { modelViewProjectionMatrix: new Float32Array(16) as Float32Array },
     };
 
     const renderObject: RenderObject = {
@@ -119,7 +119,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const transformationMatrix = getTransformationMatrix();
 
         // 重新设置uniforms
-        reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
+        reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
 
         webgpu.submit(data);
 

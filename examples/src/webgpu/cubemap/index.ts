@@ -125,6 +125,10 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
     };
 
+    const uniforms = {
+        value: { modelViewProjectionMatrix: new Float32Array(16) as Float32Array },
+    };
+
     const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
@@ -133,9 +137,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             },
         },
         bindingResources: {
-            uniforms: {
-                modelViewProjectionMatrix: new Float32Array(16),
-            },
+            uniforms,
             mySampler: sampler,
             myTexture: { texture: cubemapTexture },
         },
@@ -150,7 +152,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     {
         updateTransformationMatrix();
 
-        reactive(renderObject.bindingResources.uniforms as BufferBinding).modelViewProjectionMatrix = modelViewProjectionMatrix.subarray();
+        reactive(uniforms.value).modelViewProjectionMatrix = modelViewProjectionMatrix.subarray();
 
         const data: Submit = {
             commandEncoders: [

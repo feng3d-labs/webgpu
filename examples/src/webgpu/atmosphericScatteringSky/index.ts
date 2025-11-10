@@ -52,7 +52,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             compute: { code: atmosphericScatteringSkyWGSL },
         },
         bindingResources: {
-            uniformBuffer,
+            uniformBuffer: { value: uniformBuffer },
             outTexture: { texture: framebuffer },
         },
         workgroups: { workgroupCountX: Math.ceil(uniformBuffer.width / 64), workgroupCountY: Math.ceil(uniformBuffer.height / 64) },
