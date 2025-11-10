@@ -3,7 +3,7 @@ import { ChainMap } from '@feng3d/render-api';
 import { RenderBundle } from '../data/RenderBundle';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { runRenderObject } from '../internal/runRenderObject';
-import { WGPURenderObjectState, runCommands } from '../internal/WGPURenderObjectState';
+import { WGPURenderBundleCache } from '../internal/WGPURenderObjectState';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPURenderBundle extends ReactiveObject
@@ -52,7 +52,7 @@ export class WGPURenderBundle extends ReactiveObject
             const renderBundleEncoder = device.createRenderBundleEncoder(descriptor);
 
             //
-            const bundleState = new WGPURenderObjectState(true);
+            const bundleState = new WGPURenderBundleCache();
 
             r_renderBundle.renderObjects.concat();
             renderBundle.renderObjects.forEach((renderObject) =>
@@ -60,7 +60,7 @@ export class WGPURenderBundle extends ReactiveObject
                 runRenderObject(device, renderPassFormat, attachmentSize, renderObject, bundleState);
             });
 
-            runCommands(renderBundleEncoder, bundleState.commands);
+            bundleState.runCommands(renderBundleEncoder);
 
             const gpuRenderBundle = renderBundleEncoder.finish();
 

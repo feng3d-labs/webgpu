@@ -9,9 +9,9 @@ import { runStencilReference } from './renderobject/runStencilReference';
 import { runVertexBuffer } from './renderobject/runVertexBuffer';
 import { runViewport } from './renderobject/runViewport';
 import { RenderPassFormat } from './RenderPassFormat';
-import { WGPURenderObjectState } from './WGPURenderObjectState';
+import { WGPURenderPassCache } from './WGPURenderObjectState';
 
-export function runRenderObject(device: GPUDevice, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number }, renderObject: RenderObject, state: WGPURenderObjectState)
+export function runRenderObject(device: GPUDevice, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number }, renderObject: RenderObject, state: WGPURenderPassCache)
 {
     runViewport(renderObject, state, attachmentSize);
 

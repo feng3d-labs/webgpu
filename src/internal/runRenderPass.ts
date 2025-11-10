@@ -6,7 +6,7 @@ import { RenderBundle } from '../data/RenderBundle';
 import { runOcclusionQuery } from './runOcclusionQuery';
 import { runRenderBundle } from './runRenderBundle';
 import { runRenderObject } from './runRenderObject';
-import { CommandType, runCommands, WGPURenderObjectState } from './WGPURenderObjectState';
+import { WGPURenderPassCache } from './WGPURenderObjectState';
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
 {
@@ -22,9 +22,9 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
 
     const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
-    const commands = getCommons(device, renderPass);
+    const state = getWGPURenderPassCache(device, renderPass);
 
-    runCommands(passEncoder, commands);
+    state.runCommands(passEncoder);
 
     passEncoder.end();
 
@@ -32,20 +32,19 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
     renderPassDescriptor.occlusionQuerySet?.resolve(commandEncoder);
 }
 
-function getCommons(device: GPUDevice, renderPass: RenderPass)
+function getWGPURenderPassCache(device: GPUDevice, renderPass: RenderPass)
 {
     let commandsComputed = cache.get([device, renderPass]);
     if (commandsComputed) return commandsComputed.value;
 
     commandsComputed = computed(() =>
     {
-
         const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, renderPass.descriptor);
 
         const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
         const attachmentSize = renderPass.descriptor.attachmentSize;
 
-        const state = new WGPURenderObjectState();
+        const state = new WGPURenderPassCache();
         let queryIndex = 0;
 
         renderPass.renderPassObjects.forEach((element) =>
@@ -68,7 +67,7 @@ function getCommons(device: GPUDevice, renderPass: RenderPass)
             }
         });
 
-        return state.commands;
+        return state;
     });
 
     cache.set([device, renderPass], commandsComputed);
@@ -76,4 +75,4 @@ function getCommons(device: GPUDevice, renderPass: RenderPass)
     return commandsComputed.value;
 }
 
-const cache = new ChainMap<[GPUDevice, RenderPass], Computed<CommandType[]>>();
+const cache = new ChainMap<[GPUDevice, RenderPass], Computed<WGPURenderPassCache>>();

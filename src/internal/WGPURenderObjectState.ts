@@ -16,7 +16,7 @@ export type CommandType =
     | [func: 'endOcclusionQuery']
     ;
 
-export class WGPURenderObjectState
+export class WGPURenderPassCache
 {
     commands: CommandType[] = [];
     _setViewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number] | undefined;
@@ -28,14 +28,8 @@ export class WGPURenderObjectState
     _setVertexBuffer: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
     _setIndexBuffer: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
 
-    constructor(private isBundleEncoder: boolean = false)
-    {
-    }
-
     setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number)
     {
-        if (this.isBundleEncoder) return;
-
         const currentViewport = this._setViewport;
         if (currentViewport && x === currentViewport[0] && y === currentViewport[1] && width === currentViewport[2] && height === currentViewport[3] && minDepth === currentViewport[4] && maxDepth === currentViewport[5]) return;
 
@@ -45,8 +39,6 @@ export class WGPURenderObjectState
 
     setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate)
     {
-        if (this.isBundleEncoder) return;
-
         const currentScissorRect = this._setScissorRect;
         if (currentScissorRect && x === currentScissorRect[0] && y === currentScissorRect[1] && width === currentScissorRect[2] && height === currentScissorRect[3]) return;
 
@@ -56,8 +48,6 @@ export class WGPURenderObjectState
 
     setBlendConstant(blendConstant: Color | undefined)
     {
-        if (this.isBundleEncoder) return;
-
         if (blendConstant === undefined) return;
         const currentBlendConstant = this._setBlendConstant;
         if (blendConstant === currentBlendConstant || (blendConstant && currentBlendConstant && blendConstant[0] === currentBlendConstant[0] && blendConstant[1] === currentBlendConstant[1] && blendConstant[2] === currentBlendConstant[2] && blendConstant[3] === currentBlendConstant[3])) return;
@@ -68,8 +58,6 @@ export class WGPURenderObjectState
 
     setStencilReference(stencilReference: number | undefined)
     {
-        if (this.isBundleEncoder) return;
-
         if (stencilReference === undefined) return;
 
         if (stencilReference === this._setStencilReference) return;
@@ -128,32 +116,44 @@ export class WGPURenderObjectState
 
     executeBundles(bundles: GPURenderBundle[])
     {
-        if (this.isBundleEncoder) return;
-
         this.commands.push(['executeBundles', [bundles]]);
     }
 
     beginOcclusionQuery(queryIndex: GPUSize32)
     {
-        if (this.isBundleEncoder) return;
-
         this.commands.push(['beginOcclusionQuery', [queryIndex]]);
     }
 
     endOcclusionQuery()
     {
-        if (this.isBundleEncoder) return;
-
         this.commands.push(['endOcclusionQuery']);
+    }
+
+    runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPassEncoder)
+    {
+        const commands = this.commands;
+        for (let i = 0, n = commands.length; i < n; i++)
+        {
+            const [func, args] = commands[i];
+
+            (renderBundleEncoder[func] as Function).apply(renderBundleEncoder, args);
+        }
     }
 }
 
-export function runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPassEncoder, commands: CommandType[])
+export class WGPURenderBundleCache extends WGPURenderPassCache
 {
-    for (let i = 0, n = commands.length; i < n; i++)
-    {
-        const [func, args] = commands[i];
+    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number) { }
 
-        (renderBundleEncoder[func] as Function).apply(renderBundleEncoder, args);
-    }
+    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate) { }
+
+    setBlendConstant(blendConstant: Color | undefined) { }
+
+    setStencilReference(stencilReference: number | undefined) { }
+
+    executeBundles(bundles: GPURenderBundle[]) { }
+
+    beginOcclusionQuery(queryIndex: GPUSize32) { }
+
+    endOcclusionQuery() { }
 }
