@@ -11,7 +11,7 @@ import vertexPrecisionErrorPassWGSL from './vertexPrecisionErrorPass.wgsl';
 import vertexTextureQuadWGSL from './vertexTextureQuad.wgsl';
 
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, CanvasContext, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
+import { BindingResources, CanvasContext, CanvasTexture, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
 // Two planes close to each other for depth precision test
@@ -78,6 +78,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
     const context: CanvasContext = { canvasId: canvas.id };
+    const canvasTexture: CanvasTexture = { context };
+    const canvasTextureView: TextureView = { texture: canvasTexture };
 
     const webgpu = await new WebGPU().init();
 
@@ -224,7 +226,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const drawPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
-                view: { texture: { context } },
+                view: canvasTextureView,
                 clearValue: [0.0, 0.0, 0.5, 1.0],
             },
         ],
@@ -240,7 +242,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const drawPassLoadDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
-                view: { texture: { context } },
+                view: canvasTextureView,
                 loadOp: 'load',
             },
         ],
@@ -257,7 +259,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const textureQuadPassDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
-                view: { texture: { context: { canvasId: canvas.id } } },
+                view: canvasTextureView,
 
                 clearValue: [0.0, 0.0, 0.5, 1.0],
             },
@@ -266,7 +268,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const textureQuadPassLoadDescriptor: RenderPassDescriptor = {
         colorAttachments: [
             {
-                view: { texture: { context: { canvasId: canvas.id } } },
+                view: canvasTextureView,
 
                 loadOp: 'load',
                 storeOp: 'store',
