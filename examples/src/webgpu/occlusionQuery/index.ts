@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { Buffer, BufferBinding, OcclusionQuery, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';
+import { OcclusionQuery, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
@@ -52,22 +52,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const objectInfos = cubePositions.map(({ position, id, color }) =>
     {
-        const uniformBufferSize = (2 * 16 + 3 + 1 + 4) * 4;
-        const uniformBuffer = new Uint8Array(uniformBufferSize);
-        const uniformValues = new Float32Array(uniformBufferSize / 4);
-        const worldViewProjection = uniformValues.subarray(0, 16);
-        const worldInverseTranspose = uniformValues.subarray(16, 32);
-        const colorValue = uniformValues.subarray(32, 36);
-
-        colorValue.set(color);
-
         return {
             id,
             position: position.map((v) => v * 10),
-            uniformBuffer,
-            uniformValues,
-            worldInverseTranspose,
-            worldViewProjection,
+            uni: {
+                color: color,
+                worldViewProjectionMatrix: mat4.create(),
+                worldMatrix: mat4.create(),
+            },
         };
     });
 
@@ -146,11 +138,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         const ro: RenderObject = {
             ...renderObject,
-            bindingResources: {
-                uni: {
-                    bufferView: v.uniformBuffer,
-                },
-            },
+            bindingResources: v as any,
         };
 
         return ro;
@@ -221,10 +209,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         objectInfos.forEach(
             (
                 {
-                    uniformBuffer,
-                    uniformValues,
-                    worldViewProjection,
-                    worldInverseTranspose,
+                    uni,
                     position,
                 },
                 i,
@@ -232,12 +217,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 const world = mat4.translation(position);
 
+                const worldInverseTranspose = mat4.create();
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
+
+                const worldViewProjection = mat4.create();
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
-                const buffer = (renderObjects[i].bindingResources.uni as BufferBinding).bufferView;
 
-                reactive(Buffer.getBuffer(buffer)).data = uniformValues.subarray().buffer;
+                reactive(uni).worldViewProjectionMatrix = worldViewProjection;
+                reactive(uni).worldMatrix = worldInverseTranspose;
             },
         );
 
