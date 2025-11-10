@@ -1,6 +1,6 @@
 import { WGPUTimestampQuery } from '../caches/WGPUTimestampQuery';
 import { ComputePass } from '../data/ComputePass';
-import { WGPUComputeObject } from './WGPUComputeObject';
+import { runComputeObject } from './runComputeObject';
 
 export function runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: ComputePass)
 {
@@ -15,8 +15,7 @@ export function runComputePass(device: GPUDevice, commandEncoder: GPUCommandEnco
 
     computePass.computeObjects.forEach((computeObject) =>
     {
-        const wGPUComputeObject = WGPUComputeObject.getInstance(device, computeObject);
-        wGPUComputeObject.run(device, passEncoder);
+        runComputeObject(computeObject, device, passEncoder);
     })
 
     passEncoder.end();
