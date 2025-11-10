@@ -4,7 +4,7 @@ import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { RenderBundle } from '../data/RenderBundle';
 import { runOcclusionQuery } from './runOcclusionQuery';
 import { runRenderObject } from './runRenderObject';
-import { runRenderBundle } from './WGPURenderBundle';
+import { runRenderBundle } from './runRenderBundle';
 import { runCommands, WGPURenderObjectState } from './WGPURenderObjectState';
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
