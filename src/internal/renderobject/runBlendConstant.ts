@@ -1,8 +1,8 @@
 import { reactive } from '@feng3d/reactivity';
 import { BlendState, RenderObject } from '@feng3d/render-api';
-import { WGPURenderPassCommands } from '../WGPURenderObjectState';
+import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
-export function runBlendConstant(renderObject: RenderObject, state: WGPURenderPassCommands)
+export function runBlendConstant(renderObject: RenderObject, state: WGPURenderPassEncoder)
 {
     const r_renderObject = reactive(renderObject);
     const blendConstantColor = BlendState.getBlendConstantColor(r_renderObject.pipeline.fragment?.targets?.[0]?.blend);

@@ -1,5 +1,5 @@
 import { Color } from '@feng3d/render-api';
-import { RenderPassFormat } from './RenderPassFormat';
+import { RenderPassFormat } from '../internal/RenderPassFormat';
 
 export type CommandType =
     | [func: 'setViewport', args: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]]
@@ -17,7 +17,7 @@ export type CommandType =
     | [func: 'endOcclusionQuery']
     ;
 
-export class WGPURenderPassCommands
+export class WGPURenderPassEncoder implements GPURenderPassEncoder
 {
     commands: CommandType[] = [];
     _setViewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number] | undefined;
@@ -35,7 +35,7 @@ export class WGPURenderPassCommands
         this.attachmentSize = attachmentSize;
     }
 
-    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number)
+    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined
     {
         const currentViewport = this._setViewport;
         if (currentViewport && x === currentViewport[0] && y === currentViewport[1] && width === currentViewport[2] && height === currentViewport[3] && minDepth === currentViewport[4] && maxDepth === currentViewport[5]) return;
@@ -44,7 +44,7 @@ export class WGPURenderPassCommands
         this._setViewport = [x, y, width, height, minDepth, maxDepth];
     }
 
-    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate)
+    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined
     {
         const currentScissorRect = this._setScissorRect;
         if (currentScissorRect && x === currentScissorRect[0] && y === currentScissorRect[1] && width === currentScissorRect[2] && height === currentScissorRect[3]) return;
@@ -53,7 +53,7 @@ export class WGPURenderPassCommands
         this._setScissorRect = [x, y, width, height];
     }
 
-    setBlendConstant(blendConstant: Color | undefined)
+    setBlendConstant(blendConstant: Color | undefined): undefined
     {
         if (blendConstant === undefined) return;
         const currentBlendConstant = this._setBlendConstant;
@@ -63,7 +63,7 @@ export class WGPURenderPassCommands
         this._setBlendConstant = blendConstant;
     }
 
-    setStencilReference(stencilReference: number | undefined)
+    setStencilReference(stencilReference: number | undefined): undefined
     {
         if (stencilReference === undefined) return;
 
@@ -73,7 +73,7 @@ export class WGPURenderPassCommands
         this._setStencilReference = stencilReference;
     }
 
-    setPipeline(pipeline: GPURenderPipeline)
+    setPipeline(pipeline: GPURenderPipeline): undefined
     {
         if (pipeline === undefined) return;
 
@@ -83,7 +83,7 @@ export class WGPURenderPassCommands
         this._setPipeline = pipeline;
     }
 
-    setBindGroup(i: GPUIndex32, bindGroup: GPUBindGroup)
+    setBindGroup(i: GPUIndex32, bindGroup: GPUBindGroup): undefined
     {
         if (this._setBindGroup[i] !== bindGroup)
         {
@@ -92,7 +92,7 @@ export class WGPURenderPassCommands
         }
     }
 
-    setVertexBuffer(i: GPUIndex32, buffer: GPUBuffer | null | undefined, offset?: GPUSize64, size?: GPUSize64)
+    setVertexBuffer(i: GPUIndex32, buffer: GPUBuffer | null | undefined, offset?: GPUSize64, size?: GPUSize64): undefined
     {
         const currentVertexBuffer = this._setVertexBuffer[i];
         if (!currentVertexBuffer || currentVertexBuffer[0] !== buffer || currentVertexBuffer[1] !== offset || currentVertexBuffer[2] !== size)
@@ -102,7 +102,7 @@ export class WGPURenderPassCommands
         }
     }
 
-    setIndexBuffer(buffer: GPUBuffer | null | undefined, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64)
+    setIndexBuffer(buffer: GPUBuffer | null | undefined, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64): undefined
     {
         if (!this._setIndexBuffer || this._setIndexBuffer[0] !== buffer || this._setIndexBuffer[1] !== indexFormat || this._setIndexBuffer[2] !== offset || this._setIndexBuffer[3] !== size)
         {
@@ -111,27 +111,27 @@ export class WGPURenderPassCommands
         }
     }
 
-    draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32)
+    draw(vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32): undefined
     {
         this.commands.push(['draw', [vertexCount, instanceCount, firstVertex, firstInstance]]);
     }
 
-    drawIndexed(indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32)
+    drawIndexed(indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32): undefined
     {
         this.commands.push(['drawIndexed', [indexCount, instanceCount, firstIndex, baseVertex, firstInstance]]);
     }
 
-    executeBundles(bundles: GPURenderBundle[])
+    executeBundles(bundles: GPURenderBundle[]): undefined
     {
         this.commands.push(['executeBundles', [bundles]]);
     }
 
-    beginOcclusionQuery(queryIndex: GPUSize32)
+    beginOcclusionQuery(queryIndex: GPUSize32): undefined
     {
         this.commands.push(['beginOcclusionQuery', [queryIndex]]);
     }
 
-    endOcclusionQuery()
+    endOcclusionQuery(): undefined
     {
         this.commands.push(['endOcclusionQuery']);
     }
@@ -146,21 +146,31 @@ export class WGPURenderPassCommands
             (renderBundleEncoder[func] as Function).apply(renderBundleEncoder, args);
         }
     }
+
+    //
+    __brand: 'GPURenderPassEncoder';
+    label: string;
+    end(): undefined { throw new Error('Method not implemented.'); }
+    pushDebugGroup(groupLabel: string): undefined { throw new Error('Method not implemented.'); }
+    popDebugGroup(): undefined { throw new Error('Method not implemented.'); }
+    insertDebugMarker(markerLabel: string): undefined { throw new Error('Method not implemented.'); }
+    drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined { throw new Error('Method not implemented.'); }
+    drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined { throw new Error('Method not implemented.'); }
 }
 
-export class WGPURenderBundleCommands extends WGPURenderPassCommands
+export class WGPURenderBundleEncoder extends WGPURenderPassEncoder
 {
-    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number) { }
+    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined { }
 
-    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate) { }
+    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined { }
 
-    setBlendConstant(blendConstant: Color | undefined) { }
+    setBlendConstant(blendConstant: Color | undefined): undefined { }
 
-    setStencilReference(stencilReference: number | undefined) { }
+    setStencilReference(stencilReference: number | undefined): undefined { }
 
-    executeBundles(bundles: GPURenderBundle[]) { }
+    executeBundles(bundles: GPURenderBundle[]): undefined { }
 
-    beginOcclusionQuery(queryIndex: GPUSize32) { }
+    beginOcclusionQuery(queryIndex: GPUSize32): undefined { }
 
-    endOcclusionQuery() { }
+    endOcclusionQuery(): undefined { }
 }

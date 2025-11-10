@@ -2,9 +2,9 @@ import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
 import { WGPUBindGroup } from '../../caches/WGPUBindGroup';
 import { WGPUPipelineLayout } from '../../caches/WGPUPipelineLayout';
-import { WGPURenderPassCommands } from '../WGPURenderObjectState';
+import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
-export function runBindGroup(renderObject: RenderObject, state: WGPURenderPassCommands, device: GPUDevice)
+export function runBindGroup(renderObject: RenderObject, state: WGPURenderPassEncoder, device: GPUDevice)
 {
     const r_renderObject = reactive(renderObject);
     r_renderObject.bindingResources;

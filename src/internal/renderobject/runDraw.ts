@@ -1,8 +1,8 @@
 import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
-import { WGPURenderPassCommands } from '../WGPURenderObjectState';
+import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
-export function runDraw(renderObject: RenderObject, state: WGPURenderPassCommands)
+export function runDraw(renderObject: RenderObject, state: WGPURenderPassEncoder)
 {
     const r_renderObject = reactive(renderObject);
     const draw = r_renderObject.draw;

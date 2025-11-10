@@ -4,14 +4,14 @@ import { RenderBundle } from "../data/RenderBundle";
 import { runOcclusionQuery } from "../internal/runOcclusionQuery";
 import { runRenderBundle } from "../internal/runRenderBundle";
 import { runRenderObject } from "../internal/runRenderObject";
-import { WGPURenderPassCommands } from "../internal/WGPURenderObjectState";
 import { ReactiveObject } from "../ReactiveObject";
 import { WGPURenderPassDescriptor } from "./WGPURenderPassDescriptor";
+import { WGPURenderPassEncoder } from "./WGPURenderPassEncoder";
 
-export class WGPURenderPassCache extends ReactiveObject
+export class WGPURenderPass extends ReactiveObject
 {
     get commands() { return this._computedCommands.value; }
-    private _computedCommands: Computed<WGPURenderPassCommands>;
+    private _computedCommands: Computed<WGPURenderPassEncoder>;
 
     constructor(device: GPUDevice, renderPass: RenderPass)
     {
@@ -19,8 +19,8 @@ export class WGPURenderPassCache extends ReactiveObject
         this._onCreate(device, renderPass);
 
         //
-        WGPURenderPassCache.map.set([device, renderPass], this);
-        this.destroyCall(() => { WGPURenderPassCache.map.delete([device, renderPass]); });
+        WGPURenderPass.map.set([device, renderPass], this);
+        this.destroyCall(() => { WGPURenderPass.map.delete([device, renderPass]); });
     }
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass)
@@ -36,7 +36,7 @@ export class WGPURenderPassCache extends ReactiveObject
             r_renderPass.descriptor.attachmentSize;
             const attachmentSize = renderPass.descriptor.attachmentSize;
 
-            const state = new WGPURenderPassCommands(renderPassFormat, attachmentSize);
+            const state = new WGPURenderPassEncoder(renderPassFormat, attachmentSize);
             let queryIndex = 0;
 
             r_renderPass.renderPassObjects.concat();
@@ -66,7 +66,7 @@ export class WGPURenderPassCache extends ReactiveObject
 
     static getInstance(device: GPUDevice, renderPass: RenderPass)
     {
-        return this.map.get([device, renderPass]) || new WGPURenderPassCache(device, renderPass);
+        return this.map.get([device, renderPass]) || new WGPURenderPass(device, renderPass);
     }
-    private static readonly map = new ChainMap<[GPUDevice, RenderPass], WGPURenderPassCache>();
+    private static readonly map = new ChainMap<[GPUDevice, RenderPass], WGPURenderPass>();
 }

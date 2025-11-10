@@ -1,9 +1,9 @@
 import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
 import { WGPURenderPipeline } from '../../caches/WGPURenderPipeline';
-import { WGPURenderPassCommands } from '../WGPURenderObjectState';
+import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
-export function runPipeline(renderObject: RenderObject, state: WGPURenderPassCommands, device: GPUDevice)
+export function runPipeline(renderObject: RenderObject, state: WGPURenderPassEncoder, device: GPUDevice)
 {
     const renderPassFormat = state.renderPassFormat;
 
