@@ -3,7 +3,7 @@ import { ChainMap } from '@feng3d/render-api';
 import { RenderBundle } from '../data/RenderBundle';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { runRenderObject } from '../internal/runRenderObject';
-import { WGPURenderBundleCache } from '../internal/WGPURenderObjectState';
+import { WGPURenderBundleCommands } from '../internal/WGPURenderObjectState';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPURenderBundle extends ReactiveObject
@@ -52,7 +52,7 @@ export class WGPURenderBundle extends ReactiveObject
             const renderBundleEncoder = device.createRenderBundleEncoder(descriptor);
 
             //
-            const bundleState = new WGPURenderBundleCache(renderPassFormat, attachmentSize);
+            const bundleState = new WGPURenderBundleCommands(renderPassFormat, attachmentSize);
 
             r_renderBundle.renderObjects.concat();
             renderBundle.renderObjects.forEach((renderObject) =>

@@ -1,8 +1,8 @@
 import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
-import { WGPURenderPassCache } from '../WGPURenderObjectState';
+import { WGPURenderPassCommands } from '../WGPURenderObjectState';
 
-export function runScissorRect(renderObject: RenderObject, state: WGPURenderPassCache)
+export function runScissorRect(renderObject: RenderObject, state: WGPURenderPassCommands)
 {
     const r_renderObject = reactive(renderObject);
     const scissorRect = r_renderObject.scissorRect;

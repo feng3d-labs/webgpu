@@ -2,9 +2,9 @@ import { reactive } from '@feng3d/reactivity';
 import { Buffer, RenderObject } from '@feng3d/render-api';
 import { WGPUBuffer } from '../../caches/WGPUBuffer';
 import { WGPUVertexBufferLayout } from '../../caches/WGPUVertexBufferLayout';
-import { WGPURenderPassCache } from '../WGPURenderObjectState';
+import { WGPURenderPassCommands } from '../WGPURenderObjectState';
 
-export function runVertexBuffer(renderObject: RenderObject, state: WGPURenderPassCache, device: GPUDevice)
+export function runVertexBuffer(renderObject: RenderObject, state: WGPURenderPassCommands, device: GPUDevice)
 {
     const r_renderObject = reactive(renderObject);
     r_renderObject.vertices;

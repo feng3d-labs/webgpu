@@ -8,9 +8,9 @@ import { runScissorRect } from './renderobject/runScissorRect';
 import { runStencilReference } from './renderobject/runStencilReference';
 import { runVertexBuffer } from './renderobject/runVertexBuffer';
 import { runViewport } from './renderobject/runViewport';
-import { WGPURenderPassCache } from './WGPURenderObjectState';
+import { WGPURenderPassCommands } from './WGPURenderObjectState';
 
-export function runRenderObject(device: GPUDevice, renderObject: RenderObject, state: WGPURenderPassCache)
+export function runRenderObject(device: GPUDevice, renderObject: RenderObject, state: WGPURenderPassCommands)
 {
     runViewport(renderObject, state);
 

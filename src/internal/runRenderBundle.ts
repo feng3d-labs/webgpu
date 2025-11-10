@@ -1,8 +1,8 @@
 import { WGPURenderBundle } from '../caches/WGPURenderBundle';
 import { RenderBundle } from '../data/RenderBundle';
-import { WGPURenderPassCache } from './WGPURenderObjectState';
+import { WGPURenderPassCommands } from './WGPURenderObjectState';
 
-export function runRenderBundle(device: GPUDevice, renderBundle: RenderBundle, state: WGPURenderPassCache)
+export function runRenderBundle(device: GPUDevice, renderBundle: RenderBundle, state: WGPURenderPassCommands)
 {
     const renderPassFormat = state.renderPassFormat;
     const attachmentSize = state.attachmentSize;

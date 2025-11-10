@@ -1,8 +1,8 @@
 import { OcclusionQuery } from '@feng3d/render-api';
 import { runRenderObject } from './runRenderObject';
-import { WGPURenderPassCache } from './WGPURenderObjectState';
+import { WGPURenderPassCommands } from './WGPURenderObjectState';
 
-export function runOcclusionQuery(device: GPUDevice, occlusionQuery: OcclusionQuery, queryIndex: number, state: WGPURenderPassCache)
+export function runOcclusionQuery(device: GPUDevice, occlusionQuery: OcclusionQuery, queryIndex: number, state: WGPURenderPassCommands)
 {
     state.beginOcclusionQuery(queryIndex);
 

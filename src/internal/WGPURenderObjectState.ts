@@ -17,7 +17,7 @@ export type CommandType =
     | [func: 'endOcclusionQuery']
     ;
 
-export class WGPURenderPassCache
+export class WGPURenderPassCommands
 {
     commands: CommandType[] = [];
     _setViewport: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number] | undefined;
@@ -148,7 +148,7 @@ export class WGPURenderPassCache
     }
 }
 
-export class WGPURenderBundleCache extends WGPURenderPassCache
+export class WGPURenderBundleCommands extends WGPURenderPassCommands
 {
     setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number) { }
 
