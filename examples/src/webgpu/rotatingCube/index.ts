@@ -79,22 +79,22 @@ const init = async (canvas: HTMLCanvasElement) =>
         return modelViewProjectionMatrix as Float32Array;
     }
 
+    const data: Submit = {
+        commandEncoders: [
+            {
+                passEncoders: [
+                    { descriptor: renderPass, renderPassObjects: [renderObject] },
+                ],
+            },
+        ],
+    };
+
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
 
         // 更新uniforms
         reactive(uniforms).modelViewProjectionMatrix = transformationMatrix.subarray();
-
-        const data: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPass, renderPassObjects: [renderObject] },
-                    ],
-                },
-            ],
-        };
 
         webgpu.submit(data);
 

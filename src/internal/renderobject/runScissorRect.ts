@@ -2,13 +2,13 @@ import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
-export function runScissorRect(renderObject: RenderObject, state: WGPURenderPassEncoder)
+export function runScissorRect(renderObject: RenderObject, passEncoder: WGPURenderPassEncoder)
 {
+    const attachmentSize = passEncoder.attachmentSize;
+
+
     const r_renderObject = reactive(renderObject);
     const scissorRect = r_renderObject.scissorRect;
-
-    const attachmentSize = state.attachmentSize;
-    
     if (scissorRect)
     {
         const isYup = scissorRect.isYup ?? true;
@@ -22,10 +22,10 @@ export function runScissorRect(renderObject: RenderObject, state: WGPURenderPass
             y = attachmentSize.height - y - height;
         }
 
-        state.setScissorRect(x, y, width, height);
+        passEncoder.setScissorRect(x, y, width, height);
     }
     else
     {
-        state.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
+        passEncoder.setScissorRect(0, 0, attachmentSize.width, attachmentSize.height);
     }
 }

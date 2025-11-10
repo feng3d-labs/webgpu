@@ -1,14 +1,15 @@
 import { WGPURenderBundle } from '../caches/WGPURenderBundle';
-import { RenderBundle } from '../data/RenderBundle';
 import { WGPURenderPassEncoder } from '../caches/WGPURenderPassEncoder';
+import { RenderBundle } from '../data/RenderBundle';
 
-export function runRenderBundle(device: GPUDevice, renderBundle: RenderBundle, state: WGPURenderPassEncoder)
+export function runRenderBundle(renderBundle: RenderBundle, passEncoder: WGPURenderPassEncoder)
 {
-    const renderPassFormat = state.renderPassFormat;
-    const attachmentSize = state.attachmentSize;
+    const device = passEncoder.device;
+    const renderPassFormat = passEncoder.renderPassFormat;
+    const attachmentSize = passEncoder.attachmentSize;
 
     const wgpuRenderBundle = WGPURenderBundle.getInstance(device, renderBundle, renderPassFormat, attachmentSize);
     const gpuRenderBundle = wgpuRenderBundle.gpuRenderBundle;
 
-    state.executeBundles([gpuRenderBundle]);
+    passEncoder.executeBundles([gpuRenderBundle]);
 }

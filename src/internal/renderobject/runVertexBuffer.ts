@@ -1,11 +1,14 @@
 import { reactive } from '@feng3d/reactivity';
 import { Buffer, RenderObject } from '@feng3d/render-api';
 import { WGPUBuffer } from '../../caches/WGPUBuffer';
-import { WGPUVertexBufferLayout } from '../../caches/WGPUVertexBufferLayout';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
+import { WGPUVertexBufferLayout } from '../../caches/WGPUVertexBufferLayout';
 
-export function runVertexBuffer(renderObject: RenderObject, state: WGPURenderPassEncoder, device: GPUDevice)
+export function runVertexBuffer(renderObject: RenderObject, passEncoder: WGPURenderPassEncoder)
 {
+    const device = passEncoder.device;
+
+    //
     const r_renderObject = reactive(renderObject);
     r_renderObject.vertices;
     r_renderObject.pipeline.vertex;
@@ -28,7 +31,7 @@ export function runVertexBuffer(renderObject: RenderObject, state: WGPURenderPas
         const wgpuBuffer = WGPUBuffer.getInstance(device, buffer);
         const gpuBuffer = wgpuBuffer.gpuBuffer;
 
-        state.setVertexBuffer(index, gpuBuffer, offset, size);
+        passEncoder.setVertexBuffer(index, gpuBuffer, offset, size);
     });
 }
 let autoVertexIndex = 0;

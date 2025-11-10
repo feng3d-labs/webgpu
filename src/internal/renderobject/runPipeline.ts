@@ -1,11 +1,12 @@
 import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
-import { WGPURenderPipeline } from '../../caches/WGPURenderPipeline';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
+import { WGPURenderPipeline } from '../../caches/WGPURenderPipeline';
 
-export function runPipeline(renderObject: RenderObject, state: WGPURenderPassEncoder, device: GPUDevice)
+export function runPipeline(renderObject: RenderObject, passEncoder: WGPURenderPassEncoder)
 {
-    const renderPassFormat = state.renderPassFormat;
+    const renderPassFormat = passEncoder.renderPassFormat;
+    const device = passEncoder.device;
 
     const r_renderObject = reactive(renderObject);
     r_renderObject.pipeline;
@@ -20,5 +21,5 @@ export function runPipeline(renderObject: RenderObject, state: WGPURenderPassEnc
     const wgpuRenderPipeline = WGPURenderPipeline.getInstance(device, pipeline, renderPassFormat, vertices, indexFormat);
     const gpuRenderPipeline = wgpuRenderPipeline.gpuRenderPipeline;
 
-    state.setPipeline(gpuRenderPipeline);
+    passEncoder.setPipeline(gpuRenderPipeline);
 }

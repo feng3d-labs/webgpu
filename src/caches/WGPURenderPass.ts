@@ -36,23 +36,22 @@ export class WGPURenderPass extends ReactiveObject
             r_renderPass.descriptor.attachmentSize;
             const attachmentSize = renderPass.descriptor.attachmentSize;
 
-            const state = new WGPURenderPassEncoder(renderPassFormat, attachmentSize);
-            let queryIndex = 0;
+            const passEncoder = new WGPURenderPassEncoder(device, renderPassFormat, attachmentSize);
 
             r_renderPass.renderPassObjects.concat();
             renderPass.renderPassObjects.forEach((element) =>
             {
                 if (!element.__type__ || element.__type__ === 'RenderObject')
                 {
-                    runRenderObject(device, element as RenderObject, state);
+                    runRenderObject(element as RenderObject, passEncoder);
                 }
                 else if (element.__type__ === 'RenderBundle')
                 {
-                    runRenderBundle(device, element as RenderBundle, state);
+                    runRenderBundle(element as RenderBundle, passEncoder);
                 }
                 else if (element.__type__ === 'OcclusionQuery')
                 {
-                    runOcclusionQuery(device, element as OcclusionQuery, queryIndex++, state);
+                    runOcclusionQuery(element as OcclusionQuery, passEncoder);
                 }
                 else
                 {
@@ -60,7 +59,7 @@ export class WGPURenderPass extends ReactiveObject
                 }
             });
 
-            return state;
+            return passEncoder;
         });
     }
 

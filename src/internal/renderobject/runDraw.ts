@@ -2,7 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
-export function runDraw(renderObject: RenderObject, state: WGPURenderPassEncoder)
+export function runDraw(renderObject: RenderObject, passEncoder: WGPURenderPassEncoder)
 {
     const r_renderObject = reactive(renderObject);
     const draw = r_renderObject.draw;
@@ -10,10 +10,10 @@ export function runDraw(renderObject: RenderObject, state: WGPURenderPassEncoder
     //
     if (draw.__type__ === 'DrawVertex')
     {
-        state.draw(draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance);
+        passEncoder.draw(draw.vertexCount, draw.instanceCount, draw.firstVertex, draw.firstInstance);
     }
     else
     {
-        state.drawIndexed(draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance);
+        passEncoder.drawIndexed(draw.indexCount, draw.instanceCount, draw.firstIndex, draw.baseVertex, draw.firstInstance);
     }
 }

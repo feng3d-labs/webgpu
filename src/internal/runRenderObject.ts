@@ -10,23 +10,23 @@ import { runVertexBuffer } from './renderobject/runVertexBuffer';
 import { runViewport } from './renderobject/runViewport';
 import { WGPURenderPassEncoder } from '../caches/WGPURenderPassEncoder';
 
-export function runRenderObject(device: GPUDevice, renderObject: RenderObject, state: WGPURenderPassEncoder)
+export function runRenderObject(renderObject: RenderObject, passEncoder: WGPURenderPassEncoder)
 {
-    runViewport(renderObject, state);
+    runViewport(renderObject, passEncoder);
 
-    runScissorRect(renderObject, state);
+    runScissorRect(renderObject, passEncoder);
 
-    runBlendConstant(renderObject, state);
+    runBlendConstant(renderObject, passEncoder);
 
-    runStencilReference(renderObject, state);
+    runStencilReference(renderObject, passEncoder);
 
-    runPipeline(renderObject, state, device);
+    runPipeline(renderObject, passEncoder);
 
-    runBindGroup(renderObject, state, device);
+    runBindGroup(renderObject, passEncoder);
 
-    runVertexBuffer(renderObject, state, device);
+    runVertexBuffer(renderObject, passEncoder);
 
-    runIndexBuffer(renderObject, state, device);
+    runIndexBuffer(renderObject, passEncoder);
 
-    runDraw(renderObject, state);
+    runDraw(renderObject, passEncoder);
 }

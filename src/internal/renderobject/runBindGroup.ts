@@ -4,19 +4,23 @@ import { WGPUBindGroup } from '../../caches/WGPUBindGroup';
 import { WGPUPipelineLayout } from '../../caches/WGPUPipelineLayout';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
-export function runBindGroup(renderObject: RenderObject, state: WGPURenderPassEncoder, device: GPUDevice)
+export function runBindGroup(renderObject: RenderObject, passEncoder: WGPURenderPassEncoder)
 {
+    const device = passEncoder.device;
+
     const r_renderObject = reactive(renderObject);
-    r_renderObject.bindingResources;
 
     // 执行
-    const { bindingResources } = renderObject;
+    r_renderObject.bindingResources;
+    const bindingResources = renderObject.bindingResources;
+
+    //
     const layout = WGPUPipelineLayout.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
 
     layout.bindGroupLayouts.forEach((bindGroupLayout, index) =>
     {
         const wgpuBindGroup = WGPUBindGroup.getInstance(device, bindGroupLayout, bindingResources);
 
-        state.setBindGroup(index, wgpuBindGroup.gpuBindGroup);
+        passEncoder.setBindGroup(index, wgpuBindGroup.gpuBindGroup);
     });
 }

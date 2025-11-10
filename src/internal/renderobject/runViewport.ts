@@ -2,12 +2,12 @@ import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
-export function runViewport(renderObject: RenderObject, state: WGPURenderPassEncoder)
+export function runViewport(renderObject: RenderObject, passEncoder: WGPURenderPassEncoder)
 {
     const r_renderObject = reactive(renderObject);
     const viewport = r_renderObject.viewport;
 
-    const attachmentSize = state.attachmentSize;
+    const attachmentSize = passEncoder.attachmentSize;
 
     if (viewport)
     {
@@ -24,10 +24,10 @@ export function runViewport(renderObject: RenderObject, state: WGPURenderPassEnc
             y = attachmentSize.height - y - height;
         }
 
-        state.setViewport(x, y, width, height, minDepth, maxDepth);
+        passEncoder.setViewport(x, y, width, height, minDepth, maxDepth);
     }
     else
     {
-        state.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
+        passEncoder.setViewport(0, 0, attachmentSize.width, attachmentSize.height, 0, 1);
     }
 }

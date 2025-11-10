@@ -1,15 +1,15 @@
 import { OcclusionQuery } from '@feng3d/render-api';
-import { runRenderObject } from './runRenderObject';
 import { WGPURenderPassEncoder } from '../caches/WGPURenderPassEncoder';
+import { runRenderObject } from './runRenderObject';
 
-export function runOcclusionQuery(device: GPUDevice, occlusionQuery: OcclusionQuery, queryIndex: number, state: WGPURenderPassEncoder)
+export function runOcclusionQuery(occlusionQuery: OcclusionQuery, passEncoder: WGPURenderPassEncoder)
 {
-    state.beginOcclusionQuery(queryIndex);
+    passEncoder.beginOcclusionQuery();
 
     occlusionQuery.renderObjects.forEach((renderObject) =>
     {
-        runRenderObject(device, renderObject, state);
+        runRenderObject(renderObject, passEncoder);
     });
 
-    state.endOcclusionQuery();
+    passEncoder.endOcclusionQuery();
 }
