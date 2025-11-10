@@ -282,8 +282,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         depthTexture: { texture: depthTexture },
     };
 
-    const cameraMatrixBuffer = new Float32Array(16);
-    const cameraMatrixReversedDepthBuffer = new Float32Array(16);
+    const cameraMatrixBuffer: Float32Array = new Float32Array(16);
+    const cameraMatrixReversedDepthBuffer: Float32Array = new Float32Array(16);
 
     const modelMatrices = new Array<Mat4>(numInstances);
     const mvpMatricesData: Float32Array[] = [];
