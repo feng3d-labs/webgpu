@@ -1,4 +1,4 @@
-import { Computed, computed } from '@feng3d/reactivity';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
 import { ChainMap, OcclusionQuery, RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { WGPUQuerySet } from '../caches/WGPUQuerySet';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
@@ -37,16 +37,21 @@ function getWGPURenderPassCache(device: GPUDevice, renderPass: RenderPass)
     let commandsComputed = cache.get([device, renderPass]);
     if (commandsComputed) return commandsComputed.value;
 
+    const r_renderPass = reactive(renderPass);
+
     commandsComputed = computed(() =>
     {
+        r_renderPass.descriptor;
         const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, renderPass.descriptor);
-
         const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
+
+        r_renderPass.descriptor.attachmentSize;
         const attachmentSize = renderPass.descriptor.attachmentSize;
 
         const state = new WGPURenderPassCache();
         let queryIndex = 0;
 
+        r_renderPass.renderPassObjects.concat();
         renderPass.renderPassObjects.forEach((element) =>
         {
             if (!element.__type__ || element.__type__ === 'RenderObject')
