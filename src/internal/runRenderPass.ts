@@ -48,7 +48,7 @@ function getWGPURenderPassCache(device: GPUDevice, renderPass: RenderPass)
         r_renderPass.descriptor.attachmentSize;
         const attachmentSize = renderPass.descriptor.attachmentSize;
 
-        const state = new WGPURenderPassCache();
+        const state = new WGPURenderPassCache(renderPassFormat, attachmentSize);
         let queryIndex = 0;
 
         r_renderPass.renderPassObjects.concat();
@@ -56,15 +56,15 @@ function getWGPURenderPassCache(device: GPUDevice, renderPass: RenderPass)
         {
             if (!element.__type__ || element.__type__ === 'RenderObject')
             {
-                runRenderObject(device, renderPassFormat, attachmentSize, element as RenderObject, state);
+                runRenderObject(device, element as RenderObject, state);
             }
             else if (element.__type__ === 'RenderBundle')
             {
-                runRenderBundle(device, state, element as RenderBundle, renderPassFormat, attachmentSize);
+                runRenderBundle(device, element as RenderBundle, state);
             }
             else if (element.__type__ === 'OcclusionQuery')
             {
-                runOcclusionQuery(device, queryIndex++, state, element as OcclusionQuery, renderPassFormat, attachmentSize);
+                runOcclusionQuery(device, element as OcclusionQuery, queryIndex++, state);
             }
             else
             {

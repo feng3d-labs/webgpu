@@ -52,12 +52,12 @@ export class WGPURenderBundle extends ReactiveObject
             const renderBundleEncoder = device.createRenderBundleEncoder(descriptor);
 
             //
-            const bundleState = new WGPURenderBundleCache();
+            const bundleState = new WGPURenderBundleCache(renderPassFormat, attachmentSize);
 
             r_renderBundle.renderObjects.concat();
             renderBundle.renderObjects.forEach((renderObject) =>
             {
-                runRenderObject(device, renderPassFormat, attachmentSize, renderObject, bundleState);
+                runRenderObject(device, renderObject, bundleState);
             });
 
             bundleState.runCommands(renderBundleEncoder);

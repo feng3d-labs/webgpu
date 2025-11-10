@@ -1,4 +1,5 @@
 import { Color } from '@feng3d/render-api';
+import { RenderPassFormat } from './RenderPassFormat';
 
 export type CommandType =
     | [func: 'setViewport', args: [x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number]]
@@ -27,6 +28,12 @@ export class WGPURenderPassCache
     _setBindGroup: GPUBindGroup[] = [];
     _setVertexBuffer: [buffer: GPUBuffer, offset?: GPUSize64, size?: GPUSize64][] = [];
     _setIndexBuffer: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64];
+
+    constructor(public readonly renderPassFormat: RenderPassFormat, public readonly attachmentSize: { readonly width: number, readonly height: number })
+    {
+        this.renderPassFormat = renderPassFormat;
+        this.attachmentSize = attachmentSize;
+    }
 
     setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number)
     {

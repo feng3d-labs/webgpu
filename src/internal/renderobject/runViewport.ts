@@ -2,10 +2,12 @@ import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
 import { WGPURenderPassCache } from '../WGPURenderObjectState';
 
-export function runViewport(renderObject: RenderObject, state: WGPURenderPassCache, attachmentSize: { readonly width: number, readonly height: number })
+export function runViewport(renderObject: RenderObject, state: WGPURenderPassCache)
 {
     const r_renderObject = reactive(renderObject);
     const viewport = r_renderObject.viewport;
+
+    const attachmentSize = state.attachmentSize;
 
     if (viewport)
     {

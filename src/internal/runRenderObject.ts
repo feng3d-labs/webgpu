@@ -8,20 +8,19 @@ import { runScissorRect } from './renderobject/runScissorRect';
 import { runStencilReference } from './renderobject/runStencilReference';
 import { runVertexBuffer } from './renderobject/runVertexBuffer';
 import { runViewport } from './renderobject/runViewport';
-import { RenderPassFormat } from './RenderPassFormat';
 import { WGPURenderPassCache } from './WGPURenderObjectState';
 
-export function runRenderObject(device: GPUDevice, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number }, renderObject: RenderObject, state: WGPURenderPassCache)
+export function runRenderObject(device: GPUDevice, renderObject: RenderObject, state: WGPURenderPassCache)
 {
-    runViewport(renderObject, state, attachmentSize);
+    runViewport(renderObject, state);
 
-    runScissorRect(renderObject, state, attachmentSize);
+    runScissorRect(renderObject, state);
 
     runBlendConstant(renderObject, state);
 
     runStencilReference(renderObject, state);
 
-    runPipeline(renderObject, state, device, renderPassFormat);
+    runPipeline(renderObject, state, device);
 
     runBindGroup(renderObject, state, device);
 

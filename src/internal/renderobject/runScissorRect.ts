@@ -2,10 +2,13 @@ import { reactive } from '@feng3d/reactivity';
 import { RenderObject } from '@feng3d/render-api';
 import { WGPURenderPassCache } from '../WGPURenderObjectState';
 
-export function runScissorRect(renderObject: RenderObject, state: WGPURenderPassCache, attachmentSize: { readonly width: number, readonly height: number })
+export function runScissorRect(renderObject: RenderObject, state: WGPURenderPassCache)
 {
     const r_renderObject = reactive(renderObject);
     const scissorRect = r_renderObject.scissorRect;
+
+    const attachmentSize = state.attachmentSize;
+    
     if (scissorRect)
     {
         const isYup = scissorRect.isYup ?? true;

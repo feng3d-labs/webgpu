@@ -1,10 +1,12 @@
 import { WGPURenderBundle } from '../caches/WGPURenderBundle';
 import { RenderBundle } from '../data/RenderBundle';
-import { RenderPassFormat } from './RenderPassFormat';
-import { CommandType, WGPURenderPassCache } from './WGPURenderObjectState';
+import { WGPURenderPassCache } from './WGPURenderObjectState';
 
-export function runRenderBundle(device: GPUDevice, state: WGPURenderPassCache, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
+export function runRenderBundle(device: GPUDevice, renderBundle: RenderBundle, state: WGPURenderPassCache)
 {
+    const renderPassFormat = state.renderPassFormat;
+    const attachmentSize = state.attachmentSize;
+
     const wgpuRenderBundle = WGPURenderBundle.getInstance(device, renderBundle, renderPassFormat, attachmentSize);
     const gpuRenderBundle = wgpuRenderBundle.gpuRenderBundle;
 
