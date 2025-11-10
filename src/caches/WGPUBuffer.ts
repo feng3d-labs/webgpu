@@ -46,7 +46,6 @@ export class WGPUBuffer extends ReactiveObject
             r_buffer.label;
             r_buffer.size;
             r_buffer.usage;
-            r_buffer.data;
 
             const { label, size, usage, data } = buffer;
 
@@ -81,6 +80,22 @@ export class WGPUBuffer extends ReactiveObject
 
             // 更新GPU缓冲区引用
             return gpuBuffer;
+        });
+
+        this.effect(() =>
+        {
+            r_buffer.data;
+
+            if (!gpuBuffer) return;
+
+            const data = buffer.data;
+
+            const writeBuffers = buffer.writeBuffers || [];
+            writeBuffers.push({
+                data,
+            });
+
+            r_buffer.writeBuffers = writeBuffers;
         });
 
         this.effect(() =>
