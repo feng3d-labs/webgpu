@@ -3,10 +3,10 @@ import { RenderBundle } from '../data/RenderBundle';
 import { RenderPassFormat } from './RenderPassFormat';
 import { CommandType, WGPURenderObjectState } from './WGPURenderObjectState';
 
-export function runRenderBundle(device: GPUDevice, commands: CommandType[], state: WGPURenderObjectState, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
+export function runRenderBundle(device: GPUDevice, state: WGPURenderObjectState, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
 {
     const wgpuRenderBundle = WGPURenderBundle.getInstance(device, renderBundle, renderPassFormat, attachmentSize);
     const gpuRenderBundle = wgpuRenderBundle.gpuRenderBundle;
 
-    commands.push(['executeBundles', [[gpuRenderBundle]]]);
+    state.executeBundles([gpuRenderBundle]);
 }

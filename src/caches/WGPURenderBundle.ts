@@ -52,22 +52,13 @@ export class WGPURenderBundle extends ReactiveObject
             const renderBundleEncoder = device.createRenderBundleEncoder(descriptor);
 
             //
-            const bundleState = new WGPURenderObjectState(null, renderPassFormat, attachmentSize);
+            const bundleState = new WGPURenderObjectState(renderBundleEncoder);
 
             r_renderBundle.renderObjects.concat();
             renderBundle.renderObjects.forEach((renderObject) =>
             {
                 runRenderObject(device, renderPassFormat, attachmentSize, renderObject, bundleState);
             });
-
-            const bundleCommands = bundleState.commands.filter((command) => (
-                command[0] !== 'setViewport'
-                && command[0] !== 'setScissorRect'
-                && command[0] !== 'setBlendConstant'
-                && command[0] !== 'setStencilReference'
-            ));
-
-            runCommands(renderBundleEncoder, bundleCommands);
 
             const gpuRenderBundle = renderBundleEncoder.finish();
 

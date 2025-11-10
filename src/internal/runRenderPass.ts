@@ -3,9 +3,9 @@ import { WGPUQuerySet } from '../caches/WGPUQuerySet';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { RenderBundle } from '../data/RenderBundle';
 import { runOcclusionQuery } from './runOcclusionQuery';
-import { runRenderObject } from './runRenderObject';
 import { runRenderBundle } from './runRenderBundle';
-import { runCommands, WGPURenderObjectState } from './WGPURenderObjectState';
+import { runRenderObject } from './runRenderObject';
+import { WGPURenderObjectState } from './WGPURenderObjectState';
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass)
 {
@@ -24,8 +24,7 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
     const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
     const attachmentSize = renderPass.descriptor.attachmentSize;
 
-    const state = new WGPURenderObjectState(passEncoder, renderPassFormat, attachmentSize);
-    const commands = state.commands;
+    const state = new WGPURenderObjectState(passEncoder);
     let queryIndex = 0;
 
     renderPass.renderPassObjects.forEach((element) =>
@@ -36,11 +35,11 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
         }
         else if (element.__type__ === 'RenderBundle')
         {
-            runRenderBundle(device, commands, state, element as RenderBundle, renderPassFormat, attachmentSize);
+            runRenderBundle(device, state, element as RenderBundle, renderPassFormat, attachmentSize);
         }
         else if (element.__type__ === 'OcclusionQuery')
         {
-            runOcclusionQuery(device, commands, queryIndex++, state, element as OcclusionQuery, renderPassFormat, attachmentSize);
+            runOcclusionQuery(device, queryIndex++, state, element as OcclusionQuery, renderPassFormat, attachmentSize);
         }
         else
         {
@@ -48,10 +47,6 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
         }
     });
 
-    if (commands)
-    {
-        runCommands(passEncoder, commands);
-    }
     passEncoder.end();
 
     renderPassDescriptor.timestampWrites?.resolve(commandEncoder);
