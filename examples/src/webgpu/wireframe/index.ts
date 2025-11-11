@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, RenderObject, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
+import { BindingResources, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
 import { GUI } from 'dat.gui';
@@ -243,11 +243,21 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     gui.add(settings, 'barycentricCoordinatesBased').onChange(addRemoveGUI);
-    gui.add(settings, 'lines');
-    gui.add(settings, 'models');
+    gui.add(settings, 'lines').onChange(updateObjects);
+    gui.add(settings, 'models').onChange(updateObjects);
     gui.add(settings, 'animate');
 
     const guis = [];
+
+    const renderPass: RenderPass = {
+        descriptor: renderPassDescriptor,
+    };
+
+    const submit: Submit = {
+        commandEncoders: [{
+            passEncoders: [renderPass],
+        }],
+    };
 
     function addRemoveGUI()
     {
@@ -269,6 +279,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     .onChange(rebuildLitPipeline),
             );
         }
+        updateObjects();
     }
     addRemoveGUI();
 
@@ -281,6 +292,57 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         });
     }
     updateThickness();
+
+    function updateObjects()
+    {
+        const renderObjects: RenderObject[] = [];
+
+        objectInfos.forEach(
+            (
+                {
+                    uniformBuffer,
+                    litBindGroup,
+                    model: { vertexAttributes, indices },
+                },
+                i,
+            ) =>
+            {
+                if (settings.models)
+                {
+                    renderObjects.push({
+                        pipeline: litPipeline,
+                        bindingResources: litBindGroup,
+                        vertices: vertexAttributes,
+                        indices,
+                        draw: { __type__: 'DrawIndexed', indexCount: indices.length },
+                    });
+                }
+            },
+        );
+
+        if (settings.lines)
+        {
+            // Note: If we're using the line-list based pipeline then we need to
+            // multiply the vertex count by 2 since we need to emit 6 vertices
+            // for each triangle (3 edges).
+            const [bindGroupNdx, countMult, pipeline]
+                = settings.barycentricCoordinatesBased
+                    ? [1, 1, barycentricCoordinatesBasedWireframePipeline]
+                    : [0, 2, wireframePipeline];
+
+            objectInfos.forEach(({ wireframeBindGroups, model: { indices } }) =>
+            {
+                renderObjects.push({
+                    pipeline,
+                    bindingResources: wireframeBindGroups[bindGroupNdx],
+                    draw: { __type__: 'DrawVertex', vertexCount: indices.length * countMult },
+                });
+            });
+        }
+
+        reactive(renderPass).renderPassObjects = renderObjects;
+    }
+    updateObjects();
 
     let time = 0.0;
 
@@ -302,8 +364,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         );
 
         const viewProjection = mat4.multiply(projection, view);
-
-        const renderObjects: RenderObject[] = [];
 
         objectInfos.forEach(
             (
@@ -338,48 +398,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 // Upload our uniform values.
                 reactive(uniformBuffer.value).worldViewProjectionMatrix = worldViewProjectionMatrixValue.subarray();
                 reactive(uniformBuffer.value).worldMatrix = world;
-
-                if (settings.models)
-                {
-                    renderObjects.push({
-                        pipeline: litPipeline,
-                        bindingResources: litBindGroup,
-                        vertices: vertexAttributes,
-                        indices,
-                        draw: { __type__: 'DrawIndexed', indexCount: indices.length },
-                    });
-                }
             },
         );
-
-        if (settings.lines)
-        {
-            // Note: If we're using the line-list based pipeline then we need to
-            // multiply the vertex count by 2 since we need to emit 6 vertices
-            // for each triangle (3 edges).
-            const [bindGroupNdx, countMult, pipeline]
-                = settings.barycentricCoordinatesBased
-                    ? [1, 1, barycentricCoordinatesBasedWireframePipeline]
-                    : [0, 2, wireframePipeline];
-
-            objectInfos.forEach(({ wireframeBindGroups, model: { indices } }) =>
-            {
-                renderObjects.push({
-                    pipeline,
-                    bindingResources: wireframeBindGroups[bindGroupNdx],
-                    draw: { __type__: 'DrawVertex', vertexCount: indices.length * countMult },
-                });
-            });
-        }
-
-        const submit: Submit = {
-            commandEncoders: [{
-                passEncoders: [{
-                    descriptor: renderPassDescriptor,
-                    renderPassObjects: renderObjects,
-                }],
-            }],
-        };
 
         webgpu.submit(submit);
 

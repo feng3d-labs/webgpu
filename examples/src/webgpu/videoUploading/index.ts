@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, Sampler, Submit, RenderObject } from '@feng3d/render-api';
+import { RenderObject, RenderPassDescriptor, Sampler, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
 import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
@@ -52,18 +52,18 @@ const init = async (canvas: HTMLCanvasElement) =>
         draw: { __type__: 'DrawVertex', vertexCount: 6 },
     };
 
+    const data: Submit = {
+        commandEncoders: [
+            {
+                passEncoders: [
+                    { descriptor: renderPass, renderPassObjects: [renderObject] },
+                ],
+            },
+        ],
+    };
+
     function frame()
     {
-        const data: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPass, renderPassObjects: [renderObject] },
-                    ],
-                },
-            ],
-        };
-
         webgpu.submit(data);
 
         if ('requestVideoFrameCallback' in video)
