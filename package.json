@@ -1,6 +1,6 @@
 {
   "name": "@feng3d/webgpu",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "webgpu渲染库",
   "homepage": "https://feng3d.com/webgpu/",
   "author": "feng",
@@ -35,7 +35,8 @@
     "url": "https://gitee.com/feng3d/webgpu.git"
   },
   "files": [
-    "dist/",
+    "src",
+    "dist",
     "lib"
   ],
   "workspaces": [
