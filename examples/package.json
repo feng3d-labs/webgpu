@@ -23,7 +23,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "@feng3d/webgpu": "0.0.7",
+    "@feng3d/webgpu": "0.0.9",
     "dat.gui": "^0.7.9",
     "gl-matrix": "^3.4.3",
     "teapot": "^1.0.0",
