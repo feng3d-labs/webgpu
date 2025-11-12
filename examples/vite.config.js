@@ -21,6 +21,12 @@ export default defineConfig({
     plugins: [
         shaderToString(),
     ],
+    worker: {
+        // 为worker启用插件
+        plugins: [
+            shaderToString(),
+        ],
+    },
 });
 
 function getHtmlNamesObject()
