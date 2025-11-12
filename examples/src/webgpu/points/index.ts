@@ -135,7 +135,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 matrix: undefined,
                 resolution: undefined,
                 size: undefined,
-            }
+            },
         },
         s: sampler,
         t: { texture },

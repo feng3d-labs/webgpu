@@ -99,7 +99,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const bindingResources = {
         uniforms: {
-           value: { modelViewProjectionMatrix: new Float32Array(16)},
+            value: { modelViewProjectionMatrix: new Float32Array(16) },
         },
         mySampler: sampler,
         myTexture: { texture: cubeTexture },

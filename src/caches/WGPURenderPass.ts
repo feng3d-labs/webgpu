@@ -1,12 +1,12 @@
-import { Computed, computed, reactive } from "@feng3d/reactivity";
-import { ChainMap, OcclusionQuery, RenderObject, RenderPass, RenderPassObject } from "@feng3d/render-api";
-import { RenderBundle } from "../data/RenderBundle";
-import { runOcclusionQuery } from "../internal/runOcclusionQuery";
-import { runRenderBundle } from "../internal/runRenderBundle";
-import { runRenderObject } from "../internal/runRenderObject";
-import { ReactiveObject } from "../ReactiveObject";
-import { WGPURenderPassDescriptor } from "./WGPURenderPassDescriptor";
-import { WGPURenderPassEncoder } from "./WGPURenderPassEncoder";
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { ChainMap, OcclusionQuery, RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
+import { RenderBundle } from '../data/RenderBundle';
+import { runOcclusionQuery } from '../internal/runOcclusionQuery';
+import { runRenderBundle } from '../internal/runRenderBundle';
+import { runRenderObject } from '../internal/runRenderObject';
+import { ReactiveObject } from '../ReactiveObject';
+import { WGPURenderPassDescriptor } from './WGPURenderPassDescriptor';
+import { WGPURenderPassEncoder } from './WGPURenderPassEncoder';
 
 export class WGPURenderPass extends ReactiveObject
 {
@@ -67,5 +67,6 @@ export class WGPURenderPass extends ReactiveObject
     {
         return this.map.get([device, renderPass]) || new WGPURenderPass(device, renderPass);
     }
+
     private static readonly map = new ChainMap<[GPUDevice, RenderPass], WGPURenderPass>();
 }

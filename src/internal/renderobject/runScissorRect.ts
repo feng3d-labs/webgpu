@@ -6,7 +6,6 @@ export function runScissorRect(renderObject: RenderObject, passEncoder: WGPURend
 {
     const attachmentSize = passEncoder.attachmentSize;
 
-
     const r_renderObject = reactive(renderObject);
     const scissorRect = r_renderObject.scissorRect;
     if (scissorRect)
