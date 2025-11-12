@@ -1,27 +1,29 @@
 /**
  * 纹理维度。
  */
-export const TextureDimensionality = {
-    "1D": "1D",
-    "2D": "2D",
-    "3D": "3D",
-    Cube: "Cube",
+const TextureDimensionality = {
+    '1D': '1D',
+    '2D': '2D',
+    '3D': '3D',
+    Cube: 'Cube',
 };
-export type TextureDimensionality = keyof typeof TextureDimensionality;
+
+type TextureDimensionality = keyof typeof TextureDimensionality;
 
 /**
  * 纹理为是否数组。
  */
-export const TextureArrayed = {
+const TextureArrayed = {
     No: false,
     Yes: true,
 };
-export type TextureArrayed = keyof typeof TextureArrayed;
+
+type TextureArrayed = keyof typeof TextureArrayed;
 
 /**
  * 纹理第二类型，描述纹理维度以及是否为数组。
  */
-export type TextureSecondType = [TextureDimensionality, TextureArrayed, GPUTextureViewDimension];
+type TextureSecondType = [TextureDimensionality, TextureArrayed, GPUTextureViewDimension];
 
 /**
  * 采样纹理类型。
@@ -36,12 +38,12 @@ export const SampledTextureType: {
     texture_cube: TextureSecondType;
     texture_cube_array: TextureSecondType;
 } = {
-    texture_1d: ["1D", "No", "1d"],
-    texture_2d: ["2D", "No", "2d"],
-    texture_2d_array: ["2D", "Yes", "2d-array"],
-    texture_3d: ["3D", "No", "3d"],
-    texture_cube: ["Cube", "No", "cube"],
-    texture_cube_array: ["Cube", "Yes", "cube-array"],
+    texture_1d: ['1D', 'No', '1d'],
+    texture_2d: ['2D', 'No', '2d'],
+    texture_2d_array: ['2D', 'Yes', '2d-array'],
+    texture_3d: ['3D', 'No', '3d'],
+    texture_cube: ['Cube', 'No', 'cube'],
+    texture_cube_array: ['Cube', 'Yes', 'cube-array'],
 };
 export type SampledTextureType = keyof typeof SampledTextureType;
 
@@ -54,8 +56,8 @@ export const MultisampledTextureType: {
     texture_multisampled_2d: TextureSecondType;
     texture_depth_multisampled_2d: TextureSecondType;
 } = {
-    texture_multisampled_2d: ["2D", "No", "2d"],
-    texture_depth_multisampled_2d: ["2D", "No", "2d-array"],
+    texture_multisampled_2d: ['2D', 'No', '2d'],
+    texture_depth_multisampled_2d: ['2D', 'No', '2d-array'],
 };
 export type MultisampledTextureType = keyof typeof MultisampledTextureType;
 
@@ -67,7 +69,7 @@ export type MultisampledTextureType = keyof typeof MultisampledTextureType;
 export const ExternalSampledTextureType: {
     texture_external: TextureSecondType;
 } = {
-    texture_external: ["2D", "No", "2d"],
+    texture_external: ['2D', 'No', '2d'],
 };
 export type ExternalSampledTextureType = keyof typeof ExternalSampledTextureType;
 
@@ -82,10 +84,10 @@ export const StorageTextureType: {
     texture_storage_2d_array: TextureSecondType;
     texture_storage_3d: TextureSecondType;
 } = {
-    texture_storage_1d: ["1D", "No", "1d"],
-    texture_storage_2d: ["2D", "No", "2d"],
-    texture_storage_2d_array: ["2D", "Yes", "2d-array"],
-    texture_storage_3d: ["3D", "No", "3d"],
+    texture_storage_1d: ['1D', 'No', '1d'],
+    texture_storage_2d: ['2D', 'No', '2d'],
+    texture_storage_2d_array: ['2D', 'Yes', '2d-array'],
+    texture_storage_3d: ['3D', 'No', '3d'],
 };
 export type StorageTextureType = keyof typeof StorageTextureType;
 
@@ -98,10 +100,10 @@ export const DepthTextureType: {
     texture_depth_cube: TextureSecondType;
     texture_depth_cube_array: TextureSecondType;
 } = {
-    texture_depth_2d: ["2D", "No", "2d"],
-    texture_depth_2d_array: ["2D", "Yes", "2d-array"],
-    texture_depth_cube: ["Cube", "No", "cube"],
-    texture_depth_cube_array: ["Cube", "Yes", "cube-array"],
+    texture_depth_2d: ['2D', 'No', '2d'],
+    texture_depth_2d_array: ['2D', 'Yes', '2d-array'],
+    texture_depth_cube: ['Cube', 'No', 'cube'],
+    texture_depth_cube_array: ['Cube', 'Yes', 'cube-array'],
 };
 
 /**

@@ -1,15 +1,16 @@
-import { GUI } from "dat.gui";
+import { GUI } from 'dat.gui';
 
-import computeWGSL from "./compute.wgsl";
-import fragWGSL from "./frag.wgsl";
-import vertWGSL from "./vert.wgsl";
+import computeWGSL from './compute.wgsl';
+import fragWGSL from './frag.wgsl';
+import vertWGSL from './vert.wgsl';
 
-import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
-import { ComputePass, ComputePipeline, WebGPU } from "@feng3d/webgpu";
+import { BindingResources, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
+import { ComputePass, ComputePipeline, WebGPU } from '@feng3d/webgpu';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -24,16 +25,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const squareVertices = new Uint32Array([0, 0, 0, 1, 1, 0, 1, 1]);
     const verticesSquareBuffer: VertexAttributes = {
-        pos: { data: squareVertices, format: "uint32x2" }
+        pos: { data: squareVertices, format: 'uint32x2' },
     };
 
     function addGUI()
     {
-        gui.add(GameOptions, "timestep", 1, 60, 1);
-        gui.add(GameOptions, "width", 16, 1024, 16).onFinishChange(resetGameData);
-        gui.add(GameOptions, "height", 16, 1024, 16).onFinishChange(resetGameData);
+        gui.add(GameOptions, 'timestep', 1, 60, 1);
+        gui.add(GameOptions, 'width', 16, 1024, 16).onFinishChange(resetGameData);
+        gui.add(GameOptions, 'height', 16, 1024, 16).onFinishChange(resetGameData);
         gui
-            .add(GameOptions, "workgroupSize", [4, 8, 16])
+            .add(GameOptions, 'workgroupSize', [4, 8, 16])
             .onFinishChange(resetGameData);
     }
 
@@ -44,6 +45,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let buffer1: Uint32Array;
     let verticesBuffer1: VertexAttributes;
     let render: () => void;
+
     function resetGameData()
     {
         // compute pipeline
@@ -58,6 +60,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const sizeBuffer = new Uint32Array([GameOptions.width, GameOptions.height]);
         const length = GameOptions.width * GameOptions.height;
         const cells = new Uint32Array(length);
+
         for (let i = 0; i < length; i++)
         {
             cells[i] = Math.random() < 0.25 ? 1 : 0;
@@ -66,12 +69,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         buffer0 = cells;
 
         verticesBuffer0 = {
-            cell: { data: buffer0, format: "uint32", stepMode: "instance" }
+            cell: { data: buffer0, format: 'uint32', stepMode: 'instance' },
         };
 
         buffer1 = new Uint32Array(cells.byteLength);
         verticesBuffer1 = {
-            cell: { data: buffer1, format: "uint32", stepMode: "instance" }
+            cell: { data: buffer1, format: 'uint32', stepMode: 'instance' },
         };
 
         const bindGroup0: BindingResources = {
@@ -93,13 +96,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             fragment: {
                 code: fragWGSL,
             },
+            primitive: {
+                topology: 'triangle-strip',
+            },
         };
 
         const uniformBindGroup: BindingResources = {
             size: {
                 bufferView: sizeBuffer,
-                offset: 0,
-                size: 2 * Uint32Array.BYTES_PER_ELEMENT,
             },
         };
 
@@ -112,39 +116,36 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         const passEncodersArray: (ComputePass | RenderPass)[][] = [];
+
         for (let i = 0; i < 2; i++)
         {
             const vertices1: VertexAttributes = {};
+
             Object.assign(vertices1, i ? verticesBuffer1 : verticesBuffer0, verticesSquareBuffer);
 
             passEncodersArray[i] = [
                 {
-                    __type__: "ComputePass",
+                    __type__: 'ComputePass',
                     computeObjects: [{
                         pipeline: computePipeline,
-                        uniforms: i ? bindGroup1 : bindGroup0,
+                        bindingResources: i ? bindGroup1 : bindGroup0,
                         workgroups: {
                             workgroupCountX: GameOptions.width / GameOptions.workgroupSize,
-                            workgroupCountY: GameOptions.height / GameOptions.workgroupSize
+                            workgroupCountY: GameOptions.height / GameOptions.workgroupSize,
                         },
-                    }]
+                    }],
                 },
                 {
                     descriptor: renderPass,
-                    renderObjects: [
+                    renderPassObjects: [
                         {
                             pipeline: renderPipeline,
-                            uniforms: uniformBindGroup,
-                            geometry: {
-                                primitive: {
-                                    topology: "triangle-strip",
-                                },
-                                vertices: vertices1,
-                                draw: { __type__: "DrawVertex", vertexCount: 4, instanceCount: length },
-                            }
-                        }
+                            bindingResources: uniformBindGroup,
+                            vertices: vertices1,
+                            draw: { __type__: 'DrawVertex', vertexCount: 4, instanceCount: length },
+                        },
                     ],
-                }
+                },
             ];
         }
 
@@ -155,8 +156,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 commandEncoders: [
                     {
                         passEncoders: passEncodersArray[loopTimes],
-                    }
-                ]
+                    },
+                ],
             };
 
             webgpu.submit(submit);
@@ -184,5 +185,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);

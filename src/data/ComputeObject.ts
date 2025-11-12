@@ -1,6 +1,6 @@
-import { BindingResources } from "@feng3d/render-api";
-import { ComputePipeline } from "./ComputePipeline";
-import { Workgroups } from "./Workgroups";
+import { BindingResources } from '@feng3d/render-api';
+import { ComputePipeline } from './ComputePipeline';
+import { Workgroups } from './Workgroups';
 
 /**
  * WebGPU计算对象，包含GPU一次计算所有数据。
@@ -21,7 +21,7 @@ export interface ComputeObject
     /**
      * 绑定资源。包含数值、纹理、采样、外部纹理。
      */
-    readonly uniforms?: BindingResources;
+    readonly bindingResources?: BindingResources;
 
     /**
      * {@link GPUComputePassEncoder.dispatchWorkgroups}

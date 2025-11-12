@@ -1,5 +1,4 @@
-import { Texture } from "@feng3d/render-api";
-import { getGPUTextureFormat } from "../caches/getGPUTextureFormat";
+import { Texture } from '@feng3d/render-api';
 
 /**
  * 从 GPU纹理 上读取数据。
@@ -21,11 +20,11 @@ export async function readPixels(device: GPUDevice, params: { texture: GPUTextur
     const [width, height] = copySize;
 
     const bytesPerPixel = Texture.getTextureBytesPerPixel(texture.format);
-    const Cls = Texture.getTextureDataConstructor(texture.format);
+    const DataConstructor = Texture.getTextureDataConstructor(texture.format);
 
     const bytesPerRow = width * bytesPerPixel;
     const bufferSize = bytesPerRow * height;
-    const bufferData = new Cls(bufferSize / Cls.BYTES_PER_ELEMENT);
+    const bufferData = new DataConstructor(bufferSize / DataConstructor.BYTES_PER_ELEMENT);
 
     //
     const buffer = device.createBuffer({ size: bufferSize, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
@@ -40,7 +39,7 @@ export async function readPixels(device: GPUDevice, params: { texture: GPUTextur
             offset: 0,
             bytesPerRow,
         },
-        copySize
+        copySize,
     );
 
     device.queue.submit([commandEncoder.finish()]);

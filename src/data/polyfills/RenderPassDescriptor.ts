@@ -1,6 +1,6 @@
-import { RenderPassColorAttachment, RenderPassDescriptor } from "@feng3d/render-api";
+import { RenderPassColorAttachment, RenderPassDescriptor } from '@feng3d/render-api';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * 渲染通道描述。
@@ -16,14 +16,14 @@ declare module "@feng3d/render-api"
          *
          * 该值被修改后将会改变所有附件的尺寸，并释放附件上过时的GPU纹理资源。
          */
-        attachmentSize?: { width: number, height: number };
+        readonly attachmentSize?: { readonly width: number, readonly height: number };
 
         /**
          * The maximum number of draw calls that will be done in the render pass. Used by some
          * implementations to size work injected before the render pass. Keeping the default value
          * is a good default, unless it is known that more draw calls will be done.
          */
-        maxDrawCount?: GPUSize64;
+        readonly maxDrawCount?: GPUSize64;
     }
 
 }

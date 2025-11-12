@@ -1,13 +1,14 @@
-import { RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
-import { ComputeObject, WebGPU } from "@feng3d/webgpu";
-import { GUI } from "dat.gui";
+import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
+import { ComputeObject, WebGPU } from '@feng3d/webgpu';
+import { GUI } from 'dat.gui';
 
-import spriteWGSL from "./sprite.wgsl";
-import updateSpritesWGSL from "./updateSprites.wgsl";
+import spriteWGSL from './sprite.wgsl';
+import updateSpritesWGSL from './updateSprites.wgsl';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -36,6 +37,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const numParticles = 1500;
     const initialParticleData = new Float32Array(numParticles * 4);
+
     for (let i = 0; i < numParticles; ++i)
     {
         initialParticleData[4 * i + 0] = 2 * (Math.random() - 0.5);
@@ -45,6 +47,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     }
 
     const particleBuffers: Float32Array[] = new Array(2);
+
     for (let i = 0; i < 2; ++i)
     {
         particleBuffers[i] = initialParticleData.slice();
@@ -52,10 +55,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const computeObject0: ComputeObject = {
         pipeline: {
-            compute: { code: updateSpritesWGSL }
+            compute: { code: updateSpritesWGSL },
         },
-        uniforms: {
-            params: simParams,
+        bindingResources: {
+            params: { value: simParams },
             particlesA: {
                 bufferView: particleBuffers[0],
             },
@@ -68,14 +71,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const computeObject1: ComputeObject = {
         ...computeObject0,
-        uniforms: {
-            ...computeObject0.uniforms,
+        bindingResources: {
+            ...computeObject0.bindingResources,
             particlesA: {
-                ...computeObject0.uniforms.particlesA as {},
+                ...computeObject0.bindingResources.particlesA as {},
                 bufferView: particleBuffers[1],
             },
             particlesB: {
-                ...computeObject0.uniforms.particlesA as {},
+                ...computeObject0.bindingResources.particlesA as {},
                 bufferView: particleBuffers[0],
             },
         },
@@ -86,61 +89,58 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.0, 0.0, 0.0, 1.0],
-            }
+            },
         ],
     };
 
     const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: spriteWGSL }, fragment: { code: spriteWGSL },
-        },
-        geometry: {
             primitive: {
-                cullFace: "back",
+                cullFace: 'back',
             },
-            vertices: {
-                a_particlePos: { data: particleBuffers[0], format: "float32x2", offset: 0, arrayStride: 4 * 4, stepMode: "instance" },
-                a_particleVel: { data: particleBuffers[0], format: "float32x2", offset: 2 * 4, arrayStride: 4 * 4, stepMode: "instance" },
-                a_pos: { data: vertexBufferData, format: "float32x2" },
-            },
-            draw: { __type__: "DrawVertex", vertexCount: 3, instanceCount: numParticles }
-        }
+        },
+        vertices: {
+            a_particlePos: { data: particleBuffers[0], format: 'float32x2', offset: 0, arrayStride: 4 * 4, stepMode: 'instance' },
+            a_particleVel: { data: particleBuffers[0], format: 'float32x2', offset: 2 * 4, arrayStride: 4 * 4, stepMode: 'instance' },
+            a_pos: { data: vertexBufferData, format: 'float32x2' },
+        },
+        draw: { __type__: 'DrawVertex', vertexCount: 3, instanceCount: numParticles },
     };
 
     const renderObject1: RenderObject = {
         ...renderObject,
-        geometry: {
-            ...renderObject.geometry,
-            draw: renderObject.geometry.draw,
-            vertices: {
-                ...renderObject.geometry.vertices,
-                a_particlePos: {
-                    ...renderObject.geometry.vertices.a_particlePos,
-                    data: particleBuffers[1],
-                },
-                a_particleVel: {
-                    ...renderObject.geometry.vertices.a_particleVel,
-                    data: particleBuffers[1],
-                },
+        draw: renderObject.draw,
+        vertices: {
+            ...renderObject.vertices,
+            a_particlePos: {
+                ...renderObject.vertices.a_particlePos,
+                data: particleBuffers[1],
             },
-        }
+            a_particleVel: {
+                ...renderObject.vertices.a_particleVel,
+                data: particleBuffers[1],
+            },
+        },
     };
 
     let t = 0;
+
+    const submits: Submit[] = [0, 1].map((i) =>
+    {
+        return {
+            commandEncoders: [{
+                passEncoders: [
+                    { __type__: 'ComputePass', computeObjects: [[computeObject0, computeObject1][i]] },
+                    { descriptor: renderPass, renderPassObjects: [[renderObject, renderObject1][(i + 1) % 2]] },
+                ],
+            }],
+        };
+    });
+
     function frame()
     {
-        const data: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { __type__: "ComputePass", computeObjects: [[computeObject0, computeObject1][t % 2]] },
-                        { descriptor: renderPass, renderObjects: [[renderObject, renderObject1][(t + 1) % 2]] },
-                    ]
-                }
-            ],
-        };
-
-        webgpu.submit(data);
+        webgpu.submit(submits[t % 2]);
 
         ++t;
 
@@ -150,5 +150,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);

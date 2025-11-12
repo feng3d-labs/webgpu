@@ -1,9 +1,11 @@
-import { Submit, RenderObject } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { BufferBinding, RenderObject, Submit } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -29,14 +31,12 @@ const init = async (canvas: HTMLCanvasElement) =>
                     }
                 ` },
         },
-        geometry:{
-            vertices: {
-                position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: "float32x2" }, // 顶点坐标数据
-            },
-            indices: new Uint16Array([0, 1, 2]), // 顶点索引数据
-            draw: { __type__: "DrawIndexed", indexCount: 3 }, // 绘制命令
+        vertices: {
+            position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: 'float32x2' }, // 顶点坐标数据
         },
-        uniforms: { color: [1, 0, 0, 0] as any }, // Uniform 颜色值。
+        indices: new Uint16Array([0, 1, 2]), // 顶点索引数据
+        draw: { __type__: 'DrawIndexed', indexCount: 3 }, // 绘制命令
+        bindingResources: { color: { value: [1, 0, 0, 0] } as BufferBinding }, // Uniform 颜色值。
     };
 
     const submit: Submit = { // 一次GPU提交
@@ -50,10 +50,10 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 clearValue: [0.0, 0.0, 0.0, 1.0], // 渲染前填充颜色
                             }],
                         },
-                        renderObjects: [renderObject]
+                        renderPassObjects: [renderObject],
                     },
-                ]
-            }
+                ],
+            },
         ],
     };
 
@@ -67,8 +67,13 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     window.onclick = () =>
     {
+        // reactive(renderObject.vertices.position).stepMode = "instance";
+        // reactive(renderObject.vertices.position).stepMode = "vertex";
+        // reactive(renderObject.vertices.position).data = new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -1]);
+        // reactive(renderObject.vertices.position).format = "float32x3";
+        // reactive(renderObject.vertices.position).data = new Float32Array([1.0, 0.5, 1.0, -0.5, -0.5, 1.0, 0.5, -1, 1.0]);
         // 修改顶点着色器代码
-        renderObject.pipeline.vertex.code = `
+        reactive(renderObject.pipeline.vertex).code = `
                 @vertex
                 fn main(
                     @location(0) position: vec2<f32>,
@@ -80,7 +85,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 `;
 
         // 修改片段着色器代码
-        renderObject.pipeline.fragment.code = `
+        reactive(renderObject.pipeline.fragment).code = `
                 @binding(0) @group(0) var<uniform> color : vec4<f32>;
                 @fragment
                 fn main() -> @location(0) vec4f {
@@ -91,18 +96,19 @@ const init = async (canvas: HTMLCanvasElement) =>
                     return col;
                 }
                 `;
-        //
-        // renderObject.uniforms.color = [0, 1, 0, 1];
+
+        reactive(renderObject.bindingResources.color as BufferBinding).value = [0, 1, 0, 1];
     };
 };
 
-let webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+let webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 if (!webgpuCanvas)
 {
-    webgpuCanvas = document.createElement("canvas");
-    webgpuCanvas.id = "webgpu";
-    webgpuCanvas.style.width = "400px";
-    webgpuCanvas.style.height = "300px";
+    webgpuCanvas = document.createElement('canvas');
+    webgpuCanvas.id = 'webgpu';
+    webgpuCanvas.style.width = '400px';
+    webgpuCanvas.style.height = '300px';
     document.body.appendChild(webgpuCanvas);
 }
 init(webgpuCanvas);

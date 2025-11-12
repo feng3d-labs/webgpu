@@ -1,0 +1,44 @@
+import { CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, RenderPass } from '@feng3d/render-api';
+
+import { ComputePass } from '../data/ComputePass';
+import { runComputePass } from './runComputePass';
+import { runCopyBufferToBuffer } from './runCopyBufferToBuffer';
+import { runCopyTextureToTexture } from './runCopyTextureToTexture';
+import { runRenderPass } from './runRenderPass';
+
+export function runCommandEncoder(device: GPUDevice, commandEncoder: CommandEncoder)
+{
+    const gpuCommandEncoder = device.createCommandEncoder();
+
+    commandEncoder.passEncoders.forEach((passEncoder) =>
+    {
+        if (!passEncoder.__type__ || passEncoder.__type__ === 'RenderPass')
+        {
+            runRenderPass(device, gpuCommandEncoder, passEncoder as RenderPass);
+
+            return;
+        }
+        if (passEncoder.__type__ === 'ComputePass')
+        {
+            runComputePass(device, gpuCommandEncoder, passEncoder as ComputePass);
+
+            return;
+        }
+        if (passEncoder.__type__ === 'CopyTextureToTexture')
+        {
+            runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder as CopyTextureToTexture);
+
+            return;
+        }
+        if (passEncoder.__type__ === 'CopyBufferToBuffer')
+        {
+            runCopyBufferToBuffer(device, gpuCommandEncoder, passEncoder as CopyBufferToBuffer);
+
+            return;
+        }
+
+        console.error(`未处理 passEncoder ${passEncoder}`);
+    });
+
+    return gpuCommandEncoder.finish();
+}

@@ -1,8 +1,8 @@
-import { BindingResources, CanvasTexture, CommandEncoder, IPassEncoder, Texture } from "@feng3d/render-api";
-import { ComputePipeline } from "@feng3d/webgpu";
+import { BindingResources, CanvasTexture, CommandEncoder, PassEncoder, Texture } from '@feng3d/render-api';
+import { ComputePipeline } from '@feng3d/webgpu';
 
-import Common from "./common";
-import tonemapperWGSL from "./tonemapper.wgsl";
+import Common from './common';
+import tonemapperWGSL from './tonemapper.wgsl';
 
 /**
  * Tonemapper implements a tonemapper to convert a linear-light framebuffer to
@@ -23,7 +23,7 @@ export default class Tonemapper
         output: CanvasTexture,
     )
     {
-        const inputSize = input.size;
+        const inputSize = input.descriptor.size;
 
         this.width = inputSize[0];
         this.height = inputSize[1];
@@ -33,9 +33,9 @@ export default class Tonemapper
         };
 
         this.material = {
-            label: "Tonemap.pipeline",
+            label: 'Tonemap.pipeline',
             compute: {
-                code: tonemapperWGSL.replace("{OUTPUT_FORMAT}", output.context.configuration.format),
+                code: tonemapperWGSL.replace('{OUTPUT_FORMAT}', output.context.configuration.format),
                 constants: {
                     WorkgroupSizeX: this.kWorkgroupSizeX,
                     WorkgroupSizeY: this.kWorkgroupSizeY,
@@ -45,20 +45,21 @@ export default class Tonemapper
 
         //
         this.passEncoder = {
-            __type__: "ComputePass",
+            __type__: 'ComputePass',
             computeObjects: [{
                 pipeline: this.material,
-                uniforms: {
+                bindingResources: {
                     ...this.bindGroup,
                 },
                 workgroups: {
                     workgroupCountX: Math.ceil(this.width / this.kWorkgroupSizeX),
-                    workgroupCountY: Math.ceil(this.height / this.kWorkgroupSizeY)
+                    workgroupCountY: Math.ceil(this.height / this.kWorkgroupSizeY),
                 },
             }],
         };
     }
-    private passEncoder: IPassEncoder;
+
+    private passEncoder: PassEncoder;
 
     encode(commandEncoder: CommandEncoder)
     {

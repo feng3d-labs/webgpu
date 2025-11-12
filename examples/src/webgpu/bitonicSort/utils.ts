@@ -1,4 +1,4 @@
-import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline } from '@feng3d/render-api';
 
 const fullscreenTexturedQuad
     = `
@@ -42,8 +42,9 @@ export abstract class Base2DRendererClass
         commandEncoder: CommandEncoder,
         ...args: unknown[]
     ): void;
+
     renderPassDescriptor: RenderPassDescriptor;
-    material: RenderPipeline;
+    pipeline: RenderPipeline;
     bindGroupMap: Record<string, GPUBindGroup>;
     currentBindGroupName: string;
 
@@ -51,23 +52,18 @@ export abstract class Base2DRendererClass
         commandEncoder: CommandEncoder,
         renderPassDescriptor: RenderPassDescriptor,
         pipeline: RenderPipeline,
-        bindingResources?: BindingResources
+        bindingResources?: BindingResources,
     )
     {
         const passEncoder: RenderPass = {
             descriptor: renderPassDescriptor,
-            renderObjects: [{
+            renderPassObjects: [{
                 pipeline: pipeline,
-                uniforms: bindingResources,
-                geometry: {
-                    primitive: {
-                        topology: "triangle-list",
-                        cullFace: "none",
-                    },
-                    draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1 }
-                }
+                bindingResources: bindingResources,
+                draw: { __type__: 'DrawVertex', vertexCount: 6, instanceCount: 1 },
             }],
         };
+
         commandEncoder.passEncoders.push(passEncoder);
     }
 
@@ -83,6 +79,10 @@ export abstract class Base2DRendererClass
             },
             fragment: {
                 code,
+            },
+            primitive: {
+                topology: 'triangle-list',
+                cullFace: 'none',
             },
         };
 

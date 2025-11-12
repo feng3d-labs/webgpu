@@ -1,18 +1,20 @@
-import { mat4, vec3 } from "wgpu-matrix";
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { CanvasContext, RenderPassDescriptor, RenderPipeline, Texture, VertexAttributes } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { CanvasContext, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
-import basicVertWGSL from "../../shaders/basic.vert.wgsl";
-import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
+import basicVertWGSL from '../../shaders/basic.vert.wgsl';
+import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const webgpu = await new WebGPU().init();
 
     const devicePixelRatio = window.devicePixelRatio;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -20,14 +22,14 @@ const init = async (canvas: HTMLCanvasElement) =>
         canvasId: canvas.id,
         configuration: {
             // The canvas alphaMode defaults to 'opaque', use 'premultiplied' for transparency.
-            alphaMode: "premultiplied",
+            alphaMode: 'premultiplied',
         },
     };
 
     // Create a vertex buffer from the cube data.
     const verticesBuffer: VertexAttributes = {
-        position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-        uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+        position: { data: cubeVertexArray, format: 'float32x4', offset: cubePositionOffset, arrayStride: cubeVertexSize },
+        uv: { data: cubeVertexArray, format: 'float32x2', offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
     const pipeline: RenderPipeline = {
@@ -37,19 +39,25 @@ const init = async (canvas: HTMLCanvasElement) =>
         fragment: {
             code: vertexPositionColorWGSL,
         },
+        primitive: {
+            topology: 'triangle-list',
+            cullFace: 'back',
+        },
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less",
+            depthCompare: 'less',
         },
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: "depth24plus",
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus',
+        },
     };
 
     const uniformBindGroup = {
-        uniforms: { modelViewProjectionMatrix: undefined }
+        uniforms: { value: { modelViewProjectionMatrix: undefined } },
     };
 
     const renderPassDescriptor: RenderPassDescriptor = {
@@ -58,16 +66,16 @@ const init = async (canvas: HTMLCanvasElement) =>
                 view: { texture: { context } }, // Assigned later
 
                 clearValue: [0, 0, 0, 0], // Clear alpha to 0
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
         depthStencilAttachment: {
             view: { texture: depthTexture },
 
             depthClearValue: 1.0,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
@@ -78,13 +86,15 @@ const init = async (canvas: HTMLCanvasElement) =>
     function getTransformationMatrix()
     {
         const viewMatrix = mat4.identity();
+
         mat4.translate(viewMatrix, vec3.fromValues(0, 0, -4), viewMatrix);
         const now = Date.now() / 1000;
+
         mat4.rotate(
             viewMatrix,
             vec3.fromValues(Math.sin(now), Math.cos(now), 0),
             1,
-            viewMatrix
+            viewMatrix,
         );
 
         mat4.multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
@@ -92,34 +102,31 @@ const init = async (canvas: HTMLCanvasElement) =>
         return modelViewProjectionMatrix;
     }
 
+    const submit: Submit = {
+        commandEncoders: [{
+            passEncoders: [{
+                descriptor: renderPassDescriptor,
+                renderPassObjects: [{
+                    pipeline: pipeline,
+                    bindingResources: uniformBindGroup,
+                    vertices: verticesBuffer,
+                    draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount },
+                }],
+            }],
+        }],
+    };
+
     function frame()
     {
-        uniformBindGroup.uniforms.modelViewProjectionMatrix = getTransformationMatrix().slice();
+        reactive(uniformBindGroup.uniforms.value).modelViewProjectionMatrix = getTransformationMatrix().slice();
 
-        webgpu.submit({
-            commandEncoders: [{
-                passEncoders: [{
-                    descriptor: renderPassDescriptor,
-                    renderObjects: [{
-                        pipeline: pipeline,
-                        uniforms: uniformBindGroup,
-                        geometry: {
-                            primitive: {
-                                topology: "triangle-list",
-                                cullFace: "back",
-                            },
-                            vertices: verticesBuffer,
-                            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
-                        }
-                    }]
-                }]
-            }]
-        });
+        webgpu.submit(submit);
 
         requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);

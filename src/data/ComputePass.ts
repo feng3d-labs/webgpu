@@ -1,5 +1,5 @@
-import { ComputeObject } from "./ComputeObject";
-import { TimestampQuery } from "./TimestampQuery";
+import { ComputeObject } from './ComputeObject';
+import { TimestampQuery } from './TimestampQuery';
 
 /**
  * WebGPU计算通道编码器。
@@ -12,13 +12,18 @@ export interface ComputePass
     /**
      * 数据类型。
      */
-    readonly __type__: "ComputePass";
+    readonly __type__: 'ComputePass';
+
+    descriptor?: ComputePassDescriptor;
 
     /**
      * 计算对象列表。
      */
     computeObjects: ComputeObject[];
+}
 
+export interface ComputePassDescriptor
+{
     /**
      * 查询通道运行消耗时长（单位为纳秒）。
      *

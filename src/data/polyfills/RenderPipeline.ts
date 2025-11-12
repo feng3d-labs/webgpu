@@ -1,8 +1,8 @@
-import { BlendState, DepthStencilState } from "@feng3d/render-api";
+import { BlendState, DepthStencilState } from '@feng3d/render-api';
 
-import { MultisampleState } from "../MultisampleState";
+import { MultisampleState } from '../MultisampleState';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * GPU渲染管线。
@@ -100,10 +100,10 @@ declare module "@feng3d/render-api"
      */
     export interface IBlendFactorMap
     {
-        "src1": "src1";
-        "one-minus-src1": "one-minus-src1";
-        "src1-alpha": "src1-alpha";
-        "one-minus-src1-alpha": "one-minus-src1-alpha";
+        'src1': 'src1';
+        'one-minus-src1': 'one-minus-src1';
+        'src1-alpha': 'src1-alpha';
+        'one-minus-src1-alpha': 'one-minus-src1-alpha';
     }
 
     /**

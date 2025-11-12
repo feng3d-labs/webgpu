@@ -1,15 +1,16 @@
-import { BufferBinding, RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
-import { mat4, vec3 } from "wgpu-matrix";
+import { reactive } from '@feng3d/reactivity';
+import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
-import basicVertWGSL from "../../shaders/basic.vert.wgsl";
-import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
-
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
+import basicVertWGSL from '../../shaders/basic.vert.wgsl';
+import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -20,34 +21,32 @@ const init = async (canvas: HTMLCanvasElement) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.5, 0.5, 0.5, 1.0],
-            }
+            },
         ],
         depthStencilAttachment: {
             depthClearValue: 1,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
-    const uniforms: BufferBinding = {
-        modelViewProjectionMatrix: new Float32Array(16)
+    const uniforms = {
+        value: { modelViewProjectionMatrix: new Float32Array(16) as Float32Array },
     };
 
     const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
-        },
-        geometry:{
             primitive: {
-                cullFace: "back",
+                cullFace: 'back',
             },
-            vertices: {
-                position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-                uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
-            },
-            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
         },
-        uniforms: {
+        vertices: {
+            position: { data: cubeVertexArray, format: 'float32x4', offset: cubePositionOffset, arrayStride: cubeVertexSize },
+            uv: { data: cubeVertexArray, format: 'float32x2', offset: cubeUVOffset, arrayStride: cubeVertexSize },
+        },
+        draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount },
+        bindingResources: {
             uniforms,
         },
     };
@@ -57,20 +56,22 @@ const init = async (canvas: HTMLCanvasElement) =>
         (2 * Math.PI) / 5,
         aspect,
         1,
-        100.0
+        100.0,
     );
     const modelViewProjectionMatrix = mat4.create();
 
     function getTransformationMatrix()
     {
         const viewMatrix = mat4.identity();
+
         mat4.translate(viewMatrix, vec3.fromValues(0, 0, -4), viewMatrix);
         const now = Date.now() / 1000;
+
         mat4.rotate(
             viewMatrix,
             vec3.fromValues(Math.sin(now), Math.cos(now), 0),
             1,
-            viewMatrix
+            viewMatrix,
         );
 
         mat4.multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
@@ -78,21 +79,22 @@ const init = async (canvas: HTMLCanvasElement) =>
         return modelViewProjectionMatrix as Float32Array;
     }
 
+    const data: Submit = {
+        commandEncoders: [
+            {
+                passEncoders: [
+                    { descriptor: renderPass, renderPassObjects: [renderObject] },
+                ],
+            },
+        ],
+    };
+
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
 
-        uniforms.modelViewProjectionMatrix = new Float32Array(transformationMatrix); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
-
-        const data: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPass, renderObjects: [renderObject] },
-                    ]
-                }
-            ],
-        };
+        // 更新uniforms
+        reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
 
         webgpu.submit(data);
 
@@ -101,5 +103,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);

@@ -1,26 +1,11 @@
-import { RenderPass, RenderPassDescriptor } from "@feng3d/render-api";
-import { } from "./OcclusionQuery";
-import { RenderBundle } from "../RenderBundle";
-import { TimestampQuery } from "../TimestampQuery";
+import { OcclusionQuery } from '@feng3d/render-api';
+import { RenderBundle } from '../RenderBundle';
+import { TimestampQuery } from '../TimestampQuery';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
-    /**
-     * GPU渲染通道编码器。
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/GPURenderPassEncoder
-     *
-     * {@link GPURenderPassEncoder}
-     */
-    export interface RenderPass
+    export interface RenderPassDescriptor
     {
-        /**
-         * 渲染不被遮挡查询结果。具体数据保存在各子项的"result"属性中。
-         *
-         * 当提交WebGPU后自动获取结果后填充该属性。
-         */
-        occlusionQueryResults?: OcclusionQuery[];
-
         /**
          * 查询通道运行消耗时长（单位为纳秒）。
          *

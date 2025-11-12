@@ -1,6 +1,6 @@
-import { Texture } from "@feng3d/render-api";
+import { Texture } from '@feng3d/render-api';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * 纹理的图片资源。
@@ -48,7 +48,7 @@ declare module "@feng3d/render-api"
      * @see GPUDevice.createTexture
      * @see GPUTextureDescriptor
      */
-    export interface Texture
+    export interface TextureDescriptor
     {
         /**
          * Specifies what view {@link GPUTextureViewDescriptor#format} values will be allowed when calling

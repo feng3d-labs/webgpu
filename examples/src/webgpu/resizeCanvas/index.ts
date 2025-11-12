@@ -1,10 +1,11 @@
-import { RenderPassDescriptor, Submit, RenderObject } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 
-import redFragWGSL from "../../shaders/red.frag.wgsl";
-import triangleVertWGSL from "../../shaders/triangle.vert.wgsl";
+import redFragWGSL from '../../shaders/red.frag.wgsl';
+import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
 
-import styles from "./animatedCanvasSize.module.css";
+import styles from './animatedCanvasSize.module.css';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -22,9 +23,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         pipeline: {
             vertex: { code: triangleVertWGSL }, fragment: { code: redFragWGSL },
         },
-        geometry:{
-            draw: { __type__: "DrawVertex", vertexCount: 3 },
-        }
+        draw: { __type__: 'DrawVertex', vertexCount: 3 },
     };
 
     canvas.classList.add(styles.animatedCanvasSize);
@@ -34,15 +33,19 @@ const init = async (canvas: HTMLCanvasElement) =>
         // 画布尺寸发生变化时更改渲染通道附件尺寸。
         const currentWidth = canvas.clientWidth * devicePixelRatio;
         const currentHeight = canvas.clientHeight * devicePixelRatio;
-        renderPassDescriptor.attachmentSize = { width: currentWidth, height: currentHeight };
+
+        canvas.width = currentWidth;
+        canvas.height = currentHeight;
+
+        // reactive(renderPassDescriptor).attachmentSize = { width: currentWidth, height: currentHeight };
 
         const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { descriptor: renderPassDescriptor, renderObjects: [renderObject] },
-                    ]
-                }
+                        { descriptor: renderPassDescriptor, renderPassObjects: [renderObject] },
+                    ],
+                },
             ],
         };
 
@@ -54,5 +57,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);

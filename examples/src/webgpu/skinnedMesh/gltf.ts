@@ -1,5 +1,5 @@
-import { Mat4 } from "wgpu-matrix";
-import { GLTFNode } from "./glbUtils";
+import { Mat4 } from 'wgpu-matrix';
+import { GLTFNode } from './glbUtils';
 
 /* eslint @typescript-eslint/no-explicit-any: "off" */
 
@@ -32,7 +32,7 @@ export interface Accessor {
   componentType: 5120 | 5121 | 5122 | 5123 | 5125 | 5126 | number;
   normalized?: boolean;
   count: number;
-  type: "SCALAR" | "VEC2" | "VEC3" | "VEC4" | "MAT2" | "MAT3" | "MAT4" | string;
+  type: 'SCALAR' | 'VEC2' | 'VEC3' | 'VEC4' | 'MAT2' | 'MAT3' | 'MAT4' | string;
   max?: number[];
   min?: number[];
   sparse?: AccessorSparse;
@@ -41,7 +41,7 @@ export interface Accessor {
 
 export interface AnimationChannelTarget {
   node?: GlTfId;
-  path: "translation" | "rotation" | "scale" | "weights" | string;
+  path: 'translation' | 'rotation' | 'scale' | 'weights' | string;
 }
 
 export interface AnimationChannel {
@@ -51,7 +51,7 @@ export interface AnimationChannel {
 
 export interface AnimationSampler {
   input: GlTfId;
-  interpolation?: "LINEAR" | "STEP" | "CUBICSPLINE" | string;
+  interpolation?: 'LINEAR' | 'STEP' | 'CUBICSPLINE' | string;
   output: GlTfId;
 }
 
@@ -101,13 +101,13 @@ export interface CameraPerspective {
 export interface Camera {
   orthographic?: CameraOrthographic;
   perspective?: CameraPerspective;
-  type: "perspective" | "orthographic" | string;
+  type: 'perspective' | 'orthographic' | string;
   name?: string;
 }
 
 export interface Image {
   uri?: string;
-  mimeType?: "image/jpeg" | "image/png" | string;
+  mimeType?: 'image/jpeg' | 'image/png' | string;
   bufferView?: GlTfId;
   name?: string;
 }
@@ -142,7 +142,7 @@ export interface Material {
   occlusionTexture?: MaterialOcclusionTextureInfo;
   emissiveTexture?: TextureInfo;
   emissiveFactor?: number[];
-  alphaMode?: "OPAQUE" | "MASK" | "BLEND" | string;
+  alphaMode?: 'OPAQUE' | 'MASK' | 'BLEND' | string;
   alphaCutoff?: number;
   doubleSided?: boolean;
 }

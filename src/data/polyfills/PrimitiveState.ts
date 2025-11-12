@@ -1,6 +1,6 @@
-import { PrimitiveState } from "@feng3d/render-api";
+import { PrimitiveState } from '@feng3d/render-api';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * {@link GPUPrimitiveState}
@@ -13,7 +13,7 @@ declare module "@feng3d/render-api"
          * If true, indicates that depth clipping is disabled.
          * Requires the {@link GPUFeatureName#"depth-clip-control"} feature to be enabled.
          */
-        unclippedDepth?: boolean;
+        readonly unclippedDepth?: boolean;
     }
 
 }

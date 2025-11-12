@@ -1,14 +1,16 @@
-import { BufferBinding, RenderPassDescriptor, Sampler, Submit, Texture, TextureImageSource, RenderObject } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
-import { mat4, vec3 } from "wgpu-matrix";
+import { reactive } from '@feng3d/reactivity';
+import { BufferBinding, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture, TextureImageSource } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
-import basicVertWGSL from "../../shaders/basic.vert.wgsl";
-import sampleCubemapWGSL from "./sampleCubemap.frag.wgsl";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
+import basicVertWGSL from '../../shaders/basic.vert.wgsl';
+import sampleCubemapWGSL from './sampleCubemap.frag.wgsl';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -17,37 +19,39 @@ const init = async (canvas: HTMLCanvasElement) =>
     // Fetch the 6 separate images for negative/positive x, y, z axis of a cubemap
     // and upload it into a GPUTexture.
     let cubemapTexture: Texture;
+
     {
         // The order of the array layers is [+X, -X, +Y, -Y, +Z, -Z]
         const imgSrcs = [
             new URL(
                 `../../../assets/img/cubemap/posx.jpg`,
-                import.meta.url
+                import.meta.url,
             ).toString(),
             new URL(
                 `../../../assets/img/cubemap/negx.jpg`,
-                import.meta.url
+                import.meta.url,
             ).toString(),
             new URL(
                 `../../../assets/img/cubemap/posy.jpg`,
-                import.meta.url
+                import.meta.url,
             ).toString(),
             new URL(
                 `../../../assets/img/cubemap/negy.jpg`,
-                import.meta.url
+                import.meta.url,
             ).toString(),
             new URL(
                 `../../../assets/img/cubemap/posz.jpg`,
-                import.meta.url
+                import.meta.url,
             ).toString(),
             new URL(
                 `../../../assets/img/cubemap/negz.jpg`,
-                import.meta.url
+                import.meta.url,
             ).toString(),
         ];
         const promises = imgSrcs.map((src) =>
         {
-            const img = document.createElement("img");
+            const img = document.createElement('img');
+
             img.src = src;
 
             return img.decode().then(() => createImageBitmap(img));
@@ -56,23 +60,25 @@ const init = async (canvas: HTMLCanvasElement) =>
         const textureSource = imageBitmaps.map((v, i) =>
         {
             const item: TextureImageSource = {
-                image: v, textureOrigin: [0, 0, i]
+                image: v, textureOrigin: [0, 0, i],
             };
 
             return item;
         });
 
         cubemapTexture = {
-            size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
-            dimension: "cube",
-            format: "rgba8unorm",
+            descriptor: {
+                size: [imageBitmaps[0].width, imageBitmaps[0].height, 6],
+                dimension: 'cube',
+                format: 'rgba8unorm',
+            },
             sources: textureSource,
         };
     }
 
     const sampler: Sampler = {
-        magFilter: "linear",
-        minFilter: "linear",
+        magFilter: 'linear',
+        minFilter: 'linear',
     };
 
     const aspect = canvas.width / canvas.height;
@@ -94,7 +100,7 @@ const init = async (canvas: HTMLCanvasElement) =>
             viewMatrix,
             vec3.fromValues(1, 0, 0),
             (Math.PI / 10) * Math.sin(now),
-            tmpMat4
+            tmpMat4,
         );
         mat4.rotate(tmpMat4, vec3.fromValues(0, 1, 0), now * 0.2, tmpMat4);
 
@@ -102,7 +108,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         mat4.multiply(
             projectionMatrix,
             modelViewProjectionMatrix,
-            modelViewProjectionMatrix
+            modelViewProjectionMatrix,
         );
     }
 
@@ -110,51 +116,51 @@ const init = async (canvas: HTMLCanvasElement) =>
         colorAttachments: [
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
-            }
+            },
         ],
         depthStencilAttachment: {
             depthClearValue: 1,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
+    };
+
+    const uniforms = {
+        value: { modelViewProjectionMatrix: new Float32Array(16) as Float32Array },
     };
 
     const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: sampleCubemapWGSL },
-        },
-        uniforms: {
-            uniforms: {
-                modelViewProjectionMatrix: new Float32Array(16)
+            primitive: {
+                cullFace: 'none',
             },
+        },
+        bindingResources: {
+            uniforms,
             mySampler: sampler,
             myTexture: { texture: cubemapTexture },
         },
-        geometry: {
-            primitive: {
-                cullFace: "none",
-            },
-            vertices: {
-                position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-                uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
-            },
-            draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
-        }
+        vertices: {
+            position: { data: cubeVertexArray, format: 'float32x4', offset: cubePositionOffset, arrayStride: cubeVertexSize },
+            uv: { data: cubeVertexArray, format: 'float32x2', offset: cubeUVOffset, arrayStride: cubeVertexSize },
+        },
+        draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount },
     };
 
     function frame()
     {
         updateTransformationMatrix();
 
-        (renderObject.uniforms.uniforms as BufferBinding).modelViewProjectionMatrix = modelViewProjectionMatrix;
+        reactive(uniforms.value).modelViewProjectionMatrix = modelViewProjectionMatrix.subarray();
 
         const data: Submit = {
             commandEncoders: [
                 {
                     passEncoders: [
-                        { descriptor: renderPass, renderObjects: [renderObject] },
-                    ]
-                }
+                        { descriptor: renderPass, renderPassObjects: [renderObject] },
+                    ],
+                },
             ],
         };
 
@@ -165,5 +171,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);
