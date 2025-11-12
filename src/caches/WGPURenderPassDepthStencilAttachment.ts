@@ -110,6 +110,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
                 // 监听渲染通道描述符的附件尺寸变化
                 r_descriptor.attachmentSize.width;
                 r_descriptor.attachmentSize.height;
+                r_descriptor.sampleCount;
 
                 // 创建自动生成的深度纹理配置
                 const autoDepthTexture: Texture = {
@@ -117,6 +118,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
                         label: '自动生成的深度纹理',
                         size: [descriptor.attachmentSize.width, descriptor.attachmentSize.height],
                         format: 'depth24plus',
+                        sampleCount: descriptor.sampleCount,
                     },
                 };
 

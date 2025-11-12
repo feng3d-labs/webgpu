@@ -1,6 +1,6 @@
 {
   "name": "@feng3d/webgpu",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "webgpu渲染库",
   "homepage": "https://feng3d.com/webgpu/",
   "author": "feng",

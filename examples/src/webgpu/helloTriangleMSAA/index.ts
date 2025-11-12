@@ -18,6 +18,11 @@ const init = async (canvas: HTMLCanvasElement) =>
             view: { texture: { context: { canvasId: canvas.id } } },
             clearValue: [0.0, 0.0, 0.0, 1.0],
         }],
+        depthStencilAttachment: {
+            depthClearValue: 1.0,
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
+        },
         sampleCount: 4, // 设置多重采样数量
     };
 
