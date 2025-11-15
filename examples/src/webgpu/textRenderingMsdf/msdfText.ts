@@ -113,10 +113,7 @@ export class MsdfText
             const writeBuffers = buffer.writeBuffers || [];
 
             writeBuffers.push({
-                bufferOffset: 0,
                 data: this.bufferArray,
-                dataOffset: 0,
-                size: this.bufferArray.length,
             });
             reactive(buffer).writeBuffers = writeBuffers;
         }

@@ -258,9 +258,7 @@ setBlendConstant().`,
         const writeBuffers = buffer.writeBuffers || [];
 
         writeBuffers.push({
-            data: transformationMatrix.buffer,
-            dataOffset: transformationMatrix.byteOffset,
-            size: transformationMatrix.byteLength,
+            data: transformationMatrix,
         });
         reactive(buffer).writeBuffers = writeBuffers;
 

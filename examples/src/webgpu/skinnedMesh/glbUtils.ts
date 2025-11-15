@@ -798,9 +798,7 @@ export class GLTFSkin
             //
             writeBuffers.push({
                 bufferOffset: j * 64,
-                data: toWrite.buffer,
-                dataOffset: toWrite.byteOffset,
-                size: toWrite.byteLength,
+                data: toWrite,
             });
         }
 

@@ -504,21 +504,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         writeBuffers.push({
             bufferOffset: 0,
-            data: projectionMatrix.buffer,
-            dataOffset: projectionMatrix.byteOffset,
-            size: projectionMatrix.byteLength,
+            data: projectionMatrix,
         });
         writeBuffers.push({
             bufferOffset: 64,
-            data: viewMatrix.buffer,
-            dataOffset: viewMatrix.byteOffset,
-            size: viewMatrix.byteLength,
+            data: viewMatrix,
         });
         writeBuffers.push({
             bufferOffset: 128,
-            data: modelMatrix.buffer,
-            dataOffset: modelMatrix.byteOffset,
-            size: modelMatrix.byteLength,
+            data: modelMatrix,
         });
         reactive(buffer).writeBuffers = writeBuffers;
 

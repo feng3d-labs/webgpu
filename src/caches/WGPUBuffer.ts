@@ -91,7 +91,7 @@ export class WGPUBuffer extends ReactiveObject
 
             const writeBuffers = buffer.writeBuffers || [];
             writeBuffers.push({
-                data,
+                data: new Uint8Array(data),
             });
 
             r_buffer.writeBuffers = writeBuffers;
@@ -125,29 +125,11 @@ export class WGPUBuffer extends ReactiveObject
         {
             const bufferOffset = writeBuffer.bufferOffset ?? 0;  // 缓冲区偏移量
             const data = writeBuffer.data;                       // 要写入的数据
-            const dataOffset = writeBuffer.dataOffset ?? 0;      // 数据偏移量
             const size = writeBuffer.size;                       // 写入大小
 
-            let arrayBuffer: ArrayBuffer | SharedArrayBuffer;
-            let dataOffsetByte: number;
-            let sizeByte: number;
-
-            // 处理TypedArray类型的数据
-            if (ArrayBuffer.isView(data))
-            {
-                const bytesPerElement = data.BYTES_PER_ELEMENT;
-
-                arrayBuffer = data.buffer;
-                dataOffsetByte = data.byteOffset + bytesPerElement * dataOffset;
-                sizeByte = size ? (bytesPerElement * size) : data.byteLength;
-            }
-            // 处理ArrayBuffer类型的数据
-            else
-            {
-                arrayBuffer = data;
-                dataOffsetByte = dataOffset ?? 0;
-                sizeByte = size ?? (data.byteLength - dataOffsetByte);
-            }
+            const arrayBuffer = data.buffer;
+            const dataOffsetByte = data.byteOffset;
+            const sizeByte = size ? (data.BYTES_PER_ELEMENT * size) : data.byteLength;
 
             // 验证数据范围，防止越界
             console.assert(sizeByte <= arrayBuffer.byteLength - dataOffsetByte, `上传的尺寸超出数据范围！`);

@@ -122,7 +122,7 @@ export class WGPUBufferBinding extends ReactiveObject
 
                 const writeBuffers = buffer.writeBuffers ?? [];
 
-                writeBuffers.push({ bufferOffset: offset + itemInfoOffset, data: data.buffer, dataOffset: data.byteOffset, size: Math.min(itemInfoSize, data.byteLength) });
+                writeBuffers.push({ bufferOffset: offset + itemInfoOffset, data: data, size: Math.min(itemInfoSize, data.byteLength) / data.BYTES_PER_ELEMENT });
                 reactive(buffer).writeBuffers = writeBuffers;
             });
         }
