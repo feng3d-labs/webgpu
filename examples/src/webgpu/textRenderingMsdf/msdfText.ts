@@ -109,7 +109,7 @@ export class MsdfText
         if (this.bufferArrayDirty)
         {
             this.bufferArrayDirty = false;
-            const buffer = Buffer.getBuffer(this.textBuffer);
+            const buffer = Buffer.getBuffer(this.textBuffer.buffer);
             const writeBuffers = buffer.writeBuffers || [];
 
             writeBuffers.push({
@@ -451,7 +451,7 @@ export class MsdfTextRenderer
         this.cameraUniformBuffer.set(projection, 0);
         this.cameraUniformBuffer.set(view, 16);
 
-        const buffer = Buffer.getBuffer(this.cameraUniformBuffer);
+        const buffer = Buffer.getBuffer(this.cameraUniformBuffer.buffer);
         const writeBuffers = buffer.writeBuffers || [];
 
         writeBuffers.push({

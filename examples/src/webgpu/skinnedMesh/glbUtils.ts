@@ -784,7 +784,7 @@ export class GLTFSkin
         const globalWorldInverse = mat4.inverse(
             nodes[currentNodeIndex].worldMatrix,
         );
-        const gpuBuffer = Buffer.getBuffer(this.jointMatricesUniformBuffer);
+        const gpuBuffer = Buffer.getBuffer(this.jointMatricesUniformBuffer.buffer);
         const writeBuffers = gpuBuffer.writeBuffers || [];
 
         for (let j = 0; j < this.joints.length; j++)

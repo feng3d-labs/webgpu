@@ -176,6 +176,6 @@ export default class Radiosity
         uniformDataF32[4] = this.scene.lightCenter[0];
         uniformDataF32[5] = this.scene.lightCenter[1];
         uniformDataF32[6] = this.scene.lightCenter[2];
-        reactive(Buffer.getBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
+        reactive(Buffer.getBuffer(this.uniformBuffer.buffer)).writeBuffers = [{ data: uniformDataF32 }];
     }
 }

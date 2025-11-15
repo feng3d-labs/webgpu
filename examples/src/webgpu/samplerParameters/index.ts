@@ -51,13 +51,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             Number(config.highlightFlange),
         ]);
 
-        if (Buffer.getBuffer(bufConfig).writeBuffers)
+        if (Buffer.getBuffer(bufConfig.buffer).writeBuffers)
         {
-            Buffer.getBuffer(bufConfig).writeBuffers.push({ bufferOffset: 64, data });
+            Buffer.getBuffer(bufConfig.buffer).writeBuffers.push({ bufferOffset: 64, data });
         }
         else
         {
-            reactive(Buffer.getBuffer(bufConfig)).writeBuffers = [{ bufferOffset: 64, data }];
+            reactive(Buffer.getBuffer(bufConfig.buffer)).writeBuffers = [{ bufferOffset: 64, data }];
         }
     };
 
@@ -275,7 +275,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     );
     const bufConfig = new Uint8Array(128);
 
-    reactive(Buffer.getBuffer(bufConfig)).writeBuffers = [{ data: viewProj }];
+    reactive(Buffer.getBuffer(bufConfig.buffer)).writeBuffers = [{ data: viewProj }];
 
     const bufMatrices = kMatrices;
 

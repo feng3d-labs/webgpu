@@ -178,13 +178,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         .step(1)
         .onChange(() =>
         {
-            if (Buffer.getBuffer(configUniformBuffer).writeBuffers)
+            if (Buffer.getBuffer(configUniformBuffer.buffer).writeBuffers)
             {
-                Buffer.getBuffer(configUniformBuffer).writeBuffers.push({ data: new Uint32Array([settings.numLights]) });
+                Buffer.getBuffer(configUniformBuffer.buffer).writeBuffers.push({ data: new Uint32Array([settings.numLights]) });
             }
             else
             {
-                reactive(Buffer.getBuffer(configUniformBuffer)).writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
+                reactive(Buffer.getBuffer(configUniformBuffer.buffer)).writeBuffers = [{ data: new Uint32Array([settings.numLights]) }];
             }
         });
 
@@ -243,7 +243,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     lightExtentData.set(lightExtentMin, 0);
     lightExtentData.set(lightExtentMax, 4);
-    reactive(Buffer.getBuffer(lightExtentBuffer)).writeBuffers = [{ data: lightExtentData }];
+    reactive(Buffer.getBuffer(lightExtentBuffer.buffer)).writeBuffers = [{ data: lightExtentData }];
 
     const lightUpdateComputePipeline: ComputePipeline = {
         compute: {
@@ -292,36 +292,36 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     const cameraMatrixData = viewProjMatrix as Float32Array;
 
-    if (Buffer.getBuffer(cameraUniformBuffer).writeBuffers)
+    if (Buffer.getBuffer(cameraUniformBuffer.buffer).writeBuffers)
     {
-        Buffer.getBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraMatrixData });
+        Buffer.getBuffer(cameraUniformBuffer.buffer).writeBuffers.push({ data: cameraMatrixData });
     }
     else
     {
-        reactive(Buffer.getBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraMatrixData }];
+        reactive(Buffer.getBuffer(cameraUniformBuffer.buffer)).writeBuffers = [{ data: cameraMatrixData }];
     }
     const modelData = modelMatrix as Float32Array;
 
-    if (Buffer.getBuffer(modelUniformBuffer).writeBuffers)
+    if (Buffer.getBuffer(modelUniformBuffer.buffer).writeBuffers)
     {
-        Buffer.getBuffer(modelUniformBuffer).writeBuffers.push({ data: modelData });
+        Buffer.getBuffer(modelUniformBuffer.buffer).writeBuffers.push({ data: modelData });
     }
     else
     {
-        reactive(Buffer.getBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
+        reactive(Buffer.getBuffer(modelUniformBuffer.buffer)).writeBuffers = [{ data: modelData }];
     }
     const invertTransposeModelMatrix = mat4.invert(modelMatrix);
 
     mat4.transpose(invertTransposeModelMatrix, invertTransposeModelMatrix);
     const normalModelData = invertTransposeModelMatrix as Float32Array;
 
-    if (Buffer.getBuffer(modelUniformBuffer).writeBuffers)
+    if (Buffer.getBuffer(modelUniformBuffer.buffer).writeBuffers)
     {
-        Buffer.getBuffer(modelUniformBuffer).writeBuffers.push({ bufferOffset: 64, data: normalModelData });
+        Buffer.getBuffer(modelUniformBuffer.buffer).writeBuffers.push({ bufferOffset: 64, data: normalModelData });
     }
     else
     {
-        reactive(Buffer.getBuffer(modelUniformBuffer)).writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
+        reactive(Buffer.getBuffer(modelUniformBuffer.buffer)).writeBuffers = [{ bufferOffset: 64, data: normalModelData }];
     }
 
     // Rotates the camera around the origin based on time.
@@ -403,13 +403,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     {
         const cameraViewProj = getCameraViewProjMatrix();
 
-        if (Buffer.getBuffer(cameraUniformBuffer).writeBuffers)
+        if (Buffer.getBuffer(cameraUniformBuffer.buffer).writeBuffers)
         {
-            Buffer.getBuffer(cameraUniformBuffer).writeBuffers.push({ data: cameraViewProj });
+            Buffer.getBuffer(cameraUniformBuffer.buffer).writeBuffers.push({ data: cameraViewProj });
         }
         else
         {
-            reactive(Buffer.getBuffer(cameraUniformBuffer)).writeBuffers = [{ data: cameraViewProj }];
+            reactive(Buffer.getBuffer(cameraUniformBuffer.buffer)).writeBuffers = [{ data: cameraViewProj }];
         }
 
         const submit: Submit = {

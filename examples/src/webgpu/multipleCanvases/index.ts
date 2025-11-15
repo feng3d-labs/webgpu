@@ -302,7 +302,7 @@ const init = async () =>
             mat3.fromMat4(world, worldMatrixValue);
 
             // Upload our uniform values.
-            const buffer = Buffer.getBuffer(uniformValues);
+            const buffer = Buffer.getBuffer(uniformValues.buffer);
             const writeBuffers = buffer.writeBuffers || [];
 
             writeBuffers.push({

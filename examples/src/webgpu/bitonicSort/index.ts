@@ -723,7 +723,7 @@ async function init(
     {
         // Write elements buffer
 
-        let iGPUBuffer = Buffer.getBuffer(elementsInputBuffer.bufferView);
+        let iGPUBuffer = Buffer.getBuffer(elementsInputBuffer.bufferView.buffer);
         let writeBuffers = iGPUBuffer.writeBuffers || [];
 
         writeBuffers.push({ data: elements });
@@ -738,7 +738,7 @@ async function init(
             settings['Next Swap Span'],
         ]);
 
-        iGPUBuffer = Buffer.getBuffer(computeUniformsBuffer.bufferView);
+        iGPUBuffer = Buffer.getBuffer(computeUniformsBuffer.bufferView.buffer);
         writeBuffers = iGPUBuffer.writeBuffers || [];
         writeBuffers.push({ data: dims });
         writeBuffers.push({ bufferOffset: 8, data: stepDetails });

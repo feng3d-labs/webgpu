@@ -118,13 +118,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const updateSettings = () =>
     {
         blockDim = tileDim - (settings.filterSize - 1);
-        if (Buffer.getBuffer(blurParamsBuffer).writeBuffers)
+        if (Buffer.getBuffer(blurParamsBuffer.buffer).writeBuffers)
         {
-            Buffer.getBuffer(blurParamsBuffer).writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
+            Buffer.getBuffer(blurParamsBuffer.buffer).writeBuffers.push({ data: new Uint32Array([settings.filterSize, blockDim]) });
         }
         else
         {
-            reactive(Buffer.getBuffer(blurParamsBuffer)).writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
+            reactive(Buffer.getBuffer(blurParamsBuffer.buffer)).writeBuffers = [{ data: new Uint32Array([settings.filterSize, blockDim]) }];
         }
         needUpdateEncoder = true;
     };

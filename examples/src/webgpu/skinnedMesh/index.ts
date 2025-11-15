@@ -148,7 +148,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         .add(settings, 'renderMode', ['NORMAL', 'JOINTS', 'WEIGHTS'])
         .onChange(() =>
         {
-            const buffer = Buffer.getBuffer(generalUniformsBuffer);
+            const buffer = Buffer.getBuffer(generalUniformsBuffer.buffer);
             const writeBuffers = buffer.writeBuffers || [];
 
             writeBuffers.push({
@@ -175,7 +175,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.cameraZ = -14.6;
             }
         }
-        const buffer = Buffer.getBuffer(generalUniformsBuffer);
+        const buffer = Buffer.getBuffer(generalUniformsBuffer.buffer);
         const writeBuffers = buffer.writeBuffers || [];
 
         writeBuffers.push({
@@ -383,7 +383,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // Create bones of the skinned grid and write the inverse bind positions to
     // the skinned grid's inverse bind matrix array
-    const buffer = Buffer.getBuffer(skinnedGridInverseBindUniformBuffer);
+    const buffer = Buffer.getBuffer(skinnedGridInverseBindUniformBuffer.buffer);
     const writeBuffers = buffer.writeBuffers || [];
     const gridBoneCollection = createBoneCollection(5);
 
@@ -499,7 +499,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         animSkinnedGrid(gridBoneCollection.transforms, angle);
 
         // Write to mvp to camera buffer
-        const buffer = Buffer.getBuffer(cameraBuffer);
+        const buffer = Buffer.getBuffer(cameraBuffer.buffer);
         const writeBuffers = buffer.writeBuffers || [];
 
         writeBuffers.push({
@@ -523,7 +523,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         reactive(buffer).writeBuffers = writeBuffers;
 
         // Write to skinned grid bone uniform buffer
-        const buffer0 = Buffer.getBuffer(skinnedGridJointUniformBuffer);
+        const buffer0 = Buffer.getBuffer(skinnedGridJointUniformBuffer.buffer);
         const writeBuffers0 = buffer0.writeBuffers || [];
 
         for (let i = 0; i < gridBoneCollection.transforms.length; i++)

@@ -254,7 +254,7 @@ setBlendConstant().`,
     {
         const transformationMatrix = getTransformationMatrix();
 
-        const buffer = Buffer.getBuffer(uniformBuffer);
+        const buffer = Buffer.getBuffer(uniformBuffer.buffer);
         const writeBuffers = buffer.writeBuffers || [];
 
         writeBuffers.push({

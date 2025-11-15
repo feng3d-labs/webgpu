@@ -100,7 +100,7 @@ export class WebGPU
 
     async readBuffer(buffer: TypedArray, byteOffset?: GPUSize64, byteLength?: GPUSize64)
     {
-        const buffer0 = Buffer.getBuffer(buffer);
+        const buffer0 = Buffer.getBuffer(buffer.buffer);
 
         const commandEncoder = this.device.createCommandEncoder();
 

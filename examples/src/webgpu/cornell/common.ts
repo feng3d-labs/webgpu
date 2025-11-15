@@ -78,7 +78,7 @@ export default class Common
         uniformDataU32[33] = 0xffffffff * Math.random();
         uniformDataU32[34] = 0xffffffff * Math.random();
 
-        reactive(Buffer.getBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
+        reactive(Buffer.getBuffer(this.uniformBuffer.buffer)).writeBuffers = [{ data: uniformDataF32 }];
 
         this.frame++;
     }
