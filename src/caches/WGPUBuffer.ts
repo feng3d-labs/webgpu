@@ -45,9 +45,8 @@ export class WGPUBuffer extends ReactiveObject
             // 触发响应式依赖
             r_buffer.label;
             r_buffer.size;
-            r_buffer.usage;
 
-            const { label, size, usage, data } = buffer;
+            const { label, size, data } = buffer;
 
             // 验证缓冲区尺寸必须为4的倍数（WebGPU要求）
             console.assert(size && (size % 4 === 0), `初始化缓冲区时必须设置缓冲区尺寸且必须为4的倍数！`);
@@ -62,7 +61,7 @@ export class WGPUBuffer extends ReactiveObject
             gpuBuffer = device.createBuffer({
                 label,
                 size,
-                usage: usage ?? WGPUBuffer.defaultGPUBufferUsage,
+                usage: WGPUBuffer.defaultGPUBufferUsage,
                 mappedAtCreation,
             });
 

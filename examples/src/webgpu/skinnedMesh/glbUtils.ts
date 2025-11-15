@@ -1,6 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, FragmentState, IDraw, PrimitiveState, RenderObject, RenderPipeline, VertexAttributes, VertexFormat, vertexFormatMap, VertexState } from '@feng3d/render-api';
-import { WGPUBuffer } from '@feng3d/webgpu';
 import { Mat4, mat4, Quatn, Vec3n } from 'wgpu-matrix';
 
 import { Accessor, BufferView, GlTf, Scene } from './gltf';
@@ -249,7 +248,6 @@ export class GLTFBufferView
     view: Uint8Array;
     needsUpload: boolean;
     gpuBuffer: Buffer;
-    usage: number;
     constructor(buffer: GLTFBuffer, view: BufferView)
     {
         this.byteLength = view['byteLength'];
@@ -278,12 +276,6 @@ export class GLTFBufferView
 
         this.needsUpload = false;
         this.gpuBuffer = null;
-        this.usage = 0;
-    }
-
-    addUsage(usage: number)
-    {
-        this.usage = this.usage | usage;
     }
 
     upload()
@@ -291,7 +283,6 @@ export class GLTFBufferView
         // Note: must align to 4 byte size when mapped at creation is true
         const buf: Buffer = {
             size: alignTo(this.view.byteLength, 4),
-            usage: this.usage,
             data: this.view.buffer,
         };
 
@@ -974,9 +965,6 @@ export const convertGLBToJSONAndBinary = async (
     {
         const inverseBindMatrixAccessor = accessors[skin.inverseBindMatrices];
 
-        inverseBindMatrixAccessor.view.addUsage(
-            GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        );
         inverseBindMatrixAccessor.view.needsUpload = true;
     }
 
