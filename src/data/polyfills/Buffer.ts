@@ -26,6 +26,7 @@ declare module '@feng3d/render-api'
          *
          *  注：修改后将重新创建GPUBuffer。
          *
+         * 如果需要读取GPU缓冲区数据，则直接调用 {@link WebGPU.readBuffer} 方法。
          */
         readonly usage?: GPUBufferUsageFlags;
     }

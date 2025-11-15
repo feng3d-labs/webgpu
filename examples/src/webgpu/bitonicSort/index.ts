@@ -1,6 +1,6 @@
 import { effect, reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, BufferBinding, CommandEncoder, RenderPassDescriptor, Submit } from '@feng3d/render-api';
-import { ComputePass, ComputePipeline, WGPUBuffer, TimestampQuery, WebGPU } from '@feng3d/webgpu';
+import { ComputePass, ComputePipeline, TimestampQuery, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 
 import atomicToZero from './atomicToZero.wgsl';
@@ -272,19 +272,11 @@ async function init(
     const elementsOutputBuffer: BufferBinding = {
         bufferView: new Uint8Array(elementsBufferSize),
     };
-    const elementsStagingBuffer: Buffer = {
-        size: elementsBufferSize,
-        usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
-    };
 
     // Initialize atomic swap buffer on GPU and CPU. Counts number of swaps actually performed by
     // compute shader (when value at index x is greater than value at index y)
     const atomicSwapsOutputBuffer: BufferBinding = {
         bufferView: new Uint32Array(1),
-    };
-    const atomicSwapsStagingBuffer: Buffer = {
-        size: Uint32Array.BYTES_PER_ELEMENT,
-        usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
     };
 
     // Create uniform buffer for compute shader
@@ -822,26 +814,6 @@ async function init(
                     ? nextStepController.setValue('DISPERSE_GLOBAL')
                     : nextStepController.setValue('DISPERSE_LOCAL');
             }
-
-            // Copy GPU accessible buffers to CPU accessible buffers
-            commandEncoder.passEncoders.push(
-                {
-                    __type__: 'CopyBufferToBuffer',
-                    source: Buffer.getBuffer(elementsOutputBuffer.bufferView),
-                    sourceOffset: 0,
-                    destination: elementsStagingBuffer,
-                    destinationOffset: 0,
-                    size: elementsBufferSize,
-                },
-                {
-                    __type__: 'CopyBufferToBuffer',
-                    source: Buffer.getBuffer(atomicSwapsOutputBuffer.bufferView),
-                    sourceOffset: 0,
-                    destination: atomicSwapsStagingBuffer,
-                    destinationOffset: 0,
-                    size: Uint32Array.BYTES_PER_ELEMENT,
-                },
-            );
         }
         webgpu.submit(submit);
 
@@ -851,9 +823,9 @@ async function init(
         )
         {
             // Copy GPU element data to CPU
-            const elementsData = await webgpu.readBuffer(elementsStagingBuffer, 0, Uint32Array.BYTES_PER_ELEMENT * settings['Total Elements']);
+            const elementsData = await webgpu.readBuffer(elementsOutputBuffer.bufferView, 0, Uint32Array.BYTES_PER_ELEMENT * settings['Total Elements']);
             // Copy atomic swaps data to CPU
-            const swapsData = await webgpu.readBuffer(atomicSwapsStagingBuffer, 0, Uint32Array.BYTES_PER_ELEMENT);
+            const swapsData = await webgpu.readBuffer(atomicSwapsOutputBuffer.bufferView, 0, Uint32Array.BYTES_PER_ELEMENT);
 
             // Extract data
             const elementsOutput = new Uint32Array(elementsData);

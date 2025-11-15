@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { Buffer, ReadPixels, Submit, TextureLike } from '@feng3d/render-api';
+import { Buffer, ReadPixels, Submit, TextureLike, TypedArray } from '@feng3d/render-api';
 
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
@@ -98,16 +98,32 @@ export class WebGPU
         return result;
     }
 
-    async readBuffer(buffer: Buffer, offset?: GPUSize64, size?: GPUSize64)
+    async readBuffer(buffer: TypedArray, byteOffset?: GPUSize64, byteLength?: GPUSize64)
     {
-        const device = this.device;
-        const gpuBuffer = WGPUBuffer.getInstance(device, buffer).gpuBuffer;
+        const buffer0 = Buffer.getBuffer(buffer);
 
-        await gpuBuffer.mapAsync(GPUMapMode.READ);
+        const commandEncoder = this.device.createCommandEncoder();
 
-        const result = gpuBuffer.getMappedRange(offset, size).slice(0);
+        const source = WGPUBuffer.getInstance(this.device, buffer0).gpuBuffer;
 
-        gpuBuffer.unmap();
+        // 创建临时缓冲区，用于读取GPU缓冲区数据
+        const destination = this.device.createBuffer({ size: byteLength, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+
+        byteOffset = byteOffset ?? buffer.byteOffset;
+        byteLength = byteLength ?? buffer.byteLength;
+
+        commandEncoder.copyBufferToBuffer(source, byteOffset, destination, 0, byteLength);
+
+        this.device.queue.submit([commandEncoder.finish()]);
+
+        await destination.mapAsync(GPUMapMode.READ);
+
+        const result = destination.getMappedRange().slice(0);
+
+        destination.unmap();
+
+        // 销毁临时缓冲区
+        destination.destroy();
 
         return result;
     }

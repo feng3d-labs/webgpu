@@ -304,8 +304,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // initialize the heads buffer
             passEncoders.push({
                 __type__: 'CopyBufferToBuffer',
-                source: Buffer.getBuffer(headsInitBuffer),
-                destination: Buffer.getBuffer(headsBuffer.bufferView),
+                source: headsInitBuffer,
+                destination: headsBuffer.bufferView,
             });
 
             const scissorX = 0;
