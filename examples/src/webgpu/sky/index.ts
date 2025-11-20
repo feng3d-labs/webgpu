@@ -125,7 +125,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                 {
                     descriptor: {
                         colorAttachments: [{ clearValue: [0.5, 0.5, 0.5, 1.0], loadOp: 'clear', view: { texture: { context: { canvasId: canvas.id } } } }],
-                        depthStencilAttachment: { depthClearValue: 1.0, depthLoadOp: 'clear' },
+                        depthStencilAttachment: { depthClearValue: 1.0, depthLoadOp: 'clear', depthStoreOp: 'store' },
                     },
                     renderPassObjects: [renderObject],
                 },
