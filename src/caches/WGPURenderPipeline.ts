@@ -73,8 +73,10 @@ export class WGPURenderPipeline extends ReactiveObject
             // 计算
             const { colorFormats, depthStencilFormat, sampleCount } = renderPassFormat;
 
+            const vertexCode = r_renderPipeline.vertex.wgsl || r_renderPipeline.vertex.code;
+            const fragmentCode = r_renderPipeline.fragment?.wgsl || r_renderPipeline.fragment?.code;
             // 创建管线布局
-            const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: r_renderPipeline.vertex.code, fragment: r_renderPipeline.fragment?.code });
+            const layout = WGPUPipelineLayout.getGPUPipelineLayout(device, { vertex: vertexCode, fragment: fragmentCode });
 
             // 创建顶点状态
             r_renderPipeline.vertex;

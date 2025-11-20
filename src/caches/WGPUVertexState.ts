@@ -83,14 +83,12 @@ export class WGPUVertexState extends ReactiveObject
         this._computedGpuVertexState = computed(() =>
         {
             // 触发响应式依赖，监听顶点状态的所有属性
-            r_vertexState.code;
             r_vertexState.constants;
-            r_vertexState.entryPoint;
 
             // 获取顶点状态配置
-            const { code, constants } = vertexState;
-
-            let entryPoint = vertexState.entryPoint;
+            const constants = vertexState.constants;
+            const code = r_vertexState.wgsl || r_vertexState.code;
+            let entryPoint = r_vertexState.entryPoint;
 
             // 如果没有指定入口点，自动检测
             if (!entryPoint)

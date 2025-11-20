@@ -83,18 +83,14 @@ export class WGPUVertexBufferLayout extends ReactiveObject
      */
     private _onCreate(vertexState: VertexState, vertices: VertexAttributes)
     {
-        const r_this = reactive(this);
         const r_vertexState = reactive(vertexState);
 
         // 监听顶点状态和顶点属性变化，自动重新创建顶点缓冲区布局
         this._computedGpuVertexBufferLayouts = computed(() =>
         {
             // 触发响应式依赖，监听顶点状态的所有属性
-            r_vertexState.code;
-            r_vertexState.entryPoint;
-
-            // 获取顶点状态配置
-            const { code, entryPoint } = vertexState;
+            const code = r_vertexState.wgsl || r_vertexState.code;
+            const entryPoint = r_vertexState.entryPoint;
 
             // 获取着色器反射信息
             const wgslReflect = WGPUShaderReflect.getWGSLReflectInfo(code);

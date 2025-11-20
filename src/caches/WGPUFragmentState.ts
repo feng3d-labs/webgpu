@@ -26,17 +26,16 @@ export class WGPUFragmentState extends ReactiveObject
 
         this._computedGpuFragmentState = computed(() =>
         {
-            r_fragmentState.code;
-            r_fragmentState.entryPoint;
             r_fragmentState.targets?.concat();
             r_fragmentState.constants;
 
-            const { code, targets, constants } = fragmentState;
-            let entryPoint = fragmentState.entryPoint;
+            const code = r_fragmentState.wgsl || r_fragmentState.code;
+            const { targets, constants } = fragmentState;
 
             const module = WGPUShaderModule.getGPUShaderModule(device, code);
 
             //
+            let entryPoint = r_fragmentState.entryPoint;
             if (!entryPoint)
             {
                 const reflect = WGPUShaderReflect.getWGSLReflectInfo(code);

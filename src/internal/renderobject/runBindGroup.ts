@@ -14,8 +14,10 @@ export function runBindGroup(renderObject: RenderObject, passEncoder: WGPURender
     r_renderObject.bindingResources;
     const bindingResources = renderObject.bindingResources;
 
+    const vertexCode = r_renderObject.pipeline.vertex.wgsl || r_renderObject.pipeline.vertex.code;
+    const fragmentCode = r_renderObject.pipeline.fragment?.wgsl || r_renderObject.pipeline.fragment?.code;
     //
-    const layout = WGPUPipelineLayout.getPipelineLayout({ vertex: r_renderObject.pipeline.vertex.code, fragment: r_renderObject.pipeline.fragment?.code });
+    const layout = WGPUPipelineLayout.getPipelineLayout({ vertex: vertexCode, fragment: fragmentCode });
 
     layout.bindGroupLayouts.forEach((bindGroupLayout, index) =>
     {
