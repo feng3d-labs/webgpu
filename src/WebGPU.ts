@@ -1,5 +1,5 @@
-import { reactive } from '@feng3d/reactivity';
-import { Buffer, ReadPixels, Submit, TextureLike, TypedArray } from '@feng3d/render-api';
+import { Computed, computed, reactive } from '@feng3d/reactivity';
+import { Buffer, CanvasContext, CanvasRenderPassDescriptor, ReadPixels, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Submit, TextureLike, TypedArray } from '@feng3d/render-api';
 
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
@@ -10,6 +10,7 @@ import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
 import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
+import { unreadonly } from './utils/unreadonly';
 
 /**
  * WebGPU
@@ -42,9 +43,94 @@ export class WebGPU
 
     readonly device: GPUDevice;
 
-    constructor(device?: GPUDevice)
+    private _renderPassDescriptorComputed: Computed<RenderPassDescriptor>;
+
+    constructor(canvasContext?: CanvasContext, canvasRenderPassDescriptor?: CanvasRenderPassDescriptor)
     {
-        this.device = device;
+        this._initRenderPassDescriptorComputed(canvasContext, canvasRenderPassDescriptor);
+    }
+
+    private _initRenderPassDescriptorComputed(canvasContext?: CanvasContext, canvasRenderPassDescriptor?: CanvasRenderPassDescriptor)
+    {
+        if (canvasContext)
+        {
+            const colorAttachment: RenderPassColorAttachment = { view: { texture: { context: canvasContext } } };
+            const depthStencilAttachment: RenderPassDepthStencilAttachment = {};
+            //
+            const descriptor: RenderPassDescriptor = {
+                colorAttachments: [colorAttachment],
+            };
+
+            this._renderPassDescriptorComputed = computed(() =>
+            {
+                if (!canvasRenderPassDescriptor) return descriptor;
+
+                const r_canvasRenderPassDescriptor = reactive(canvasRenderPassDescriptor);
+                //
+                r_canvasRenderPassDescriptor.clearColorValue;
+                reactive(descriptor.colorAttachments[0]).clearValue = canvasRenderPassDescriptor.clearColorValue;
+
+                r_canvasRenderPassDescriptor.loadColorOp;
+                reactive(descriptor.colorAttachments[0]).loadOp = canvasRenderPassDescriptor.loadColorOp;
+
+                let hasDepthStencilAttachment = false;
+                if (r_canvasRenderPassDescriptor.depthClearValue !== undefined)
+                {
+                    hasDepthStencilAttachment = true;
+                    reactive(depthStencilAttachment).depthClearValue = r_canvasRenderPassDescriptor.depthClearValue;
+                }
+                else
+                {
+                    delete unreadonly(depthStencilAttachment).depthClearValue;
+                }
+                if (r_canvasRenderPassDescriptor.depthLoadOp !== undefined)
+                {
+                    hasDepthStencilAttachment = true;
+                    reactive(depthStencilAttachment).depthLoadOp = r_canvasRenderPassDescriptor.depthLoadOp;
+                }
+                else
+                {
+                    delete unreadonly(depthStencilAttachment).depthLoadOp;
+                }
+                if (r_canvasRenderPassDescriptor.stencilClearValue !== undefined)
+                {
+                    hasDepthStencilAttachment = true;
+                    reactive(depthStencilAttachment).stencilClearValue = r_canvasRenderPassDescriptor.stencilClearValue;
+                }
+                else
+                {
+                    delete unreadonly(depthStencilAttachment).stencilClearValue;
+                }
+                if (r_canvasRenderPassDescriptor.stencilLoadOp !== undefined)
+                {
+                    hasDepthStencilAttachment = true;
+                    reactive(depthStencilAttachment).stencilLoadOp = r_canvasRenderPassDescriptor.stencilLoadOp;
+                }
+                else
+                {
+                    delete unreadonly(depthStencilAttachment).stencilLoadOp;
+                }
+                if (hasDepthStencilAttachment)
+                {
+                    reactive(descriptor).depthStencilAttachment = depthStencilAttachment;
+                }
+                else
+                {
+                    delete unreadonly(descriptor).depthStencilAttachment;
+                }
+
+                if (r_canvasRenderPassDescriptor.sampleCount !== undefined)
+                {
+                    reactive(descriptor).sampleCount = r_canvasRenderPassDescriptor.sampleCount;
+                }
+                else
+                {
+                    delete unreadonly(descriptor).sampleCount;
+                }
+
+                return descriptor;
+            });
+        }
     }
 
     destroy()
@@ -58,7 +144,7 @@ export class WebGPU
     {
         const device = this.device;
 
-        runSubmit(device, submit);
+        runSubmit(device, submit, this._renderPassDescriptorComputed?.value);
     }
 
     destoryTexture(texture: TextureLike)
