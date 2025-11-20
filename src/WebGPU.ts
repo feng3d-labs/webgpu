@@ -1,5 +1,5 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { Buffer, CanvasContext, CanvasRenderPassDescriptor, ReadPixels, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Submit, TextureLike, TypedArray } from '@feng3d/render-api';
+import { Buffer, CanvasContext, CanvasRenderPassDescriptor, ReadPixels, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Submit, TextureLike, TypedArray, unreadonly } from '@feng3d/render-api';
 
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
@@ -10,7 +10,6 @@ import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
 import { readPixels } from './utils/readPixels';
 import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
-import { unreadonly } from './utils/unreadonly';
 
 /**
  * WebGPU
