@@ -37,10 +37,10 @@ export class WGPUPrimitiveState extends ReactiveObject
             // 计算
             const { topology, cullFace, frontFace, unclippedDepth } = primitive;
             const gpuPrimitive: GPUPrimitiveState = {
-                topology: topology ?? 'triangle-list',
+                topology: topology ?? 'triangle-list' as any,
                 stripIndexFormat: (topology === 'triangle-strip' || topology === 'line-strip') ? indexFormat : undefined,
                 frontFace: frontFace ?? 'ccw',
-                cullMode: cullFace ?? 'none',
+                cullMode: cullFace ?? 'none' as any,
                 unclippedDepth: unclippedDepth ?? false,
             };
 
