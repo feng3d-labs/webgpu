@@ -118,6 +118,39 @@ export class WebGPU
                     delete unreadonly(descriptor).depthStencilAttachment;
                 }
 
+                if (r_canvasRenderPassDescriptor.depthStoreOp !== undefined)
+                {
+                    reactive(depthStencilAttachment).depthStoreOp = r_canvasRenderPassDescriptor.depthStoreOp;
+                }
+                else
+                {
+                    delete unreadonly(depthStencilAttachment).depthStoreOp;
+                }
+                if (r_canvasRenderPassDescriptor.depthReadOnly !== undefined)
+                {
+                    reactive(depthStencilAttachment).depthReadOnly = r_canvasRenderPassDescriptor.depthReadOnly;
+                }
+                else
+                {
+                    delete unreadonly(depthStencilAttachment).depthReadOnly;
+                }
+                if (r_canvasRenderPassDescriptor.stencilStoreOp !== undefined)
+                {
+                    reactive(depthStencilAttachment).stencilStoreOp = r_canvasRenderPassDescriptor.stencilStoreOp;
+                }
+                else
+                {
+                    delete unreadonly(depthStencilAttachment).stencilStoreOp;
+                }
+                if (r_canvasRenderPassDescriptor.stencilReadOnly !== undefined)
+                {
+                    reactive(depthStencilAttachment).stencilReadOnly = r_canvasRenderPassDescriptor.stencilReadOnly;
+                }
+                else
+                {
+                    delete unreadonly(depthStencilAttachment).stencilReadOnly;
+                }
+
                 if (r_canvasRenderPassDescriptor.sampleCount !== undefined)
                 {
                     reactive(descriptor).sampleCount = r_canvasRenderPassDescriptor.sampleCount;
