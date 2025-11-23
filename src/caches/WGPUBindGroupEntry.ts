@@ -83,8 +83,6 @@ export class WGPUBindGroupEntry extends ReactiveObject
                     if (!textureView)
                     {
                         const baseName = name.replace(/_texture$/, ''); // 移除 '_texture' 后缀
-                        // 监听基础名称以触发响应式更新
-                        r_bindingResources[baseName];
                         const value = bindingResources[baseName];
                         if (isTextureSamplerObject(value))
                         {
@@ -108,24 +106,10 @@ export class WGPUBindGroupEntry extends ReactiveObject
 
                 if (!textureView)
                 {
-                    const baseName = name.endsWith('_texture') ? name.replace(/_texture$/, '') : name;
-                    const value = bindingResources[baseName];
-                    const hasValue = value !== undefined;
-                    const isObject = hasValue && typeof value === 'object';
-                    const hasTexture = isObject && 'texture' in value;
-                    const hasSampler = isObject && 'sampler' in value;
-                    throw new Error(
-                        `Texture binding '${name}' is undefined in bindingResources. ` +
-                        `baseName: '${baseName}', hasValue: ${hasValue}, isObject: ${isObject}, ` +
-                        `hasTexture: ${hasTexture}, hasSampler: ${hasSampler}`,
-                    );
+                    throw new Error(`Texture binding '${name}' is undefined in bindingResources`);
                 }
 
                 const wgpuTextureView = WGPUTextureView.getInstance(device, textureView);
-                if (!wgpuTextureView)
-                {
-                    throw new Error(`Failed to create WGPUTextureView for '${name}'`);
-                }
                 entry.resource = wgpuTextureView.textureView;
             }
             else
