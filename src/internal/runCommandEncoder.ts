@@ -26,7 +26,7 @@ export function runCommandEncoder(device: GPUDevice, commandEncoder: CommandEnco
         }
         if (passEncoder.__type__ === 'CopyTextureToTexture')
         {
-            runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder as CopyTextureToTexture);
+            runCopyTextureToTexture(device, gpuCommandEncoder, passEncoder as CopyTextureToTexture, renderPassDescriptor);
 
             return;
         }
