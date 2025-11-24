@@ -61,9 +61,6 @@ const init = async () =>
         return [rand(), rand(), rand(), 1];
     }
 
-    const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-    const depthFormat = 'depth24plus';
-
     const module = {
         code: `
     struct Uniforms {

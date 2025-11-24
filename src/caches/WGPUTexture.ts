@@ -102,7 +102,8 @@ export class WGPUTexture extends ReactiveObject
             const descriptor = texture.descriptor;
 
             // 提取纹理属性
-            const { format, size, viewFormats, sampleCount } = descriptor;
+            const { size, viewFormats, sampleCount } = descriptor;
+            const format = descriptor.format || 'rgba8unorm';
 
             // 验证纹理尺寸必须存在
             console.assert(!!size, `无法从纹理中获取到正确的尺寸！size必须设置！`, texture);
