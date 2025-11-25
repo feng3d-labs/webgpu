@@ -1,12 +1,11 @@
-import { RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
+import { CanvasContext, RenderPass, RenderPassDescriptor } from '@feng3d/render-api';
 import { WGPUQuerySet } from '../caches/WGPUQuerySet';
 import { WGPURenderPass } from '../caches/WGPURenderPass';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 
-export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass, defaultRenderPassDescriptor?: RenderPassDescriptor)
+export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass, canvasContext?: CanvasContext)
 {
-    const descriptor = renderPass.descriptor || defaultRenderPassDescriptor;
-    const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, descriptor);
+    const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, renderPass.descriptor, canvasContext);
     const renderPassDescriptor = wgpuRenderPassDescriptor.gpuRenderPassDescriptor;
 
     //
@@ -18,7 +17,7 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
 
     const passEncoder = commandEncoder.beginRenderPass(renderPassDescriptor);
 
-    const state = WGPURenderPass.getInstance(device, renderPass, defaultRenderPassDescriptor);
+    const state = WGPURenderPass.getInstance(device, renderPass, canvasContext);
 
     state.commands.runCommands(passEncoder);
 

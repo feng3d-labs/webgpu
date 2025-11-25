@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, defaultRenderPassColorAttachment, RenderPassColorAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
+import { CanvasContext, ChainMap, defaultRenderPassColorAttachment, RenderPassColorAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
 import { WGPUTextureLike } from './WGPUTextureLike';
@@ -52,15 +52,15 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
      * @param colorAttachment 颜色附件配置对象，包含视图和操作参数
      * @param descriptor 渲染通道描述符，用于获取采样数等参数
      */
-    constructor(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor)
+    constructor(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor, canvasContext?: CanvasContext)
     {
         super();
 
         // 设置颜色附件创建和更新逻辑
-        this._onCreate(device, colorAttachment, descriptor);
+        this._onCreate(device, colorAttachment, descriptor, canvasContext);
         //
-        WGPURenderPassColorAttachment.map.set([device, colorAttachment, descriptor], this);
-        this.destroyCall(() => { WGPURenderPassColorAttachment.map.delete([device, colorAttachment, descriptor]); })
+        WGPURenderPassColorAttachment.map.set([device, colorAttachment, descriptor, canvasContext], this);
+        this.destroyCall(() => { WGPURenderPassColorAttachment.map.delete([device, colorAttachment, descriptor, canvasContext]); })
     }
 
     /**
@@ -74,8 +74,9 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
      * @param device GPU设备实例
      * @param colorAttachment 颜色附件配置对象
      * @param descriptor 渲染通道描述符
+     * @param canvasContext 画布上下文，当view缺省时使用
      */
-    private _onCreate(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor)
+    private _onCreate(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor, canvasContext?: CanvasContext)
     {
         const r_colorAttachment = reactive(colorAttachment);
         const r_descriptor = reactive(descriptor);
@@ -119,9 +120,14 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
         {
             r_colorAttachment.view;
 
+            // 如果view缺省，使用canvasContext创建view
+            const view = colorAttachment.view || (canvasContext ? { texture: { context: canvasContext } } : undefined);
+            if (!view) return;
+
             // 获取纹理视图实例
-            const wGPUTextureView = WGPUTextureView.getInstance(device, colorAttachment.view);
-            const textureView = wGPUTextureView.textureView;
+            const wGPUTextureView = WGPUTextureView.getInstance(device, view);
+            const textureView = wGPUTextureView?.textureView;
+            if (!textureView) return;
 
             const sampleCount = r_descriptor.sampleCount;
             if (sampleCount)
@@ -149,7 +155,10 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
             }
 
             // 获取原始纹理信息
-            const wgpuTexture = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
+            const view = colorAttachment.view || (canvasContext ? { texture: { context: canvasContext } } : undefined);
+            if (!view?.texture) return;
+
+            const wgpuTexture = WGPUTextureLike.getInstance(device, view.texture);
             const gpuTexture = wgpuTexture.gpuTexture;
 
             const key = [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers, gpuTexture.format, sampleCount].join(',');
@@ -208,11 +217,11 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
      * @param descriptor 渲染通道描述符
      * @returns 颜色附件实例
      */
-    static getInstance(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor)
+    static getInstance(device: GPUDevice, colorAttachment: RenderPassColorAttachment, descriptor: RenderPassDescriptor, canvasContext?: CanvasContext)
     {
         // 尝试从缓存中获取现有实例，如果不存在则创建新实例
-        return this.map.get([device, colorAttachment, descriptor]) || new WGPURenderPassColorAttachment(device, colorAttachment, descriptor);
+        return this.map.get([device, colorAttachment, descriptor, canvasContext]) || new WGPURenderPassColorAttachment(device, colorAttachment, descriptor, canvasContext);
     }
 
-    private static readonly map = new ChainMap<[GPUDevice, RenderPassColorAttachment, RenderPassDescriptor], WGPURenderPassColorAttachment>();
+    private static readonly map = new ChainMap<[GPUDevice, RenderPassColorAttachment, RenderPassDescriptor, CanvasContext], WGPURenderPassColorAttachment>();
 }

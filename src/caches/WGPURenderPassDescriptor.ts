@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, RenderPassColorAttachment, RenderPassDescriptor } from '@feng3d/render-api';
+import { CanvasContext, ChainMap, RenderPassColorAttachment, RenderPassDescriptor } from '@feng3d/render-api';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';
@@ -15,17 +15,17 @@ export class WGPURenderPassDescriptor extends ReactiveObject
     get renderPassFormat() { return this._computedRenderPassFormat.value; }
     private _computedRenderPassFormat: Computed<RenderPassFormat>;
 
-    constructor(device: GPUDevice, descriptor: RenderPassDescriptor)
+    constructor(device: GPUDevice, descriptor: RenderPassDescriptor, canvasContext?: CanvasContext)
     {
         super();
 
-        this._onCreate(device, descriptor)
+        this._onCreate(device, descriptor, canvasContext)
         //
-        WGPURenderPassDescriptor.map.set([device, descriptor], this);
-        this.destroyCall(() => { WGPURenderPassDescriptor.map.delete([device, descriptor]); });
+        WGPURenderPassDescriptor.map.set([device, descriptor, canvasContext], this);
+        this.destroyCall(() => { WGPURenderPassDescriptor.map.delete([device, descriptor, canvasContext]); });
     }
 
-    private _onCreate(device: GPUDevice, descriptor: RenderPassDescriptor)
+    private _onCreate(device: GPUDevice, descriptor: RenderPassDescriptor, canvasContext?: CanvasContext)
     {
         const r_descriptor = reactive(descriptor);
 
@@ -34,15 +34,16 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         {
             for (const colorAttachment of descriptor.colorAttachments)
             {
-                if (colorAttachment.view.texture)
+                const view = colorAttachment.view || (canvasContext && descriptor.colorAttachments[0] === colorAttachment ? { texture: { context: canvasContext } } : undefined);
+                if (view?.texture)
                 {
-                    const gpuTextureLike = WGPUTextureLike.getInstance(device, colorAttachment.view.texture);
+                    const gpuTextureLike = WGPUTextureLike.getInstance(device, view.texture);
                     const gpuTexture = gpuTextureLike.gpuTexture;
                     r_descriptor.attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
                     break;
                 }
             }
-            if (!descriptor.attachmentSize)
+            if (!descriptor.attachmentSize && descriptor.depthStencilAttachment?.view?.texture)
             {
                 const gpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
                 const gpuTexture = gpuTextureLike.gpuTexture;
@@ -57,11 +58,14 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
             //
             r_descriptor.colorAttachments?.concat();
-            const gpuColorAttachments = descriptor.colorAttachments.reduce((pre: GPURenderPassColorAttachment[], v) =>
+            const gpuColorAttachments = descriptor.colorAttachments.reduce((pre: GPURenderPassColorAttachment[], v, index) =>
             {
                 if (!v) return pre;
 
-                const wgpuRenderPassColorAttachment = WGPURenderPassColorAttachment.getInstance(device, v, descriptor);
+                // 如果第一个颜色附件的view缺省，使用canvasContext
+                const isFirstAttachment = index === 0;
+                const attachmentCanvasContext = (isFirstAttachment && !v.view && canvasContext) ? canvasContext : undefined;
+                const wgpuRenderPassColorAttachment = WGPURenderPassColorAttachment.getInstance(device, v, descriptor, attachmentCanvasContext);
                 const attachment = wgpuRenderPassColorAttachment.gpuRenderPassColorAttachment;
 
                 pre.push(attachment);
@@ -100,15 +104,18 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             return gpuRenderPassDescriptor;
         });
 
-        const getAttachmentFormat = (attachment: RenderPassColorAttachment) =>
+        const getAttachmentFormat = (attachment: RenderPassColorAttachment, index: number) =>
         {
             const r_attachment = reactive(attachment);
 
             return computed(() =>
             {
-                r_attachment.view.texture;
+                r_attachment.view;
+                // 如果第一个颜色附件的view缺省，使用canvasContext
+                const view = attachment.view || (index === 0 && canvasContext ? { texture: { context: canvasContext } } : undefined);
+                if (!view?.texture) return undefined;
 
-                const texture = attachment.view.texture;
+                const texture = view.texture;
 
                 const wGPUTextureLike = WGPUTextureLike.getInstance(device, texture);
                 const gpuTexture = wGPUTextureLike.gpuTexture;
@@ -128,8 +135,8 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             const colorAttachments = descriptor.colorAttachments;
             for (let i = 0; i < colorAttachments.length; i++)
             {
-                const format = getAttachmentFormat(colorAttachments[i]);
-                colorFormats.push(format);
+                const format = getAttachmentFormat(colorAttachments[i], i);
+                if (format) colorFormats.push(format);
             }
 
             const depthStencilFormat: GPUTextureFormat = gpuRenderPassDescriptor.depthStencilAttachment?.view?.texture.format;
@@ -156,12 +163,12 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         });
     }
 
-    static getInstance(device: GPUDevice, descriptor: RenderPassDescriptor)
+    static getInstance(device: GPUDevice, descriptor: RenderPassDescriptor, canvasContext?: CanvasContext)
     {
-        return this.map.get([device, descriptor]) || new WGPURenderPassDescriptor(device, descriptor);
+        return this.map.get([device, descriptor, canvasContext]) || new WGPURenderPassDescriptor(device, descriptor, canvasContext);
     }
 
-    private static readonly map = new ChainMap<[GPUDevice, RenderPassDescriptor], WGPURenderPassDescriptor>();
+    private static readonly map = new ChainMap<[GPUDevice, RenderPassDescriptor, CanvasContext], WGPURenderPassDescriptor>();
 }
 
 const renderPassFormatCache: { [key: string]: RenderPassFormat } = {}

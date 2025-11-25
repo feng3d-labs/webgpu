@@ -1,5 +1,5 @@
-import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { Buffer, CanvasContext, CanvasRenderPassDescriptor, ReadPixels, RenderPassColorAttachment, RenderPassDepthStencilAttachment, RenderPassDescriptor, Submit, TextureLike, TypedArray, unreadonly } from '@feng3d/render-api';
+import { reactive } from '@feng3d/reactivity';
+import { Buffer, CanvasContext, ReadPixels, Submit, TextureLike, TypedArray } from '@feng3d/render-api';
 
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
@@ -42,127 +42,11 @@ export class WebGPU
 
     readonly device: GPUDevice;
 
-    private _renderPassDescriptorComputed: Computed<RenderPassDescriptor>;
+    private _canvasContext: CanvasContext;
 
-    constructor(canvasContext?: CanvasContext, canvasRenderPassDescriptor?: CanvasRenderPassDescriptor)
+    constructor(canvasContext?: CanvasContext)
     {
-        this._initRenderPassDescriptorComputed(canvasContext, canvasRenderPassDescriptor);
-    }
-
-    private _initRenderPassDescriptorComputed(canvasContext?: CanvasContext, canvasRenderPassDescriptor?: CanvasRenderPassDescriptor)
-    {
-        if (canvasContext)
-        {
-            const colorAttachment: RenderPassColorAttachment = { view: { texture: { context: canvasContext } } };
-            const depthStencilAttachment: RenderPassDepthStencilAttachment = {};
-            //
-            const descriptor: RenderPassDescriptor = {
-                colorAttachments: [colorAttachment],
-            };
-
-            this._renderPassDescriptorComputed = computed(() =>
-            {
-                if (!canvasRenderPassDescriptor) return descriptor;
-
-                const r_canvasRenderPassDescriptor = reactive(canvasRenderPassDescriptor);
-                //
-                r_canvasRenderPassDescriptor.clearColorValue;
-                reactive(descriptor.colorAttachments[0]).clearValue = canvasRenderPassDescriptor.clearColorValue;
-
-                r_canvasRenderPassDescriptor.loadColorOp;
-                reactive(descriptor.colorAttachments[0]).loadOp = canvasRenderPassDescriptor.loadColorOp;
-
-                let hasDepthStencilAttachment = false;
-                if (r_canvasRenderPassDescriptor.depthClearValue !== undefined)
-                {
-                    hasDepthStencilAttachment = true;
-                    reactive(depthStencilAttachment).depthClearValue = r_canvasRenderPassDescriptor.depthClearValue;
-                }
-                else
-                {
-                    delete unreadonly(depthStencilAttachment).depthClearValue;
-                }
-                if (r_canvasRenderPassDescriptor.depthLoadOp !== undefined)
-                {
-                    hasDepthStencilAttachment = true;
-                    reactive(depthStencilAttachment).depthLoadOp = r_canvasRenderPassDescriptor.depthLoadOp;
-                }
-                else
-                {
-                    delete unreadonly(depthStencilAttachment).depthLoadOp;
-                }
-                if (r_canvasRenderPassDescriptor.stencilClearValue !== undefined)
-                {
-                    hasDepthStencilAttachment = true;
-                    reactive(depthStencilAttachment).stencilClearValue = r_canvasRenderPassDescriptor.stencilClearValue;
-                }
-                else
-                {
-                    delete unreadonly(depthStencilAttachment).stencilClearValue;
-                }
-                if (r_canvasRenderPassDescriptor.stencilLoadOp !== undefined)
-                {
-                    hasDepthStencilAttachment = true;
-                    reactive(depthStencilAttachment).stencilLoadOp = r_canvasRenderPassDescriptor.stencilLoadOp;
-                }
-                else
-                {
-                    delete unreadonly(depthStencilAttachment).stencilLoadOp;
-                }
-                if (hasDepthStencilAttachment)
-                {
-                    reactive(descriptor).depthStencilAttachment = depthStencilAttachment;
-                }
-                else
-                {
-                    delete unreadonly(descriptor).depthStencilAttachment;
-                }
-
-                if (r_canvasRenderPassDescriptor.depthStoreOp !== undefined)
-                {
-                    reactive(depthStencilAttachment).depthStoreOp = r_canvasRenderPassDescriptor.depthStoreOp;
-                }
-                else
-                {
-                    delete unreadonly(depthStencilAttachment).depthStoreOp;
-                }
-                if (r_canvasRenderPassDescriptor.depthReadOnly !== undefined)
-                {
-                    reactive(depthStencilAttachment).depthReadOnly = r_canvasRenderPassDescriptor.depthReadOnly;
-                }
-                else
-                {
-                    delete unreadonly(depthStencilAttachment).depthReadOnly;
-                }
-                if (r_canvasRenderPassDescriptor.stencilStoreOp !== undefined)
-                {
-                    reactive(depthStencilAttachment).stencilStoreOp = r_canvasRenderPassDescriptor.stencilStoreOp;
-                }
-                else
-                {
-                    delete unreadonly(depthStencilAttachment).stencilStoreOp;
-                }
-                if (r_canvasRenderPassDescriptor.stencilReadOnly !== undefined)
-                {
-                    reactive(depthStencilAttachment).stencilReadOnly = r_canvasRenderPassDescriptor.stencilReadOnly;
-                }
-                else
-                {
-                    delete unreadonly(depthStencilAttachment).stencilReadOnly;
-                }
-
-                if (r_canvasRenderPassDescriptor.sampleCount !== undefined)
-                {
-                    reactive(descriptor).sampleCount = r_canvasRenderPassDescriptor.sampleCount;
-                }
-                else
-                {
-                    delete unreadonly(descriptor).sampleCount;
-                }
-
-                return descriptor;
-            });
-        }
+        this._canvasContext = canvasContext;
     }
 
     destroy()
@@ -176,7 +60,7 @@ export class WebGPU
     {
         const device = this.device;
 
-        runSubmit(device, submit, this._renderPassDescriptorComputed?.value);
+        runSubmit(device, submit, this._canvasContext);
     }
 
     destoryTexture(texture: TextureLike)

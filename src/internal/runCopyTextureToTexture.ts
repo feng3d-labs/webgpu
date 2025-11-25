@@ -1,21 +1,21 @@
-import { CopyTextureToTexture, RenderPassDescriptor } from '@feng3d/render-api';
+import { CanvasContext, CopyTextureToTexture } from '@feng3d/render-api';
 import { WGPUTextureLike } from '../caches/WGPUTextureLike';
 
-export function runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: CopyTextureToTexture, renderPassDescriptor?: RenderPassDescriptor)
+export function runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: CopyTextureToTexture, canvasContext?: CanvasContext)
 {
     let sTexture = copyTextureToTexture.source.texture;
-    if (sTexture === null)
+    if (!sTexture && canvasContext)
     {
-        sTexture = renderPassDescriptor?.colorAttachments[0].view.texture;
+        sTexture = { context: canvasContext };
     }
 
     const sourceTexture = WGPUTextureLike.getInstance(device, sTexture);
     const gpuSourceTexture = sourceTexture.gpuTexture;
 
     let dTexture = copyTextureToTexture.destination.texture;
-    if (dTexture === null)
+    if (!dTexture && canvasContext)
     {
-        dTexture = renderPassDescriptor?.colorAttachments[0].view.texture;
+        dTexture = { context: canvasContext };
     }
     const destinationTexture = WGPUTextureLike.getInstance(device, dTexture);
     const gpuDestinationTexture = destinationTexture.gpuTexture;

@@ -1,5 +1,5 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, OcclusionQuery, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject } from '@feng3d/render-api';
+import { CanvasContext, ChainMap, OcclusionQuery, RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
 import { RenderBundle } from '../data/RenderBundle';
 import { runOcclusionQuery } from '../internal/runOcclusionQuery';
 import { runRenderBundle } from '../internal/runRenderBundle';
@@ -13,31 +13,29 @@ export class WGPURenderPass extends ReactiveObject
     get commands() { return this._computedCommands.value; }
     private _computedCommands: Computed<WGPURenderPassEncoder>;
 
-    constructor(device: GPUDevice, renderPass: RenderPass, defaultRenderPassDescriptor?: RenderPassDescriptor)
+    constructor(device: GPUDevice, renderPass: RenderPass, canvasContext?: CanvasContext)
     {
         super();
-        this._onCreate(device, renderPass, defaultRenderPassDescriptor);
+        this._onCreate(device, renderPass, canvasContext);
 
         //
-        WGPURenderPass.map.set([device, renderPass, defaultRenderPassDescriptor], this);
-        this.destroyCall(() => { WGPURenderPass.map.delete([device, renderPass, defaultRenderPassDescriptor]); });
+        WGPURenderPass.map.set([device, renderPass, canvasContext], this);
+        this.destroyCall(() => { WGPURenderPass.map.delete([device, renderPass, canvasContext]); });
     }
 
-    private _onCreate(device: GPUDevice, renderPass: RenderPass, defaultRenderPassDescriptor?: RenderPassDescriptor)
+    private _onCreate(device: GPUDevice, renderPass: RenderPass, canvasContext?: CanvasContext)
     {
         const r_renderPass = reactive(renderPass);
 
         this._computedCommands = computed(() =>
         {
             r_renderPass.descriptor;
-            const descriptor = renderPass.descriptor || defaultRenderPassDescriptor;
-            const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, descriptor);
+            r_renderPass.descriptor.attachmentSize;
+
+            const wgpuRenderPassDescriptor = WGPURenderPassDescriptor.getInstance(device, renderPass.descriptor, canvasContext);
             const renderPassFormat = wgpuRenderPassDescriptor.renderPassFormat;
 
-            const r_descriptor = reactive(descriptor);
-
-            r_descriptor.attachmentSize;
-            const attachmentSize = descriptor.attachmentSize;
+            const attachmentSize = renderPass.descriptor.attachmentSize;
 
             const passEncoder = new WGPURenderPassEncoder(device, renderPassFormat, attachmentSize);
 
@@ -66,10 +64,10 @@ export class WGPURenderPass extends ReactiveObject
         });
     }
 
-    static getInstance(device: GPUDevice, renderPass: RenderPass, defaultRenderPassDescriptor?: RenderPassDescriptor)
+    static getInstance(device: GPUDevice, renderPass: RenderPass, canvasContext?: CanvasContext)
     {
-        return this.map.get([device, renderPass, defaultRenderPassDescriptor]) || new WGPURenderPass(device, renderPass, defaultRenderPassDescriptor);
+        return this.map.get([device, renderPass, canvasContext]) || new WGPURenderPass(device, renderPass, canvasContext);
     }
 
-    private static readonly map = new ChainMap<[GPUDevice, RenderPass, RenderPassDescriptor], WGPURenderPass>();
+    private static readonly map = new ChainMap<[GPUDevice, RenderPass, CanvasContext], WGPURenderPass>();
 }
