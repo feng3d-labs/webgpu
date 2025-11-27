@@ -60,14 +60,6 @@ declare module '@feng3d/render-api'
          * 注：修改后将重新创建视图。
          */
         readonly mipLevelCount?: GPUIntegerCoordinate;
-
-        /**
-         * How many array layers, starting with {@link GPUTextureViewDescriptor#baseArrayLayer}, are accessible
-         * to the texture view.
-         *
-         * 注：修改后将重新创建视图。
-         */
-        readonly arrayLayerCount?: GPUIntegerCoordinate;
     }
 
 }

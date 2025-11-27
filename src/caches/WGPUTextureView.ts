@@ -87,7 +87,8 @@ export class WGPUTextureView extends ReactiveObject
             const usage = r_view.usage;
             const aspect = r_view.aspect;
             const mipLevelCount = r_view.mipLevelCount;
-            const arrayLayerCount = r_view.arrayLayerCount;
+            // 默认值为 1，确保每个颜色附件只绑定一个纹理层（WebGPU 要求）
+            const arrayLayerCount = r_view.arrayLayerCount ?? 1;
 
             // 创建纹理视图描述符
             const descriptor: GPUTextureViewDescriptor = {
