@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { CanvasContext, ChainMap, defaultRenderPassColorAttachment, RenderPassColorAttachment, RenderPassDescriptor, Texture } from '@feng3d/render-api';
+import { CanvasContext, ChainMap, defaultRenderPassColorAttachment, RenderPassColorAttachment, RenderPassDescriptor, Texture, unreadonly } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
 import { WGPUTextureLike } from './WGPUTextureLike';
@@ -123,6 +123,9 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
             // 如果view缺省，使用canvasContext创建view
             const view = colorAttachment.view || (canvasContext ? { texture: { context: canvasContext } } : undefined);
             if (!view) return;
+
+            // 标记为颜色附件
+            unreadonly(view).isUsedAsColorAttachment = true;
 
             // 获取纹理视图实例
             const wGPUTextureView = WGPUTextureView.getInstance(device, view);

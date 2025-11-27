@@ -87,8 +87,15 @@ export class WGPUTextureView extends ReactiveObject
             const usage = r_view.usage;
             const aspect = r_view.aspect;
             const mipLevelCount = r_view.mipLevelCount;
-            // 默认值为 1，确保每个颜色附件只绑定一个纹理层（WebGPU 要求）
-            const arrayLayerCount = r_view.arrayLayerCount ?? 1;
+            // 监听 isUsedAsColorAttachment 属性
+            r_view.isUsedAsColorAttachment;
+            // 数组层数逻辑：
+            // - 如果被用作颜色附件，必须为 1（WebGPU 要求）
+            // - 如果显式指定了 arrayLayerCount，使用指定值
+            // - 否则为 undefined（使用所有剩余层）
+            const arrayLayerCount = r_view.arrayLayerCount !== undefined
+                ? r_view.arrayLayerCount
+                : (r_view.isUsedAsColorAttachment ? 1 : undefined);
 
             // 创建纹理视图描述符
             const descriptor: GPUTextureViewDescriptor = {
@@ -100,7 +107,12 @@ export class WGPUTextureView extends ReactiveObject
                 usage,
                 aspect,
                 mipLevelCount,
-                arrayLayerCount,
+            };
+            // 只有当 arrayLayerCount 有值时才添加到描述符中
+            // 如果为 undefined，WebGPU 会使用所有剩余层
+            if (arrayLayerCount !== undefined)
+            {
+                descriptor.arrayLayerCount = arrayLayerCount;
             }
 
             // 创建新的纹理视图
