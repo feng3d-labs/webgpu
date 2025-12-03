@@ -136,21 +136,9 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
             };
 
             gpuRenderPassDepthStencilAttachment.depthClearValue = r_depthStencilAttachment.depthClearValue ?? 1;
-
-            if (r_depthStencilAttachment.depthLoadOp)
-            {
-                gpuRenderPassDepthStencilAttachment.depthLoadOp = depthStencilAttachment.depthLoadOp;
-            }
-
-            if (r_depthStencilAttachment.depthStoreOp)
-            {
-                gpuRenderPassDepthStencilAttachment.depthStoreOp = depthStencilAttachment.depthStoreOp;
-            }
-
-            if (r_depthStencilAttachment.depthReadOnly)
-            {
-                gpuRenderPassDepthStencilAttachment.depthReadOnly = depthStencilAttachment.depthReadOnly;
-            }
+            gpuRenderPassDepthStencilAttachment.depthLoadOp = r_depthStencilAttachment.depthLoadOp ?? 'clear';
+            gpuRenderPassDepthStencilAttachment.depthStoreOp = r_depthStencilAttachment.depthStoreOp ?? 'store';
+            gpuRenderPassDepthStencilAttachment.depthReadOnly = r_depthStencilAttachment.depthReadOnly ?? false;
 
             if (r_depthStencilAttachment.stencilClearValue)
             {
