@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { Buffer, CanvasContext, ReadPixels, Submit, TextureLike, TypedArray } from '@feng3d/render-api';
+import { Buffer, CanvasContext, ReadPixels, Submit, TextureLike, TextureView, TypedArray } from '@feng3d/render-api';
 
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
@@ -43,10 +43,16 @@ export class WebGPU
     readonly device: GPUDevice;
 
     private _canvasContext: CanvasContext;
+    private _canvasTextureView: TextureView;
 
     constructor(canvasContext?: CanvasContext)
     {
         this._canvasContext = canvasContext;
+        this._canvasTextureView = {
+            texture: {
+                context: this._canvasContext,
+            },
+        };
     }
 
     destroy()
@@ -88,6 +94,20 @@ export class WebGPU
     async readPixels(gpuReadPixels: ReadPixels)
     {
         const device = this.device;
+
+        // 如果没有指定纹理，使用当前画布纹理
+        if (!gpuReadPixels.texture && this._canvasContext)
+        {
+            gpuReadPixels.texture = {
+                context: this._canvasContext,
+            };
+        }
+
+        if (!gpuReadPixels.texture)
+        {
+            throw new Error('readPixels: texture is required');
+        }
+
         const gpuTexture = WGPUTextureLike.getInstance(this.device, gpuReadPixels.texture);
 
         const result = await readPixels(device, {

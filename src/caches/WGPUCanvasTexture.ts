@@ -31,9 +31,11 @@ export class WGPUCanvasTexture extends ReactiveObject
         //
         this._onCreate(device, canvasTexture);
 
+        const canvasId = canvasTexture.context.canvasId;
+
         //
-        WGPUCanvasTexture.map.set([device, canvasTexture], this);
-        this.destroyCall(() => { WGPUCanvasTexture.map.delete([device, canvasTexture]); });
+        WGPUCanvasTexture.map.set([device, canvasId], this);
+        this.destroyCall(() => { WGPUCanvasTexture.map.delete([device, canvasId]); });
     }
 
     private _onCreate(device: GPUDevice, canvasTexture: CanvasTexture)
@@ -80,10 +82,10 @@ export class WGPUCanvasTexture extends ReactiveObject
      */
     static getInstance(device: GPUDevice, canvasTexture: CanvasTexture)
     {
-        return this.map.get([device, canvasTexture]) || new WGPUCanvasTexture(device, canvasTexture);
+        return this.map.get([device, canvasTexture.context.canvasId]) || new WGPUCanvasTexture(device, canvasTexture);
     }
 
-    private static readonly map = new ChainMap<[GPUDevice, CanvasTexture], WGPUCanvasTexture>();
+    private static readonly map = new ChainMap<[GPUDevice, string | HTMLCanvasElement | OffscreenCanvas], WGPUCanvasTexture>();
 }
 
 let id = 0;

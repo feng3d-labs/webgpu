@@ -85,7 +85,6 @@ async function readPixelColor(webgpu: WebGPU, textureView: TextureView, x: numbe
     // WebGPU 的 ReadPixels 需要 texture 字段（从 textureView.texture 获取）
     const readPixelsParams: ReadPixels = {
         texture: textureView.texture,
-        textureView,
         origin: [x, y] as [number, number],
         copySize: [1, 1] as [number, number],
     };
