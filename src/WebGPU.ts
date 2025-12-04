@@ -95,6 +95,8 @@ export class WebGPU
             texture: gpuTexture.gpuTexture,
         });
 
+        // 设置纹理格式信息
+        gpuReadPixels.format = gpuTexture.gpuTexture.format as any;
         gpuReadPixels.result = result;
 
         return result;

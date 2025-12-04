@@ -1,4 +1,4 @@
-import { CanvasTexture, RenderObject, Submit, TextureView } from '@feng3d/render-api';
+import { CanvasTexture, ReadPixels, RenderObject, Submit, TextureView } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
 // 创建两个重叠的三角形
@@ -83,20 +83,30 @@ async function readPixelColor(webgpu: WebGPU, textureView: TextureView, x: numbe
 {
     // 使用 webgpu.readPixels 读取像素（WebGPU 的 readPixels 是异步的）
     // WebGPU 的 ReadPixels 需要 texture 字段（从 textureView.texture 获取）
-    const result = await webgpu.readPixels({
+    const readPixelsParams: ReadPixels = {
         texture: textureView.texture,
         textureView,
-        origin: [x, y],
-        copySize: [1, 1],
-    });
+        origin: [x, y] as [number, number],
+        copySize: [1, 1] as [number, number],
+    };
+    const result = await webgpu.readPixels(readPixelsParams);
 
     // 将结果转换为 Uint8Array 并提取颜色值
     const pixel = new Uint8Array(result.buffer, result.byteOffset, 4);
 
-    // WebGPU 画布纹理通常使用 BGRA 格式（bgra8unorm）
-    // 需要将 BGRA 转换为 RGBA：交换 B 和 R 通道
-    // BGRA: [B, G, R, A] -> RGBA: [R, G, B, A]
-    return [pixel[2], pixel[1], pixel[0], pixel[3]];
+    // 根据纹理格式处理颜色通道顺序
+    const format = readPixelsParams.format;
+    if (format === 'bgra8unorm' || format === 'bgra8unorm-srgb')
+    {
+        // BGRA 格式：需要将 BGRA 转换为 RGBA：交换 B 和 R 通道
+        // BGRA: [B, G, R, A] -> RGBA: [R, G, B, A]
+        return [pixel[2], pixel[1], pixel[0], pixel[3]];
+    }
+    else
+    {
+        // RGBA 格式：直接返回
+        return [pixel[0], pixel[1], pixel[2], pixel[3]];
+    }
 }
 
 // 测试 1: 没有深度附件
