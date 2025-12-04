@@ -20,7 +20,7 @@
     "clean": "rimraf \"{lib,dist,public}\"",
     "build": "vite build",
     "test": "vitest",
-    "test_web": "cd test_web && vite",
+    "test_web": "vite --config test_vite.config.js",
     "types": "tsc",
     "watch": "tsc -w",
     "lint": "eslint . --ext .js,.ts --max-warnings 0",
