@@ -4,6 +4,9 @@
  * 管理所有测试页面，显示测试状态和结果
  */
 
+// 导入自动生成的测试配置
+import { tests as testConfigs } from './test-config';
+
 interface TestInfo
 {
     name: string;
@@ -15,16 +18,20 @@ interface TestInfo
     iframe?: HTMLIFrameElement;
 }
 
+// 从配置文件初始化测试列表
+function initializeTests(): TestInfo[]
+{
+    return testConfigs.map((config) => ({
+        name: config.name,
+        description: config.description,
+        htmlFile: config.htmlFile,
+        testName: config.testName,
+        status: 'pending' as const,
+    }));
+}
+
 // 定义所有测试
-const tests: TestInfo[] = [
-    {
-        name: '深度附件和画布颜色读取测试',
-        description: '测试深度附件的正确性以及从画布读取像素颜色的功能。包含两个测试用例：没有深度附件时深度测试被禁用，有深度附件时深度测试启用。',
-        htmlFile: 'depth-attachment-canvas-readpixels.html',
-        testName: 'depth-attachment-canvas-readpixels',
-        status: 'pending',
-    },
-];
+const tests: TestInfo[] = initializeTests();
 
 // 更新统计信息
 function updateSummary()
