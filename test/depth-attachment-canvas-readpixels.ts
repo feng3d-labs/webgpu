@@ -8,9 +8,9 @@ function createRedTriangle(): RenderObject
         vertices: {
             position: {
                 data: new Float32Array([
-                    -0.5, -0.5, -0.5, // 左下（z=-0.5，更靠近）
-                    0.5, -0.5, -0.5,  // 右下（z=-0.5，更靠近）
-                    0.0, 0.5, -0.5,   // 上（z=-0.5，更靠近）
+                    -0.5, -0.5, 0.1, // 左下（z=0.1，更靠近）
+                    0.5, -0.5, 0.1,  // 右下（z=0.1，更靠近）
+                    0.0, 0.5, 0.1,   // 上（z=0.1，更靠近）
                 ]),
                 format: 'float32x3' as const,
             },
@@ -46,9 +46,9 @@ function createGreenTriangle(): RenderObject
         vertices: {
             position: {
                 data: new Float32Array([
-                    -0.3, -0.3, 0.5, // 左下（z=0.5，更远）
-                    0.3, -0.3, 0.5,  // 右下（z=0.5，更远）
-                    0.0, 0.3, 0.5,   // 上（z=0.5，更远）
+                    -0.3, -0.3, 0.9, // 左下（z=0.9，更远）
+                    0.3, -0.3, 0.9,  // 右下（z=0.9，更远）
+                    0.0, 0.3, 0.9,   // 上（z=0.9，更远）
                 ]),
                 format: 'float32x3' as const,
             },
@@ -119,7 +119,7 @@ async function testWithoutDepthAttachment()
         };
 
         // 提交渲染（没有深度附件，直接渲染到画布）
-        // 先绘制红色（z=-0.5，更靠近），后绘制绿色（z=0.5，更远）
+        // 先绘制红色（z=0.1，更靠近），后绘制绿色（z=0.9，更远）
         // 如果没有深度测试，后绘制的绿色会覆盖先绘制的红色
         const submit: Submit = {
             commandEncoders: [{
@@ -193,7 +193,7 @@ async function testWithDepthAttachment()
         };
 
         // 提交渲染（有深度附件，直接渲染到画布）
-        // 先绘制红色（z=-0.5，更靠近），后绘制绿色（z=0.5，更远）
+        // 先绘制红色（z=0.1，更靠近），后绘制绿色（z=0.9，更远）
         // 有深度测试时，更靠近的红色会覆盖更远的绿色
         const submit: Submit = {
             commandEncoders: [{
@@ -216,7 +216,7 @@ async function testWithDepthAttachment()
         const centerY = Math.floor(canvas.height / 2);
         const [r, g, b, a] = await readPixelColor(webgpu, canvasTextureView, centerX, centerY);
 
-        // 验证：有深度附件时，更靠近的红色三角形（z=-0.5）应该覆盖更远的绿色三角形（z=0.5）
+        // 验证：有深度附件时，更靠近的红色三角形（z=0.1）应该覆盖更远的绿色三角形（z=0.9）
         // 中心点应该是红色（255, 0, 0）或接近红色
         const isRed = r > 200 && g < 100 && b < 100;
 
