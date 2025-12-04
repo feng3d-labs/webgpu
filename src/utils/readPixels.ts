@@ -22,9 +22,11 @@ export async function readPixels(device: GPUDevice, params: { texture: GPUTextur
     const bytesPerPixel = Texture.getTextureBytesPerPixel(texture.format);
     const DataConstructor = Texture.getTextureDataConstructor(texture.format);
 
-    const bytesPerRow = width * bytesPerPixel;
-    const bufferSize = bytesPerRow * height;
-    const bufferData = new DataConstructor(bufferSize / DataConstructor.BYTES_PER_ELEMENT);
+    // WebGPU 要求 bytesPerRow 必须是 256 的倍数
+    const unalignedBytesPerRow = width * bytesPerPixel;
+    const alignedBytesPerRow = Math.ceil(unalignedBytesPerRow / 256) * 256;
+    const bufferSize = alignedBytesPerRow * height;
+    const bufferData = new DataConstructor((unalignedBytesPerRow * height) / DataConstructor.BYTES_PER_ELEMENT);
 
     //
     const buffer = device.createBuffer({ size: bufferSize, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
@@ -37,7 +39,7 @@ export async function readPixels(device: GPUDevice, params: { texture: GPUTextur
         {
             buffer,
             offset: 0,
-            bytesPerRow,
+            bytesPerRow: alignedBytesPerRow,
         },
         copySize,
     );
@@ -48,7 +50,17 @@ export async function readPixels(device: GPUDevice, params: { texture: GPUTextur
 
     const source = new Uint8Array(buffer.getMappedRange());
 
-    bufferData.set(source);
+    // 从对齐的缓冲区中提取实际数据（跳过每行的填充字节）
+    const actualDataSize = unalignedBytesPerRow * height;
+    const actualData = new Uint8Array(actualDataSize);
+    for (let row = 0; row < height; row++)
+    {
+        const sourceOffset = row * alignedBytesPerRow;
+        const destOffset = row * unalignedBytesPerRow;
+        actualData.set(source.subarray(sourceOffset, sourceOffset + unalignedBytesPerRow), destOffset);
+    }
+
+    bufferData.set(actualData);
 
     buffer.destroy();
 
