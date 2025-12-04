@@ -90,10 +90,13 @@ async function readPixelColor(webgpu: WebGPU, textureView: TextureView, x: numbe
         copySize: [1, 1],
     });
 
-    // 将结果转换为 Uint8Array 并提取 RGBA 值
+    // 将结果转换为 Uint8Array 并提取颜色值
     const pixel = new Uint8Array(result.buffer, result.byteOffset, 4);
 
-    return [pixel[0], pixel[1], pixel[2], pixel[3]];
+    // WebGPU 画布纹理通常使用 BGRA 格式（bgra8unorm）
+    // 需要将 BGRA 转换为 RGBA：交换 B 和 R 通道
+    // BGRA: [B, G, R, A] -> RGBA: [R, G, B, A]
+    return [pixel[2], pixel[1], pixel[0], pixel[3]];
 }
 
 // 测试 1: 没有深度附件
