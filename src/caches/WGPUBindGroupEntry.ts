@@ -117,6 +117,10 @@ export class WGPUBindGroupEntry extends ReactiveObject
                 // 检查是否是 texture+sampler 对象
                 let sampler: Sampler;
                 const value = bindingResources[name];
+                if (!value)
+                {
+                    throw new Error(`Sampler binding '${name}' is undefined in bindingResources`);
+                }
 
                 if (isTextureSamplerObject(value))
                 {
@@ -125,7 +129,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
                 }
                 else
                 {
-                    sampler = bindingResources[name] as Sampler;
+                    sampler = value as Sampler;
                 }
 
                 const wgpuSampler = WGPUSampler.getInstance(device, sampler);
