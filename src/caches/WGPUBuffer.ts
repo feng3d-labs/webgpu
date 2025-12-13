@@ -43,7 +43,6 @@ export class WGPUBuffer extends ReactiveObject
         this._computed = computed(() =>
         {
             // 触发响应式依赖
-            r_buffer.label;
             r_buffer.size;
 
             const { label, size, data } = buffer;
