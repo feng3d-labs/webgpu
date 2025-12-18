@@ -45,6 +45,9 @@ function flipRTTTextures(device: GPUDevice, commandEncoder: GPUCommandEncoder, d
         return;
     }
 
+    // 用于跟踪已翻转的纹理层，避免重复翻转
+    const flippedLayers = new Set<string>();
+
     for (const colorAttachment of descriptor.colorAttachments)
     {
         const view = colorAttachment?.view;
@@ -61,11 +64,25 @@ function flipRTTTextures(device: GPUDevice, commandEncoder: GPUCommandEncoder, d
             continue;
         }
 
-        // 获取 GPU 纹理并翻转
+        // 获取 GPU 纹理
         const wgpuTexture = WGPUTextureLike.getInstance(device, texture);
-        if (wgpuTexture?.gpuTexture)
+        if (!wgpuTexture?.gpuTexture)
         {
-            flipRTTTexture(device, commandEncoder, wgpuTexture.gpuTexture);
+            continue;
         }
+
+        // 获取数组层索引（用于 2d-array 纹理）
+        const baseArrayLayer = view.baseArrayLayer ?? 0;
+
+        // 生成唯一键，避免重复翻转同一纹理层
+        const layerKey = `${wgpuTexture.gpuTexture.label || 'texture'}_${baseArrayLayer}`;
+        if (flippedLayers.has(layerKey))
+        {
+            continue;
+        }
+        flippedLayers.add(layerKey);
+
+        // 翻转指定层
+        flipRTTTexture(device, commandEncoder, wgpuTexture.gpuTexture, { baseArrayLayer });
     }
 }

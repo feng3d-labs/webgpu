@@ -1,6 +1,17 @@
 import textureInvertYPremultiplyAlpha_wgsl from './textureInvertYPremultiplyAlpha.wgsl';
 
 /**
+ * 翻转 RTT 纹理层的选项
+ */
+export interface FlipRTTTextureOptions
+{
+    /**
+     * 要翻转的数组层索引（用于 2d-array 纹理）
+     */
+    baseArrayLayer?: number;
+}
+
+/**
  * 翻转 RTT 纹理的 Y 轴（使用已有的 commandEncoder）
  *
  * 用于在渲染通道结束后立即翻转纹理，使 WebGPU 的 RTT 结果与 WebGL 坐标系一致。
@@ -8,9 +19,12 @@ import textureInvertYPremultiplyAlpha_wgsl from './textureInvertYPremultiplyAlph
  * @param device GPU 设备
  * @param commandEncoder 命令编码器
  * @param texture 要翻转的纹理
+ * @param options 翻转选项
  */
-export function flipRTTTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, texture: GPUTexture)
+export function flipRTTTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, texture: GPUTexture, options?: FlipRTTTextureOptions)
 {
+    const baseArrayLayer = options?.baseArrayLayer ?? 0;
+
     // 初始化着色器模块（懒加载）
     if (!shaderModule)
     {
@@ -27,11 +41,11 @@ export function flipRTTTexture(device: GPUDevice, commandEncoder: GPUCommandEnco
         usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST | GPUTextureUsage.RENDER_ATTACHMENT,
     });
 
-    // 复制原纹理到临时纹理
+    // 复制原纹理指定层到临时纹理
     commandEncoder.copyTextureToTexture(
-        { texture },
+        { texture, origin: { x: 0, y: 0, z: baseArrayLayer } },
         { texture: tempTexture },
-        { width: texture.width, height: texture.height },
+        { width: texture.width, height: texture.height, depthOrArrayLayers: 1 },
     );
 
     // 创建绑定组
@@ -52,11 +66,14 @@ export function flipRTTTexture(device: GPUDevice, commandEncoder: GPUCommandEnco
         ],
     });
 
-    // 创建渲染通道进行翻转
+    // 创建渲染通道进行翻转（使用单层视图）
     const renderPassEncoder = commandEncoder.beginRenderPass({
         colorAttachments: [
             {
-                view: texture.createView(),
+                view: texture.createView({
+                    baseArrayLayer,
+                    arrayLayerCount: 1,
+                }),
                 loadOp: 'load',
                 storeOp: 'store',
             },
