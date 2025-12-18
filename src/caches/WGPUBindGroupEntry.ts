@@ -59,6 +59,10 @@ export class WGPUBindGroupEntry extends ReactiveObject
             {
                 // 执行
                 const bufferBinding = bindingResources[name] as BufferBinding;
+                if (!bufferBinding)
+                {
+                    throw new Error(`Buffer binding '${name}' is undefined in bindingResources`);
+                }
 
                 //
                 const wgpuBufferBinding = WGPUBufferBinding.getInstance(device, bufferBinding, type);
