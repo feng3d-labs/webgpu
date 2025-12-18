@@ -12,6 +12,26 @@ import { readPixels } from './utils/readPixels';
 import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultiplyAlpha';
 
 /**
+ * WebGPU 初始化选项
+ */
+export interface WebGPUOptions extends CanvasContext
+{
+    /**
+     * 是否自动翻转 RTT（渲染到纹理）的 Y 轴，以兼容 WebGL 坐标系。
+     *
+     * WebGL 和 WebGPU 在 RTT 场景下纹理坐标系不同：
+     * - WebGL：Y 轴向上，纹理原点在左下角
+     * - WebGPU：Y 轴向下，纹理原点在左上角
+     *
+     * 启用此选项后，WebGPU 会在渲染到纹理后自动翻转 Y 轴，
+     * 使 WebGL 和 WebGPU 的渲染结果保持一致。
+     *
+     * @default true
+     */
+    autoFlipRTT?: boolean;
+}
+
+/**
  * WebGPU
  */
 export class WebGPU
@@ -42,17 +62,25 @@ export class WebGPU
 
     readonly device: GPUDevice;
 
+    /**
+     * 是否自动翻转 RTT 纹理的 Y 轴。
+     *
+     * @default true
+     */
+    readonly autoFlipRTT: boolean;
+
     private _canvasContext: CanvasContext;
     private _canvasTextureView: TextureView;
 
-    constructor(canvasContext?: CanvasContext)
+    constructor(options?: WebGPUOptions)
     {
-        this._canvasContext = canvasContext;
+        this._canvasContext = options;
         this._canvasTextureView = {
             texture: {
                 context: this._canvasContext,
             },
         };
+        this.autoFlipRTT = options?.autoFlipRTT ?? true;
     }
 
     destroy()
@@ -66,7 +94,7 @@ export class WebGPU
     {
         const device = this.device;
 
-        runSubmit(device, submit, this._canvasContext);
+        runSubmit(device, submit, this._canvasContext, this.autoFlipRTT);
     }
 
     destoryTexture(texture: TextureLike)
