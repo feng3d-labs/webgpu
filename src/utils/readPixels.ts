@@ -5,18 +5,24 @@ import { Texture } from '@feng3d/render-api';
  *
  * @param device GPU设备。
  * @param texture GPU纹理
- * @param x 纹理读取X坐标。
- * @param y 纹理读取Y坐标。
- * @param width 纹理读取宽度。
- * @param height 纹理读取高度。
+ * @param origin 纹理读取起点坐标 [x, y]。
+ * @param copySize 纹理读取尺寸 [width, height]。
+ * @param mipLevel mipmap级别，默认为 0。
+ * @param arrayLayer 纹理数组层索引，默认为 0。
  *
  * @returns 读取到的数据。
  */
-export async function readPixels(device: GPUDevice, params: { texture: GPUTexture, origin: [x: number, y: number], copySize: [width: number, height: number] })
+export async function readPixels(device: GPUDevice, params: {
+    texture: GPUTexture,
+    origin: [x: number, y: number],
+    copySize: [width: number, height: number],
+    mipLevel?: number,
+    arrayLayer?: number,
+})
 {
     const commandEncoder = device.createCommandEncoder();
 
-    const { texture, origin, copySize } = params;
+    const { texture, origin, copySize, mipLevel = 0, arrayLayer = 0 } = params;
     const [width, height] = copySize;
 
     const bytesPerPixel = Texture.getTextureBytesPerPixel(texture.format);
@@ -34,7 +40,8 @@ export async function readPixels(device: GPUDevice, params: { texture: GPUTextur
     commandEncoder.copyTextureToBuffer(
         {
             texture,
-            origin,
+            mipLevel,
+            origin: { x: origin[0], y: origin[1], z: arrayLayer },
         },
         {
             buffer,

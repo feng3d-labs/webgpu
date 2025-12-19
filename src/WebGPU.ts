@@ -123,24 +123,30 @@ export class WebGPU
     {
         const device = this.device;
 
-        // 如果没有指定纹理，使用当前画布纹理
-        if (!gpuReadPixels.texture && this._canvasContext)
+        // 如果没有指定纹理视图，使用当前画布纹理
+        if (!gpuReadPixels.textureView && this._canvasContext)
         {
-            gpuReadPixels.texture = {
-                context: this._canvasContext,
+            gpuReadPixels.textureView = {
+                texture: {
+                    context: this._canvasContext,
+                },
             };
         }
 
-        if (!gpuReadPixels.texture)
+        if (!gpuReadPixels.textureView)
         {
-            throw new Error('readPixels: texture is required');
+            throw new Error('readPixels: textureView is required');
         }
 
-        const gpuTexture = WGPUTextureLike.getInstance(this.device, gpuReadPixels.texture);
+        const textureView = gpuReadPixels.textureView;
+        const gpuTexture = WGPUTextureLike.getInstance(this.device, textureView.texture);
 
         const result = await readPixels(device, {
-            ...gpuReadPixels,
             texture: gpuTexture.gpuTexture,
+            origin: gpuReadPixels.origin,
+            copySize: gpuReadPixels.copySize,
+            mipLevel: textureView.baseMipLevel ?? 0,
+            arrayLayer: textureView.baseArrayLayer ?? 0,
         });
 
         // 设置纹理格式信息
