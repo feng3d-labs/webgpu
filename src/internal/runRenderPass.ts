@@ -3,6 +3,7 @@ import { WGPUQuerySet } from '../caches/WGPUQuerySet';
 import { WGPURenderPass } from '../caches/WGPURenderPass';
 import { WGPURenderPassDescriptor } from '../caches/WGPURenderPassDescriptor';
 import { WGPUTextureLike } from '../caches/WGPUTextureLike';
+import { flipDepthTexture } from '../utils/flipDepthTexture';
 import { flipRTTTexture } from '../utils/flipRTTTexture';
 
 export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncoder, renderPass: RenderPass, canvasContext?: CanvasContext, autoFlipRTT?: boolean)
@@ -36,53 +37,73 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
 }
 
 /**
- * 翻转渲染通道中的 RTT 纹理
+ * 翻转渲染通道中的 RTT 纹理（包括颜色附件和深度附件）
  */
 function flipRTTTextures(device: GPUDevice, commandEncoder: GPUCommandEncoder, descriptor: RenderPassDescriptor)
 {
-    if (!descriptor?.colorAttachments)
+    // 用于跟踪已翻转的纹理，避免重复翻转
+    const flippedTextures = new Set<string>();
+
+    // 翻转颜色附件
+    if (descriptor?.colorAttachments)
     {
-        return;
+        for (const colorAttachment of descriptor.colorAttachments)
+        {
+            const view = colorAttachment?.view;
+            if (!view)
+            {
+                continue;
+            }
+
+            // 获取纹理（可能是 Texture 或 CanvasTexture）
+            const texture = view.texture;
+            if (!texture || 'context' in texture)
+            {
+                // 跳过 CanvasTexture（画布纹理不需要翻转）
+                continue;
+            }
+
+            // 获取 GPU 纹理
+            const wgpuTexture = WGPUTextureLike.getInstance(device, texture);
+            if (!wgpuTexture?.gpuTexture)
+            {
+                continue;
+            }
+
+            // 获取数组层索引（用于 2d-array 纹理）
+            const baseArrayLayer = view.baseArrayLayer ?? 0;
+
+            // 生成唯一键，避免重复翻转同一纹理层
+            const layerKey = `color_${wgpuTexture.gpuTexture.label || 'texture'}_${baseArrayLayer}`;
+            if (flippedTextures.has(layerKey))
+            {
+                continue;
+            }
+            flippedTextures.add(layerKey);
+
+            // 翻转颜色纹理
+            flipRTTTexture(device, commandEncoder, wgpuTexture.gpuTexture, { baseArrayLayer });
+        }
     }
 
-    // 用于跟踪已翻转的纹理层，避免重复翻转
-    const flippedLayers = new Set<string>();
-
-    for (const colorAttachment of descriptor.colorAttachments)
+    // 翻转深度附件
+    const depthView = descriptor?.depthStencilAttachment?.view;
+    if (depthView)
     {
-        const view = colorAttachment?.view;
-        if (!view)
+        const depthTextureSource = depthView.texture;
+        if (depthTextureSource && !('context' in depthTextureSource))
         {
-            continue;
+            const wgpuDepthTexture = WGPUTextureLike.getInstance(device, depthTextureSource);
+            if (wgpuDepthTexture?.gpuTexture)
+            {
+                const layerKey = `depth_${wgpuDepthTexture.gpuTexture.label || 'texture'}`;
+                if (!flippedTextures.has(layerKey))
+                {
+                    flippedTextures.add(layerKey);
+                    // 翻转深度纹理
+                    flipDepthTexture(device, commandEncoder, wgpuDepthTexture.gpuTexture);
+                }
+            }
         }
-
-        // 获取纹理（可能是 Texture 或 CanvasTexture）
-        const texture = view.texture;
-        if (!texture || 'context' in texture)
-        {
-            // 跳过 CanvasTexture（画布纹理不需要翻转）
-            continue;
-        }
-
-        // 获取 GPU 纹理
-        const wgpuTexture = WGPUTextureLike.getInstance(device, texture);
-        if (!wgpuTexture?.gpuTexture)
-        {
-            continue;
-        }
-
-        // 获取数组层索引（用于 2d-array 纹理）
-        const baseArrayLayer = view.baseArrayLayer ?? 0;
-
-        // 生成唯一键，避免重复翻转同一纹理层
-        const layerKey = `${wgpuTexture.gpuTexture.label || 'texture'}_${baseArrayLayer}`;
-        if (flippedLayers.has(layerKey))
-        {
-            continue;
-        }
-        flippedLayers.add(layerKey);
-
-        // 翻转指定层
-        flipRTTTexture(device, commandEncoder, wgpuTexture.gpuTexture, { baseArrayLayer });
     }
 }
