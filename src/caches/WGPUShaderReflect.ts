@@ -72,8 +72,62 @@ export class WGPUShaderReflect
 
         if (reflect) return reflect;
 
-        // 创建新的着色器反射信息并缓存
-        reflect = WGPUShaderReflect.reflectMap[code] = new WgslReflect(code);
+        try
+        {
+            // 创建新的着色器反射信息并缓存
+            reflect = WGPUShaderReflect.reflectMap[code] = new WgslReflect(code);
+        }
+        catch (e)
+        {
+            // 增强错误信息，明确指出是 WGSL 着色器解析错误
+            const errorMessage = e instanceof Error ? e.message : String(e);
+            const lines = code.split('\n');
+
+            // 尝试从错误消息中提取行号
+            const lineMatch = errorMessage.match(/line\s*(\d+)/i);
+            const errorLine = lineMatch ? parseInt(lineMatch[1], 10) : null;
+
+            // 构建详细错误输出
+            const separator = '='.repeat(70);
+            const errorOutput: string[] = [
+                '',
+                separator,
+                '[WGSL Shader Parse Error]',
+                `Error: ${errorMessage}`,
+                separator,
+            ];
+
+            if (errorLine !== null)
+            {
+                errorOutput.push('Code context:');
+                const startLine = Math.max(0, errorLine - 3);
+                const endLine = Math.min(lines.length, errorLine + 2);
+
+                for (let i = startLine; i < endLine; i++)
+                {
+                    const lineNumber = (i + 1).toString().padStart(4, ' ');
+                    const marker = (i + 1 === errorLine) ? '>>>' : '   ';
+                    errorOutput.push(`${marker} ${lineNumber} | ${lines[i]}`);
+                }
+            }
+            else
+            {
+                errorOutput.push('Full WGSL code:');
+                lines.forEach((line, i) =>
+                {
+                    const lineNumber = (i + 1).toString().padStart(4, ' ');
+                    errorOutput.push(`    ${lineNumber} | ${line}`);
+                });
+            }
+
+            errorOutput.push(separator);
+            errorOutput.push('');
+
+            console.error(errorOutput.join('\n'));
+
+            // 重新抛出带有更明确信息的错误
+            throw new Error(`[WGSL Parse Error] ${errorMessage}\n\nSee console for full shader code and context.`);
+        }
 
         return reflect;
     }
