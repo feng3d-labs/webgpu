@@ -24,17 +24,16 @@ export class WGPUSampler extends ReactiveObject
 
         this._computedGpuSampler = computed(() =>
         {
-            const r_defaultSampler = reactive(defaultSampler);
-
+            // defaultSampler 是常量，不需要 reactive 包装
             //
             const label = r_sampler.label;
-            const addressModeU = r_sampler.addressModeU ?? r_defaultSampler.addressModeU;
-            const addressModeV = r_sampler.addressModeV ?? r_defaultSampler.addressModeV;
-            const addressModeW = r_sampler.addressModeW ?? r_defaultSampler.addressModeW;
-            const magFilter = r_sampler.magFilter ?? r_defaultSampler.magFilter;
-            const minFilter = r_sampler.minFilter ?? r_defaultSampler.minFilter;
-            const mipmapFilter = r_sampler.mipmapFilter ?? r_defaultSampler.mipmapFilter;
-            let lodMinClamp = r_sampler.lodMinClamp ?? r_defaultSampler.lodMinClamp;
+            const addressModeU = r_sampler.addressModeU ?? defaultSampler.addressModeU;
+            const addressModeV = r_sampler.addressModeV ?? defaultSampler.addressModeV;
+            const addressModeW = r_sampler.addressModeW ?? defaultSampler.addressModeW;
+            const magFilter = r_sampler.magFilter ?? defaultSampler.magFilter;
+            const minFilter = r_sampler.minFilter ?? defaultSampler.minFilter;
+            const mipmapFilter = r_sampler.mipmapFilter ?? defaultSampler.mipmapFilter;
+            let lodMinClamp = r_sampler.lodMinClamp ?? defaultSampler.lodMinClamp;
             // WebGPU 不允许负数的 LOD clamp 值
             if (lodMinClamp < 0)
             {
@@ -43,9 +42,11 @@ export class WGPUSampler extends ReactiveObject
             }
             // 当用户没有显式设置 mipmapFilter 时，lodMaxClamp 默认为 0（不使用 mipmap）
             // 以保持与 WebGL 行为一致（WebGL 中 minFilter='nearest'/'linear' 不使用 mipmap）
-            const lodMaxClamp = r_sampler.lodMaxClamp ?? (r_sampler.mipmapFilter === undefined ? 0 : r_defaultSampler.lodMaxClamp);
-            const compare = r_sampler.compare ?? r_defaultSampler.compare;
-            const maxAnisotropy = (minFilter === 'linear' && magFilter === 'linear' && mipmapFilter === 'linear') ? r_sampler.maxAnisotropy : r_defaultSampler.maxAnisotropy;
+            const lodMaxClamp = r_sampler.lodMaxClamp ?? (r_sampler.mipmapFilter === undefined ? 0 : defaultSampler.lodMaxClamp);
+            const compare = r_sampler.compare ?? defaultSampler.compare;
+            const maxAnisotropy = (minFilter === 'linear' && magFilter === 'linear' && mipmapFilter === 'linear')
+                ? (r_sampler.maxAnisotropy ?? defaultSampler.maxAnisotropy)
+                : defaultSampler.maxAnisotropy;
 
             //
             const gpuSampler = device.createSampler({
