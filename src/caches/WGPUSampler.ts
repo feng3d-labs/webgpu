@@ -34,7 +34,13 @@ export class WGPUSampler extends ReactiveObject
             const magFilter = r_sampler.magFilter ?? r_defaultSampler.magFilter;
             const minFilter = r_sampler.minFilter ?? r_defaultSampler.minFilter;
             const mipmapFilter = r_sampler.mipmapFilter ?? r_defaultSampler.mipmapFilter;
-            const lodMinClamp = r_sampler.lodMinClamp ?? r_defaultSampler.lodMinClamp;
+            let lodMinClamp = r_sampler.lodMinClamp ?? r_defaultSampler.lodMinClamp;
+            // WebGPU 不允许负数的 LOD clamp 值
+            if (lodMinClamp < 0)
+            {
+                console.warn(`[WGPUSampler] lodMinClamp (${lodMinClamp}) 不能为负数，已自动修正为 0`);
+                lodMinClamp = 0;
+            }
             const lodMaxClamp = r_sampler.lodMaxClamp ?? r_defaultSampler.lodMaxClamp;
             const compare = r_sampler.compare ?? r_defaultSampler.compare;
             const maxAnisotropy = (minFilter === 'linear' && magFilter === 'linear' && mipmapFilter === 'linear') ? r_sampler.maxAnisotropy : r_defaultSampler.maxAnisotropy;
