@@ -57,11 +57,17 @@ export class WGPUBindGroupEntry extends ReactiveObject
             //
             if (resourceType === ResourceType.Uniform || resourceType === ResourceType.Storage)
             {
-                // 执行
-                const bufferBinding = bindingResources[name] as BufferBinding;
+                // 优先使用变量名查找，如果找不到则尝试使用结构体名
+                let bufferBinding = bindingResources[name] as BufferBinding;
                 if (!bufferBinding)
                 {
-                    throw new Error(`Buffer binding '${name}' is undefined in bindingResources`);
+                    // 监听结构体名
+                    r_bindingResources[type.name];
+                    bufferBinding = bindingResources[type.name] as BufferBinding;
+                }
+                if (!bufferBinding)
+                {
+                    throw new Error(`没有找到缓冲区绑定 '${name}'，同时尝试了 '${type.name}'`);
                 }
 
                 //
@@ -110,7 +116,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
 
                 if (!textureView)
                 {
-                    throw new Error(`Texture binding '${name}' is undefined in bindingResources`);
+                    throw new Error(`没有找到纹理绑定 '${name}'`);
                 }
 
                 const wgpuTextureView = WGPUTextureView.getInstance(device, textureView);
@@ -123,7 +129,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
                 const value = bindingResources[name];
                 if (!value)
                 {
-                    throw new Error(`Sampler binding '${name}' is undefined in bindingResources`);
+                    throw new Error(`没有找到采样器绑定 '${name}'`);
                 }
 
                 if (isTextureSamplerObject(value))
