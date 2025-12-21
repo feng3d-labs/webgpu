@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, Sampler } from '@feng3d/render-api';
+import { ChainMap, defaultSampler, Sampler } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUSampler extends ReactiveObject
@@ -24,7 +24,7 @@ export class WGPUSampler extends ReactiveObject
 
         this._computedGpuSampler = computed(() =>
         {
-            const r_defaultSampler = reactive(WGPUSampler).defaultSampler;
+            const r_defaultSampler = reactive(defaultSampler);
 
             //
             const label = r_sampler.label;
@@ -41,7 +41,9 @@ export class WGPUSampler extends ReactiveObject
                 console.warn(`[WGPUSampler] lodMinClamp (${lodMinClamp}) 不能为负数，已自动修正为 0`);
                 lodMinClamp = 0;
             }
-            const lodMaxClamp = r_sampler.lodMaxClamp ?? r_defaultSampler.lodMaxClamp;
+            // 当用户没有显式设置 mipmapFilter 时，lodMaxClamp 默认为 0（不使用 mipmap）
+            // 以保持与 WebGL 行为一致（WebGL 中 minFilter='nearest'/'linear' 不使用 mipmap）
+            const lodMaxClamp = r_sampler.lodMaxClamp ?? (r_sampler.mipmapFilter === undefined ? 0 : r_defaultSampler.lodMaxClamp);
             const compare = r_sampler.compare ?? r_defaultSampler.compare;
             const maxAnisotropy = (minFilter === 'linear' && magFilter === 'linear' && mipmapFilter === 'linear') ? r_sampler.maxAnisotropy : r_defaultSampler.maxAnisotropy;
 
@@ -78,20 +80,4 @@ export class WGPUSampler extends ReactiveObject
     }
 
     private static readonly map = new ChainMap<[GPUDevice, Sampler], WGPUSampler>();
-
-    /**
-     * GPU采样器默认值。
-     */
-    static readonly defaultSampler: Sampler = {
-        addressModeU: 'repeat',
-        addressModeV: 'repeat',
-        addressModeW: 'repeat',
-        magFilter: 'nearest',
-        minFilter: 'nearest',
-        mipmapFilter: 'nearest',
-        lodMinClamp: 0,
-        lodMaxClamp: 16,
-        compare: undefined,
-        maxAnisotropy: 1,
-    };
 }
