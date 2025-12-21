@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { BlendComponent, BlendState, ChainMap } from '@feng3d/render-api';
+import { BlendComponent, BlendState, ChainMap, defaultBlendComponent } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**
@@ -41,7 +41,8 @@ export class WGPUBlendState extends ReactiveObject
         this._computedGpuBlendState = computed(() =>
         {
             const color = WGPUBlendState.getGPUBlendComponent(r_blend.color);
-            const alpha = WGPUBlendState.getGPUBlendComponent(r_blend.alpha);
+            // alpha 继承 color 的设置，与 WebGL 保持一致
+            const alpha = WGPUBlendState.getGPUBlendComponent(r_blend.alpha, color);
 
             // 构建WebGPU混合状态对象
             const gpuBlend: GPUBlendState = {
@@ -56,20 +57,32 @@ export class WGPUBlendState extends ReactiveObject
     /**
      * 将BlendComponent转换为GPUBlendComponent
      * @param blendComponent 原始混合组件
+     * @param fallback 当属性未设置时的后备值（用于 alpha 继承 color 的设置）
      * @returns 对应的WebGPU混合组件
      */
-    private static getGPUBlendComponent(blendComponent?: BlendComponent): GPUBlendComponent
+    private static getGPUBlendComponent(blendComponent?: BlendComponent, fallback?: GPUBlendComponent): GPUBlendComponent
     {
-        // 如果没有指定混合组件，则返回默认值
-        if (!blendComponent) return { operation: 'add', srcFactor: 'one', dstFactor: 'zero' };
+        // 如果没有指定混合组件，则使用后备值或默认值
+        if (!blendComponent)
+        {
+            return fallback ?? {
+                operation: defaultBlendComponent.operation,
+                srcFactor: defaultBlendComponent.srcFactor,
+                dstFactor: defaultBlendComponent.dstFactor,
+            };
+        }
 
         // 解构混合组件属性
         const { operation, srcFactor, dstFactor } = blendComponent;
+        // 后备值的各属性
+        const fallbackOperation = fallback?.operation ?? defaultBlendComponent.operation;
+        const fallbackSrcFactor = fallback?.srcFactor ?? defaultBlendComponent.srcFactor;
+        const fallbackDstFactor = fallback?.dstFactor ?? defaultBlendComponent.dstFactor;
         // 当 operation 为 max 或 min 时，srcFactor 和 dstFactor 必须为 one。
         const gpuBlendComponent: GPUBlendComponent = {
-            operation: operation ?? 'add',
-            srcFactor: (operation === 'max' || operation === 'min') ? 'one' : (srcFactor ?? 'one'),
-            dstFactor: (operation === 'max' || operation === 'min') ? 'one' : (dstFactor ?? 'zero'),
+            operation: operation ?? fallbackOperation,
+            srcFactor: (operation === 'max' || operation === 'min') ? 'one' : (srcFactor ?? fallbackSrcFactor),
+            dstFactor: (operation === 'max' || operation === 'min') ? 'one' : (dstFactor ?? fallbackDstFactor),
         };
 
         return gpuBlendComponent;
