@@ -1,5 +1,5 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { Buffer, ChainMap } from '@feng3d/render-api';
+import { Buffer, ChainMap, shared } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**
@@ -145,9 +145,17 @@ export class WGPUBuffer extends ReactiveObject
                 sizeByte,
             );
         });
-
-        // 清空写入数据，避免重复处理
-        reactive(buffer).writeBuffers = null;
+        if (!shared.isRunWebGL)
+        {
+            reactive(buffer).writeBuffers = null;
+        }
+        else
+        {
+            setTimeout(() =>
+            {
+                reactive(buffer).writeBuffers = null;
+            }, 0);
+        }
     }
 
     /**
