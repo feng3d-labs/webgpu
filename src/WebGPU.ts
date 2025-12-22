@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { Buffer, CanvasContext, ReadPixels, shared, Submit, TextureLike, TextureView, TypedArray } from '@feng3d/render-api';
+import { Buffer, CanvasContext, ReadPixels, renderState, Submit, TextureLike, TextureView, TypedArray } from '@feng3d/render-api';
 
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
@@ -74,7 +74,7 @@ export class WebGPU
 
     constructor(options?: WebGPUOptions)
     {
-        shared.isRunWebGPU = true;
+        renderState.isRunWebGPU = true;
         //
         this._canvasContext = options;
         this._canvasTextureView = {
