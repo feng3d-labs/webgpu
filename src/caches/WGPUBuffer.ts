@@ -147,7 +147,7 @@ export class WGPUBuffer extends ReactiveObject
         });
 
         // 清空写入数据，避免重复处理
-        // reactive(buffer).writeBuffers = null;
+        reactive(buffer).writeBuffers = null;
     }
 
     /**
