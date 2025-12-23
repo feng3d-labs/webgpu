@@ -40,7 +40,7 @@ function adjustSamplerForTexture(texture: Texture | undefined, sampler: Sampler)
             console.warn(
                 `[WebGPU] 纹理没有 mipmap（generateMipmap: false），但采样器设置了 mipmapFilter: '${sampler.mipmapFilter}'。`
                 + ` 已自动忽略 mipmapFilter 并将 lodMaxClamp 设为 0，以避免采样错误。`
-                + ` 建议：设置 generateMipmap: true 或移除 mipmapFilter 配置。`
+                + ` 建议：设置 generateMipmap: true 或移除 mipmapFilter 配置。`,
             );
         }
 
