@@ -112,7 +112,13 @@ export class WGPUTexture extends ReactiveObject
             const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
 
             // 计算mip级别数量
-            const mipLevelCount = descriptor.mipLevelCount ?? (descriptor.generateMipmap ? (1 + Math.log2(Math.max(size[0], size[1])) | 0) : 1);
+            // 注意：3D 纹理使用计算着色器生成 mipmap，需要考虑深度维度
+            const is3DTexture = descriptor.dimension === '3d';
+            const mipLevelCount = descriptor.mipLevelCount ?? (
+                descriptor.generateMipmap
+                    ? (1 + Math.log2(Math.max(size[0], size[1], is3DTexture ? size[2] : 1)) | 0)
+                    : 1
+            );
 
             // 生成纹理标签
             const label = descriptor.label ?? `GPUTexture ${WGPUTexture._autoIndex++}`;
