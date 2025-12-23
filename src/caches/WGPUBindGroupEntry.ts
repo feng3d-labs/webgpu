@@ -17,6 +17,43 @@ function isTextureSamplerObject(value: any): value is { texture: Texture; sample
     return value && typeof value === 'object' && 'texture' in value && 'sampler' in value;
 }
 
+// 用于追踪已警告的纹理，避免重复警告
+const warnedTextures = new WeakSet<Texture>();
+
+/**
+ * 根据纹理的 mip level 数量调整采样器配置
+ * 当纹理只有单一 mip level 时，忽略 mipmapFilter 并限制 lodMaxClamp
+ */
+function adjustSamplerForTexture(texture: Texture | undefined, sampler: Sampler): Sampler
+{
+    if (!texture) return sampler;
+
+    const descriptor = texture.descriptor;
+    const hasMipmap = descriptor.generateMipmap || (descriptor.mipLevelCount && descriptor.mipLevelCount > 1);
+
+    if (!hasMipmap && sampler.mipmapFilter)
+    {
+        // 只警告一次
+        if (!warnedTextures.has(texture))
+        {
+            warnedTextures.add(texture);
+            console.warn(
+                `[WebGPU] 纹理没有 mipmap（generateMipmap: false），但采样器设置了 mipmapFilter: '${sampler.mipmapFilter}'。`
+                + ` 已自动忽略 mipmapFilter 并将 lodMaxClamp 设为 0，以避免采样错误。`
+                + ` 建议：设置 generateMipmap: true 或移除 mipmapFilter 配置。`
+            );
+        }
+
+        return {
+            ...sampler,
+            mipmapFilter: undefined,
+            lodMaxClamp: 0,
+        };
+    }
+
+    return sampler;
+}
+
 export class WGPUBindGroupEntry extends ReactiveObject
 {
     get gpuBindGroupEntry() { return this._computedGpuBindGroupEntry.value; }
@@ -126,6 +163,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
             {
                 // 检查是否是 texture+sampler 对象
                 let sampler: Sampler;
+                let texture: Texture | undefined;
                 const value = bindingResources[name];
                 if (!value)
                 {
@@ -134,15 +172,26 @@ export class WGPUBindGroupEntry extends ReactiveObject
 
                 if (isTextureSamplerObject(value))
                 {
-                    // 从 texture+sampler 对象中提取 sampler
+                    // 从 texture+sampler 对象中提取 sampler 和 texture
                     sampler = value.sampler;
+                    texture = value.texture;
                 }
                 else
                 {
                     sampler = value as Sampler;
+                    // 尝试从展开格式获取对应的纹理（如 diffuse -> diffuse_texture）
+                    const textureKey = `${name}_texture`;
+                    const textureValue = bindingResources[textureKey];
+                    if (textureValue && typeof textureValue === 'object' && 'texture' in textureValue)
+                    {
+                        texture = (textureValue as TextureView).texture as Texture;
+                    }
                 }
 
-                const wgpuSampler = WGPUSampler.getInstance(device, sampler);
+                // 检查纹理是否只有单一 mip level，如果是则调整采样器配置
+                const adjustedSampler = adjustSamplerForTexture(texture, sampler);
+
+                const wgpuSampler = WGPUSampler.getInstance(device, adjustedSampler);
                 entry.resource = wgpuSampler.gpuSampler;
             }
 
