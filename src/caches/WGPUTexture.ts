@@ -1,6 +1,7 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureImageSource, TextureSource } from '@feng3d/render-api';
+import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureFormat, TextureImageSource, TextureSource } from '@feng3d/render-api';
 import { ReactiveObject } from '../ReactiveObject';
+import { isCopyExternalImageSupported, writeImageWithFallback } from '../utils/copyExternalImageFallback';
 import { generateMipmap } from '../utils/generate-mipmap';
 
 /**
@@ -238,6 +239,16 @@ export class WGPUTexture extends ReactiveObject
                 // 获取图片实际尺寸
                 const imageSize = TextureImageSource.getTexImageSourceSize(imageSource.image);
                 const copySize = imageSource.size || imageSize;
+
+                // 检查格式是否支持 copyExternalImageToTexture
+                const format = gpuTexture.format as TextureFormat;
+                if (!isCopyExternalImageSupported(format))
+                {
+                    // 使用回退方案：提取像素数据后使用 writeTexture
+                    writeImageWithFallback(device, gpuTexture, imageSource, copySize);
+
+                    return;
+                }
 
                 let imageOrigin = imageSource.imageOrigin;
 
