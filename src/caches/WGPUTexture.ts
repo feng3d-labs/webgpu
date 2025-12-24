@@ -354,6 +354,7 @@ export class WGPUTexture extends ReactiveObject
 
         // 深度纹理、多重采样纹理和某些特定格式不支持存储绑定
         if (format.indexOf('depth') !== -1 // 深度纹理
+            || format.indexOf('-srgb') !== -1 // sRGB 格式不支持存储绑定
             || sampleCount // 多重采样纹理
             || format === 'r8unorm'
             || format === 'bgra8unorm' // 需要设备支持 "bgra8unorm-storage" 特性
