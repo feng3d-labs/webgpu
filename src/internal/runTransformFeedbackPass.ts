@@ -75,12 +75,33 @@ function convertToComputeObject(transformFeedbackObject: TransformFeedbackObject
         }
     }
 
-    // 添加输出数据（从 transformFeedback 中提取）
+    // 获取缓冲区模式
+    const bufferMode = pipeline.transformFeedbackVaryings?.bufferMode ?? 'INTERLEAVED_ATTRIBS';
+    const varyings = pipeline.transformFeedbackVaryings?.varyings ?? [];
     const transformFeedback = transformFeedbackObject.transformFeedback;
-    if (transformFeedback?.bindBuffers?.length > 0)
+
+    if (bufferMode === 'SEPARATE_ATTRIBS')
     {
-        const outputData = transformFeedback.bindBuffers[0].data;
-        bindingResourcesObj['outputData'] = { bufferView: outputData };
+        // 分离模式：为每个 varying 绑定独立的输出缓冲区
+        if (transformFeedback?.bindBuffers)
+        {
+            for (let i = 0; i < transformFeedback.bindBuffers.length && i < varyings.length; i++)
+            {
+                const bindBuffer = transformFeedback.bindBuffers[i];
+                const varyingName = varyings[i];
+                // 使用 outputData_gl_Position 或 outputData_v_color 格式
+                bindingResourcesObj[`outputData_${varyingName}`] = { bufferView: bindBuffer.data };
+            }
+        }
+    }
+    else
+    {
+        // 交错模式：使用单一输出缓冲区
+        if (transformFeedback?.bindBuffers?.length > 0)
+        {
+            const outputData = transformFeedback.bindBuffers[0].data;
+            bindingResourcesObj['outputData'] = { bufferView: outputData };
+        }
     }
 
     // 计算工作组数量
