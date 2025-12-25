@@ -62,16 +62,14 @@ function convertToComputeObject(transformFeedbackObject: TransformFeedbackObject
         Object.assign(bindingResourcesObj, transformFeedbackObject.uniforms);
     }
 
-    // 添加输入数据（从 vertices 中提取）
+    // 添加输入数据（从 vertices 中提取，每个属性绑定为独立的缓冲区）
     const vertices = transformFeedbackObject.vertices;
     if (vertices)
     {
-        const firstAttrKey = Object.keys(vertices)[0];
-        if (firstAttrKey)
+        for (const [attrName, attrValue] of Object.entries(vertices))
         {
-            const firstAttr = vertices[firstAttrKey];
-            const inputData = firstAttr.data;
-            bindingResourcesObj['inputData'] = { bufferView: inputData };
+            // 使用 inputData_属性名 格式绑定每个输入缓冲区
+            bindingResourcesObj[`inputData_${attrName}`] = { bufferView: attrValue.data };
         }
     }
 
