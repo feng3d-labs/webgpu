@@ -26,7 +26,7 @@
     "lint": "eslint . --ext .js,.ts --max-warnings 0",
     "lintfix": "npm run lint -- --fix",
     "docs": "typedoc && cd examples && vite build --outDir ../public",
-    "upload_oss": "npm run docs && feng3d-cli oss_upload_dir",
+    "upload_oss": "npm run docs && npx feng3d-cli oss_upload_dir",
     "release": "npm run clean && npm run lint && npm run build && npm run docs && npm run types && npm publish",
     "prepublishOnly": "node scripts/prepublish.js",
     "postpublish": "node scripts/postpublish.js"
@@ -51,7 +51,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
-    "feng3d-cli": "^0.0.3",
     "@typescript-eslint/eslint-plugin": "8.32.1",
     "@typescript-eslint/parser": "8.32.1",
     "cross-env": "7.0.3",
