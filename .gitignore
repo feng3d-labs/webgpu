@@ -1,12 +1,26 @@
 node_modules
-yarn.lock
+package-lock.json
 dist
 lib
 public
 out
-package-lock.json
-pnpm-lock.yaml
 # 自动生成的测试配置文件
 **/test-config.ts
 # 测试构建输出目录
 test_dist
+# 测试覆盖率
+coverage
+
+# 以下文件可由 feng3d-cli 自动生成，无需提交
+# 运行 `feng3d-cli update` 可重新生成
+feng3d.json
+.cursorrules
+eslint.config.js
+typedoc.json
+test/_.test.ts
+.husky/pre-commit
+.vscode/settings.json
+tsconfig.json
+vite.config.js
+scripts/prepublish.js
+scripts/postpublish.js

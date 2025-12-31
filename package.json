@@ -17,19 +17,21 @@
   },
   "scripts": {
     "dev": "cd examples && npm run dev",
-    "clean": "rimraf \"{lib,dist,public}\"",
-    "build": "vite build",
-    "test": "vitest",
+    "clean": "rimraf lib dist public",
+    "build": "vite build && tsc",
+    "watch": "concurrently \"vite build --watch\" \"tsc -w\" \"vitest\"",
+    "test": "vitest run",
     "test_web": "vite --config test_vite.config.js",
-    "types": "tsc",
-    "watch": "tsc -w",
     "lint": "eslint . --ext .js,.ts --max-warnings 0",
     "lintfix": "npm run lint -- --fix",
     "docs": "typedoc && cd examples && vite build --outDir ../public",
-    "upload_oss": "npm run docs && feng3d-cli oss_upload_dir",
-    "release": "npm run clean && npm run lint && npm run build && npm run docs && npm run types && npm publish",
+    "upload_oss": "npm run docs && npx feng3d-cli oss_upload_dir",
+    "update": "npx feng3d-cli update && npm install",
+    "postinstall": "npx feng3d-cli update || exit 0",
     "prepublishOnly": "node scripts/prepublish.js",
-    "postpublish": "node scripts/postpublish.js"
+    "release": "npm run clean && npm run lint && npm test && npm run build && npm run docs && npm publish",
+    "postpublish": "node scripts/postpublish.js",
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -51,7 +53,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
-    "@feng3d/cli": "^0.0.19",
     "@typescript-eslint/eslint-plugin": "8.32.1",
     "@typescript-eslint/parser": "8.32.1",
     "cross-env": "7.0.3",
@@ -64,7 +65,10 @@
     "typescript": "5.8.3",
     "typescript-eslint": "^8.32.1",
     "vite": "^6.3.5",
-    "vitest": "^3.1.3"
+    "vitest": "^3.1.3",
+    "concurrently": "^9.1.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.10"
   },
   "dependencies": {
     "@feng3d/reactivity": "^1.0.6",
@@ -72,5 +76,10 @@
     "@feng3d/watcher": "^0.8.14",
     "@webgpu/types": "0.1.60",
     "wgsl_reflect": "^1.2.1"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "eslint --fix --max-warnings 0"
+    ]
   }
 }
