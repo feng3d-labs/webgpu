@@ -1,3 +1,0 @@
-[submodule "packages/feng3d-cli"]
-	path = packages/feng3d-cli
-	url = https://github.com/feng3d-labs/feng3d-cli.git

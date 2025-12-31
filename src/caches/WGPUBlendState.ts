@@ -14,7 +14,11 @@ export class WGPUBlendState extends ReactiveObject
      * 对应的WebGPU混合状态对象
      * 只读属性，当原始BlendState发生变化时会自动更新
      */
-    get gpuBlendState() { return this._computedGpuBlendState.value; }
+    get gpuBlendState()
+    {
+        return this._computedGpuBlendState.value;
+    }
+
     private _computedGpuBlendState: Computed<GPUBlendState>;
 
     /**
@@ -28,7 +32,10 @@ export class WGPUBlendState extends ReactiveObject
         this._onCreate(blendState);
         //
         WGPUBlendState.map.set([blendState], this);
-        this.destroyCall(() => { WGPUBlendState.map.delete([blendState]); });
+        this.destroyCall(() =>
+        {
+            WGPUBlendState.map.delete([blendState]);
+        });
     }
 
     /**
@@ -38,6 +45,7 @@ export class WGPUBlendState extends ReactiveObject
     private _onCreate(blendState: BlendState)
     {
         const r_blend = reactive(blendState);
+
         this._computedGpuBlendState = computed(() =>
         {
             const color = WGPUBlendState.getGPUBlendComponent(r_blend.color);
