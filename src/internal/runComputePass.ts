@@ -5,9 +5,11 @@ import { runComputeObject } from './runComputeObject';
 export function runComputePass(device: GPUDevice, commandEncoder: GPUCommandEncoder, computePass: ComputePass)
 {
     const descriptor: GPUComputePassDescriptor = {};
+
     if (computePass.descriptor?.timestampQuery)
     {
         const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, computePass.descriptor.timestampQuery);
+
         descriptor.timestampWrites = wGPUTimestampQuery.gpuPassTimestampWrites;
     }
     //

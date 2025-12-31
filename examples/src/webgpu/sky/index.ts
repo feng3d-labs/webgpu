@@ -24,6 +24,7 @@ const r_parameters = reactive(parameters);
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -74,6 +75,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     };
 
     const folderSky = gui.addFolder('Sky');
+
     folderSky.add(r_parameters, 'elevation', 0, 10, 0.1);
     folderSky.add(r_parameters, 'azimuth', -180, 180, 0.1);
     folderSky.add(r_parameters, 'cameraRotationX', -180, 180, 0.1);
@@ -86,6 +88,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const theta = (r_parameters.azimuth) / 180 * Math.PI;
 
         const sun = setFromSphericalCoords(1, phi, theta);
+
         reactive(uniforms.value).sunPosition = new Float32Array(sun) as Float32Array;
     });
 
@@ -104,6 +107,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         const modelMatrix = mat4.scaling([10000, 10000, 10000]);
 
         const cameraMatrix = mat4.identity();
+
         mat4.rotateX(cameraMatrix, cameraRotationX, cameraMatrix);
         mat4.rotateY(cameraMatrix, cameraRotationY, cameraMatrix);
         const viewMatrix = mat4.inverse(cameraMatrix);

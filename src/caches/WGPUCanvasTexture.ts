@@ -15,7 +15,11 @@ export class WGPUCanvasTexture extends ReactiveObject
     /**
      * WebGPU纹理对象
      */
-    get gpuTexture() { return this._computedGpuTexture.value; }
+    get gpuTexture()
+    {
+        return this._computedGpuTexture.value;
+    }
+
     private _computedGpuTexture: Computed<GPUTexture>;
 
     /**
@@ -35,7 +39,10 @@ export class WGPUCanvasTexture extends ReactiveObject
 
         //
         WGPUCanvasTexture.map.set([device, canvasId], this);
-        this.destroyCall(() => { WGPUCanvasTexture.map.delete([device, canvasId]); });
+        this.destroyCall(() =>
+        {
+            WGPUCanvasTexture.map.delete([device, canvasId]);
+        });
     }
 
     private _onCreate(device: GPUDevice, canvasTexture: CanvasTexture)
@@ -44,6 +51,7 @@ export class WGPUCanvasTexture extends ReactiveObject
         const r_canvasTexture = reactive(canvasTexture);
 
         let oldGpuTexture: GPUTexture;
+
         this._computedGpuTexture = computed(() =>
         {
             reactive(device.queue).preSubmit;
@@ -54,6 +62,7 @@ export class WGPUCanvasTexture extends ReactiveObject
 
             //
             const wgpuCanvasContext = WGPUCanvasContext.getInstance(device, context);
+
             // 监听画布上下文版本号变化
             wgpuCanvasContext.version;
 

@@ -22,6 +22,7 @@ describe('ChainMap', () =>
         testdata.forEach((v) =>
         {
             const result = map.get(v[0]);
+
             assert.strictEqual(v[1], result);
         });
         console.timeEnd('ChainMap get');
@@ -37,6 +38,7 @@ describe('ChainMap', () =>
         testdata.forEach((v) =>
         {
             const result = map1[`${v[0][0]},${v[0][1]},${v[0][2]},${v[1]}`];
+
             assert.strictEqual(v[1], result);
         });
         console.timeEnd('ChainObjectMap get');

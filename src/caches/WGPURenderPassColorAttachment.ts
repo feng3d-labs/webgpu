@@ -40,7 +40,11 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
      * 这是实际的GPU颜色附件实例，用于在渲染通道中指定颜色输出目标。
      * 当颜色附件配置发生变化时，此对象会自动重新创建。
      */
-    get gpuRenderPassColorAttachment() { return this._computedGpuRenderPassColorAttachment.value; }
+    get gpuRenderPassColorAttachment()
+    {
+        return this._computedGpuRenderPassColorAttachment.value;
+    }
+
     private _computedGpuRenderPassColorAttachment: Computed<GPURenderPassColorAttachment>;
 
     /**
@@ -60,7 +64,10 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
         this._onCreate(device, colorAttachment, descriptor, canvasContext);
         //
         WGPURenderPassColorAttachment.map.set([device, colorAttachment, descriptor, canvasContext], this);
-        this.destroyCall(() => { WGPURenderPassColorAttachment.map.delete([device, colorAttachment, descriptor, canvasContext]); })
+        this.destroyCall(() =>
+        {
+            WGPURenderPassColorAttachment.map.delete([device, colorAttachment, descriptor, canvasContext]);
+        })
     }
 
     /**
@@ -122,6 +129,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 
             // 如果view缺省，使用canvasContext创建view
             const view = colorAttachment.view || (canvasContext ? { texture: { context: canvasContext } } : undefined);
+
             if (!view) return;
 
             // 标记为颜色附件
@@ -130,9 +138,11 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
             // 获取纹理视图实例
             const wGPUTextureView = WGPUTextureView.getInstance(device, view);
             const textureView = wGPUTextureView?.textureView;
+
             if (!textureView) return;
 
             const sampleCount = r_descriptor.sampleCount;
+
             if (sampleCount)
             {
                 gpuRenderPassColorAttachment.resolveTarget = textureView;
@@ -150,6 +160,7 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
         {
             // 检查是否需要多重采样
             const sampleCount = r_descriptor.sampleCount;
+
             if (!sampleCount)
             {
                 gpuRenderPassColorAttachment.resolveTarget = undefined;
@@ -159,12 +170,14 @@ export class WGPURenderPassColorAttachment extends ReactiveObject
 
             // 获取原始纹理信息
             const view = colorAttachment.view || (canvasContext ? { texture: { context: canvasContext } } : undefined);
+
             if (!view?.texture) return;
 
             const wgpuTexture = WGPUTextureLike.getInstance(device, view.texture);
             const gpuTexture = wgpuTexture.gpuTexture;
 
             const key = [gpuTexture.width, gpuTexture.height, gpuTexture.depthOrArrayLayers, gpuTexture.format, sampleCount].join(',');
+
             if (multisampleTextureKey === key) return;
             multisampleTextureKey = key;
 

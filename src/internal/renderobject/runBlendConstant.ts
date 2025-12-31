@@ -6,5 +6,6 @@ export function runBlendConstant(renderObject: RenderObject, passEncoder: WGPURe
 {
     const r_renderObject = reactive(renderObject);
     const blendConstantColor = BlendState.getBlendConstantColor(r_renderObject.pipeline.fragment?.targets?.[0]?.blend);
+
     passEncoder.setBlendConstant(blendConstantColor);
 }

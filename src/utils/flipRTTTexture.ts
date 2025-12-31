@@ -99,6 +99,7 @@ export function flipRTTTexture(device: GPUDevice, commandEncoder: GPUCommandEnco
 function getOrCreatePipeline(device: GPUDevice, format: GPUTextureFormat): GPURenderPipeline
 {
     let pipeline = pipelineCache.get(format);
+
     if (!pipeline)
     {
         pipeline = device.createRenderPipeline({

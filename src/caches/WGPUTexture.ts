@@ -39,7 +39,11 @@ export class WGPUTexture extends ReactiveObject
      * 这是实际的GPU纹理实例，用于在渲染管线中存储和访问纹理数据。
      * 当纹理配置发生变化时，此对象会自动重新创建。
      */
-    get gpuTexture() { return this._computedGpuTexture.value; }
+    get gpuTexture()
+    {
+        return this._computedGpuTexture.value;
+    }
+
     private _computedGpuTexture: Computed<GPUTexture>;
 
     /**
@@ -59,7 +63,10 @@ export class WGPUTexture extends ReactiveObject
 
         //
         WGPUTexture.map.set([device, texture], this);
-        this.destroyCall(() => { WGPUTexture.map.delete([device, texture]); });
+        this.destroyCall(() =>
+        {
+            WGPUTexture.map.delete([device, texture]);
+        });
     }
 
     /**
@@ -83,6 +90,7 @@ export class WGPUTexture extends ReactiveObject
         {
             // 触发响应式依赖，监听纹理描述符的所有属性
             const r_descriptor = r_texture.descriptor;
+
             if (r_descriptor)
             {
                 r_descriptor.label;
@@ -242,6 +250,7 @@ export class WGPUTexture extends ReactiveObject
 
                 // 检查格式是否支持 copyExternalImageToTexture
                 const format = gpuTexture.format as TextureFormat;
+
                 if (!isCopyExternalImageSupported(format))
                 {
                     // 使用回退方案：提取像素数据后使用 writeTexture

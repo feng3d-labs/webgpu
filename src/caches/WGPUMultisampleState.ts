@@ -4,7 +4,11 @@ import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUMultisampleState extends ReactiveObject
 {
-    get gpuMultisampleState() { return this._computedGpuMultisampleState.value; }
+    get gpuMultisampleState()
+    {
+        return this._computedGpuMultisampleState.value;
+    }
+
     private _computedGpuMultisampleState: Computed<GPUMultisampleState>;
 
     constructor(multisampleState: MultisampleState)
@@ -14,7 +18,10 @@ export class WGPUMultisampleState extends ReactiveObject
         this._onCreate(multisampleState);
         //
         WGPUMultisampleState.map.set(multisampleState, this);
-        this.destroyCall(() => { WGPUMultisampleState.map.delete(multisampleState); });
+        this.destroyCall(() =>
+        {
+            WGPUMultisampleState.map.delete(multisampleState);
+        });
     }
 
     private _onCreate(multisampleState: MultisampleState)
@@ -27,6 +34,7 @@ export class WGPUMultisampleState extends ReactiveObject
             }
 
             const r_multisampleState = reactive(multisampleState);
+
             // 监听
             r_multisampleState.mask;
             r_multisampleState.alphaToCoverageEnabled;

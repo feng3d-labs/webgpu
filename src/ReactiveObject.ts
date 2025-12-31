@@ -75,6 +75,7 @@ export class ReactiveObject
     effect(fn: () => void)
     {
         let eff: Effect;
+
         this._effectScope.run(() =>
         {
             eff = effect(fn);

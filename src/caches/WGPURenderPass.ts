@@ -10,7 +10,11 @@ import { WGPURenderPassEncoder } from './WGPURenderPassEncoder';
 
 export class WGPURenderPass extends ReactiveObject
 {
-    get commands() { return this._computedCommands.value; }
+    get commands()
+    {
+        return this._computedCommands.value;
+    }
+
     private _computedCommands: Computed<WGPURenderPassEncoder>;
 
     constructor(device: GPUDevice, renderPass: RenderPass, canvasContext?: CanvasContext)
@@ -20,7 +24,10 @@ export class WGPURenderPass extends ReactiveObject
 
         //
         WGPURenderPass.map.set([device, renderPass, canvasContext], this);
-        this.destroyCall(() => { WGPURenderPass.map.delete([device, renderPass, canvasContext]); });
+        this.destroyCall(() =>
+        {
+            WGPURenderPass.map.delete([device, renderPass, canvasContext]);
+        });
     }
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass, canvasContext?: CanvasContext)

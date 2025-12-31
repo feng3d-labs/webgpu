@@ -15,6 +15,7 @@ export class WGPUShaderModule
     static getGPUShaderModule(device: GPUDevice, code: string)
     {
         let gpuShaderModule = this.map.get([device, code]);
+
         if (gpuShaderModule) return gpuShaderModule;
 
         try
@@ -51,6 +52,7 @@ export class WGPUShaderModule
                 {
                     const lineNumber = (i + 1).toString().padStart(4, ' ');
                     const marker = (i + 1 === errorLine) ? '>>>' : '   ';
+
                     errorOutput.push(`${marker} ${lineNumber} | ${lines[i]}`);
                 }
             }
@@ -60,6 +62,7 @@ export class WGPUShaderModule
                 lines.forEach((line, i) =>
                 {
                     const lineNumber = (i + 1).toString().padStart(4, ' ');
+
                     errorOutput.push(`    ${lineNumber} | ${line}`);
                 });
             }
@@ -93,12 +96,14 @@ export class WGPUShaderModule
                     {
                         const lineNumber = (i + 1).toString().padStart(4, ' ');
                         const marker = (i + 1 === lineNum) ? '>>>' : '   ';
+
                         contextLines.push(`${marker} ${lineNumber} | ${lines[i]}`);
 
                         // 添加错误位置指示
                         if (i + 1 === lineNum && linePos > 0)
                         {
                             const pointer = ' '.repeat(linePos + 9) + '^';
+
                             contextLines.push(pointer);
                         }
                     }

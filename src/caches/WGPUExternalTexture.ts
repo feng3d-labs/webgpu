@@ -5,7 +5,11 @@ import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUExternalTexture extends ReactiveObject
 {
-    get gpuExternalTexture() { return this._computedGpuExternalTexture.value; }
+    get gpuExternalTexture()
+    {
+        return this._computedGpuExternalTexture.value;
+    }
+
     private _computedGpuExternalTexture: Computed<GPUExternalTexture>;
 
     constructor(device: GPUDevice, videoTexture: VideoTexture)
@@ -15,7 +19,10 @@ export class WGPUExternalTexture extends ReactiveObject
         this._onCreate(device, videoTexture);
         //
         WGPUExternalTexture.map.set([device, videoTexture], this);
-        this.destroyCall(() => { WGPUExternalTexture.map.delete([device, videoTexture]); });
+        this.destroyCall(() =>
+        {
+            WGPUExternalTexture.map.delete([device, videoTexture]);
+        });
     }
 
     private _onCreate(device: GPUDevice, videoTexture: VideoTexture)

@@ -7,7 +7,11 @@ import { WGPUBuffer } from './WGPUBuffer';
 
 export class WGPUBufferBinding extends ReactiveObject
 {
-    get gpuBufferBinding() { return this._computedGpuBufferBinding.value; }
+    get gpuBufferBinding()
+    {
+        return this._computedGpuBufferBinding.value;
+    }
+
     private _computedGpuBufferBinding: Computed<GPUBufferBinding>;
 
     constructor(device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo)
@@ -17,7 +21,10 @@ export class WGPUBufferBinding extends ReactiveObject
         this._onCreate(device, bufferBinding, type);
         //
         WGPUBufferBinding.map.set([device, bufferBinding, type], this);
-        this.destroyCall(() => { WGPUBufferBinding.map.delete([device, bufferBinding, type]); });
+        this.destroyCall(() =>
+        {
+            WGPUBufferBinding.map.delete([device, bufferBinding, type]);
+        });
     }
 
     private _onCreate(device: GPUDevice, bufferBinding: BufferBinding, type: TypeInfo)
@@ -284,4 +291,5 @@ const baseTypeDataCls: { [key: string]: DataCls } = {
     mat4x3h: Float32Array,
     mat4x4h: Float32Array,
 };
+
 type DataCls = Float32ArrayConstructor | Int32ArrayConstructor | Uint32ArrayConstructor | Int16ArrayConstructor;

@@ -5,7 +5,11 @@ import { WGPUStencilFaceState } from './WGPUStencilFaceState';
 
 export class WGPUDepthStencilState extends ReactiveObject
 {
-    get gpuDepthStencilState() { return this._computedGpuDepthStencilState.value; }
+    get gpuDepthStencilState()
+    {
+        return this._computedGpuDepthStencilState.value;
+    }
+
     private _computedGpuDepthStencilState: Computed<GPUDepthStencilState>;
 
     constructor(depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat)
@@ -16,7 +20,10 @@ export class WGPUDepthStencilState extends ReactiveObject
 
         //
         WGPUDepthStencilState.map.set([depthStencil, depthStencilFormat], this);
-        this.destroyCall(() => { WGPUDepthStencilState.map.delete([depthStencil, depthStencilFormat]); });
+        this.destroyCall(() =>
+        {
+            WGPUDepthStencilState.map.delete([depthStencil, depthStencilFormat]);
+        });
     }
 
     private _onCreate(depthStencil: DepthStencilState, depthStencilFormat: GPUTextureFormat)
@@ -27,6 +34,7 @@ export class WGPUDepthStencilState extends ReactiveObject
             {
                 // 监听
                 const r_depthStencil = reactive(depthStencil);
+
                 r_depthStencil.depthWriteEnabled;
                 r_depthStencil.depthCompare;
                 r_depthStencil.stencilFront;

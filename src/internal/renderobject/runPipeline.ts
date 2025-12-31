@@ -9,6 +9,7 @@ export function runPipeline(renderObject: RenderObject, passEncoder: WGPURenderP
     const device = passEncoder.device;
 
     const r_renderObject = reactive(renderObject);
+
     r_renderObject.pipeline;
     r_renderObject.vertices;
     r_renderObject.indices;

@@ -10,6 +10,7 @@ export function runVertexBuffer(renderObject: RenderObject, passEncoder: WGPURen
 
     //
     const r_renderObject = reactive(renderObject);
+
     r_renderObject.vertices;
     r_renderObject.pipeline.vertex;
 

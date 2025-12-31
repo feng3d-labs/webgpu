@@ -357,5 +357,6 @@ fn main(@builtin(global_invocation_id) globalId: vec3<u32>) {
     }
 
     const commandBuffer = encoder.finish();
+
     device.queue.submit([commandBuffer]);
 }

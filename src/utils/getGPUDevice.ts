@@ -33,6 +33,7 @@ export async function getGPUDevice(options?: GPURequestAdapterOptions, descripto
     if (adapter)
     {
         const adapterLimits = adapter.limits;
+
         descriptor.requiredLimits = descriptor.requiredLimits || {};
         // 请求适配器支持的最大 storage buffer 数量
         if (adapterLimits.maxStorageBuffersPerShaderStage > 8)

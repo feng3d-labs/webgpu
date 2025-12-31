@@ -220,9 +220,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 const world = mat4.translation(position);
 
                 const worldInverseTranspose = mat4.create();
+
                 mat4.transpose(mat4.inverse(world), worldInverseTranspose);
 
                 const worldViewProjection = mat4.create();
+
                 mat4.multiply(viewProjection, world, worldViewProjection);
 
                 reactive(uni.value).worldViewProjectionMatrix = worldViewProjection;

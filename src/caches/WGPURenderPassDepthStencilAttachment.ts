@@ -41,7 +41,11 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
      * 这是实际的GPU深度模板附件实例，用于在渲染通道中指定深度和模板测试目标。
      * 当深度模板附件配置发生变化时，此对象会自动重新创建。
      */
-    get gpuRenderPassDepthStencilAttachment() { return this._computedGpuRenderPassDepthStencilAttachment.value; }
+    get gpuRenderPassDepthStencilAttachment()
+    {
+        return this._computedGpuRenderPassDepthStencilAttachment.value;
+    }
+
     private _computedGpuRenderPassDepthStencilAttachment: Computed<GPURenderPassDepthStencilAttachment>;
 
     /**
@@ -61,7 +65,10 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
         this._onCreate(device, descriptor);
         //
         WGPURenderPassDepthStencilAttachment.map.set([device, descriptor], this);
-        this.destroyCall(() => { WGPURenderPassDepthStencilAttachment.map.delete([device, descriptor]); })
+        this.destroyCall(() =>
+        {
+            WGPURenderPassDepthStencilAttachment.map.delete([device, descriptor]);
+        })
     }
 
     /**
@@ -88,6 +95,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
         {
             //
             const r_depthStencilAttachment = r_descriptor.depthStencilAttachment;
+
             if (!r_depthStencilAttachment)
             {
                 return null;
@@ -102,6 +110,7 @@ export class WGPURenderPassDepthStencilAttachment extends ReactiveObject
             {
                 // 获取深度纹理视图实例
                 const wGPUTextureView = WGPUTextureView.getInstance(device, descriptor.depthStencilAttachment.view);
+
                 textureView = wGPUTextureView.textureView;
             }
             // 如果没有提供深度纹理视图，自动生成一个

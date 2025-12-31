@@ -283,6 +283,7 @@ function layoutList(files)
         for (let i = 0; i < section.length; i++)
         {
             const file = section[i];
+
             if (!links[file]) continue;
 
             if (links[file].classList.contains('hidden') === false)

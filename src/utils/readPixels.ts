@@ -60,10 +60,12 @@ export async function readPixels(device: GPUDevice, params: {
     // 从对齐的缓冲区中提取实际数据（跳过每行的填充字节）
     const actualDataSize = unalignedBytesPerRow * height;
     const actualData = new Uint8Array(actualDataSize);
+
     for (let row = 0; row < height; row++)
     {
         const sourceOffset = row * alignedBytesPerRow;
         const destOffset = row * unalignedBytesPerRow;
+
         actualData.set(source.subarray(sourceOffset, sourceOffset + unalignedBytesPerRow), destOffset);
     }
 

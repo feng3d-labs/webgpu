@@ -19,6 +19,7 @@ export function runTransformFeedbackPass(device: GPUDevice, commandEncoder: GPUC
     transformFeedbackPass.transformFeedbackObjects.forEach((transformFeedbackObject) =>
     {
         const computeObject = convertToComputeObject(transformFeedbackObject);
+
         if (computeObject)
         {
             computePass.computeObjects.push(computeObject);
@@ -64,6 +65,7 @@ function convertToComputeObject(transformFeedbackObject: TransformFeedbackObject
 
     // 添加输入数据（从 vertices 中提取，每个属性绑定为独立的缓冲区）
     const vertices = transformFeedbackObject.vertices;
+
     if (vertices)
     {
         for (const [attrName, attrValue] of Object.entries(vertices))
@@ -87,6 +89,7 @@ function convertToComputeObject(transformFeedbackObject: TransformFeedbackObject
             {
                 const bindBuffer = transformFeedback.bindBuffers[i];
                 const varyingName = varyings[i];
+
                 // 使用 outputData_gl_Position 或 outputData_v_color 格式
                 bindingResourcesObj[`outputData_${varyingName}`] = { bufferView: bindBuffer.data };
             }
@@ -98,6 +101,7 @@ function convertToComputeObject(transformFeedbackObject: TransformFeedbackObject
         if (transformFeedback?.bindBuffers?.length > 0)
         {
             const outputData = transformFeedback.bindBuffers[0].data;
+
             bindingResourcesObj['outputData'] = { bufferView: outputData };
         }
     }

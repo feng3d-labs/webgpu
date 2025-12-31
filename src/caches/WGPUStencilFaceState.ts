@@ -4,7 +4,11 @@ import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUStencilFaceState extends ReactiveObject
 {
-    get gpuStencilFaceState() { return this._computedGpuStencilFaceState.value; }
+    get gpuStencilFaceState()
+    {
+        return this._computedGpuStencilFaceState.value;
+    }
+
     private _computedGpuStencilFaceState: Computed<GPUStencilFaceState>;
 
     constructor(stencilFaceState: StencilFaceState)
@@ -14,7 +18,10 @@ export class WGPUStencilFaceState extends ReactiveObject
         this._onCreate(stencilFaceState);
         //
         WGPUStencilFaceState.map.set(stencilFaceState, this);
-        this.destroyCall(() => { WGPUStencilFaceState.map.delete(stencilFaceState); });
+        this.destroyCall(() =>
+        {
+            WGPUStencilFaceState.map.delete(stencilFaceState);
+        });
     }
 
     private _onCreate(stencilFaceState: StencilFaceState)

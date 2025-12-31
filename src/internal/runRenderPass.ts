@@ -13,6 +13,7 @@ export function runRenderPass(device: GPUDevice, commandEncoder: GPUCommandEncod
 
     //
     const wgpuQuerySet = WGPUQuerySet.getInstance(device, renderPass);
+
     if (wgpuQuerySet.gpuQuerySet)
     {
         renderPassDescriptor.occlusionQuerySet = wgpuQuerySet.gpuQuerySet;
@@ -50,6 +51,7 @@ function flipRTTTextures(device: GPUDevice, commandEncoder: GPUCommandEncoder, d
         for (const colorAttachment of descriptor.colorAttachments)
         {
             const view = colorAttachment?.view;
+
             if (!view)
             {
                 continue;
@@ -57,6 +59,7 @@ function flipRTTTextures(device: GPUDevice, commandEncoder: GPUCommandEncoder, d
 
             // 获取纹理（可能是 Texture 或 CanvasTexture）
             const texture = view.texture;
+
             if (!texture || 'context' in texture)
             {
                 // 跳过 CanvasTexture（画布纹理不需要翻转）
@@ -65,6 +68,7 @@ function flipRTTTextures(device: GPUDevice, commandEncoder: GPUCommandEncoder, d
 
             // 获取 GPU 纹理
             const wgpuTexture = WGPUTextureLike.getInstance(device, texture);
+
             if (!wgpuTexture?.gpuTexture)
             {
                 continue;
@@ -75,6 +79,7 @@ function flipRTTTextures(device: GPUDevice, commandEncoder: GPUCommandEncoder, d
 
             // 生成唯一键，避免重复翻转同一纹理层
             const layerKey = `color_${wgpuTexture.gpuTexture.label || 'texture'}_${baseArrayLayer}`;
+
             if (flippedTextures.has(layerKey))
             {
                 continue;
@@ -88,15 +93,19 @@ function flipRTTTextures(device: GPUDevice, commandEncoder: GPUCommandEncoder, d
 
     // 翻转深度附件
     const depthView = descriptor?.depthStencilAttachment?.view;
+
     if (depthView)
     {
         const depthTextureSource = depthView.texture;
+
         if (depthTextureSource && !('context' in depthTextureSource))
         {
             const wgpuDepthTexture = WGPUTextureLike.getInstance(device, depthTextureSource);
+
             if (wgpuDepthTexture?.gpuTexture)
             {
                 const layerKey = `depth_${wgpuDepthTexture.gpuTexture.label || 'texture'}`;
+
                 if (!flippedTextures.has(layerKey))
                 {
                     flippedTextures.add(layerKey);

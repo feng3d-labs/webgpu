@@ -39,7 +39,11 @@ export class WGPUCanvasContext extends ReactiveObject
      * 可以是HTMLCanvasElement（用于DOM渲染）或OffscreenCanvas（用于离屏渲染）。
      * 当canvasId变化时，此元素会自动更新。
      */
-    get canvas() { return this._computedCanvas.value; }
+    get canvas()
+    {
+        return this._computedCanvas.value;
+    }
+
     private _computedCanvas: Computed<HTMLCanvasElement | OffscreenCanvas>;
 
     /**
@@ -48,7 +52,11 @@ export class WGPUCanvasContext extends ReactiveObject
      * 用于与GPU进行交互的画布上下文对象，提供纹理获取和渲染功能。
      * 当画布元素变化时，此上下文会自动重新创建。
      */
-    get gpuCanvasContext() { return this._computedGpuCanvasContext.value; }
+    get gpuCanvasContext()
+    {
+        return this._computedGpuCanvasContext.value;
+    }
+
     private _computedGpuCanvasContext: Computed<GPUCanvasContext>;
 
     /**
@@ -57,7 +65,11 @@ export class WGPUCanvasContext extends ReactiveObject
      * 当画布上下文配置发生变化时，版本号会自动递增。
      * 可用于检测画布上下文是否需要重新获取纹理。
      */
-    get version() { return this._computedVersion.value; }
+    get version()
+    {
+        return this._computedVersion.value;
+    }
+
     private _computedVersion: Computed<number>;
 
     /**
@@ -77,7 +89,10 @@ export class WGPUCanvasContext extends ReactiveObject
 
         //
         WGPUCanvasContext.map.set([device, context], this);
-        this.destroyCall(() => { WGPUCanvasContext.map.delete([device, context]); });
+        this.destroyCall(() =>
+        {
+            WGPUCanvasContext.map.delete([device, context]);
+        });
     }
 
     /**
@@ -158,6 +173,7 @@ export class WGPUCanvasContext extends ReactiveObject
         {
             // 触发响应式依赖，监听配置的各个属性变化
             const r_configuration = r_context.configuration;
+
             if (r_configuration)
             {
                 r_configuration.format;

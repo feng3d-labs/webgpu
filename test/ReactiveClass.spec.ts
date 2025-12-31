@@ -151,6 +151,7 @@ describe('ReactiveObject', () =>
         it('应该正确初始化派生状态', () =>
         {
             const data = testInstance.showData;
+
             assert.strictEqual(data.displayName, 'Anonymous');
             assert.strictEqual(data.isAdult, false);
             assert.strictEqual(data.status, 'inactive');
@@ -220,12 +221,14 @@ describe('ReactiveObject', () =>
         it('应该正确处理复杂的依赖关系', () =>
         {
             const r_testInstance = reactive(testInstance);
+
             // 测试多个属性同时变化
             r_testInstance.name = 'Alice';
             r_testInstance.age = 20;
             r_testInstance.active = true;
 
             const data = testInstance.showData;
+
             assert.strictEqual(data.displayName, 'Alice');
             assert.strictEqual(data.isAdult, true);
             assert.strictEqual(data.status, 'active-adult');
@@ -235,6 +238,7 @@ describe('ReactiveObject', () =>
         {
             const r_testInstance = reactive(testInstance);
             const showData = testInstance.showData;
+
             // 设置一些状态
             r_testInstance.name = 'Bob';
             r_testInstance.age = 25;
@@ -260,12 +264,14 @@ describe('ReactiveObject', () =>
         it('应该处理空函数副作用', () =>
         {
             const reactiveClass = new ReactiveObject();
+
             assert.doesNotThrow(() =>
             {
                 const eff = reactiveClass.effect(() =>
                 {
                     // 空函数
                 });
+
                 assert.ok(eff);
             });
             reactiveClass.destroy();
@@ -332,7 +338,8 @@ describe('ReactiveObject', () =>
                     console.log('test');
                 });
                 assert.fail('应该在销毁后抛出错误');
-            } catch (error)
+            }
+            catch (error)
             {
                 // 预期的错误
                 assert.ok(error);

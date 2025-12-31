@@ -74,6 +74,7 @@ export function flipDepthTexture(device: GPUDevice, commandEncoder: GPUCommandEn
 function getOrCreatePipeline(device: GPUDevice, format: GPUTextureFormat): GPURenderPipeline
 {
     let pipeline = pipelineCache.get(format);
+
     if (!pipeline)
     {
         pipeline = device.createRenderPipeline({

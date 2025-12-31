@@ -8,7 +8,10 @@ import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPURenderBundle extends ReactiveObject
 {
-    get gpuRenderBundle() { return this._computedGpuRenderBundle.value; }
+    get gpuRenderBundle()
+    {
+        return this._computedGpuRenderBundle.value;
+    }
 
     private _computedGpuRenderBundle: Computed<GPURenderBundle>;
 
@@ -19,7 +22,10 @@ export class WGPURenderBundle extends ReactiveObject
 
         //
         WGPURenderBundle.map.set([device, renderBundle, renderPassFormat, attachmentSize], this);
-        this.destroyCall(() => { WGPURenderBundle.map.delete([device, renderBundle, renderPassFormat, attachmentSize]); });
+        this.destroyCall(() =>
+        {
+            WGPURenderBundle.map.delete([device, renderBundle, renderPassFormat, attachmentSize]);
+        });
     }
 
     private _onCreate(device: GPUDevice, renderBundle: RenderBundle, renderPassFormat: RenderPassFormat, attachmentSize: { readonly width: number, readonly height: number })
@@ -32,6 +38,7 @@ export class WGPURenderBundle extends ReactiveObject
             // 执行
             r_renderPassFormat.colorFormats.concat();
             const descriptor: GPURenderBundleEncoderDescriptor = { colorFormats: renderPassFormat.colorFormats };
+
             if (r_renderPassFormat.depthStencilFormat)
             {
                 descriptor.depthStencilFormat = renderPassFormat.depthStencilFormat;

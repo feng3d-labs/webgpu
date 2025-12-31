@@ -93,6 +93,7 @@ export class WGPUPipelineLayout
     {
         // 生成着色器的唯一标识符，用于缓存查找
         const shaderKey = getShaderKey(shader);
+
         if (WGPUPipelineLayout._pipelineLayoutMap.has(shaderKey)) return WGPUPipelineLayout._pipelineLayoutMap.get(shaderKey);
 
         let entryMap: GPUBindGroupLayoutEntryMap;
@@ -186,6 +187,7 @@ export class WGPUPipelineLayout
 
         // 检查是否已存在相同的管线布局，避免重复创建
         let gpuPipelineLayout = this._pipelineLayoutDescriptorMap[pipelineLayoutKey];
+
         if (!gpuPipelineLayout)
         {
             // 创建新的管线布局描述符并缓存
@@ -237,6 +239,7 @@ export class WGPUPipelineLayout
 
         // 检查设备缓存中是否已存在对应的管线布局
         let gpuPipelineLayout = WGPUPipelineLayout.map.get([device, shaderKey]);
+
         if (gpuPipelineLayout) return gpuPipelineLayout;
 
         // 获取管线布局描述符

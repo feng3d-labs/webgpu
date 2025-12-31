@@ -5,7 +5,11 @@ import { WGPUBlendState } from './WGPUBlendState';
 
 export class WGPUColorTargetState extends ReactiveObject
 {
-    get gpuColorTargetState() { return this._computedGpuColorTargetState.value; }
+    get gpuColorTargetState()
+    {
+        return this._computedGpuColorTargetState.value;
+    }
+
     private _computedGpuColorTargetState: Computed<GPUColorTargetState>;
 
     constructor(colorTargetState: ColorTargetState, format: GPUTextureFormat)
@@ -15,7 +19,10 @@ export class WGPUColorTargetState extends ReactiveObject
         this._onCreate(colorTargetState, format);
         //
         WGPUColorTargetState.map.set([colorTargetState, format], this);
-        this.destroyCall(() => { WGPUColorTargetState.map.delete([colorTargetState, format]); });
+        this.destroyCall(() =>
+        {
+            WGPUColorTargetState.map.delete([colorTargetState, format]);
+        });
     }
 
     private _onCreate(colorTargetState: ColorTargetState, format: GPUTextureFormat)
@@ -32,6 +39,7 @@ export class WGPUColorTargetState extends ReactiveObject
                 if (r_colorTargetState.blend)
                 {
                     const wgpuBlendState = WGPUBlendState.getInstance(colorTargetState.blend);
+
                     gpuColorTargetState.blend = wgpuBlendState.gpuBlendState;
                 }
 

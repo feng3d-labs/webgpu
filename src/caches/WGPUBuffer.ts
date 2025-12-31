@@ -9,7 +9,10 @@ import { ReactiveObject } from '../ReactiveObject';
  */
 export class WGPUBuffer extends ReactiveObject
 {
-    get gpuBuffer() { return this._computed.value; }
+    get gpuBuffer()
+    {
+        return this._computed.value;
+    }
 
     private _computed: Computed<GPUBuffer>;
 
@@ -26,7 +29,10 @@ export class WGPUBuffer extends ReactiveObject
 
         //
         WGPUBuffer.map.set([device, buffer], this);
-        this.destroyCall(() => { WGPUBuffer.map.delete([device, buffer]); });
+        this.destroyCall(() =>
+        {
+            WGPUBuffer.map.delete([device, buffer]);
+        });
     }
 
     /**
@@ -89,6 +95,7 @@ export class WGPUBuffer extends ReactiveObject
             const data = buffer.data;
 
             const writeBuffers = buffer.writeBuffers || [];
+
             writeBuffers.push({
                 data: new Uint8Array(data),
             });
@@ -99,7 +106,8 @@ export class WGPUBuffer extends ReactiveObject
         this.effect(() =>
         {
             // 触发响应式依赖，监听writeBuffers数组变化
-            r_buffer.writeBuffers?.forEach(() => { });
+            r_buffer.writeBuffers?.forEach(() =>
+            { });
 
             if (!gpuBuffer) return;
 

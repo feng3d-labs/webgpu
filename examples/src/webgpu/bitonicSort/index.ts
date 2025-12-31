@@ -110,6 +110,7 @@ async function init(
         reactive(querySet).result;
 
         const result = querySet.result;
+
         if (result === undefined) return;
 
         // Calculate new step, sort, and average sort times

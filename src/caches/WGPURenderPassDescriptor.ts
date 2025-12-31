@@ -9,10 +9,18 @@ import { WGPUTimestampQuery } from './WGPUTimestampQuery';
 
 export class WGPURenderPassDescriptor extends ReactiveObject
 {
-    get gpuRenderPassDescriptor() { return this._computedGpuRenderPassDescriptor.value; }
+    get gpuRenderPassDescriptor()
+    {
+        return this._computedGpuRenderPassDescriptor.value;
+    }
+
     private _computedGpuRenderPassDescriptor: Computed<GPURenderPassDescriptor>;
 
-    get renderPassFormat() { return this._computedRenderPassFormat.value; }
+    get renderPassFormat()
+    {
+        return this._computedRenderPassFormat.value;
+    }
+
     private _computedRenderPassFormat: Computed<RenderPassFormat>;
 
     constructor(device: GPUDevice, descriptor: RenderPassDescriptor, canvasContext?: CanvasContext)
@@ -22,7 +30,10 @@ export class WGPURenderPassDescriptor extends ReactiveObject
         this._onCreate(device, descriptor, canvasContext)
         //
         WGPURenderPassDescriptor.map.set([device, descriptor, canvasContext], this);
-        this.destroyCall(() => { WGPURenderPassDescriptor.map.delete([device, descriptor, canvasContext]); });
+        this.destroyCall(() =>
+        {
+            WGPURenderPassDescriptor.map.delete([device, descriptor, canvasContext]);
+        });
     }
 
     private _onCreate(device: GPUDevice, descriptor: RenderPassDescriptor, canvasContext?: CanvasContext)
@@ -35,10 +46,12 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             for (const colorAttachment of descriptor.colorAttachments)
             {
                 const view = colorAttachment.view || (canvasContext && descriptor.colorAttachments[0] === colorAttachment ? { texture: { context: canvasContext } } : undefined);
+
                 if (view?.texture)
                 {
                     const gpuTextureLike = WGPUTextureLike.getInstance(device, view.texture);
                     const gpuTexture = gpuTextureLike.gpuTexture;
+
                     r_descriptor.attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
                     break;
                 }
@@ -47,6 +60,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             {
                 const gpuTextureLike = WGPUTextureLike.getInstance(device, descriptor.depthStencilAttachment.view.texture);
                 const gpuTexture = gpuTextureLike.gpuTexture;
+
                 r_descriptor.attachmentSize = { width: gpuTexture.width, height: gpuTexture.height };
             }
         }
@@ -83,11 +97,13 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             if (descriptor.timestampQuery)
             {
                 const wGPUTimestampQuery = WGPUTimestampQuery.getInstance(device, descriptor.timestampQuery);
+
                 gpuRenderPassDescriptor.timestampWrites = wGPUTimestampQuery?.gpuPassTimestampWrites;
             }
 
             //
             const wGPURenderPassDepthStencilAttachment = WGPURenderPassDepthStencilAttachment.getInstance(device, descriptor);
+
             if (wGPURenderPassDepthStencilAttachment.gpuRenderPassDepthStencilAttachment)
             {
                 gpuRenderPassDescriptor.depthStencilAttachment = wGPURenderPassDepthStencilAttachment.gpuRenderPassDepthStencilAttachment;
@@ -113,6 +129,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
                 r_attachment.view;
                 // 如果第一个颜色附件的view缺省，使用canvasContext
                 const view = attachment.view || (index === 0 && canvasContext ? { texture: { context: canvasContext } } : undefined);
+
                 if (!view?.texture) return undefined;
 
                 const texture = view.texture;
@@ -133,9 +150,11 @@ export class WGPURenderPassDescriptor extends ReactiveObject
 
             r_descriptor.colorAttachments?.concat();
             const colorAttachments = descriptor.colorAttachments;
+
             for (let i = 0; i < colorAttachments.length; i++)
             {
                 const format = getAttachmentFormat(colorAttachments[i], i);
+
                 if (format) colorFormats.push(format);
             }
 
@@ -145,6 +164,7 @@ export class WGPURenderPassDescriptor extends ReactiveObject
             let renderPassFormat: RenderPassFormat
 
             const renderPassFormatKey = [...colorFormats, depthStencilFormat, sampleCount].join(',');
+
             if (renderPassFormatCache[renderPassFormatKey])
             {
                 renderPassFormat = renderPassFormatCache[renderPassFormatKey];

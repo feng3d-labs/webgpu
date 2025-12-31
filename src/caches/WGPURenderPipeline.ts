@@ -29,7 +29,11 @@ export class WGPURenderPipeline extends ReactiveObject
      * 对应的WebGPU渲染管线对象
      * 只读属性，当相关参数发生变化时会自动重新创建
      */
-    get gpuRenderPipeline() { return this._computedGpuRenderPipeline.value; }
+    get gpuRenderPipeline()
+    {
+        return this._computedGpuRenderPipeline.value;
+    }
+
     private _computedGpuRenderPipeline: Computed<GPURenderPipeline>;
 
     /**
@@ -46,7 +50,10 @@ export class WGPURenderPipeline extends ReactiveObject
         this._onCreate(device, renderPipeline, renderPassFormat, vertices, indexFormat);
 
         WGPURenderPipeline.map.set([device, renderPipeline, renderPassFormat, vertices, indexFormat], this);
-        this.destroyCall(() => { WGPURenderPipeline.map.delete([device, renderPipeline, renderPassFormat, vertices, indexFormat]); });
+        this.destroyCall(() =>
+        {
+            WGPURenderPipeline.map.delete([device, renderPipeline, renderPassFormat, vertices, indexFormat]);
+        });
     }
 
     /**
@@ -94,6 +101,7 @@ export class WGPURenderPipeline extends ReactiveObject
             if (r_renderPipeline.fragment)
             {
                 const wgpuFragmentState = WGPUFragmentState.getInstance(device, renderPipeline.fragment, colorFormats);
+
                 gpuRenderPipelineDescriptor.fragment = wgpuFragmentState.gpuFragmentState;
             }
 
@@ -101,6 +109,7 @@ export class WGPURenderPipeline extends ReactiveObject
             {
                 // 创建图元状态
                 const wgpuPrimitiveState = WGPUPrimitiveState.getInstance(renderPipeline.primitive, indexFormat);
+
                 gpuRenderPipelineDescriptor.primitive = wgpuPrimitiveState.gpuPrimitiveState;
             }
 
@@ -108,6 +117,7 @@ export class WGPURenderPipeline extends ReactiveObject
             {
                 // 创建深度模板状态
                 const wgpuDepthStencilState = WGPUDepthStencilState.getInstance(renderPipeline.depthStencil, depthStencilFormat);
+
                 gpuRenderPipelineDescriptor.depthStencil = wgpuDepthStencilState?.gpuDepthStencilState;
             }
 
@@ -115,6 +125,7 @@ export class WGPURenderPipeline extends ReactiveObject
             if (r_renderPipeline.multisample || sampleCount)
             {
                 const wgpuMultisampleState = WGPUMultisampleState.getInstance(renderPipeline.multisample);
+
                 gpuRenderPipelineDescriptor.multisample = wgpuMultisampleState.gpuMultisampleState;
             }
 

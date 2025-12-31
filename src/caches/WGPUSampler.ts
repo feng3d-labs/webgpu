@@ -4,7 +4,11 @@ import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUSampler extends ReactiveObject
 {
-    get gpuSampler() { return this._computedGpuSampler.value; }
+    get gpuSampler()
+    {
+        return this._computedGpuSampler.value;
+    }
+
     private _computedGpuSampler: Computed<GPUSampler>;
 
     constructor(device: GPUDevice, sampler: Sampler)
@@ -15,7 +19,10 @@ export class WGPUSampler extends ReactiveObject
 
         //
         WGPUSampler.map.set([device, sampler], this);
-        this.destroyCall(() => { WGPUSampler.map.delete([device, sampler]); });
+        this.destroyCall(() =>
+        {
+            WGPUSampler.map.delete([device, sampler]);
+        });
     }
 
     private _onCreate(device: GPUDevice, sampler: Sampler)
@@ -34,6 +41,7 @@ export class WGPUSampler extends ReactiveObject
             const minFilter = r_sampler.minFilter ?? defaultSampler.minFilter;
             const mipmapFilter = r_sampler.mipmapFilter ?? defaultSampler.mipmapFilter;
             let lodMinClamp = r_sampler.lodMinClamp ?? defaultSampler.lodMinClamp;
+
             // WebGPU 不允许负数的 LOD clamp 值
             if (lodMinClamp < 0)
             {

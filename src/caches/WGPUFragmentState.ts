@@ -7,7 +7,11 @@ import { WGPUShaderReflect } from './WGPUShaderReflect';
 
 export class WGPUFragmentState extends ReactiveObject
 {
-    get gpuFragmentState() { return this._computedGpuFragmentState.value; }
+    get gpuFragmentState()
+    {
+        return this._computedGpuFragmentState.value;
+    }
+
     private _computedGpuFragmentState: Computed<GPUFragmentState>;
 
     constructor(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
@@ -17,7 +21,10 @@ export class WGPUFragmentState extends ReactiveObject
         this._onCreate(device, fragmentState, colorAttachments);
         //
         WGPUFragmentState.map.set([device, fragmentState, colorAttachments], this);
-        this.destroyCall(() => { WGPUFragmentState.map.delete([device, fragmentState, colorAttachments]); });
+        this.destroyCall(() =>
+        {
+            WGPUFragmentState.map.delete([device, fragmentState, colorAttachments]);
+        });
     }
 
     private _onCreate(device: GPUDevice, fragmentState: FragmentState, colorAttachments: readonly GPUTextureFormat[])
@@ -36,9 +43,11 @@ export class WGPUFragmentState extends ReactiveObject
 
             //
             let entryPoint = r_fragmentState.entryPoint;
+
             if (!entryPoint)
             {
                 const reflect = WGPUShaderReflect.getWGSLReflectInfo(code);
+
                 entryPoint = reflect.entry.fragment[0].name;
             }
 
@@ -51,6 +60,7 @@ export class WGPUFragmentState extends ReactiveObject
                 for (let i = 0; i < colorAttachments.length; i++)
                 {
                     const format = colorAttachments[i];
+
                     if (!format)
                     {
                         gpuColorTargetStates.push(undefined)
@@ -58,6 +68,7 @@ export class WGPUFragmentState extends ReactiveObject
                     }
 
                     const wgpuColorTargetState = WGPUColorTargetState.getInstance(targets[i], format);
+
                     gpuColorTargetStates.push(wgpuColorTargetState.gpuColorTargetState);
                 }
             }

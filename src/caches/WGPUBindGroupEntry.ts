@@ -56,7 +56,11 @@ function adjustSamplerForTexture(texture: Texture | undefined, sampler: Sampler)
 
 export class WGPUBindGroupEntry extends ReactiveObject
 {
-    get gpuBindGroupEntry() { return this._computedGpuBindGroupEntry.value; }
+    get gpuBindGroupEntry()
+    {
+        return this._computedGpuBindGroupEntry.value;
+    }
+
     private _computedGpuBindGroupEntry: Computed<GPUBindGroupEntry>;
 
     constructor(device: GPUDevice, bindGroupLayout: GPUBindGroupLayoutEntry, bindingResources: BindingResources)
@@ -66,7 +70,10 @@ export class WGPUBindGroupEntry extends ReactiveObject
         this._onCreate(device, bindGroupLayout, bindingResources);
         //
         WGPUBindGroupEntry.map.set([device, bindGroupLayout, bindingResources], this);
-        this.destroyCall(() => { WGPUBindGroupEntry.map.delete([device, bindGroupLayout, bindingResources]); });
+        this.destroyCall(() =>
+        {
+            WGPUBindGroupEntry.map.delete([device, bindGroupLayout, bindingResources]);
+        });
     }
 
     private _onCreate(device: GPUDevice, v: GPUBindGroupLayoutEntry, bindingResources: BindingResources)
@@ -85,6 +92,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
             if (name.endsWith('_texture'))
             {
                 const baseName = name.replace(/_texture$/, ''); // 移除 '_texture' 后缀
+
                 r_bindingResources[baseName];
             }
 
@@ -96,6 +104,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
             {
                 // 优先使用变量名查找，如果找不到则尝试使用结构体名
                 let bufferBinding = bindingResources[name] as BufferBinding;
+
                 if (!bufferBinding)
                 {
                     // 监听结构体名
@@ -109,11 +118,13 @@ export class WGPUBindGroupEntry extends ReactiveObject
 
                 //
                 const wgpuBufferBinding = WGPUBufferBinding.getInstance(device, bufferBinding, type);
+
                 entry.resource = wgpuBufferBinding.gpuBufferBinding;
             }
             else if (ExternalSampledTextureType[type.name]) // 判断是否为外部纹理
             {
                 const wgpuExternalTexture = WGPUExternalTexture.getInstance(device, bindingResources[name] as VideoTexture);
+
                 entry.resource = wgpuExternalTexture.gpuExternalTexture;
             }
             else if (resourceType === ResourceType.Texture || resourceType === ResourceType.StorageTexture)
@@ -131,6 +142,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
                     {
                         const baseName = name.replace(/_texture$/, ''); // 移除 '_texture' 后缀
                         const value = bindingResources[baseName];
+
                         if (isTextureSamplerObject(value))
                         {
                             textureView = { texture: value.texture } as TextureView;
@@ -141,6 +153,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
                 {
                     // 检查是否是 texture+sampler 对象（如 { uSampler: { texture, sampler } }）
                     const value = bindingResources[name];
+
                     if (isTextureSamplerObject(value))
                     {
                         textureView = { texture: value.texture } as TextureView;
@@ -157,6 +170,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
                 }
 
                 const wgpuTextureView = WGPUTextureView.getInstance(device, textureView);
+
                 entry.resource = wgpuTextureView.textureView;
             }
             else
@@ -165,6 +179,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
                 let sampler: Sampler;
                 let texture: Texture | undefined;
                 const value = bindingResources[name];
+
                 if (!value)
                 {
                     throw new Error(`没有找到采样器绑定 '${name}'`);
@@ -182,6 +197,7 @@ export class WGPUBindGroupEntry extends ReactiveObject
                     // 尝试从展开格式获取对应的纹理（如 diffuse -> diffuse_texture）
                     const textureKey = `${name}_texture`;
                     const textureValue = bindingResources[textureKey];
+
                     if (textureValue && typeof textureValue === 'object' && 'texture' in textureValue)
                     {
                         texture = (textureValue as TextureView).texture as Texture;
@@ -192,13 +208,17 @@ export class WGPUBindGroupEntry extends ReactiveObject
                 const adjustedSampler = adjustSamplerForTexture(texture, sampler);
 
                 const wgpuSampler = WGPUSampler.getInstance(device, adjustedSampler);
+
                 entry.resource = wgpuSampler.gpuSampler;
             }
 
             return entry;
         });
 
-        this.destroyCall(() => { this._computedGpuBindGroupEntry = null; });
+        this.destroyCall(() =>
+        {
+            this._computedGpuBindGroupEntry = null;
+        });
     }
 
     static getInstance(device: GPUDevice, bindGroupLayout: GPUBindGroupLayoutEntry, bindingResources: BindingResources)

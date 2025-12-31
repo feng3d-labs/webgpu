@@ -4,7 +4,11 @@ import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUPrimitiveState extends ReactiveObject
 {
-    get gpuPrimitiveState() { return this._computedGpuPrimitiveState.value; }
+    get gpuPrimitiveState()
+    {
+        return this._computedGpuPrimitiveState.value;
+    }
+
     private _computedGpuPrimitiveState: Computed<GPUPrimitiveState>;
 
     constructor(primitive: PrimitiveState, indexFormat: GPUIndexFormat)
@@ -14,7 +18,10 @@ export class WGPUPrimitiveState extends ReactiveObject
         this._onCreate(primitive, indexFormat);
         //
         WGPUPrimitiveState.map.set([primitive, indexFormat], this);
-        this.destroyCall(() => { WGPUPrimitiveState.map.delete([primitive, indexFormat]); });
+        this.destroyCall(() =>
+        {
+            WGPUPrimitiveState.map.delete([primitive, indexFormat]);
+        });
     }
 
     private _onCreate(primitive: PrimitiveState, indexFormat: GPUIndexFormat)

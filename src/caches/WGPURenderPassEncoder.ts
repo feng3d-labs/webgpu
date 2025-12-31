@@ -40,6 +40,7 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
     setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined
     {
         const currentViewport = this._setViewport;
+
         if (currentViewport && x === currentViewport[0] && y === currentViewport[1] && width === currentViewport[2] && height === currentViewport[3] && minDepth === currentViewport[4] && maxDepth === currentViewport[5]) return;
 
         this._commands.push(['setViewport', [x, y, width, height, minDepth, maxDepth]]);
@@ -49,6 +50,7 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
     setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined
     {
         const currentScissorRect = this._setScissorRect;
+
         if (currentScissorRect && x === currentScissorRect[0] && y === currentScissorRect[1] && width === currentScissorRect[2] && height === currentScissorRect[3]) return;
 
         this._commands.push(['setScissorRect', [x, y, width, height]]);
@@ -59,6 +61,7 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
     {
         if (blendConstant === undefined) return;
         const currentBlendConstant = this._setBlendConstant;
+
         if (blendConstant === currentBlendConstant || (blendConstant && currentBlendConstant && blendConstant[0] === currentBlendConstant[0] && blendConstant[1] === currentBlendConstant[1] && blendConstant[2] === currentBlendConstant[2] && blendConstant[3] === currentBlendConstant[3])) return;
 
         this._commands.push(['setBlendConstant', [blendConstant]]);
@@ -97,6 +100,7 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
     setVertexBuffer(i: GPUIndex32, buffer: GPUBuffer | null | undefined, offset?: GPUSize64, size?: GPUSize64): undefined
     {
         const currentVertexBuffer = this._setVertexBuffer[i];
+
         if (!currentVertexBuffer || currentVertexBuffer[0] !== buffer || currentVertexBuffer[1] !== offset || currentVertexBuffer[2] !== size)
         {
             this._commands.push(['setVertexBuffer', [i, buffer, offset, size]]);
@@ -143,6 +147,7 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
     runCommands(renderBundleEncoder: GPURenderBundleEncoder | GPURenderPassEncoder)
     {
         const commands = this._commands;
+
         for (let i = 0, n = commands.length; i < n; i++)
         {
             const [func, args] = commands[i];
@@ -154,27 +159,57 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
     //
     __brand: 'GPURenderPassEncoder';
     label: string;
-    end(): undefined { throw new Error('Method not implemented.'); }
-    pushDebugGroup(groupLabel: string): undefined { throw new Error('Method not implemented.'); }
-    popDebugGroup(): undefined { throw new Error('Method not implemented.'); }
-    insertDebugMarker(markerLabel: string): undefined { throw new Error('Method not implemented.'); }
-    drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined { throw new Error('Method not implemented.'); }
-    drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined { throw new Error('Method not implemented.'); }
+    end(): undefined
+    {
+        throw new Error('Method not implemented.');
+    }
+
+    pushDebugGroup(groupLabel: string): undefined
+    {
+        throw new Error('Method not implemented.');
+    }
+
+    popDebugGroup(): undefined
+    {
+        throw new Error('Method not implemented.');
+    }
+
+    insertDebugMarker(markerLabel: string): undefined
+    {
+        throw new Error('Method not implemented.');
+    }
+
+    drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
+    {
+        throw new Error('Method not implemented.');
+    }
+
+    drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
+    {
+        throw new Error('Method not implemented.');
+    }
 }
 
 export class WGPURenderBundleEncoder extends WGPURenderPassEncoder
 {
-    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined { }
+    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined
+    { }
 
-    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined { }
+    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined
+    { }
 
-    setBlendConstant(blendConstant: Color | undefined): undefined { }
+    setBlendConstant(blendConstant: Color | undefined): undefined
+    { }
 
-    setStencilReference(stencilReference: number | undefined): undefined { }
+    setStencilReference(stencilReference: number | undefined): undefined
+    { }
 
-    executeBundles(bundles: GPURenderBundle[]): undefined { }
+    executeBundles(bundles: GPURenderBundle[]): undefined
+    { }
 
-    beginOcclusionQuery(): undefined { }
+    beginOcclusionQuery(): undefined
+    { }
 
-    endOcclusionQuery(): undefined { }
+    endOcclusionQuery(): undefined
+    { }
 }

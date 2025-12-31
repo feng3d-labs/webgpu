@@ -8,7 +8,11 @@ import { BindGroupLayoutDescriptor } from './WGPUPipelineLayout';
 
 export class WGPUBindGroup extends ReactiveObject
 {
-    get gpuBindGroup() { return this._computedGpuBindGroup.value; }
+    get gpuBindGroup()
+    {
+        return this._computedGpuBindGroup.value;
+    }
+
     private _computedGpuBindGroup: Computed<GPUBindGroup>;
 
     constructor(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)
@@ -18,7 +22,10 @@ export class WGPUBindGroup extends ReactiveObject
         this._onCreate(device, bindGroupLayout, bindingResources);
         //
         WGPUBindGroup.map.set([device, bindGroupLayout, bindingResources], this);
-        this.destroyCall(() => { WGPUBindGroup.map.delete([device, bindGroupLayout, bindingResources]); });
+        this.destroyCall(() =>
+        {
+            WGPUBindGroup.map.delete([device, bindGroupLayout, bindingResources]);
+        });
     }
 
     private _onCreate(device: GPUDevice, bindGroupLayout: BindGroupLayoutDescriptor, bindingResources: BindingResources)

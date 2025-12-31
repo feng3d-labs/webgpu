@@ -84,6 +84,7 @@ function buildDirTree(filteredTests: TestInfo[]): DirNode
     filteredTests.forEach((test) =>
     {
         const dirPath = test.dirPath || '.';
+
         if (dirPath === '.')
         {
             root.tests.push(test);
@@ -147,12 +148,14 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
 
         // 目录标题
         const dirHeader = document.createElement('div');
+
         dirHeader.className = 'test-dir-header';
         dirHeader.style.cursor = 'pointer';
         dirHeader.style.paddingLeft = `${8 + child.level * 16}px`; // 根据层级缩进
         dirHeader.onclick = () => toggleDir(child.fullPath);
 
         const icon = document.createElement('span');
+
         icon.className = 'dir-icon';
         icon.textContent = isExpanded ? '▼' : '▶';
         icon.style.marginRight = '6px';
@@ -161,6 +164,7 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
         icon.style.fontSize = '9px';
 
         const dirName = document.createElement('span');
+
         dirName.textContent = child.name;
 
         dirHeader.appendChild(icon);
@@ -176,6 +180,7 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
             {
                 const testIndex = tests.indexOf(test);
                 const testItem = document.createElement('div');
+
                 testItem.className = 'test-item';
                 testItem.style.marginLeft = `${8 + (child.level + 1) * 16}px`; // 测试项缩进
 
@@ -207,6 +212,7 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
         {
             const testIndex = tests.indexOf(test);
             const testItem = document.createElement('div');
+
             testItem.className = 'test-item';
 
             const statusClass = test.status;
@@ -231,6 +237,7 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
 function renderTestList()
 {
     const testList = document.getElementById('test-list');
+
     if (!testList) return;
 
     testList.innerHTML = '';
@@ -253,6 +260,7 @@ function renderTestList()
 export function openTest(index: number)
 {
     const test = tests[index];
+
     if (test)
     {
         window.open(test.htmlFile, '_blank');
@@ -263,12 +271,14 @@ export function openTest(index: number)
 function runTest(index: number)
 {
     const test = tests[index];
+
     if (!test) return;
 
     // 创建 iframe 来运行测试
     // 注意：WebGPU 需要可见的 canvas 才能正常工作
     // 将 iframe 放在一个很小的可见区域（右下角 1x1 像素），确保 canvas 完全可见
     const iframe = document.createElement('iframe');
+
     iframe.style.position = 'fixed';
     iframe.style.right = '0';
     iframe.style.bottom = '0';
@@ -331,7 +341,8 @@ function runTest(index: number)
                     iframe.parentNode.removeChild(iframe);
                 }
             }
-        } catch (e)
+        }
+        catch (e)
         {
             // 跨域错误，无法访问 iframe.contentWindow.location
             // 忽略此错误，依靠 onerror 或超时处理
@@ -401,6 +412,7 @@ document.addEventListener('DOMContentLoaded', () =>
     // 构建目录树以收集所有目录路径
     const dirTree = buildDirTree(tests);
     const allDirPaths = new Set<string>();
+
     collectAllDirPaths(dirTree, allDirPaths);
 
     // 默认展开所有目录
@@ -411,6 +423,7 @@ document.addEventListener('DOMContentLoaded', () =>
 
     // 绑定筛选复选框事件
     const filterCheckbox = document.getElementById('filter-failures') as HTMLInputElement;
+
     if (filterCheckbox)
     {
         filterCheckbox.addEventListener('change', (e) =>

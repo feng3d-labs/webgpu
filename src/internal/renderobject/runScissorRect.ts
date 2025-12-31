@@ -8,6 +8,7 @@ export function runScissorRect(renderObject: RenderObject, passEncoder: WGPURend
 
     const r_renderObject = reactive(renderObject);
     const scissorRect = r_renderObject.scissorRect;
+
     if (scissorRect)
     {
         const isYup = scissorRect.isYup ?? true;

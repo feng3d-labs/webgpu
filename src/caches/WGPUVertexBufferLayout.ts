@@ -39,7 +39,10 @@ export class WGPUVertexBufferLayout extends ReactiveObject
      * 包含所有顶点缓冲区的布局配置信息，用于GPU渲染管线。
      * 当顶点状态或顶点属性发生变化时，此数组会自动重新创建。
      */
-    get vertexBufferLayouts() { return this._computedGpuVertexBufferLayouts.value.vertexBufferLayouts; }
+    get vertexBufferLayouts()
+    {
+        return this._computedGpuVertexBufferLayouts.value.vertexBufferLayouts;
+    }
 
     /**
      * 顶点数据数组
@@ -47,7 +50,10 @@ export class WGPUVertexBufferLayout extends ReactiveObject
      * 包含所有顶点数据，与vertexBufferLayouts 中的布局一一对应。
      * 当顶点状态或顶点属性发生变化时，此数组会自动重新创建。
      */
-    get vertexDatas() { return this._computedGpuVertexBufferLayouts.value.vertexDatas; }
+    get vertexDatas()
+    {
+        return this._computedGpuVertexBufferLayouts.value.vertexDatas;
+    }
 
     private _computedGpuVertexBufferLayouts: Computed<{ vertexBufferLayouts: GPUVertexBufferLayout[], vertexDatas: VertexData[] }>;
 
@@ -68,7 +74,10 @@ export class WGPUVertexBufferLayout extends ReactiveObject
 
         //
         WGPUVertexBufferLayout.map.set([vertexState, vertices], this);
-        this.destroyCall(() => { WGPUVertexBufferLayout.map.delete([vertexState, vertices]); });
+        this.destroyCall(() =>
+        {
+            WGPUVertexBufferLayout.map.delete([vertexState, vertices]);
+        });
     }
 
     /**
@@ -122,10 +131,12 @@ export class WGPUVertexBufferLayout extends ReactiveObject
 
                 // 获取对应的顶点属性配置
                 const vertexAttribute = vertices[attributeName];
+
                 console.assert(!!vertexAttribute, `在提供的顶点属性数据中未找到 ${attributeName} 。`);
 
                 // 监听每个顶点属性数据的变化
                 const r_vertexAttribute = reactive(vertexAttribute);
+
                 r_vertexAttribute.data;
                 r_vertexAttribute.format;
                 r_vertexAttribute.offset;
@@ -185,6 +196,7 @@ export class WGPUVertexBufferLayout extends ReactiveObject
                 }
                 // 添加顶点属性到布局中
                 const attributes = gpuVertexBufferLayout.attributes as Array<GPUVertexAttribute>;
+
                 attributes.push({ shaderLocation, offset: attributeOffset, format });
             });
 

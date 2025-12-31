@@ -39,6 +39,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         reactive(timestampQuery).result;
 
         const result = timestampQuery.result;
+
         if (result === undefined) return;
 
         // Show the last successfully downloaded elapsed time.

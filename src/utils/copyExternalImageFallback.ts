@@ -102,6 +102,7 @@ function extractPixelDataFromImage(image: TexImageSource, flipY?: boolean): Uint
 
     // 创建离屏画布
     const canvas = document.createElement('canvas');
+
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d')!;
@@ -145,6 +146,7 @@ function convertPixelData(
         // Float32 格式
         case 'rgba32float': {
             const result = new Float32Array(pixelCount * 4);
+
             for (let i = 0; i < pixelCount; i++)
             {
                 result[i * 4 + 0] = rgba8Data[i * 4 + 0] / 255;
@@ -157,6 +159,7 @@ function convertPixelData(
         }
         case 'rg32float': {
             const result = new Float32Array(pixelCount * 2);
+
             for (let i = 0; i < pixelCount; i++)
             {
                 result[i * 2 + 0] = rgba8Data[i * 4 + 0] / 255;
@@ -167,6 +170,7 @@ function convertPixelData(
         }
         case 'r32float': {
             const result = new Float32Array(pixelCount);
+
             for (let i = 0; i < pixelCount; i++)
             {
                 result[i] = rgba8Data[i * 4 + 0] / 255;
@@ -178,6 +182,7 @@ function convertPixelData(
         // Float16 格式 (使用 Uint16Array 存储 half-float)
         case 'rg16float': {
             const result = new Uint16Array(pixelCount * 2);
+
             for (let i = 0; i < pixelCount; i++)
             {
                 result[i * 2 + 0] = float32ToFloat16(rgba8Data[i * 4 + 0] / 255);
@@ -188,6 +193,7 @@ function convertPixelData(
         }
         case 'r16float': {
             const result = new Uint16Array(pixelCount);
+
             for (let i = 0; i < pixelCount; i++)
             {
                 result[i] = float32ToFloat16(rgba8Data[i * 4 + 0] / 255);
@@ -203,6 +209,7 @@ function convertPixelData(
         }
         case 'rgba8sint': {
             const result = new Int8Array(pixelCount * 4);
+
             for (let i = 0; i < rgba8Data.length; i++)
             {
                 // 将 0-255 映射到 -128 到 127
@@ -213,6 +220,7 @@ function convertPixelData(
         }
         case 'rg8uint': {
             const result = new Uint8Array(pixelCount * 2);
+
             for (let i = 0; i < pixelCount; i++)
             {
                 result[i * 2 + 0] = rgba8Data[i * 4 + 0];
@@ -223,6 +231,7 @@ function convertPixelData(
         }
         case 'r8uint': {
             const result = new Uint8Array(pixelCount);
+
             for (let i = 0; i < pixelCount; i++)
             {
                 result[i] = rgba8Data[i * 4 + 0];
@@ -234,6 +243,7 @@ function convertPixelData(
         // 16位整数格式
         case 'rgba16uint': {
             const result = new Uint16Array(pixelCount * 4);
+
             for (let i = 0; i < pixelCount; i++)
             {
                 // 将 0-255 映射到 0-65535
@@ -249,6 +259,7 @@ function convertPixelData(
         // 32位整数格式
         case 'rgba32uint': {
             const result = new Uint32Array(pixelCount * 4);
+
             for (let i = 0; i < pixelCount; i++)
             {
                 result[i * 4 + 0] = rgba8Data[i * 4 + 0];

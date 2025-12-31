@@ -38,7 +38,11 @@ export class WGPUTimestampQuery extends ReactiveObject
      * 这是实际的GPU时间戳查询集实例，用于在渲染通道中记录时间戳。
      * 当时间戳查询配置发生变化时，此对象会自动重新创建。
      */
-    get gpuPassTimestampWrites() { return this._computedGpuPassTimestampWrites.value; }
+    get gpuPassTimestampWrites()
+    {
+        return this._computedGpuPassTimestampWrites.value;
+    }
+
     private _computedGpuPassTimestampWrites: Computed<GPURenderPassTimestampWrites | GPUComputePassTimestampWrites>;
 
     /**
@@ -58,7 +62,10 @@ export class WGPUTimestampQuery extends ReactiveObject
 
         //
         WGPUTimestampQuery.map.set([device, timestampQuery], this);
-        this.destroyCall(() => { WGPUTimestampQuery.map.delete([device, timestampQuery]); });
+        this.destroyCall(() =>
+        {
+            WGPUTimestampQuery.map.delete([device, timestampQuery]);
+        });
     }
 
     /**

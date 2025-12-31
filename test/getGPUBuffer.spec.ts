@@ -65,6 +65,7 @@ describe('getGPUBuffer', () =>
 function getGPUBuffer(buffer: Buffer)
 {
     let result = buffers.get([buffer]);
+
     if (result) return result.value;
 
     const r_buffer = reactive(buffer);
@@ -119,7 +120,8 @@ function onWriteBuffers(gpuBuffer: Float32Array, buffer: Buffer)
     computed(() =>
     {
         // 触发响应式依赖，监听writeBuffers数组变化
-        r_buffer.writeBuffers?.forEach(() => { });
+        r_buffer.writeBuffers?.forEach(() =>
+        { });
 
         // 如果GPU缓冲区不存在或没有写入数据，则跳过
         if (!buffer.writeBuffers) return;

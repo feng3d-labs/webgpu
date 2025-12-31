@@ -40,7 +40,11 @@ export class WGPUVertexState extends ReactiveObject
      * 这是实际的GPU顶点状态实例，用于定义顶点着色器的执行配置。
      * 当顶点状态配置发生变化时，此对象会自动重新创建。
      */
-    get gpuVertexState() { return this._computedGpuVertexState.value; }
+    get gpuVertexState()
+    {
+        return this._computedGpuVertexState.value;
+    }
+
     private _computedGpuVertexState: Computed<GPUVertexState>;
 
     /**
@@ -61,7 +65,10 @@ export class WGPUVertexState extends ReactiveObject
 
         //
         WGPUVertexState.map.set([device, vertexState, vertices], this);
-        this.destroyCall(() => { WGPUVertexState.map.delete([device, vertexState, vertices]); });
+        this.destroyCall(() =>
+        {
+            WGPUVertexState.map.delete([device, vertexState, vertices]);
+        });
     }
 
     /**
@@ -110,6 +117,7 @@ export class WGPUVertexState extends ReactiveObject
             {
                 // 获取顶点缓冲区布局配置
                 const wgpuVertexBufferLayout = WGPUVertexBufferLayout.getInstance(vertexState, vertices);
+
                 gpuVertexState.buffers = wgpuVertexBufferLayout.vertexBufferLayouts;
             }
 

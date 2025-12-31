@@ -107,6 +107,7 @@ export class WGPUShaderReflect
                 {
                     const lineNumber = (i + 1).toString().padStart(4, ' ');
                     const marker = (i + 1 === errorLine) ? '>>>' : '   ';
+
                     errorOutput.push(`${marker} ${lineNumber} | ${lines[i]}`);
                 }
             }
@@ -116,6 +117,7 @@ export class WGPUShaderReflect
                 lines.forEach((line, i) =>
                 {
                     const lineNumber = (i + 1).toString().padStart(4, ' ');
+
                     errorOutput.push(`    ${lineNumber} | ${line}`);
                 });
             }

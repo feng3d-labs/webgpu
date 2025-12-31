@@ -153,6 +153,7 @@ function generateTestConfig()
         const testInfo = extractTestInfo(htmlContent, fileName);
 
         let htmlFile = file.relativePath;
+
         if (!htmlFile.startsWith('/'))
         {
             htmlFile = '/' + htmlFile;
@@ -195,6 +196,7 @@ export const tests: TestInfo[] = ${testsWithSingleQuotes};
 `;
 
     const configPath = join(testWebDir, 'test-config.ts');
+
     writeFileSync(configPath, configContent, 'utf-8');
 
     return tests;

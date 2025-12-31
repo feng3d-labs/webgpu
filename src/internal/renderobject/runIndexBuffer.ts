@@ -7,9 +7,11 @@ export function runIndexBuffer(renderObject: RenderObject, passEncoder: WGPURend
 {
     //
     const r_renderObject = reactive(renderObject);
+
     r_renderObject.indices;
 
     const { indices } = renderObject;
+
     if (indices)
     {
         const device = passEncoder.device;

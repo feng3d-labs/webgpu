@@ -41,7 +41,11 @@ export class WGPUComputePipeline extends ReactiveObject
      * 这是实际的GPU计算管线实例，用于执行计算着色器。
      * 当计算管线配置发生变化时，此对象会自动重新创建。
      */
-    get gpuComputePipeline() { return this._computedGpuComputePipeline.value; }
+    get gpuComputePipeline()
+    {
+        return this._computedGpuComputePipeline.value;
+    }
+
     private _computedGpuComputePipeline: Computed<GPUComputePipeline>;
 
     /**
@@ -61,7 +65,10 @@ export class WGPUComputePipeline extends ReactiveObject
 
         //
         WGPUComputePipeline.map.set([device, computePipeline], this);
-        this.destroyCall(() => { WGPUComputePipeline.map.delete([device, computePipeline]); });
+        this.destroyCall(() =>
+        {
+            WGPUComputePipeline.map.delete([device, computePipeline]);
+        });
     }
 
     /**
@@ -103,6 +110,7 @@ export class WGPUComputePipeline extends ReactiveObject
             if (!entryPoint)
             {
                 const reflect = WGPUShaderReflect.getWGSLReflectInfo(code);
+
                 entryPoint = reflect.entry.compute[0].name;
             }
 

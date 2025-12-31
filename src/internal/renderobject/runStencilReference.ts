@@ -6,5 +6,6 @@ export function runStencilReference(renderObject: RenderObject, passEncoder: WGP
 {
     const r_renderObject = reactive(renderObject);
     const stencilReference = getStencilReference(r_renderObject.pipeline.depthStencil);
+
     passEncoder.setStencilReference(stencilReference);
 }

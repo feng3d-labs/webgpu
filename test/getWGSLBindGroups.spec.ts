@@ -53,6 +53,7 @@ fn main(input : FragmentInput) -> @location(0) vec4<f32> {
 
         
         `);
+
         assert.equal(true, true);
     });
 });

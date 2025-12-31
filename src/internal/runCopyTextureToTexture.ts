@@ -4,6 +4,7 @@ import { WGPUTextureLike } from '../caches/WGPUTextureLike';
 export function runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: CopyTextureToTexture, canvasContext?: CanvasContext)
 {
     let sTexture = copyTextureToTexture.source.texture;
+
     if (!sTexture && canvasContext)
     {
         sTexture = { context: canvasContext };
@@ -13,6 +14,7 @@ export function runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCo
     const gpuSourceTexture = sourceTexture.gpuTexture;
 
     let dTexture = copyTextureToTexture.destination.texture;
+
     if (!dTexture && canvasContext)
     {
         dTexture = { context: canvasContext };

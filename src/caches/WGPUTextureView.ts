@@ -33,7 +33,11 @@ export class WGPUTextureView extends ReactiveObject
      * 这是实际的GPU纹理视图实例，用于在渲染管线中访问纹理数据。
      * 当纹理视图配置发生变化时，此对象会自动重新创建。
      */
-    get textureView() { return this._computedTextureView.value; }
+    get textureView()
+    {
+        return this._computedTextureView.value;
+    }
+
     private _computedTextureView: Computed<GPUTextureView>;
 
     /**
@@ -52,7 +56,10 @@ export class WGPUTextureView extends ReactiveObject
         this._onCreate(device, view);
         //
         WGPUTextureView.map.set([device, view], this);
-        this.destroyCall(() => { WGPUTextureView.map.delete([device, view]); });
+        this.destroyCall(() =>
+        {
+            WGPUTextureView.map.delete([device, view]);
+        });
     }
 
     /**
@@ -87,6 +94,7 @@ export class WGPUTextureView extends ReactiveObject
             const usage = r_view.usage;
             const aspect = r_view.aspect;
             const mipLevelCount = r_view.mipLevelCount;
+
             // 监听 isUsedAsColorAttachment 属性
             r_view.isUsedAsColorAttachment;
             // 数组层数逻辑：
@@ -108,6 +116,7 @@ export class WGPUTextureView extends ReactiveObject
                 aspect,
                 mipLevelCount,
             };
+
             // 只有当 arrayLayerCount 有值时才添加到描述符中
             // 如果为 undefined，WebGPU 会使用所有剩余层
             if (arrayLayerCount !== undefined)
@@ -163,6 +172,7 @@ declare global
     GPUTexture.prototype.createView = function (this: GPUTexture, descriptor: GPUTextureViewDescriptor): GPUTextureView
     {
         const textureView: GPUTextureView = createView.call(this, descriptor);
+
         textureView.texture = this;
 
         return textureView;

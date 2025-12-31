@@ -4,7 +4,11 @@ import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUQuerySet extends ReactiveObject
 {
-    get gpuQuerySet() { return this._computedGpuQuerySet.value; }
+    get gpuQuerySet()
+    {
+        return this._computedGpuQuerySet.value;
+    }
+
     private _computedGpuQuerySet: Computed<GPUQuerySet>;
 
     constructor(device: GPUDevice, renderPass: RenderPass)
@@ -14,7 +18,10 @@ export class WGPUQuerySet extends ReactiveObject
         this._onCreate(device, renderPass);
         //
         WGPUQuerySet.map.set([device, renderPass], this);
-        this.destroyCall(() => { WGPUQuerySet.map.delete([device, renderPass]); });
+        this.destroyCall(() =>
+        {
+            WGPUQuerySet.map.delete([device, renderPass]);
+        });
     }
 
     private _onCreate(device: GPUDevice, renderPass: RenderPass)
@@ -27,6 +34,7 @@ export class WGPUQuerySet extends ReactiveObject
         let resolveBuf: GPUBuffer
 
         let needQueryResult = false;
+
         this.effect(() =>
         {
             reactive(device.queue).afterSubmit;

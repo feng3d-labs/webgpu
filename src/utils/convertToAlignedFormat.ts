@@ -28,6 +28,7 @@ export function convertToAlignedFormat<T extends Float32Array | Int32Array | Uin
 
     // 确定列数
     let cols = 0;
+
     if (mat2x3Match) cols = 2;
     else if (mat3x3Match) cols = 3;
     else if (mat4x3Match) cols = 4;
