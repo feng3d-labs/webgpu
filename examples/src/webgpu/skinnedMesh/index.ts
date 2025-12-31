@@ -1,16 +1,14 @@
-import { GUI } from "dat.gui";
-import { Mat4, mat4, quat, vec3 } from "wgpu-matrix";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, Buffer, PassEncoder, RenderObject, RenderPass, RenderPassDescriptor, Submit, Texture } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
+import { GUI } from 'dat.gui';
+import { Mat4, mat4, quat, vec3 } from 'wgpu-matrix';
 
-import { convertGLBToJSONAndBinary, GLTFSkin } from "./glbUtils";
-import gltfWGSL from "./gltf.wgsl";
-import gridWGSL from "./grid.wgsl";
-import { gridIndices } from "./gridData";
-import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from "./gridUtils";
-
-import { BindingResources, PassEncoder, RenderObject, RenderPass, RenderPassDescriptor, Submit, Texture } from "@feng3d/render-api";
-import { reactive } from "@feng3d/reactivity";
-import { getGBuffer } from "@feng3d/webgpu";
-import { WebGPU } from "@feng3d/webgpu";
+import { convertGLBToJSONAndBinary, GLTFSkin } from './glbUtils';
+import gltfWGSL from './gltf.wgsl';
+import gridWGSL from './grid.wgsl';
+import { gridIndices } from './gridData';
+import { createSkinnedGridBuffers, createSkinnedGridRenderPipeline } from './gridUtils';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -99,8 +97,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
     */
 
-    //Normal setup
+    // Normal setup
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -113,15 +112,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         objectScale: 1,
         angle: 0.2,
         speed: 50,
-        object: "Whale",
-        renderMode: "NORMAL",
-        skinMode: "ON",
+        object: 'Whale',
+        renderMode: 'NORMAL',
+        skinMode: 'ON',
     };
 
     // Determine whether we want to render our whale or our skinned grid
-    gui.add(settings, "object", ["Whale", "Skinned Grid"]).onChange(() =>
+    gui.add(settings, 'object', ['Whale', 'Skinned Grid']).onChange(() =>
     {
-        if (settings.object === "Skinned Grid")
+        if (settings.object === 'Skinned Grid')
         {
             settings.cameraX = -10;
             settings.cameraY = 0;
@@ -129,7 +128,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
         else
         {
-            if (settings.skinMode === "OFF")
+            if (settings.skinMode === 'OFF')
             {
                 settings.cameraX = 0;
                 settings.cameraY = 0;
@@ -146,10 +145,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // Output the mesh normals, its joints, or the weights that influence the movement of the joints
     gui
-        .add(settings, "renderMode", ["NORMAL", "JOINTS", "WEIGHTS"])
+        .add(settings, 'renderMode', ['NORMAL', 'JOINTS', 'WEIGHTS'])
         .onChange(() =>
         {
-            const buffer = getGBuffer(generalUniformsBuffer);
+            const buffer = Buffer.getBuffer(generalUniformsBuffer.buffer);
             const writeBuffers = buffer.writeBuffers || [];
 
             writeBuffers.push({
@@ -159,11 +158,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             reactive(buffer).writeBuffers = writeBuffers;
         });
     // Determine whether the mesh is static or whether skinning is activated
-    gui.add(settings, "skinMode", ["ON", "OFF"]).onChange(() =>
+    gui.add(settings, 'skinMode', ['ON', 'OFF']).onChange(() =>
     {
-        if (settings.object === "Whale")
+        if (settings.object === 'Whale')
         {
-            if (settings.skinMode === "OFF")
+            if (settings.skinMode === 'OFF')
             {
                 settings.cameraX = 0;
                 settings.cameraY = 0;
@@ -176,21 +175,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 settings.cameraZ = -14.6;
             }
         }
-        const buffer = getGBuffer(generalUniformsBuffer);
+        const buffer = Buffer.getBuffer(generalUniformsBuffer.buffer);
         const writeBuffers = buffer.writeBuffers || [];
+
         writeBuffers.push({
             bufferOffset: 4,
             data: new Uint32Array([SkinMode[settings.skinMode]]),
         });
         reactive(buffer).writeBuffers = writeBuffers;
     });
-    const animFolder = gui.addFolder("Animation Settings");
-    animFolder.add(settings, "angle", 0.05, 0.5).step(0.05);
-    animFolder.add(settings, "speed", 10, 100).step(10);
+    const animFolder = gui.addFolder('Animation Settings');
+
+    animFolder.add(settings, 'angle', 0.05, 0.5).step(0.05);
+    animFolder.add(settings, 'speed', 10, 100).step(10);
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: "depth24plus",
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus',
+        },
     };
 
     const cameraBuffer = new Float32Array(48);
@@ -198,7 +201,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const cameraBGCluster: BindingResources = {
         camera_uniforms: {
             bufferView: cameraBuffer,
-        }
+        },
     };
 
     const generalUniformsBuffer = new Uint32Array(2);
@@ -210,7 +213,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     };
 
     // Fetch whale resources from the glb file
-    const whaleScene = await fetch("../../../assets/gltf/whale.glb")
+    const whaleScene = await fetch('../../../assets/gltf/whale.glb')
         .then((res) => res.arrayBuffer())
         .then((buffer) => convertGLBToJSONAndBinary(buffer));
 
@@ -245,14 +248,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         (2 * Math.PI) / 5,
         aspect,
         0.1,
-        100.0
+        100.0,
     );
 
     const orthographicProjection = mat4.ortho(-20, 20, -10, 10, -100, 100);
 
     function getProjectionMatrix()
     {
-        if (settings.object !== "Skinned Grid")
+        if (settings.object !== 'Skinned Grid')
         {
             return perspectiveProjection;
         }
@@ -263,16 +266,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     function getViewMatrix()
     {
         const viewMatrix = mat4.identity();
-        if (settings.object === "Skinned Grid")
+
+        if (settings.object === 'Skinned Grid')
         {
             mat4.translate(
                 viewMatrix,
                 vec3.fromValues(
                     settings.cameraX * settings.objectScale,
                     settings.cameraY * settings.objectScale,
-                    settings.cameraZ
+                    settings.cameraZ,
                 ),
-                viewMatrix
+                viewMatrix,
             );
         }
         else
@@ -280,7 +284,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             mat4.translate(
                 viewMatrix,
                 vec3.fromValues(settings.cameraX, settings.cameraY, settings.cameraZ),
-                viewMatrix
+                viewMatrix,
             );
         }
 
@@ -293,10 +297,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         const scaleVector = vec3.fromValues(
             settings.objectScale,
             settings.objectScale,
-            settings.objectScale
+            settings.objectScale,
         );
+
         mat4.scale(modelMatrix, scaleVector, modelMatrix);
-        if (settings.object === "Whale")
+        if (settings.object === 'Whale')
         {
             mat4.rotateY(modelMatrix, (Date.now() / 1000) * 0.5, modelMatrix);
         }
@@ -311,15 +316,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0.3, 0.3, 0.3, 1.0],
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
         depthStencilAttachment: {
             view: { texture: depthTexture },
-            depthLoadOp: "clear",
+            depthLoadOp: 'clear',
             depthClearValue: 1.0,
-            depthStoreOp: "store",
+            depthStoreOp: 'store',
         },
     };
 
@@ -330,8 +335,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 view: { texture: { context: { canvasId: canvas.id } } }, // Assigned later
 
                 clearValue: [0.3, 0.3, 0.3, 1.0],
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
     };
@@ -339,6 +344,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const animSkinnedGrid = (boneTransforms: Mat4[], angle: number) =>
     {
         const m = mat4.identity();
+
         mat4.rotateZ(m, angle, boneTransforms[0]);
         mat4.translate(boneTransforms[0], vec3.create(4, 0, 0), m);
         mat4.rotateZ(m, angle, boneTransforms[1]);
@@ -355,6 +361,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Bone bind poses, an extra matrix per joint/bone that represents the starting point
         // of the bone before any transformations are applied
         const bindPoses: Mat4[] = [];
+
         // Create a transform, bind pose, and inverse bind pose for each bone
         for (let i = 0; i < numBones; i++)
         {
@@ -376,14 +383,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     // Create bones of the skinned grid and write the inverse bind positions to
     // the skinned grid's inverse bind matrix array
-    const buffer = getGBuffer(skinnedGridInverseBindUniformBuffer);
+    const buffer = Buffer.getBuffer(skinnedGridInverseBindUniformBuffer.buffer);
     const writeBuffers = buffer.writeBuffers || [];
     const gridBoneCollection = createBoneCollection(5);
+
     for (let i = 0; i < gridBoneCollection.bindPosesInv.length; i++)
     {
         writeBuffers.push({
             bufferOffset: i * 64,
-            data: gridBoneCollection.bindPosesInv[i]
+            data: gridBoneCollection.bindPosesInv[i],
         });
     }
     reactive(buffer).writeBuffers = writeBuffers;
@@ -396,6 +404,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         {
             // Index into the current joint
             const joint = skin.joints[i];
+
             // If our map does
             if (!origMatrices.has(joint))
             {
@@ -404,6 +413,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             // Get the original position, rotation, and scale of the current joint
             const origMatrix = origMatrices.get(joint);
             let m = mat4.create();
+
             // Depending on which bone we are accessing, apply a specific rotation to the bone's original
             // transformation to animate it
             if (joint === 1 || joint === 0)
@@ -436,14 +446,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             ...cameraBGCluster,
             ...generalUniformsBGCLuster,
         };
+
         for (const scene of whaleScene.scenes)
         {
             scene.root.renderDrawables(renderObjects, bindingResources);
         }
         const passEncoder: RenderPass = {
             descriptor: gltfRenderPassDescriptor,
-            renderPassObjects: renderObjects
+            renderPassObjects: renderObjects,
         };
+
         return passEncoder;
     })();
     const skinnedGridRenderPass = (() =>
@@ -461,13 +473,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             },
             vertices: skinnedGridVertexBuffers.vertices,
             indices: skinnedGridVertexBuffers.indices,
-            draw: { __type__: "DrawIndexed", indexCount: gridIndices.length },
+            draw: { __type__: 'DrawIndexed', indexCount: gridIndices.length },
         };
         //
         const passEncoder: RenderPass = {
             descriptor: gltfRenderPassDescriptor,
             renderPassObjects: [renderObject],
         };
+
         return passEncoder;
     })();
 
@@ -481,40 +494,37 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         // Calculate bone transformation
         const t = (Date.now() / 20000) * settings.speed;
         const angle = Math.sin(t) * settings.angle;
+
         // Compute Transforms when angle is applied
         animSkinnedGrid(gridBoneCollection.transforms, angle);
 
         // Write to mvp to camera buffer
-        const buffer = getGBuffer(cameraBuffer);
+        const buffer = Buffer.getBuffer(cameraBuffer.buffer);
         const writeBuffers = buffer.writeBuffers || [];
+
         writeBuffers.push({
             bufferOffset: 0,
-            data: projectionMatrix.buffer,
-            dataOffset: projectionMatrix.byteOffset,
-            size: projectionMatrix.byteLength
+            data: projectionMatrix,
         });
         writeBuffers.push({
             bufferOffset: 64,
-            data: viewMatrix.buffer,
-            dataOffset: viewMatrix.byteOffset,
-            size: viewMatrix.byteLength
+            data: viewMatrix,
         });
         writeBuffers.push({
             bufferOffset: 128,
-            data: modelMatrix.buffer,
-            dataOffset: modelMatrix.byteOffset,
-            size: modelMatrix.byteLength
+            data: modelMatrix,
         });
         reactive(buffer).writeBuffers = writeBuffers;
 
         // Write to skinned grid bone uniform buffer
-        const buffer0 = getGBuffer(skinnedGridJointUniformBuffer);
+        const buffer0 = Buffer.getBuffer(skinnedGridJointUniformBuffer.buffer);
         const writeBuffers0 = buffer0.writeBuffers || [];
+
         for (let i = 0; i < gridBoneCollection.transforms.length; i++)
         {
             writeBuffers0.push({
                 bufferOffset: i * 64,
-                data: gridBoneCollection.transforms[i]
+                data: gridBoneCollection.transforms[i],
             });
         }
         reactive(buffer0).writeBuffers = writeBuffers0;
@@ -531,7 +541,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         whaleScene.skins[0].update(6, whaleScene.nodes);
 
         passEncoders.length = 0;
-        if (settings.object === "Whale")
+        if (settings.object === 'Whale')
         {
             passEncoders.push(whaleRenderPass);
         }
@@ -548,5 +558,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);

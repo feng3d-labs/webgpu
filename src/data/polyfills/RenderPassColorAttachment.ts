@@ -1,6 +1,7 @@
-import { TextureView } from "@feng3d/render-api";
+import { reactive } from '@feng3d/reactivity';
+import { defaultRenderPassColorAttachment } from '@feng3d/render-api';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
 
     /**
@@ -31,3 +32,7 @@ declare module "@feng3d/render-api"
         readonly depthSlice?: GPUIntegerCoordinate;
     }
 }
+const r_defaultRenderPassColorAttachment = reactive(defaultRenderPassColorAttachment);
+
+r_defaultRenderPassColorAttachment.storeOp = 'store';
+r_defaultRenderPassColorAttachment.depthSlice = undefined;

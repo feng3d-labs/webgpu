@@ -1,6 +1,6 @@
-import { RenderPassColorAttachment, RenderPassDescriptor } from "@feng3d/render-api";
+import { RenderPassColorAttachment, RenderPassDescriptor } from '@feng3d/render-api';
 
-declare module "@feng3d/render-api"
+declare module '@feng3d/render-api'
 {
     /**
      * 渲染通道描述。

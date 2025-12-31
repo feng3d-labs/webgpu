@@ -4,16 +4,21 @@
 export interface TimestampQuery
 {
     /**
-     * 是否支持该特性时将调用此回调函数。
+     * 当前WebGPU是否支持该特性。
      *
-     * @param isSupports 当前WebGPU是否支持该特性。
+     * 默认值为`undefined`，在运行时自动赋值，如果当前WebGPU不支持该特性，则该属性为`false`。
      */
-    onSupports?(isSupports: boolean): void;
+    readonly isSupports?: boolean;
 
     /**
-     * 获得结果时将调用此回调函数。
+     * 通道运行消耗时长（单位为纳秒）。
      *
-     * @param elapsedNs 通道运行消耗时长（单位为纳秒）
+     * 默认值为`undefined`，在运行时自动赋值。
      */
-    onQuery?(elapsedNs: number): void;
+    readonly result?: {
+        /**
+         * 通道运行消耗时长（单位为纳秒）。
+         */
+        elapsedNs: number;
+    };
 }

@@ -1,10 +1,10 @@
-import { BindingResources, CommandEncoder, PassEncoder, Texture } from "@feng3d/render-api";
-import { reactive } from "@feng3d/reactivity";
-import { ComputePipeline, getGBuffer } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, Buffer, CommandEncoder, PassEncoder, Texture } from '@feng3d/render-api';
+import { ComputePipeline } from '@feng3d/webgpu';
 
-import Common from "./common";
-import radiosityWGSL from "./radiosity.wgsl";
-import Scene from "./scene";
+import Common from './common';
+import radiosityWGSL from './radiosity.wgsl';
+import Scene from './scene';
 
 /**
  * Radiosity computes lightmaps, calculated by software raytracing of light in
@@ -13,7 +13,7 @@ import Scene from "./scene";
 export default class Radiosity
 {
     // The output lightmap format and dimensions
-    static readonly lightmapFormat = "rgba16float";
+    static readonly lightmapFormat = 'rgba16float';
     static readonly lightmapWidth = 256;
     static readonly lightmapHeight = 256;
 
@@ -27,6 +27,7 @@ export default class Radiosity
     private readonly kWorkgroupsPerFrame = 1024;
     private readonly kPhotonsPerFrame
         = this.kPhotonsPerWorkgroup * this.kWorkgroupsPerFrame;
+
     // Maximum value that can be added to the 'accumulation' buffer, per photon,
     // across all texels.
     private readonly kPhotonEnergy = 100000;
@@ -56,13 +57,15 @@ export default class Radiosity
         this.common = common;
         this.scene = scene;
         this.lightmap = {
-            label: "Radiosity.lightmap",
-            size: [
-                Radiosity.lightmapWidth,
-                Radiosity.lightmapHeight,
-                scene.quads.length,
-            ],
-            format: Radiosity.lightmapFormat,
+            descriptor: {
+                label: 'Radiosity.lightmap',
+                size: [
+                    Radiosity.lightmapWidth,
+                    Radiosity.lightmapHeight,
+                    scene.quads.length,
+                ],
+                format: Radiosity.lightmapFormat,
+            },
         };
         this.accumulationBuffer = new Uint8Array(Radiosity.lightmapWidth
             * Radiosity.lightmapHeight
@@ -82,10 +85,10 @@ export default class Radiosity
         };
 
         this.radiosityPipeline = {
-            label: "Radiosity.radiosityPipeline",
+            label: 'Radiosity.radiosityPipeline',
             compute: {
                 code: radiosityWGSL + common.wgsl,
-                entryPoint: "radiosity",
+                entryPoint: 'radiosity',
                 constants: {
                     PhotonsPerWorkgroup: this.kPhotonsPerWorkgroup,
                     PhotonEnergy: this.kPhotonEnergy,
@@ -94,10 +97,10 @@ export default class Radiosity
         };
 
         this.accumulationToLightmapPipeline = {
-            label: "Radiosity.accumulationToLightmapPipeline",
+            label: 'Radiosity.accumulationToLightmapPipeline',
             compute: {
                 code: radiosityWGSL + common.wgsl,
-                entryPoint: "accumulation_to_lightmap",
+                entryPoint: 'accumulation_to_lightmap',
                 constants: {
                     AccumulationToLightmapWorkgroupSizeX:
                         this.kAccumulationToLightmapWorkgroupSizeX,
@@ -107,10 +110,10 @@ export default class Radiosity
             },
         };
 
-        const lightmapSize = this.lightmap.size;
+        const lightmapSize = this.lightmap.descriptor.size;
 
         this.passEncoders = [{
-            __type__: "ComputePass",
+            __type__: 'ComputePass',
             computeObjects: [
                 // Dispatch the radiosity workgroups
                 {
@@ -131,12 +134,13 @@ export default class Radiosity
                     workgroups: {
                         workgroupCountX: Math.ceil(Radiosity.lightmapWidth / this.kAccumulationToLightmapWorkgroupSizeX),
                         workgroupCountY: Math.ceil(Radiosity.lightmapHeight / this.kAccumulationToLightmapWorkgroupSizeY),
-                        workgroupCountZ: lightmapSize[2] ?? 1
+                        workgroupCountZ: lightmapSize[2] ?? 1,
                     },
-                }
+                },
             ],
         }];
     }
+
     private passEncoders: PassEncoder[];
 
     encode(commandEncoder: CommandEncoder)
@@ -159,10 +163,12 @@ export default class Radiosity
         // the 'accumulation' buffer values to prevent u32 overflow.
         const accumulationBufferScale
             = this.accumulationMean > 2 * this.kAccumulationMeanMax ? 0.5 : 1;
+
         this.accumulationMean *= accumulationBufferScale;
 
         // Update the radiosity uniform buffer data.
         const uniformDataF32 = new Float32Array(this.uniformBuffer.byteLength / 4);
+
         uniformDataF32[0] = accumulationToLightmapScale;
         uniformDataF32[1] = accumulationBufferScale;
         uniformDataF32[2] = this.scene.lightWidth;
@@ -170,6 +176,6 @@ export default class Radiosity
         uniformDataF32[4] = this.scene.lightCenter[0];
         uniformDataF32[5] = this.scene.lightCenter[1];
         uniformDataF32[6] = this.scene.lightCenter[2];
-        reactive(getGBuffer(this.uniformBuffer)).writeBuffers = [{ data: uniformDataF32 }];
+        reactive(Buffer.getBuffer(this.uniformBuffer.buffer)).writeBuffers = [{ data: uniformDataF32 }];
     }
 }

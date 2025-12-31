@@ -1,8 +1,8 @@
-import { reactive } from "@feng3d/reactivity";
-import { BindingResources, BufferBinding, CommandEncoder, RenderPassDescriptor } from "@feng3d/render-api";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, CommandEncoder, RenderPassDescriptor } from '@feng3d/render-api';
 
-import bitonicDisplay from "./bitonicDisplay.frag.wgsl";
-import { Base2DRendererClass } from "./utils";
+import bitonicDisplay from './bitonicDisplay.frag.wgsl';
+import { Base2DRendererClass } from './utils';
 
 interface BitonicDisplayRenderArgs
 {
@@ -18,15 +18,15 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
     constructor(
         renderPassDescriptor: RenderPassDescriptor,
         computeBGDescript: BindingResources,
-        label: string
+        label: string,
     )
     {
         super();
         this.renderPassDescriptor = renderPassDescriptor;
         this.computeBGDescript = computeBGDescript;
 
-        const fragment_uniforms: BufferBinding = {
-            highlight: undefined,
+        const fragment_uniforms = {
+            value: { highlight: undefined },
         };
 
         reactive(computeBGDescript).fragment_uniforms = fragment_uniforms;
@@ -38,7 +38,7 @@ export default class BitonicDisplayRenderer extends Base2DRendererClass
 
         this.setArguments = (args: BitonicDisplayRenderArgs) =>
         {
-            reactive(fragment_uniforms).highlight = args.highlight;
+            reactive(fragment_uniforms.value).highlight = args.highlight;
         };
     }
 

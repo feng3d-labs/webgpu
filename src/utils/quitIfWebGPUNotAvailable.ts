@@ -4,13 +4,13 @@
  */
 export function quitIfWebGPUNotAvailable(
     adapter: GPUAdapter | null,
-    device: GPUDevice | null
+    device: GPUDevice | null,
 ): asserts device
 {
     if (!device)
     {
         quitIfAdapterNotAvailable(adapter);
-        fail("Unable to get a device for an unknown reason");
+        fail('Unable to get a device for an unknown reason');
 
         return;
     }
@@ -27,12 +27,12 @@ export function quitIfWebGPUNotAvailable(
 
 /** Shows an error dialog if getting an adapter wasn't successful. */
 function quitIfAdapterNotAvailable(
-    adapter: GPUAdapter | null
+    adapter: GPUAdapter | null,
 ): asserts adapter
 {
-    if (!("gpu" in navigator))
+    if (!('gpu' in navigator))
     {
-        fail("navigator.gpu is not defined - WebGPU not available in this browser");
+        fail('navigator.gpu is not defined - WebGPU not available in this browser');
     }
 
     if (!adapter)
@@ -48,7 +48,7 @@ const fail = (() =>
 
     function createErrorOutput()
     {
-        if (typeof document === "undefined")
+        if (typeof document === 'undefined')
         {
             // Not implemented in workers.
             return {
@@ -59,16 +59,19 @@ const fail = (() =>
             };
         }
 
-        const dialogBox = document.createElement("dialog");
+        const dialogBox = document.createElement('dialog');
+
         dialogBox.close();
         document.body.append(dialogBox);
 
-        const dialogText = document.createElement("pre");
-        dialogText.style.whiteSpace = "pre-wrap";
+        const dialogText = document.createElement('pre');
+
+        dialogText.style.whiteSpace = 'pre-wrap';
         dialogBox.append(dialogText);
 
-        const closeBtn = document.createElement("button");
-        closeBtn.textContent = "OK";
+        const closeBtn = document.createElement('button');
+
+        closeBtn.textContent = 'OK';
         closeBtn.onclick = () => dialogBox.close();
         dialogBox.append(closeBtn);
 
@@ -79,9 +82,9 @@ const fail = (() =>
                 // (show the first error, not the most recent error).
                 if (!dialogBox.open)
                 {
-                    if (msg.indexOf("allow_unsafe_apis") > -1)
+                    if (msg.indexOf('allow_unsafe_apis') > -1)
                     {
-                        msg += "\n\n使用到了您的浏览器不支持的特性，请更换您的浏览器试试。";
+                        msg += '\n\n使用到了您的浏览器不支持的特性，请更换您的浏览器试试。';
                     }
 
                     dialogText.textContent = msg;
@@ -97,7 +100,7 @@ const fail = (() =>
     {
         if (!output) output = createErrorOutput();
 
-        output.show(message);
+        // output.show(message);
         throw new Error(message);
     };
 })();

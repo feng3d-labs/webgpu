@@ -1,13 +1,14 @@
-export const computeArgKeys = ["width", "height", "algo", "blockHeight"];
+export const computeArgKeys = ['width', 'height', 'algo', 'blockHeight'];
 
 export const NaiveBitonicCompute = (workgroupSize: number) =>
 {
-  if (workgroupSize % 2 !== 0 || workgroupSize > 256)
-{
-    workgroupSize = 256;
-  }
-  // Ensure that workgroupSize is half the number of elements
-  return `
+    if (workgroupSize % 2 !== 0 || workgroupSize > 256)
+    {
+        workgroupSize = 256;
+    }
+
+    // Ensure that workgroupSize is half the number of elements
+    return `
 
 struct Uniforms {
   width: f32,

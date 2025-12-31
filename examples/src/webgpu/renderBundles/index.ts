@@ -1,14 +1,12 @@
-import { BindingResources, CanvasContext, RenderObject, RenderPass, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { reactive } from "@feng3d/reactivity";
-import { RenderBundle, WebGPU, getGBuffer } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, Buffer, CanvasContext, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
+import { RenderBundle, WebGPU } from '@feng3d/webgpu';
+import { GUI } from 'dat.gui';
+import Stats from 'stats.js';
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { GUI } from "dat.gui";
-import Stats from "stats-js";
-import { mat4, vec3 } from "wgpu-matrix";
-
-import { SphereLayout, createSphereMesh } from "../../meshes/sphere";
-
-import meshWGSL from "./mesh.wgsl";
+import { SphereLayout, createSphereMesh } from '../../meshes/sphere';
+import meshWGSL from './mesh.wgsl';
 
 interface Renderable
 {
@@ -19,14 +17,15 @@ interface Renderable
     bindGroup?: BindingResources;
 }
 
-const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
+const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
 {
     const settings = {
         useRenderBundles: true,
         asteroidCount: 5000,
     };
-    gui.add(settings, "useRenderBundles").onChange(onUseRenderBundlesChanged);
-    gui.add(settings, "asteroidCount", 1000, 10000, 1000).onChange(() =>
+
+    gui.add(settings, 'useRenderBundles').onChange(onUseRenderBundlesChanged);
+    gui.add(settings, 'asteroidCount', 1000, 10000, 1000).onChange(() =>
     {
         // If the content of the scene changes the render bundle must be recreated.
         ensureEnoughAsteroids();
@@ -34,6 +33,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     });
 
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -53,15 +53,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             // Backface culling since the sphere is solid piece of geometry.
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
-            cullFace: "back",
+            cullFace: 'back',
         },
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: "depth24plus",
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus',
+        },
     };
 
     const uniformBufferSize = 4 * 16; // 4x4 matrix
@@ -69,36 +71,42 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
     // Fetch the images and upload them into a GPUTexture.
     let planetTexture: Texture;
+
     {
         const response = await fetch(
-            new URL("../../../assets/img/saturn.jpg", import.meta.url).toString()
+            new URL('../../../assets/img/saturn.jpg', import.meta.url).toString(),
         );
         const imageBitmap = await createImageBitmap(await response.blob());
 
         planetTexture = {
-            size: [imageBitmap.width, imageBitmap.height],
-            format: "rgba8unorm",
+            descriptor: {
+                size: [imageBitmap.width, imageBitmap.height],
+                format: 'rgba8unorm',
+            },
             sources: [{ image: imageBitmap }],
         };
     }
 
     let moonTexture: Texture;
+
     {
         const response = await fetch(
-            new URL("../../../assets/img/moon.jpg", import.meta.url).toString()
+            new URL('../../../assets/img/moon.jpg', import.meta.url).toString(),
         );
         const imageBitmap = await createImageBitmap(await response.blob());
 
         moonTexture = {
-            size: [imageBitmap.width, imageBitmap.height],
-            format: "rgba8unorm",
+            descriptor: {
+                size: [imageBitmap.width, imageBitmap.height],
+                format: 'rgba8unorm',
+            },
             sources: [{ image: imageBitmap }],
         };
     }
 
     const sampler: Sampler = {
-        magFilter: "linear",
-        minFilter: "linear",
+        magFilter: 'linear',
+        minFilter: 'linear',
     };
 
     // Helper functions to create the required meshes and bind groups for each sphere.
@@ -106,23 +114,23 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         radius: number,
         widthSegments = 32,
         heightSegments = 16,
-        randomness = 0
+        randomness = 0,
     ): Renderable
     {
         const sphereMesh = createSphereMesh(
             radius,
             widthSegments,
             heightSegments,
-            randomness
+            randomness,
         );
 
         // Create a vertex buffer from the sphere data.
         const vertices = sphereMesh.vertices;
 
         const vertexAttributes: VertexAttributes = {
-            position: { data: vertices, format: "float32x3", offset: SphereLayout.positionsOffset, arrayStride: SphereLayout.vertexStride },
-            normal: { data: vertices, format: "float32x3", offset: SphereLayout.normalOffset, arrayStride: SphereLayout.vertexStride },
-            uv: { data: vertices, format: "float32x2", offset: SphereLayout.uvOffset, arrayStride: SphereLayout.vertexStride },
+            position: { data: vertices, format: 'float32x3', offset: SphereLayout.positionsOffset, arrayStride: SphereLayout.vertexStride },
+            normal: { data: vertices, format: 'float32x3', offset: SphereLayout.normalOffset, arrayStride: SphereLayout.vertexStride },
+            uv: { data: vertices, format: 'float32x2', offset: SphereLayout.uvOffset, arrayStride: SphereLayout.vertexStride },
         };
 
         const indices = sphereMesh.indices;
@@ -136,7 +144,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
     function createSphereBindGroup1(
         texture: Texture,
-        transform: Float32Array
+        transform: Float32Array,
     ): BindingResources
     {
         const uniformBuffer = new Float32Array(transform);
@@ -153,10 +161,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     }
 
     const transform = mat4.create();
+
     mat4.identity(transform);
 
     // Create one large central planet surrounded by a large ring of asteroids
     const planet = createSphereRenderable(1.0);
+
     planet.bindGroup = createSphereBindGroup1(planetTexture, transform);
 
     const asteroids1 = [
@@ -204,8 +214,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
             view: { texture: depthTexture },
 
             depthClearValue: 1,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
@@ -214,21 +224,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         (2 * Math.PI) / 5,
         aspect,
         1,
-        100.0
+        100.0,
     );
     const modelViewProjectionMatrix = mat4.create();
 
+    const uniforms = {
+        value: { viewProjectionMatrix: modelViewProjectionMatrix as Float32Array },
+    };
+
     const frameBindGroup: BindingResources = {
-        uniforms: {
-            bufferView: uniformBuffer,
-        },
+        uniforms: uniforms,
     };
 
     function getTransformationMatrix()
     {
         const viewMatrix = mat4.identity();
+
         mat4.translate(viewMatrix, vec3.fromValues(0, 0, -4), viewMatrix);
         const now = Date.now() / 1000;
+
         // Tilt the view matrix so the planet looks like it's off-axis.
         mat4.rotateZ(viewMatrix, Math.PI * 0.1, viewMatrix);
         mat4.rotateX(viewMatrix, Math.PI * 0.1, viewMatrix);
@@ -252,6 +266,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         // scene, which helps demonstrate the potential time savings a render bundle
         // can provide.)
         let count = 0;
+
         for (const renderable of renderables)
         {
             if (!renderable.renderObject)
@@ -261,7 +276,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
                     bindingResources: { ...frameBindGroup, ...renderable.bindGroup },
                     vertices: renderable.vertexAttributes,
                     indices: renderable.indices,
-                    draw: { __type__: "DrawIndexed", indexCount: renderable.indexCount },
+                    draw: { __type__: 'DrawIndexed', indexCount: renderable.indexCount },
                 };
             }
 
@@ -285,8 +300,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
         commandEncoders: [
             {
                 passEncoders: [renderPass],
-            }
-        ]
+            },
+        ],
     };
 
     // The render bundle can be encoded once and re-used as many times as needed.
@@ -301,15 +316,17 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
     // such as when using frustrum or occlusion culling, will not benefit from
     // using render bundles as much.
     let renderBundle: RenderBundle = {
-        __type__: "RenderBundle",
+        __type__: 'RenderBundle',
         renderObjects: renderScene(),
     };
+
     function updateRenderBundle()
     {
         const renderBundleEncoder: RenderBundle = {
-            __type__: "RenderBundle",
+            __type__: 'RenderBundle',
             renderObjects: renderScene(),
         };
+
         renderBundle = renderBundleEncoder;
         onUseRenderBundlesChanged();
     }
@@ -339,7 +356,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 
         const transformationMatrix = getTransformationMatrix();
 
-        reactive(getGBuffer(uniformBuffer)).writeBuffers = [{ data: transformationMatrix }];
+        reactive(uniforms.value).viewProjectionMatrix = transformationMatrix.subarray();
 
         webgpu.submit(submit);
 
@@ -350,7 +367,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats) =>
 };
 
 const stats = new Stats();
+
 document.body.appendChild(stats.dom);
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel, stats);

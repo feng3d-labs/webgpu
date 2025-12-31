@@ -1,9 +1,9 @@
-import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Texture } from "@feng3d/render-api";
+import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Texture } from '@feng3d/render-api';
 
-import Common from "./common";
-import Radiosity from "./radiosity";
-import rasterizerWGSL from "./rasterizer.wgsl";
-import Scene from "./scene";
+import Common from './common';
+import Radiosity from './radiosity';
+import rasterizerWGSL from './rasterizer.wgsl';
+import Scene from './scene';
 
 /**
  * Rasterizer renders the scene using a regular raserization graphics pipeline.
@@ -26,16 +26,18 @@ export default class Rasterizer
         this.common = common;
         this.scene = scene;
 
-        const framebufferSize = framebuffer.size;
+        const framebufferSize = framebuffer.descriptor.size;
 
         const depthTexture: Texture = {
-            label: "RasterizerRenderer.depthTexture",
-            size: [framebufferSize[0], framebufferSize[1]],
-            format: "depth24plus",
+            descriptor: {
+                label: 'RasterizerRenderer.depthTexture',
+                size: [framebufferSize[0], framebufferSize[1]],
+                format: 'depth24plus',
+            },
         };
 
         this.renderPassDescriptor = {
-            label: "RasterizerRenderer.renderPassDescriptor",
+            label: 'RasterizerRenderer.renderPassDescriptor',
             colorAttachments: [
                 {
                     view: { texture: framebuffer },
@@ -46,23 +48,23 @@ export default class Rasterizer
                 view: { texture: depthTexture },
 
                 depthClearValue: 1,
-                depthLoadOp: "clear",
-                depthStoreOp: "store",
+                depthLoadOp: 'clear',
+                depthStoreOp: 'store',
             },
         };
 
         this.bindGroup = {
             lightmap: { texture: radiosity.lightmap },
             smpl: {
-                addressModeU: "clamp-to-edge",
-                addressModeV: "clamp-to-edge",
-                magFilter: "linear",
-                minFilter: "linear",
+                addressModeU: 'clamp-to-edge',
+                addressModeV: 'clamp-to-edge',
+                magFilter: 'linear',
+                minFilter: 'linear',
             },
         };
 
         this.pipeline = {
-            label: "RasterizerRenderer.pipeline",
+            label: 'RasterizerRenderer.pipeline',
             vertex: {
                 code: rasterizerWGSL + common.wgsl,
             },
@@ -70,7 +72,7 @@ export default class Rasterizer
                 code: rasterizerWGSL + common.wgsl,
             },
             primitive: {
-                cullFace: "back",
+                cullFace: 'back',
             },
         };
 
@@ -85,10 +87,11 @@ export default class Rasterizer
                 },
                 vertices: this.scene.vertexAttributes,
                 indices: this.scene.indices,
-                draw: { __type__: "DrawIndexed", indexCount: this.scene.indexCount },
+                draw: { __type__: 'DrawIndexed', indexCount: this.scene.indexCount },
             }],
         };
     }
+
     private renderPassEncoder: RenderPass;
 
     encode(commandEncoder: CommandEncoder)

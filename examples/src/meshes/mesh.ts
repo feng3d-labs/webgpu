@@ -1,4 +1,4 @@
-import { vec3, vec2 } from "wgpu-matrix";
+import { vec3, vec2 } from 'wgpu-matrix';
 
 // Defines what to pass to pipeline to render mesh
 export interface Renderable
@@ -18,33 +18,33 @@ export interface Mesh
 
 export const getMeshPosAtIndex = (mesh: Mesh, index: number) =>
 {
-  const arr = new Float32Array(
-    mesh.vertices.buffer,
-    index * mesh.vertexStride + 0,
-    3
-  );
+    const arr = new Float32Array(
+        mesh.vertices.buffer,
+        index * mesh.vertexStride + 0,
+        3,
+    );
 
-return vec3.fromValues(arr[0], arr[1], arr[2]);
+    return vec3.fromValues(arr[0], arr[1], arr[2]);
 };
 
 export const getMeshNormalAtIndex = (mesh: Mesh, index: number) =>
 {
-  const arr = new Float32Array(
-    mesh.vertices.buffer,
-    index * mesh.vertexStride + 3 * Float32Array.BYTES_PER_ELEMENT,
-    3
-  );
+    const arr = new Float32Array(
+        mesh.vertices.buffer,
+        index * mesh.vertexStride + 3 * Float32Array.BYTES_PER_ELEMENT,
+        3,
+    );
 
-return vec3.fromValues(arr[0], arr[1], arr[2]);
+    return vec3.fromValues(arr[0], arr[1], arr[2]);
 };
 
 export const getMeshUVAtIndex = (mesh: Mesh, index: number) =>
 {
-  const arr = new Float32Array(
-    mesh.vertices.buffer,
-    index * mesh.vertexStride + 6 * Float32Array.BYTES_PER_ELEMENT,
-    2
-  );
+    const arr = new Float32Array(
+        mesh.vertices.buffer,
+        index * mesh.vertexStride + 6 * Float32Array.BYTES_PER_ELEMENT,
+        2,
+    );
 
-return vec2.fromValues(arr[0], arr[1]);
+    return vec2.fromValues(arr[0], arr[1]);
 };

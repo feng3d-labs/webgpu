@@ -1,19 +1,20 @@
-import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from "@feng3d/render-api";
-import { reactive } from "@feng3d/reactivity";
-import { WebGPU, getGBuffer } from "@feng3d/webgpu";
-import { mat4, vec3 } from "wgpu-matrix";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, Buffer, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { mesh } from "../../meshes/stanfordDragon";
+import { mesh } from '../../meshes/stanfordDragon';
 
-import fragmentWGSL from "./fragment.wgsl";
-import vertexWGSL from "./vertex.wgsl";
-import vertexShadowWGSL from "./vertexShadow.wgsl";
+import fragmentWGSL from './fragment.wgsl';
+import vertexWGSL from './vertex.wgsl';
+import vertexShadowWGSL from './vertexShadow.wgsl';
 
 const shadowDepthTextureSize = 1024;
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
     const aspect = canvas.width / canvas.height;
@@ -22,6 +23,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Create the model vertex buffer.
     const vertexBuffer = new Float32Array(mesh.positions.length * 3 * 2);
+
     for (let i = 0; i < mesh.positions.length; ++i)
     {
         vertexBuffer.set(mesh.positions[i], 6 * i);
@@ -29,13 +31,14 @@ const init = async (canvas: HTMLCanvasElement) =>
     }
 
     const vertices: VertexAttributes = {
-        position: { data: vertexBuffer, format: "float32x3", offset: 0, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
-        normal: { data: vertexBuffer, format: "float32x3", offset: Float32Array.BYTES_PER_ELEMENT * 3, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
+        position: { data: vertexBuffer, format: 'float32x3', offset: 0, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
+        normal: { data: vertexBuffer, format: 'float32x3', offset: Float32Array.BYTES_PER_ELEMENT * 3, arrayStride: Float32Array.BYTES_PER_ELEMENT * 6 },
     };
 
     // Create the model index buffer.
     const indexCount = mesh.triangles.length * 3;
     const indexBuffer = new Uint16Array(indexCount);
+
     for (let i = 0; i < mesh.triangles.length; ++i)
     {
         indexBuffer.set(mesh.triangles[i], 3 * i);
@@ -43,15 +46,17 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     // Create the depth texture for rendering/sampling the shadow map.
     const shadowDepthTexture: Texture = {
-        size: [shadowDepthTextureSize, shadowDepthTextureSize, 1],
-        format: "depth32float",
+        descriptor: {
+            size: [shadowDepthTextureSize, shadowDepthTextureSize, 1],
+            format: 'depth32float',
+        },
     };
 
     // Create some common descriptors used for both the shadow pipeline
     // and the color rendering pipeline.
     const primitive: GPUPrimitiveState = {
-        topology: "triangle-list",
-        cullMode: "back",
+        topology: 'triangle-list',
+        cullMode: 'back',
     };
 
     const shadowPipeline: RenderPipeline = {
@@ -61,7 +66,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         primitive,
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less",
+            depthCompare: 'less',
         },
     };
 
@@ -81,13 +86,15 @@ const init = async (canvas: HTMLCanvasElement) =>
         primitive,
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less",
+            depthCompare: 'less',
         },
     };
 
     const depthTexture: Texture = {
-        size: [canvas.width, canvas.height],
-        format: "depth24plus-stencil8",
+        descriptor: {
+            size: [canvas.width, canvas.height],
+            format: 'depth24plus-stencil8',
+        },
     };
 
     const renderPassDescriptor: RenderPassDescriptor = {
@@ -95,17 +102,17 @@ const init = async (canvas: HTMLCanvasElement) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.5, 0.5, 0.5, 1.0],
-            }
+            },
         ],
         depthStencilAttachment: {
             view: { texture: depthTexture },
 
             depthClearValue: 1.0,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
             stencilClearValue: 0,
-            stencilLoadOp: "clear",
-            stencilStoreOp: "store",
+            stencilLoadOp: 'clear',
+            stencilStoreOp: 'store',
         },
     };
 
@@ -129,7 +136,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         },
         shadowMap: { texture: shadowDepthTexture },
         shadowSampler: {
-            compare: "less",
+            compare: 'less',
         },
     };
 
@@ -151,6 +158,7 @@ const init = async (canvas: HTMLCanvasElement) =>
     const lightViewMatrix = mat4.lookAt(lightPosition, origin, upVector);
 
     const lightProjectionMatrix = mat4.create();
+
     {
         const left = -80;
         const right = 80;
@@ -158,12 +166,13 @@ const init = async (canvas: HTMLCanvasElement) =>
         const top = 80;
         const near = -200;
         const far = 300;
+
         mat4.ortho(left, right, bottom, top, near, far, lightProjectionMatrix);
     }
 
     const lightViewProjMatrix = mat4.multiply(
         lightProjectionMatrix,
-        lightViewMatrix
+        lightViewMatrix,
     );
 
     const viewProjMatrix = mat4.multiply(projectionMatrix, viewMatrix);
@@ -176,14 +185,16 @@ const init = async (canvas: HTMLCanvasElement) =>
         const lightMatrixData = lightViewProjMatrix as Float32Array;
         const cameraMatrixData = viewProjMatrix as Float32Array;
         const lightData = lightPosition as Float32Array;
-        reactive(getGBuffer(sceneUniformBuffer)).writeBuffers = [
+
+        reactive(Buffer.getBuffer(sceneUniformBuffer.buffer)).writeBuffers = [
             { bufferOffset: 0, data: lightMatrixData },
             { bufferOffset: 64, data: cameraMatrixData },
             { bufferOffset: 128, data: lightData },
         ];
 
         const modelData = modelMatrix as Float32Array;
-        reactive(getGBuffer(modelUniformBuffer)).writeBuffers = [{ data: modelData }];
+
+        reactive(Buffer.getBuffer(modelUniformBuffer.buffer)).writeBuffers = [{ data: modelData }];
     }
 
     // Rotates the camera around the origin based on time.
@@ -193,6 +204,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         const rad = Math.PI * (Date.now() / 2000);
         const rotation = mat4.rotateY(mat4.translation(origin), rad);
+
         vec3.transformMat4(eyePosition, rotation, eyePosition);
 
         const viewMatrix = mat4.lookAt(eyePosition, origin, upVector);
@@ -208,8 +220,8 @@ const init = async (canvas: HTMLCanvasElement) =>
             view: { texture: shadowDepthTexture },
 
             depthClearValue: 1,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
@@ -228,9 +240,9 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 },
                                 vertices,
                                 indices: indexBuffer,
-                                draw: { __type__: "DrawIndexed", indexCount },
+                                draw: { __type__: 'DrawIndexed', indexCount },
                             },
-                        ]
+                        ],
                     },
                     {
                         descriptor: renderPassDescriptor,
@@ -243,21 +255,22 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 },
                                 vertices,
                                 indices: indexBuffer,
-                                draw: { __type__: "DrawIndexed", indexCount },
-                            }
+                                draw: { __type__: 'DrawIndexed', indexCount },
+                            },
                         ],
-                    }
-                ]
-            }
-        ]
+                    },
+                ],
+            },
+        ],
     };
 
     function frame()
     {
         const cameraViewProj = getCameraViewProjMatrix();
-        const writeBuffers = getGBuffer(sceneUniformBuffer).writeBuffers || [];
+        const writeBuffers = Buffer.getBuffer(sceneUniformBuffer.buffer).writeBuffers || [];
+
         writeBuffers.push({ bufferOffset: 64, data: cameraViewProj });
-        reactive(getGBuffer(sceneUniformBuffer)).writeBuffers = writeBuffers;
+        reactive(Buffer.getBuffer(sceneUniformBuffer.buffer)).writeBuffers = writeBuffers;
 
         webgpu.submit(submit);
 
@@ -266,5 +279,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);

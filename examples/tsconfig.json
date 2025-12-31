@@ -11,9 +11,6 @@
 		"esModuleInterop": true,
 		"resolveJsonModule": true,
 		"noEmit": true,
-		"types": [
-			"@webgpu/types"
-		],
 		"lib": [
 			"ES2015",
 			"es2020",

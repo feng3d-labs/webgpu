@@ -1,19 +1,18 @@
-import { mat4, vec3 } from "wgpu-matrix";
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { BufferBinding, RenderObject, RenderPassDescriptor, Submit } from "@feng3d/render-api";
-import { reactive } from "@feng3d/reactivity";
-import { WebGPU } from "@feng3d/webgpu";
-import { getGBuffer } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { BufferBinding, RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
-import basicVertWGSL from "../../shaders/basic.vert.wgsl";
-import vertexPositionColorWGSL from "../../shaders/vertexPositionColor.frag.wgsl";
-
+import basicVertWGSL from '../../shaders/basic.vert.wgsl';
+import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const devicePixelRatio = window.devicePixelRatio || 1;
+
     canvas.width = canvas.clientWidth * devicePixelRatio;
     canvas.height = canvas.clientHeight * devicePixelRatio;
 
@@ -24,12 +23,12 @@ const init = async (canvas: HTMLCanvasElement) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.5, 0.5, 0.5, 1.0],
-            }
+            },
         ],
         depthStencilAttachment: {
             depthClearValue: 1,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
@@ -39,31 +38,31 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const uniformBuffer = new ArrayBuffer(uniformBufferSize);
 
-    const uniforms: BufferBinding = {
+    const uniforms = {
         bufferView: new Uint8Array(uniformBuffer, 0, matrixSize),
-        modelViewProjectionMatrix: null, // 在帧循环中设置
+        value: { modelViewProjectionMatrix: null as Float32Array }, // 在帧循环中设置
     };
 
     const renderObject: RenderObject = {
         pipeline: {
             vertex: { code: basicVertWGSL }, fragment: { code: vertexPositionColorWGSL },
             primitive: {
-                cullFace: "back",
+                cullFace: 'back',
             },
         },
         bindingResources: {
             uniforms,
         },
         vertices: {
-            position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-            uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+            position: { data: cubeVertexArray, format: 'float32x4', offset: cubePositionOffset, arrayStride: cubeVertexSize },
+            uv: { data: cubeVertexArray, format: 'float32x2', offset: cubeUVOffset, arrayStride: cubeVertexSize },
         },
-        draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount },
+        draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount },
     };
 
-    const uniforms1: BufferBinding = {
+    const uniforms1 = {
         bufferView: new Uint8Array(uniformBuffer, offset, matrixSize),
-        modelViewProjectionMatrix: null, // 在帧循环中设置
+        value: { modelViewProjectionMatrix: null as Float32Array }, // 在帧循环中设置
     };
 
     const renderObject1: RenderObject = {
@@ -78,7 +77,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         (2 * Math.PI) / 5,
         aspect,
         1,
-        100.0
+        100.0,
     );
 
     const modelMatrix1 = mat4.translation(vec3.create(-2, 0, 0));
@@ -98,26 +97,26 @@ const init = async (canvas: HTMLCanvasElement) =>
             modelMatrix1,
             vec3.fromValues(Math.sin(now), Math.cos(now), 0),
             1,
-            tmpMat41
+            tmpMat41,
         );
         mat4.rotate(
             modelMatrix2,
             vec3.fromValues(Math.cos(now), Math.sin(now), 0),
             1,
-            tmpMat42
+            tmpMat42,
         );
 
         mat4.multiply(viewMatrix, tmpMat41, modelViewProjectionMatrix1);
         mat4.multiply(
             projectionMatrix,
             modelViewProjectionMatrix1,
-            modelViewProjectionMatrix1
+            modelViewProjectionMatrix1,
         );
         mat4.multiply(viewMatrix, tmpMat42, modelViewProjectionMatrix2);
         mat4.multiply(
             projectionMatrix,
             modelViewProjectionMatrix2,
-            modelViewProjectionMatrix2
+            modelViewProjectionMatrix2,
         );
     }
 
@@ -126,8 +125,8 @@ const init = async (canvas: HTMLCanvasElement) =>
             {
                 passEncoders: [
                     { descriptor: renderPassDescriptor, renderPassObjects: [renderObject, renderObject1] },
-                ]
-            }
+                ],
+            },
         ],
     };
 
@@ -136,8 +135,8 @@ const init = async (canvas: HTMLCanvasElement) =>
         updateTransformationMatrix();
 
         // 使用 subarray 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
-        reactive(uniforms).modelViewProjectionMatrix = modelViewProjectionMatrix1.subarray();
-        reactive(uniforms1).modelViewProjectionMatrix = modelViewProjectionMatrix2.subarray();
+        reactive(uniforms.value).modelViewProjectionMatrix = modelViewProjectionMatrix1.subarray();
+        reactive(uniforms1.value).modelViewProjectionMatrix = modelViewProjectionMatrix2.subarray();
 
         webgpu.submit(data);
 
@@ -146,5 +145,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     requestAnimationFrame(frame);
 };
 
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas);

@@ -1,19 +1,19 @@
-const panel = document.getElementById("panel") as HTMLDivElement;
-const content = document.getElementById("content") as HTMLDivElement;
-const viewer = document.getElementById("viewer") as HTMLIFrameElement;
-const filterInput = document.getElementById("filterInput") as HTMLInputElement;
-const clearSearchButton = document.getElementById("clearSearchButton") as HTMLDivElement;
-const expandButton = document.getElementById("expandButton") as HTMLDivElement;
-const viewSrcButton = document.getElementById("button") as HTMLAnchorElement;
-const panelScrim = document.getElementById("panelScrim") as HTMLDivElement;
-const previewsToggler = document.getElementById("previewsToggler") as HTMLImageElement;
+const panel = document.getElementById('panel') as HTMLDivElement;
+const content = document.getElementById('content') as HTMLDivElement;
+const viewer = document.getElementById('viewer') as HTMLIFrameElement;
+const filterInput = document.getElementById('filterInput') as HTMLInputElement;
+const clearSearchButton = document.getElementById('clearSearchButton') as HTMLDivElement;
+const expandButton = document.getElementById('expandButton') as HTMLDivElement;
+const viewSrcButton = document.getElementById('button') as HTMLAnchorElement;
+const panelScrim = document.getElementById('panelScrim') as HTMLDivElement;
+const previewsToggler = document.getElementById('previewsToggler') as HTMLImageElement;
 
-const sectionLink = document.querySelector("#sections > a") as HTMLAnchorElement;
+const sectionLink = document.querySelector('#sections > a') as HTMLAnchorElement;
 const sectionDefaultHref = sectionLink.href;
 
 const links = {};
 const validRedirects = new Map();
-const container = document.createElement("div");
+const container = document.createElement('div');
 
 let selected = null;
 
@@ -23,18 +23,19 @@ async function init()
 {
     content.appendChild(container);
 
-    viewSrcButton.style.display = "none";
+    viewSrcButton.style.display = 'none';
 
-    const files = await (await fetch("./files.json")).json();
-    const tags = await (await fetch("./tags.json")).json();
+    const files = await (await fetch('./files.json')).json();
+    const tags = await (await fetch('./tags.json')).json();
 
     for (const key in files)
     {
         const category = files[key];
 
-        const header = document.createElement("h2");
+        const header = document.createElement('h2');
+
         header.textContent = key;
-        header.setAttribute("data-category", key);
+        header.setAttribute('data-category', key);
         container.appendChild(header);
 
         for (let i = 0; i < category.length; i++)
@@ -46,6 +47,7 @@ async function init()
                 validRedirects.set(file, `src/webgpu/${file}/index.html`);
 
                 const link = createLink(file, tags[file]);
+
                 container.appendChild(link);
 
                 links[file] = link;
@@ -53,7 +55,7 @@ async function init()
         }
     }
 
-    if (window.location.hash !== "")
+    if (window.location.hash !== '')
     {
         const file = window.location.hash.substring(1);
 
@@ -63,72 +65,72 @@ async function init()
         {
             selectFile(file);
             viewer.src = validRedirects.get(file);
-            viewer.style.display = "unset";
+            viewer.style.display = 'unset';
         }
     }
 
-    if (viewer.src === "")
+    if (viewer.src === '')
     {
-        viewer.srcdoc = (document.getElementById("PlaceholderHTML") as HTMLTemplateElement).innerHTML;
-        viewer.style.display = "unset";
+        viewer.srcdoc = (document.getElementById('PlaceholderHTML') as HTMLTemplateElement).innerHTML;
+        viewer.style.display = 'unset';
     }
 
     filterInput.value = extractQuery();
 
-    if (filterInput.value !== "")
+    if (filterInput.value !== '')
     {
-        panel.classList.add("searchFocused");
+        panel.classList.add('searchFocused');
 
         updateFilter(files, tags);
     }
     else
     {
-        updateLink("");
+        updateLink('');
     }
 
     // Events
 
     filterInput.onfocus = function ()
     {
-        panel.classList.add("searchFocused");
+        panel.classList.add('searchFocused');
     };
 
     filterInput.onblur = function ()
     {
-        if (filterInput.value === "")
+        if (filterInput.value === '')
         {
-            panel.classList.remove("searchFocused");
+            panel.classList.remove('searchFocused');
         }
     };
 
     clearSearchButton.onclick = function ()
     {
-        filterInput.value = "";
+        filterInput.value = '';
         updateFilter(files, tags);
         filterInput.focus();
     };
 
-    filterInput.addEventListener("input", function ()
+    filterInput.addEventListener('input', function ()
     {
         updateFilter(files, tags);
     });
 
-    expandButton.addEventListener("click", function (event)
+    expandButton.addEventListener('click', function (event)
     {
         event.preventDefault();
-        panel.classList.toggle("open");
+        panel.classList.toggle('open');
     });
 
     panelScrim.onclick = function (event)
     {
         event.preventDefault();
-        panel.classList.toggle("open");
+        panel.classList.toggle('open');
     };
 
     previewsToggler.onclick = function (event)
     {
         event.preventDefault();
-        content.classList.toggle("minimal");
+        content.classList.toggle('minimal');
     };
 
     // iOS iframe auto-resize workaround
@@ -137,13 +139,13 @@ async function init()
     {
         viewer.style.width = getComputedStyle(viewer).width;
         viewer.style.height = getComputedStyle(viewer).height;
-        viewer.setAttribute("scrolling", "no");
+        viewer.setAttribute('scrolling', 'no');
     }
 }
 
 function createLink(file, tags)
 {
-    const external = Array.isArray(tags) && tags.includes("external") ? " <span class=\"tag\">external</span>" : "";
+    const external = Array.isArray(tags) && tags.includes('external') ? ' <span class="tag">external</span>' : '';
 
     const template = `
 				<div class="card">
@@ -158,8 +160,9 @@ function createLink(file, tags)
 
     const link = createElementFromHTML(template) as HTMLDivElement;
 
-    const element = link.querySelector("a[target=\"viewer\"]") as HTMLAnchorElement;
-    element.addEventListener("click", function (event: MouseEvent)
+    const element = link.querySelector('a[target="viewer"]') as HTMLAnchorElement;
+
+    element.addEventListener('click', function (event: MouseEvent)
     {
         if (event.button !== 0 || event.ctrlKey || event.altKey || event.metaKey) return;
 
@@ -171,44 +174,45 @@ function createLink(file, tags)
 
 function selectFile(file)
 {
-    if (selected !== null) (links[selected] as HTMLDivElement).classList.remove("selected");
+    if (selected !== null) (links[selected] as HTMLDivElement).classList.remove('selected');
 
-    links[file].classList.add("selected");
+    links[file].classList.add('selected');
 
     window.location.hash = file;
     viewer.focus();
-    viewer.style.display = "unset";
+    viewer.style.display = 'unset';
 
-    panel.classList.remove("open");
+    panel.classList.remove('open');
 
     selected = file;
 
     // Reveal "View source" button and set attributes to this example
-    viewSrcButton.style.display = "";
+    viewSrcButton.style.display = '';
     viewSrcButton.href = `https://github.com/feng3d-labs/webgpu/tree/master/examples/src/webgpu/${selected}/index.ts`;
     viewSrcButton.title = `View source code for ${getName(selected)} on GitHub`;
 }
 
 function escapeRegExp(string)
 {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // https://stackoverflow.com/a/6969486/5250847
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // https://stackoverflow.com/a/6969486/5250847
 }
 
 function updateFilter(files, tags)
 {
     let v = filterInput.value.trim();
-    v = v.replace(/\s+/gi, " "); // replace multiple whitespaces with a single one
 
-    if (v !== "")
+    v = v.replace(/\s+/gi, ' '); // replace multiple whitespaces with a single one
+
+    if (v !== '')
     {
-        window.history.replaceState({}, "", `?q=${v}${window.location.hash}`);
+        window.history.replaceState({}, '', `?q=${v}${window.location.hash}`);
     }
     else
     {
-        window.history.replaceState({}, "", window.location.pathname + window.location.hash);
+        window.history.replaceState({}, '', window.location.pathname + window.location.hash);
     }
 
-    const exp = new RegExp(escapeRegExp(v), "gi");
+    const exp = new RegExp(escapeRegExp(v), 'gi');
 
     for (const key in files)
     {
@@ -232,6 +236,7 @@ function updateLink(search)
     if (search)
     {
         const link = sectionLink.href.split(/[?#]/)[0];
+
         sectionLink.href = `${link}?q=${search}`;
     }
     else
@@ -243,17 +248,18 @@ function updateLink(search)
 function filterExample(file, exp, tags)
 {
     const link = links[file];
+
     if (!link) return;
-    if (file in tags) file += ` ${tags[file].join(" ")}`;
-    const res = file.replace(/_+/g, " ").match(exp);
+    if (file in tags) file += ` ${tags[file].join(' ')}`;
+    const res = file.replace(/_+/g, ' ').match(exp);
 
     if (res && res.length > 0)
     {
-        link.classList.remove("hidden");
+        link.classList.remove('hidden');
     }
     else
     {
-        link.classList.add("hidden");
+        link.classList.add('hidden');
     }
 }
 
@@ -278,7 +284,9 @@ function layoutList(files)
         {
             const file = section[i];
 
-            if (links[file].classList.contains("hidden") === false)
+            if (!links[file]) continue;
+
+            if (links[file].classList.contains('hidden') === false)
             {
                 collapsed = false;
                 break;
@@ -289,11 +297,11 @@ function layoutList(files)
 
         if (collapsed)
         {
-            element.classList.add("hidden");
+            element.classList.add('hidden');
         }
         else
         {
-            element.classList.remove("hidden");
+            element.classList.remove('hidden');
         }
     }
 }
@@ -302,17 +310,18 @@ function extractQuery()
 {
     const search = window.location.search;
 
-    if (search.indexOf("?q=") !== -1)
+    if (search.indexOf('?q=') !== -1)
     {
         return decodeURI(search.slice(3));
     }
 
-    return "";
+    return '';
 }
 
 function createElementFromHTML(htmlString)
 {
-    const div = document.createElement("div");
+    const div = document.createElement('div');
+
     div.innerHTML = htmlString.trim();
 
     return div.firstChild;

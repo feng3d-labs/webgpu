@@ -1,9 +1,9 @@
-import { reactive } from "@feng3d/reactivity";
-import { CanvasContext, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from "@feng3d/render-api";
-import { WebGPU } from "@feng3d/webgpu";
-import { mat4, vec3 } from "wgpu-matrix";
+import { reactive } from '@feng3d/reactivity';
+import { CanvasContext, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
+import { mat4, vec3 } from 'wgpu-matrix';
 
-import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from "../../meshes/cube";
+import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
 const basicVertWGSL = `
 struct Uniforms {
@@ -44,11 +44,11 @@ fn main(
 // OffscreenCanvas to be able to display anything. Here we listen for an 'init' message from the
 // main thread that will contain an OffscreenCanvas transferred from the page, and use that as the
 // signal to begin WebGPU initialization.
-self.addEventListener("message", (ev) =>
+self.addEventListener('message', (ev) =>
 {
     switch (ev.data.type)
     {
-        case "init": {
+        case 'init': {
             try
             {
                 init(ev.data.offscreenCanvas);
@@ -56,7 +56,7 @@ self.addEventListener("message", (ev) =>
             catch (err)
             {
                 console.error(
-                    `Error while initializing WebGPU in worker process: ${err.message}`
+                    `Error while initializing WebGPU in worker process: ${err.message}`,
                 );
             }
             break;
@@ -74,8 +74,8 @@ async function init(canvas: OffscreenCanvas)
 
     // Create a vertex buffer from the cube data.
     const verticesBuffer: VertexAttributes = {
-        position: { data: cubeVertexArray, format: "float32x4", offset: cubePositionOffset, arrayStride: cubeVertexSize },
-        uv: { data: cubeVertexArray, format: "float32x2", offset: cubeUVOffset, arrayStride: cubeVertexSize },
+        position: { data: cubeVertexArray, format: 'float32x4', offset: cubePositionOffset, arrayStride: cubeVertexSize },
+        uv: { data: cubeVertexArray, format: 'float32x2', offset: cubeUVOffset, arrayStride: cubeVertexSize },
     };
 
     const pipeline: RenderPipeline = {
@@ -86,24 +86,24 @@ async function init(canvas: OffscreenCanvas)
             code: vertexPositionColorWGSL,
         },
         primitive: {
-            topology: "triangle-list",
+            topology: 'triangle-list',
 
             // Backface culling since the cube is solid piece of geometry.
             // Faces pointing away from the camera will be occluded by faces
             // pointing toward the camera.
-            cullFace: "back",
-            frontFace: "ccw",
+            cullFace: 'back',
+            frontFace: 'ccw',
         },
         // Enable depth testing so that the fragment closest to the camera
         // is rendered in front.
         depthStencil: {
             depthWriteEnabled: true,
-            depthCompare: "less",
+            depthCompare: 'less',
         },
     };
 
     const uniformBindGroup = {
-        uniforms: { modelViewProjectionMatrix: undefined },
+        uniforms: { value: { modelViewProjectionMatrix: undefined } },
     };
 
     const renderPassDescriptor: RenderPassDescriptor = {
@@ -112,14 +112,14 @@ async function init(canvas: OffscreenCanvas)
                 view: { texture: { context } }, // Assigned later
 
                 clearValue: [0.5, 0.5, 0.5, 1.0],
-                loadOp: "clear",
-                storeOp: "store",
+                loadOp: 'clear',
+                storeOp: 'store',
             },
         ],
         depthStencilAttachment: {
             depthClearValue: 1.0,
-            depthLoadOp: "clear",
-            depthStoreOp: "store",
+            depthLoadOp: 'clear',
+            depthStoreOp: 'store',
         },
     };
 
@@ -128,20 +128,22 @@ async function init(canvas: OffscreenCanvas)
         (2 * Math.PI) / 5,
         aspect,
         1,
-        100.0
+        100.0,
     );
     const modelViewProjectionMatrix = mat4.create();
 
     function getTransformationMatrix()
     {
         const viewMatrix = mat4.identity();
+
         mat4.translate(viewMatrix, vec3.fromValues(0, 0, -4), viewMatrix);
         const now = Date.now() / 1000;
+
         mat4.rotate(
             viewMatrix,
             vec3.fromValues(Math.sin(now), Math.cos(now), 0),
             1,
-            viewMatrix
+            viewMatrix,
         );
 
         mat4.multiply(projectionMatrix, viewMatrix, modelViewProjectionMatrix);
@@ -157,16 +159,17 @@ async function init(canvas: OffscreenCanvas)
                     pipeline,
                     bindingResources: uniformBindGroup,
                     vertices: verticesBuffer,
-                    draw: { __type__: "DrawVertex", vertexCount: cubeVertexCount }
-                }]
-            }]
-        }]
+                    draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount },
+                }],
+            }],
+        }],
     };
 
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
-        reactive(uniformBindGroup.uniforms).modelViewProjectionMatrix = transformationMatrix.slice();
+
+        reactive(uniformBindGroup.uniforms.value).modelViewProjectionMatrix = transformationMatrix.slice();
 
         webgpu.submit(submit);
 

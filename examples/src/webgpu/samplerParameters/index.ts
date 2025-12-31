@@ -1,11 +1,11 @@
-import { GUI } from "dat.gui";
-import { mat4 } from "wgpu-matrix";
-import { reactive } from "@feng3d/reactivity";
-import { BindingResources, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureSource } from "@feng3d/render-api";
-import { getGBuffer, WebGPU } from "@feng3d/webgpu";
+import { reactive } from '@feng3d/reactivity';
+import { BindingResources, Buffer, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureSource } from '@feng3d/render-api';
+import { WebGPU } from '@feng3d/webgpu';
+import { GUI } from 'dat.gui';
+import { mat4 } from 'wgpu-matrix';
 
-import showTextureWGSL from "./showTexture.wgsl";
-import texturedSquareWGSL from "./texturedSquare.wgsl";
+import showTextureWGSL from './showTexture.wgsl';
+import texturedSquareWGSL from './texturedSquare.wgsl';
 
 const kMatrices: Readonly<Float32Array> = new Float32Array([
     // Row 1: Scale by 2
@@ -51,22 +51,22 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             Number(config.highlightFlange),
         ]);
 
-        if (getGBuffer(bufConfig).writeBuffers)
+        if (Buffer.getBuffer(bufConfig.buffer).writeBuffers)
         {
-            getGBuffer(bufConfig).writeBuffers.push({ bufferOffset: 64, data });
+            Buffer.getBuffer(bufConfig.buffer).writeBuffers.push({ bufferOffset: 64, data });
         }
         else
         {
-            reactive(getGBuffer(bufConfig)).writeBuffers = [{ bufferOffset: 64, data }];
+            reactive(Buffer.getBuffer(bufConfig.buffer)).writeBuffers = [{ bufferOffset: 64, data }];
         }
     };
 
     const kInitSamplerDescriptor = {
-        addressModeU: "clamp-to-edge",
-        addressModeV: "clamp-to-edge",
-        magFilter: "linear",
-        minFilter: "linear",
-        mipmapFilter: "linear",
+        addressModeU: 'clamp-to-edge',
+        addressModeV: 'clamp-to-edge',
+        magFilter: 'linear',
+        minFilter: 'linear',
+        mipmapFilter: 'linear',
         lodMinClamp: 0,
         lodMaxClamp: 4,
         maxAnisotropy: 1,
@@ -87,60 +87,67 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 Object.assign(config, { flangeLogSize: 10 });
                 Object.assign(r_samplerDescriptor, {
-                    addressModeU: "repeat",
-                    addressModeV: "repeat",
+                    addressModeU: 'repeat',
+                    addressModeV: 'repeat',
                 });
                 gui.updateDisplay();
             },
             smooth()
             {
                 Object.assign(r_samplerDescriptor, {
-                    magFilter: "linear",
-                    minFilter: "linear",
-                    mipmapFilter: "linear",
+                    magFilter: 'linear',
+                    minFilter: 'linear',
+                    mipmapFilter: 'linear',
                 });
                 gui.updateDisplay();
             },
             crunchy()
             {
                 Object.assign(r_samplerDescriptor, {
-                    magFilter: "nearest",
-                    minFilter: "nearest",
-                    mipmapFilter: "nearest",
+                    magFilter: 'nearest',
+                    minFilter: 'nearest',
+                    mipmapFilter: 'nearest',
                 });
                 gui.updateDisplay();
             },
         };
-        const presets = gui.addFolder("Presets");
-        presets.open();
-        presets.add(buttons, "initial").name("reset to initial");
-        presets.add(buttons, "checkerboard").name("checkered floor");
-        presets.add(buttons, "smooth").name("smooth (linear)");
-        presets.add(buttons, "crunchy").name("crunchy (nearest)");
+        const presets = gui.addFolder('Presets');
 
-        const flangeFold = gui.addFolder("Plane settings");
+        presets.open();
+        presets.add(buttons, 'initial').name('reset to initial');
+        presets.add(buttons, 'checkerboard').name('checkered floor');
+        presets.add(buttons, 'smooth').name('smooth (linear)');
+        presets.add(buttons, 'crunchy').name('crunchy (nearest)');
+
+        const flangeFold = gui.addFolder('Plane settings');
+
         flangeFold.open();
-        flangeFold.add(config, "flangeLogSize", 0, 10.0, 0.1).name("size = 2**");
-        flangeFold.add(config, "highlightFlange");
-        flangeFold.add(config, "animation", 0, 0.5);
+        flangeFold.add(config, 'flangeLogSize', 0, 10.0, 0.1).name('size = 2**');
+        flangeFold.add(config, 'highlightFlange');
+        flangeFold.add(config, 'animation', 0, 0.5);
 
         gui.width = 280;
         {
-            const folder = gui.addFolder("GPUSamplerDescriptor");
+            const folder = gui.addFolder('GPUSamplerDescriptor');
+
             folder.open();
 
-            const kAddressModes = ["clamp-to-edge", "repeat", "mirror-repeat"];
-            folder.add(r_samplerDescriptor, "addressModeU", kAddressModes);
-            folder.add(r_samplerDescriptor, "addressModeV", kAddressModes);
+            const kAddressModes = ['clamp-to-edge', 'repeat', 'mirror-repeat'];
 
-            const kFilterModes = ["nearest", "linear"];
-            folder.add(r_samplerDescriptor, "magFilter", kFilterModes);
-            folder.add(r_samplerDescriptor, "minFilter", kFilterModes);
-            const kMipmapFilterModes = ["nearest", "linear"] as const;
-            folder.add(r_samplerDescriptor, "mipmapFilter", kMipmapFilterModes);
+            folder.add(r_samplerDescriptor, 'addressModeU', kAddressModes);
+            folder.add(r_samplerDescriptor, 'addressModeV', kAddressModes);
 
-            const ctlMin = folder.add(r_samplerDescriptor, "lodMinClamp", 0, 4, 0.1);
-            const ctlMax = folder.add(r_samplerDescriptor, "lodMaxClamp", 0, 4, 0.1);
+            const kFilterModes = ['nearest', 'linear'];
+
+            folder.add(r_samplerDescriptor, 'magFilter', kFilterModes);
+            folder.add(r_samplerDescriptor, 'minFilter', kFilterModes);
+            const kMipmapFilterModes = ['nearest', 'linear'] as const;
+
+            folder.add(r_samplerDescriptor, 'mipmapFilter', kMipmapFilterModes);
+
+            const ctlMin = folder.add(r_samplerDescriptor, 'lodMinClamp', 0, 4, 0.1);
+            const ctlMax = folder.add(r_samplerDescriptor, 'lodMaxClamp', 0, 4, 0.1);
+
             ctlMin.onChange((value: number) =>
             {
                 if (r_samplerDescriptor.lodMaxClamp < value) ctlMax.setValue(value);
@@ -152,11 +159,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
             {
                 const folder2 = folder.addFolder(
-                    "maxAnisotropy (set only if all \"linear\")"
+                    'maxAnisotropy (set only if all "linear")',
                 );
+
                 folder2.open();
                 const kMaxAnisotropy = 16;
-                folder2.add(r_samplerDescriptor, "maxAnisotropy", 1, kMaxAnisotropy, 1);
+
+                folder2.add(r_samplerDescriptor, 'maxAnisotropy', 1, kMaxAnisotropy, 1);
             }
         }
     }
@@ -180,7 +189,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kScaleFactor = Math.floor(kCanvasLayoutDevicePixels / kCanvasSize);
     const kCanvasDevicePixels = kScaleFactor * kCanvasSize;
     const kCanvasCSSSize = kCanvasDevicePixels / devicePixelRatio;
-    canvas.style.imageRendering = "pixelated";
+
+    canvas.style.imageRendering = 'pixelated';
     canvas.width = canvas.height = kCanvasSize;
     canvas.style.minWidth = canvas.style.maxWidth = `${kCanvasCSSSize}px`;
 
@@ -208,33 +218,37 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         [216, 27, 96, 255], // pink
     ];
     const writeTextures: TextureSource[] = [];
+
     for (let mipLevel = 0; mipLevel < kTextureMipLevels; ++mipLevel)
     {
         const size = 2 ** (kTextureMipLevels - mipLevel); // 16, 8, 4, 2
         const data = new Uint8Array(size * size * 4);
+
         for (let y = 0; y < size; ++y)
         {
             for (let x = 0; x < size; ++x)
             {
                 data.set(
                     (x + y) % 2 ? kColorForLevel[mipLevel] : [0, 0, 0, 255],
-                    (y * size + x) * 4
+                    (y * size + x) * 4,
                 );
             }
         }
         writeTextures.push({
-            __type__: "TextureDataSource",
+            __type__: 'TextureDataSource',
             mipLevel,
             data,
             dataLayout: { width: size },
-            size: [size, size]
+            size: [size, size],
         });
     }
     const checkerboard: Texture = {
-        format: "rgba8unorm",
-        size: [kTextureBaseSize, kTextureBaseSize],
-        mipLevelCount: 4,
-        sources: writeTextures
+        descriptor: {
+            format: 'rgba8unorm',
+            size: [kTextureBaseSize, kTextureBaseSize],
+            mipLevelCount: 4,
+        },
+        sources: writeTextures,
     };
 
     //
@@ -242,7 +256,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     //
 
     const showTexturePipeline: RenderPipeline = {
-        vertex: { code: showTextureWGSL }, fragment: { code: showTextureWGSL }
+        vertex: { code: showTextureWGSL }, fragment: { code: showTextureWGSL },
     };
 
     //
@@ -257,10 +271,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const kCameraDist = 3;
     const viewProj = mat4.translate(
         mat4.perspective(2 * Math.atan(1 / kCameraDist), 1, 0.1, 100),
-        [0, 0, -kCameraDist]
+        [0, 0, -kCameraDist],
     );
     const bufConfig = new Uint8Array(128);
-    reactive(getGBuffer(bufConfig)).writeBuffers = [{ data: viewProj }];
+
+    reactive(Buffer.getBuffer(bufConfig.buffer)).writeBuffers = [{ data: viewProj }];
 
     const bufMatrices = kMatrices;
 
@@ -269,7 +284,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             {
                 view: { texture: { context: { canvasId: canvas.id } } },
                 clearValue: [0.2, 0.2, 0.2, 1.0],
-            }
+            },
         ],
     };
 
@@ -292,8 +307,8 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 viewport: { isYup: false, x: vpX, y: vpY, width: kViewportSize, height: kViewportSize, minDepth: 0, maxDepth: 1 },
                 pipeline: texturedSquarePipeline,
                 bindingResources: bindingResources0,
-                draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i }
-            }
+                draw: { __type__: 'DrawVertex', vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: i },
+            },
         );
     }
 
@@ -301,37 +316,38 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         tex: { texture: checkerboard },
     };
     const kLastViewport = (kViewportGridSize - 1) * kViewportGridStride + 1;
+
     renderObjects.push(
         {
             viewport: { isYup: false, x: kLastViewport, y: kLastViewport, width: 32, height: 32, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 }
-        }
+            draw: { __type__: 'DrawVertex', vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 0 },
+        },
     );
     renderObjects.push(
         {
             viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport, width: 16, height: 16, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 }
-        }
+            draw: { __type__: 'DrawVertex', vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 1 },
+        },
     );
     renderObjects.push(
         {
             viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 16, width: 8, height: 8, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 }
-        }
+            draw: { __type__: 'DrawVertex', vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 3 },
+        },
     );
     renderObjects.push(
         {
             viewport: { isYup: false, x: kLastViewport + 32, y: kLastViewport + 24, width: 4, height: 4, minDepth: 0, maxDepth: 1 },
             pipeline: showTexturePipeline,
             bindingResources: bindingResources1,
-            draw: { __type__: "DrawVertex", vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 }
-        }
+            draw: { __type__: 'DrawVertex', vertexCount: 6, instanceCount: 1, firstVertex: 0, firstInstance: 2 },
+        },
     );
 
     const submit: Submit = {
@@ -341,10 +357,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                     {
                         descriptor: renderPass,
                         renderPassObjects: renderObjects,
-                    }
-                ]
-            }
-        ]
+                    },
+                ],
+            },
+        ],
     };
 
     function frame()
@@ -360,5 +376,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 };
 
 const panel = new GUI({ width: 310 });
-const webgpuCanvas = document.getElementById("webgpu") as HTMLCanvasElement;
+const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
+
 init(webgpuCanvas, panel);
