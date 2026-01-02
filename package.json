@@ -16,15 +16,16 @@
     }
   },
   "scripts": {
-    "dev": "cd examples && npm run dev",
+    "examples:dev": "cd examples && npm run dev",
+    "test_web": "cd test_web && npm run dev",
     "clean": "rimraf lib dist public",
     "build": "vite build && tsc",
     "watch": "concurrently \"vite build --watch\" \"tsc -w\" \"vitest\"",
     "test": "vitest run",
-    "test_web": "vite --config test_vite.config.js",
     "lint": "eslint . --ext .js,.ts --max-warnings 0",
     "lintfix": "npm run lint -- --fix",
-    "docs": "typedoc && cd examples && vite build --outDir ../public",
+    "docs": "typedoc",
+    "postdocs": "node scripts/postdocs.js && cd examples && vite build --outDir ../public",
     "upload_oss": "npm run docs && npx feng3d-cli oss_upload_dir",
     "prepublishOnly": "node scripts/prepublish.js",
     "release": "npm run clean && npm run lint && npm test && npm run build && npm run docs && npm publish",
@@ -43,6 +44,7 @@
   "workspaces": [
     ".",
     "./examples",
+    "./test_web",
     "packages/*",
     "packages/*/examples"
   ],

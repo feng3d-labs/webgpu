@@ -5,7 +5,7 @@
  */
 
 // 导入自动生成的测试配置
-import { tests as testConfigs } from './test_web/test-config';
+import { tests as testConfigs } from './test-config';
 
 interface TestInfo
 {
@@ -129,17 +129,10 @@ function collectAllDirPaths(node: DirNode, paths: Set<string>)
 // 递归渲染目录节点
 function renderDirNode(node: DirNode, parentElement: HTMLElement)
 {
-    // 排序：先显示本项目的（test_web），再显示其他项目的
+    // 排序：按名称字母顺序排列
     const sortedChildren = Array.from(node.children.values()).sort((a, b) =>
-    {
-        const isAProject = a.fullPath === 'test_web' || a.fullPath.startsWith('test_web/');
-        const isBProject = b.fullPath === 'test_web' || b.fullPath.startsWith('test_web/');
-
-        if (isAProject && !isBProject) return -1;
-        if (!isAProject && isBProject) return 1;
-
-        return a.name.localeCompare(b.name);
-    });
+        a.name.localeCompare(b.name),
+    );
 
     // 渲染子目录
     sortedChildren.forEach((child) =>
@@ -330,7 +323,7 @@ function runTest(index: number)
     {
         try
         {
-            if (iframe.contentWindow && iframe.contentWindow.location.pathname === '/test.html')
+            if (iframe.contentWindow && iframe.contentWindow.location.pathname === '/index.html')
             {
                 clearTimeout(timeout);
                 test.status = 'fail';
@@ -439,3 +432,4 @@ document.addEventListener('DOMContentLoaded', () =>
 
 // 将函数暴露到全局作用域，以便 HTML 中的 onclick 可以调用
 (window as any).openTest = openTest;
+

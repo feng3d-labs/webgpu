@@ -6,7 +6,6 @@ import fg from 'fast-glob';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const testWebDir = resolve(__dirname, 'test_web');
 
 const TEST_FILE_PATTERN = '**/*.spect.html';
 const EXCLUDE_PATTERNS = [
@@ -21,10 +20,10 @@ export default defineConfig({
     publicDir: false,
     server: {
         port: 3002,
-        open: '/test.html',
+        open: '/index.html',
     },
     build: {
-        outDir: resolve(__dirname, 'test_dist'),
+        outDir: resolve(__dirname, '../public/test_web'),
         rollupOptions: {
             input: getSpectHtmlFiles(),
             output: {
@@ -58,8 +57,8 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            '@feng3d/webgpu': resolve(__dirname, 'src'),
-            '@feng3d/render-api': resolve(__dirname, '../render-api/src'),
+            '@feng3d/webgpu': resolve(__dirname, '../src'),
+            '@feng3d/render-api': resolve(__dirname, '../../render-api/src'),
         },
     },
     plugins: [
@@ -99,10 +98,10 @@ function findSpectHtmlFiles(baseDir, scanDir, pattern = '**/*.spect.html', exclu
 function getSpectHtmlFiles()
 {
     const input = {
-        main: resolve(__dirname, 'test.html'),
+        main: resolve(__dirname, 'index.html'),
     };
 
-    const testFiles = findSpectHtmlFiles(testWebDir, __dirname, TEST_FILE_PATTERN, EXCLUDE_PATTERNS);
+    const testFiles = findSpectHtmlFiles(__dirname, __dirname, TEST_FILE_PATTERN, EXCLUDE_PATTERNS);
 
     testFiles.forEach((file) =>
     {
@@ -144,7 +143,7 @@ function extractTestInfo(htmlContent, fileName)
 
 function generateTestConfig()
 {
-    const testFiles = findSpectHtmlFiles(testWebDir, __dirname, TEST_FILE_PATTERN, EXCLUDE_PATTERNS);
+    const testFiles = findSpectHtmlFiles(__dirname, __dirname, TEST_FILE_PATTERN, EXCLUDE_PATTERNS);
 
     const tests = testFiles.map((file) =>
     {
@@ -195,7 +194,7 @@ export interface TestInfo
 export const tests: TestInfo[] = ${testsWithSingleQuotes};
 `;
 
-    const configPath = join(testWebDir, 'test-config.ts');
+    const configPath = join(__dirname, 'test-config.ts');
 
     writeFileSync(configPath, configContent, 'utf-8');
 
@@ -231,3 +230,4 @@ function shaderToString()
         },
     };
 }
+
