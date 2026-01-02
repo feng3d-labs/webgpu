@@ -8,6 +8,9 @@ const namespace = 'feng3d';
 const external = pkg.standalone ? [] : Object.keys(pkg.dependencies || []);
 const globals = () => namespace;
 
+// 构建时在输出文件底部添加版本号打印
+const versionBanner = `console.log("${pkg.name} v${pkg.version}");`;
+
 export default defineConfig({
     build: {
         lib: {
@@ -25,6 +28,8 @@ export default defineConfig({
             output: {
                 // 在 UMD 构建模式下为这些外部化的依赖提供一个全局变量
                 globals,
+                // 在输出文件底部添加版本号打印
+                footer: versionBanner,
             },
         },
     },

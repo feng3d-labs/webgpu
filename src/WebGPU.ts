@@ -82,7 +82,7 @@ export class WebGPU
                 context: this._canvasContext,
             },
         };
-        this.autoFlipRTT = options?.autoFlipRTT ?? true;
+        this.autoFlipRTT = options?.autoFlipRTT ?? false;
     }
 
     destroy()

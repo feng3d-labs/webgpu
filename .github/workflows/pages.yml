@@ -1,15 +1,16 @@
 # 将文档发布到 GitHub Pages
-# 仅在主分支版本号发生变化时触发部署
+# 在 npm 发布成功后自动执行，也可手动触发
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches:
-      - master
-      - main
-    paths:
-      - 'package.json'  # 仅在 package.json 变化时触发
-  workflow_dispatch:  # 支持手动触发
+  # npm 发布成功后自动触发
+  workflow_run:
+    workflows: ["Publish to NPM"]
+    types:
+      - completed
+
+  # 支持手动触发
+  workflow_dispatch:
 
 # 设置 GITHUB_TOKEN 的权限
 permissions:
@@ -23,40 +24,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # 检查版本号是否变化
-  check-version:
-    runs-on: ubuntu-latest
-    outputs:
-      version_changed: ${{ steps.check.outputs.changed }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 2  # 获取最近两次提交以比较版本
-
-      - name: Check if version changed
-        id: check
-        run: |
-          # 获取当前版本
-          CURRENT_VERSION=$(node -p "require('./package.json').version")
-          # 获取上一次提交的版本
-          git checkout HEAD~1 -- package.json 2>/dev/null || echo "First commit"
-          PREVIOUS_VERSION=$(node -p "require('./package.json').version" 2>/dev/null || echo "0.0.0")
-          git checkout HEAD -- package.json
-          
-          if [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
-            echo "Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION"
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "Version unchanged: $CURRENT_VERSION"
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
-
   build:
     runs-on: ubuntu-latest
-    needs: check-version
-    # 仅在版本号变化或手动触发时构建
-    if: needs.check-version.outputs.version_changed == 'true' || github.event_name == 'workflow_dispatch'
+    # 仅在 publish 成功后执行，或手动触发时执行
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -90,4 +61,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-

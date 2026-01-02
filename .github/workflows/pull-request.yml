@@ -1,6 +1,6 @@
-# CI - 运行单元测试
-# 在合并到主分支或在主分支提交代码时执行
-name: CI
+# 代码检查和测试
+# 在 PR 或推送到主分支时执行
+name: Lint and Test
 
 on:
   push:
