@@ -85,6 +85,8 @@ if (!webgpuCanvas)
 init(webgpuCanvas);
 ```
 
+[![在 StackBlitz 中打开](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/feng3d-labs/webgpu/tree/master/examples)
+
 ## 参考
 1. https://github.com/webgpu/webgpu-samples
 2. https://www.orillusion.com/zh/webgpu.html
