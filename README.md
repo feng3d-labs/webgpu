@@ -14,8 +14,8 @@ npm install @feng3d/webgpu
 ```
 
 ## 如何使用
-```
-import { ISubmit } from "@feng3d/render-api";
+```typescript
+import { Submit } from "@feng3d/render-api";
 import { WebGPU } from "@feng3d/webgpu";
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -26,7 +26,7 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     const webgpu = await new WebGPU().init(); // 初始化WebGPU
 
-    const submit: ISubmit = { // 一次GPU提交
+    const submit: Submit = { // 一次GPU提交
         commandEncoders: [ // 命令编码列表
             {
                 passEncoders: [ // 通道编码列表
@@ -37,7 +37,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 clearValue: [0.0, 0.0, 0.0, 1.0], // 渲染前填充颜色
                             }],
                         },
-                        renderObjects: [{ // 渲染对象
+                        renderPassObjects: [{ // 渲染对象
                             pipeline: { // 渲染管线
                                 vertex: { // 顶点着色器
                                     code: `
@@ -61,8 +61,8 @@ const init = async (canvas: HTMLCanvasElement) =>
                                 position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: "float32x2" }, // 顶点坐标数据
                             },
                             indices: new Uint16Array([0, 1, 2]), // 顶点索引数据
-                            uniforms: { color: [1, 0, 0, 0] }, // Uniform 颜色值。
-                            drawIndexed: { indexCount: 3 }, // 绘制命令
+                            bindingResources: { color: { value: [1, 0, 0, 1] } }, // Uniform 颜色值
+                            draw: { __type__: "DrawIndexed", indexCount: 3 }, // 绘制命令
                         }]
                     },
                 ]
@@ -83,7 +83,6 @@ if (!webgpuCanvas)
     document.body.appendChild(webgpuCanvas);
 }
 init(webgpuCanvas);
-
 ```
 
 ## 参考
