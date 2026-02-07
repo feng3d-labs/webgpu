@@ -1,0 +1,11 @@
+{
+  "specTests": [
+    {
+      "name": "WebGPU 深度附件和画布颜色读取测试",
+      "description": "测试深度附件的正确性以及从画布读取像素颜色的功能",
+      "htmlFile": "src/tests/depth-attachment-canvas-readpixels.spect.html",
+      "testName": "depth-attachment-canvas-readpixels",
+      "dirPath": "."
+    }
+  ]
+}

@@ -210,10 +210,23 @@
         .stat-value.pending {
             color: #6c757d;
         }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 15px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
 <body>
+    <a href="index.html" class="back-link">← 返回示例列表</a>
     <h1>WebGPU 测试套件</h1>
 
     <div class="summary">
@@ -247,8 +260,7 @@
         <!-- 测试项将由 JavaScript 动态生成 -->
     </div>
 
-    <script type="module" src="./index.ts"></script>
+    <script type="module" src="./src/test.js"></script>
 </body>
 
 </html>
-

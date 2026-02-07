@@ -31,7 +31,7 @@ export default defineConfig({
 
 function getHtmlNamesObject()
 {
-    const entries = fg.sync(['index.html', 'src/**/*.html'], { dot: true });
+    const entries = fg.sync(['index.html', 'test.html', 'src/**/*.html'], { dot: true });
 
     const obj = entries.reduce((pv, cv) =>
     {

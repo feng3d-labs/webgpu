@@ -5,7 +5,7 @@
  */
 
 // 导入自动生成的测试配置
-import { tests as testConfigs } from './test-config';
+import { tests as testConfigs } from './test-config.js';
 
 interface TestInfo
 {
@@ -17,6 +17,7 @@ interface TestInfo
     testName?: string; // 用于匹配 postMessage 中的 testName
     dirPath?: string; // 目录路径（相对于根目录）
     iframe?: HTMLIFrameElement;
+    type: 'spectest' | 'example'; // 测试类型
 }
 
 // 从配置文件初始化测试列表
@@ -28,6 +29,7 @@ function initializeTests(): TestInfo[]
         htmlFile: config.htmlFile,
         testName: config.testName,
         dirPath: config.dirPath,
+        type: config.type,
         status: 'pending' as const,
     }));
 }
@@ -260,6 +262,33 @@ export function openTest(index: number)
     }
 }
 
+// 检查 WebGPU 是否可用
+async function checkWebGPU(): Promise<{ success: boolean; error?: string }>
+{
+    try
+    {
+        const gpu = (navigator as any).gpu;
+
+        if (!gpu)
+        {
+            return { success: false, error: 'WebGPU 不受支持' };
+        }
+        const adapter = await gpu.requestAdapter();
+
+        if (!adapter)
+        {
+            return { success: false, error: '没有可用的 WebGPU 适配器' };
+        }
+        adapter.dispose();
+
+        return { success: true };
+    }
+    catch (e)
+    {
+        return { success: false, error: e instanceof Error ? e.message : String(e) };
+    }
+}
+
 // 运行单个测试
 function runTest(index: number)
 {
@@ -345,35 +374,75 @@ function runTest(index: number)
     // 监听 iframe 发送的消息
     const messageHandler = (event: MessageEvent) =>
     {
-        if (event.data && event.data.type === 'test-result' && event.data.testName === test.testName)
+        if (event.data && event.data.type === 'test-result')
         {
-            clearTimeout(timeout);
-            window.removeEventListener('message', messageHandler);
+            // 对于 spectest，使用 testName 匹配
+            // 对于 example，使用 htmlFile 匹配（没有 testName 的情况）
+            const isMatch = test.type === 'spectest'
+                ? event.data.testName === test.testName
+                : event.data.testName === test.testName || (!test.testName && event.source === iframe.contentWindow);
 
-            test.status = event.data.passed ? 'pass' : 'fail';
-            if (event.data.message)
+            if (isMatch)
             {
-                test.error = event.data.message;
-            }
-            else if (!event.data.passed)
-            {
-                test.error = '测试失败，但未提供详细错误信息';
-            }
+                clearTimeout(timeout);
+                window.removeEventListener('message', messageHandler);
 
-            // 延迟移除 iframe，确保测试完全完成
-            setTimeout(() =>
-            {
-                if (iframe.parentNode)
+                test.status = event.data.passed ? 'pass' : 'fail';
+                if (event.data.message)
                 {
-                    iframe.parentNode.removeChild(iframe);
+                    test.error = event.data.message;
                 }
-            }, 500);
+                else if (!event.data.passed)
+                {
+                    test.error = '测试失败，但未提供详细错误信息';
+                }
 
-            renderTestList();
+                // 延迟移除 iframe，确保测试完全完成
+                setTimeout(() =>
+                {
+                    if (iframe.parentNode)
+                    {
+                        iframe.parentNode.removeChild(iframe);
+                    }
+                }, 500);
+
+                renderTestList();
+            }
         }
     };
 
     window.addEventListener('message', messageHandler);
+
+    // 对于普通示例（没有测试接口的），等待一段时间后检查 WebGPU 支持
+    if (test.type === 'example' && !test.testName)
+    {
+        setTimeout(async () =>
+        {
+            if (test.status === 'pending')
+            {
+                // 检查 WebGPU 是否可用
+                const result = await checkWebGPU();
+
+                if (result.success)
+                {
+                    test.status = 'pass';
+                }
+                else
+                {
+                    test.status = 'fail';
+                    test.error = result.error || 'WebGPU 初始化失败';
+                }
+                clearTimeout(timeout);
+                renderTestList();
+
+                // 移除 iframe
+                if (iframe.parentNode)
+                {
+                    iframe.parentNode.removeChild(iframe);
+                }
+            }
+        }, 3000);
+    }
 }
 
 // 运行所有测试
@@ -432,4 +501,3 @@ document.addEventListener('DOMContentLoaded', () =>
 
 // 将函数暴露到全局作用域，以便 HTML 中的 onclick 可以调用
 (window as any).openTest = openTest;
-

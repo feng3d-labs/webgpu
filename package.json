@@ -17,7 +17,6 @@
   },
   "scripts": {
     "examples:dev": "cd examples && npm run dev",
-    "test_web": "cd test_web && npm run dev",
     "postdocs": "node scripts/postdocs.js && cd examples && vite build --outDir ../public",
     "clean": "rimraf lib dist public",
     "build": "vite build && tsc",
@@ -78,7 +77,6 @@
   "workspaces": [
     ".",
     "./examples",
-    "./test_web",
     "packages/*",
     "packages/*/examples"
   ]
