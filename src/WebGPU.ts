@@ -17,14 +17,7 @@ import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultipl
 export interface WebGPUOptions extends CanvasContext
 {
     /**
-     * 是否自动翻转 RTT（渲染到纹理）的 Y 轴，以兼容 WebGL 坐标系。
-     *
-     * WebGL 和 WebGPU 在 RTT 场景下纹理坐标系不同：
-     * - WebGL：Y 轴向上，纹理原点在左下角
-     * - WebGPU：Y 轴向下，纹理原点在左上角
-     *
-     * 启用此选项后，WebGPU 会在渲染到纹理后自动翻转 Y 轴，
-     * 使 WebGL 和 WebGPU 的渲染结果保持一致。
+     * 是否自动翻转 RTT（渲染到纹理）的 Y 轴。
      *
      * @default true
      */

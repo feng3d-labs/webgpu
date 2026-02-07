@@ -3,8 +3,6 @@ import flipDepthTextureShader from './flipDepthTextureShader.wgsl';
 /**
  * 翻转深度纹理的 Y 轴
  *
- * 使用深度渲染通道实现翻转，使 WebGPU 的深度纹理与 WebGL 坐标系一致。
- *
  * @param device GPU 设备
  * @param commandEncoder 命令编码器
  * @param depthTexture 要翻转的深度纹理

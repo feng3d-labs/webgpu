@@ -14,8 +14,6 @@ export interface FlipRTTTextureOptions
 /**
  * 翻转 RTT 纹理的 Y 轴（使用已有的 commandEncoder）
  *
- * 用于在渲染通道结束后立即翻转纹理，使 WebGPU 的 RTT 结果与 WebGL 坐标系一致。
- *
  * @param device GPU 设备
  * @param commandEncoder 命令编码器
  * @param texture 要翻转的纹理

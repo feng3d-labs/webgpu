@@ -49,7 +49,7 @@ export class WGPUBlendState extends ReactiveObject
         this._computedGpuBlendState = computed(() =>
         {
             const color = WGPUBlendState.getGPUBlendComponent(r_blend.color);
-            // alpha 继承 color 的设置，与 WebGL 保持一致
+            // alpha 继承 color 的设置
             const alpha = WGPUBlendState.getGPUBlendComponent(r_blend.alpha, color);
 
             // 构建WebGPU混合状态对象

@@ -49,7 +49,6 @@ export class WGPUSampler extends ReactiveObject
                 lodMinClamp = 0;
             }
             // 当用户没有显式设置 mipmapFilter 时，lodMaxClamp 默认为 0（不使用 mipmap）
-            // 以保持与 WebGL 行为一致（WebGL 中 minFilter='nearest'/'linear' 不使用 mipmap）
             const lodMaxClamp = r_sampler.lodMaxClamp ?? (r_sampler.mipmapFilter === undefined ? 0 : defaultSampler.lodMaxClamp);
             const compare = r_sampler.compare ?? defaultSampler.compare;
             const maxAnisotropy = (minFilter === 'linear' && magFilter === 'linear' && mipmapFilter === 'linear')
