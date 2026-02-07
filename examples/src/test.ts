@@ -7,6 +7,89 @@
 // 导入自动生成的测试配置
 import { tests as testConfigs } from './test-config.js';
 
+// 存储控制台日志
+const consoleMessages: Map<string, { errors: string[]; warnings: string[]; logs: string[] }> = new Map();
+
+// 拦截全局错误
+const originalError = console.error;
+const originalWarn = console.warn;
+
+console.error = (...args: any[]) =>
+{
+    const message = args.map(arg =>
+        typeof arg === 'string' ? arg : (arg?.message || JSON.stringify(arg)),
+    ).join(' ');
+
+    // 尝试找到当前正在运行的测试
+    const runningTest = tests.find(t => t.status === 'pending' && t.iframe);
+
+    if (runningTest)
+    {
+        const messages = consoleMessages.get(runningTest.name);
+
+        if (messages)
+        {
+            messages.errors.push(message);
+        }
+    }
+
+    originalError.apply(console, args);
+};
+
+console.warn = (...args: any[]) =>
+{
+    const message = args.map(arg =>
+        typeof arg === 'string' ? arg : JSON.stringify(arg),
+    ).join(' ');
+
+    // 尝试找到当前正在运行的测试
+    const runningTest = tests.find(t => t.status === 'pending' && t.iframe);
+
+    if (runningTest)
+    {
+        const messages = consoleMessages.get(runningTest.name);
+
+        if (messages)
+        {
+            messages.warnings.push(message);
+        }
+    }
+
+    originalWarn.apply(console, args);
+};
+
+// 监听全局未捕获的错误
+window.addEventListener('error', (event) =>
+{
+    const runningTest = tests.find(t => t.status === 'pending' && t.iframe);
+
+    if (runningTest)
+    {
+        const messages = consoleMessages.get(runningTest.name);
+
+        if (messages)
+        {
+            messages.errors.push(`未捕获的错误: ${event.message}`);
+        }
+    }
+});
+
+// 监听未处理的 Promise 拒绝
+window.addEventListener('unhandledrejection', (event) =>
+{
+    const runningTest = tests.find(t => t.status === 'pending' && t.iframe);
+
+    if (runningTest)
+    {
+        const messages = consoleMessages.get(runningTest.name);
+
+        if (messages)
+        {
+            messages.errors.push(`未处理的 Promise 拒绝: ${event.reason}`);
+        }
+    }
+});
+
 interface TestInfo
 {
     name: string;
@@ -190,6 +273,7 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
                     </div>
                     <div class="test-description">${test.description}</div>
                     ${test.status === 'fail' && test.error ? `<div class="test-error">${test.error}</div>` : ''}
+                    ${renderConsoleErrors(test.name)}
                 `;
 
                 parentElement.appendChild(testItem);
@@ -221,11 +305,59 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
                 </div>
                 <div class="test-description">${test.description}</div>
                 ${test.status === 'fail' && test.error ? `<div class="test-error">${test.error}</div>` : ''}
+                ${renderConsoleErrors(test.name)}
             `;
 
             parentElement.appendChild(testItem);
         });
     }
+}
+
+// 渲染控制台错误信息
+function renderConsoleErrors(testName: string): string
+{
+    const messages = consoleMessages.get(testName);
+
+    if (!messages || (messages.errors.length === 0 && messages.warnings.length === 0))
+    {
+        return '';
+    }
+
+    let html = '<div class="test-console-output">';
+
+    if (messages.errors.length > 0)
+    {
+        html += '<div class="console-errors">控制台错误:</div>';
+        messages.errors.slice(0, 5).forEach(err =>
+        {
+            html += `<div class="console-error-line">- ${escapeHtml(err)}</div>`;
+        });
+        if (messages.errors.length > 5)
+        {
+            html += `<div class="console-error-line">... 还有 ${messages.errors.length - 5} 个错误</div>`;
+        }
+    }
+    if (messages.warnings.length > 0)
+    {
+        html += '<div class="console-warnings">警告:</div>';
+        messages.warnings.slice(0, 3).forEach(warn =>
+        {
+            html += `<div class="console-warn-line">- ${escapeHtml(warn)}</div>`;
+        });
+    }
+    html += '</div>';
+
+    return html;
+}
+
+// HTML 转义函数
+function escapeHtml(text: string): string
+{
+    const div = document.createElement('div');
+
+    div.textContent = text;
+
+    return div.innerHTML;
 }
 
 // 渲染测试列表
@@ -296,6 +428,9 @@ function runTest(index: number)
 
     if (!test) return;
 
+    // 为每个测试创建控制台消息存储
+    consoleMessages.set(test.name, { errors: [], warnings: [], logs: [] });
+
     // 创建 iframe 来运行测试
     // 注意：WebGPU 需要可见的 canvas 才能正常工作
     // 将 iframe 放在一个很小的可见区域（右下角 1x1 像素），确保 canvas 完全可见
@@ -322,8 +457,16 @@ function runTest(index: number)
     {
         if (test.status === 'pending')
         {
+            const messages = consoleMessages.get(test.name);
+            const errorCount = messages?.errors.length || 0;
+            const errorInfo = errorCount > 0 ? `（${errorCount} 个错误）` : '';
+
             test.status = 'fail';
-            test.error = '测试超时（30秒内未完成）';
+            test.error = `测试超时（30秒内未完成）${errorInfo}`;
+            if (messages && messages.errors.length > 0)
+            {
+                test.error += `\n错误: ${messages.errors[0]}`;
+            }
             renderTestList();
 
             // 移除 iframe
@@ -388,13 +531,29 @@ function runTest(index: number)
                 window.removeEventListener('message', messageHandler);
 
                 test.status = event.data.passed ? 'pass' : 'fail';
+
+                // 检查是否有控制台错误
+                const messages = consoleMessages.get(test.name);
+                const hasErrors = messages && messages.errors.length > 0;
+
                 if (event.data.message)
                 {
                     test.error = event.data.message;
+                    // 如果测试通过但有控制台错误，添加警告信息
+                    if (event.data.passed && hasErrors)
+                    {
+                        test.error += `\n（但有 ${messages.errors.length} 个控制台错误）`;
+                    }
                 }
                 else if (!event.data.passed)
                 {
                     test.error = '测试失败，但未提供详细错误信息';
+                }
+                else if (hasErrors)
+                {
+                    // 测试通过但有控制台错误
+                    test.error = `测试通过，但有 ${messages.errors.length} 个控制台错误`;
+                    test.status = 'fail'; // 将状态改为失败
                 }
 
                 // 延迟移除 iframe，确保测试完全完成

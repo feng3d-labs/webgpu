@@ -3,6 +3,8 @@ import { BindingResources, Buffer, CanvasContext, PassEncoder, RenderPassDescrip
 import { WebGPU } from '@feng3d/webgpu';
 import { mat3, mat4 } from 'wgpu-matrix';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import { modelData } from './models';
 
 type Model = {
@@ -328,9 +330,13 @@ const init = async () =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(render);
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(render);
     }
-    requestAnimationFrame(render);
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
+    rAF(render);
 };
 
 init();

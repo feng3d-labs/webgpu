@@ -1,6 +1,8 @@
 import { RenderPassDescriptor, Submit, RenderObject } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import redFragWGSL from '../../shaders/red.frag.wgsl';
 import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
 
@@ -43,14 +45,16 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
+    // 使用包装后的 requestAnimationFrame
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         webgpu.submit(data);
-
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
 
-    requestAnimationFrame(frame);
+    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

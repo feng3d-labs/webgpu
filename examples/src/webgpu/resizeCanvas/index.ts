@@ -5,6 +5,8 @@ import { WebGPU } from '@feng3d/webgpu';
 import redFragWGSL from '../../shaders/red.frag.wgsl';
 import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import styles from './animatedCanvasSize.module.css';
 
 const init = async (canvas: HTMLCanvasElement) =>
@@ -51,10 +53,14 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         webgpu.submit(data);
 
-        requestAnimationFrame(frame);
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(frame);
     }
 
-    requestAnimationFrame(frame);
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
+    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

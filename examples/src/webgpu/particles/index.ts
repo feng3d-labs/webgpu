@@ -3,6 +3,7 @@ import { BindingResources, Buffer, RenderPass, RenderPassDescriptor, RenderPipel
 import { ComputePass, ComputePipeline, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4, vec3 } from 'wgpu-matrix';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 import importLevelWGSL from './import_level.wgsl';
 import particleWGSL from './particle.wgsl';
@@ -341,9 +342,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
+    rAF(frame);
 };
 
 const panel = new GUI({ width: 310 });

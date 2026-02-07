@@ -4,6 +4,7 @@ import { GUI } from 'dat.gui';
 
 import spriteWGSL from './sprite.wgsl';
 import updateSpritesWGSL from './updateSprites.wgsl';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -138,15 +139,19 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     });
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         webgpu.submit(submits[t % 2]);
 
         ++t;
 
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+
+    rAF(frame);
 };
 
 const panel = new GUI({ width: 310 });

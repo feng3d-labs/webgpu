@@ -11,6 +11,8 @@ import fragmentWGSL from '../../shaders/black.frag.wgsl';
 
 import PerfCounter from './PerfCounter';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 const init = async (canvas: HTMLCanvasElement) =>
 {
     const renderPassDurationCounter = new PerfCounter();
@@ -167,6 +169,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         return modelViewProjectionMatrix;
     }
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
@@ -175,9 +180,9 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

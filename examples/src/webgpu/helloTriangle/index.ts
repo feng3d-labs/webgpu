@@ -1,5 +1,6 @@
 import { Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
+import { isTestMode, wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -54,13 +55,16 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         webgpu.submit(submit);
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
 
-    requestAnimationFrame(frame);
+    rAF(frame);
 
     // webgpu.submit(submit); // 提交GPU执行
 };

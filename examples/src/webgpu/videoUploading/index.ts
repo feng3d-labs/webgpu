@@ -1,6 +1,8 @@
 import { RenderObject, RenderPassDescriptor, Sampler, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
 import sampleExternalTextureWGSL from '../../shaders/sampleExternalTexture.frag.wgsl';
 
@@ -62,6 +64,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         webgpu.submit(data);
@@ -72,17 +77,16 @@ const init = async (canvas: HTMLCanvasElement) =>
         }
         else
         {
-            requestAnimationFrame(frame);
+            rAF(frame);
         }
     }
-
     if ('requestVideoFrameCallback' in video)
     {
         video.requestVideoFrameCallback(frame);
     }
     else
     {
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
 };
 

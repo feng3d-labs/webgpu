@@ -2,6 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { BindingResources, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 import { mat4, vec3 } from 'wgpu-matrix';
 import { createBoxMeshWithTangents } from '../../meshes/box';
 import normalMapWGSL from './normalMap.wgsl';
@@ -365,9 +366,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(frame);
     }
-    frame();
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
+    rAF(frame);
 };
 
 const panel = new GUI();

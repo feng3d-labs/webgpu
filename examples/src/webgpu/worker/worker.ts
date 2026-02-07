@@ -2,6 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { CanvasContext, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
@@ -165,6 +166,9 @@ async function init(canvas: OffscreenCanvas)
         }],
     };
 
+    // 使用包装后的 requestAnimationFrame
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
@@ -173,14 +177,14 @@ async function init(canvas: OffscreenCanvas)
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
 
     // Note: It is important to return control to the browser regularly in order for the worker to
     // process events. You shouldn't simply loop infinitely with while(true) or similar! Using a
     // traditional requestAnimationFrame() loop in the worker is one way to ensure that events are
     // handled correctly by the worker.
-    requestAnimationFrame(frame);
+    rAF(frame);
 }
 
 export { };

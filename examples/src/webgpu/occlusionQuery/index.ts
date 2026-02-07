@@ -4,6 +4,8 @@ import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import solidColorLitWGSL from './solidColorLit.wgsl';
 
 const info = document.querySelector('#info');
@@ -181,6 +183,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let time = 0;
     let then = 0;
 
+    // 使用包装后的 requestAnimationFrame
+    const rAF = wrapRequestAnimationFrame();
+
     function render(now: number)
     {
         now *= 0.001; // convert to seconds
@@ -234,9 +239,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(render);
+        rAF(render);
     }
-    requestAnimationFrame(render);
+    rAF(render);
 };
 
 const panel = new GUI({ width: 310 });

@@ -3,6 +3,7 @@ import { RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Te
 import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 import distanceSizedPointsVertWGSL from './distance-sized-points.vert.wgsl';
 import fixedSizePointsVertWGSL from './fixed-size-points.vert.wgsl';
@@ -220,10 +221,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(render);
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(render);
     }
 
-    requestAnimationFrame(render);
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
+    rAF(render);
 };
 
 const panel = new GUI();

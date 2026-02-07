@@ -5,6 +5,7 @@ import { GUI } from 'dat.gui';
 import { Mat4, mat4, quat, vec3 } from 'wgpu-matrix';
 
 import { convertGLBToJSONAndBinary, GLTFSkin } from './glbUtils';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 import gltfWGSL from './gltf.wgsl';
 import gridWGSL from './grid.wgsl';
 import { gridIndices } from './gridData';
@@ -439,6 +440,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     const passEncoders: PassEncoder[] = [];
     const submit: Submit = { commandEncoders: [{ passEncoders }] };
 
+    // 使用包装后的 requestAnimationFrame
+    const rAF = wrapRequestAnimationFrame();
+
     const whaleRenderPass = (() =>
     {
         const renderObjects: RenderObject[] = [];
@@ -552,9 +556,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+
+    rAF(frame);
 };
 
 const panel = new GUI({ width: 310 });

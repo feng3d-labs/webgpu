@@ -6,6 +6,8 @@ import { WebGPU } from '@feng3d/webgpu';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
 
@@ -122,9 +124,13 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
+    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

@@ -2,6 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 import { mesh } from '../../meshes/stanfordDragon';
 
@@ -274,9 +275,13 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
+    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

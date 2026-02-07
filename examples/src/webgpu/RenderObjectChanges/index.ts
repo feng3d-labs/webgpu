@@ -1,6 +1,7 @@
 import { reactive } from '@feng3d/reactivity';
 import { BufferBinding, RenderObject, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -57,13 +58,16 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function render()
     {
         webgpu.submit(submit); // 提交GPU执行
-        requestAnimationFrame(render);
+        rAF(render);
     }
 
-    render();
+    rAF(render);
 
     window.onclick = () =>
     {

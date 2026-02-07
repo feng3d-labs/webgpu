@@ -1,6 +1,8 @@
 import { GUI } from 'dat.gui';
 import checkerWGSL from './checker.wgsl';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
@@ -108,6 +110,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         }],
     };
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         reactive(uni).color0 = cssColorToRGBA(settings.color0);
@@ -115,6 +120,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         reactive(uni).size = settings.size;
 
         webgpu.submit(submit);
+
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(frame);
     }
 
     function getDevicePixelContentBoxSize(entry: ResizeObserverEntry)
@@ -151,6 +159,9 @@ const init = async (canvas: HTMLCanvasElement) =>
     });
 
     observer.observe(canvas);
+
+    // Start the render loop
+    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

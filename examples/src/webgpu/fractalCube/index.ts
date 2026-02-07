@@ -3,6 +3,8 @@ import { CanvasContext, CopyTextureToTexture, RenderObject, RenderPassDescriptor
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
@@ -112,6 +114,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         copySize: [canvas.width, canvas.height],
     };
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
@@ -131,9 +136,10 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         webgpu.submit(data);
 
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+
+    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

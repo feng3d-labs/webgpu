@@ -1,5 +1,7 @@
 import { GUI } from 'dat.gui';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import computeWGSL from './compute.wgsl';
 import fragWGSL from './frag.wgsl';
 import vertWGSL from './vert.wgsl';
@@ -167,6 +169,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     addGUI();
     resetGameData();
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     (function loop()
     {
         if (GameOptions.timestep)
@@ -180,7 +185,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
             }
         }
 
-        requestAnimationFrame(loop);
+        rAF(loop);
     })();
 };
 

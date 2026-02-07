@@ -2,6 +2,7 @@ import { GUI } from 'dat.gui';
 
 import { mat4, vec3, vec4 } from 'wgpu-matrix';
 import { mesh } from '../../meshes/stanfordDragon';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 import fragmentDeferredRendering from './fragmentDeferredRendering.wgsl';
 import fragmentGBuffersDebugView from './fragmentGBuffersDebugView.wgsl';
@@ -422,9 +423,13 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
+    rAF(frame);
 };
 
 const panel = new GUI({ width: 310 });

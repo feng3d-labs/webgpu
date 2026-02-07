@@ -2,6 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from '@feng3d/render-api';
 import { ComputePass, ComputePipeline, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
 import blurWGSL from './blur.wgsl';
@@ -217,6 +218,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     }
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         if (needUpdateEncoder)
@@ -226,9 +230,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+    rAF(frame);
 };
 
 const panel = new GUI({ width: 310 });

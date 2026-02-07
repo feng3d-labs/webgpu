@@ -4,6 +4,7 @@ import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
 import { MsdfTextRenderer } from './msdfText';
@@ -250,6 +251,9 @@ setBlendConstant().`,
         return modelViewProjectionMatrix;
     }
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
@@ -284,9 +288,10 @@ setBlendConstant().`,
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+
+    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

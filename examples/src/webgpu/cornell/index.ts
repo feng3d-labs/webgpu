@@ -6,6 +6,7 @@ import Rasterizer from './rasterizer';
 import Raytracer from './raytracer';
 import Scene from './scene';
 import Tonemapper from './tonemapper';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 import { CanvasContext, CommandEncoder, Submit, Texture } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
@@ -85,10 +86,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+        rAF(frame);
     }
 
-    requestAnimationFrame(frame);
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
+    rAF(frame);
 };
 
 const panel = new GUI({ width: 310 });

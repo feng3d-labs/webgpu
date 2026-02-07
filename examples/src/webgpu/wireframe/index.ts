@@ -5,6 +5,7 @@ import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 import { modelData } from './models';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 import solidColorLitWGSL from './solidColorLit.wgsl';
 import { randColor, randElement } from './utils';
 import wireframeWGSL from './wireframe.wgsl';
@@ -346,6 +347,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     let time = 0.0;
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function render(ts: number)
     {
         if (settings.animate)
@@ -403,9 +407,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(render);
+        rAF(render);
     }
-    requestAnimationFrame(render);
+
+    rAF(render);
 };
 
 const panel = new GUI({ width: 310 });

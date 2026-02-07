@@ -4,6 +4,8 @@ import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import texturedQuadWGSL from './texturedQuad.wgsl';
 
 declare module '@feng3d/render-api'
@@ -524,6 +526,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }],
     };
 
+    // 使用包装后的 requestAnimationFrame
+    const rAF = wrapRequestAnimationFrame();
+
     function render()
     {
         gui.updateDisplay();
@@ -557,11 +562,11 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(render);
+        rAF(render);
     }
 
     applyPreset();
-    render();
+    rAF(render);
 };
 
 const panel = new GUI({ width: 310 });

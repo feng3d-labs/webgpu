@@ -4,6 +4,7 @@ import { RenderBundle, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 
 import animometerWGSL from './animometer.wgsl';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -190,6 +191,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let frameTimeAvg: number;
     let updateDisplay = true;
 
+    // 使用包装后的 requestAnimationFrame
+    const rAF = wrapRequestAnimationFrame();
+
     function frame(timestamp: number)
     {
         let frameTime = 0;
@@ -230,9 +234,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
                 updateDisplay = true;
             }, 100);
         }
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+    rAF(frame);
 };
 
 const panel = new GUI({ width: 310 });

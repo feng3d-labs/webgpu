@@ -8,6 +8,7 @@ import { createInputHandler } from './input';
 import { reactive } from '@feng3d/reactivity';
 import { RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -157,6 +158,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     let lastFrameMS = Date.now();
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         const now = Date.now();
@@ -170,9 +174,10 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
         webgpu.submit(data);
 
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+
+    rAF(frame);
 };
 
 const panel = new GUI();

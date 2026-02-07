@@ -5,6 +5,8 @@ import { GUI } from 'dat.gui';
 import Stats from 'stats.js';
 import { mat4, vec3 } from 'wgpu-matrix';
 
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+
 import { SphereLayout, createSphereMesh } from '../../meshes/sphere';
 import meshWGSL from './mesh.wgsl';
 
@@ -350,6 +352,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
     }
     onUseRenderBundlesChanged();
 
+    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         stats.begin();
@@ -361,9 +366,9 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
         webgpu.submit(submit);
 
         stats.end();
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+    rAF(frame);
 };
 
 const stats = new Stats();

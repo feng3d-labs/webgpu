@@ -5,6 +5,7 @@ import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
 import volumeWGSL from './volume.wgsl';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
 
 const gui = new GUI();
 
@@ -164,6 +165,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         }],
     };
 
+    // 使用包装后的 requestAnimationFrame
+    const rAF = wrapRequestAnimationFrame();
+
     function frame()
     {
         const now = Date.now();
@@ -178,9 +182,10 @@ const init = async (canvas: HTMLCanvasElement) =>
 
         webgpu.submit(submit);
 
-        requestAnimationFrame(frame);
+        rAF(frame);
     }
-    requestAnimationFrame(frame);
+
+    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;
