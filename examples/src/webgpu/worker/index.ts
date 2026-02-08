@@ -13,6 +13,14 @@ const init = async (canvas: HTMLCanvasElement) =>
     // have a `type` field that we can use to determine the content of the message.
         switch (ev.data.type)
         {
+            case 'test-result': {
+                // 转发 Worker 的测试结果到父窗口（测试页面）
+                if (window.parent !== window)
+                {
+                    window.parent.postMessage(ev.data, '*');
+                }
+                break;
+            }
             default: {
                 console.error(`Unknown Message Type: ${ev.data.type}`);
             }

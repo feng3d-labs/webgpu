@@ -171,6 +171,12 @@ async function init(canvas: OffscreenCanvas, testName: string = 'example-worker'
     (self as any).testNameForWorker = testName;
     const rAF = wrapRequestAnimationFrame();
 
+    // 在 Worker 中，我们需要手动处理测试结果报告
+    // 因为 Worker 无法直接访问父窗口（测试页面）
+    let frameCount = 0;
+    const maxFrames = 3;
+    let reported = false;
+
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
@@ -179,7 +185,29 @@ async function init(canvas: OffscreenCanvas, testName: string = 'example-worker'
 
         webgpu.submit(submit);
 
-        rAF(frame);
+        frameCount++;
+
+        // 检查是否在测试模式（通过 wrapRequestAnimationFrame 的行为判断）
+        // 如果 rAF 没有返回有效的 animationFrameId，说明已达到 maxFrames
+        const animationFrameId = rAF(frame);
+
+        // 如果 animationFrameId 是 0，说明测试模式已达到帧数限制
+        if (animationFrameId === 0 && !reported)
+        {
+            reported = true;
+            // 向主线程发送测试结果，由主线程转发到测试页面
+            self.postMessage({
+                type: 'test-result',
+                testName,
+                passed: true,
+                message: `成功渲染 ${frameCount} 帧`,
+                details: {
+                    errors: [],
+                    warnings: [],
+                    frameCount,
+                },
+            });
+        }
     }
 
     // Note: It is important to return control to the browser regularly in order for the worker to

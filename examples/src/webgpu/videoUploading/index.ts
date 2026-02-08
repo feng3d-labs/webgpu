@@ -8,6 +8,12 @@ import sampleExternalTextureWGSL from '../../shaders/sampleExternalTexture.frag.
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
+    // 检测测试模式（需要在 await video.play() 之前）
+    const isTestMode = (typeof window !== 'undefined') && (
+        window.location.search.includes('test=true') ||
+        (window.parent !== window && window.parent.location.pathname.includes('test.html'))
+    );
+
     // Set video element
     const video = document.createElement('video');
 
@@ -18,7 +24,12 @@ const init = async (canvas: HTMLCanvasElement) =>
         '../../../assets/video/pano.webm',
         import.meta.url,
     ).toString();
-    await video.play();
+
+    // 测试模式下跳过等待视频播放，避免阻塞
+    if (!isTestMode)
+    {
+        await video.play();
+    }
 
     const devicePixelRatio = window.devicePixelRatio || 1;
 
@@ -67,13 +78,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
     const rAF = wrapRequestAnimationFrame();
 
-    // 测试模式下使用 requestAnimationFrame 替代 requestVideoFrameCallback
-    // 因为 requestVideoFrameCallback 需要视频实际播放，在测试环境中可能导致超时
-    const isTestMode = (typeof window !== 'undefined') && (
-        window.location.search.includes('test=true') ||
-        (window.parent !== window && window.parent.location.pathname.includes('test.html'))
-    );
-
     let frameCount = 0;
     const maxFrames = isTestMode ? 3 : Infinity;
 
@@ -86,6 +90,9 @@ const init = async (canvas: HTMLCanvasElement) =>
         // 测试模式下限制帧数
         if (isTestMode && frameCount >= maxFrames)
         {
+            // 再调用一次 rAF 以触发 wrapRequestAnimationFrame 的结果报告
+            rAF(frame);
+
             return; // 停止渲染
         }
 

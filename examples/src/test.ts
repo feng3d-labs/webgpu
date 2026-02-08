@@ -121,8 +121,12 @@ function initializeTests(): TestInfo[]
 // 定义所有测试
 const tests: TestInfo[] = initializeTests();
 
-// 筛选状态：是否只显示失败的测试
-let showFailuresOnly = false;
+// 筛选状态：当前选择的过滤类型
+type FilterType = 'all' | 'pass' | 'fail' | 'running' | 'pending';
+let currentFilter: FilterType = 'all';
+
+// 搜索关键词
+let searchKeyword = '';
 
 // 目录展开状态：记录哪些目录是展开的
 const expandedDirs = new Set<string>();
@@ -463,10 +467,25 @@ function renderTestList()
 
     testList.innerHTML = '';
 
-    // 根据筛选条件过滤测试
-    const filteredTests = showFailuresOnly
-        ? tests.filter(test => test.status === 'fail')
-        : tests;
+    // 根据筛选条件和搜索关键词过滤测试
+    let filteredTests = tests;
+
+    // 应用状态过滤
+    if (currentFilter !== 'all')
+    {
+        filteredTests = filteredTests.filter(test => test.status === currentFilter);
+    }
+
+    // 应用搜索关键词过滤
+    if (searchKeyword.trim())
+    {
+        const keyword = searchKeyword.toLowerCase();
+
+        filteredTests = filteredTests.filter(test =>
+            test.name.toLowerCase().includes(keyword) ||
+            test.description.toLowerCase().includes(keyword),
+        );
+    }
 
     // 构建目录树
     const dirTree = buildDirTree(filteredTests);
@@ -747,6 +766,36 @@ function toggleDir(dirPath: string)
     renderTestList();
 }
 
+// 设置过滤按钮状态
+function updateFilterButtons()
+{
+    const buttons = document.querySelectorAll('.filter-btn');
+
+    buttons.forEach(btn =>
+    {
+        const filter = btn.getAttribute('data-filter') as FilterType;
+
+        if (filter === currentFilter)
+        {
+            btn.classList.add('active');
+            btn.classList.add(`active-filter-${filter}`);
+        }
+        else
+        {
+            btn.classList.remove('active');
+            btn.classList.remove(`active-filter-${filter}`);
+        }
+    });
+}
+
+// 切换过滤类型
+function setFilter(filter: FilterType)
+{
+    currentFilter = filter;
+    updateFilterButtons();
+    renderTestList();
+}
+
 // 初始化
 document.addEventListener('DOMContentLoaded', () =>
 {
@@ -762,15 +811,42 @@ document.addEventListener('DOMContentLoaded', () =>
         expandedDirs.add(dirPath);
     });
 
-    // 绑定筛选复选框事件
-    const filterCheckbox = document.getElementById('filter-failures') as HTMLInputElement;
+    // 绑定过滤按钮事件
+    const filterButtons = document.querySelectorAll('.filter-btn');
 
-    if (filterCheckbox)
+    filterButtons.forEach(btn =>
     {
-        filterCheckbox.addEventListener('change', (e) =>
+        btn.addEventListener('click', () =>
         {
-            showFailuresOnly = (e.target as HTMLInputElement).checked;
+            const filter = btn.getAttribute('data-filter') as FilterType;
+
+            setFilter(filter);
+        });
+    });
+
+    // 绑定搜索输入事件
+    const searchInput = document.getElementById('search-input') as HTMLInputElement;
+    const clearSearch = document.getElementById('clear-search');
+
+    if (searchInput)
+    {
+        searchInput.addEventListener('input', (e) =>
+        {
+            searchKeyword = (e.target as HTMLInputElement).value;
             renderTestList();
+        });
+    }
+
+    if (clearSearch)
+    {
+        clearSearch.addEventListener('click', () =>
+        {
+            if (searchInput)
+            {
+                searchInput.value = '';
+                searchKeyword = '';
+                renderTestList();
+            }
         });
     }
 
