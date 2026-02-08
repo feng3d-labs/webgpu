@@ -1,7 +1,7 @@
 import { reactive } from '@feng3d/reactivity';
 import { BufferBinding, RenderObject, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -30,7 +30,7 @@ const init = async (canvas: HTMLCanvasElement) =>
                     fn main() -> @location(0) vec4f {
                         return color;
                     }
-                ` },
+                    ` },
         },
         vertices: {
             position: { data: new Float32Array([0.0, 0.5, -0.5, -0.5, 0.5, -0.5]), format: 'float32x2' }, // 顶点坐标数据
@@ -58,16 +58,12 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    function render()
-    {
-        webgpu.submit(submit); // 提交GPU执行
-        rAF(render);
-    }
-
-    rAF(render);
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-RenderObjectChanges',
+        canvas,
+        render: () => webgpu.submit(submit),
+    });
 
     window.onclick = () =>
     {

@@ -1,6 +1,6 @@
 import { Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
-import { isTestMode, wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -55,18 +55,12 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    function frame()
-    {
-        webgpu.submit(submit);
-        rAF(frame);
-    }
-
-    rAF(frame);
-
-    // webgpu.submit(submit); // 提交GPU执行
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-helloTriangle',
+        canvas,
+        render: () => webgpu.submit(submit),
+    });
 };
 
 let webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

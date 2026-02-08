@@ -428,6 +428,244 @@
         .search-input:not(:placeholder-shown) + .search-icon {
             display: none;
         }
+
+        /* 测试卡片展开图标 */
+        .test-expand-icon {
+            font-size: 9px;
+            color: #666;
+            transition: transform 0.15s ease;
+            margin-right: 6px;
+            display: inline-block;
+            width: 10px;
+            cursor: pointer;
+        }
+
+        .test-header {
+            cursor: pointer;
+        }
+
+        /* 测试详情面板样式 */
+        .test-detail-panel {
+            margin-top: 10px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            animation: slideDown 0.2s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .test-detail-section {
+            margin-bottom: 12px;
+        }
+
+        .test-detail-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .test-detail-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 6px;
+            padding-bottom: 4px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .test-logs-content {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 6px;
+            font-size: 11px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .test-logs-empty {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 8px;
+            font-size: 11px;
+            color: #999;
+            text-align: center;
+        }
+
+        .console-logs {
+            font-weight: 600;
+            color: #007bff;
+            margin-bottom: 4px;
+        }
+
+        .console-log-line {
+            color: #666;
+            padding: 2px 0;
+            padding-left: 8px;
+            word-break: break-word;
+        }
+
+        /* 测试预览容器 */
+        .test-preview-container {
+            position: relative;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .test-preview-iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+            display: block;
+        }
+
+        .test-preview-actions {
+            display: flex;
+            gap: 6px;
+            padding: 6px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .test-preview-empty {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 20px;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+
+        /* 展开状态下的卡片样式 */
+        .test-item.detail-expanded {
+            background-color: #fafbfc;
+        }
+
+        /* 渲染结果图片样式 */
+        .test-render-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        /* 日志时间戳样式 */
+        .log-time {
+            color: #999;
+            font-size: 10px;
+            margin-right: 6px;
+        }
+
+        /* 滚动条样式优化 */
+        .test-logs-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .test-logs-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+
+        .test-logs-content::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+
+        .test-logs-content::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* 测试详情左右布局 */
+        .test-detail-content {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .test-detail-left {
+            flex: 0 0 auto;
+            max-width: 50%;
+        }
+
+        .test-detail-right {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .test-detail-section {
+            margin-bottom: 0;
+        }
+
+        .test-detail-title {
+            margin-bottom: 8px;
+        }
+
+        /* 左侧渲染结果容器 */
+        .test-preview-container {
+            position: relative;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            overflow: hidden;
+            background-color: #000;
+            display: inline-block;
+            max-width: 100%;
+        }
+
+        .test-render-image {
+            max-width: 100%;
+            max-height: 300px;
+            width: auto;
+            height: auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        .test-preview-iframe {
+            width: 100%;
+            height: 200px;
+            border: none;
+            display: block;
+        }
+
+        .test-preview-actions {
+            display: flex;
+            gap: 6px;
+            padding: 6px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .test-preview-empty {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 20px;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+        }
+
+        /* 右侧日志区域 */
+        .test-logs-content {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            padding: 6px;
+            font-size: 11px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 

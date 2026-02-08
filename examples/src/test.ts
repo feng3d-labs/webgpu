@@ -102,6 +102,20 @@ interface TestInfo
     iframe?: HTMLIFrameElement;
     type: 'spectest' | 'example'; // 测试类型
     startTime?: number; // 测试开始时间
+    /** 测试返回的渲染结果数据 */
+    renderData?: string;
+    /** 渲染结果类型 */
+    renderDataType?: 'png' | 'jpeg' | 'webp';
+    /** 测试返回的完整日志 */
+    testLogs?: TestLogItem[];
+}
+
+/** 测试日志项 */
+interface TestLogItem
+{
+    level: 'log' | 'info' | 'warn' | 'error' | 'debug';
+    message: string;
+    timestamp?: number;
 }
 
 // 从配置文件初始化测试列表
@@ -130,6 +144,9 @@ let searchKeyword = '';
 
 // 目录展开状态：记录哪些目录是展开的
 const expandedDirs = new Set<string>();
+
+// 测试详情展开状态：记录哪些测试的详情已展开
+const expandedTests = new Set<string>();
 
 // 最大并发测试数量
 const MAX_CONCURRENT_TESTS = 5;
@@ -272,7 +289,9 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
                 const testIndex = tests.indexOf(test);
                 const testItem = document.createElement('div');
 
-                testItem.className = 'test-item';
+                const isDetailExpanded = expandedTests.has(test.name);
+
+                testItem.className = `test-item${isDetailExpanded ? ' detail-expanded' : ''}`;
                 testItem.style.marginLeft = `${8 + (child.level + 1) * 16}px`; // 测试项缩进
 
                 const statusClass = test.status;
@@ -299,23 +318,27 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
 
                 if (test.status === 'pending' || test.status === 'fail')
                 {
-                    buttons += `<button class="btn btn-run" onclick="runTest(${testIndex})">运行</button>`;
+                    buttons += `<button class="btn btn-run" onclick="event.stopPropagation(); runTest(${testIndex})">运行</button>`;
                 }
                 if (test.status === 'pass' || test.status === 'fail')
                 {
-                    buttons += `<button class="btn btn-reset" onclick="resetTest(${testIndex})">重置</button>`;
+                    buttons += `<button class="btn btn-reset" onclick="event.stopPropagation(); resetTest(${testIndex})">重置</button>`;
                 }
-                buttons += `<button class="btn btn-primary" onclick="openTest(${testIndex})">查看</button>`;
+                buttons += `<button class="btn btn-primary" onclick="event.stopPropagation(); openTest(${testIndex})">查看</button>`;
+
+                // 展开图标
+                const expandIcon = isDetailExpanded ? '▼' : '▶';
 
                 testItem.innerHTML = `
-                    <div class="test-header">
+                    <div class="test-header" onclick="toggleTestDetail('${test.name.replace(/'/g, "\\'")}')">
+                        <span class="test-expand-icon">${expandIcon}</span>
                         <div class="test-title">${test.name}</div>
                         <div class="test-status ${statusClass}">${statusText}${timeInfo}</div>
                         <div class="test-buttons">${buttons}</div>
                     </div>
                     <div class="test-description">${test.description}</div>
                     ${test.status === 'fail' && test.error ? `<div class="test-error">${test.error}</div>` : ''}
-                    ${renderConsoleErrors(test.name)}
+                    ${renderTestDetail(test)}
                 `;
 
                 parentElement.appendChild(testItem);
@@ -334,7 +357,9 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
             const testIndex = tests.indexOf(test);
             const testItem = document.createElement('div');
 
-            testItem.className = 'test-item';
+            const isDetailExpanded = expandedTests.has(test.name);
+
+            testItem.className = `test-item${isDetailExpanded ? ' detail-expanded' : ''}`;
 
             const statusClass = test.status;
             let statusText = test.status === 'pending' ? '待测试' : test.status === 'running' ? '运行中' : test.status === 'pass' ? '通过' : '失败';
@@ -353,23 +378,27 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
 
             if (test.status === 'pending' || test.status === 'fail')
             {
-                buttons += `<button class="btn btn-run" onclick="runTest(${testIndex})">运行</button>`;
+                buttons += `<button class="btn btn-run" onclick="event.stopPropagation(); runTest(${testIndex})">运行</button>`;
             }
             if (test.status === 'pass' || test.status === 'fail')
             {
-                buttons += `<button class="btn btn-reset" onclick="resetTest(${testIndex})">重置</button>`;
+                buttons += `<button class="btn btn-reset" onclick="event.stopPropagation(); resetTest(${testIndex})">重置</button>`;
             }
-            buttons += `<button class="btn btn-primary" onclick="openTest(${testIndex})">查看</button>`;
+            buttons += `<button class="btn btn-primary" onclick="event.stopPropagation(); openTest(${testIndex})">查看</button>`;
+
+            // 展开图标
+            const expandIcon = isDetailExpanded ? '▼' : '▶';
 
             testItem.innerHTML = `
-                <div class="test-header">
+                <div class="test-header" onclick="toggleTestDetail('${test.name.replace(/'/g, "\\'")}')">
+                    <span class="test-expand-icon">${expandIcon}</span>
                     <div class="test-title">${test.name}</div>
                     <div class="test-status ${statusClass}">${statusText}${timeInfo}</div>
                     <div class="test-buttons">${buttons}</div>
                 </div>
                 <div class="test-description">${test.description}</div>
                 ${test.status === 'fail' && test.error ? `<div class="test-error">${test.error}</div>` : ''}
-                ${renderConsoleErrors(test.name)}
+                ${renderTestDetail(test)}
             `;
 
             parentElement.appendChild(testItem);
@@ -421,6 +450,162 @@ function renderConsoleErrors(testName: string): string
     html += '</div>';
 
     return html;
+}
+
+// 切换测试详情展开/收起
+function toggleTestDetail(testName: string)
+{
+    if (expandedTests.has(testName))
+    {
+        expandedTests.delete(testName);
+    }
+    else
+    {
+        expandedTests.add(testName);
+    }
+    renderTestList();
+}
+
+// 渲染测试详情面板（展开时显示的内容）
+function renderTestDetail(test: TestInfo): string
+{
+    const isExpanded = expandedTests.has(test.name);
+
+    if (!isExpanded)
+    {
+        return '';
+    }
+
+    let html = '<div class="test-detail-panel">';
+
+    // 使用左右布局
+    html += '<div class="test-detail-content">';
+
+    // 左侧：渲染画面预览区域
+    html += '<div class="test-detail-left">';
+    html += '<div class="test-detail-title">渲染画面</div>';
+
+    // 如果测试返回了渲染结果数据，直接显示
+    if (test.renderData)
+    {
+        const imageId = `render-${test.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
+        const dataUrl = `data:image/${test.renderDataType || 'png'};base64,${test.renderData}`;
+
+        html += `<div class="test-preview-container">`;
+        html += `<img id="${imageId}" class="test-render-image" src="${dataUrl}" alt="渲染结果" />`;
+        html += `<div class="test-preview-actions">
+            <button class="btn btn-primary" onclick="event.stopPropagation(); openTest(${tests.indexOf(test)})">在新窗口打开</button>
+            <button class="btn btn-secondary" onclick="event.stopPropagation(); downloadRender('${dataUrl}', '${test.name}')">下载图片</button>
+        </div>`;
+        html += '</div>';
+    }
+    // 如果没有返回渲染数据但测试已完成，使用 iframe 预览
+    else if (test.status === 'pass' || test.status === 'fail')
+    {
+        const previewId = `preview-${test.name.replace(/[^a-zA-Z0-9]/g, '-')}`;
+
+        html += `<div class="test-preview-container">`;
+        html += `<iframe id="${previewId}" class="test-preview-iframe" src="${test.htmlFile}?preview=true"></iframe>`;
+        html += `<div class="test-preview-actions">
+            <button class="btn btn-primary" onclick="event.stopPropagation(); openTest(${tests.indexOf(test)})">在新窗口打开</button>
+            <button class="btn btn-secondary" onclick="event.stopPropagation(); refreshPreview('${previewId}')">刷新</button>
+        </div>`;
+        html += '</div>';
+    }
+    else
+    {
+        html += '<div class="test-preview-empty">请先运行测试以查看渲染画面</div>';
+    }
+    html += '</div>';
+
+    // 右侧：日志区域
+    html += '<div class="test-detail-right">';
+    html += '<div class="test-detail-title">控制台日志</div>';
+
+    // 优先显示测试返回的完整日志
+    if (test.testLogs && test.testLogs.length > 0)
+    {
+        html += '<div class="test-logs-content">';
+        test.testLogs.forEach((log) =>
+        {
+            const levelClass = `console-${log.level}-line`;
+            const timestamp = log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : '';
+            const timeStr = timestamp ? `<span class="log-time">[${timestamp}]</span>` : '';
+
+            html += `<div class="${levelClass}">${timeStr}${escapeHtml(log.message)}</div>`;
+        });
+        html += '</div>';
+    }
+    // 否则显示捕获的控制台消息
+    else
+    {
+        const messages = consoleMessages.get(test.name);
+
+        if (messages && (messages.errors.length > 0 || messages.warnings.length > 0 || messages.logs.length > 0))
+        {
+            html += '<div class="test-logs-content">';
+            if (messages.logs.length > 0)
+            {
+                html += '<div class="console-logs">日志:</div>';
+                messages.logs.slice(0, 10).forEach(log =>
+                {
+                    html += `<div class="console-log-line">- ${escapeHtml(log)}</div>`;
+                });
+            }
+            if (messages.errors.length > 0)
+            {
+                html += '<div class="console-errors">错误:</div>';
+                messages.errors.slice(0, 10).forEach(err =>
+                {
+                    html += `<div class="console-error-line">- ${escapeHtml(err)}</div>`;
+                });
+            }
+            if (messages.warnings.length > 0)
+            {
+                html += '<div class="console-warnings">警告:</div>';
+                messages.warnings.slice(0, 10).forEach(warn =>
+                {
+                    html += `<div class="console-warn-line">- ${escapeHtml(warn)}</div>`;
+                });
+            }
+            html += '</div>';
+        }
+        else
+        {
+            html += '<div class="test-logs-empty">暂无日志</div>';
+        }
+    }
+    html += '</div>';
+
+    html += '</div>'; // 结束 test-detail-content
+    html += '</div>'; // 结束 test-detail-panel
+
+    return html;
+}
+
+// 下载渲染结果图片
+function downloadRender(dataUrl: string, testName: string)
+{
+    const link = document.createElement('a');
+
+    link.href = dataUrl;
+    link.download = `${testName}-render.png`;
+    link.click();
+}
+
+// 刷新预览 iframe
+function refreshPreview(iframeId: string)
+{
+    const iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+
+    if (iframe)
+    {
+        // 通过重新赋值来刷新 iframe
+        const currentSrc = iframe.src;
+
+        iframe.src = '';
+        iframe.src = currentSrc;
+    }
 }
 
 // HTML 转义函数
@@ -638,6 +823,19 @@ function runTest(index: number)
                 window.removeEventListener('message', messageHandler);
 
                 test.status = event.data.passed ? 'pass' : 'fail';
+
+                // 保存测试返回的渲染结果数据
+                if (event.data.renderData)
+                {
+                    test.renderData = event.data.renderData;
+                    test.renderDataType = event.data.renderDataType || 'png';
+                }
+
+                // 保存测试返回的完整日志
+                if (event.data.logs && Array.isArray(event.data.logs))
+                {
+                    test.testLogs = event.data.logs;
+                }
 
                 // 检查是否有控制台错误
                 const messages = consoleMessages.get(test.name);
@@ -896,3 +1094,6 @@ document.addEventListener('DOMContentLoaded', () =>
 (window as any).openTest = openTest;
 (window as any).runTest = runTest;
 (window as any).resetTest = resetTest;
+(window as any).toggleTestDetail = toggleTestDetail;
+(window as any).refreshPreview = refreshPreview;
+(window as any).downloadRender = downloadRender;
