@@ -6,7 +6,7 @@ import { mat4 } from 'wgpu-matrix';
 
 import skyFragWGSL from './sky.frag.wgsl';
 import skyVertWGSL from './sky.vert.wgsl';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 const parameters: {
     readonly elevation: number,

@@ -4,7 +4,7 @@ import atmosphericScatteringSkyWGSL from './atmosphericScatteringSky.wgsl';
 
 import { CanvasContext, Texture } from '@feng3d/render-api';
 import { ComputeObject, WebGPU } from '@feng3d/webgpu';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

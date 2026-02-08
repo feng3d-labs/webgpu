@@ -4,7 +4,7 @@ import { RenderBundle, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 
 import animometerWGSL from './animometer.wgsl';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

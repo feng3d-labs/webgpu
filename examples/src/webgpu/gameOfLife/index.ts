@@ -1,6 +1,6 @@
 import { GUI } from 'dat.gui';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import computeWGSL from './compute.wgsl';
 import fragWGSL from './frag.wgsl';

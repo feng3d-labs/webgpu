@@ -324,15 +324,24 @@ export class TestRunner
         const globalObj: any = (typeof window !== 'undefined') ? window : self;
 
         // 如果在 iframe 或 worker 中，向父窗口发送结果
-        if (globalObj.parent !== globalObj)
+        // 安全检查：确保 parent 存在且不等于自身
+        if (globalObj.parent && globalObj.parent !== globalObj)
         {
-            globalObj.parent.postMessage({
-                type: 'test-result',
-                testName: result.testName,
-                passed: result.passed,
-                message: result.message,
-                details: result.details,
-            }, '*');
+            try
+            {
+                globalObj.parent.postMessage({
+                    type: 'test-result',
+                    testName: result.testName,
+                    passed: result.passed,
+                    message: result.message,
+                    details: result.details,
+                }, '*');
+            }
+            catch (e)
+            {
+                // postMessage 失败（可能是跨域），忽略
+                console.warn('无法发送测试结果到父窗口:', e);
+            }
         }
     }
 
@@ -407,8 +416,13 @@ export function wrapRequestAnimationFrame(maxFrames: number = 3): typeof request
     // 获取测试名称
     let testName = 'example-worker'; // Worker 的默认测试名称
 
+    // 优先从全局变量获取（Worker 通过主线程传递）
+    if (globalObj.testNameForWorker)
+    {
+        testName = globalObj.testNameForWorker;
+    }
     // 如果有 window 对象，尝试从 URL 参数或 pathname 推断
-    if (typeof window !== 'undefined' && window.location)
+    else if (typeof window !== 'undefined' && window.location)
     {
         // 首先尝试从 URL 参数获取
         const params = new URLSearchParams(window.location.search);
@@ -452,12 +466,21 @@ export function wrapRequestAnimationFrame(maxFrames: number = 3): typeof request
                     },
                 };
 
-                if (globalObj.parent !== globalObj)
+                // 安全检查：确保 parent 存在且不等于自身
+                if (globalObj.parent && globalObj.parent !== globalObj)
                 {
-                    globalObj.parent.postMessage({
-                        type: 'test-result',
-                        ...result,
-                    }, '*');
+                    try
+                    {
+                        globalObj.parent.postMessage({
+                            type: 'test-result',
+                            ...result,
+                        }, '*');
+                    }
+                    catch (e)
+                    {
+                        // postMessage 失败（可能是跨域），忽略
+                        console.warn('无法发送测试结果到父窗口:', e);
+                    }
                 }
             }, 500);
 

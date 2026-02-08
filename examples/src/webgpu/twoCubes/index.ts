@@ -3,7 +3,7 @@ import { mat4, vec3 } from 'wgpu-matrix';
 import { reactive } from '@feng3d/reactivity';
 import { BufferBinding, RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 

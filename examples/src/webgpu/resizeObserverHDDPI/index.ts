@@ -1,7 +1,7 @@
 import { GUI } from 'dat.gui';
 import checkerWGSL from './checker.wgsl';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';

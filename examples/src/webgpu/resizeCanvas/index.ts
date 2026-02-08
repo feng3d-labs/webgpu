@@ -5,7 +5,7 @@ import { WebGPU } from '@feng3d/webgpu';
 import redFragWGSL from '../../shaders/red.frag.wgsl';
 import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import styles from './animatedCanvasSize.module.css';
 

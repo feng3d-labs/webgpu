@@ -3,7 +3,7 @@ import { BufferBinding, RenderObject, RenderPassDescriptor, Sampler, Submit, Tex
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';

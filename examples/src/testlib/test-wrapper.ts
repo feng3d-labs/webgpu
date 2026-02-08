@@ -38,10 +38,10 @@
  */
 
 // 重新导出 test-runner 中的功能
-export { isTestMode, checkWebGPU, wrapRequestAnimationFrame, runTest, TestRunner, type TestRunnerOptions } from './test-runner.js';
+export { isTestMode, checkWebGPU, wrapRequestAnimationFrame, runTest, TestRunner, type TestRunnerOptions } from './test-runner';
 
 // 同时导入 checkWebGPU 供内部使用
-import { checkWebGPU } from './test-runner.js';
+import { checkWebGPU } from './test-runner';
 
 export interface TestResultData
 {

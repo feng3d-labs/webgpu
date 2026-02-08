@@ -5,7 +5,7 @@ import { GUI } from 'dat.gui';
 import { Mat4, mat4, quat, vec3 } from 'wgpu-matrix';
 
 import { convertGLBToJSONAndBinary, GLTFSkin } from './glbUtils';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 import gltfWGSL from './gltf.wgsl';
 import gridWGSL from './grid.wgsl';
 import { gridIndices } from './gridData';

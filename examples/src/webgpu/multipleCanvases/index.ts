@@ -3,7 +3,7 @@ import { BindingResources, Buffer, CanvasContext, PassEncoder, RenderPassDescrip
 import { WebGPU } from '@feng3d/webgpu';
 import { mat3, mat4 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import { modelData } from './models';
 

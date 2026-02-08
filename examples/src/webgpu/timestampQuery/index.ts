@@ -11,7 +11,7 @@ import fragmentWGSL from '../../shaders/black.frag.wgsl';
 
 import PerfCounter from './PerfCounter';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {

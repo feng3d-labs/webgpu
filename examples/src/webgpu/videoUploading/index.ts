@@ -1,7 +1,7 @@
 import { RenderObject, RenderPassDescriptor, Sampler, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
 import sampleExternalTextureWGSL from '../../shaders/sampleExternalTexture.frag.wgsl';
@@ -67,12 +67,31 @@ const init = async (canvas: HTMLCanvasElement) =>
     // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
     const rAF = wrapRequestAnimationFrame();
 
+    // 测试模式下使用 requestAnimationFrame 替代 requestVideoFrameCallback
+    // 因为 requestVideoFrameCallback 需要视频实际播放，在测试环境中可能导致超时
+    const isTestMode = (typeof window !== 'undefined') && (
+        window.location.search.includes('test=true') ||
+        (window.parent !== window && window.parent.location.pathname.includes('test.html'))
+    );
+
+    let frameCount = 0;
+    const maxFrames = isTestMode ? 3 : Infinity;
+
     function frame()
     {
         webgpu.submit(data);
 
-        if ('requestVideoFrameCallback' in video)
+        frameCount++;
+
+        // 测试模式下限制帧数
+        if (isTestMode && frameCount >= maxFrames)
         {
+            return; // 停止渲染
+        }
+
+        if (!isTestMode && 'requestVideoFrameCallback' in video)
+        {
+            // 只在非测试模式下使用 requestVideoFrameCallback
             video.requestVideoFrameCallback(frame);
         }
         else
@@ -80,7 +99,8 @@ const init = async (canvas: HTMLCanvasElement) =>
             rAF(frame);
         }
     }
-    if ('requestVideoFrameCallback' in video)
+
+    if (!isTestMode && 'requestVideoFrameCallback' in video)
     {
         video.requestVideoFrameCallback(frame);
     }

@@ -8,7 +8,7 @@ import { createInputHandler } from './input';
 import { reactive } from '@feng3d/reactivity';
 import { RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

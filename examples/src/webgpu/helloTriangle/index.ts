@@ -1,6 +1,6 @@
 import { Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
-import { isTestMode, wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { isTestMode, wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {

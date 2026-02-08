@@ -5,7 +5,7 @@ import { GUI } from 'dat.gui';
 import { mat4, vec3 } from 'wgpu-matrix';
 
 import { mesh } from '../../meshes/teapot';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import compositeWGSL from './composite.wgsl';
 import opaqueWGSL from './opaque.wgsl';

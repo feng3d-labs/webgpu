@@ -3,7 +3,7 @@ import { BindingResources, Buffer, RenderPass, RenderPassDescriptor, RenderPipel
 import { ComputePass, ComputePipeline, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4, vec3 } from 'wgpu-matrix';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import importLevelWGSL from './import_level.wgsl';
 import particleWGSL from './particle.wgsl';

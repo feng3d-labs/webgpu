@@ -29,11 +29,16 @@ const init = async (canvas: HTMLCanvasElement) =>
     offscreenCanvas.width = canvas.clientWidth * devicePixelRatio;
     offscreenCanvas.height = canvas.clientHeight * devicePixelRatio;
 
+    // 获取测试名称，用于在测试模式下正确报告结果
+    const testName = (typeof window !== 'undefined' && window.location)
+        ? new URLSearchParams(window.location.search).get('testName') || 'example-worker'
+        : 'example-worker';
+
     // Send a message to the worker telling it to initialize WebGPU with the OffscreenCanvas. The
     // array passed as the second argument here indicates that the OffscreenCanvas is to be
     // transferred to the worker, meaning this main thread will lose access to it and it will be
     // fully owned by the worker.
-    worker.postMessage({ type: 'init', offscreenCanvas }, [offscreenCanvas]);
+    worker.postMessage({ type: 'init', offscreenCanvas, testName }, [offscreenCanvas]);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

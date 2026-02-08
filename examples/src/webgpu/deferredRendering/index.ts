@@ -2,7 +2,7 @@ import { GUI } from 'dat.gui';
 
 import { mat4, vec3, vec4 } from 'wgpu-matrix';
 import { mesh } from '../../meshes/stanfordDragon';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import fragmentDeferredRendering from './fragmentDeferredRendering.wgsl';
 import fragmentGBuffersDebugView from './fragmentGBuffersDebugView.wgsl';

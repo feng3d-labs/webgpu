@@ -4,7 +4,7 @@ import { GUI } from 'dat.gui';
 
 import spriteWGSL from './sprite.wgsl';
 import updateSpritesWGSL from './updateSprites.wgsl';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

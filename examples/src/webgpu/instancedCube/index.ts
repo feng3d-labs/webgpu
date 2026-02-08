@@ -3,7 +3,7 @@ import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { Mat4, mat4, vec3 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 import instancedVertWGSL from '../../shaders/instanced.vert.wgsl';

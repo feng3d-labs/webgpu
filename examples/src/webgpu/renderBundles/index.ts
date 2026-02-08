@@ -5,7 +5,7 @@ import { GUI } from 'dat.gui';
 import Stats from 'stats.js';
 import { mat4, vec3 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import { SphereLayout, createSphereMesh } from '../../meshes/sphere';
 import meshWGSL from './mesh.wgsl';

@@ -5,7 +5,7 @@
  */
 
 // 导入自动生成的测试配置
-import { tests as testConfigs } from './test-config.js';
+import { tests as testConfigs } from './test-config';
 
 // 存储控制台日志
 const consoleMessages: Map<string, { errors: string[]; warnings: string[]; logs: string[] }> = new Map();

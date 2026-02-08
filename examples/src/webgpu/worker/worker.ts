@@ -2,7 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { CanvasContext, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
@@ -52,7 +52,7 @@ self.addEventListener('message', (ev) =>
         case 'init': {
             try
             {
-                init(ev.data.offscreenCanvas);
+                init(ev.data.offscreenCanvas, ev.data.testName);
             }
             catch (err)
             {
@@ -68,7 +68,7 @@ self.addEventListener('message', (ev) =>
 // Once we receive the OffscreenCanvas this init() function is called, which functions similarly
 // to the init() method for all the other samples. The remainder of this file is largely identical
 // to the rotatingCube sample.
-async function init(canvas: OffscreenCanvas)
+async function init(canvas: OffscreenCanvas, testName: string = 'example-worker')
 {
     const webgpu = await new WebGPU().init();
     const context: CanvasContext = { canvasId: canvas };
@@ -167,6 +167,8 @@ async function init(canvas: OffscreenCanvas)
     };
 
     // 使用包装后的 requestAnimationFrame
+    // 设置 testName 以便测试模式下正确报告结果
+    (self as any).testNameForWorker = testName;
     const rAF = wrapRequestAnimationFrame();
 
     function frame()

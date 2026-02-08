@@ -14,7 +14,7 @@ import { reactive } from '@feng3d/reactivity';
 import { BindingResources, CanvasContext, CanvasTexture, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.

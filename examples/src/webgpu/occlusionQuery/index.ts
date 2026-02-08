@@ -4,7 +4,7 @@ import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import solidColorLitWGSL from './solidColorLit.wgsl';
 

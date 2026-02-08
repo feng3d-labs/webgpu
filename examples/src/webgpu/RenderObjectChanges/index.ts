@@ -1,7 +1,7 @@
 import { reactive } from '@feng3d/reactivity';
 import { BufferBinding, RenderObject, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {

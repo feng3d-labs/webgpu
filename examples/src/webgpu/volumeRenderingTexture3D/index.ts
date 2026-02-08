@@ -5,7 +5,7 @@ import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
 import volumeWGSL from './volume.wgsl';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 const gui = new GUI();
 

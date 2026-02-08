@@ -1,7 +1,7 @@
 import { RenderPassDescriptor, Submit, RenderObject } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper.js';
+import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 
 import redFragWGSL from '../../shaders/red.frag.wgsl';
 import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
