@@ -258,7 +258,14 @@ export async function captureCanvasAsync(
             const blob = await canvas.convertToBlob({ type: `image/${format}`, quality });
             const arrayBuffer = await blob.arrayBuffer();
             // 将 ArrayBuffer 转换为 base64
-            const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+            const uint8Array = new Uint8Array(arrayBuffer);
+            let binary = '';
+
+            for (let i = 0; i < uint8Array.length; i++)
+            {
+                binary += String.fromCharCode(uint8Array[i]);
+            }
+            const base64 = btoa(binary);
 
             return base64;
         }
@@ -375,10 +382,25 @@ export function setupExampleTest(options: SetupExampleTestOptions): typeof reque
                 const logs = getAndStopGlobalCapture();
                 const renderData = await captureCanvasAsync(canvas);
 
+                // 检查渲染结果是否为纯黑色
+                let passed = true;
+                let message = `成功渲染 ${framesRendered} 帧`;
+
+                if (renderData)
+                {
+                    const blackRender = await isRenderBlack(renderData);
+
+                    if (blackRender)
+                    {
+                        passed = false;
+                        message = `渲染结果为纯黑色，可能存在渲染问题`;
+                    }
+                }
+
                 reportTestResult({
                     testName,
-                    passed: true,
-                    message: `成功渲染 ${framesRendered} 帧`,
+                    passed,
+                    message,
                     renderData: renderData || undefined,
                     renderDataType: 'png',
                     logs,
@@ -397,6 +419,72 @@ export function setupExampleTest(options: SetupExampleTestOptions): typeof reque
 
     // 返回一个伪 RAF 函数，测试模式下不应该被调用
     return requestAnimationFrame;
+}
+
+/**
+ * 检查渲染结果是否为纯黑色
+ * @param renderData base64 编码的图片数据
+ * @param threshold 黑色阈值（0-255），默认为 10
+ * @param blackPixelRatio 判定为纯黑的黑像素比例阈值（0-1），默认为 0.95（95%以上像素为黑色）
+ * @returns 是否为纯黑色渲染
+ */
+export async function isRenderBlack(
+    renderData: string,
+    threshold: number = 10,
+    blackPixelRatio: number = 0.95,
+): Promise<boolean>
+{
+    try
+    {
+        // 将 base64 数据转换为 Image
+        const image = await new Promise<HTMLImageElement>((resolve, reject) =>
+        {
+            const img = new Image();
+
+            img.onload = () => resolve(img);
+            img.onerror = () => reject(new Error('Failed to load image'));
+            img.src = `data:image/png;base64,${renderData}`;
+        });
+
+        // 创建临时 canvas 来读取像素数据
+        const canvas = document.createElement('canvas');
+
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const ctx = canvas.getContext('2d');
+
+        if (!ctx) return false;
+
+        ctx.drawImage(image, 0, 0);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        let blackPixels = 0;
+        const totalPixels = data.length / 4;
+
+        // 统计黑色像素数量
+        for (let i = 0; i < data.length; i += 4)
+        {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+
+            // 如果像素接近黑色
+            if (r < threshold && g < threshold && b < threshold)
+            {
+                blackPixels++;
+            }
+        }
+
+        // 如果超过指定比例的像素是黑色，则认为是纯黑渲染
+        return (blackPixels / totalPixels) >= blackPixelRatio;
+    }
+    catch (e)
+    {
+        console.warn('检查渲染结果是否为纯黑时出错:', e);
+
+        return false;
+    }
 }
 
 /**

@@ -6,6 +6,8 @@
 
 // 导入自动生成的测试配置
 import { tests as testConfigs } from './test-config';
+// 导入纯黑色渲染检测函数
+import { isRenderBlack } from './testlib/test-wrapper';
 
 // 存储控制台日志
 const consoleMessages: Map<string, { errors: string[]; warnings: string[]; logs: string[] }> = new Map();
@@ -859,6 +861,31 @@ function runTest(index: number)
                     // 测试通过但有控制台错误
                     test.error = `测试通过，但有 ${messages.errors.length} 个控制台错误`;
                     test.status = 'fail'; // 将状态改为失败
+                }
+
+                // 检查渲染结果是否为纯黑色（对于通过且没有错误消息的测试）
+                if (test.status === 'pass' && test.renderData)
+                {
+                    // 异步检查渲染结果
+                    isRenderBlack(test.renderData).then((isBlack) =>
+                    {
+                        if (isBlack)
+                        {
+                            test.status = 'fail';
+                            if (test.error)
+                            {
+                                test.error += '\n渲染结果为纯黑色，可能存在渲染问题';
+                            }
+                            else
+                            {
+                                test.error = '渲染结果为纯黑色，可能存在渲染问题';
+                            }
+                            renderTestList();
+                        }
+                    }).catch((e) =>
+                    {
+                        console.warn('检查渲染结果时出错:', e);
+                    });
                 }
 
                 // 延迟移除 iframe，确保测试完全完成
