@@ -177,13 +177,11 @@
             opacity: 0.8;
             font-weight: normal;
         }
-            word-break: break-word;
-        }
 
-        .test-actions {
-            display: inline-flex;
-            gap: 8px;
-            margin-left: 10px;
+        .test-buttons {
+            display: flex;
+            gap: 4px;
+            align-items: center;
         }
 
         .btn {
@@ -202,6 +200,39 @@
 
         .btn-primary:hover {
             background-color: #0056b3;
+        }
+
+        .btn-run {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-run:hover {
+            background-color: #218838;
+        }
+
+        .btn-reset {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-reset:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-reset:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #run-all-btn {
+            padding: 6px 14px;
+            font-size: 12px;
+        }
+
+        #run-all-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-secondary {
@@ -303,6 +334,7 @@
                 <div class="stat-value pending" id="stat-pending">0</div>
             </div>
             <div class="stat-item" style="margin-left: auto;">
+                <button class="btn btn-run" id="run-all-btn" style="margin-right: 8px;">运行所有</button>
                 <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 12px; color: #666;">
                     <input type="checkbox" id="filter-failures" style="cursor: pointer;">
                     <span>只显示失败</span>

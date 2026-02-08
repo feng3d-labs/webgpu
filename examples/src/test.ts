@@ -127,6 +127,13 @@ let showFailuresOnly = false;
 // 目录展开状态：记录哪些目录是展开的
 const expandedDirs = new Set<string>();
 
+// 最大并发测试数量
+const MAX_CONCURRENT_TESTS = 5;
+
+// 待运行测试队列
+let testQueue: number[] = [];
+let runningCount = 0;
+
 // 更新统计信息
 function updateSummary()
 {
@@ -144,7 +151,7 @@ function updateSummary()
     if (statTotal) statTotal.textContent = total.toString();
     if (statPass) statPass.textContent = pass.toString();
     if (statFail) statFail.textContent = fail.toString();
-    if (statPending) statPending.textContent = `${pending}${running > 0 ? ` (${running} 运行中)` : ''}`;
+    if (statPending) statPending.textContent = `${pending}${running > 0 ? ` (${running}/${MAX_CONCURRENT_TESTS})` : ''}`;
 }
 
 // 目录树节点接口
@@ -283,11 +290,24 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
                     timeInfo = `<span class="test-time">(${formatTime(elapsed)})</span>`;
                 }
 
+                // 按钮配置
+                let buttons = '';
+
+                if (test.status === 'pending' || test.status === 'fail')
+                {
+                    buttons += `<button class="btn btn-run" onclick="runTest(${testIndex})">运行</button>`;
+                }
+                if (test.status === 'pass' || test.status === 'fail')
+                {
+                    buttons += `<button class="btn btn-reset" onclick="resetTest(${testIndex})">重置</button>`;
+                }
+                buttons += `<button class="btn btn-primary" onclick="openTest(${testIndex})">查看</button>`;
+
                 testItem.innerHTML = `
                     <div class="test-header">
                         <div class="test-title">${test.name}</div>
                         <div class="test-status ${statusClass}">${statusText}${timeInfo}</div>
-                        <button class="btn btn-primary" onclick="openTest(${testIndex})">查看</button>
+                        <div class="test-buttons">${buttons}</div>
                     </div>
                     <div class="test-description">${test.description}</div>
                     ${test.status === 'fail' && test.error ? `<div class="test-error">${test.error}</div>` : ''}
@@ -324,11 +344,24 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
                 timeInfo = `<span class="test-time">(${formatTime(elapsed)})</span>`;
             }
 
+            // 按钮配置
+            let buttons = '';
+
+            if (test.status === 'pending' || test.status === 'fail')
+            {
+                buttons += `<button class="btn btn-run" onclick="runTest(${testIndex})">运行</button>`;
+            }
+            if (test.status === 'pass' || test.status === 'fail')
+            {
+                buttons += `<button class="btn btn-reset" onclick="resetTest(${testIndex})">重置</button>`;
+            }
+            buttons += `<button class="btn btn-primary" onclick="openTest(${testIndex})">查看</button>`;
+
             testItem.innerHTML = `
                 <div class="test-header">
                     <div class="test-title">${test.name}</div>
                     <div class="test-status ${statusClass}">${statusText}${timeInfo}</div>
-                    <button class="btn btn-primary" onclick="openTest(${testIndex})">查看</button>
+                    <div class="test-buttons">${buttons}</div>
                 </div>
                 <div class="test-description">${test.description}</div>
                 ${test.status === 'fail' && test.error ? `<div class="test-error">${test.error}</div>` : ''}
@@ -394,6 +427,31 @@ function escapeHtml(text: string): string
     div.textContent = text;
 
     return div.innerHTML;
+}
+
+// 重置测试状态
+export function resetTest(index: number)
+{
+    const test = tests[index];
+
+    if (!test) return;
+
+    // 移除 iframe（如果存在）
+    if (test.iframe && test.iframe.parentNode)
+    {
+        test.iframe.parentNode.removeChild(test.iframe);
+    }
+
+    // 重置状态
+    test.status = 'pending';
+    test.error = undefined;
+    test.startTime = undefined;
+    test.iframe = undefined;
+
+    // 清除控制台消息
+    consoleMessages.delete(test.name);
+
+    renderTestList();
 }
 
 // 渲染测试列表
@@ -464,6 +522,12 @@ function runTest(index: number)
 
     if (!test) return;
 
+    // 如果已经在运行中，不重复运行
+    if (test.status === 'running') return;
+
+    // 增加运行计数
+    runningCount++;
+
     // 为每个测试创建控制台消息存储
     consoleMessages.set(test.name, { errors: [], warnings: [], logs: [] });
 
@@ -493,6 +557,13 @@ function runTest(index: number)
 
     document.body.appendChild(iframe);
 
+    // 测试完成后的清理函数
+    const cleanup = () =>
+    {
+        runningCount--;
+        processQueue(); // 处理队列中的下一个测试
+    };
+
     // 超时处理已移除，测试会等待直到完成
 
     iframe.onerror = () =>
@@ -505,6 +576,7 @@ function runTest(index: number)
         {
             iframe.parentNode.removeChild(iframe);
         }
+        cleanup();
     };
 
     // 检查是否被重定向到主页
@@ -521,6 +593,7 @@ function runTest(index: number)
                 {
                     iframe.parentNode.removeChild(iframe);
                 }
+                cleanup();
             }
         }
         catch (e)
@@ -581,6 +654,7 @@ function runTest(index: number)
                 }, 500);
 
                 renderTestList();
+                cleanup();
             }
         }
     };
@@ -592,7 +666,7 @@ function runTest(index: number)
     {
         setTimeout(async () =>
         {
-            if (test.status === 'pending')
+            if (test.status === 'running')
             {
                 // 检查 WebGPU 是否可用
                 const result = await checkWebGPU();
@@ -613,18 +687,50 @@ function runTest(index: number)
                 {
                     iframe.parentNode.removeChild(iframe);
                 }
+                cleanup();
             }
         }, 3000);
+    }
+}
+
+// 处理队列中的测试
+function processQueue()
+{
+    while (testQueue.length > 0 && runningCount < MAX_CONCURRENT_TESTS)
+    {
+        const index = testQueue.shift()!;
+
+        runTest(index);
+    }
+}
+
+// 将测试添加到队列
+function queueTest(index: number)
+{
+    if (!testQueue.includes(index))
+    {
+        testQueue.push(index);
+        processQueue();
     }
 }
 
 // 运行所有测试
 function runAllTests()
 {
+    testQueue = [];
+    runningCount = 0;
+
     for (let i = 0; i < tests.length; i++)
     {
-        setTimeout(() => runTest(i), i * 500);
+        // 只运行待测试的测试
+        if (tests[i].status === 'pending')
+        {
+            testQueue.push(i);
+        }
     }
+
+    // 开始处理队列
+    processQueue();
 }
 
 // 切换目录展开/收拢状态
@@ -669,7 +775,23 @@ document.addEventListener('DOMContentLoaded', () =>
     }
 
     renderTestList();
-    runAllTests();
+
+    // 不再自动运行所有测试，用户需要点击"运行所有"按钮
+    // runAllTests();
+
+    // 绑定"运行所有"按钮
+    const runAllBtn = document.getElementById('run-all-btn');
+
+    if (runAllBtn)
+    {
+        runAllBtn.addEventListener('click', () =>
+        {
+            runAllTests();
+            // 禁用按钮防止重复点击
+            (runAllBtn as HTMLButtonElement).disabled = true;
+            runAllBtn.textContent = '运行中...';
+        });
+    }
 
     // 定时更新运行中测试的时间显示
     setInterval(() =>
@@ -680,8 +802,21 @@ document.addEventListener('DOMContentLoaded', () =>
         {
             renderTestList();
         }
+        else
+        {
+            // 所有测试完成，恢复"运行所有"按钮
+            const runAllBtn = document.getElementById('run-all-btn');
+
+            if (runAllBtn)
+            {
+                (runAllBtn as HTMLButtonElement).disabled = false;
+                runAllBtn.textContent = '运行所有';
+            }
+        }
     }, 1000);
 });
 
 // 将函数暴露到全局作用域，以便 HTML 中的 onclick 可以调用
 (window as any).openTest = openTest;
+(window as any).runTest = runTest;
+(window as any).resetTest = resetTest;
