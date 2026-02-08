@@ -151,7 +151,7 @@ const expandedDirs = new Set<string>();
 const expandedTests = new Set<string>();
 
 // 最大并发测试数量
-const MAX_CONCURRENT_TESTS = 5;
+const MAX_CONCURRENT_TESTS = 1;
 
 // 待运行测试队列
 let testQueue: number[] = [];
@@ -744,19 +744,16 @@ function runTest(index: number)
 
     // 创建 iframe 来运行测试
     // 注意：WebGPU 需要可见的 canvas 才能正常工作
-    // 将 iframe 放在一个很小的可见区域（右下角 1x1 像素），确保 canvas 完全可见
+    // 将 iframe 放在屏幕外（左侧）但保持完全可见，避免 transform scale 导致的渲染问题
     const iframe = document.createElement('iframe');
 
     iframe.style.position = 'fixed';
-    iframe.style.right = '0';
-    iframe.style.bottom = '0';
-    iframe.style.width = '400px'; // 保持 canvas 的实际尺寸，确保渲染正常
-    iframe.style.height = '300px'; // 保持 canvas 的实际尺寸，确保渲染正常
+    iframe.style.left = '-9999px'; // 移到屏幕外左侧，但保持完全可见
+    iframe.style.top = '0';
+    iframe.style.width = '800px'; // 保持足够大的尺寸
+    iframe.style.height = '600px'; // 保持足够大的尺寸
     iframe.style.border = 'none';
     iframe.style.overflow = 'hidden';
-    iframe.style.zIndex = '-1'; // 放在最底层，不遮挡其他内容
-    iframe.style.transform = 'scale(0.01)'; // 缩小到 1%，几乎看不见但完全可见
-    iframe.style.transformOrigin = 'bottom right'; // 从右下角缩放
     iframe.style.pointerEvents = 'none'; // 禁用鼠标事件
     iframe.src = test.htmlFile;
     test.iframe = iframe;
