@@ -3,7 +3,7 @@ import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { Mat4, mat4, vec3 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 import instancedVertWGSL from '../../shaders/instanced.vert.wgsl';
@@ -136,20 +136,18 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-instancedCube',
+        canvas,
+        render: () =>
+        {
+            // Update the matrix data.
+            updateTransformationMatrix();
 
-    function frame()
-    {
-        // Update the matrix data.
-        updateTransformationMatrix();
-
-        webgpu.submit(data);
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+            webgpu.submit(data);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

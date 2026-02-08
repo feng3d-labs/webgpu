@@ -4,7 +4,7 @@ import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import showTextureWGSL from './showTexture.wgsl';
 import texturedSquareWGSL from './texturedSquare.wgsl';
@@ -365,19 +365,16 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         ],
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    setupExampleTest({
+        testName: 'example-samplerParameters',
+        canvas,
+        render: () =>
+        {
+            updateConfigBuffer();
 
-    function frame()
-    {
-        updateConfigBuffer();
-
-        webgpu.submit(submit);
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+            webgpu.submit(submit);
+        },
+    });
 };
 
 const panel = new GUI({ width: 310 });

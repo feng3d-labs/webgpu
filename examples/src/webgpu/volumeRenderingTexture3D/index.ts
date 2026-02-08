@@ -5,7 +5,7 @@ import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
 import volumeWGSL from './volume.wgsl';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const gui = new GUI();
 
@@ -165,27 +165,24 @@ const init = async (canvas: HTMLCanvasElement) =>
         }],
     };
 
-    // 使用包装后的 requestAnimationFrame
-    const rAF = wrapRequestAnimationFrame();
+    setupExampleTest({
+        testName: 'example-volumeRenderingTexture3D',
+        canvas,
+        render: () =>
+        {
+            const now = Date.now();
+            const deltaTime = (now - lastFrameMS) / 1000;
 
-    function frame()
-    {
-        const now = Date.now();
-        const deltaTime = (now - lastFrameMS) / 1000;
+            lastFrameMS = now;
 
-        lastFrameMS = now;
+            const inverseModelViewProjection
+                = getInverseModelViewProjectionMatrix(deltaTime);
 
-        const inverseModelViewProjection
-            = getInverseModelViewProjectionMatrix(deltaTime);
+            reactive(uniformBuffer).inverseModelViewProjectionMatrix = inverseModelViewProjection;
 
-        reactive(uniformBuffer).inverseModelViewProjectionMatrix = inverseModelViewProjection;
-
-        webgpu.submit(submit);
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+            webgpu.submit(submit);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

@@ -3,7 +3,7 @@ import { mat4, vec3 } from 'wgpu-matrix';
 import { reactive } from '@feng3d/reactivity';
 import { BufferBinding, RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
@@ -131,23 +131,20 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    setupExampleTest({
+        testName: 'example-twoCubes',
+        canvas,
+        render: () =>
+        {
+            updateTransformationMatrix();
 
-    function frame()
-    {
-        updateTransformationMatrix();
+            // 使用 subarray 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
+            reactive(uniforms.value).modelViewProjectionMatrix = modelViewProjectionMatrix1.subarray();
+            reactive(uniforms1.value).modelViewProjectionMatrix = modelViewProjectionMatrix2.subarray();
 
-        // 使用 subarray 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
-        reactive(uniforms.value).modelViewProjectionMatrix = modelViewProjectionMatrix1.subarray();
-        reactive(uniforms1.value).modelViewProjectionMatrix = modelViewProjectionMatrix2.subarray();
-
-        webgpu.submit(data);
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+            webgpu.submit(data);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

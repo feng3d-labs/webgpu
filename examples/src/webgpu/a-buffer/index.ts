@@ -5,7 +5,7 @@ import { GUI } from 'dat.gui';
 import { mat4, vec3 } from 'wgpu-matrix';
 
 import { mesh } from '../../meshes/teapot';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import compositeWGSL from './composite.wgsl';
 import opaqueWGSL from './opaque.wgsl';
@@ -389,16 +389,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         .add(settings, 'memoryStrategy', ['multipass', 'clamp-pixel-ratio'])
         .onFinishChange(updateSettings);
 
-    // 使用包装后的 requestAnimationFrame
-    const rAF = wrapRequestAnimationFrame();
-
-    function frame()
-    {
-        doDraw();
-        rAF(frame);
-    }
-
-    rAF(frame);
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-a-buffer',
+        canvas,
+        render: () => doDraw(),
+    });
 };
 
 const panel = new GUI({ width: 310 });

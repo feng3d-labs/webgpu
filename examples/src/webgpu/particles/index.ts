@@ -3,7 +3,7 @@ import { BindingResources, Buffer, RenderPass, RenderPassDescriptor, RenderPipel
 import { ComputePass, ComputePipeline, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4, vec3 } from 'wgpu-matrix';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import importLevelWGSL from './import_level.wgsl';
 import particleWGSL from './particle.wgsl';
@@ -341,15 +341,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }];
 
         webgpu.submit(submit);
-
-        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-        rAF(frame);
     }
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    rAF(frame);
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-particles',
+        canvas,
+        render: () => frame(),
+    });
 };
 
 const panel = new GUI({ width: 310 });

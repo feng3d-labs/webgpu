@@ -3,7 +3,7 @@ import { BufferBinding, RenderObject, RenderPassDescriptor, Sampler, Submit, Tex
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
@@ -150,30 +150,29 @@ const init = async (canvas: HTMLCanvasElement) =>
         draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount },
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-cubemap',
+        canvas,
+        render: () =>
+        {
+            updateTransformationMatrix();
 
-    function frame()
-    {
-        updateTransformationMatrix();
+            reactive(uniforms.value).modelViewProjectionMatrix = modelViewProjectionMatrix.subarray();
 
-        reactive(uniforms.value).modelViewProjectionMatrix = modelViewProjectionMatrix.subarray();
+            const data: Submit = {
+                commandEncoders: [
+                    {
+                        passEncoders: [
+                            { descriptor: renderPass, renderPassObjects: [renderObject] },
+                        ],
+                    },
+                ],
+            };
 
-        const data: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPass, renderPassObjects: [renderObject] },
-                    ],
-                },
-            ],
-        };
-
-        webgpu.submit(data);
-
-        rAF(frame);
-    }
-    rAF(frame);
+            webgpu.submit(data);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

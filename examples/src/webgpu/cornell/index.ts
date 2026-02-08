@@ -6,7 +6,7 @@ import Rasterizer from './rasterizer';
 import Raytracer from './raytracer';
 import Scene from './scene';
 import Tonemapper from './tonemapper';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { CanvasContext, CommandEncoder, Submit, Texture } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
@@ -72,28 +72,25 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     raytracer.encode(raytracerCommandEncoder);
     tonemapper.encode(raytracerCommandEncoder);
 
-    function frame()
-    {
-        common.update({
-            rotateCamera: params.rotateCamera,
-            aspect: canvas.width / canvas.height,
-        });
-        radiosity.run();
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-cornell',
+        canvas,
+        render: () =>
+        {
+            common.update({
+                rotateCamera: params.rotateCamera,
+                aspect: canvas.width / canvas.height,
+            });
+            radiosity.run();
 
-        const submit: Submit = {
-            commandEncoders: [params.renderer === 'rasterizer' ? rasterizerCommandEncoder : raytracerCommandEncoder],
-        };
+            const submit: Submit = {
+                commandEncoders: [params.renderer === 'rasterizer' ? rasterizerCommandEncoder : raytracerCommandEncoder],
+            };
 
-        webgpu.submit(submit);
-
-        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-        rAF(frame);
-    }
-
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    rAF(frame);
+            webgpu.submit(submit);
+        },
+    });
 };
 
 const panel = new GUI({ width: 310 });

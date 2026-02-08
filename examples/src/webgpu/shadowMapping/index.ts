@@ -2,7 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, RenderPassDescriptor, RenderPipeline, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { mesh } from '../../meshes/stanfordDragon';
 
@@ -265,23 +265,20 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    function frame()
-    {
-        const cameraViewProj = getCameraViewProjMatrix();
-        const writeBuffers = Buffer.getBuffer(sceneUniformBuffer.buffer).writeBuffers || [];
+    setupExampleTest({
+        testName: 'example-shadowMapping',
+        canvas,
+        render: () =>
+        {
+            const cameraViewProj = getCameraViewProjMatrix();
+            const writeBuffers = Buffer.getBuffer(sceneUniformBuffer.buffer).writeBuffers || [];
 
-        writeBuffers.push({ bufferOffset: 64, data: cameraViewProj });
-        reactive(Buffer.getBuffer(sceneUniformBuffer.buffer)).writeBuffers = writeBuffers;
+            writeBuffers.push({ bufferOffset: 64, data: cameraViewProj });
+            reactive(Buffer.getBuffer(sceneUniformBuffer.buffer)).writeBuffers = writeBuffers;
 
-        webgpu.submit(submit);
-
-        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-        rAF(frame);
-    }
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    rAF(frame);
+            webgpu.submit(submit);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

@@ -6,7 +6,7 @@ import { mat4 } from 'wgpu-matrix';
 
 import skyFragWGSL from './sky.frag.wgsl';
 import skyVertWGSL from './sky.vert.wgsl';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const parameters: {
     readonly elevation: number,
@@ -136,18 +136,14 @@ const init = async (canvas: HTMLCanvasElement) =>
         }],
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    // Draw the scene repeatedly
-    function render()
-    {
-        webgpu.submit(submit);
-
-        rAF(render);
-    }
-
-    rAF(render);
+    setupExampleTest({
+        testName: 'example-sky',
+        canvas,
+        render: () =>
+        {
+            webgpu.submit(submit);
+        },
+    });
 };
 
 //

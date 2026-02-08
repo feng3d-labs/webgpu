@@ -8,7 +8,7 @@ import { createInputHandler } from './input';
 import { reactive } from '@feng3d/reactivity';
 import { RenderObject, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -158,26 +158,24 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 
     let lastFrameMS = Date.now();
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-cameras',
+        canvas,
+        render: () =>
+        {
+            const now = Date.now();
+            const deltaTime = (now - lastFrameMS) / 1000;
 
-    function frame()
-    {
-        const now = Date.now();
-        const deltaTime = (now - lastFrameMS) / 1000;
+            lastFrameMS = now;
 
-        lastFrameMS = now;
+            const modelViewProjection = getModelViewProjectionMatrix(deltaTime);
 
-        const modelViewProjection = getModelViewProjectionMatrix(deltaTime);
+            reactive(bindingResources.uniforms.value).modelViewProjectionMatrix = new Float32Array(modelViewProjection); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
 
-        reactive(bindingResources.uniforms.value).modelViewProjectionMatrix = new Float32Array(modelViewProjection); // 使用 new Float32Array 是因为赋值不同的对象才会触发数据改变重新上传数据到GPU
-
-        webgpu.submit(data);
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+            webgpu.submit(data);
+        },
+    });
 };
 
 const panel = new GUI();

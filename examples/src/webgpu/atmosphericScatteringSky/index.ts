@@ -4,7 +4,7 @@ import atmosphericScatteringSkyWGSL from './atmosphericScatteringSky.wgsl';
 
 import { CanvasContext, Texture } from '@feng3d/render-api';
 import { ComputeObject, WebGPU } from '@feng3d/webgpu';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -59,22 +59,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         workgroups: { workgroupCountX: Math.ceil(uniformBuffer.width / 64), workgroupCountY: Math.ceil(uniformBuffer.height / 64) },
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-    let t = 0;
-
-    function frame()
-    {
-        webgpu.submit({
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-atmosphericScatteringSky',
+        canvas,
+        render: () => webgpu.submit({
             commandEncoders: [{ passEncoders: [{ __type__: 'ComputePass', computeObjects: [computeObject0] }] }],
-        });
-
-        ++t;
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+        }),
+    });
 };
 
 const panel = new GUI({ width: 310 });

@@ -1,7 +1,7 @@
 import { GUI } from 'dat.gui';
 import checkerWGSL from './checker.wgsl';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';
@@ -110,20 +110,18 @@ const init = async (canvas: HTMLCanvasElement) =>
         }],
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    setupExampleTest({
+        testName: 'example-resizeObserverHDDPI',
+        canvas,
+        render: () =>
+        {
+            reactive(uni).color0 = cssColorToRGBA(settings.color0);
+            reactive(uni).color1 = cssColorToRGBA(settings.color1);
+            reactive(uni).size = settings.size;
 
-    function frame()
-    {
-        reactive(uni).color0 = cssColorToRGBA(settings.color0);
-        reactive(uni).color1 = cssColorToRGBA(settings.color1);
-        reactive(uni).size = settings.size;
-
-        webgpu.submit(submit);
-
-        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-        rAF(frame);
-    }
+            webgpu.submit(submit);
+        },
+    });
 
     function getDevicePixelContentBoxSize(entry: ResizeObserverEntry)
     {
@@ -159,9 +157,6 @@ const init = async (canvas: HTMLCanvasElement) =>
     });
 
     observer.observe(canvas);
-
-    // Start the render loop
-    rAF(frame);
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

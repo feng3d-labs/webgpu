@@ -5,7 +5,7 @@ import { WebGPU } from '@feng3d/webgpu';
 import redFragWGSL from '../../shaders/red.frag.wgsl';
 import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import styles from './animatedCanvasSize.module.css';
 
@@ -30,37 +30,33 @@ const init = async (canvas: HTMLCanvasElement) =>
 
     canvas.classList.add(styles.animatedCanvasSize);
 
-    function frame()
-    {
-        // 画布尺寸发生变化时更改渲染通道附件尺寸。
-        const currentWidth = canvas.clientWidth * devicePixelRatio;
-        const currentHeight = canvas.clientHeight * devicePixelRatio;
+    setupExampleTest({
+        testName: 'example-resizeCanvas',
+        canvas,
+        render: () =>
+        {
+            // 画布尺寸发生变化时更改渲染通道附件尺寸。
+            const currentWidth = canvas.clientWidth * devicePixelRatio;
+            const currentHeight = canvas.clientHeight * devicePixelRatio;
 
-        canvas.width = currentWidth;
-        canvas.height = currentHeight;
+            canvas.width = currentWidth;
+            canvas.height = currentHeight;
 
-        // reactive(renderPassDescriptor).attachmentSize = { width: currentWidth, height: currentHeight };
+            // reactive(renderPassDescriptor).attachmentSize = { width: currentWidth, height: currentHeight };
 
-        const data: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPassDescriptor, renderPassObjects: [renderObject] },
-                    ],
-                },
-            ],
-        };
+            const data: Submit = {
+                commandEncoders: [
+                    {
+                        passEncoders: [
+                            { descriptor: renderPassDescriptor, renderPassObjects: [renderObject] },
+                        ],
+                    },
+                ],
+            };
 
-        webgpu.submit(data);
-
-        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-        rAF(frame);
-    }
-
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    rAF(frame);
+            webgpu.submit(data);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

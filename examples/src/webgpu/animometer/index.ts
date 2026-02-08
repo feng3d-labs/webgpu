@@ -4,7 +4,7 @@ import { RenderBundle, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 
 import animometerWGSL from './animometer.wgsl';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -191,52 +191,53 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let frameTimeAvg: number;
     let updateDisplay = true;
 
-    // 使用包装后的 requestAnimationFrame
-    const rAF = wrapRequestAnimationFrame();
-
-    function frame(timestamp: number)
-    {
-        let frameTime = 0;
-
-        if (previousFrameTimestamp !== undefined)
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-animometer',
+        canvas,
+        render: () =>
         {
-            frameTime = timestamp - previousFrameTimestamp;
-        }
-        previousFrameTimestamp = timestamp;
+            const timestamp = performance.now();
+            let frameTime = 0;
 
-        const start = performance.now();
-
-        doDraw(timestamp);
-        const jsTime = performance.now() - start;
-
-        if (frameTimeAvg === undefined)
-        {
-            frameTimeAvg = frameTime;
-        }
-        if (jsTimeAvg === undefined)
-        {
-            jsTimeAvg = jsTime;
-        }
-
-        const w = 0.2;
-
-        frameTimeAvg = (1 - w) * frameTimeAvg + w * frameTime;
-        jsTimeAvg = (1 - w) * jsTimeAvg + w * jsTime;
-
-        if (updateDisplay)
-        {
-            perfDisplay.innerHTML = `Avg Javascript: ${jsTimeAvg.toFixed(
-                2,
-            )} ms\nAvg Frame: ${frameTimeAvg.toFixed(2)} ms`;
-            updateDisplay = false;
-            setTimeout(() =>
+            if (previousFrameTimestamp !== undefined)
             {
-                updateDisplay = true;
-            }, 100);
-        }
-        rAF(frame);
-    }
-    rAF(frame);
+                frameTime = timestamp - previousFrameTimestamp;
+            }
+            previousFrameTimestamp = timestamp;
+
+            const start = performance.now();
+
+            doDraw(timestamp);
+            const jsTime = performance.now() - start;
+
+            if (frameTimeAvg === undefined)
+            {
+                frameTimeAvg = frameTime;
+            }
+            if (jsTimeAvg === undefined)
+            {
+                jsTimeAvg = jsTime;
+            }
+
+            const w = 0.2;
+
+            frameTimeAvg = (1 - w) * frameTimeAvg + w * frameTime;
+            jsTimeAvg = (1 - w) * jsTimeAvg + w * jsTime;
+
+            if (updateDisplay)
+            {
+                perfDisplay.innerHTML = `Avg Javascript: ${jsTimeAvg.toFixed(
+                    2,
+                )} ms\nAvg Frame: ${frameTimeAvg.toFixed(2)} ms`;
+                updateDisplay = false;
+                setTimeout(() =>
+                {
+                    updateDisplay = true;
+                }, 100);
+            }
+        },
+    });
 };
 
 const panel = new GUI({ width: 310 });

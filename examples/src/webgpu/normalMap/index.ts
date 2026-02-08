@@ -2,7 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { BindingResources, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import { mat4, vec3 } from 'wgpu-matrix';
 import { createBoxMeshWithTangents } from '../../meshes/box';
 import normalMapWGSL from './normalMap.wgsl';
@@ -365,14 +365,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         webgpu.submit(submit);
-
-        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-        rAF(frame);
     }
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
 
-    rAF(frame);
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-normalMap',
+        canvas,
+        render: () => frame(),
+    });
 };
 
 const panel = new GUI();

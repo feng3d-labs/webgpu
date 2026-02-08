@@ -2,7 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
-import { isTestMode, wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
@@ -90,22 +90,19 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    setupExampleTest({
+        testName: 'example-rotatingCube',
+        canvas,
+        render: () =>
+        {
+            const transformationMatrix = getTransformationMatrix();
 
-    function frame()
-    {
-        const transformationMatrix = getTransformationMatrix();
+            // 更新uniforms
+            reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
 
-        // 更新uniforms
-        reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
-
-        webgpu.submit(data);
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+            webgpu.submit(data);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

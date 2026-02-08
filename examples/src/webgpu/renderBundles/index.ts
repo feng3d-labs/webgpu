@@ -5,7 +5,7 @@ import { GUI } from 'dat.gui';
 import Stats from 'stats.js';
 import { mat4, vec3 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { SphereLayout, createSphereMesh } from '../../meshes/sphere';
 import meshWGSL from './mesh.wgsl';
@@ -352,23 +352,22 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI, stats: Stats) =>
     }
     onUseRenderBundlesChanged();
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    setupExampleTest({
+        testName: 'example-renderBundles',
+        canvas,
+        render: () =>
+        {
+            stats.begin();
 
-    function frame()
-    {
-        stats.begin();
+            const transformationMatrix = getTransformationMatrix();
 
-        const transformationMatrix = getTransformationMatrix();
+            reactive(uniforms.value).viewProjectionMatrix = transformationMatrix.subarray();
 
-        reactive(uniforms.value).viewProjectionMatrix = transformationMatrix.subarray();
+            webgpu.submit(submit);
 
-        webgpu.submit(submit);
-
-        stats.end();
-        rAF(frame);
-    }
-    rAF(frame);
+            stats.end();
+        },
+    });
 };
 
 const stats = new Stats();

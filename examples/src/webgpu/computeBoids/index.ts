@@ -4,7 +4,7 @@ import { GUI } from 'dat.gui';
 
 import spriteWGSL from './sprite.wgsl';
 import updateSpritesWGSL from './updateSprites.wgsl';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {
@@ -139,19 +139,12 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
     });
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    function frame()
-    {
-        webgpu.submit(submits[t % 2]);
-
-        ++t;
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-computeBoids',
+        canvas,
+        render: () => webgpu.submit(submits[t % 2]),
+    });
 };
 
 const panel = new GUI({ width: 310 });

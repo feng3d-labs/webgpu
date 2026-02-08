@@ -1,7 +1,7 @@
 import { RenderPassDescriptor, Submit, RenderObject } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import redFragWGSL from '../../shaders/red.frag.wgsl';
 import triangleVertWGSL from '../../shaders/triangle.vert.wgsl';
@@ -45,16 +45,12 @@ const init = async (canvas: HTMLCanvasElement) =>
         ],
     };
 
-    // 使用包装后的 requestAnimationFrame
-    const rAF = wrapRequestAnimationFrame();
-
-    function frame()
-    {
-        webgpu.submit(data);
-        rAF(frame);
-    }
-
-    rAF(frame);
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-helloTriangleMSAA',
+        canvas,
+        render: () => webgpu.submit(data),
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

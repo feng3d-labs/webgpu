@@ -1,6 +1,6 @@
 import { GUI } from 'dat.gui';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import computeWGSL from './compute.wgsl';
 import fragWGSL from './frag.wgsl';
@@ -169,24 +169,21 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     addGUI();
     resetGameData();
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    (function loop()
-    {
-        if (GameOptions.timestep)
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-gameOfLife',
+        canvas,
+        render: () =>
         {
-            wholeTime++;
-            if (wholeTime >= GameOptions.timestep)
+            if (GameOptions.timestep)
             {
-                render();
-                wholeTime -= GameOptions.timestep;
-                loopTimes = 1 - loopTimes;
-            }
-        }
+                wholeTime++;
+                if (loopTimes) loopTimes--;
 
-        rAF(loop);
-    })();
+                render();
+            }
+        },
+    });
 };
 
 const panel = new GUI({ width: 310 });

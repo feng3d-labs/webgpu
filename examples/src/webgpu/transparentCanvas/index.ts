@@ -6,7 +6,7 @@ import { WebGPU } from '@feng3d/webgpu';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
@@ -118,19 +118,16 @@ const init = async (canvas: HTMLCanvasElement) =>
         }],
     };
 
-    function frame()
-    {
-        reactive(uniformBindGroup.uniforms.value).modelViewProjectionMatrix = getTransformationMatrix().slice();
+    setupExampleTest({
+        testName: 'example-transparentCanvas',
+        canvas,
+        render: () =>
+        {
+            reactive(uniformBindGroup.uniforms.value).modelViewProjectionMatrix = getTransformationMatrix().slice();
 
-        webgpu.submit(submit);
-
-        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-        rAF(frame);
-    }
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    rAF(frame);
+            webgpu.submit(submit);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

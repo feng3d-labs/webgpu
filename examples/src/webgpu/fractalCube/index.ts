@@ -3,7 +3,7 @@ import { CanvasContext, CopyTextureToTexture, RenderObject, RenderPassDescriptor
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
 
@@ -114,32 +114,30 @@ const init = async (canvas: HTMLCanvasElement) =>
         copySize: [canvas.width, canvas.height],
     };
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-fractalCube',
+        canvas,
+        render: () =>
+        {
+            const transformationMatrix = getTransformationMatrix();
 
-    function frame()
-    {
-        const transformationMatrix = getTransformationMatrix();
+            reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
 
-        reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
+            const data: Submit = {
+                commandEncoders: [
+                    {
+                        passEncoders: [
+                            { descriptor: renderPass, renderPassObjects: [renderObject] },
+                            copyTextureToTexture,
+                        ],
+                    },
+                ],
+            };
 
-        const data: Submit = {
-            commandEncoders: [
-                {
-                    passEncoders: [
-                        { descriptor: renderPass, renderPassObjects: [renderObject] },
-                        copyTextureToTexture,
-                    ],
-                },
-            ],
-        };
-
-        webgpu.submit(data);
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+            webgpu.submit(data);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

@@ -4,7 +4,7 @@ import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import solidColorLitWGSL from './solidColorLit.wgsl';
 
@@ -183,9 +183,6 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
     let time = 0;
     let then = 0;
 
-    // 使用包装后的 requestAnimationFrame
-    const rAF = wrapRequestAnimationFrame();
-
     function render(now: number)
     {
         now *= 0.001; // convert to seconds
@@ -238,10 +235,14 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         );
 
         webgpu.submit(submit);
-
-        rAF(render);
     }
-    rAF(render);
+
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-occlusionQuery',
+        canvas,
+        render: (now) => render(now),
+    });
 };
 
 const panel = new GUI({ width: 310 });

@@ -2,7 +2,7 @@ import { reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture } from '@feng3d/render-api';
 import { ComputePass, ComputePipeline, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';
 import blurWGSL from './blur.wgsl';
@@ -218,21 +218,20 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }
     }
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
-
-    function frame()
-    {
-        if (needUpdateEncoder)
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-imageBlur',
+        canvas,
+        render: () =>
         {
-            updateComputePassEncoder();
-        }
+            if (needUpdateEncoder)
+            {
+                updateComputePassEncoder();
+            }
 
-        webgpu.submit(submit);
-
-        rAF(frame);
-    }
-    rAF(frame);
+            webgpu.submit(submit);
+        },
+    });
 };
 
 const panel = new GUI({ width: 310 });

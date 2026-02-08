@@ -4,7 +4,7 @@ import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';
 import { MsdfTextRenderer } from './msdfText';
@@ -251,47 +251,44 @@ setBlendConstant().`,
         return modelViewProjectionMatrix;
     }
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    setupExampleTest({
+        testName: 'example-textRenderingMsdf',
+        canvas,
+        render: () =>
+        {
+            const transformationMatrix = getTransformationMatrix();
 
-    function frame()
-    {
-        const transformationMatrix = getTransformationMatrix();
+            const buffer = Buffer.getBuffer(uniformBuffer.buffer);
+            const writeBuffers = buffer.writeBuffers || [];
 
-        const buffer = Buffer.getBuffer(uniformBuffer.buffer);
-        const writeBuffers = buffer.writeBuffers || [];
+            writeBuffers.push({
+                data: transformationMatrix,
+            });
+            reactive(buffer).writeBuffers = writeBuffers;
 
-        writeBuffers.push({
-            data: transformationMatrix,
-        });
-        reactive(buffer).writeBuffers = writeBuffers;
+            const renderObjects: RenderPassObject[] = [];
 
-        const renderObjects: RenderPassObject[] = [];
+            renderObjects.push({
+                pipeline: pipeline,
+                bindingResources: uniformBindGroup,
+                vertices: verticesBuffer,
+                draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount, instanceCount: 1 },
+            });
 
-        renderObjects.push({
-            pipeline: pipeline,
-            bindingResources: uniformBindGroup,
-            vertices: verticesBuffer,
-            draw: { __type__: 'DrawVertex', vertexCount: cubeVertexCount, instanceCount: 1 },
-        });
+            textRenderer.render(renderObjects, ...text);
 
-        textRenderer.render(renderObjects, ...text);
-
-        const submit: Submit = {
-            commandEncoders: [{
-                passEncoders: [{
-                    descriptor: renderPassDescriptor,
-                    renderPassObjects: renderObjects,
+            const submit: Submit = {
+                commandEncoders: [{
+                    passEncoders: [{
+                        descriptor: renderPassDescriptor,
+                        renderPassObjects: renderObjects,
+                    }],
                 }],
-            }],
-        };
+            };
 
-        webgpu.submit(submit);
-
-        rAF(frame);
-    }
-
-    rAF(frame);
+            webgpu.submit(submit);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

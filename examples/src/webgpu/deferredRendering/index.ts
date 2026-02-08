@@ -2,7 +2,7 @@ import { GUI } from 'dat.gui';
 
 import { mat4, vec3, vec4 } from 'wgpu-matrix';
 import { mesh } from '../../meshes/stanfordDragon';
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import fragmentDeferredRendering from './fragmentDeferredRendering.wgsl';
 import fragmentGBuffersDebugView from './fragmentGBuffersDebugView.wgsl';
@@ -422,14 +422,36 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         };
 
         webgpu.submit(submit);
-
-        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-        rAF(frame);
     }
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
 
-    rAF(frame);
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-deferredRendering',
+        canvas,
+        render: () =>
+        {
+            const cameraViewProj = getCameraViewProjMatrix();
+
+            if (Buffer.getBuffer(cameraUniformBuffer.buffer).writeBuffers)
+            {
+                Buffer.getBuffer(cameraUniformBuffer.buffer).writeBuffers.push({ data: cameraViewProj });
+            }
+            else
+            {
+                reactive(Buffer.getBuffer(cameraUniformBuffer.buffer)).writeBuffers = [{ data: cameraViewProj }];
+            }
+
+            const submit: Submit = {
+                commandEncoders: [
+                    {
+                        passEncoders: settings.mode === 'gBuffers view' ? gBuffersPassEncoders : passEncoders,
+                    },
+                ],
+            };
+
+            webgpu.submit(submit);
+        },
+    });
 };
 
 const panel = new GUI({ width: 310 });

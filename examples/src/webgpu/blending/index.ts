@@ -4,7 +4,7 @@ import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import texturedQuadWGSL from './texturedQuad.wgsl';
 
@@ -526,9 +526,7 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         }],
     };
 
-    // 使用包装后的 requestAnimationFrame
-    const rAF = wrapRequestAnimationFrame();
-
+    // 使用 setupExampleTest 设置测试模式
     function render()
     {
         gui.updateDisplay();
@@ -561,12 +559,15 @@ const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
         updateUniforms(dstUniform.value, canvas, dstTexture);
 
         webgpu.submit(submit);
-
-        rAF(render);
     }
 
     applyPreset();
-    rAF(render);
+
+    setupExampleTest({
+        testName: 'example-blending',
+        canvas,
+        render,
+    });
 };
 
 const panel = new GUI({ width: 310 });

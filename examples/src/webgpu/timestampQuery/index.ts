@@ -11,7 +11,7 @@ import fragmentWGSL from '../../shaders/black.frag.wgsl';
 
 import PerfCounter from './PerfCounter';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement) =>
 {
@@ -169,20 +169,18 @@ const init = async (canvas: HTMLCanvasElement) =>
         return modelViewProjectionMatrix;
     }
 
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
+    setupExampleTest({
+        testName: 'example-timestampQuery',
+        canvas,
+        render: () =>
+        {
+            const transformationMatrix = getTransformationMatrix();
 
-    function frame()
-    {
-        const transformationMatrix = getTransformationMatrix();
+            reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
 
-        reactive(uniforms.value).modelViewProjectionMatrix = transformationMatrix.subarray();
-
-        webgpu.submit(submit);
-
-        rAF(frame);
-    }
-    rAF(frame);
+            webgpu.submit(submit);
+        },
+    });
 };
 
 const webgpuCanvas = document.getElementById('webgpu') as HTMLCanvasElement;

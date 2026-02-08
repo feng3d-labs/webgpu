@@ -3,7 +3,7 @@ import { BindingResources, Buffer, CanvasContext, PassEncoder, RenderPassDescrip
 import { WebGPU } from '@feng3d/webgpu';
 import { mat3, mat4 } from 'wgpu-matrix';
 
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
+import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { modelData } from './models';
 
@@ -329,14 +329,14 @@ const init = async () =>
         };
 
         webgpu.submit(submit);
-
-        // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-        rAF(render);
     }
-    // 使用包装后的 requestAnimationFrame，测试模式下只会渲染指定帧数
-    const rAF = wrapRequestAnimationFrame();
 
-    rAF(render);
+    // 使用 setupExampleTest 设置测试模式
+    setupExampleTest({
+        testName: 'example-multipleCanvases',
+        canvas: outerElem.querySelector('canvas') as HTMLCanvasElement,
+        render: (time) => render(time),
+    });
 };
 
 init();
