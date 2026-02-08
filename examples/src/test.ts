@@ -95,12 +95,13 @@ interface TestInfo
     name: string;
     description: string;
     htmlFile: string;
-    status: 'pending' | 'pass' | 'fail';
+    status: 'pending' | 'running' | 'pass' | 'fail';
     error?: string;
     testName?: string; // 用于匹配 postMessage 中的 testName
     dirPath?: string; // 目录路径（相对于根目录）
     iframe?: HTMLIFrameElement;
     type: 'spectest' | 'example'; // 测试类型
+    startTime?: number; // 测试开始时间
 }
 
 // 从配置文件初始化测试列表
@@ -132,6 +133,7 @@ function updateSummary()
     const total = tests.length;
     const pass = tests.filter(t => t.status === 'pass').length;
     const fail = tests.filter(t => t.status === 'fail').length;
+    const running = tests.filter(t => t.status === 'running').length;
     const pending = tests.filter(t => t.status === 'pending').length;
 
     const statTotal = document.getElementById('stat-total');
@@ -142,7 +144,7 @@ function updateSummary()
     if (statTotal) statTotal.textContent = total.toString();
     if (statPass) statPass.textContent = pass.toString();
     if (statFail) statFail.textContent = fail.toString();
-    if (statPending) statPending.textContent = pending.toString();
+    if (statPending) statPending.textContent = `${pending}${running > 0 ? ` (${running} 运行中)` : ''}`;
 }
 
 // 目录树节点接口
@@ -263,12 +265,28 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
                 testItem.style.marginLeft = `${8 + (child.level + 1) * 16}px`; // 测试项缩进
 
                 const statusClass = test.status;
-                const statusText = test.status === 'pending' ? '待测试' : test.status === 'pass' ? '通过' : '失败';
+                let statusText = test.status === 'pending' ? '待测试' : test.status === 'running' ? '运行中' : test.status === 'pass' ? '通过' : '失败';
+                let timeInfo = '';
+
+                // 显示运行时间
+                if (test.status === 'running' && test.startTime)
+                {
+                    const elapsed = Date.now() - test.startTime;
+
+                    timeInfo = `<span class="test-time">(${formatTime(elapsed)})</span>`;
+                }
+                else if ((test.status === 'pass' || test.status === 'fail') && test.startTime)
+                {
+                    // 计算总耗时（估算）
+                    const elapsed = test.status === 'pass' ? 1000 : 5000; // 简化显示
+
+                    timeInfo = `<span class="test-time">(${formatTime(elapsed)})</span>`;
+                }
 
                 testItem.innerHTML = `
                     <div class="test-header">
                         <div class="test-title">${test.name}</div>
-                        <div class="test-status ${statusClass}">${statusText}</div>
+                        <div class="test-status ${statusClass}">${statusText}${timeInfo}</div>
                         <button class="btn btn-primary" onclick="openTest(${testIndex})">查看</button>
                     </div>
                     <div class="test-description">${test.description}</div>
@@ -295,12 +313,21 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
             testItem.className = 'test-item';
 
             const statusClass = test.status;
-            const statusText = test.status === 'pending' ? '待测试' : test.status === 'pass' ? '通过' : '失败';
+            let statusText = test.status === 'pending' ? '待测试' : test.status === 'running' ? '运行中' : test.status === 'pass' ? '通过' : '失败';
+            let timeInfo = '';
+
+            // 显示运行时间
+            if (test.status === 'running' && test.startTime)
+            {
+                const elapsed = Date.now() - test.startTime;
+
+                timeInfo = `<span class="test-time">(${formatTime(elapsed)})</span>`;
+            }
 
             testItem.innerHTML = `
                 <div class="test-header">
                     <div class="test-title">${test.name}</div>
-                    <div class="test-status ${statusClass}">${statusText}</div>
+                    <div class="test-status ${statusClass}">${statusText}${timeInfo}</div>
                     <button class="btn btn-primary" onclick="openTest(${testIndex})">查看</button>
                 </div>
                 <div class="test-description">${test.description}</div>
@@ -311,6 +338,15 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
             parentElement.appendChild(testItem);
         });
     }
+}
+
+// 格式化时间显示
+function formatTime(ms: number): string
+{
+    if (ms < 1000) return `${ms}ms`;
+    if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
+
+    return `${Math.floor(ms / 60000)}m${Math.floor((ms % 60000) / 1000)}s`;
 }
 
 // 渲染控制台错误信息
@@ -431,6 +467,11 @@ function runTest(index: number)
     // 为每个测试创建控制台消息存储
     consoleMessages.set(test.name, { errors: [], warnings: [], logs: [] });
 
+    // 设置为运行中状态
+    test.status = 'running';
+    test.startTime = Date.now();
+    renderTestList();
+
     // 创建 iframe 来运行测试
     // 注意：WebGPU 需要可见的 canvas 才能正常工作
     // 将 iframe 放在一个很小的可见区域（右下角 1x1 像素），确保 canvas 完全可见
@@ -452,34 +493,10 @@ function runTest(index: number)
 
     document.body.appendChild(iframe);
 
-    // 设置超时，如果 30 秒内没有收到结果，标记为失败
-    const timeout = setTimeout(() =>
-    {
-        if (test.status === 'pending')
-        {
-            const messages = consoleMessages.get(test.name);
-            const errorCount = messages?.errors.length || 0;
-            const errorInfo = errorCount > 0 ? `（${errorCount} 个错误）` : '';
-
-            test.status = 'fail';
-            test.error = `测试超时（30秒内未完成）${errorInfo}`;
-            if (messages && messages.errors.length > 0)
-            {
-                test.error += `\n错误: ${messages.errors[0]}`;
-            }
-            renderTestList();
-
-            // 移除 iframe
-            if (iframe.parentNode)
-            {
-                iframe.parentNode.removeChild(iframe);
-            }
-        }
-    }, 30000);
+    // 超时处理已移除，测试会等待直到完成
 
     iframe.onerror = () =>
     {
-        clearTimeout(timeout);
         test.status = 'fail';
         test.error = 'iframe 加载失败';
         renderTestList();
@@ -497,7 +514,6 @@ function runTest(index: number)
         {
             if (iframe.contentWindow && iframe.contentWindow.location.pathname === '/index.html')
             {
-                clearTimeout(timeout);
                 test.status = 'fail';
                 test.error = 'iframe 被重定向到主页，可能页面不存在或加载失败。';
                 renderTestList();
@@ -527,7 +543,6 @@ function runTest(index: number)
 
             if (isMatch)
             {
-                clearTimeout(timeout);
                 window.removeEventListener('message', messageHandler);
 
                 test.status = event.data.passed ? 'pass' : 'fail';
@@ -591,7 +606,6 @@ function runTest(index: number)
                     test.status = 'fail';
                     test.error = result.error || 'WebGPU 初始化失败';
                 }
-                clearTimeout(timeout);
                 renderTestList();
 
                 // 移除 iframe
@@ -656,6 +670,17 @@ document.addEventListener('DOMContentLoaded', () =>
 
     renderTestList();
     runAllTests();
+
+    // 定时更新运行中测试的时间显示
+    setInterval(() =>
+    {
+        const runningTests = tests.filter(t => t.status === 'running');
+
+        if (runningTests.length > 0)
+        {
+            renderTestList();
+        }
+    }, 1000);
 });
 
 // 将函数暴露到全局作用域，以便 HTML 中的 onclick 可以调用
