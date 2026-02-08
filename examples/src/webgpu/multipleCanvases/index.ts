@@ -1,5 +1,5 @@
 // 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
-import { setupExampleTest } from '../../testlib/test-wrapper';
+import { setupExampleTest, isTestMode } from '../../testlib/test-wrapper';
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, CanvasContext, PassEncoder, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
@@ -152,6 +152,15 @@ const init = async () =>
         }
     });
 
+    // 在测试模式下，强制所有画布可见（用于测试）
+    const forceVisibleInTestMode = (canvas: HTMLCanvasElement) =>
+    {
+        if (isTestMode())
+        {
+            visibleCanvasSet.add(canvas);
+        }
+    };
+
     type CanvasInfo = {
         context: CanvasContext;
         clearValue: [number, number, number, number];
@@ -179,6 +188,9 @@ const init = async () =>
 
         resizeObserver.observe(canvas);
         intersectionObserver.observe(canvas);
+
+        // 在测试模式下强制画布可见
+        forceVisibleInTestMode(canvas);
 
         const container = document.createElement('div');
 
@@ -332,9 +344,12 @@ const init = async () =>
     }
 
     // 使用 setupExampleTest 设置测试模式
+    // 在测试模式下，合成前4个画布的结果
+    const allCanvases = Array.from(outerElem.querySelectorAll('canvas')) as HTMLCanvasElement[];
+
     setupExampleTest({
         testName: 'example-multipleCanvases',
-        canvas: outerElem.querySelector('canvas') as HTMLCanvasElement,
+        canvas: allCanvases.slice(0, 4), // 最多合成4个画布
         render: (time) => render(time),
     });
 };

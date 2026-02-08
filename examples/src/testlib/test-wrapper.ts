@@ -324,8 +324,8 @@ export interface SetupExampleTestOptions
 {
     /** 测试名称 */
     testName: string;
-    /** Canvas 元素 */
-    canvas: HTMLCanvasElement;
+    /** Canvas 元素（或多个画布） */
+    canvas: HTMLCanvasElement | HTMLCanvasElement[];
     /** 渲染函数 */
     render: (time?: number) => void;
     /** 渲染多少帧后停止（默认为3帧） */
@@ -366,6 +366,9 @@ export function setupExampleTest(options: SetupExampleTestOptions): typeof reque
     // 测试模式下的逻辑
     let framesRendered = 0;
 
+    // 处理画布数组或单个画布
+    const canvases = Array.isArray(canvas) ? canvas : [canvas];
+
     // 定义渲染循环函数
     const renderLoop = () =>
     {
@@ -380,7 +383,20 @@ export function setupExampleTest(options: SetupExampleTestOptions): typeof reque
             {
                 // 获取全局日志（从模块加载时就开始捕获）
                 const logs = getAndStopGlobalCapture();
-                const renderData = await captureCanvasAsync(canvas);
+
+                // 获取渲染数据
+                let renderData: string | null = null;
+
+                if (canvases.length > 1)
+                {
+                    // 多个画布，进行合成
+                    renderData = await compositeCanvases(canvases);
+                }
+                else
+                {
+                    // 单个画布，直接捕获
+                    renderData = await captureCanvasAsync(canvases[0]);
+                }
 
                 // 检查渲染结果是否为纯黑色
                 let passed = true;
@@ -484,6 +500,74 @@ export async function isRenderBlack(
         console.warn('检查渲染结果是否为纯黑时出错:', e);
 
         return false;
+    }
+}
+
+/**
+ * 合并多个画布的渲染结果为一张图片
+ * @param canvases 要合并的画布数组（最多4个）
+ * @returns Promise<string | null> 合并后的 base64 编码图片数据
+ */
+export async function compositeCanvases(
+    canvases: HTMLCanvasElement[],
+): Promise<string | null>
+{
+    if (canvases.length === 0) return null;
+
+    try
+    {
+        // 获取第一个画布的尺寸作为参考
+        const firstCanvas = canvases[0];
+        const canvasWidth = firstCanvas.width || firstCanvas.clientWidth || 300;
+        const canvasHeight = firstCanvas.height || firstCanvas.clientHeight || 300;
+
+        // 计算网格布局（最多2x2，即4个画布）
+        const cols = Math.min(2, Math.ceil(Math.sqrt(canvases.length)));
+        const rows = Math.min(2, Math.ceil(canvases.length / cols));
+
+        // 创建合成画布
+        const compositeCanvas = document.createElement('canvas');
+
+        compositeCanvas.width = canvasWidth * cols;
+        compositeCanvas.height = canvasHeight * rows;
+
+        const ctx = compositeCanvas.getContext('2d');
+
+        if (!ctx) return null;
+
+        // 填充白色背景
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, compositeCanvas.width, compositeCanvas.height);
+
+        // 将每个画布绘制到合成画布上
+        for (let i = 0; i < Math.min(canvases.length, 4); i++)
+        {
+            const canvas = canvases[i];
+            const col = i % cols;
+            const row = Math.floor(i / cols);
+            const x = col * canvasWidth;
+            const y = row * canvasHeight;
+
+            // 绘制画布内容
+            ctx.drawImage(canvas, x, y, canvasWidth, canvasHeight);
+
+            // 添加边框以便区分
+            ctx.strokeStyle = '#cccccc';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, canvasWidth, canvasHeight);
+        }
+
+        // 转换为 base64
+        const dataUrl = compositeCanvas.toDataURL('image/png', 0.92);
+        const base64Data = dataUrl.split(',')[1];
+
+        return base64Data;
+    }
+    catch (e)
+    {
+        console.warn('合成画布时出错:', e);
+
+        return null;
     }
 }
 
