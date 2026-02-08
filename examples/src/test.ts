@@ -326,7 +326,12 @@ function renderDirNode(node: DirNode, parentElement: HTMLElement)
                 {
                     buttons += `<button class="btn btn-reset" onclick="event.stopPropagation(); resetTest(${testIndex})">重置</button>`;
                 }
-                buttons += `<button class="btn btn-primary" onclick="event.stopPropagation(); openTest(${testIndex})">查看</button>`;
+                // 如果有渲染数据，点击查看展开详情；否则在新窗口打开
+                const viewButtonAction = test.renderData
+                    ? `toggleTestDetail('${test.name.replace(/'/g, "\\'")}')`
+                    : `openTest(${testIndex})`;
+
+                buttons += `<button class="btn btn-primary" onclick="event.stopPropagation(); ${viewButtonAction}">查看</button>`;
 
                 // 展开图标
                 const expandIcon = isDetailExpanded ? '▼' : '▶';

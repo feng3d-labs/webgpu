@@ -1,5 +1,3 @@
-// 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
-import { wrapRequestAnimationFrame } from '../../testlib/test-wrapper';
 import { reactive } from '@feng3d/reactivity';
 import { CanvasContext, RenderPassDescriptor, RenderPipeline, Submit, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
@@ -53,7 +51,7 @@ self.addEventListener('message', (ev) =>
         case 'init': {
             try
             {
-                init(ev.data.offscreenCanvas, ev.data.testName);
+                init(ev.data.offscreenCanvas);
             }
             catch (err)
             {
@@ -69,7 +67,7 @@ self.addEventListener('message', (ev) =>
 // Once we receive the OffscreenCanvas this init() function is called, which functions similarly
 // to the init() method for all the other samples. The remainder of this file is largely identical
 // to the rotatingCube sample.
-async function init(canvas: OffscreenCanvas, testName: string = 'example-worker')
+async function init(canvas: OffscreenCanvas)
 {
     const webgpu = await new WebGPU().init();
     const context: CanvasContext = { canvasId: canvas };
@@ -167,17 +165,6 @@ async function init(canvas: OffscreenCanvas, testName: string = 'example-worker'
         }],
     };
 
-    // 使用包装后的 requestAnimationFrame
-    // 设置 testName 以便测试模式下正确报告结果
-    (self as any).testNameForWorker = testName;
-    const rAF = wrapRequestAnimationFrame();
-
-    // 在 Worker 中，我们需要手动处理测试结果报告
-    // 因为 Worker 无法直接访问父窗口（测试页面）
-    let frameCount = 0;
-    const maxFrames = 3;
-    let reported = false;
-
     function frame()
     {
         const transformationMatrix = getTransformationMatrix();
@@ -185,38 +172,17 @@ async function init(canvas: OffscreenCanvas, testName: string = 'example-worker'
         reactive(uniformBindGroup.uniforms.value).modelViewProjectionMatrix = transformationMatrix.slice();
 
         webgpu.submit(submit);
-
-        frameCount++;
-
-        // 检查是否在测试模式（通过 wrapRequestAnimationFrame 的行为判断）
-        // 如果 rAF 没有返回有效的 animationFrameId，说明已达到 maxFrames
-        const animationFrameId = rAF(frame);
-
-        // 如果 animationFrameId 是 0，说明测试模式已达到帧数限制
-        if (animationFrameId === 0 && !reported)
-        {
-            reported = true;
-            // 向主线程发送测试结果，由主线程转发到测试页面
-            self.postMessage({
-                type: 'test-result',
-                testName,
-                passed: true,
-                message: `成功渲染 ${frameCount} 帧`,
-                details: {
-                    errors: [],
-                    warnings: [],
-                    frameCount,
-                },
-            });
-        }
+        requestAnimationFrame(frame);
     }
 
     // Note: It is important to return control to the browser regularly in order for the worker to
     // process events. You shouldn't simply loop infinitely with while(true) or similar! Using a
     // traditional requestAnimationFrame() loop in the worker is one way to ensure that events are
     // handled correctly by the worker.
-    rAF(frame);
+    requestAnimationFrame(frame);
+
+    // Notify main thread that initialization is complete
+    self.postMessage({ type: 'ready' });
 }
 
 export { };
-
