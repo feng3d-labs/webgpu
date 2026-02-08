@@ -1,3 +1,5 @@
+// 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import { GUI } from 'dat.gui';
 
 import Common from './common';
@@ -6,7 +8,6 @@ import Rasterizer from './rasterizer';
 import Raytracer from './raytracer';
 import Scene from './scene';
 import Tonemapper from './tonemapper';
-import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { CanvasContext, CommandEncoder, Submit, Texture } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';

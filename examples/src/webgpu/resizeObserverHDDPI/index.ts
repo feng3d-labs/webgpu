@@ -1,7 +1,7 @@
+// 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import { GUI } from 'dat.gui';
 import checkerWGSL from './checker.wgsl';
-
-import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';
@@ -49,10 +49,11 @@ const init = async (canvas: HTMLCanvasElement) =>
     const containerElem = document.querySelector('#container') as HTMLElement;
 
     const gui = new GUI();
+    let frameChangeListener: (() => void) | undefined;
 
-    gui.addColor(settings, 'color0').onChange(frame);
-    gui.addColor(settings, 'color1').onChange(frame);
-    gui.add(settings, 'size', 1, 32, 1).name('checker size').onChange(frame);
+    gui.addColor(settings, 'color0').onChange(() => frameChangeListener?.());
+    gui.addColor(settings, 'color1').onChange(() => frameChangeListener?.());
+    gui.add(settings, 'size', 1, 32, 1).name('checker size').onChange(() => frameChangeListener?.());
     gui.add(settings, 'fullscreen');
     gui.add(settings, 'resizable').onChange(() =>
     {
@@ -110,7 +111,7 @@ const init = async (canvas: HTMLCanvasElement) =>
         }],
     };
 
-    setupExampleTest({
+    const rAF = setupExampleTest({
         testName: 'example-resizeObserverHDDPI',
         canvas,
         render: () =>
@@ -122,6 +123,11 @@ const init = async (canvas: HTMLCanvasElement) =>
             webgpu.submit(submit);
         },
     });
+
+    const frame = () => rAF(() =>
+    {});
+
+    frameChangeListener = frame;
 
     function getDevicePixelContentBoxSize(entry: ResizeObserverEntry)
     {

@@ -82,9 +82,8 @@ function createGreenTriangle(): RenderObject
 async function readPixelColor(webgpu: WebGPU, textureView: TextureView, x: number, y: number): Promise<[number, number, number, number]>
 {
     // 使用 webgpu.readPixels 读取像素（WebGPU 的 readPixels 是异步的）
-    // WebGPU 的 ReadPixels 需要 texture 字段（从 textureView.texture 获取）
     const readPixelsParams: ReadPixels = {
-        texture: textureView.texture,
+        textureView,
         origin: [x, y] as [number, number],
         copySize: [1, 1] as [number, number],
     };

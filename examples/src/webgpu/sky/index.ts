@@ -1,3 +1,5 @@
+// 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import { effect, reactive } from '@feng3d/reactivity';
 import { RenderObject, Submit } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
@@ -6,7 +8,6 @@ import { mat4 } from 'wgpu-matrix';
 
 import skyFragWGSL from './sky.frag.wgsl';
 import skyVertWGSL from './sky.vert.wgsl';
-import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const parameters: {
     readonly elevation: number,

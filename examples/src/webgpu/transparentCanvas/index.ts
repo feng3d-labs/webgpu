@@ -1,3 +1,5 @@
+// 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import { mat4, vec3 } from 'wgpu-matrix';
 
 import { reactive } from '@feng3d/reactivity';
@@ -5,8 +7,6 @@ import { CanvasContext, RenderPassDescriptor, RenderPipeline, Submit, Texture, V
 import { WebGPU } from '@feng3d/webgpu';
 
 import { cubePositionOffset, cubeUVOffset, cubeVertexArray, cubeVertexCount, cubeVertexSize } from '../../meshes/cube';
-
-import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import basicVertWGSL from '../../shaders/basic.vert.wgsl';
 import vertexPositionColorWGSL from '../../shaders/vertexPositionColor.frag.wgsl';

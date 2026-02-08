@@ -1,11 +1,11 @@
+// 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, Buffer, CanvasContext, RenderObject, RenderPass, RenderPassDescriptor, RenderPipeline, Sampler, Submit, Texture, VertexAttributes } from '@feng3d/render-api';
 import { RenderBundle, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import Stats from 'stats.js';
 import { mat4, vec3 } from 'wgpu-matrix';
-
-import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import { SphereLayout, createSphereMesh } from '../../meshes/sphere';
 import meshWGSL from './mesh.wgsl';

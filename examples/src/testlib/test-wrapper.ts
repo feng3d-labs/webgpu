@@ -39,7 +39,7 @@
 export { isTestMode, checkWebGPU, wrapRequestAnimationFrame, runTest, TestRunner, type TestRunnerOptions } from './test-runner';
 
 // 同时导入 isTestMode 和 checkWebGPU 供内部使用
-import { isTestMode } from './test-runner';
+import { isTestMode, checkWebGPU } from './test-runner';
 
 /**
  * 控制台日志项
@@ -52,6 +52,126 @@ export interface ConsoleLogItem
     message: string;
     /** 时间戳 */
     timestamp?: number;
+}
+
+/**
+ * 控制台日志捕获器
+ */
+export class ConsoleCapture
+{
+    private logs: ConsoleLogItem[] = [];
+    private originalConsole: {
+        log?: typeof console.log;
+        info?: typeof console.info;
+        warn?: typeof console.warn;
+        error?: typeof console.error;
+        debug?: typeof console.debug;
+    } = {};
+
+    /** 开始捕获控制台输出 */
+    start(): void
+    {
+        // 保存原始方法
+        this.originalConsole.log = console.log;
+        this.originalConsole.info = console.info;
+        this.originalConsole.warn = console.warn;
+        this.originalConsole.error = console.error;
+        this.originalConsole.debug = console.debug;
+
+        const capture = (level: ConsoleLogItem['level']) =>
+            (...args: any[]) =>
+            {
+                const message = args.map(arg =>
+                {
+                    if (typeof arg === 'string') return arg;
+                    if (arg instanceof Error) return arg.message;
+                    try
+                    {
+                        return JSON.stringify(arg);
+                    }
+                    catch
+                    {
+                        return String(arg);
+                    }
+                }).join(' ');
+
+                this.logs.push({
+                    level,
+                    message,
+                    timestamp: Date.now(),
+                });
+
+                // 调用原始方法
+                const original = this.originalConsole[level as keyof typeof this.originalConsole];
+
+                if (original)
+                {
+                    original.apply(console, args);
+                }
+            };
+
+        console.log = capture('log');
+        console.info = capture('info');
+        console.warn = capture('warn');
+        console.error = capture('error');
+        console.debug = capture('debug');
+    }
+
+    /** 停止捕获并返回日志 */
+    stop(): ConsoleLogItem[]
+    {
+        // 恢复原始方法
+        if (this.originalConsole.log) console.log = this.originalConsole.log;
+        if (this.originalConsole.info) console.info = this.originalConsole.info;
+        if (this.originalConsole.warn) console.warn = this.originalConsole.warn;
+        if (this.originalConsole.error) console.error = this.originalConsole.error;
+        if (this.originalConsole.debug) console.debug = this.originalConsole.debug;
+
+        return this.logs;
+    }
+
+    /** 获取当前捕获的日志（不停止捕获） */
+    getLogs(): ConsoleLogItem[]
+    {
+        return [...this.logs];
+    }
+
+    /** 清空日志 */
+    clear(): void
+    {
+        this.logs = [];
+    }
+}
+
+/**
+ * 全局日志捕获器
+ * 在测试模式下，从模块加载时就捕获所有控制台输出
+ */
+let globalConsoleCapture: ConsoleCapture | null = null;
+
+// 在测试模式下，立即启动全局日志捕获
+if (isTestMode())
+{
+    globalConsoleCapture = new ConsoleCapture();
+    globalConsoleCapture.start();
+}
+
+/**
+ * 获取全局日志并停止捕获
+ * 此函数仅供 setupExampleTest 内部使用
+ */
+export function getAndStopGlobalCapture(): ConsoleLogItem[]
+{
+    if (globalConsoleCapture)
+    {
+        const logs = globalConsoleCapture.stop();
+
+        globalConsoleCapture = null;
+
+        return logs;
+    }
+
+    return [];
 }
 
 /**
@@ -159,95 +279,6 @@ export async function captureCanvasAsync(
 }
 
 /**
- * 控制台日志捕获器
- */
-export class ConsoleCapture
-{
-    private logs: ConsoleLogItem[] = [];
-    private originalConsole: {
-        log?: typeof console.log;
-        info?: typeof console.info;
-        warn?: typeof console.warn;
-        error?: typeof console.error;
-        debug?: typeof console.debug;
-    } = {};
-
-    /** 开始捕获控制台输出 */
-    start(): void
-    {
-        // 保存原始方法
-        this.originalConsole.log = console.log;
-        this.originalConsole.info = console.info;
-        this.originalConsole.warn = console.warn;
-        this.originalConsole.error = console.error;
-        this.originalConsole.debug = console.debug;
-
-        const capture = (level: ConsoleLogItem['level']) =>
-            (...args: any[]) =>
-            {
-                const message = args.map(arg =>
-                {
-                    if (typeof arg === 'string') return arg;
-                    if (arg instanceof Error) return arg.message;
-                    try
-                    {
-                        return JSON.stringify(arg);
-                    }
-                    catch
-                    {
-                        return String(arg);
-                    }
-                }).join(' ');
-
-                this.logs.push({
-                    level,
-                    message,
-                    timestamp: Date.now(),
-                });
-
-                // 调用原始方法
-                const original = this.originalConsole[level as keyof typeof this.originalConsole];
-
-                if (original)
-                {
-                    original.apply(console, args);
-                }
-            };
-
-        console.log = capture('log');
-        console.info = capture('info');
-        console.warn = capture('warn');
-        console.error = capture('error');
-        console.debug = capture('debug');
-    }
-
-    /** 停止捕获并返回日志 */
-    stop(): ConsoleLogItem[]
-    {
-        // 恢复原始方法
-        if (this.originalConsole.log) console.log = this.originalConsole.log;
-        if (this.originalConsole.info) console.info = this.originalConsole.info;
-        if (this.originalConsole.warn) console.warn = this.originalConsole.warn;
-        if (this.originalConsole.error) console.error = this.originalConsole.error;
-        if (this.originalConsole.debug) console.debug = this.originalConsole.debug;
-
-        return this.logs;
-    }
-
-    /** 获取当前捕获的日志（不停止捕获） */
-    getLogs(): ConsoleLogItem[]
-    {
-        return [...this.logs];
-    }
-
-    /** 清空日志 */
-    clear(): void
-    {
-        this.logs = [];
-    }
-}
-
-/**
  * 向父窗口发送测试结果
  * 用于测试页面接收测试结果
  */
@@ -278,7 +309,7 @@ export function reportTestResult(data: TestResultData)
  * setupExampleTest({
  *     testName: 'helloTriangle',
  *     canvas,
- *     render: () => webgpu.submit(submit),
+ *     render: (time?: number) => webgpu.submit(submit),
  * });
  * ```
  */
@@ -289,7 +320,7 @@ export interface SetupExampleTestOptions
     /** Canvas 元素 */
     canvas: HTMLCanvasElement;
     /** 渲染函数 */
-    render: () => void;
+    render: (time?: number) => void;
     /** 渲染多少帧后停止（默认为3帧） */
     frameCount?: number;
     /** 完成后的额外延迟（毫秒） */
@@ -310,20 +341,23 @@ export function setupExampleTest(options: SetupExampleTestOptions): typeof reque
 {
     const { testName, canvas, render, frameCount = 3, finishDelay = 100 } = options;
 
-    // 如果不在测试模式，直接返回原始 requestAnimationFrame
-    // 不自动开始渲染循环，让示例自己处理
+    // 如果不在测试模式，启动持续渲染循环
     if (!isTestMode())
     {
+        // 非测试模式下，启动持续的渲染循环以支持动画
+        const renderLoop = (time: number) =>
+        {
+            render(time);
+            requestAnimationFrame(renderLoop);
+        };
+
+        requestAnimationFrame(renderLoop);
+
         return requestAnimationFrame;
     }
 
     // 测试模式下的逻辑
     let framesRendered = 0;
-
-    // 启动早期控制台捕获
-    const consoleCapture = new ConsoleCapture();
-
-    consoleCapture.start();
 
     // 定义渲染循环函数
     const renderLoop = () =>
@@ -337,7 +371,8 @@ export function setupExampleTest(options: SetupExampleTestOptions): typeof reque
             // 达到最大帧数，延迟后报告结果
             setTimeout(async () =>
             {
-                const logs = consoleCapture.stop();
+                // 获取全局日志（从模块加载时就开始捕获）
+                const logs = getAndStopGlobalCapture();
                 const renderData = await captureCanvasAsync(canvas);
 
                 reportTestResult({

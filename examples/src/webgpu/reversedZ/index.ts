@@ -1,3 +1,5 @@
+// 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import { GUI } from 'dat.gui';
 
 import { Mat4, mat4, vec3 } from 'wgpu-matrix';
@@ -13,8 +15,6 @@ import vertexTextureQuadWGSL from './vertexTextureQuad.wgsl';
 import { reactive } from '@feng3d/reactivity';
 import { BindingResources, CanvasContext, CanvasTexture, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/render-api';
 import { WebGPU } from '@feng3d/webgpu';
-
-import { setupExampleTest } from '../../testlib/test-wrapper';
 
 // Two planes close to each other for depth precision test
 const geometryVertexSize = 4 * 8; // Byte size of one geometry vertex.

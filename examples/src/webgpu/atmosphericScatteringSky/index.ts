@@ -1,10 +1,11 @@
+// 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import { GUI } from 'dat.gui';
 
 import atmosphericScatteringSkyWGSL from './atmosphericScatteringSky.wgsl';
 
 import { CanvasContext, Texture } from '@feng3d/render-api';
 import { ComputeObject, WebGPU } from '@feng3d/webgpu';
-import { setupExampleTest } from '../../testlib/test-wrapper';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>
 {

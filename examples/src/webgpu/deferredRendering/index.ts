@@ -1,8 +1,9 @@
+// 必须首先导入 test-wrapper，以确保在测试模式下能捕获所有日志（包括其他模块导入时的日志）
+import { setupExampleTest } from '../../testlib/test-wrapper';
 import { GUI } from 'dat.gui';
 
 import { mat4, vec3, vec4 } from 'wgpu-matrix';
 import { mesh } from '../../meshes/stanfordDragon';
-import { setupExampleTest } from '../../testlib/test-wrapper';
 
 import fragmentDeferredRendering from './fragmentDeferredRendering.wgsl';
 import fragmentGBuffersDebugView from './fragmentGBuffersDebugView.wgsl';
