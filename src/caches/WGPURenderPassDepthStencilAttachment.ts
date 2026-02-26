@@ -6,7 +6,7 @@ import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
 import { WGPUTextureView } from './WGPUTextureView';
 
-import '../data/polyfills/RenderPassDepthStencilAttachment';
+import '../data/RenderPassDepthStencilAttachment';
 
 /**
  * WebGPU渲染通道深度模板附件缓存管理器

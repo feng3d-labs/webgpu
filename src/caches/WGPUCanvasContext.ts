@@ -3,7 +3,7 @@ import { CanvasContext } from '../data/CanvasContext';
 import { ChainMap } from '../utils/ChainMap';
 import { watcher } from '@feng3d/watcher';
 
-import '../data/polyfills/CanvasContext.ts';
+import '../data/CanvasContext';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**
