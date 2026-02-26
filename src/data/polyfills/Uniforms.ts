@@ -1,7 +1,10 @@
-import { Sampler } from '@feng3d/render-api';
+import { Sampler } from '../Sampler';
+import { TextureView } from '../TextureView';
 import { VideoTexture } from '../VideoTexture';
 
-declare module '@feng3d/render-api'
+export {};
+
+declare module '../Uniforms'
 {
     export interface BindingResourceTypeMap
     {

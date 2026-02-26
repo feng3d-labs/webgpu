@@ -1,5 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
-import { Buffer, RenderObject } from '@feng3d/render-api';
+import { Buffer } from '../../data/Buffer';
+import { RenderObject } from '../../data/RenderObject';
 import { WGPUBuffer } from '../../caches/WGPUBuffer';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 import { WGPUVertexBufferLayout } from '../../caches/WGPUVertexBufferLayout';

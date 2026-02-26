@@ -1,19 +1,3 @@
-import { PrimitiveState } from '@feng3d/render-api';
+export {};
+// PrimitiveState 中的 unclippedDepth 属性已在主文件中定义，此处无需重复定义。
 
-declare module '@feng3d/render-api'
-{
-    /**
-     * {@link GPUPrimitiveState}
-     *
-     * `stripIndexFormat` 将由引擎自动设置。
-     */
-    export interface PrimitiveState
-    {
-        /**
-         * If true, indicates that depth clipping is disabled.
-         * Requires the {@link GPUFeatureName#"depth-clip-control"} feature to be enabled.
-         */
-        readonly unclippedDepth?: boolean;
-    }
-
-}

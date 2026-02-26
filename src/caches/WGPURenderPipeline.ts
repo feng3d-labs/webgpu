@@ -1,5 +1,7 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, RenderPipeline, VertexAttributes } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { RenderPipeline } from '../data/RenderPipeline';
+import { VertexAttributes } from '../data/VertexAttributes';
 
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { ReactiveObject } from '../ReactiveObject';

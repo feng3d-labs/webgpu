@@ -1,4 +1,4 @@
-import { ChainMap } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
 
 /**
  * GPU着色器模块管理器。

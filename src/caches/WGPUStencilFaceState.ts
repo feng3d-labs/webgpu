@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { StencilFaceState } from '@feng3d/render-api';
+import { StencilFaceState } from '../data/StencilFaceState';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUStencilFaceState extends ReactiveObject

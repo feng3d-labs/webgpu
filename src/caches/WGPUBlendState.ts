@@ -1,5 +1,7 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { BlendComponent, BlendState, ChainMap, defaultBlendComponent } from '@feng3d/render-api';
+import { BlendComponent, defaultBlendComponent } from '../data/BlendComponent';
+import { BlendState } from '../data/BlendState';
+import { ChainMap } from '../utils/ChainMap';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**

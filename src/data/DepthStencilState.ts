@@ -86,6 +86,13 @@ export interface DepthStencilState
      * 对应WebGL中的 WebGLRenderingContextBase.polygonOffset 函数的 factor 参数。
      */
     readonly depthBiasSlopeScale?: number;
+
+    /**
+     * 片元的最大深度偏差。
+     *
+     * 默认为 0 。
+     */
+    readonly depthBiasClamp?: number;
 }
 
 /**

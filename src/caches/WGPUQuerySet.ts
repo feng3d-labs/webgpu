@@ -1,5 +1,7 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, OcclusionQuery, RenderPass } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { OcclusionQuery } from '../data/OcclusionQuery';
+import { RenderPass } from '../data/RenderPass';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUQuerySet extends ReactiveObject

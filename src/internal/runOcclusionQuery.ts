@@ -1,4 +1,4 @@
-import { OcclusionQuery } from '@feng3d/render-api';
+import { OcclusionQuery } from '../data/OcclusionQuery';
 import { WGPURenderPassEncoder } from '../caches/WGPURenderPassEncoder';
 import { runRenderObject } from './runRenderObject';
 

@@ -31,4 +31,18 @@ export interface DrawIndexed
      * 默认为 0 。
      */
     readonly firstIndex?: number;
+
+    /**
+     * Added to each index value before indexing into the vertex buffers.
+     *
+     * 默认为 0 。
+     */
+    readonly baseVertex?: number;
+
+    /**
+     * First instance to draw.
+     *
+     * 默认为 0 。
+     */
+    readonly firstInstance?: number;
 }

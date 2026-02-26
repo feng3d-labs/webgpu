@@ -1,4 +1,4 @@
-import { Texture } from '@feng3d/render-api';
+import { Texture } from '../data/Texture';
 
 /**
  * 从 GPU纹理 上读取数据。

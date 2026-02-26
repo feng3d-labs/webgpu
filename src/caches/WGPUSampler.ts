@@ -1,5 +1,6 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, defaultSampler, Sampler } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { Sampler, defaultSampler } from '../data/Sampler';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUSampler extends ReactiveObject

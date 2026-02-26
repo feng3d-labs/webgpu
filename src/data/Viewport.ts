@@ -63,4 +63,22 @@ export interface Viewport
      * 默认为画布高度或者渲染通道的附件高度。
      */
     height: number;
+
+    /**
+     * Minimum depth value of the viewport.
+     *
+     * 0.0 ≤ minDepth ≤ 1.0 并且 minDepth ≤ maxDepth
+     *
+     * 默认为 0 。
+     */
+    minDepth?: number;
+
+    /**
+     * Maximum depth value of the viewport.
+     *
+     * 0.0 ≤ maxDepth ≤ 1.0 并且 minDepth ≤ maxDepth
+     *
+     * 默认为 1 。
+     */
+    maxDepth?: number;
 }

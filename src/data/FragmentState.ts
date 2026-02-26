@@ -23,6 +23,16 @@ export interface FragmentState
     readonly wgsl?: string;
 
     /**
+     * 入口函数名称。
+     */
+    readonly entryPoint?: string;
+
+    /**
+     * Specifies the values of pipeline-overridable constants in the shader module.
+     */
+    readonly constants?: Readonly<Record<string, GPUPipelineConstantValue>>;
+
+    /**
      * A list of {@link GPUColorTargetState} defining the formats and behaviors of the color targets
      * this pipeline writes to.
      *

@@ -1,7 +1,6 @@
-import { } from '@feng3d/render-api';
 import { ComputePass } from '../ComputePass';
 
-declare module '@feng3d/render-api'
+declare module '../CommandEncoder'
 {
     export interface PassEncoderMap
     {

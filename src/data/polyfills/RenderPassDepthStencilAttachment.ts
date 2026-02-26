@@ -1,6 +1,6 @@
-import '@feng3d/render-api';
+import { TextureView } from '../TextureView';
 
-declare module '@feng3d/render-api'
+declare module '../RenderPassDepthStencilAttachment'
 {
     /**
      * GPU渲染通道深度模板附件。

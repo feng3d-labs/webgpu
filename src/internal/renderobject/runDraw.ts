@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { RenderObject } from '@feng3d/render-api';
+import { RenderObject } from '../../data/RenderObject';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
 export function runDraw(renderObject: RenderObject, passEncoder: WGPURenderPassEncoder)

@@ -1,5 +1,8 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, VertexAttributes, VertexData, vertexFormatMap, VertexState } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { VertexAttributes, VertexData } from '../data/VertexAttributes';
+import { vertexFormatMap } from '../consts/vertexFormatMap';
+import { VertexState } from '../data/VertexState';
 import { FunctionInfo } from 'wgsl_reflect';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUShaderReflect } from './WGPUShaderReflect';

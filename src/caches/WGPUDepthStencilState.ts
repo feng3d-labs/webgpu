@@ -1,5 +1,6 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, DepthStencilState } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { DepthStencilState } from '../data/DepthStencilState';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUStencilFaceState } from './WGPUStencilFaceState';
 

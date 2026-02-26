@@ -73,7 +73,7 @@ export interface RenderPassColorAttachment
     readonly depthSlice?: GPUIntegerCoordinate;
 }
 
-export type Color = readonly [red: number, green: number, blue: number, alpha: number];
+export type Color = [red: number, green: number, blue: number, alpha: number];
 
 export type LoadOp = 'load' | 'clear';
 

@@ -1,12 +1,12 @@
 import { CanvasConfiguration } from '../CanvasConfiguration';
 
 /**
- * 扩展 @feng3d/render-api 模块
+ * 扩展本地 CanvasContext 模块
  *
  * 为 CanvasContext 接口添加 WebGPU 相关的配置属性
  * 使 CanvasContext 能够支持 WebGPU 画布配置
  */
-declare module '@feng3d/render-api'
+declare module '../CanvasContext'
 {
     /**
      * 扩展 CanvasContext 接口

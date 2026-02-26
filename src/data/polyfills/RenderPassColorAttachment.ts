@@ -1,7 +1,8 @@
 import { reactive } from '@feng3d/reactivity';
-import { defaultRenderPassColorAttachment } from '@feng3d/render-api';
+import { defaultRenderPassColorAttachment, RenderPassColorAttachment } from '../RenderPassColorAttachment';
+import { TextureView } from '../TextureView';
 
-declare module '@feng3d/render-api'
+declare module '../RenderPassColorAttachment'
 {
 
     /**

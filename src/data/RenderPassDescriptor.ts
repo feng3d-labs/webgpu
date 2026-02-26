@@ -1,5 +1,6 @@
 import { RenderPassColorAttachment } from './RenderPassColorAttachment';
 import { RenderPassDepthStencilAttachment } from './RenderPassDepthStencilAttachment';
+import { TimestampQuery } from './TimestampQuery';
 
 /**
  * 渲染通道描述。
@@ -56,4 +57,11 @@ export interface RenderPassDescriptor
      * is a good default, unless it is known that more draw calls will be done.
      */
     readonly maxDrawCount?: GPUSize64;
+
+    /**
+     * 查询通道运行消耗时长（单位为纳秒）。
+     *
+     * 如果需要查询通道运行消耗时长，需要为该属性赋值，如 `pass.timestampQuery = {};`。WebGPU渲染完成后引擎自动填充结果到属性`elapsedNs`。
+     */
+    readonly timestampQuery?: TimestampQuery;
 }

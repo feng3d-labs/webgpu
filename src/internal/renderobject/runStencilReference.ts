@@ -1,5 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
-import { RenderObject, getStencilReference } from '@feng3d/render-api';
+import { RenderObject } from '../../data/RenderObject';
+import { getStencilReference } from '../../data/DepthStencilState';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';
 
 export function runStencilReference(renderObject: RenderObject, passEncoder: WGPURenderPassEncoder)

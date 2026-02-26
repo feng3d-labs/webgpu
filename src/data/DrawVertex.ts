@@ -31,4 +31,11 @@ export interface DrawVertex
      * 默认为 0。
      */
     readonly firstVertex?: number;
+
+    /**
+     * First instance to draw.
+     *
+     * 默认为 0 。
+     */
+    readonly firstInstance?: number;
 }

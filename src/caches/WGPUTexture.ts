@@ -1,5 +1,11 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, Texture, TextureDataSource, TextureDimension, TextureFormat, TextureImageSource, TextureSource } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { Texture } from '../data/Texture';
+import { TextureDataSource } from '../data/TextureDataSource';
+import { TextureDimension } from '../types/TextureDimension';
+import { TextureFormat } from '../types/TextureFormat';
+import { TextureImageSource } from '../data/TextureImageSource';
+import { TextureSource } from '../types/TextureSource';
 import { ReactiveObject } from '../ReactiveObject';
 import { isCopyExternalImageSupported, writeImageWithFallback } from '../utils/copyExternalImageFallback';
 import { generateMipmap } from '../utils/generate-mipmap';
@@ -118,7 +124,7 @@ export class WGPUTexture extends ReactiveObject
             console.assert(!!size, `无法从纹理中获取到正确的尺寸！size必须设置！`, texture);
 
             // 根据格式和采样数确定使用标志
-            const usage = WGPUTexture._getGPUTextureUsageFlags(format, sampleCount);
+            const usage = WGPUTexture._getGPUTextureUsageFlags(format as GPUTextureFormat, sampleCount);
 
             // 计算mip级别数量
             // 注意：3D 纹理使用计算着色器生成 mipmap，需要考虑深度维度
@@ -141,9 +147,9 @@ export class WGPUTexture extends ReactiveObject
                 mipLevelCount,
                 sampleCount,
                 dimension,
-                format,
+                format: format as GPUTextureFormat,
                 usage,
-                viewFormats,
+                viewFormats: viewFormats as Iterable<GPUTextureFormat> | undefined,
             };
 
             // 检查bgra8unorm格式的设备支持

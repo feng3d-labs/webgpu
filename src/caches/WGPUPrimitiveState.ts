@@ -1,5 +1,6 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, PrimitiveState } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { PrimitiveState } from '../data/PrimitiveState';
 import { ReactiveObject } from '../ReactiveObject';
 
 export class WGPUPrimitiveState extends ReactiveObject
