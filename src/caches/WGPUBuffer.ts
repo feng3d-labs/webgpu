@@ -1,7 +1,6 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
 import { Buffer } from '../data/Buffer';
 import { ChainMap } from '../utils/ChainMap';
-import { renderState } from '../utils/renderState';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**
@@ -155,17 +154,8 @@ export class WGPUBuffer extends ReactiveObject
                 sizeByte,
             );
         });
-        if (!renderState.isRunWebGL)
-        {
-            reactive(buffer).writeBuffers = null;
-        }
-        else
-        {
-            setTimeout(() =>
-            {
-                reactive(buffer).writeBuffers = null;
-            }, 0);
-        }
+        // 写入完成后清空缓冲数据
+        reactive(buffer).writeBuffers = null;
     }
 
     /**

@@ -1,4 +1,4 @@
-import { Submit } from '@feng3d/render-api';
+import { Submit } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 
 const init = async (canvas: HTMLCanvasElement) =>

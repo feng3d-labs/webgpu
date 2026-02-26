@@ -3,7 +3,6 @@ import { TypedArray } from '../types/TypedArray';
 /**
  * GPU缓冲区之间拷贝。
  *
- * {@link WebGL2RenderingContextBase.copyBufferSubData}
  * {@link GPUCommandEncoder.copyBufferToBuffer}
  */
 export interface CopyBufferToBuffer

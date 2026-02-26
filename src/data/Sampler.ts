@@ -8,7 +8,6 @@ import { CompareFunction } from './StencilFaceState';
  * {@link GPUSamplerDescriptor}
  *
  * @see https://www.orillusion.com/zh/webgpu.html#dictdef-gpusamplerdescriptor
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/samplerParameter
  */
 export interface Sampler
 {
@@ -24,7 +23,6 @@ export interface Sampler
      *
      * 默认 "repeat"。
      *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/samplerParameter#gl.texture_wrap_s
      * @see https://gpuweb.github.io/gpuweb/#dom-gpusamplerdescriptor-addressmodeu
      */
     readonly addressModeU?: IAddressMode;
@@ -34,7 +32,6 @@ export interface Sampler
      *
      * 默认 "repeat"。
      *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/samplerParameter#gl.texture_wrap_t
      * @see https://gpuweb.github.io/gpuweb/#dom-gpusamplerdescriptor-addressmodev
      */
     readonly addressModeV?: IAddressMode;
@@ -44,7 +41,6 @@ export interface Sampler
      *
      * 默认 "repeat"。
      *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/samplerParameter#gl.texture_wrap_r
      * @see https://gpuweb.github.io/gpuweb/#dom-gpusamplerdescriptor-addressmodew
      */
     readonly addressModeW?: IAddressMode;
@@ -55,7 +51,6 @@ export interface Sampler
      * 默认 "nearest"。
      *
      * @see https://www.orillusion.com/zh/webgpu.html#dom-gpusamplerdescriptor-magfilter
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/samplerParameter#gl.texture_mag_filter
      */
     readonly magFilter?: IFilterMode;
 
@@ -64,10 +59,7 @@ export interface Sampler
      *
      * 默认 "nearest"。
      *
-     * 注：WebGL中如果使用mipmap相关值时需要设置 {@link Sampler.mipmapFilter} 值。
-     *
      * @see https://www.orillusion.com/zh/webgpu.html#dom-gpusamplerdescriptor-minfilter
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/samplerParameter#gl.texture_min_filter
      */
     readonly minFilter?: IFilterMode;
 
@@ -77,7 +69,6 @@ export interface Sampler
      * 默认 "nearest"。
      *
      * @see https://www.orillusion.com/zh/webgpu.html#dom-gpusamplerdescriptor-mipmapfilter
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/samplerParameter#gl.texture_min_filter
      */
     readonly mipmapFilter?: IMipmapFilterMode;
 
@@ -92,7 +83,6 @@ export interface Sampler
      * 注：大多数实现支持范围在1到16之间（包括1和16）的maxAnisotropy值。所使用的maxAnisotropy值将被限制在平台支持的最大值内
      *
      * @see https://www.orillusion.com/zh/webgpu.html#dom-gpusamplerdescriptor-maxanisotropy
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/EXT_texture_filter_anisotropic
      */
     readonly maxAnisotropy?: number;
 
@@ -106,7 +96,7 @@ export interface Sampler
     /**
      * 采样时使用的最大Lod等级。
      *
-     * 默认 16。当未设置 {@link mipmapFilter} 时默认为 0（不使用 mipmap），以保持与 WebGL 行为一致。
+     * 默认 16。当未设置 {@link mipmapFilter} 时默认为 0（不使用 mipmap）。
      */
     readonly lodMaxClamp?: number;
 

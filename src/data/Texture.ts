@@ -51,8 +51,6 @@ export interface TextureDescriptor
     /**
      * 纹理维度，默认为 "2d" 。
      *
-     * WebGL中不支持 "1d" "cube-array"。
-     *
      * 注：修改后将重新创建纹理。
      */
     readonly dimension?: TextureDimension;
@@ -130,11 +128,6 @@ export interface Texture
     /**
      * 初始化纹理资源。
      *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texImage2D
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/texImage3D
-     *
-     * ### WebGPU
-     *
      * @see GPUQueue.copyExternalImageToTexture
      * @see GPUQueue.writeTexture
      *
@@ -144,11 +137,6 @@ export interface Texture
 
     /**
      * 写入纹理资源。
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texSubImage2D
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/texSubImage3D
-     *
-     * ### WebGPU
      *
      * @see GPUQueue.copyExternalImageToTexture
      * @see GPUQueue.writeTexture
@@ -206,8 +194,6 @@ export interface TextureDataLayout
 {
     /**
      * 默认为 0。字节偏移，一般用于跳过文件头部非纹理数据部分。
-     *
-     * 注：WebGL1不支持。
      */
     offset?: number;
 

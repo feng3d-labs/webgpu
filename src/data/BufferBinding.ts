@@ -3,9 +3,6 @@ import { TypedArray } from '../types/TypedArray';
 /**
  * 缓冲区绑定。
  *
- * WebGL 统一块(Uniform Block) 数据
- * WebGPU 缓冲区绑定（GPUBufferBinding）
- *
  * @see GPUBufferBinding
  */
 export interface BufferBinding

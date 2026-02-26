@@ -1,17 +1,16 @@
 import { reactive } from '@feng3d/reactivity';
-import { CanvasContext } from './data/CanvasContext';
-import { renderState } from './utils/renderState';
 import { Buffer } from './data/Buffer';
+import { CanvasContext } from './data/CanvasContext';
 import { ReadPixels } from './data/ReadPixels';
 import { Submit } from './data/Submit';
-import { TextureLike } from './types/TextureLike';
-import { TextureView } from './data/TextureView';
+import { TextureLike } from './data/Texture';
 import { TypedArray } from './types/TypedArray';
 
+import { renderState } from './utils/renderState';
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
-import './data/polyfills/RenderObject';
-import './data/polyfills/RenderPass';
+import './data/RenderObject';
+import './data/RenderPass';
 import { runSubmit } from './internal/runSubmit';
 import { copyDepthTexture } from './utils/copyDepthTexture';
 import { getGPUDevice } from './utils/getGPUDevice';
@@ -24,16 +23,8 @@ import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultipl
 export interface WebGPUOptions extends CanvasContext
 {
     /**
-     * 是否自动翻转 RTT（渲染到纹理）的 Y 轴，以兼容 WebGL 坐标系。
-     *
-     * WebGL 和 WebGPU 在 RTT 场景下纹理坐标系不同：
-     * - WebGL：Y 轴向上，纹理原点在左下角
-     * - WebGPU：Y 轴向下，纹理原点在左上角
-     *
-     * 启用此选项后，WebGPU 会在渲染到纹理后自动翻转 Y 轴，
-     * 使 WebGL 和 WebGPU 的渲染结果保持一致。
-     *
-     * @default true
+     * @deprecated 此选项已废弃，不再有效
+     * @default false
      */
     autoFlipRTT?: boolean;
 }
@@ -70,14 +61,12 @@ export class WebGPU
     readonly device: GPUDevice;
 
     /**
-     * 是否自动翻转 RTT 纹理的 Y 轴。
-     *
-     * @default true
+     * @deprecated 已移除 WebGL 支持，此属性不再有效
      */
     readonly autoFlipRTT: boolean;
 
     private _canvasContext: CanvasContext;
-    private _canvasTextureView: TextureView;
+    private _canvasTextureView: any;
 
     constructor(options?: WebGPUOptions)
     {
@@ -89,7 +78,7 @@ export class WebGPU
                 context: this._canvasContext,
             },
         };
-        this.autoFlipRTT = options?.autoFlipRTT ?? false;
+        this.autoFlipRTT = false; // 已废弃
     }
 
     destroy()
@@ -103,7 +92,7 @@ export class WebGPU
     {
         const device = this.device;
 
-        runSubmit(device, submit, this._canvasContext, this.autoFlipRTT);
+        runSubmit(device, submit, this._canvasContext);
     }
 
     destoryTexture(texture: TextureLike)

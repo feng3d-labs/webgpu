@@ -30,8 +30,6 @@ export interface TransformFeedbackObject
 
     /**
      * 根据顶点数据绘制图元。
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/drawVertex
      */
     readonly draw: DrawVertex;
 
@@ -42,8 +40,6 @@ export interface TransformFeedbackObject
 
     /**
      * 回写顶点着色器中输出到缓冲区。
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/bindTransformFeedback
      */
     transformFeedback: TransformFeedback;
 }
@@ -51,14 +47,12 @@ export interface TransformFeedbackObject
 export interface TransformFeedbackPipeline
 {
     /**
-     * 顶点着色器阶段描述（用于 WebGL Transform Feedback）。
+     * 顶点着色器阶段描述。
      */
     readonly vertex: VertexState;
 
     /**
      * 回写变量。
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/transformFeedbackVaryings
      */
     transformFeedbackVaryings: TransformFeedbackVaryings;
 }
@@ -67,7 +61,7 @@ export interface TransformFeedbackVaryings
 {
     /**
      * 回写变量列表。
-    */
+     */
     varyings: string[];
 
     /**
@@ -77,7 +71,7 @@ export interface TransformFeedbackVaryings
 }
 
 /**
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext/createTransformFeedback
+ * 变换反馈。
  */
 export interface TransformFeedback
 {

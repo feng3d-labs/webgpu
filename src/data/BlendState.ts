@@ -6,8 +6,6 @@ import { Color } from './RenderPassColorAttachment';
  *
  * 定义如何混合到目标颜色中。
  *
- * ### WebGPU
- *
  * @see https://gpuweb.github.io/gpuweb/#dictdef-gpublendstate
  */
 export interface BlendState
@@ -17,7 +15,6 @@ export interface BlendState
      *
      * 当 {@link BlendComponent.srcFactor} {@link BlendComponent.dstFactor} 取值为 "constant" 或者 "one-minus-constant" 时生效。
      *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendColor
      * @see https://gpuweb.github.io/gpuweb/#dom-renderstate-blendconstant-slot
      *
      * 注：只取 renderPipeline.fragment?.targets?.[0]?.blend.constantColor 值。

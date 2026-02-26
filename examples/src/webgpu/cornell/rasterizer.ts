@@ -1,4 +1,4 @@
-import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Texture } from '@feng3d/render-api';
+import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline, Texture } from '@feng3d/webgpu';
 
 import Common from './common';
 import Radiosity from './radiosity';

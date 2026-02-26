@@ -5,7 +5,7 @@ import { RenderBundle } from './RenderBundle';
 import { TimestampQuery } from './TimestampQuery';
 
 /**
- * WebGL渲染通道
+ * 渲染通道
  *
  * 包含渲染通道描述以及需要渲染的对象列表。
  */
@@ -19,7 +19,7 @@ export interface RenderPass
     /**
      * 渲染通道描述
      *
-     * 必须提供。第一个颜色附件中的纹理视图可以缺省，当缺省时使用 WebGL/WebGPU 构造函数中传递的 canvasContext。
+     * 必须提供。第一个颜色附件中的纹理视图可以缺省，当缺省时使用 WebGPU 构造函数中传递的 canvasContext。
      */
     readonly descriptor: RenderPassDescriptor;
 

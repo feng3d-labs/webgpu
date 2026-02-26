@@ -1,4 +1,4 @@
-import { RenderObject, RenderPassDescriptor, Sampler, Submit } from '@feng3d/render-api';
+import { RenderObject, RenderPassDescriptor, Sampler, Submit } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 
 import fullscreenTexturedQuadWGSL from '../../shaders/fullscreenTexturedQuad.wgsl';

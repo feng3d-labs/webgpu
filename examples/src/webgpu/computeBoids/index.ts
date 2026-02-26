@@ -1,4 +1,4 @@
-import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
+import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/webgpu';
 import { ComputeObject, WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 

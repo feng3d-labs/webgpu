@@ -2,7 +2,7 @@ import { GUI } from 'dat.gui';
 import checkerWGSL from './checker.wgsl';
 
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/render-api';
+import { BindingResources, RenderPassDescriptor, RenderPipeline, Submit } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 
 const init = async (canvas: HTMLCanvasElement) =>

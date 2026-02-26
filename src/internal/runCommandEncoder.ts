@@ -12,7 +12,7 @@ import { runCopyTextureToTexture } from './runCopyTextureToTexture';
 import { runRenderPass } from './runRenderPass';
 import { runTransformFeedbackPass } from './runTransformFeedbackPass';
 
-export function runCommandEncoder(device: GPUDevice, commandEncoder: CommandEncoder, canvasContext?: CanvasContext, autoFlipRTT?: boolean)
+export function runCommandEncoder(device: GPUDevice, commandEncoder: CommandEncoder, canvasContext?: CanvasContext)
 {
     const gpuCommandEncoder = device.createCommandEncoder();
 
@@ -20,7 +20,7 @@ export function runCommandEncoder(device: GPUDevice, commandEncoder: CommandEnco
     {
         if (!passEncoder.__type__ || passEncoder.__type__ === 'RenderPass')
         {
-            runRenderPass(device, gpuCommandEncoder, passEncoder as RenderPass, canvasContext, autoFlipRTT);
+            runRenderPass(device, gpuCommandEncoder, passEncoder as RenderPass, canvasContext);
 
             return;
         }

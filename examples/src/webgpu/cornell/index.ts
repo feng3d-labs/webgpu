@@ -7,7 +7,7 @@ import Raytracer from './raytracer';
 import Scene from './scene';
 import Tonemapper from './tonemapper';
 
-import { CanvasContext, CommandEncoder, Submit, Texture } from '@feng3d/render-api';
+import { CanvasContext, CommandEncoder, Submit, Texture } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 
 const init = async (canvas: HTMLCanvasElement, gui: GUI) =>

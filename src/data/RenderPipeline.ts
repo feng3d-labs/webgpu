@@ -51,9 +51,16 @@ export interface RenderPipeline
 }
 
 /**
- * 扩展仅WebGPU支持的混合参数。 "src1" | "one-minus-src1" | "src1-alpha" | "one-minus-src1-alpha" 需要开启扩展 `dual-source-blending` 。
+ * WebGPU dual-source-blending 扩展的混合因子类型。
+ *
+ * 定义了 WebGPU 特有的混合因子 "src1" | "one-minus-src1" | "src1-alpha" | "one-minus-src1-alpha"，
+ * 这些因子需要开启扩展 `dual-source-blending` 才能使用。
+ *
+ * @deprecated 保留此接口以保持向后兼容性。这些值是 WebGPU 特有的，不是 WebGL。
+ *
+ * @see https://www.w3.org/TR/webgpu/#dictdef-gpublendfactor
  */
-export interface IBlendFactorMap
+export interface IWebGLBlendFactorMap
 {
     'src1': 'src1';
     'one-minus-src1': 'one-minus-src1';

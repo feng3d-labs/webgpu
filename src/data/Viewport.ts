@@ -12,8 +12,6 @@
  * * 0.0 ≤ maxDepth ≤ 1.0
  * * minDepth ≤ maxDepth
  *
- * {@link WebGLRenderingContextBase.viewport}
- *
  * @see https://gpuweb.github.io/gpuweb/#dom-gpurenderpassencoder-setviewport
  *
  */
@@ -21,8 +19,6 @@ export interface Viewport
 {
     /**
      * 是否为Y轴朝上。
-     *
-     * WebGL中Y轴朝上，WebGPU中Y轴朝下。
      *
      * 默认为 ture。
      */

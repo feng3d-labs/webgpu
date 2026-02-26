@@ -11,7 +11,7 @@ import vertexTextureQuad from './vertexTextureQuad.wgsl';
 import vertexWriteGBuffers from './vertexWriteGBuffers.wgsl';
 
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, Buffer, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/render-api';
+import { BindingResources, Buffer, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/webgpu';
 import { ComputePass, ComputePipeline, WebGPU } from '@feng3d/webgpu';
 
 const kMaxNumLights = 1024;

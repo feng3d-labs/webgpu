@@ -3,8 +3,6 @@ import { WriteBuffer } from './WriteBuffer';
 /**
  * 缓冲区
  *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/bufferData
- *
  * {@link GPUBufferDescriptor}
  *
  * {@link GPUBuffer}

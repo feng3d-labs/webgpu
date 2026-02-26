@@ -1,4 +1,4 @@
-import { RenderPipeline, VertexAttributes } from '@feng3d/render-api';
+import { RenderPipeline, VertexAttributes } from '@feng3d/webgpu';
 
 import { gridIndices, gridJoints, gridVertices, gridWeights } from './gridData';
 
