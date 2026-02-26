@@ -18,15 +18,14 @@ coverage
 .nyc_output
 **/test-config.ts
 
-# IDE
-.vscode
-.idea
-*.swp
-*.swo
-*~
-.DS_Store
+# 截图和调试文件（专门目录）
+screenshots/
+*.png
+*.jpg
+*.jpeg
+*.gif
 
-# 临时文件
+# 日志和临时文件
 *.tmp
 *.temp
 *.log
@@ -34,9 +33,6 @@ coverage
 console*.log
 network*.json
 page_structure.md
-*.png
-*.jpg
-*.jpeg
 
 # Vite
 .vite
@@ -58,7 +54,7 @@ page_structure.md
 .DS_Store
 Thumbs.db
 
-# 编辑器
+# IDE
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -70,6 +66,9 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+*.swp
+*.swo
+*~
 
 # 剩余文件
 .cache
