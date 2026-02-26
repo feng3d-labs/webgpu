@@ -3,11 +3,6 @@ import { TextureDataLayout, DataImageOrigin, TextureOrigin, TextureSize } from '
 /**
  * 纹理的数据资源。
  *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texSubImage2D
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/texSubImage3D
- *
- * ### WebGPU
- *
  * @see GPUQueue.writeTexture
  */
 export interface TextureDataSource

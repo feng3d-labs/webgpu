@@ -23,8 +23,6 @@ export interface ColorTargetState
      * [red: boolean, green: boolean, blue: boolean, alpha: boolean]
      *
      * 默认 [true,true,true,true]
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/colorMask
      */
     readonly writeMask?: WriteMask;
 }

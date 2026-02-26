@@ -44,7 +44,7 @@ export interface PassEncoderMap
     CopyBufferToBuffer: CopyBufferToBuffer;
 
     /**
-     * Transform Feedback 通道（WebGL2 特有，WebGPU 使用计算着色器模拟）。
+     * Transform Feedback 通道。
      */
     TransformFeedbackPass: TransformFeedbackPass;
 

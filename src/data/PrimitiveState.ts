@@ -67,8 +67,6 @@ export interface PrimitiveTopologyMap
 
 /**
  * 剔除面类型。
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/cullFace
  */
 export type CullFace = CullFaceMap[keyof CullFaceMap];
 
@@ -80,6 +78,6 @@ export interface CullFaceMap
 }
 
 /**
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/frontFace
+ * 正向方向。
  */
 export type FrontFace = 'ccw' | 'cw';

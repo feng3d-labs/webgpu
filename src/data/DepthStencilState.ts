@@ -15,8 +15,6 @@ export interface DepthStencilState
      * 指示这个 GPURenderPipeline 是否可以修改 depthStencilAttachment 深度值。
      *
      * 默认为 `true` 。
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/depthMask
      */
     readonly depthWriteEnabled?: boolean;
 
@@ -24,8 +22,6 @@ export interface DepthStencilState
      * 用于测试片元深度与 depthStencilAttachment 深度值的比较操作。
      *
      * 默认 `'less'` 。
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/depthFunc
      */
     readonly depthCompare?: CompareFunction;
 
@@ -47,11 +43,6 @@ export interface DepthStencilState
      * 模板测试时如果使用 "replace" ，则使用该值填充模板值。
      *
      * 默认为 0 。
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFunc
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/stencilFuncSeparate
-     *
-     * @see https://www.orillusion.com/zh/webgpu.html#dom-gpurenderpassencoder-setstencilreference
      */
     readonly stencilReference?: number;
 
@@ -73,17 +64,13 @@ export interface DepthStencilState
      * 添加到每个片元的恒定深度偏差。
      *
      * 默认为 0 。
-     *
-     * 对应WebGL中的 WebGLRenderingContextBase.polygonOffset 函数的 units 参数。
-    */
+     */
     readonly depthBias?: number;
 
     /**
      * 与片元的斜率成比例的深度偏差。
      *
      * 默认为 0 。
-     *
-     * 对应WebGL中的 WebGLRenderingContextBase.polygonOffset 函数的 factor 参数。
      */
     readonly depthBiasSlopeScale?: number;
 

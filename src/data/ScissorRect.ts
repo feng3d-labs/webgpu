@@ -11,7 +11,6 @@
  * * x+width ≤ this.[[attachment_size]].width.
  * * y+height ≤ this.[[attachment_size]].height.
  *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/scissor
  * @see https://www.orillusion.com/zh/webgpu.html#dom-gpurenderpassencoder-setscissorrect
  *
  */
@@ -19,8 +18,6 @@ export interface ScissorRect
 {
     /**
      * 是否为Y轴朝上。
-     *
-     * WebGL中Y轴朝上，WebGPU中Y轴朝下。
      *
      * 默认为 ture。
      */

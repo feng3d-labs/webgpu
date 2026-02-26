@@ -3,8 +3,6 @@ import { TextureView } from './TextureView';
 
 /**
  * 读取渲染缓冲区或者纹理视图中的像素值。
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/readPixels
  */
 export interface ReadPixels
 {
