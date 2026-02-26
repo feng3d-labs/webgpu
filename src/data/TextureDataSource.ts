@@ -55,4 +55,13 @@ export interface TextureDataSource
      * 写入尺寸。
      */
     size?: TextureSize
+
+    /**
+     * Defines which aspects of the texture to copy to/from.
+     *
+     * 写入纹理哪部分内容。
+     *
+     * @see GPUImageCopyTexture
+     */
+    aspect?: GPUTextureAspect;
 }

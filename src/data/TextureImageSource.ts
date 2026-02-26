@@ -60,6 +60,26 @@ export interface TextureImageSource
      * 是否需要预乘透明度。
      */
     premultipliedAlpha?: boolean;
+
+    /**
+     * Defines which aspects of the texture to copy to/from.
+     *
+     * 写入纹理哪部分内容。
+     *
+     * @see GPUImageCopyTexture
+     */
+    aspect?: GPUTextureAspect;
+
+    /**
+     * Describes the color space and encoding used to encode data into the destination texture.
+     *
+     * This may result in values outside of the range [0, 1] being written to the target texture,
+     * if its format can represent them. Otherwise, the results are clamped to the target
+     * texture format's range.
+     *
+     * @see GPUImageCopyTextureTagged
+     */
+    colorSpace?: PredefinedColorSpace;
 }
 
 export class TextureImageSource
