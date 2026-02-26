@@ -1,6 +1,7 @@
 import { reactive } from '@feng3d/reactivity';
-import { Buffer, CanvasContext, ReadPixels, renderState, Submit, TextureLike, TextureView, TypedArray } from '@feng3d/render-api';
+import { Buffer, CanvasContext, ReadPixels, Submit, TextureLike, TypedArray } from '@feng3d/render-api';
 
+import { renderState } from './utils/renderState';
 import { WGPUBuffer } from './caches/WGPUBuffer';
 import { WGPUTextureLike } from './caches/WGPUTextureLike';
 import './data/polyfills/RenderObject';
@@ -26,7 +27,8 @@ export interface WebGPUOptions extends CanvasContext
      * 启用此选项后，WebGPU 会在渲染到纹理后自动翻转 Y 轴，
      * 使 WebGL 和 WebGPU 的渲染结果保持一致。
      *
-     * @default true
+     * @deprecated 已移除 WebGL 支持，此选项不再有效
+     * @default false
      */
     autoFlipRTT?: boolean;
 }
@@ -63,14 +65,12 @@ export class WebGPU
     readonly device: GPUDevice;
 
     /**
-     * 是否自动翻转 RTT 纹理的 Y 轴。
-     *
-     * @default true
+     * @deprecated 已移除 WebGL 支持，此属性不再有效
      */
     readonly autoFlipRTT: boolean;
 
     private _canvasContext: CanvasContext;
-    private _canvasTextureView: TextureView;
+    private _canvasTextureView: any;
 
     constructor(options?: WebGPUOptions)
     {
@@ -82,7 +82,7 @@ export class WebGPU
                 context: this._canvasContext,
             },
         };
-        this.autoFlipRTT = options?.autoFlipRTT ?? false;
+        this.autoFlipRTT = false; // WebGL 支持已移除，此选项不再有效
     }
 
     destroy()
@@ -96,7 +96,7 @@ export class WebGPU
     {
         const device = this.device;
 
-        runSubmit(device, submit, this._canvasContext, this.autoFlipRTT);
+        runSubmit(device, submit, this._canvasContext);
     }
 
     destoryTexture(texture: TextureLike)

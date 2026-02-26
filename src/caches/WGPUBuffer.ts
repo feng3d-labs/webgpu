@@ -153,17 +153,8 @@ export class WGPUBuffer extends ReactiveObject
                 sizeByte,
             );
         });
-        if (!renderState.isRunWebGL)
-        {
-            reactive(buffer).writeBuffers = null;
-        }
-        else
-        {
-            setTimeout(() =>
-            {
-                reactive(buffer).writeBuffers = null;
-            }, 0);
-        }
+        // 写入完成后清空缓冲数据
+        reactive(buffer).writeBuffers = null;
     }
 
     /**

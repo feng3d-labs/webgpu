@@ -1,4 +1,4 @@
-import { ChainMap } from '@feng3d/render-api';
+import { ChainMap } from '../src/utils/ChainMap';
 import { assert, describe, it } from 'vitest';
 
 describe('ChainMap', () =>

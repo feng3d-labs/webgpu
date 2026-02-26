@@ -2,13 +2,13 @@ import { reactive } from '@feng3d/reactivity';
 import { CanvasContext, Submit } from '@feng3d/render-api';
 import { runCommandEncoder } from './runCommandEncoder';
 
-export function runSubmit(device: GPUDevice, submit: Submit, canvasContext?: CanvasContext, autoFlipRTT?: boolean)
+export function runSubmit(device: GPUDevice, submit: Submit, canvasContext?: CanvasContext)
 {
     reactive(device.queue).preSubmit = ~~device.queue.preSubmit + 1;
 
     const commandBuffers = submit.commandEncoders.map((v) =>
     {
-        return runCommandEncoder(device, v, canvasContext, autoFlipRTT);
+        return runCommandEncoder(device, v, canvasContext);
     });
 
     device.queue.submit(commandBuffers);
