@@ -72,3 +72,6 @@ Thumbs.db
 
 # 剩余文件
 .cache
+
+# Playwright MCP 工具生成的文件
+.playwright-mcp/
