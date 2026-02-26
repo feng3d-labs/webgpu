@@ -1,4 +1,4 @@
-import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline } from '@feng3d/render-api';
+import { BindingResources, CommandEncoder, RenderPass, RenderPassDescriptor, RenderPipeline } from '@feng3d/webgpu';
 
 const fullscreenTexturedQuad
     = `

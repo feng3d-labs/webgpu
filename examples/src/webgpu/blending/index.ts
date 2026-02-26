@@ -1,12 +1,12 @@
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, CanvasContext, Color, RenderObject, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView } from '@feng3d/render-api';
+import { BindingResources, CanvasContext, Color, RenderObject, RenderPassDescriptor, RenderPassObject, RenderPipeline, Sampler, Submit, Texture, TextureView } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';
 
 import texturedQuadWGSL from './texturedQuad.wgsl';
 
-declare module '@feng3d/render-api'
+declare module '@feng3d/webgpu'
 {
     interface Uniforms
     {

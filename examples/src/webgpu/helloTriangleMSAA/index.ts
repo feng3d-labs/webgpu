@@ -1,4 +1,4 @@
-import { RenderPassDescriptor, Submit, RenderObject } from '@feng3d/render-api';
+import { RenderPassDescriptor, Submit, RenderObject } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 
 import redFragWGSL from '../../shaders/red.frag.wgsl';

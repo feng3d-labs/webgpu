@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, Buffer, CommandEncoder, PassEncoder, Texture } from '@feng3d/render-api';
+import { BindingResources, Buffer, CommandEncoder, PassEncoder, Texture } from '@feng3d/webgpu';
 import { ComputePipeline } from '@feng3d/webgpu';
 
 import Common from './common';

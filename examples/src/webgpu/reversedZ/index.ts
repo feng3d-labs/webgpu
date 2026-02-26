@@ -11,7 +11,7 @@ import vertexPrecisionErrorPassWGSL from './vertexPrecisionErrorPass.wgsl';
 import vertexTextureQuadWGSL from './vertexTextureQuad.wgsl';
 
 import { reactive } from '@feng3d/reactivity';
-import { BindingResources, CanvasContext, CanvasTexture, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/render-api';
+import { BindingResources, CanvasContext, CanvasTexture, RenderPass, RenderPassDescriptor, RenderPipeline, Submit, Texture, TextureView, VertexAttributes } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 
 // Two planes close to each other for depth precision test

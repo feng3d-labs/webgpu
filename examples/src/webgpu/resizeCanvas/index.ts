@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/render-api';
+import { RenderObject, RenderPassDescriptor, Submit } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 
 import redFragWGSL from '../../shaders/red.frag.wgsl';

@@ -1,5 +1,5 @@
 import { effect, reactive } from '@feng3d/reactivity';
-import { RenderObject, Submit } from '@feng3d/render-api';
+import { RenderObject, Submit } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 import { GUI } from 'dat.gui';
 import { mat4 } from 'wgpu-matrix';

@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { CanvasContext, CopyTextureToTexture, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from '@feng3d/render-api';
+import { CanvasContext, CopyTextureToTexture, RenderObject, RenderPassDescriptor, Sampler, Submit, Texture } from '@feng3d/webgpu';
 import { WebGPU } from '@feng3d/webgpu';
 import { mat4, vec3 } from 'wgpu-matrix';
 

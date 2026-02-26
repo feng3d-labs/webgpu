@@ -1,4 +1,4 @@
-import { DepthStencilState, RenderPipeline, Texture } from '@feng3d/render-api';
+import { DepthStencilState, RenderPipeline, Texture } from '@feng3d/webgpu';
 
 export const create3DRenderPipeline = (
     label: string,
