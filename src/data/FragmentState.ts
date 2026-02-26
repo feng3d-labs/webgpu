@@ -13,7 +13,9 @@ export interface FragmentState
     readonly code?: string;
 
     /**
-     * GLSL着色器代码。适用于WebGL。
+     * GLSL着色器代码。
+     *
+     * @deprecated 已移除 WebGL 支持，请使用 WGSL 或 code 属性。
      */
     readonly glsl?: string;
 
@@ -37,8 +39,6 @@ export interface FragmentState
      * this pipeline writes to.
      *
      * 定义了该管道写入的颜色目标的格式和行为。
-     *
-     * 注：WebGL中没法分别对每个颜色附件进行设置，统一使用第一项（targets[0]）设置！
      */
     readonly targets?: readonly ColorTargetState[];
 }

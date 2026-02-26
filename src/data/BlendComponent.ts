@@ -1,13 +1,6 @@
 /**
  * 为颜色或alpha通道定义相应渲染目标的混合行为。
  *
- * ### WebGL
- *
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendEquation
- * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/blendFunc
- *
- * ### WebGPU
- *
  * @see https://gpuweb.github.io/gpuweb/#dictdef-gpucolortargetstate
  */
 export interface BlendComponent
@@ -74,8 +67,6 @@ export interface IBlendFactorMap
 
 /**
  * 默认混合组件配置。
- *
- * 用于 WebGL 和 WebGPU 在未指定混合组件时使用相同的默认值，确保渲染效果一致。
  */
 export const defaultBlendComponent: BlendComponent = {
     operation: 'add',

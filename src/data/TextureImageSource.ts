@@ -52,7 +52,7 @@ export interface TextureImageSource
     /**
      * 是否Y轴翻转图片。
      *
-     * 注：WebGL（先翻转，再拷贝）与WebGPU（先拷贝，再翻转）处理方式不一样。此次已WebGL为准。当拷贝全图时，效果一致。
+     * 默认 false。
      */
     flipY?: boolean;
 

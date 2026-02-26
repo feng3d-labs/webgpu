@@ -20,9 +20,7 @@ export interface PrimitiveState
      *
      * 图形拓扑结构。
      *
-     * 以下仅在WebGL生效
-     * * LINE_LOOP 绘制循环连线。
-     * * TRIANGLE_FAN  绘制三角扇形。
+     * 注意：WebGPU 不支持 LINE_LOOP 和 TRIANGLE_FAN。
      */
     readonly topology?: PrimitiveTopology;
 
@@ -68,7 +66,7 @@ export interface PrimitiveTopologyMap
 }
 
 /**
- * * `FRONT_AND_BACK` 剔除正面与背面，仅在WebGL中生效！
+ * 剔除面类型。
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/cullFace
  */
