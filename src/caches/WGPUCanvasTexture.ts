@@ -1,5 +1,6 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { CanvasTexture, ChainMap } from '@feng3d/render-api';
+import { CanvasTexture } from '../data/CanvasTexture';
+import { ChainMap } from '../utils/ChainMap';
 
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUCanvasContext } from './WGPUCanvasContext';

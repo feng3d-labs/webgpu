@@ -1,4 +1,4 @@
-import { ChainMap } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
 import { WGPUBindGroupLayout } from './WGPUBindGroupLayout';
 import { GPUBindGroupLayoutEntryMap, WGPUShaderReflect } from './WGPUShaderReflect';
 

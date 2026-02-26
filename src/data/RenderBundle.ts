@@ -1,4 +1,4 @@
-import { RenderObject } from '@feng3d/render-api';
+import { RenderObject } from './RenderObject';
 
 /**
  * GPU渲染捆绑对象。

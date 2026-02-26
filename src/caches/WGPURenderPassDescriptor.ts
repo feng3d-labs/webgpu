@@ -1,5 +1,8 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { CanvasContext, ChainMap, RenderPassColorAttachment, RenderPassDescriptor } from '@feng3d/render-api';
+import { CanvasContext } from '../data/CanvasContext';
+import { ChainMap } from '../utils/ChainMap';
+import { RenderPassColorAttachment } from '../data/RenderPassColorAttachment';
+import { RenderPassDescriptor } from '../data/RenderPassDescriptor';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPURenderPassColorAttachment } from './WGPURenderPassColorAttachment';

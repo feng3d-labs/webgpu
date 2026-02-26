@@ -1,5 +1,6 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { CanvasContext, ChainMap } from '@feng3d/render-api';
+import { CanvasContext } from '../data/CanvasContext';
+import { ChainMap } from '../utils/ChainMap';
 import { watcher } from '@feng3d/watcher';
 
 import '../data/polyfills/CanvasContext.ts';

@@ -1,4 +1,5 @@
-import { CanvasContext, CopyTextureToTexture } from '@feng3d/render-api';
+import { CanvasContext } from '../data/CanvasContext';
+import { CopyTextureToTexture } from '../data/CopyTextureToTexture';
 import { WGPUTextureLike } from '../caches/WGPUTextureLike';
 
 export function runCopyTextureToTexture(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyTextureToTexture: CopyTextureToTexture, canvasContext?: CanvasContext)

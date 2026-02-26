@@ -1,6 +1,7 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, TypedArray } from '@feng3d/render-api';
 import { assert, describe, it } from 'vitest';
+import { ChainMap } from '../src/utils/ChainMap';
+import { TypedArray } from '../src/types/TypedArray';
 
 let computedCount = 0;
 let writeBuffersCount = 0;

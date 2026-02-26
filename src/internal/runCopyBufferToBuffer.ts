@@ -1,4 +1,5 @@
-import { Buffer, CopyBufferToBuffer } from '@feng3d/render-api';
+import { Buffer } from '../data/Buffer';
+import { CopyBufferToBuffer } from '../data/CopyBufferToBuffer';
 import { WGPUBuffer } from '../caches/WGPUBuffer';
 
 export function runCopyBufferToBuffer(device: GPUDevice, commandEncoder: GPUCommandEncoder, copyBufferToBuffer: CopyBufferToBuffer)

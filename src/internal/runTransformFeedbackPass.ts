@@ -1,4 +1,5 @@
-import { BindingResources, TransformFeedbackObject, TransformFeedbackPass } from '@feng3d/render-api';
+import { BindingResources } from '../data/BindingResources';
+import { TransformFeedbackPass, TransformFeedbackObject } from '../data/TransformFeedbackPass';
 
 import { runComputePass } from './runComputePass';
 import { ComputeObject } from '../data/ComputeObject';

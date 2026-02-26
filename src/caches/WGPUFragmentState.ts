@@ -1,5 +1,6 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, FragmentState } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { FragmentState } from '../data/FragmentState';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUColorTargetState } from './WGPUColorTargetState';
 import { WGPUShaderModule } from './WGPUShaderModule';
