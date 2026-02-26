@@ -1,5 +1,5 @@
-import { ChainMap } from '../src/utils/ChainMap';
 import { assert, describe, it } from 'vitest';
+import { ChainMap } from '../src/utils/ChainMap';
 
 describe('ChainMap', () =>
 {

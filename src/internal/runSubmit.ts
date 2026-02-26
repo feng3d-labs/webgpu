@@ -1,5 +1,6 @@
 import { reactive } from '@feng3d/reactivity';
-import { CanvasContext, Submit } from '@feng3d/render-api';
+import { CanvasContext } from '../data/CanvasContext';
+import { Submit } from '../data/Submit';
 import { runCommandEncoder } from './runCommandEncoder';
 
 export function runSubmit(device: GPUDevice, submit: Submit, canvasContext?: CanvasContext)

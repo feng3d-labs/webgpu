@@ -1,5 +1,6 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, ColorTargetState } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { ColorTargetState } from '../data/ColorTargetState';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUBlendState } from './WGPUBlendState';
 

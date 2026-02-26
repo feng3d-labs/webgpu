@@ -1,4 +1,4 @@
-import { BindingResources } from '@feng3d/render-api';
+import { BindingResources } from './BindingResources';
 import { ComputePipeline } from './ComputePipeline';
 import { Workgroups } from './Workgroups';
 

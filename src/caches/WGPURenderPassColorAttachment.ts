@@ -1,5 +1,10 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { CanvasContext, ChainMap, defaultRenderPassColorAttachment, RenderPassColorAttachment, RenderPassDescriptor, Texture, unreadonly } from '@feng3d/render-api';
+import { CanvasContext } from '../data/CanvasContext';
+import { ChainMap } from '../utils/ChainMap';
+import { defaultRenderPassColorAttachment, RenderPassColorAttachment } from '../data/RenderPassColorAttachment';
+import { RenderPassDescriptor } from '../data/RenderPassDescriptor';
+import { Texture } from '../data/Texture';
+import { unreadonly } from '../utils/unreadonly';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTexture } from './WGPUTexture';
 import { WGPUTextureLike } from './WGPUTextureLike';

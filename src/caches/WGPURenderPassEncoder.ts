@@ -1,4 +1,4 @@
-import { Color } from '@feng3d/render-api';
+import { Color } from '../types/Color';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 
 export type CommandType =

@@ -1,5 +1,10 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { CanvasContext, ChainMap, OcclusionQuery, RenderObject, RenderPass, RenderPassObject } from '@feng3d/render-api';
+import { CanvasContext } from '../data/CanvasContext';
+import { ChainMap } from '../utils/ChainMap';
+import { OcclusionQuery } from '../data/OcclusionQuery';
+import { RenderObject } from '../data/RenderObject';
+import { RenderPass } from '../data/RenderPass';
+import { RenderPassObject } from '../data/RenderPass';
 import { RenderBundle } from '../data/RenderBundle';
 import { runOcclusionQuery } from '../internal/runOcclusionQuery';
 import { runRenderBundle } from '../internal/runRenderBundle';

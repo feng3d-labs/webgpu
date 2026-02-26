@@ -1,5 +1,6 @@
 import { Computed, computed } from '@feng3d/reactivity';
-import { BindingResources, ChainMap } from '@feng3d/render-api';
+import { BindingResources } from '../data/BindingResources';
+import { ChainMap } from '../utils/ChainMap';
 
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUBindGroupEntry } from './WGPUBindGroupEntry';

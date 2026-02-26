@@ -1,4 +1,4 @@
-import { RenderObject } from '@feng3d/render-api';
+import { RenderObject } from '../data/RenderObject';
 import { runBindGroup } from './renderobject/runBindGroup';
 import { runBlendConstant } from './renderobject/runBlendConstant';
 import { runDraw } from './renderobject/runDraw';

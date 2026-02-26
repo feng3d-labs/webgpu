@@ -1,4 +1,4 @@
-import { RenderPassDescriptor } from '@feng3d/render-api';
+import { RenderPassDescriptor } from './RenderPassDescriptor';
 
 /**
  * 多重采样阶段描述。

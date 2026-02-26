@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
 import { ComputePipeline } from '../data/ComputePipeline';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUPipelineLayout } from './WGPUPipelineLayout';

@@ -1,10 +1,10 @@
 import { reactive } from '@feng3d/reactivity';
-import { Buffer } from '../data/Buffer';
-import { CanvasContext } from '../data/CanvasContext';
-import { ReadPixels } from '../data/ReadPixels';
-import { Submit } from '../data/Submit';
-import { TextureLike } from '../data/Texture';
-import { TypedArray } from '../types/TypedArray';
+import { Buffer } from './data/Buffer';
+import { CanvasContext } from './data/CanvasContext';
+import { ReadPixels } from './data/ReadPixels';
+import { Submit } from './data/Submit';
+import { TextureLike } from './data/Texture';
+import { TypedArray } from './types/TypedArray';
 
 import { renderState } from './utils/renderState';
 import { WGPUBuffer } from './caches/WGPUBuffer';

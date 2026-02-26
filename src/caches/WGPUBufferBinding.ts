@@ -1,5 +1,8 @@
 import { computed, Computed, reactive, UnReadonly } from '@feng3d/reactivity';
-import { Buffer, BufferBinding, BufferBindingInfo, ChainMap } from '@feng3d/render-api';
+import { Buffer } from '../data/Buffer';
+import { BufferBinding } from '../data/BufferBinding';
+import { BufferBindingInfo } from '../internal/BufferBindingInfo';
+import { ChainMap } from '../utils/ChainMap';
 import { ArrayInfo, StructInfo, TemplateInfo, TypeInfo } from 'wgsl_reflect';
 import { ReactiveObject } from '../ReactiveObject';
 import { convertToAlignedFormat } from '../utils/convertToAlignedFormat';

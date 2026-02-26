@@ -1,5 +1,5 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { ChainMap } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
 import { TimestampQuery } from '../data/TimestampQuery';
 import { ReactiveObject } from '../ReactiveObject';
 

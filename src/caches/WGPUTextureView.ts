@@ -1,5 +1,7 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap, Texture, TextureView } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
+import { Texture } from '../data/Texture';
+import { TextureView } from '../data/TextureView';
 import { ReactiveObject } from '../ReactiveObject';
 import { WGPUTextureLike } from './WGPUTextureLike';
 

@@ -1,5 +1,5 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { ChainMap } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
 import { VideoTexture } from '../data/VideoTexture';
 import { ReactiveObject } from '../ReactiveObject';
 

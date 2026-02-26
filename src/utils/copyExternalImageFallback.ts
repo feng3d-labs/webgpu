@@ -1,4 +1,6 @@
-import { Texture, TextureFormat, TextureImageSource } from '@feng3d/render-api';
+import { Texture } from '../data/Texture';
+import { TextureFormat } from '../data/Texture';
+import { TextureImageSource } from '../data/TextureImageSource';
 
 /**
  * 支持 copyExternalImageToTexture 的纹理格式集合

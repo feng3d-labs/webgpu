@@ -1,4 +1,9 @@
-import { CanvasContext, CommandEncoder, CopyBufferToBuffer, CopyTextureToTexture, RenderPass, TransformFeedbackPass } from '@feng3d/render-api';
+import { CanvasContext } from '../data/CanvasContext';
+import { CommandEncoder } from '../data/CommandEncoder';
+import { CopyBufferToBuffer } from '../data/CopyBufferToBuffer';
+import { CopyTextureToTexture } from '../data/CopyTextureToTexture';
+import { RenderPass } from '../data/RenderPass';
+import { TransformFeedbackPass } from '../data/TransformFeedbackPass';
 
 import { ComputePass } from '../data/ComputePass';
 import { runComputePass } from './runComputePass';

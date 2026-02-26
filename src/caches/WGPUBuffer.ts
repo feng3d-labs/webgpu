@@ -1,5 +1,7 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { Buffer, ChainMap, renderState } from '@feng3d/render-api';
+import { Buffer } from '../data/Buffer';
+import { ChainMap } from '../utils/ChainMap';
+import { renderState } from '../utils/renderState';
 import { ReactiveObject } from '../ReactiveObject';
 
 /**

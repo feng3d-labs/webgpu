@@ -1,5 +1,5 @@
 import { reactive } from '@feng3d/reactivity';
-import { RenderObject } from '@feng3d/render-api';
+import { RenderObject } from '../../data/RenderObject';
 import { WGPUBindGroup } from '../../caches/WGPUBindGroup';
 import { WGPUPipelineLayout } from '../../caches/WGPUPipelineLayout';
 import { WGPURenderPassEncoder } from '../../caches/WGPURenderPassEncoder';

@@ -1,5 +1,5 @@
 import { Computed, computed, reactive } from '@feng3d/reactivity';
-import { ChainMap } from '@feng3d/render-api';
+import { ChainMap } from '../utils/ChainMap';
 import { RenderBundle } from '../data/RenderBundle';
 import { RenderPassFormat } from '../internal/RenderPassFormat';
 import { runRenderObject } from '../internal/runRenderObject';

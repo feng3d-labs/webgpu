@@ -1,5 +1,10 @@
 import { computed, Computed, reactive } from '@feng3d/reactivity';
-import { BindingResources, BufferBinding, ChainMap, Sampler, Texture, TextureView } from '@feng3d/render-api';
+import { BindingResources } from '../data/BindingResources';
+import { BufferBinding } from '../data/BufferBinding';
+import { ChainMap } from '../utils/ChainMap';
+import { Sampler } from '../data/Sampler';
+import { Texture } from '../data/Texture';
+import { TextureView } from '../data/TextureView';
 import { ResourceType } from 'wgsl_reflect';
 import { VideoTexture } from '../data/VideoTexture';
 import { ReactiveObject } from '../ReactiveObject';
