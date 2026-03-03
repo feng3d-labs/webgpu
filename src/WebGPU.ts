@@ -22,11 +22,6 @@ import { textureInvertYPremultiplyAlpha } from './utils/textureInvertYPremultipl
  */
 export interface WebGPUOptions extends CanvasContext
 {
-    /**
-     * @deprecated 此选项已废弃，不再有效
-     * @default false
-     */
-    autoFlipRTT?: boolean;
 }
 
 /**
@@ -60,11 +55,6 @@ export class WebGPU
 
     readonly device: GPUDevice;
 
-    /**
-     * @deprecated 已移除 WebGL 支持，此属性不再有效
-     */
-    readonly autoFlipRTT: boolean;
-
     private _canvasContext: CanvasContext;
     private _canvasTextureView: any;
 
@@ -78,7 +68,6 @@ export class WebGPU
                 context: this._canvasContext,
             },
         };
-        this.autoFlipRTT = false; // 已废弃
     }
 
     destroy()

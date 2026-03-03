@@ -13,13 +13,6 @@ export interface FragmentState
     readonly code?: string;
 
     /**
-     * GLSL着色器代码。
-     *
-     * @deprecated 已移除 WebGL 支持，请使用 WGSL 或 code 属性。
-     */
-    readonly glsl?: string;
-
-    /**
      * WGSL着色器代码。适用于WebGPU。
      */
     readonly wgsl?: string;
