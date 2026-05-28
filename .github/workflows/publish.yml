@@ -29,17 +29,27 @@ jobs:
           echo "Package: $PUBLISH_NAME"
           echo "Current version: $CURRENT_VERSION"
 
-          # 通过 npm registry 协议检查该版本是否已在 GitHub Packages 上存在
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+          # 通过 npm registry 协议查询包元数据，再用 jq/node 提取版本列表
+          # GitHub Packages 对单版本 GET 会返回 405，因此改为拉整个包的 versions
+          META_JSON=$(curl -s \
             -H "Authorization: Bearer $GITHUB_TOKEN" \
-            "https://npm.pkg.github.com/$PUBLISH_NAME/$CURRENT_VERSION")
+            -H "Accept: application/json" \
+            "https://npm.pkg.github.com/$PUBLISH_NAME")
 
-          if [ "$HTTP_STATUS" = "404" ]; then
+          EXISTS=$(node -e "
+            try {
+              const m = JSON.parse(process.argv[1]);
+              const versions = m && m.versions ? Object.keys(m.versions) : [];
+              process.stdout.write(versions.includes(process.argv[2]) ? 'yes' : 'no');
+            } catch { process.stdout.write('no'); }
+          " "$META_JSON" "$CURRENT_VERSION")
+
+          if [ "$EXISTS" = "no" ]; then
             echo "Version $CURRENT_VERSION not found, will publish"
             echo "should_publish=true" >> $GITHUB_OUTPUT
             echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           else
-            echo "Version $CURRENT_VERSION already exists (HTTP $HTTP_STATUS)"
+            echo "Version $CURRENT_VERSION already exists, skipping"
             echo "should_publish=false" >> $GITHUB_OUTPUT
           fi
 
