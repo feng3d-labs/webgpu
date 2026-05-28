@@ -10,6 +10,7 @@ export type CommandType =
     | [func: 'setIndexBuffer', args: [buffer: GPUBuffer, indexFormat: GPUIndexFormat, offset?: GPUSize64, size?: GPUSize64]]
     | [func: 'draw', args: [vertexCount: GPUSize32, instanceCount?: GPUSize32, firstVertex?: GPUSize32, firstInstance?: GPUSize32]]
     | [func: 'drawIndexed', args: [indexCount: GPUSize32, instanceCount?: GPUSize32, firstIndex?: GPUSize32, baseVertex?: GPUSignedOffset32, firstInstance?: GPUSize32]]
+    | [func: 'drawIndexedIndirect', args: [indirectBuffer: GPUBuffer, indirectOffset: GPUSize64]]
     | [func: 'setBlendConstant', args: [color: GPUColor]]
     | [func: 'setStencilReference', args: [reference: GPUStencilValue]]
     | [func: 'executeBundles', args: [bundles: GPURenderBundle[]]]
@@ -127,6 +128,11 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
         this._commands.push(['drawIndexed', [indexCount, instanceCount, firstIndex, baseVertex, firstInstance]]);
     }
 
+    drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset?: GPUSize64): undefined
+    {
+        this._commands.push(['drawIndexedIndirect', [indirectBuffer, indirectOffset ?? 0]]);
+    }
+
     executeBundles(bundles: GPURenderBundle[]): undefined
     {
         this._commands.push(['executeBundles', [bundles]]);
@@ -164,7 +170,7 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
         throw new Error('Method not implemented.');
     }
 
-    pushDebugGroup(groupLabel: string): undefined
+    pushDebugGroup(_groupLabel: string): undefined
     {
         throw new Error('Method not implemented.');
     }
@@ -174,17 +180,12 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
         throw new Error('Method not implemented.');
     }
 
-    insertDebugMarker(markerLabel: string): undefined
+    insertDebugMarker(_markerLabel: string): undefined
     {
         throw new Error('Method not implemented.');
     }
 
-    drawIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
-    {
-        throw new Error('Method not implemented.');
-    }
-
-    drawIndexedIndirect(indirectBuffer: GPUBuffer, indirectOffset: GPUSize64): undefined
+    drawIndirect(_indirectBuffer: GPUBuffer, _indirectOffset: GPUSize64): undefined
     {
         throw new Error('Method not implemented.');
     }
@@ -192,19 +193,19 @@ export class WGPURenderPassEncoder implements GPURenderPassEncoder
 
 export class WGPURenderBundleEncoder extends WGPURenderPassEncoder
 {
-    setViewport(x: number, y: number, width: number, height: number, minDepth: number, maxDepth: number): undefined
+    setViewport(_x: number, _y: number, _width: number, _height: number, _minDepth: number, _maxDepth: number): undefined
     { }
 
-    setScissorRect(x: GPUIntegerCoordinate, y: GPUIntegerCoordinate, width: GPUIntegerCoordinate, height: GPUIntegerCoordinate): undefined
+    setScissorRect(_x: GPUIntegerCoordinate, _y: GPUIntegerCoordinate, _width: GPUIntegerCoordinate, _height: GPUIntegerCoordinate): undefined
     { }
 
-    setBlendConstant(blendConstant: Color | undefined): undefined
+    setBlendConstant(_blendConstant: Color | undefined): undefined
     { }
 
-    setStencilReference(stencilReference: number | undefined): undefined
+    setStencilReference(_stencilReference: number | undefined): undefined
     { }
 
-    executeBundles(bundles: GPURenderBundle[]): undefined
+    executeBundles(_bundles: GPURenderBundle[]): undefined
     { }
 
     beginOcclusionQuery(): undefined

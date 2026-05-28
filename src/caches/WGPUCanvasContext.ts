@@ -131,7 +131,7 @@ export class WGPUCanvasContext extends ReactiveObject
         // 监听画布ID变化，自动创建画布元素和GPU上下文
         this._computedGpuCanvasContext = computed(() =>
         {
-            const canvas = this._computedCanvas.value
+            const canvas = this._computedCanvas.value;
             const gpuCanvasContext = canvas?.getContext('webgpu') as GPUCanvasContext;
 
             // 设置画布配置监听
@@ -205,6 +205,7 @@ export class WGPUCanvasContext extends ReactiveObject
                 device: device,
                 usage,
                 format,
+                viewFormats: configuration?.viewFormats ? [...configuration.viewFormats] : undefined,
             };
 
             // 配置GPU画布上下文
@@ -230,7 +231,7 @@ export class WGPUCanvasContext extends ReactiveObject
         const _onChanged = () =>
         {
             r_versionObject.version = versionObject.version + 1;
-        }
+        };
 
         watcher.watch(canvas, 'width', _onChanged);
         watcher.watch(canvas, 'height', _onChanged);
@@ -239,7 +240,7 @@ export class WGPUCanvasContext extends ReactiveObject
         {
             watcher.unwatch(canvas, 'width', _onChanged);
             watcher.unwatch(canvas, 'height', _onChanged);
-        }
+        };
     }
 
     /**
