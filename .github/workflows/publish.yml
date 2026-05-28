@@ -1,5 +1,5 @@
-# 当 package.json 中的版本在 npm 不存在时自动发布
-name: Publish to NPM
+# 当 package.json 中的版本在 GitHub Packages 不存在时自动发布
+name: Publish to GitHub Packages
 
 on:
   push:
@@ -18,24 +18,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Check if version exists on npm
+      - name: Check if version exists on GitHub Packages
         id: check
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # 获取包名和当前版本
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          # 发布到 GitHub Packages 时的实际包名（scope 与组织名匹配）
+          PUBLISH_NAME="@feng3d-labs/webgpu"
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          echo "Package: $PACKAGE_NAME"
+          echo "Package: $PUBLISH_NAME"
           echo "Current version: $CURRENT_VERSION"
 
-          # 检查该版本是否已在 npm 上存在
-          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/$PACKAGE_NAME/$CURRENT_VERSION")
+          # 通过 npm registry 协议检查该版本是否已在 GitHub Packages 上存在
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: Bearer $GITHUB_TOKEN" \
+            "https://npm.pkg.github.com/$PUBLISH_NAME/$CURRENT_VERSION")
 
           if [ "$HTTP_STATUS" = "404" ]; then
-            echo "Version $CURRENT_VERSION not found on npm, will publish"
+            echo "Version $CURRENT_VERSION not found, will publish"
             echo "should_publish=true" >> $GITHUB_OUTPUT
             echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           else
-            echo "Version $CURRENT_VERSION already exists on npm (HTTP $HTTP_STATUS)"
+            echo "Version $CURRENT_VERSION already exists (HTTP $HTTP_STATUS)"
             echo "should_publish=false" >> $GITHUB_OUTPUT
           fi
 
@@ -43,6 +47,9 @@ jobs:
     needs: check-version
     if: needs.check-version.outputs.should_publish == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,7 +60,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@feng3d-labs'
 
       - name: Install dependencies
         run: npm install
@@ -61,10 +69,10 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Release to NPM
+      - name: Release to GitHub Packages
         run: npm run release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Git Tag
         run: |

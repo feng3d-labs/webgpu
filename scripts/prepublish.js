@@ -6,6 +6,9 @@ const pkgpath = path.resolve('package.json');
 let pkg = fs.readFileSync(pkgpath, 'utf8');
 
 pkg = pkg
+    // 发布到 GitHub Packages 时 scope 需要匹配仓库组织名
+    .replaceAll(`"name": "@feng3d/webgpu"`, `"name": "@feng3d-labs/webgpu"`)
+    //
     .replaceAll(`"types": "./src/index.ts"`, `"types": "./lib/index.d.ts"`)
     //
     .replaceAll(`"module": "./src/index.ts"`, `"module": "./dist/index.js"`)
