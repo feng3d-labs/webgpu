@@ -6,9 +6,6 @@ const pkgpath = path.resolve('package.json');
 let pkg = fs.readFileSync(pkgpath, 'utf8');
 
 pkg = pkg
-    // 还原开发态包名
-    .replaceAll(`"name": "@feng3d-labs/webgpu"`, `"name": "@feng3d/webgpu"`)
-    //
     .replaceAll(`"types": "./lib/index.d.ts"`, `"types": "./src/index.ts"`)
     //
     .replaceAll(`"module": "./dist/index.js"`, `"module": "./src/index.ts"`)
@@ -19,4 +16,3 @@ pkg = pkg
 ;
 
 fs.writeFileSync(pkgpath, pkg, 'utf8');
-
