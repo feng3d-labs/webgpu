@@ -25,7 +25,7 @@
     "vite": "^6.3.5"
   },
   "dependencies": {
-    "@feng3d/reactivity": "1.0.12",
+    "@feng3d/reactivity": "1.0.13",
     "@feng3d/webgpu": "*",
     "dat.gui": "^0.7.9",
     "gl-matrix": "^3.4.3",

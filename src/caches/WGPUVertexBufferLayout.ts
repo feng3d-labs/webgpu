@@ -191,11 +191,8 @@ export class WGPUVertexBufferLayout extends ReactiveObject
                 {
                     // 使用现有的顶点缓冲区布局
                     gpuVertexBufferLayout = vertexBufferLayouts[index];
-                    if (__DEV__)
-                    {
-                        // 验证同一顶点缓冲区中的步长和步进模式必须相同
-                        console.assert(vertexBufferLayouts[index].arrayStride === arrayStride && vertexBufferLayouts[index].stepMode === stepMode, '要求同一顶点缓冲区中 arrayStride 与 stepMode 必须相同。');
-                    }
+                    // 验证同一顶点缓冲区中的步长和步进模式必须相同
+                    console.assert(vertexBufferLayouts[index].arrayStride === arrayStride && vertexBufferLayouts[index].stepMode === stepMode, '要求同一顶点缓冲区中 arrayStride 与 stepMode 必须相同。');
                 }
                 // 添加顶点属性到布局中
                 const attributes = gpuVertexBufferLayout.attributes as Array<GPUVertexAttribute>;
